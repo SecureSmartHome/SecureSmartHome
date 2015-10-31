@@ -1,0 +1,12 @@
+android {
+    defaultConfig {
+        applicationId "de.unipassau.isl.evs.ssh.app"
+    }
+}
+
+dependencies {
+    compile project(':core')
+
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:design:22.2.1'
+}

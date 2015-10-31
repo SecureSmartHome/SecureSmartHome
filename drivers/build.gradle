@@ -1,0 +1,10 @@
+android {
+    defaultConfig {
+        //applicationId "de.unipassau.isl.evs.ssh.drivers"
+    }
+}
+
+dependencies {
+    compile project(':core')
+    //compile 'ODROID-libs'
+}

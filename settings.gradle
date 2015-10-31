@@ -1,0 +1,3 @@
+include 'core', 'drivers', 'slave', 'master', 'app'
+
+rootProject.name = "SecureSmartHome"
