@@ -5,8 +5,8 @@ android {
 }
 
 dependencies {
-    //compile 'com.google.guava:guava:18.0'
+    compile 'com.google.guava:guava:18.0'
     //compile 'com.fasterxml.jackson.core:jackson-databind:2.6.3'
-    compile 'io.netty:netty-all:4.1.0.Beta7'
+    compile 'io.netty:netty-handler:5.0.0.Alpha2'
     compile 'com.madgag.spongycastle:pkix:1.52.0.0'
 }

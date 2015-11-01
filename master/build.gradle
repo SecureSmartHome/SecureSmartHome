@@ -7,6 +7,4 @@ android {
 dependencies {
     compile project(':core')
     compile project(':drivers')
-
-    compile 'com.android.support:appcompat-v7:22.2.1'
 }
