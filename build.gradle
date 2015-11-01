@@ -29,7 +29,7 @@ allprojects {
         }
     }
 
-    if (project.name == "drivers" || project.name == "core")  {
+    if (project.name == "drivers" || project.name == "core") {
         apply plugin: 'com.android.library'
     } else {
         apply plugin: 'com.android.application'
@@ -58,6 +58,8 @@ allprojects {
         packagingOptions {
             exclude 'META-INF/LICENSE'
             exclude 'META-INF/NOTICE'
+            exclude 'META-INF/io.netty.versions.properties'
+            exclude 'META-INF/INDEX.LIST'
         }
         lintOptions {
             abortOnError false
