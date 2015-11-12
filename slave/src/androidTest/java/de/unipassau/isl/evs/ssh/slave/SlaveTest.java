@@ -2,7 +2,7 @@ package de.unipassau.isl.evs.ssh.slave;
 
 import android.test.ApplicationTestCase;
 
-import de.unipassau.isl.evs.ssh.core.Container;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.drivers.Driver;
 
 public class SlaveTest extends ApplicationTestCase {

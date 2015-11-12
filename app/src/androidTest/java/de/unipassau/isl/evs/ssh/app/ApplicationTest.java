@@ -2,11 +2,7 @@ package de.unipassau.isl.evs.ssh.app;
 
 import android.test.ApplicationTestCase;
 
-import junit.framework.TestCase;
-
-import java.sql.Driver;
-
-import de.unipassau.isl.evs.ssh.core.Container;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 
 public class ApplicationTest extends ApplicationTestCase {
     public ApplicationTest(Class applicationClass) {

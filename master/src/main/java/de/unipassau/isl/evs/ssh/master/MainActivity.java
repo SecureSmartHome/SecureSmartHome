@@ -6,8 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import de.unipassau.isl.evs.ssh.master.R;
-import de.unipassau.isl.evs.ssh.core.Container;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 
 public class MainActivity extends AppCompatActivity {
 
