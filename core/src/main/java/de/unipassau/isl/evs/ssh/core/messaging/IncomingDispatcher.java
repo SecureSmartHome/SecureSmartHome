@@ -25,8 +25,8 @@ public class IncomingDispatcher extends ChannelHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object in) throws Exception {
-        if (in instanceof Message.AdressedMessage) {
-            Message.AdressedMessage msg = ((Message.AdressedMessage) in);
+        if (in instanceof Message.AddressedMessage) {
+            Message.AddressedMessage msg = ((Message.AddressedMessage) in);
             Set<MessageHandler> handlers = mappings.get(msg.getRoutingKey());
             for (MessageHandler handler : handlers) {
                 handler.handle(msg);

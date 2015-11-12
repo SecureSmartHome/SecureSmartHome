@@ -44,20 +44,20 @@ public class Message implements Serializable {
         return headers;
     }
 
-    public AdressedMessage setDestination(OdroidID fromID, OdroidID toID, String toHandler) {
-        return new AdressedMessage(this, fromID, toID, toHandler);
+    public AddressedMessage setDestination(OdroidID fromID, OdroidID toID, String toHandler) {
+        return new AddressedMessage(this, fromID, toID, toHandler);
     }
 
-    public static class AdressedMessage extends Message {
-        public OdroidID fromID;
-        public OdroidID toID;
-        public String routingKey;
+    public static class AddressedMessage extends Message {
+        private OdroidID fromID;
+        private OdroidID toID;
+        private String routingKey;
 
-        private AdressedMessage(Message from, OdroidID fromID, OdroidID toID, String routingKey) {
+        private AddressedMessage(Message from, OdroidID fromID, OdroidID toID, String routingKey) {
             this(new TypedMap<>(from.headers), from.payload, fromID, toID, routingKey);
         }
 
-        public AdressedMessage(TypedMap headers, MessagePayload payload, OdroidID fromID, OdroidID toID, String routingKey) {
+        public AddressedMessage(TypedMap headers, MessagePayload payload, OdroidID fromID, OdroidID toID, String routingKey) {
             super(headers, payload);
             this.fromID = fromID;
             this.toID = toID;

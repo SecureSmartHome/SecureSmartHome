@@ -13,8 +13,8 @@ public class OutgoingRouter {
     }
 
     public ChannelFuture sendMessage(OdroidID toID, String routingKey, Message message) {
-        Message.AdressedMessage adressedMessage = message.setDestination(getLocalID(), toID, routingKey);
-        if (adressedMessage.getToID().equals(getLocalID())) {
+        Message.AddressedMessage addressedMessage = message.setDestination(getLocalID(), toID, routingKey);
+        if (addressedMessage.getToID().equals(getLocalID())) {
             //require("IncomingDispatcher").queue(addressedMessage);
         } else {
             //require("Server").findConnectionForID(toID).write(addressesMessage);
