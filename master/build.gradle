@@ -2,6 +2,14 @@ android {
     defaultConfig {
         applicationId "de.unipassau.isl.evs.ssh.master"
     }
+    if (sign) {
+        signingConfigs {
+            release {
+                keyAlias "Master"
+                keyPassword System.getenv("SIGN_MASTER_PWD")
+            }
+        }
+    }
 }
 
 dependencies {

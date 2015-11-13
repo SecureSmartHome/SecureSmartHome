@@ -2,6 +2,14 @@ android {
     defaultConfig {
         applicationId "de.unipassau.isl.evs.ssh.slave"
     }
+    if (sign) {
+        signingConfigs {
+            release {
+                keyAlias "Slave"
+                keyPassword System.getenv("SIGN_SLAVE_PWD")
+            }
+        }
+    }
 }
 
 dependencies {

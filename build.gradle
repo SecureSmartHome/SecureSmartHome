@@ -16,6 +16,10 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.8'
 }
 
+ext {
+    sign = false
+}
+
 allprojects {
     if (project == rootProject) return
 
@@ -48,11 +52,26 @@ allprojects {
             targetSdkVersion 22
             versionCode 1
             versionName "1.0"
+
+            testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         }
         buildTypes {
             release {
                 minifyEnabled false
                 proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            }
+        }
+        if (sign) {
+            signingConfigs {
+                release {
+                    storeFile file("evs-ssh.jks")
+                    storePassword System.getenv("SIGN_STORE_PWD")
+                }
+            }
+            buildTypes {
+                release {
+                    signingConfig signingConfigs.release
+                }
             }
         }
         packagingOptions {
@@ -64,5 +83,16 @@ allprojects {
         lintOptions {
             abortOnError false
         }
+        configurations.all {
+            resolutionStrategy {
+                force 'com.android.support:support-annotations:22.2.1'
+            }
+        }
+    }
+
+    dependencies {
+        androidTestCompile 'com.android.support.test:runner:0.4'
+        androidTestCompile 'com.android.support.test:rules:0.4'
+        androidTestCompile 'com.android.support:support-annotations:22.2.1'
     }
 }
