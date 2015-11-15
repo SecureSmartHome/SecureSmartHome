@@ -3,6 +3,7 @@ package de.unipassau.isl.evs.ssh.app;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.TextView;
 
+import de.unipassau.isl.evs.ssh.app.activity.MainActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
