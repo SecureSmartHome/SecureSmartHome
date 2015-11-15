@@ -23,6 +23,11 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
+/**
+ * Scheduler is a component that allows periodic or delayed execution of tasks.
+ * The scheduler is based on Android AlarmManager class.
+ * This class allows to schedule PendingIntents and Runnables to be executed later.
+ */
 public class Scheduler extends AbstractComponent {
     private static final String TAG = Scheduler.class.getSimpleName();
     private String INTENT_ACTION;
@@ -99,6 +104,12 @@ public class Scheduler extends AbstractComponent {
         return new AlarmFuture(id, alarmIntent);
     }
 
+    /**
+     * Will run given task after waiting for given delay milliseconds.
+     *
+     * @param runnable    Task to be run.
+     * @param delayMillis Milliseconds to wait till running the Task.
+     */
     public Future<?> scheduleExecution(Runnable runnable, long delayMillis, boolean wakeUp, long executionLatency) {
         final int id = counter.getAndIncrement();
         runnables.put(id, new OneTimeRunnable(id, runnable));

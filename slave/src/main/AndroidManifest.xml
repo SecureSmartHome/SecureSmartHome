@@ -5,7 +5,8 @@
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:icon="@drawable/icon">
         <activity
             android:name="de.unipassau.isl.evs.ssh.slave.MainActivity"
             android:label="@string/app_name">
@@ -15,6 +16,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
 
+        <service android:name=".SlaveContainer" />
+    </application>
 </manifest>

@@ -1,14 +1,26 @@
-package de.unipassau.isl.evs.ssh.app;
+package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.handler.Handler;
+import de.unipassau.isl.evs.ssh.core.messaging.Message;
 
-public class MainActivity extends AppCompatActivity {
+/**
+ * As this Activity also displays information like wether the light is on or not, this Activity also
+ * needs to messages concerning that information.
+ */
+public class MainActivity extends Activity implements Handler {
+    @Override
+    public void handle(Message message) {
+        //TODO implement
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -5,9 +5,10 @@
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:icon="@drawable/icon">
         <activity
-            android:name="de.unipassau.isl.evs.ssh.app.MainActivity"
+            android:name="de.unipassau.isl.evs.ssh.app.activity.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -15,6 +16,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".activity.AddModulActivity" />
+        <activity android:name=".activity.AddNewUserDeviceActivity" />
+        <activity android:name=".activity.AppRegisterUserDeviceActivity" />
+        <activity android:name=".activity.ClimateActivity" />
+        <activity android:name=".activity.DoorActivity" />
+        <activity android:name=".activity.HolidayActivity" />
+        <activity android:name=".activity.LightActivity" />
+        <activity android:name=".activity.ModifyPermissionActivity" />
+        <activity android:name=".activity.OperateDoorFragment" />
+        <activity android:name=".activity.StatusActivity" />
+
+        <service android:name=".AppContainer" />
     </application>
 
 </manifest>

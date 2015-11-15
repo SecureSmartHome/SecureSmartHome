@@ -14,9 +14,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     }
 
     public void testViews() {
-        assertEquals(
-                "[core, drivers]",
-                ((TextView) getActivity().findViewById(R.id.textViewComponents)).getText());
+        assertEquals("[core, drivers]", ((TextView) getActivity().findViewById(R.id.textViewComponents)).getText());
     }
 
     public void testDependencies() {
