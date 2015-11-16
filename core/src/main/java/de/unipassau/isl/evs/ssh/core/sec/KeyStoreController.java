@@ -1,8 +1,13 @@
 package de.unipassau.isl.evs.ssh.core.sec;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+
+import static de.unipassau.isl.evs.ssh.core.util.UtilityFunctions.byteArrayToHexString;
 
 /**
  * The KeyStoreController controls the KeyStore which can load and store keys and provides Key generation.
@@ -54,4 +59,15 @@ public class KeyStoreController extends AbstractComponent {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Calculates the fingerprint of a public key.
+     * @param publicKey PublicKey to calculate fingerprint for.
+     * @return Fingerprint as String.
+     * @throws NoSuchAlgorithmException
+     */
+    public String calculatePublicKeyFingerprint(PublicKey publicKey)
+            throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        return byteArrayToHexString(md.digest(publicKey.getEncoded()));
+    }
 }
