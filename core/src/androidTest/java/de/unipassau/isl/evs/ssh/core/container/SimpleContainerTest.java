@@ -92,22 +92,4 @@ public class SimpleContainerTest extends TestCase {
         assertEquals(c1.destroyCount, 1);
         assertEquals(c2.destroyCount, 1);
     }
-
-
-    private class TestComponent extends AbstractComponent {
-        private int initCount;
-        private int destroyCount;
-
-        @Override
-        public void init(Container container) {
-            super.init(container);
-            initCount++;
-        }
-
-        @Override
-        public void destroy() {
-            super.destroy();
-            destroyCount++;
-        }
-    }
 }

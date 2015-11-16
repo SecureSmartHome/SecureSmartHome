@@ -1,19 +1,28 @@
 package de.unipassau.isl.evs.ssh.core.container;
 
+import android.util.Log;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.ncoder.typedmap.Key;
 import de.ncoder.typedmap.TypedMap;
 
 public class SimpleContainer implements Container {
+    public final String TAG = "SContainer@" + Objects.hashCode(this);
+
     private final TypedMap<Component> components = new TypedMap<>(new ConcurrentHashMap<Key<? extends Component>, Component>());
     private final List<Key<? extends Component>> log = new LinkedList<>();
     private transient TypedMap<Component> componentsUnmodifiable;
+
+    public SimpleContainer() {
+        Log.v(TAG, "constructor");
+    }
 
     @Override
     public synchronized <T extends Component, V extends T> void register(Key<T> key, V component) {
@@ -81,6 +90,7 @@ public class SimpleContainer implements Container {
 
     @Override
     public void shutdown() {
+        Log.v(TAG, "shutdown:called");
         ListIterator<Key<? extends Component>> it = log.listIterator(log.size());
         while (it.hasPrevious()) {
             Key<? extends Component> key = it.previous();
@@ -89,7 +99,8 @@ public class SimpleContainer implements Container {
                 component.destroy();
             }
         }
-        assert components.isEmpty() : "Not all components were removed: " + components;
+        if (!components.isEmpty()) Log.wtf(TAG, "shutdown: not all components were removed: " + components);
+        Log.d(TAG, "shutdown:finished");
     }
 
     public TypedMap<Component> getData() {

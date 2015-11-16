@@ -5,27 +5,36 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.IBinder;
-
-import java.util.Collection;
+import android.util.Log;
 
 import de.ncoder.typedmap.Key;
 import de.ncoder.typedmap.TypedMap;
 
 public class ContainerService extends Service implements Container {
+    public static final String TAG = ContainerService.class.getSimpleName();
+
     public static final Key<ContextComponent> KEY_CONTEXT = new Key<>(ContextComponent.class, "ContainerContext");
     private final Container container = new SimpleContainer();
     private final Binder theBinder = new Binder();
 
     @Override
     public void onCreate() {
+        Log.v(TAG, "onCreate:called");
         super.onCreate();
         container.register(KEY_CONTEXT, new ContextComponent(this));
+        init();
+        Log.d(TAG, "onCreate:finished");
+    }
+
+    protected void init() {
     }
 
     @Override
     public void onDestroy() {
+        Log.v(TAG, "onDestroy:called");
         container.shutdown();
         super.onDestroy();
+        Log.d(TAG, "onDestroy:finished");
     }
 
     @Override
@@ -84,10 +93,12 @@ public class ContainerService extends Service implements Container {
 
         @Override
         public void init(Container container) {
+            Log.d(TAG, getClass().getSimpleName() + " initialized");
         }
 
         @Override
         public void destroy() {
+            Log.d(TAG, getClass().getSimpleName() + " destroyed");
         }
 
         @Override
