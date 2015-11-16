@@ -1,7 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.container;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -56,7 +55,28 @@ public interface Container {
 
     TypedMap<? extends Component> getData();
 
-    Collection<Key<? extends Component>> getKeys();
-
     void shutdown();
+
+    class ComponentException extends IllegalStateException {
+        private final Key<?> key;
+
+        public ComponentException(Key<?> key, String expected, String actual) {
+            super("Illegal Component status for key " + key + "\n" +
+                    "expected: " + expected + "\n" +
+                    "actual:   " + actual);
+            this.key = key;
+        }
+
+        public ComponentException(Key<?> key, Component expected, Component actual) {
+            this(key, String.valueOf(expected), String.valueOf(actual));
+        }
+
+        public ComponentException(Key<?> key, boolean expectedNull) {
+            this(key, expectedNull ? "null" : "non-null", !expectedNull ? "null" : "non-null");
+        }
+
+        public Key<?> getKey() {
+            return key;
+        }
+    }
 }
