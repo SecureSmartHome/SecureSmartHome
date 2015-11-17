@@ -8,6 +8,14 @@ public class Permission {
     private String permission;
     private int hasPermission;
 
+    public Permission() {
+    }
+
+    public Permission(String permission, int hasPermission) {
+        this.permission = permission;
+        this.hasPermission = hasPermission;
+    }
+
     public String getPermission() {
         return permission;
     }

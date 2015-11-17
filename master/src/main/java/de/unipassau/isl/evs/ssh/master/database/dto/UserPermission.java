@@ -7,6 +7,14 @@ public class UserPermission {
     private DeviceID userDeviceID;
     private Permission permission;
 
+    public UserPermission() {
+    }
+
+    public UserPermission(DeviceID userDeviceID, Permission permission) {
+        this.userDeviceID = userDeviceID;
+        this.permission = permission;
+    }
+
     public DeviceID getUserDeviceID() {
         return userDeviceID;
     }

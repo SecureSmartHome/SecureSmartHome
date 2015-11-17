@@ -12,6 +12,15 @@ public class UserDevice {
     private String inGroup;
     private DeviceID userDeviceID;
 
+    public UserDevice() {
+    }
+
+    public UserDevice(String name, String inGroup, DeviceID userDeviceID) {
+        this.name = name;
+        this.inGroup = inGroup;
+        this.userDeviceID = userDeviceID;
+    }
+
     public String getName() {
         return name;
     }

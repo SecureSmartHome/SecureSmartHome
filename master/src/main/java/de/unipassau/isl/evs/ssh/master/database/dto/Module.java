@@ -10,6 +10,14 @@ public class Module {
     private String name;
     private DeviceID atSlave;
 
+    public Module() {
+    }
+
+    public Module(String name, DeviceID atSlave) {
+        this.name = name;
+        this.atSlave = atSlave;
+    }
+
     public String getName() {
         return name;
     }

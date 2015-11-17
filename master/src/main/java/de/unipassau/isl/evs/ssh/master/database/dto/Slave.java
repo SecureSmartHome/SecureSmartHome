@@ -10,6 +10,14 @@ public class Slave {
     private String name;
     private DeviceID slaveID;
 
+    public Slave() {
+    }
+
+    public Slave(String name, DeviceID slaveID) {
+        this.name = name;
+        this.slaveID = slaveID;
+    }
+
     public String getName() {
         return name;
     }
