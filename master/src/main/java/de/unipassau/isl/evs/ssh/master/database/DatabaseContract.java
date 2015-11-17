@@ -32,7 +32,7 @@ public class DatabaseContract {
     }
 
     public class Group {
-        public static final String TABLE_NAME = "Group";
+        public static final String TABLE_NAME = "DeviceGroup";
         public static final String COLUMN_ID = "_ID";
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_PERMISSION_TEMPLATE_ID = "permissionTemplateId";
