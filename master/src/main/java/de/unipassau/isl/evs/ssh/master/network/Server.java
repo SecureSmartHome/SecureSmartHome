@@ -158,7 +158,7 @@ public class Server extends AbstractComponent {
      *
      * @return the found Channel, or {@code null} if no Channel matches the given ID
      */
-    public Channel findDispatcher(String id) {
+    public Channel findChannel(String id) {
         for (Channel channel : connections) {
             if (channel.isActive() && channel.id().asShortText().startsWith(id)
                 //&& channel.attr(AttributeKey.newInstance("device-uid")).matches(id) //TODO also match device UID
@@ -193,28 +193,29 @@ public class Server extends AbstractComponent {
     }
 
     /**
-     * @return {@code true}, if the Server TCP channel isn't open currently
+     * @return {@code true}, if the Server TCP channel is currently open
      */
-    public boolean isChannelInactive() {
-        return serverChannel.channel() == null || !serverChannel.channel().isActive();
+    public boolean isChannelOpen() {
+        return serverChannel.channel() != null && serverChannel.channel().isOpen();
     }
 
     /**
      * @return {@code true}, if the Executor that is used for accepting incoming connections and processing data
      * has been shut down
      */
-    public boolean isExecutorTerminated() {
-        return serverExecutor.isTerminated();
+    public boolean isExecutorAlive() {
+        return serverExecutor != null && !serverExecutor.isTerminated() && !serverExecutor.isShutdown();
     }
 
     /**
      * Blocks until the Server channel has been closed.
      *
      * @throws InterruptedException
-     * @see #isChannelInactive()
+     * @see #isChannelOpen()
      * @see Channel#closeFuture()
      */
     public void awaitShutdown() throws InterruptedException {
         serverChannel.channel().closeFuture().await();
+        serverExecutor.terminationFuture().await();
     }
 }

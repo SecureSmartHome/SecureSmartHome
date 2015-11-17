@@ -146,28 +146,28 @@ public class Client extends AbstractComponent {
     }
 
     /**
-     * @return {@code true}, if the Client TCP channel isn't open currently
+     * @return {@code true}, if the Client TCP channel is currently open
      */
-    public boolean isChannelInactive() {
-        return clientChannel.channel() == null || !clientChannel.channel().isActive();
+    public boolean isChannelOpen() {
+        return clientChannel.channel() != null && clientChannel.channel().isOpen();
     }
 
     /**
-     * @return {@code true}, if the Executor that is used for accepting incoming connections and processing data
-     * has been shut down
+     * @return {@code true}, if the Executor that is used for processing data has been shut down
      */
-    public boolean isExecutorTerminated() {
-        return clientExecutor.isTerminated();
+    public boolean isExecutorAlive() {
+        return clientExecutor != null && !clientExecutor.isTerminated() && !clientExecutor.isShutdown();
     }
 
     /**
      * Blocks until the Client channel has been closed.
      *
      * @throws InterruptedException
-     * @see #isChannelInactive()
+     * @see #isChannelOpen()
      * @see Channel#closeFuture()
      */
     public void awaitShutdown() throws InterruptedException {
         clientChannel.channel().closeFuture().await();
+        clientExecutor.terminationFuture().await();
     }
 }
