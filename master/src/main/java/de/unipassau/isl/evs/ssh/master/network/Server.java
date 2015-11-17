@@ -90,7 +90,7 @@ public class Server extends AbstractComponent {
             throw new IllegalStateException("Server already running");
         }
 
-        setResourceLeakDetection();
+        ResourceLeakDetector.setLevel(getResourceLeakDetection());
 
         //Setup the Executor and Connection Pool
         serverExecutor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("server"));
@@ -174,8 +174,8 @@ public class Server extends AbstractComponent {
         return 12345;
     }
 
-    private void setResourceLeakDetection() {
-        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID);
+    private ResourceLeakDetector.Level getResourceLeakDetection() {
+        return ResourceLeakDetector.Level.PARANOID;
     }
 
     /**

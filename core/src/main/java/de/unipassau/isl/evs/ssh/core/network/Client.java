@@ -79,7 +79,7 @@ public class Client extends AbstractComponent {
             throw new IllegalStateException("client already running");
         }
 
-        setResourceLeakDetection();
+        ResourceLeakDetector.setLevel(getResourceLeakDetection());
 
         //Setup the Executor and Connection Pool
         clientExecutor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("client"));
@@ -134,8 +134,8 @@ public class Client extends AbstractComponent {
         return 12345; // TODO get data from database;
     }
 
-    private void setResourceLeakDetection() {
-        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID);
+    private ResourceLeakDetector.Level getResourceLeakDetection() {
+        return ResourceLeakDetector.Level.PARANOID;
     }
 
     /**
