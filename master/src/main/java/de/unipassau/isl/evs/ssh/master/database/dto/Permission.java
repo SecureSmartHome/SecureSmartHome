@@ -5,30 +5,30 @@ package de.unipassau.isl.evs.ssh.master.database.dto;
  */
 public class Permission {
 
-    private String permission;
-    private int hasPermission;
+    private String permissionName;
+    private boolean hasPermission;
 
     public Permission() {
     }
 
-    public Permission(String permission, int hasPermission) {
-        this.permission = permission;
+    public Permission(String permissionName, boolean hasPermission) {
+        this.permissionName = permissionName;
         this.hasPermission = hasPermission;
     }
 
-    public String getPermission() {
-        return permission;
+    public String getPermissionName() {
+        return permissionName;
     }
 
-    public void setPermission(String permission) {
-        this.permission = permission;
+    public void setPermissionName(String permissionName) {
+        this.permissionName = permissionName;
     }
 
-    public int getHasPermission() {
+    public boolean isHasPermission() {
         return hasPermission;
     }
 
-    public void setHasPermission(int hasPermission) {
+    public void setHasPermission(boolean hasPermission) {
         this.hasPermission = hasPermission;
     }
 }
