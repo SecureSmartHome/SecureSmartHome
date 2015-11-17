@@ -5,14 +5,10 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.test.InstrumentationTestCase;
 
-import org.spongycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.GeneralSecurityException;
-import java.security.PublicKey;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,13 +46,13 @@ public class ServerTest extends InstrumentationTestCase {
         Server server = addServer(container);
         try {
             Socket client1 = new Socket("localhost", ((InetSocketAddress) server.getAddress()).getPort());
-            Thread.sleep(1000);
+            Thread.sleep(1000); //wait for the connection to be established
 
             assertTrue(client1.isConnected());
             assertEquals(1, server.getActiveChannels().size());
 
             client1.close();
-            Thread.sleep(1000);
+            Thread.sleep(1000); //wait for the connection to be closed
 
             assertFalse(client1.isConnected());
             assertEquals(0, server.getActiveChannels().size());
@@ -71,7 +67,7 @@ public class ServerTest extends InstrumentationTestCase {
         Server server = addServer(container);
         try {
             container.register(Client.KEY, new Client());
-            Thread.sleep(1000);
+            Thread.sleep(1000); //wait for the connection to be established
 
             Client client = container.get(Client.KEY);
             assertTrue(client.isChannelOpen());
@@ -80,7 +76,6 @@ public class ServerTest extends InstrumentationTestCase {
 
             container.unregister(Client.KEY);
             client.awaitShutdown();
-            Thread.sleep(1000);
 
             assertFalse(client.isChannelOpen());
             assertFalse(client.isExecutorAlive());
@@ -90,7 +85,7 @@ public class ServerTest extends InstrumentationTestCase {
         }
     }
 
-    public void testSerialRoudtrip() throws InterruptedException, ExecutionException {
+    public void testSerialRoundTrip() throws InterruptedException, ExecutionException {
         final BlockingQueue<Object> serverQueue = new LinkedBlockingQueue<>();
         final BlockingQueue<Object> clientQueue = new LinkedBlockingQueue<>();
         final Promise<SocketChannel> serverChannel = new DefaultPromise<>(GlobalEventExecutor.INSTANCE);
@@ -98,65 +93,45 @@ public class ServerTest extends InstrumentationTestCase {
 
         SimpleContainer container = new SimpleContainer();
         addContext(container);
-        Server server = new Server() {
-            @Override
-            protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
-                super.initChannel(ch);
-                ch.pipeline().addLast(new MessageToMessageDecoder<Object>() {
-                    @Override
-                    protected void decode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
-                        serverQueue.add(msg);
-                    }
-                });
-                serverChannel.setSuccess(ch);
-            }
-        };
+        Server server = new TestServer(serverQueue, serverChannel);
         container.register(Server.KEY, server);
         try {
-            Client client = new Client() {
-                @Override
-                protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
-                    super.initChannel(ch);
-                    ch.pipeline().addLast(new MessageToMessageDecoder<Object>() {
-                        @Override
-                        protected void decode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
-                            clientQueue.add(msg);
-                        }
-                    });
-                    clientChannel.setSuccess(ch);
-                }
-            };
+            Client client = new TestClient(clientQueue, clientChannel);
             container.register(Client.KEY, client);
-            Thread.sleep(1000);
 
             try {
                 serverChannel.await(1000);
                 clientChannel.await(1000);
 
-                String obj1 = "test123ÄÖÜ∑";
-                clientChannel.get().writeAndFlush(obj1).await(1000);
-                assertEquals(obj1, serverQueue.poll(1000, TimeUnit.MILLISECONDS));
-
-                Map<String, Object> obj2 = new HashMap<>();
-                obj2.put("test", "abc");
-                obj2.put("test2", 123);
-                obj2.putAll(System.getenv());
-                serverChannel.get().writeAndFlush(obj2).await(1000);
-                assertEquals(obj2, clientQueue.poll(1000, TimeUnit.MILLISECONDS));
-
-                SecretKey obj3 = new SecretKeySpec(new byte[]{1, 2, 3, 4}, "RAW");
-                clientChannel.get().writeAndFlush(obj3).await(1000);
-                assertEquals(obj3, serverQueue.poll(1000, TimeUnit.MILLISECONDS));
+                runRoundTripTests(serverQueue, clientQueue, serverChannel, clientChannel);
             } finally {
                 container.unregister(Client.KEY);
                 client.awaitShutdown();
-                Thread.sleep(1000);
             }
         } finally {
             shutdownServer(container);
         }
         assertTrue(serverQueue.isEmpty());
         assertTrue(clientQueue.isEmpty());
+    }
+
+    private void runRoundTripTests(BlockingQueue<Object> serverQueue, BlockingQueue<Object> clientQueue,
+                                   Promise<SocketChannel> serverChannel, Promise<SocketChannel> clientChannel)
+            throws InterruptedException, ExecutionException {
+        String obj1 = "test123ÄÖÜ∑";
+        clientChannel.get().writeAndFlush(obj1).await(1000);
+        assertEquals(obj1, serverQueue.poll(1000, TimeUnit.MILLISECONDS));
+
+        Map<String, Object> obj2 = new HashMap<>();
+        obj2.put("test", "abc");
+        obj2.put("test2", 123);
+        obj2.putAll(System.getenv());
+        serverChannel.get().writeAndFlush(obj2).await(1000);
+        assertEquals(obj2, clientQueue.poll(1000, TimeUnit.MILLISECONDS));
+
+        SecretKey obj3 = new SecretKeySpec(new byte[]{1, 2, 3, 4}, "RAW");
+        clientChannel.get().writeAndFlush(obj3).await(1000);
+        assertEquals(obj3, serverQueue.poll(1000, TimeUnit.MILLISECONDS));
     }
 
     private void addContext(SimpleContainer container) {
@@ -191,6 +166,50 @@ public class ServerTest extends InstrumentationTestCase {
             server.awaitShutdown();
             assertFalse(server.isChannelOpen());
             assertFalse(server.isExecutorAlive());
+        }
+    }
+
+    private static class TestServer extends Server {
+        private final BlockingQueue<Object> serverQueue;
+        private final Promise<SocketChannel> serverChannel;
+
+        public TestServer(BlockingQueue<Object> serverQueue, Promise<SocketChannel> serverChannel) {
+            this.serverQueue = serverQueue;
+            this.serverChannel = serverChannel;
+        }
+
+        @Override
+        protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
+            super.initChannel(ch);
+            ch.pipeline().addLast(new MessageToMessageDecoder<Object>() {
+                @Override
+                protected void decode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
+                    serverQueue.add(msg);
+                }
+            });
+            serverChannel.setSuccess(ch);
+        }
+    }
+
+    private static class TestClient extends Client {
+        private final BlockingQueue<Object> clientQueue;
+        private final Promise<SocketChannel> clientChannel;
+
+        public TestClient(BlockingQueue<Object> clientQueue, Promise<SocketChannel> clientChannel) {
+            this.clientQueue = clientQueue;
+            this.clientChannel = clientChannel;
+        }
+
+        @Override
+        protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
+            super.initChannel(ch);
+            ch.pipeline().addLast(new MessageToMessageDecoder<Object>() {
+                @Override
+                protected void decode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
+                    clientQueue.add(msg);
+                }
+            });
+            clientChannel.setSuccess(ch);
         }
     }
 }
