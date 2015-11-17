@@ -1,17 +1,23 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import java.net.SocketAddress;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.StartupException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -88,6 +94,12 @@ public class Client extends AbstractComponent {
         Bootstrap b = new Bootstrap()
                 .group(clientExecutor)
                 .channel(NioSocketChannel.class)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        Client.this.initChannel(ch);
+                    }
+                })
                 .option(ChannelOption.SO_KEEPALIVE, true);
 
         //Wait for the start of the client
@@ -104,7 +116,6 @@ public class Client extends AbstractComponent {
      * by the {@link de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher}.
      */
     protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
-
 
         //TODO setup pipeline
         //Handler (de-)serialization
@@ -127,11 +138,15 @@ public class Client extends AbstractComponent {
     }
 
     private String getHost() {
-        return "hello"; // TODO get host data
+        SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
+                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        return sharedPref.getString(CoreConstants.PREF_HOST, null);
     }
 
     private int getPort() {
-        return 12345; // TODO get data from database;
+        SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
+                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        return sharedPref.getInt(CoreConstants.PREF_PORT, CoreConstants.DEFAULT_PORT);
     }
 
     private ResourceLeakDetector.Level getResourceLeakDetection() {
