@@ -1,6 +1,6 @@
 package de.unipassau.isl.evs.ssh.master.network;
 
-import org.junit.Test;
+import android.test.InstrumentationTestCase;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -8,15 +8,8 @@ import java.net.Socket;
 
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-public class ServerTest {
-
-    @Test
-    public void testServerConnect() throws InterruptedException, IOException {
+public class ServerTest extends InstrumentationTestCase {
+    public void testStartup() throws IOException, InterruptedException {
         SimpleContainer container = new SimpleContainer();
         container.register(Server.KEY, new Server());
 
