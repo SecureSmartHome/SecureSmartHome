@@ -5,15 +5,36 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.test.InstrumentationTestCase;
 
+import org.spongycastle.jcajce.provider.asymmetric.rsa.BCRSAPublicKey;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.master.MasterConstants;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.MessageToMessageDecoder;
+import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.util.concurrent.Promise;
 
 public class ServerTest extends InstrumentationTestCase {
     public void testStartup() throws IOException, InterruptedException {
@@ -69,7 +90,74 @@ public class ServerTest extends InstrumentationTestCase {
         }
     }
 
-    //private void testRoudtrip() {} //TODO test pipeline
+    public void testSerialRoudtrip() throws InterruptedException, ExecutionException {
+        final BlockingQueue<Object> serverQueue = new LinkedBlockingQueue<>();
+        final BlockingQueue<Object> clientQueue = new LinkedBlockingQueue<>();
+        final Promise<SocketChannel> serverChannel = new DefaultPromise<>(GlobalEventExecutor.INSTANCE);
+        final Promise<SocketChannel> clientChannel = new DefaultPromise<>(GlobalEventExecutor.INSTANCE);
+
+        SimpleContainer container = new SimpleContainer();
+        addContext(container);
+        Server server = new Server() {
+            @Override
+            protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
+                super.initChannel(ch);
+                ch.pipeline().addLast(new MessageToMessageDecoder<Object>() {
+                    @Override
+                    protected void decode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
+                        serverQueue.add(msg);
+                    }
+                });
+                serverChannel.setSuccess(ch);
+            }
+        };
+        container.register(Server.KEY, server);
+        try {
+            Client client = new Client() {
+                @Override
+                protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
+                    super.initChannel(ch);
+                    ch.pipeline().addLast(new MessageToMessageDecoder<Object>() {
+                        @Override
+                        protected void decode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
+                            clientQueue.add(msg);
+                        }
+                    });
+                    clientChannel.setSuccess(ch);
+                }
+            };
+            container.register(Client.KEY, client);
+            Thread.sleep(1000);
+
+            try {
+                serverChannel.await(1000);
+                clientChannel.await(1000);
+
+                String obj1 = "test123ÄÖÜ∑";
+                clientChannel.get().writeAndFlush(obj1).await(1000);
+                assertEquals(obj1, serverQueue.poll(1000, TimeUnit.MILLISECONDS));
+
+                Map<String, Object> obj2 = new HashMap<>();
+                obj2.put("test", "abc");
+                obj2.put("test2", 123);
+                obj2.putAll(System.getenv());
+                serverChannel.get().writeAndFlush(obj2).await(1000);
+                assertEquals(obj2, clientQueue.poll(1000, TimeUnit.MILLISECONDS));
+
+                SecretKey obj3 = new SecretKeySpec(new byte[]{1, 2, 3, 4}, "RAW");
+                clientChannel.get().writeAndFlush(obj3).await(1000);
+                assertEquals(obj3, serverQueue.poll(1000, TimeUnit.MILLISECONDS));
+            } finally {
+                container.unregister(Client.KEY);
+                client.awaitShutdown();
+                Thread.sleep(1000);
+            }
+        } finally {
+            shutdownServer(container);
+        }
+        assertTrue(serverQueue.isEmpty());
+        assertTrue(clientQueue.isEmpty());
+    }
 
     private void addContext(SimpleContainer container) {
         container.register(ContainerService.KEY_CONTEXT,
