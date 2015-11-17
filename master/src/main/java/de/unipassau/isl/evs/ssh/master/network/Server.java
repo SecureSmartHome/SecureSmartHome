@@ -1,14 +1,20 @@
 package de.unipassau.isl.evs.ssh.master.network;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import java.net.SocketAddress;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.StartupException;
+import de.unipassau.isl.evs.ssh.master.MasterConstants;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -171,7 +177,9 @@ public class Server extends AbstractComponent {
 
 
     private int getPort() {
-        return 12345;
+        SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
+                .getSharedPreferences(MasterConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        return sharedPref.getInt(MasterConstants.PREF_SERVER_PORT, CoreConstants.DEFAULT_PORT);
     }
 
     private ResourceLeakDetector.Level getResourceLeakDetection() {
