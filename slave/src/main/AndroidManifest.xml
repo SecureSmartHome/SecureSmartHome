@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.unipassau.isl.evs.ssh.slave">
+<manifest
+    package="de.unipassau.isl.evs.ssh.slave"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
+        android:icon="@drawable/icon"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:icon="@drawable/icon">
+        android:theme="@style/AppTheme">
         <activity
             android:name="de.unipassau.isl.evs.ssh.slave.MainActivity"
             android:label="@string/app_name">
