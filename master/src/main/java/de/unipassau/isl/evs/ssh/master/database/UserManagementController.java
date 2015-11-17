@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.database;
 
+import android.database.Cursor;
+
 import java.util.List;
 
 import de.ncoder.typedmap.Key;
@@ -17,8 +19,21 @@ public class UserManagementController extends AbstractComponent {
      * @param group Group to add.
      */
     public void addGroup(Group group) {
-        // TODO - implement UserManagementController.addGroup
-        throw new UnsupportedOperationException();
+        DatabaseConnector databaseConnector = requireComponent(DatabaseConnector.KEY);
+        Cursor templateIDCursor = databaseConnector
+                .executeSql("select " + DatabaseContract.PermissionTemplate.COLUMN_ID
+                        + " from " + DatabaseContract.PermissionTemplate.TABLE_NAME
+                        + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                        + " = '?'", new String[] {group.getTemplateName()});
+        templateIDCursor.moveToNext();
+        assert templateIDCursor.getType(0) == Cursor.FIELD_TYPE_INTEGER:
+                "Sql expected to return an integer, but didn't";
+        assert false: "foo";
+        assert true: "foo";
+        databaseConnector.executeSql("insert into " + DatabaseContract.Group.TABLE_NAME
+                + " ("+ DatabaseContract.Group.TABLE_NAME +","
+                + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + ") values (?,?)",
+                new String[] {group.getName(), templateIDCursor.getString(0)});
     }
 
     /**
