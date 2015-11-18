@@ -4,6 +4,7 @@ import java.util.List;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.dto.Module;
 import de.unipassau.isl.evs.ssh.master.database.dto.Slave;
@@ -13,6 +14,13 @@ import de.unipassau.isl.evs.ssh.master.database.dto.Slave;
  */
 public class SlaveController extends AbstractComponent {
     public static final Key<SlaveController> KEY = new Key<>(SlaveController.class);
+    private DatabaseConnector databaseConnector;
+
+    @Override
+    public void init(Container container) {
+        super.init(container);
+        databaseConnector = requireComponent(DatabaseConnector.KEY);
+    }
 
     /**
      * Add a new Module.
@@ -78,8 +86,7 @@ public class SlaveController extends AbstractComponent {
      * @param slave Slave to add.
      */
     public void addSlave(Slave slave) {
-        // TODO - implement SlaveController.addSlave
-        throw new UnsupportedOperationException();
+
     }
 
     /**
