@@ -42,9 +42,10 @@ public class KeyStoreController extends AbstractComponent {
     public static final String KEY_STORE_TYPE = "BKS";
     public static final String KEY_PAIR_ALGORITHM = "RSA";
     public static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA256withRSA";
-    public static final String SYMMETRIC_KEY_ALGORITHM = "BLOWFISH";
+    public static final String SYMMETRIC_KEY_ALGORITHM = "AES";
     public static final String PUBLIC_KEY_PREFIX = "public_key:";
-    public static final int KEY_SIZE = 1024;
+    public static final int ASYMMETRIC_KEY_SIZE = 4096;
+    public static final int SYMMETRIC_KEY_SIZE = 256;
 
     public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);
     private KeyStore keyStore;
@@ -125,6 +126,19 @@ public class KeyStoreController extends AbstractComponent {
     }
 
     /**
+     * Returns the Certificate of the device using the KeyStoreController
+     *
+     * @return PrivateKey of this device
+     * @throws UnrecoverableEntryException
+     * @throws NoSuchAlgorithmException
+     * @throws KeyStoreException
+     */
+    public Certificate getOwnCertificate() throws UnrecoverableEntryException,
+            NoSuchAlgorithmException, KeyStoreException {
+        return ((KeyStore.PrivateKeyEntry) loadKey(LOCAL_PRIVATE_KEY_ALIAS)).getCertificate();
+    }
+
+    /**
      * Saves a certificate and adds an alias to it, so it may be found again.
      *
      * @param certificate
@@ -133,7 +147,6 @@ public class KeyStoreController extends AbstractComponent {
     public void savePublicKey(Certificate certificate) throws KeyStoreException {
         storeKey(certificate, PUBLIC_KEY_PREFIX + ((X509Certificate) certificate).getSignature());
     }
-
 
     /**
      * Loads a KeyStore.Entry from the KeyStore.
@@ -166,14 +179,14 @@ public class KeyStoreController extends AbstractComponent {
         KeyPairGenerator generator;
 
         generator = KeyPairGenerator.getInstance(KEY_PAIR_ALGORITHM);
-        generator.initialize(KEY_SIZE);
+        generator.initialize(ASYMMETRIC_KEY_SIZE);
 
         KeyPair keyPair = generator.generateKeyPair();
 
         //Check Certificate
         X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
         certGen.setSerialNumber(BigInteger.valueOf(1L));
-        certGen.setSubjectDN(new X500Principal("CN=evs")); //FIXME
+        certGen.setSubjectDN(new X500Principal("CN=evs"));
         certGen.setIssuerDN(new X500Principal("CN=evs"));
         certGen.setPublicKey(keyPair.getPublic());
         certGen.setNotBefore(new Date());
@@ -187,7 +200,7 @@ public class KeyStoreController extends AbstractComponent {
 
         keyStore.setEntry(LOCAL_PRIVATE_KEY_ALIAS,
                 new KeyStore.PrivateKeyEntry(keyPair.getPrivate(), new X509Certificate[]{cert}),
-                new KeyStore.PasswordProtection(keyPairPassword)); //FIXME
+                new KeyStore.PasswordProtection(keyPairPassword));
 
         Arrays.fill(keyPairPassword, (char) 0);
 
@@ -203,6 +216,8 @@ public class KeyStoreController extends AbstractComponent {
      * @throws NoSuchAlgorithmException
      */
     public java.security.Key generateKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
+        KeyGenerator generator = KeyGenerator.getInstance(SYMMETRIC_KEY_ALGORITHM);
+        generator.init(SYMMETRIC_KEY_SIZE);
         return KeyGenerator.getInstance(SYMMETRIC_KEY_ALGORITHM).generateKey();
     }
 
