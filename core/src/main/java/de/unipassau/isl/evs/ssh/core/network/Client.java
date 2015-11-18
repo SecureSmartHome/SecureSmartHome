@@ -13,7 +13,6 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.StartupException;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
@@ -40,11 +39,8 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_HOST;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
 
-// TODO deal with broken connections? (maybe initialize a new connection)
-
 /**
- * FIXME javadoc
- * a netty stack accepting connections from devices and handling communication with them using a netty pipeline.
+ * A netty stack accepting connections to and from the master and handling communication with them using a netty pipeline.
  * For details about the pipeline, see {@link #startClient()} and {@link #initChannel(SocketChannel)}.
  */
 public class Client extends AbstractComponent {
@@ -59,7 +55,6 @@ public class Client extends AbstractComponent {
      * Use {@link ChannelFuture#sync()} to wait for client startup.
      */
     private ChannelFuture clientChannel;
-
     /**
      * The ObjectEncoder shared by all pipelines used for serializing all sent {@link de.unipassau.isl.evs.ssh.core.messaging.Message}s
      */
@@ -70,11 +65,14 @@ public class Client extends AbstractComponent {
     private ObjectDecoder sharedObjectDecoder = new ObjectDecoder(
             ClassResolvers.weakCachingConcurrentResolver(ClassLoader.getSystemClassLoader()));
 
+    /**
+     * Boolean if the client connection is active.
+     */
     private boolean isActive;
 
     /**
-     * Init timeouts and the connection registry and start the netty IO client synchronously
-     * FIXME javadoc
+     * Init timeouts and the connection registry.
+     * Calls {@link #startClient()} method and to start the netty IO client synchronously.
      */
     @Override
     public void init(Container container) {
@@ -87,7 +85,6 @@ public class Client extends AbstractComponent {
         }
     }
 
-
     /**
      * Initializes the netty data pipeline and starts the client
      *
@@ -95,7 +92,8 @@ public class Client extends AbstractComponent {
      * @throws IllegalArgumentException is the Client is already running
      */
     private void startClient() throws InterruptedException {
-        if (isChannelOpen() && isExecutorAlive()) {
+        // TODO clientChannel not initialized yet -> NullPointerException without (clientChannel != null)
+        if (clientChannel != null && isChannelOpen() && isExecutorAlive()) {
             throw new IllegalStateException("client already running");
         }
 
@@ -161,17 +159,23 @@ public class Client extends AbstractComponent {
             clientChannel.channel().close();
         }
         if (clientExecutor != null) {
-            clientExecutor.shutdownGracefully(1, 5, TimeUnit.SECONDS); //TODO config grace duration
+            clientExecutor.shutdownGracefully(1, 5, TimeUnit.SECONDS);
         }
         super.destroy();
     }
 
+    /**
+     * @return if available host name, otherwise {@code null}.
+     */
     private String getHost() {
         SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
                 .getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
         return sharedPref.getString(PREF_HOST, null);
     }
 
+    /**
+     * @return if available port, otherwise default port
+     */
     private int getPort() {
         SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
                 .getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
@@ -207,8 +211,6 @@ public class Client extends AbstractComponent {
      * Blocks until the Client channel has been closed.
      *
      * @throws InterruptedException
-     * @see #isChannelOpen()
-     * @see Channel#closeFuture()
      */
     public void awaitShutdown() throws InterruptedException {
         clientChannel.channel().closeFuture().await();
