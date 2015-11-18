@@ -2,7 +2,7 @@ package de.unipassau.isl.evs.ssh.core.messaging;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.util.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import io.netty.channel.ChannelFuture;
 
 /**

@@ -5,7 +5,7 @@ import java.io.Serializable;
 import de.ncoder.typedmap.Key;
 import de.ncoder.typedmap.TypedMap;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
-import de.unipassau.isl.evs.ssh.core.util.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * Message are used to exchange information between devices and handlers.
