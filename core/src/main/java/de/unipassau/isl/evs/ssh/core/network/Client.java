@@ -1,7 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
 
-import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.net.SocketAddress;
@@ -9,7 +8,6 @@ import java.security.GeneralSecurityException;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
@@ -31,6 +29,15 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.DefaultExecutorServiceFactory;
+
+import static android.content.Context.MODE_PRIVATE;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_ALL_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_READER_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_WRITER_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.DEFAULT_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_HOST;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
 
 // TODO deal with broken connections? (maybe initialize a new connection)
 
@@ -70,13 +77,6 @@ public class Client extends AbstractComponent {
     public void init(Container container) {
         super.init(container);
         try {
-            //TODO read timeout from config
-//            SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
-//                    .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-//            int timeout = sharedPref.getInt(CoreConstants.PREF_TIMEOUT, CoreConstants.DEFAULT_TIMEOUT);
-
-
-
             startClient();
         } catch (InterruptedException e) {
             throw new StartupException("Could not start netty client", e);
@@ -125,16 +125,16 @@ public class Client extends AbstractComponent {
      * by the {@link de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher}.
      */
     protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
-
-        //TODO setup pipeline by adding all handlers
+        //TODO add remaining necessary handlers
 
         //Handler (de-)serialization
-        ch.pipeline().addLast("sharedObjectEncoder", sharedObjectEncoder);
-        ch.pipeline().addLast("sharedObjectDecoder", sharedObjectDecoder);
+        ch.pipeline().addLast(sharedObjectEncoder.getClass().getSimpleName(), sharedObjectEncoder);
+        ch.pipeline().addLast(sharedObjectDecoder.getClass().getSimpleName(), sharedObjectDecoder);
         ch.pipeline().addLast(new LoggingHandler(LogLevel.TRACE));
         //Timeout Handler
-        ch.pipeline().addLast("idleStateHandler", new IdleStateHandler(60, 30, 0));
-        ch.pipeline().addLast("TimeoutHandler", new TimeoutHandler());
+        ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
+                new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
+        ch.pipeline().addLast(TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
     }
 
     /**
@@ -152,14 +152,14 @@ public class Client extends AbstractComponent {
 
     private String getHost() {
         SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-        return sharedPref.getString(CoreConstants.PREF_HOST, null);
+                .getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        return sharedPref.getString(PREF_HOST, null);
     }
 
     private int getPort() {
         SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-        return sharedPref.getInt(CoreConstants.PREF_PORT, CoreConstants.DEFAULT_PORT);
+                .getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        return sharedPref.getInt(PREF_PORT, DEFAULT_PORT);
     }
 
     private ResourceLeakDetector.Level getResourceLeakDetection() {
