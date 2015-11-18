@@ -130,7 +130,7 @@ public class Client extends AbstractComponent {
         //Handler (de-)serialization
         ch.pipeline().addLast(sharedObjectEncoder.getClass().getSimpleName(), sharedObjectEncoder);
         ch.pipeline().addLast(sharedObjectDecoder.getClass().getSimpleName(), sharedObjectDecoder);
-        ch.pipeline().addLast(new LoggingHandler(LogLevel.TRACE));
+        ch.pipeline().addLast(LoggingHandler.class.getSimpleName(), new LoggingHandler(LogLevel.TRACE));
         //Timeout Handler
         ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
                 new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));

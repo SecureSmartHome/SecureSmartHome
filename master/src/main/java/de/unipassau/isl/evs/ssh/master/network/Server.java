@@ -9,12 +9,11 @@ import java.security.GeneralSecurityException;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.StartupException;
-import de.unipassau.isl.evs.ssh.master.MasterConstants;
+import de.unipassau.isl.evs.ssh.core.network.TimeoutHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -31,9 +30,17 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.DefaultExecutorServiceFactory;
 import io.netty.util.concurrent.GlobalEventExecutor;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_ALL_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_READER_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_WRITER_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.DEFAULT_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
+import static de.unipassau.isl.evs.ssh.master.MasterConstants.PREF_SERVER_PORT;
 
 /**
  * The heart of the master server: a netty stack accepting connections from devices and handling communication with them using a netty pipeline.
@@ -76,7 +83,6 @@ public class Server extends AbstractComponent {
     public void init(Container container) {
         super.init(container);
         try {
-            //TODO read timeouts from config
             //TODO require device registry
             startServer();
         } catch (InterruptedException e) {
@@ -102,7 +108,6 @@ public class Server extends AbstractComponent {
         serverExecutor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("server"));
         connections = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
-        //TODO Configure the Server via the Bootstrap
         ServerBootstrap b = new ServerBootstrap()
                 .group(serverExecutor)
                 .channel(NioServerSocketChannel.class)
@@ -137,9 +142,13 @@ public class Server extends AbstractComponent {
 
         //TODO setup pipeline
         //Handler (de-)serialization
-        ch.pipeline().addLast(sharedObjectEncoder);
-        ch.pipeline().addLast(sharedObjectDecoder);
-        ch.pipeline().addLast(new LoggingHandler(LogLevel.TRACE));
+        ch.pipeline().addLast(sharedObjectEncoder.getClass().getSimpleName(), sharedObjectEncoder);
+        ch.pipeline().addLast(sharedObjectDecoder.getClass().getSimpleName(), sharedObjectDecoder);
+        ch.pipeline().addLast(LoggingHandler.class.getSimpleName(), new LoggingHandler(LogLevel.TRACE));
+        //Timeout Handler
+        ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
+                new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
+        ch.pipeline().addLast(TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
 
         //Register connection
         connections.add(ch);
@@ -178,8 +187,8 @@ public class Server extends AbstractComponent {
 
     private int getPort() {
         SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(MasterConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-        return sharedPref.getInt(MasterConstants.PREF_SERVER_PORT, CoreConstants.DEFAULT_PORT);
+                .getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        return sharedPref.getInt(PREF_SERVER_PORT, DEFAULT_PORT);
     }
 
     private ResourceLeakDetector.Level getResourceLeakDetection() {
