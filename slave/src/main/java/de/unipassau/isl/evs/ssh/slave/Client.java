@@ -3,7 +3,7 @@ package de.unipassau.isl.evs.ssh.slave;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.util.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * A Client is a Component that has the Server as its only communication partner for

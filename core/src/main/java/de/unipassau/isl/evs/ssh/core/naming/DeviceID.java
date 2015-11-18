@@ -8,4 +8,3 @@ public class DeviceID {
     private String fingerprint;
 
 }
-

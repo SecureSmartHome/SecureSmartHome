@@ -4,7 +4,7 @@ import java.util.List;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.util.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.master.database.dto.UserPermission;
 
