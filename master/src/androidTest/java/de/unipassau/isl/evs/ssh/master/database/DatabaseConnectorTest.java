@@ -22,9 +22,10 @@ public class DatabaseConnectorTest extends InstrumentationTestCase {
         c.moveToFirst();
         assertEquals(c.getString(c.getColumnIndex("name")), "HolidayLog");
 
-        db.executeSql("insert into UserDevice values (?,?,?);", new String[]{ "1", "bob", "fingerprint" });
-        c = db.executeSql("select * from UserDevice where _ID = 1;", null);
+        db.executeSql("insert into UserDevice values (?,?,?);", new String[]{ "1001", "bob", "fingerprint" });
+        c = db.executeSql("select * from UserDevice where _ID = 1001;", null);
         c.moveToFirst();
         assertEquals(c.getString(c.getColumnIndex("name")), "bob");
+        db.executeSql("delete from UserDevice where _ID = ?;", new String[]{ "1001" });
     }
 }
