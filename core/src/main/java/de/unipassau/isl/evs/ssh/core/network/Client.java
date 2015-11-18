@@ -15,6 +15,7 @@ import de.unipassau.isl.evs.ssh.core.container.StartupException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -69,6 +70,8 @@ public class Client extends AbstractComponent {
     private ObjectDecoder sharedObjectDecoder = new ObjectDecoder(
             ClassResolvers.weakCachingConcurrentResolver(ClassLoader.getSystemClassLoader()));
 
+    private boolean isActive;
+
     /**
      * Init timeouts and the connection registry and start the netty IO client synchronously
      * FIXME javadoc
@@ -78,6 +81,7 @@ public class Client extends AbstractComponent {
         super.init(container);
         try {
             startClient();
+            isActive = true;
         } catch (InterruptedException e) {
             throw new StartupException("Could not start netty client", e);
         }
@@ -91,14 +95,16 @@ public class Client extends AbstractComponent {
      * @throws IllegalArgumentException is the Client is already running
      */
     private void startClient() throws InterruptedException {
-        if ((clientExecutor != null && !clientExecutor.isTerminated())) {
+        if (isChannelOpen() && isExecutorAlive()) {
             throw new IllegalStateException("client already running");
         }
 
         ResourceLeakDetector.setLevel(getResourceLeakDetection());
 
-        //Setup the Executor and Connection Pool
-        clientExecutor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("client"));
+        if (!isExecutorAlive()) {
+            //Setup the Executor and Connection Pool
+            clientExecutor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("client"));
+        }
 
         Bootstrap b = new Bootstrap()
                 .group(clientExecutor)
@@ -113,6 +119,15 @@ public class Client extends AbstractComponent {
 
         //Wait for the start of the client
         clientChannel = b.connect(getHost(), getPort()).sync();
+        clientChannel.channel().closeFuture().addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if (isActive && isExecutorAlive() && !clientExecutor.isShuttingDown()) {
+                    startClient();
+                    //FIXME this may result in an endless loop if the hostname is wrong or not reachable (e.g. due to connection loss)
+                }
+            }
+        });
         if (clientChannel == null) {
             throw new StartupException("Could not open client channel");
         }
@@ -141,6 +156,7 @@ public class Client extends AbstractComponent {
      * Stop listening, close all connections and shut down the executors.
      */
     public void destroy() {
+        isActive = false;
         if (clientChannel != null && clientChannel.channel() != null) {
             clientChannel.channel().close();
         }
