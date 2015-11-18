@@ -18,6 +18,7 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
@@ -25,6 +26,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -39,14 +41,25 @@ public class KeyStoreController extends AbstractComponent {
     public static final String LOCAL_PRIVATE_KEY_ALIAS = "localPrivateKey";
     public static final String KEY_STORE_FILENAME = "encryptText-keystore.bks";
     public static final String KEY_STORE_TYPE = "BKS";
-    public static final String KEY_PAIR_ALGORITHM = "ECDHC";
-    private static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA256WITHDETECDSA";
-    private static final String SYMMETRIC_KEY_ALGORITHM = "BLOWFISH";
+    public static final String KEY_PAIR_ALGORITHM = "RSA";
+    public static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA256withRSA";
+    public static final String SYMMETRIC_KEY_ALGORITHM = "BLOWFISH";
+    public static final String PUBLIC_KEY_PREFIX = "public_key:";
     public static final int KEY_SIZE = 1024;
 
     public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);
     private KeyStore keyStore;
 
+    static {
+        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+    }
+
+    /**
+     * This functions allows the Container to initialize the KeyStoreController.
+     *
+     * @param container The Container calling this function will reference itself so that Components
+     *                  know by whom they are managed.
+     */
     @Override
     public void init(Container container) {
         super.init(container);
@@ -59,7 +72,7 @@ public class KeyStoreController extends AbstractComponent {
             if (file.exists()) {
                 char[] keyStorePassword = getKeystorePassword();
                 keyStore.load(containerServiceContext.openFileInput(KEY_STORE_FILENAME), keyStorePassword);
-                keyStorePassword = null; //set to null to remove the password from memory
+                Arrays.fill(keyStorePassword, (char) 0);
             } else {
                 keyStore.load(null);
             }
@@ -74,26 +87,70 @@ public class KeyStoreController extends AbstractComponent {
     }
 
     /**
-     * Loads a Key from the KeyStore.
+     * Returns the public key for the associated alias or null if there is no key for this alias
      *
-     * @param alias Alias by which the Key was stored by.
-     * @return Returns the associated Key or null if there is no key stored.
+     * @param alias identifying the key
+     * @return public key for the associated alias
+     * @throws UnrecoverableEntryException
+     * @throws NoSuchAlgorithmException
+     * @throws KeyStoreException
      */
-    public java.security.Key loadKey(String alias) throws KeyStoreException, UnrecoverableEntryException,
+    public java.security.Key getPublicKey(String alias) throws UnrecoverableEntryException, NoSuchAlgorithmException,
+            KeyStoreException {
+
+        java.security.Key key = null;
+
+        if (alias.equals(LOCAL_PRIVATE_KEY_ALIAS)) {
+            KeyStore.Entry entry = loadKey(alias);
+            key = ((KeyStore.PrivateKeyEntry) entry).getCertificate().getPublicKey();
+        } else {
+            KeyStore.Entry entry = loadKey(PUBLIC_KEY_PREFIX + alias);
+            if (entry!= null) {
+                key = ((KeyStore.TrustedCertificateEntry) entry).getTrustedCertificate().getPublicKey();
+            }
+        }
+        return key;
+    }
+
+    /**
+     * Returns the PrivateKey of the device using the KeyStoreController
+     *
+     * @return PrivateKey of this device
+     * @throws UnrecoverableEntryException
+     * @throws NoSuchAlgorithmException
+     * @throws KeyStoreException
+     */
+    public java.security.Key getOwnPrivateKey() throws UnrecoverableEntryException, NoSuchAlgorithmException,
+            KeyStoreException {
+        return ((KeyStore.PrivateKeyEntry) loadKey(LOCAL_PRIVATE_KEY_ALIAS)).getPrivateKey();
+    }
+
+    /**
+     * Saves a certificate and adds an alias to it, so it may be found again.
+     *
+     * @param certificate
+     * @throws KeyStoreException
+     */
+    public void savePublicKey(Certificate certificate) throws KeyStoreException {
+        storeKey(certificate, PUBLIC_KEY_PREFIX + ((X509Certificate) certificate).getSignature());
+    }
+
+
+    /**
+     * Loads a KeyStore.Entry from the KeyStore.
+     *
+     * @param alias Alias by which the Entry was stored by.
+     * @return Returns the associated keyStoreEntry or null if there is no entry stored.
+     */
+    private KeyStore.Entry loadKey(String alias) throws KeyStoreException, UnrecoverableEntryException,
             NoSuchAlgorithmException {
 
         KeyStore.Entry entry;
         if (keyStore.containsAlias(alias)) {
-            entry = keyStore.getEntry(alias, null);
-
-            java.security.Key key;
-
-            if (alias.equals(LOCAL_PRIVATE_KEY_ALIAS)) {
-                key = ((KeyStore.PrivateKeyEntry) entry).getPrivateKey();
-            } else {
-                key = ((KeyStore.PrivateKeyEntry) entry).getCertificate().getPublicKey();
-            }
-            return key;
+            char[] keyPairPassword = getKeyPairPassword();
+            entry = keyStore.getEntry(alias, new KeyStore.PasswordProtection(keyPairPassword));
+            Arrays.fill(keyPairPassword, (char) 0);
+            return entry;
         }
 
         return null;
@@ -127,9 +184,13 @@ public class KeyStoreController extends AbstractComponent {
         certGen.setSignatureAlgorithm(KEY_PAIR_SIGNING_ALGORITHM);
         X509Certificate cert = certGen.generate(keyPair.getPrivate());
 
+        char[] keyPairPassword = getKeyPairPassword();
+
         keyStore.setEntry(LOCAL_PRIVATE_KEY_ALIAS,
                 new KeyStore.PrivateKeyEntry(keyPair.getPrivate(), new X509Certificate[]{cert}),
-                null);
+                new KeyStore.PasswordProtection(keyPairPassword)); //FIXME
+
+        Arrays.fill(keyPairPassword, (char) 0);
 
         return keyPair;
     }
@@ -142,7 +203,7 @@ public class KeyStoreController extends AbstractComponent {
      * @throws InvalidKeySpecException
      * @throws NoSuchAlgorithmException
      */
-    private java.security.Key generateKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
+    public java.security.Key generateKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
         return KeyGenerator.getInstance(SYMMETRIC_KEY_ALGORITHM).generateKey();
     }
 
@@ -154,11 +215,13 @@ public class KeyStoreController extends AbstractComponent {
      *
      * @throws KeyStoreException if certificate cannot be added to the KeyStore
      */
-    public void storeKey(Certificate certificate, String alias) throws KeyStoreException {
+    private void storeKey(Certificate certificate, String alias) throws KeyStoreException {
         keyStore.setCertificateEntry(alias, certificate);
     }
 
     private char[] getKeystorePassword() {
         return "titBewgOt2".toCharArray();
     }
+
+    private char[] getKeyPairPassword() { return "clipnitLav9".toCharArray(); }
 }
