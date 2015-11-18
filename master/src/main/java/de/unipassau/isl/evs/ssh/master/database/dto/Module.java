@@ -1,6 +1,6 @@
 package de.unipassau.isl.evs.ssh.master.database.dto;
 
-import de.unipassau.isl.evs.ssh.core.util.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * A DTO representing modules which are connected to slave devices, e..g. a light.
