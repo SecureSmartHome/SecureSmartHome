@@ -28,11 +28,15 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.DefaultExecutorServiceFactory;
 
+// TODO deal with broken connections? (maybe initialize a new connection)
+
 /**
  * FIXME javadoc
+ * a netty stack accepting connections from devices and handling communication with them using a netty pipeline.
  * For details about the pipeline, see {@link #startClient()} and {@link #initChannel(SocketChannel)}.
  */
 public class Client extends AbstractComponent {
@@ -59,20 +63,26 @@ public class Client extends AbstractComponent {
             ClassResolvers.weakCachingConcurrentResolver(ClassLoader.getSystemClassLoader()));
 
     /**
-     * Init timeouts and the connection registry and start the netty IO server synchronously
+     * Init timeouts and the connection registry and start the netty IO client synchronously
      * FIXME javadoc
      */
     @Override
     public void init(Container container) {
         super.init(container);
         try {
-            //TODO read timeouts from config
-            //TODO require device registry
+            //TODO read timeout from config
+//            SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
+//                    .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+//            int timeout = sharedPref.getInt(CoreConstants.PREF_TIMEOUT, CoreConstants.DEFAULT_TIMEOUT);
+
+
+
             startClient();
         } catch (InterruptedException e) {
             throw new StartupException("Could not start netty client", e);
         }
     }
+
 
     /**
      * Initializes the netty data pipeline and starts the client
@@ -90,7 +100,6 @@ public class Client extends AbstractComponent {
         //Setup the Executor and Connection Pool
         clientExecutor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("client"));
 
-        //TODO Configure the Client via the Bootstrap
         Bootstrap b = new Bootstrap()
                 .group(clientExecutor)
                 .channel(NioSocketChannel.class)
@@ -117,11 +126,15 @@ public class Client extends AbstractComponent {
      */
     protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
 
-        //TODO setup pipeline
+        //TODO setup pipeline by adding all handlers
+
         //Handler (de-)serialization
-        ch.pipeline().addLast(sharedObjectEncoder);
-        ch.pipeline().addLast(sharedObjectDecoder);
+        ch.pipeline().addLast("sharedObjectEncoder", sharedObjectEncoder);
+        ch.pipeline().addLast("sharedObjectDecoder", sharedObjectDecoder);
         ch.pipeline().addLast(new LoggingHandler(LogLevel.TRACE));
+        //Timeout Handler
+        ch.pipeline().addLast("idleStateHandler", new IdleStateHandler(60, 30, 0));
+        ch.pipeline().addLast("TimeoutHandler", new TimeoutHandler());
     }
 
     /**
