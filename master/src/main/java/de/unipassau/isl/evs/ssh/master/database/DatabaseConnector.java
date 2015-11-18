@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
@@ -15,8 +16,9 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
  */
 public class DatabaseConnector extends AbstractComponent {
     public static final Key<DatabaseConnector> KEY = new Key<>(DatabaseConnector.class);
+    public static final String TAG = DatabaseConnector.class.getSimpleName();
 
-    private SQLiteDatabase db;
+    private SQLiteDatabase database;
 
     /**
      * Execute the given sql statement on the database.
@@ -27,26 +29,34 @@ public class DatabaseConnector extends AbstractComponent {
      */
     public synchronized Cursor executeSql(String sql, String[] selectionArgs) {
         Cursor result = null;
-        db.beginTransaction();
+        database.beginTransaction();
         try {
-            result = db.rawQuery(sql, selectionArgs);
-            db.setTransactionSuccessful();
+            //Log.v(TAG, "executing query: " + sql);
+            result = database.rawQuery(sql, selectionArgs);
+            // rawQuery() does not execute insert statements but only compiles them.
+            // Cursor.moveTo...() executes the actual sql statement.
+            result.moveToPosition(-1);
+            database.setTransactionSuccessful();
         } finally {
-            db.endTransaction();
+            database.endTransaction();
         }
         return result;
     }
 
     @Override
     public void init(Container container) {
+        Log.v(TAG, "init:called");
         super.init(container);
-        db = new DBOpenHelper(container.require(ContainerService.KEY_CONTEXT)).getWritableDatabase();
+        database = new DBOpenHelper(container.require(ContainerService.KEY_CONTEXT)).getWritableDatabase();
+        Log.v(TAG, "init:finished");
     }
 
     @Override
     public void destroy() {
-        db.close();
+        Log.v(TAG, "destroy:called");
+        database.close();
         super.destroy();
+        Log.v(TAG, "destroy:finished");
     }
 
     public class DBOpenHelper extends SQLiteOpenHelper {
@@ -78,14 +88,14 @@ public class DatabaseConnector extends AbstractComponent {
                 + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " INTEGER NOT NULL"
                 + ");"
 
-                + "CREATE TABLE" + DatabaseContract.Group.TABLE_NAME + " ("
+                + "CREATE TABLE " + DatabaseContract.Group.TABLE_NAME + " ("
                 + DatabaseContract.Group.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.Group.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
                 + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + " INTEGER NOT NULL,"
                 + "FOREIGN KEY(permissionTemplateId) REFERENCES PermissionTemplate(_ID)"
                 + ");"
 
-                + "CREATE TABLE" + DatabaseContract.MemberOf.TABLE_NAME + " ("
+                + "CREATE TABLE " + DatabaseContract.MemberOf.TABLE_NAME + " ("
                 + DatabaseContract.MemberOf.COLUMN_USER_ID + " INTEGER NOT NULL,"
                 + DatabaseContract.MemberOf.COLUMN_GROUP_ID + " INTEGER NOT NULL,"
                 + "PRIMARY KEY (userId, groupId),"
@@ -93,12 +103,12 @@ public class DatabaseConnector extends AbstractComponent {
                 + "FOREIGN KEY(userId) REFERENCES UserDevice(_ID)"
                 + ");"
 
-                + "CREATE TABLE" + DatabaseContract.PermissionTemplate.TABLE_NAME + " ("
+                + "CREATE TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + " ("
                 + DatabaseContract.PermissionTemplate.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.PermissionTemplate.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE"
                 + ");"
 
-                + "CREATE TABLE" + DatabaseContract.ComposedOfPermission.TABLE_NAME + " ("
+                + "CREATE TABLE " + DatabaseContract.ComposedOfPermission.TABLE_NAME + " ("
                 + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID + " INTEGER NOT NULL,"
                 + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID + " INTEGER NOT NULL,"
                 + "PRIMARY KEY (permissionId, permissionTemplateId),"
@@ -106,7 +116,7 @@ public class DatabaseConnector extends AbstractComponent {
                 + "FOREIGN KEY(permissionId) REFERENCES Permission(_ID)"
                 + ");"
 
-                + "CREATE TABLE" + DatabaseContract.ElectronicModule.TABLE_NAME + " ("
+                + "CREATE TABLE " + DatabaseContract.ElectronicModule.TABLE_NAME + " ("
                 + DatabaseContract.ElectronicModule.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + " INTEGER NOT NULL,"
                 + DatabaseContract.ElectronicModule.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
@@ -120,7 +130,7 @@ public class DatabaseConnector extends AbstractComponent {
                 + "FOREIGN KEY(slaveId) REFERENCES Slave(_ID)"
                 + ");"
 
-                + "CREATE TABLE" + DatabaseContract.Slave.TABLE_NAME + " ("
+                + "CREATE TABLE " + DatabaseContract.Slave.TABLE_NAME + " ("
                 + DatabaseContract.Slave.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.Slave.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
                 + DatabaseContract.Slave.COLUMN_FINGERPRINT + " VARCHAR NOT NULL UNIQUE"
@@ -137,19 +147,29 @@ public class DatabaseConnector extends AbstractComponent {
                 + "DROP TABLE " + DatabaseContract.ElectronicModule.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.Slave.TABLE_NAME + ";";
 
+        private void execSQLScript(String script, SQLiteDatabase db){
+            String[] statements = script.split("\\;");
+            for (String statement : statements) {
+                //Log.v(TAG, "executing SQL statement: " + statement + ";");
+                db.execSQL(statement + ";");
+            }
+        }
+
         public DBOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(SQL_CREATE_DB);
+            Log.v(TAG, "creating Database");
+            execSQLScript(SQL_CREATE_DB, db);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             // Drops all tables and creates them again.
-            db.execSQL(SQL_DROP_TABLES);
+            Log.v(TAG, "updating Database");
+            execSQLScript(SQL_DROP_TABLES, db);
             onCreate(db);
         }
 
