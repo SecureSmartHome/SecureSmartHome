@@ -1,10 +1,8 @@
 package de.unipassau.isl.evs.ssh.core.sec;
 
 import android.test.InstrumentationTestCase;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
-import junit.framework.TestCase;
 import org.spongycastle.x509.X509V3CertificateGenerator;
 
 import javax.crypto.Cipher;
@@ -13,8 +11,6 @@ import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
@@ -43,7 +39,7 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
      *
      * @throws Exception
      */
-    public void testLoadKey() throws Exception {
+    public void  testLoadKey() throws Exception {
         SimpleContainer container = new SimpleContainer();
         container.register(ContainerService.KEY_CONTEXT,
                 new ContainerService.ContextComponent(getInstrumentation().getTargetContext()));
@@ -57,6 +53,34 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
 
         Key publicKey = controller.getPublicKey(KeyStoreController.LOCAL_PRIVATE_KEY_ALIAS);
         Key privateKey = controller.getOwnPrivateKey();
+        assertNotNull(publicKey);
+        assertNotNull(privateKey);
+
+        Cipher cipher = Cipher.getInstance(KeyStoreController.KEY_PAIR_ALGORITHM);
+
+        String input = "Test-String";
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        byte[] encrypted = cipher.doFinal(input.getBytes());
+
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        String decrypted = new String(cipher.doFinal(encrypted));
+
+        assertEquals(input, decrypted);
+    }
+
+    public void testOwnCertificateAndKey() throws Exception {
+        SimpleContainer container = new SimpleContainer();
+        container.register(ContainerService.KEY_CONTEXT,
+                new ContainerService.ContextComponent(getInstrumentation().getTargetContext()));
+
+        KeyStoreController controller = new KeyStoreController();
+
+        container.register(controller.KEY, controller);
+
+        Key privateKey = controller.getOwnPrivateKey();
+
+        Key publicKey = controller.getOwnCertificate().getPublicKey();
+
         assertNotNull(publicKey);
         assertNotNull(privateKey);
 
@@ -89,7 +113,7 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
         KeyPairGenerator generator;
 
         generator = KeyPairGenerator.getInstance(KeyStoreController.KEY_PAIR_ALGORITHM);
-        generator.initialize(KeyStoreController.KEY_SIZE);
+        generator.initialize(KeyStoreController.ASYMMETRIC_KEY_SIZE);
         KeyPair keyPair = generator.generateKeyPair();
 
         //Check Certificate
