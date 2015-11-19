@@ -25,11 +25,6 @@ public class UserManagementController extends AbstractComponent {
                                 + " from " + DatabaseContract.Group.TABLE_NAME
                                 + " where " + DatabaseContract.Group.COLUMN_NAME
                                 + " = ?";
-    private static final String USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY =
-            "select " + DatabaseContract.UserDevice.COLUMN_ID
-                    + " from " + DatabaseContract.UserDevice.TABLE_NAME
-                    + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
-                    + " = ?";
 
     @Override
     public void init(Container container) {
@@ -62,8 +57,8 @@ public class UserManagementController extends AbstractComponent {
      *
      * @param groupName Name of the Group.
      */
-    public void deleteGroup(String groupName) {
-        databaseConnector.executeSql("delete from"
+    public void removeGroup(String groupName) {
+        databaseConnector.executeSql("delete from "
                         + DatabaseContract.Group.TABLE_NAME
                         + " where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
                             new String[] { groupName });
@@ -88,30 +83,13 @@ public class UserManagementController extends AbstractComponent {
     }
 
     /**
-     * Get a list of all Groups.
-     */
-    public String getTemplateNameOfGroup(String groupName) {
-        Cursor templateNameCursor = databaseConnector.executeSql("select t."
-                + DatabaseContract.PermissionTemplate.COLUMN_NAME
-                + " from " + DatabaseContract.Group.TABLE_NAME + " g"
-                + " join " + DatabaseContract.PermissionTemplate.TABLE_NAME + " t"
-                + " on g." + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + " = t."
-                + DatabaseContract.PermissionTemplate.COLUMN_ID + " where "
-                + DatabaseContract.Group.COLUMN_NAME + " = ?", new String[]{ groupName });
-        if (templateNameCursor.moveToNext()) {
-            templateNameCursor.getString(0);
-        }
-        throw new IllegalArgumentException("Group " + groupName + " does not exist.");
-    }
-
-    /**
      * Change the name of a Group.
      *
      * @param oldName Old name of the Group.
      * @param newName New name of the Group.
      */
     public void changeGroupName(String oldName, String newName) {
-        databaseConnector.executeSql("update " + DatabaseContract.Group.TABLE_NAME
+        databaseConnector.executeSql("update or ignore " + DatabaseContract.Group.TABLE_NAME
                 + " set " + DatabaseContract.Group.COLUMN_NAME
                 + " = ? where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
                     new String[] { newName, oldName });
@@ -146,7 +124,7 @@ public class UserManagementController extends AbstractComponent {
      * @param newName New name of the UserDevice.
      */
     public void changeUserDeviceName(String oldName, String newName) {
-        databaseConnector.executeSql("update " + DatabaseContract.UserDevice.TABLE_NAME
+        databaseConnector.executeSql("update or ignore " + DatabaseContract.UserDevice.TABLE_NAME
                         + " set " + DatabaseContract.UserDevice.COLUMN_NAME
                         + " = ? where " + DatabaseContract.UserDevice.COLUMN_NAME + " = ?",
                 new String[] { newName, oldName });
@@ -173,8 +151,8 @@ public class UserManagementController extends AbstractComponent {
      *
      * @param userDeviceID ID of the UserDevice.
      */
-    public void deleteUserDevice(DeviceID userDeviceID) {
-        databaseConnector.executeSql("delete from"
+    public void removeUserDevice(DeviceID userDeviceID) {
+        databaseConnector.executeSql("delete from "
                         + DatabaseContract.UserDevice.TABLE_NAME
                         + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
                             new String[] { userDeviceID.getFingerprint() });
@@ -201,7 +179,7 @@ public class UserManagementController extends AbstractComponent {
      * @param groupName    Name of the new Group.
      */
     public void changeGroupMembership(DeviceID userDeviceID, String groupName) {
-        databaseConnector.executeSql("update " + DatabaseContract.UserDevice.TABLE_NAME
+        databaseConnector.executeSql("update or ignore " + DatabaseContract.UserDevice.TABLE_NAME
                         + " set " + DatabaseContract.UserDevice.COLUMN_GROUP_ID
                         + " = (" + GROUP_ID_FROM_NAME_SQL_QUERY
                         + ") where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
@@ -216,7 +194,7 @@ public class UserManagementController extends AbstractComponent {
                 + " join " + DatabaseContract.PermissionTemplate.TABLE_NAME + " t"
                 + " on g." + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + " = t."
                 + DatabaseContract.PermissionTemplate.COLUMN_ID
-                + " where " + DatabaseContract.Group.COLUMN_ID + " = ?",
+                + " where g." + DatabaseContract.Group.COLUMN_NAME + " = ?",
                     new String[] { groupName });
         if (groupCursor.moveToNext()) {
             return new Group(groupCursor.getString(0), groupCursor.getString(1));

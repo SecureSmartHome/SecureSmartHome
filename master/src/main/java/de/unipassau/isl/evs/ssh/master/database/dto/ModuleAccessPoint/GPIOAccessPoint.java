@@ -13,7 +13,7 @@ public class GPIOAccessPoint extends ModuleAccessPoint {
 
     @Override
     public String[] getAccessInformation() {
-        return new String[0];
+        return new String[] { String.valueOf(port) };
     }
 
     @Override

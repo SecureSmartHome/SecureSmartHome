@@ -38,7 +38,7 @@ public class HolidayController extends AbstractComponent {
         databaseConnector.executeSql("insert into " + DatabaseContract.HolidayLog.TABLE_NAME
                 + " (" + DatabaseContract.HolidayLog.COLUMN_ACTION
                 + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + ") values (? ,?)",
-                    new String[] { action, String.valueOf(System.currentTimeMillis() / 1000) });
+                    new String[] { action, String.valueOf(System.currentTimeMillis()) });
     }
 
     /**
@@ -50,9 +50,9 @@ public class HolidayController extends AbstractComponent {
      */
     public List<String> getLogEntriesRange(Date from, Date to) {
         Cursor holidayEntriesCursor = databaseConnector.executeSql("select "
-                + DatabaseContract.HolidayLog.TABLE_NAME
+                + DatabaseContract.HolidayLog.COLUMN_ACTION
                 + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
-                + " from " + DatabaseContract.HolidayLog.TABLE_NAME, new String[]{});
+                + " from " + DatabaseContract.HolidayLog.TABLE_NAME, new String[] {});
         List<String> actions = new LinkedList<>();
         while (holidayEntriesCursor.moveToNext()) {
             Long timestamp = holidayEntriesCursor.getLong(1);

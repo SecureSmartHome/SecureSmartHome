@@ -9,8 +9,6 @@ import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import de.unipassau.isl.evs.ssh.master.database.dto.Permission;
-import de.unipassau.isl.evs.ssh.master.database.dto.UserPermission;
 
 /**
  * Offers high level methods to interact with the tables associated with permissions in the database.
@@ -31,7 +29,7 @@ public class PermissionController extends AbstractComponent {
     private static final String USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY =
                         "select " + DatabaseContract.UserDevice.COLUMN_ID
                         + " from " + DatabaseContract.UserDevice.TABLE_NAME
-                        + " where " + DatabaseContract.UserDevice.COLUMN_NAME
+                        + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
                         + " = ?";
 
     @Override
@@ -52,7 +50,7 @@ public class PermissionController extends AbstractComponent {
      * @param templateName Name of the template.
      * @return List of the permissions in the template
      */
-    public List<Permission> getTemplate(String templateName) {
+    public List<String> getPermissionsOfTemplate(String templateName) {
         Cursor permissionsCursor = databaseConnector
                 .executeSql("select p." + DatabaseContract.Permission.COLUMN_NAME
                         + " from " + DatabaseContract.ComposedOfPermission.TABLE_NAME + " comp "
@@ -64,9 +62,9 @@ public class PermissionController extends AbstractComponent {
                         + " = p." + DatabaseContract.Permission.COLUMN_ID
                         + " where pt." + DatabaseContract.PermissionTemplate.COLUMN_NAME
                         + " = ?", new String[] { templateName });
-        List<Permission> permissions = new LinkedList<>();
+        List<String> permissions = new LinkedList<>();
         while (permissionsCursor.moveToNext()) {
-            permissions.add(new Permission(permissionsCursor.getString(0), true));
+            permissions.add(permissionsCursor.getString(0));
         }
         return permissions;
     }
@@ -88,8 +86,8 @@ public class PermissionController extends AbstractComponent {
                         + " ud on hp." + DatabaseContract.HasPermission.COLUMN_USER_ID
                         + " = ud." + DatabaseContract.UserDevice.COLUMN_ID
                         + " where p." + DatabaseContract.Permission.COLUMN_NAME
-                        + " = '?' and ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
-                        + " = '?'", new String[] { permissionName, userDeviceID.getFingerprint()});
+                        + " = ? and ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                        + " = ?", new String[] { permissionName, userDeviceID.getFingerprint()});
         return permissionCursor.moveToNext();
     }
 
@@ -105,61 +103,48 @@ public class PermissionController extends AbstractComponent {
                         + " = ?", new String[] { templateName });
     }
 
-    /**
-     * Set single permission in a template.
-     *
-     * @param templateName Name of the template to set permission in.
-     * @param permission   Permission to update.
-     */
-    public void setPermissionInTemplate(String templateName, Permission permission) {
-        if (permission.isHasPermission()) {
-            databaseConnector.executeSql("insert or ignore into "
-                            + DatabaseContract.ComposedOfPermission.TABLE_NAME
-                            + " (" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
-                            + ", "
-                            + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
-                            + ") values ((" + PERMISSION_ID_FROM_NAME_SQL_QUERY
-                            + "), (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
-                                new String[] { permission.getPermissionName(), templateName} );
-        } else {
-            databaseConnector.executeSql("delete from "
-                            + DatabaseContract.ComposedOfPermission.TABLE_NAME
-                            + " where " + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
-                            + " = (" + PERMISSION_ID_FROM_NAME_SQL_QUERY + ") and "
-                            + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
-                            + " = (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + ")" ,
-                            new String[] { permission.getPermissionName(), templateName });
-        }
+    public void addPermissionToTemplate(String templateName, String permissionName) {
+        databaseConnector.executeSql("insert or ignore into "
+                        + DatabaseContract.ComposedOfPermission.TABLE_NAME
+                        + " (" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
+                        + ", "
+                        + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
+                        + ") values ((" + PERMISSION_ID_FROM_NAME_SQL_QUERY
+                        + "), (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
+                new String[] { permissionName, templateName} );
     }
 
-    /**
-     * Updates a given permission.
-     *
-     * @param userPermission Permissions to set.
-     */
-    public void setUserPermission(UserPermission userPermission) {
-        if (userPermission.getPermission().isHasPermission()) {
+    public void removePermissionFromTemplate(String templateName, String permissionName) {
+        databaseConnector.executeSql("delete from "
+                        + DatabaseContract.ComposedOfPermission.TABLE_NAME
+                        + " where " + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
+                        + " = (" + PERMISSION_ID_FROM_NAME_SQL_QUERY + ") and "
+                        + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
+                        + " = (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + ")" ,
+                        new String[] { permissionName, templateName });
+    }
+
+    public void addUserPermission(DeviceID userDeviceID, String permissionName) {
             databaseConnector.executeSql("insert or ignore into "
                             + DatabaseContract.HasPermission.TABLE_NAME
                             + " (" + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
                             + ", " + DatabaseContract.HasPermission.COLUMN_USER_ID
                             + ") values ((" + PERMISSION_ID_FROM_NAME_SQL_QUERY
                             + "), (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
-                            + "))" , new String[] { userPermission.getPermission()
-                                .getPermissionName(), userPermission.getUserDeviceID()
-                                .getFingerprint() });
-        } else {
-            databaseConnector.executeSql("delete from "
-                            + DatabaseContract.HasPermission.TABLE_NAME
-                            + " where " + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
-                            + " = (" + PERMISSION_ID_FROM_NAME_SQL_QUERY
-                            + ") and " + DatabaseContract.HasPermission.COLUMN_USER_ID
-                            + " = (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
-                            +")" , new String[] { userPermission.getPermission()
-                                .getPermissionName(), userPermission.getUserDeviceID()
-                                .getFingerprint()});
-        }
+                            + "))" , new String[] { permissionName,
+                                userDeviceID.getFingerprint() });
     }
+
+    public void removeUserPermission(DeviceID userDeviceID, String permissionName) {
+        databaseConnector.executeSql("delete from "
+                + DatabaseContract.HasPermission.TABLE_NAME
+                + " where " + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
+                + " = (" + PERMISSION_ID_FROM_NAME_SQL_QUERY
+                + ") and " + DatabaseContract.HasPermission.COLUMN_USER_ID
+                + " = (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
+                +")" , new String[] { permissionName, userDeviceID.getFingerprint() });
+    }
+
 
     /**
      * Adds a new template to the database.
@@ -195,5 +180,27 @@ public class PermissionController extends AbstractComponent {
                         + DatabaseContract.Permission.TABLE_NAME
                         + " where " + DatabaseContract.Permission.COLUMN_NAME
                         + " = ?", new String[]{permissionName});
+    }
+
+    public List<String> getPermissions() {
+        Cursor permissionsCursor = databaseConnector.executeSql("select "
+                + DatabaseContract.Permission.COLUMN_NAME
+                + " from " + DatabaseContract.Permission.TABLE_NAME, new String[] {});
+        List<String> permissions = new LinkedList<>();
+        while (permissionsCursor.moveToNext()) {
+            permissions.add(permissionsCursor.getString(0));
+        }
+        return permissions;
+    }
+
+    public List<String> getTemplates() {
+        Cursor templatesCursor = databaseConnector.executeSql("select "
+                + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                + " from " + DatabaseContract.PermissionTemplate.TABLE_NAME, new String[] {});
+        List<String> templates = new LinkedList<>();
+        while (templatesCursor.moveToNext()) {
+            templates.add(templatesCursor.getString(0));
+        }
+        return templates;
     }
 }

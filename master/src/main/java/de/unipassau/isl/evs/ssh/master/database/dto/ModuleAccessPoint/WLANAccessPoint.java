@@ -19,7 +19,7 @@ public class WLANAccessPoint extends ModuleAccessPoint {
 
     @Override
     public String[] getAccessInformation() {
-        return new String[0];
+        return new String[] { String.valueOf(port), username, password, iPAddress };
     }
 
     @Override

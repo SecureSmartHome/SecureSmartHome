@@ -51,6 +51,9 @@ public class SlaveController extends AbstractComponent {
             allModuleAccessPoints[moduleAccessPoint.getDatabaseIndices()[i]] =
                     moduleAccessPoint.getAccessInformation()[i];
         }
+        for (String allModuleAccessPoint : allModuleAccessPoints) {
+            System.out.println(allModuleAccessPoint);
+        }
         return allModuleAccessPoints;
     }
 
@@ -85,7 +88,7 @@ public class SlaveController extends AbstractComponent {
      * @param moduleName Name of the Module to remove.
      */
     public void removeModule(String moduleName) {
-        databaseConnector.executeSql("delete from"
+        databaseConnector.executeSql("delete from "
                         + DatabaseContract.ElectronicModule.TABLE_NAME
                         + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME + " = ?",
                             new String[] { moduleName });
@@ -212,7 +215,7 @@ public class SlaveController extends AbstractComponent {
      * @param newName New Module name.
      */
     public void changeModuleName(String oldName, String newName) {
-        databaseConnector.executeSql("update " + DatabaseContract.ElectronicModule.TABLE_NAME
+        databaseConnector.executeSql("update or ignore " + DatabaseContract.ElectronicModule.TABLE_NAME
                         + " set " + DatabaseContract.ElectronicModule.COLUMN_NAME
                         + " = ? where " + DatabaseContract.ElectronicModule.COLUMN_NAME + " = ?",
                 new String[] { newName, oldName });
@@ -241,7 +244,7 @@ public class SlaveController extends AbstractComponent {
      * @param newName New Slave name.
      */
     public void changeSlaveName(String oldName, String newName) {
-        databaseConnector.executeSql("update " + DatabaseContract.Slave.TABLE_NAME
+        databaseConnector.executeSql("update or ignore " + DatabaseContract.Slave.TABLE_NAME
                         + " set " + DatabaseContract.Slave.COLUMN_NAME
                         + " = ? where " + DatabaseContract.Slave.COLUMN_NAME + " = ?",
                 new String[] { newName, oldName });
@@ -255,8 +258,8 @@ public class SlaveController extends AbstractComponent {
     public void addSlave(Slave slave) {
         databaseConnector.executeSql("insert or ignore into "
                         + DatabaseContract.Slave.TABLE_NAME
-                        + " ("+ DatabaseContract.Slave.TABLE_NAME
-                        + "," + DatabaseContract.Slave.COLUMN_FINGERPRINT+ ") values (?, ?)",
+                        + " ("+ DatabaseContract.Slave.COLUMN_NAME
+                        + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT+ ") values (?, ?)",
                             new String[] { slave.getName(), slave.getSlaveID().getFingerprint() });
     }
 
@@ -266,7 +269,7 @@ public class SlaveController extends AbstractComponent {
      * @param slaveID DeviceID of the Slave.
      */
     public void removeSlave(DeviceID slaveID) {
-        databaseConnector.executeSql("delete from"
+        databaseConnector.executeSql("delete from "
                         + DatabaseContract.Slave.TABLE_NAME
                         + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
                             new String[] { slaveID.getFingerprint() });
