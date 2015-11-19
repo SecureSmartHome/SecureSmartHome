@@ -98,7 +98,7 @@ public class Server extends AbstractComponent {
      * @throws IllegalArgumentException is the Server is already running
      */
     private void startServer() throws InterruptedException {
-        if ((serverExecutor != null && !serverExecutor.isTerminated())) {
+        if (isExecutorAlive()) {
             throw new IllegalStateException("Server already running");
         }
 

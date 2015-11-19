@@ -25,7 +25,6 @@ public class ClientTest extends TestCase {
 
         client.awaitShutdown();
         container.shutdown();
-
         assertFalse(client.isChannelOpen());
         assertFalse(client.isExecutorAlive());
     }

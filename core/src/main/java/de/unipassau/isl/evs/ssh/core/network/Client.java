@@ -92,8 +92,7 @@ public class Client extends AbstractComponent {
      * @throws IllegalArgumentException is the Client is already running
      */
     private void startClient() throws InterruptedException {
-        // TODO clientChannel not initialized yet -> NullPointerException without (clientChannel != null)
-        if (clientChannel != null && isChannelOpen() && isExecutorAlive()) {
+        if (isChannelOpen() && isExecutorAlive()) {
             throw new IllegalStateException("client already running");
         }
 
@@ -197,7 +196,7 @@ public class Client extends AbstractComponent {
      * @return {@code true}, if the Client TCP channel is currently open
      */
     public boolean isChannelOpen() {
-        return clientChannel.channel() != null && clientChannel.channel().isOpen();
+        return clientChannel != null && clientChannel.channel() != null && clientChannel.channel().isOpen();
     }
 
     /**

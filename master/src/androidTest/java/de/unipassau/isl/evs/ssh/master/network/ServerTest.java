@@ -54,7 +54,6 @@ public class ServerTest extends InstrumentationTestCase {
             client1.close();
             Thread.sleep(1000); //wait for the connection to be closed
 
-            assertFalse(client1.isConnected());
             assertEquals(0, server.getActiveChannels().size());
         } finally {
             shutdownServer(container);
@@ -78,6 +77,7 @@ public class ServerTest extends InstrumentationTestCase {
             client.awaitShutdown();
 
             assertFalse(client.isChannelOpen());
+            assertNotNull(client.getAddress());
             assertFalse(client.isExecutorAlive());
             assertEquals(0, server.getActiveChannels().size());
         } finally {
