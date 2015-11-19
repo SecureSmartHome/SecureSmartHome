@@ -21,7 +21,7 @@ public class ControllerTest extends InstrumentationTestCase {
     //Todo: handle error if none existing group / template ref is given
     //Todo: handle error if unique name is twice
 
-    public void testTemplatesAndPermissions() throws InUseException, IllegalReferenceException {
+    public void testTemplatesAndPermissions() throws InUseException, IllegalReferenceException, AlreadyInUseException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
@@ -42,6 +42,13 @@ public class ControllerTest extends InstrumentationTestCase {
         permissionController.addPermission("test2");
         permissionController.addPermission("test3");
         permissionController.addPermission("test4");
+
+        //Add same name
+        try {
+            permissionController.addPermission("test");
+        } catch (AlreadyInUseException e) {
+            assertFalse(false);
+        }
 
         //Check that permissions are inserted
         assertTrue(permissionController.getPermissions().containsAll(Arrays.asList("test", "test2", "test3", "test4")));
@@ -67,6 +74,10 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add none existing permissions or template
         try {
             permissionController.addPermissionToTemplate("asdf", "zzz");
+        } catch (IllegalReferenceException illegalReferenceException) {
+            assertFalse(false);
+        }
+        try {
             permissionController.addPermissionToTemplate("44", "test");
         } catch (IllegalReferenceException illegalReferenceException) {
             assertFalse(false);
@@ -120,7 +131,7 @@ public class ControllerTest extends InstrumentationTestCase {
         assertTrue(permissionController.getPermissions().contains("test"));
     }
 
-    public void testUserDevicesSlashGroupsAndPermissions() throws InUseException, IllegalReferenceException {
+    public void testUserDevicesSlashGroupsAndPermissions() throws DatabaseControllerException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
@@ -135,22 +146,45 @@ public class ControllerTest extends InstrumentationTestCase {
                 container.require(UserManagementController.KEY);
 
         //Init stuff to test with. init already tested in testTemplatesAndPermissions
-        permissionController.addTemplate("tmpl");
+        permissionController.addTemplate("tmplll");
+        //RenameTemplate
+        permissionController.changeTemplateName("tmplll", "tmpl");
         permissionController.addTemplate("tmpl2");
         permissionController.addTemplate("tmpl3");
         permissionController.addPermission("perm1");
         permissionController.addPermission("perm2");
         permissionController.addPermission("perm3");
 
+        //Rename to already existing
+        try {
+            permissionController.changeTemplateName("tmpl2", "tmpl");
+        } catch (AlreadyInUseException e) {
+            assertFalse(false);
+        }
+
+        //Add same name
+        try {
+            permissionController.addTemplate("tmpl");
+        } catch (AlreadyInUseException e) {
+            assertFalse(false);
+        }
+
         //Add Group
         userManagementController.addGroup(new Group("grp1", "tmpl"));
         userManagementController.addGroup(new Group("grp2", "tmpl"));
         userManagementController.addGroup(new Group("grp3", "tmpl2"));
 
+        //Use same Groupname twice
+        try {
+            userManagementController.addGroup(new Group("grp1", "tmpl"));
+        } catch (DatabaseControllerException e) {
+            assertFalse(false);
+        }
+
         //Test adding group with not existing template
         try {
             userManagementController.addGroup(new Group("dkjfkdfj", "aklsdjflasdjlf"));
-        } catch (IllegalReferenceException illegalReferenceException) {
+        } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
 
@@ -181,6 +215,13 @@ public class ControllerTest extends InstrumentationTestCase {
         assertTrue(userManagementController.getGroups().size() == 3);
         assertTrue(userManagementController.getGroup("such wow") != null);
 
+        //Change to already existing name
+        try {
+            userManagementController.changeGroupName("grp3", "such wow");
+        } catch (AlreadyInUseException e) {
+            assertFalse(false);
+        }
+
         //Test removing groups
         userManagementController.removeGroup("grp2");
         assertTrue(userManagementController.getGroups().size() == 2);
@@ -206,7 +247,7 @@ public class ControllerTest extends InstrumentationTestCase {
         try {
             userManagementController.addUserDevice(
                     new UserDevice("askdfj", "--", new DeviceID("20")));
-        } catch (IllegalReferenceException illegalReferenceException) {
+        } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
 
@@ -218,7 +259,11 @@ public class ControllerTest extends InstrumentationTestCase {
         }
 
         //Check colliding
-        //Todo: difference for userManagementController.addUserDevice(new UserDevice("u2", "such wow", new DeviceID("3")));
+        try {
+            userManagementController.addUserDevice(new UserDevice("u2", "such wow", new DeviceID("3")));
+        } catch (DatabaseControllerException e) {
+            assertFalse(false);
+        }
         assertTrue(userManagementController.getUserDevices().size() == 3);
         assertTrue(userManagementController.getUserDevice(new DeviceID("1")) != null);
         assertTrue(userManagementController.getUserDevice(new DeviceID("2")) != null);
@@ -240,6 +285,10 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add none existing permissions or devices
         try {
             permissionController.addUserPermission(new DeviceID("4"), "zzz");
+        } catch (IllegalReferenceException illegalReferenceException) {
+            assertFalse(false);
+        }
+        try {
             permissionController.addUserPermission(new DeviceID("44"), "perm3");
         } catch (IllegalReferenceException illegalReferenceException) {
             assertFalse(false);
@@ -273,7 +322,11 @@ public class ControllerTest extends InstrumentationTestCase {
         userManagementController.changeUserDeviceName("u1", "1u");
         userManagementController.changeUserDeviceName("u2", "11u");
         //Rename to same as other
-        userManagementController.changeUserDeviceName("u3", "11u");
+        try {
+            userManagementController.changeUserDeviceName("u3", "11u");
+        } catch (AlreadyInUseException e) {
+            assertFalse(false);
+        }
         assertTrue(userManagementController.getUserDevices().size() == 3);
         //Users still there
         assertTrue(userManagementController.getUserDevice(new DeviceID("1")) != null);
@@ -308,7 +361,7 @@ public class ControllerTest extends InstrumentationTestCase {
         userManagementController.removeUserDevice(new DeviceID("200"));
     }
 
-    public void testSlaveController() throws InUseException, IllegalReferenceException {
+    public void testSlaveController() throws DatabaseControllerException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
@@ -329,6 +382,18 @@ public class ControllerTest extends InstrumentationTestCase {
         }
         assertTrue(slaves.containsAll(Arrays.asList("s1", "s2", "s3")));
 
+        //Add already existing slave
+        try {
+            slaveController.addSlave(new Slave("s1", new DeviceID("55")));
+        } catch (AlreadyInUseException e ) {
+            assertFalse(false);
+        }
+        try {
+            slaveController.addSlave(new Slave("s55", new DeviceID("2")));
+        } catch (AlreadyInUseException e ) {
+            assertFalse(false);
+        }
+
         //Test modules init
         slaveController.addModule(new Module("m1", new DeviceID("1"), new USBAccessPoint(2)));
         slaveController.addModule(new Module("m2", new DeviceID("1"), new USBAccessPoint(1)));
@@ -339,10 +404,16 @@ public class ControllerTest extends InstrumentationTestCase {
         //Test to init modules at none existing slaves
         try {
             slaveController.addModule(new Module("m1", new DeviceID("99"), new USBAccessPoint(2)));
-        } catch (IllegalReferenceException illegalReferenceException) {
+        } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
 
+        //Add module with already existing name
+        try {
+            slaveController.addModule(new Module("m2", new DeviceID("1"), new USBAccessPoint(1)));
+        } catch (DatabaseControllerException e) {
+            assertFalse(false);
+        }
 
         //Check if modules are on slave
         List<String> modules = new LinkedList<>();
@@ -368,8 +439,6 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //change slave names
         slaveController.changeSlaveName("s1", "abc");
-        //Rename none existing slave
-        slaveController.changeSlaveName("s2", "aa");
         slaveController.changeSlaveName("s3", "abcd");
         slaves = new LinkedList<>();
         for (Slave slave : slaveController.getSlaves()) {
@@ -377,7 +446,13 @@ public class ControllerTest extends InstrumentationTestCase {
         }
         assertTrue(slaves.containsAll(Arrays.asList("abc", "abcd")));
         //Change to existing name
-        slaveController.changeSlaveName("s3", "abc");
+        try {
+            slaveController.changeSlaveName("abcd", "abc");
+        } catch (AlreadyInUseException e) {
+            assertFalse(false);
+        }
+        //Rename none existing slave
+        slaveController.changeSlaveName("s2", "aa");
 
         //Change module name
         slaveController.changeModuleName("m1", "asdf");
@@ -385,10 +460,13 @@ public class ControllerTest extends InstrumentationTestCase {
         assertNotNull(slaveController.getModule("m2"));
         assertTrue(slaveController.getModules().size() == 2);
         //Change to existing name
-        slaveController.changeModuleName("m2", "asdf");
-        assertNotNull(slaveController.getModule("asdf"));
-        assertNotNull(slaveController.getModule("m2"));
-        assertTrue(slaveController.getModules().size() == 2);
+        try {
+            slaveController.changeModuleName("m2", "asdf");
+        } catch (AlreadyInUseException e) {
+            assertNotNull(slaveController.getModule("asdf"));
+            assertNotNull(slaveController.getModule("m2"));
+            assertTrue(slaveController.getModules().size() == 2);
+        }
 
         //Remove module
         slaveController.removeModule("asdf");

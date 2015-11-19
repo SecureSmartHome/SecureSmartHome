@@ -119,8 +119,7 @@ public class PermissionController extends AbstractComponent {
                             + "), (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
                     new String[] { permissionName, templateName} );
         } catch (SQLiteConstraintException sqlce) {
-            throw new IllegalReferenceException(
-                    "The given Template or Permission does not exist in the database");
+            throw new IllegalReferenceException("The given Template or Permission does not exist in the database");
         }
     }
 
@@ -168,11 +167,15 @@ public class PermissionController extends AbstractComponent {
      *
      * @param templateName Name of the template.
      */
-    public void addTemplate(String templateName) {
-        databaseConnector.executeSql("insert or ignore into "
-                        + DatabaseContract.PermissionTemplate.TABLE_NAME
-                        + " (" + DatabaseContract.PermissionTemplate.COLUMN_NAME + ")"
-                        + "values (?)", new String[] { templateName });
+    public void addTemplate(String templateName) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("insert into "
+                    + DatabaseContract.PermissionTemplate.TABLE_NAME
+                    + " (" + DatabaseContract.PermissionTemplate.COLUMN_NAME + ")"
+                    + "values (?)", new String[]{templateName});
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The name is already used by another Template.");
+        }
     }
 
     /**
@@ -180,11 +183,15 @@ public class PermissionController extends AbstractComponent {
      *
      * @param permissionName Name of the permission.
      */
-    public void addPermission(String permissionName) {
-        databaseConnector.executeSql("insert or ignore into "
-                        + DatabaseContract.Permission.TABLE_NAME
-                        + " (" + DatabaseContract.Permission.COLUMN_NAME + ")"
-                        + "values (?)", new String[]{permissionName});
+    public void addPermission(String permissionName) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("insert into "
+                    + DatabaseContract.Permission.TABLE_NAME
+                    + " (" + DatabaseContract.Permission.COLUMN_NAME + ")"
+                    + "values (?)", new String[]{permissionName});
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The name is already used by another Permission.");
+        }
     }
 
     /**
@@ -219,5 +226,16 @@ public class PermissionController extends AbstractComponent {
             templates.add(templatesCursor.getString(0));
         }
         return templates;
+    }
+
+    public void changeTemplateName(String oldName, String newName) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("update " + DatabaseContract.PermissionTemplate.TABLE_NAME
+                            + " set " + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                            + " = ? where " + DatabaseContract.PermissionTemplate.COLUMN_NAME + " = ?",
+                    new String[] { newName, oldName });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The given name is already used by another Template.");
+        }
     }
 }

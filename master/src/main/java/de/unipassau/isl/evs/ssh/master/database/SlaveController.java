@@ -63,7 +63,7 @@ public class SlaveController extends AbstractComponent {
      *
      * @param module Module to add.
      */
-    public void addModule(Module module) throws IllegalReferenceException {
+    public void addModule(Module module) throws DatabaseControllerException {
         try {
             //Notice: Changed order of values to avoid having to concat twice!
             databaseConnector.executeSql("insert into "
@@ -83,7 +83,8 @@ public class SlaveController extends AbstractComponent {
                             new String[] { module.getModuleAccessPoint().getType(),
                                     module.getAtSlave().getFingerprint(), module.getName() }, String.class));
         } catch (SQLiteConstraintException sqlce) {
-            throw new IllegalReferenceException("The given Slave does not exist in the database");
+            throw new DatabaseControllerException("The given Slave does not exist in the database"
+                    + " or the name is already used by another Module");
         }
     }
 
@@ -219,11 +220,15 @@ public class SlaveController extends AbstractComponent {
      * @param oldName Old Module name.
      * @param newName New Module name.
      */
-    public void changeModuleName(String oldName, String newName) {
-        databaseConnector.executeSql("update or ignore " + DatabaseContract.ElectronicModule.TABLE_NAME
-                        + " set " + DatabaseContract.ElectronicModule.COLUMN_NAME
-                        + " = ? where " + DatabaseContract.ElectronicModule.COLUMN_NAME + " = ?",
-                new String[] { newName, oldName });
+    public void changeModuleName(String oldName, String newName) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("update " + DatabaseContract.ElectronicModule.TABLE_NAME
+                            + " set " + DatabaseContract.ElectronicModule.COLUMN_NAME
+                            + " = ? where " + DatabaseContract.ElectronicModule.COLUMN_NAME + " = ?",
+                    new String[] { newName, oldName });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The given name is already used by another Module.");
+        }
     }
 
     /**
@@ -248,11 +253,15 @@ public class SlaveController extends AbstractComponent {
      * @param oldName Old Slave name.
      * @param newName New Slave name.
      */
-    public void changeSlaveName(String oldName, String newName) {
-        databaseConnector.executeSql("update or ignore " + DatabaseContract.Slave.TABLE_NAME
-                        + " set " + DatabaseContract.Slave.COLUMN_NAME
-                        + " = ? where " + DatabaseContract.Slave.COLUMN_NAME + " = ?",
-                new String[] { newName, oldName });
+    public void changeSlaveName(String oldName, String newName) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("update " + DatabaseContract.Slave.TABLE_NAME
+                            + " set " + DatabaseContract.Slave.COLUMN_NAME
+                            + " = ? where " + DatabaseContract.Slave.COLUMN_NAME + " = ?",
+                    new String[] { newName, oldName });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The given name is already used by another Slave.");
+        }
     }
 
     /**
@@ -260,12 +269,16 @@ public class SlaveController extends AbstractComponent {
      *
      * @param slave Slave to add.
      */
-    public void addSlave(Slave slave) {
-        databaseConnector.executeSql("insert or ignore into "
-                        + DatabaseContract.Slave.TABLE_NAME
-                        + " ("+ DatabaseContract.Slave.COLUMN_NAME
-                        + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT+ ") values (?, ?)",
-                            new String[] { slave.getName(), slave.getSlaveID().getFingerprint() });
+    public void addSlave(Slave slave) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("insert into "
+                            + DatabaseContract.Slave.TABLE_NAME
+                            + " (" + DatabaseContract.Slave.COLUMN_NAME
+                            + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT + ") values (?, ?)",
+                    new String[]{slave.getName(), slave.getSlaveID().getFingerprint()});
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The given name or fingerprint is already used by another Slave.");
+        }
     }
 
     /**

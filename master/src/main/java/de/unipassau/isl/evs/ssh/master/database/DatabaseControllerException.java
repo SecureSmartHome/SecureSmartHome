@@ -1,6 +1,6 @@
 package de.unipassau.isl.evs.ssh.master.database;
 
-public abstract class DatabaseControllerException extends Exception {
+public class DatabaseControllerException extends Exception {
     public DatabaseControllerException() {
     }
 

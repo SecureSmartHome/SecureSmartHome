@@ -44,7 +44,7 @@ public class UserManagementController extends AbstractComponent {
      *
      * @param group Group to add.
      */
-    public void addGroup(Group group) throws IllegalReferenceException {
+    public void addGroup(Group group) throws DatabaseControllerException {
         try {
             databaseConnector.executeSql("insert into "
                             + DatabaseContract.Group.TABLE_NAME
@@ -53,8 +53,8 @@ public class UserManagementController extends AbstractComponent {
                             + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
                     new String[] { group.getName(), group.getTemplateName() });
         } catch (SQLiteConstraintException sqlce) {
-            throw new IllegalReferenceException(
-                    "The given Template does not exist in the database");
+            throw new DatabaseControllerException("Either the given Template does not exist in the database"
+                    + "or the name is already in use by another Group.");
         }
     }
 
@@ -98,11 +98,15 @@ public class UserManagementController extends AbstractComponent {
      * @param oldName Old name of the Group.
      * @param newName New name of the Group.
      */
-    public void changeGroupName(String oldName, String newName) {
-        databaseConnector.executeSql("update or ignore " + DatabaseContract.Group.TABLE_NAME
-                + " set " + DatabaseContract.Group.COLUMN_NAME
-                + " = ? where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
-                    new String[] { newName, oldName });
+    public void changeGroupName(String oldName, String newName) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("update " + DatabaseContract.Group.TABLE_NAME
+                            + " set " + DatabaseContract.Group.COLUMN_NAME
+                            + " = ? where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
+                                new String[] { newName, oldName });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The given name is already used by another Group.");
+        }
     }
 
     /**
@@ -133,11 +137,16 @@ public class UserManagementController extends AbstractComponent {
      * @param oldName Old name of the UserDevice.
      * @param newName New name of the UserDevice.
      */
-    public void changeUserDeviceName(String oldName, String newName) {
-        databaseConnector.executeSql("update or ignore " + DatabaseContract.UserDevice.TABLE_NAME
-                        + " set " + DatabaseContract.UserDevice.COLUMN_NAME
-                        + " = ? where " + DatabaseContract.UserDevice.COLUMN_NAME + " = ?",
-                new String[] { newName, oldName });
+    public void changeUserDeviceName(String oldName, String newName) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("update "
+                            + DatabaseContract.UserDevice.TABLE_NAME
+                            + " set " + DatabaseContract.UserDevice.COLUMN_NAME
+                            + " = ? where " + DatabaseContract.UserDevice.COLUMN_NAME + " = ?",
+                    new String[]{newName, oldName});
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The given name is already used by another UserDevice.");
+        }
     }
 
     /**
@@ -145,7 +154,7 @@ public class UserManagementController extends AbstractComponent {
      *
      * @param user The new UserDevice.
      */
-    public void addUserDevice(UserDevice user) throws IllegalReferenceException {
+    public void addUserDevice(UserDevice user) throws DatabaseControllerException {
         try {
             databaseConnector.executeSql("insert into "
                             + DatabaseContract.UserDevice.TABLE_NAME
@@ -156,7 +165,10 @@ public class UserManagementController extends AbstractComponent {
                     new String[] { user.getName(), user.getUserDeviceID().getFingerprint(),
                             user.getInGroup() });
         } catch (SQLiteConstraintException sqlce) {
-            throw new IllegalReferenceException("The given Group does not exist in the database");
+            System.out.println(sqlce.getMessage());
+            throw new DatabaseControllerException(
+                    "Either the given Group does not exist in the database"
+                    + " or a UserDevice already has the given name or fingerprint.");
         }
     }
 
@@ -186,8 +198,7 @@ public class UserManagementController extends AbstractComponent {
                             + ") where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
                                 new String[] { templateName, groupName });
         } catch (SQLiteConstraintException sqlce) {
-            throw new IllegalReferenceException(
-                    "The given Template does not exist in the database");
+            throw new IllegalReferenceException("The given Template does not exist in the database");
         }
     }
 
