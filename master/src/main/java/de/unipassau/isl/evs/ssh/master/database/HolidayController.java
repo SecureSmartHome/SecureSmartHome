@@ -5,12 +5,26 @@ import java.util.List;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 
 /**
  * Offers high level methods to interact with the holiday table in the database.
  */
 public class HolidayController extends AbstractComponent {
     public static final Key<HolidayController> KEY = new Key<>(HolidayController.class);
+    private DatabaseConnector databaseConnector;
+
+    @Override
+    public void init(Container container) {
+        super.init(container);
+        databaseConnector = requireComponent(DatabaseConnector.KEY);
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        databaseConnector = null;
+    }
 
     /**
      * Add a new action to the database.

@@ -40,6 +40,12 @@ public class PermissionController extends AbstractComponent {
         databaseConnector = requireComponent(DatabaseConnector.KEY);
     }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+        databaseConnector = null;
+    }
+
     /**
      * Lists all permissions of a given template.
      *

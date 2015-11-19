@@ -22,6 +22,12 @@ public class SlaveController extends AbstractComponent {
         databaseConnector = requireComponent(DatabaseConnector.KEY);
     }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+        databaseConnector = null;
+    }
+
     /**
      * Add a new Module.
      *
