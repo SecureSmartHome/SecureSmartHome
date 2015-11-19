@@ -9,6 +9,7 @@ import org.spongycastle.x509.X509V3CertificateGenerator;
 import javax.crypto.KeyGenerator;
 import javax.security.auth.x500.X500Principal;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -36,7 +37,6 @@ import java.util.Date;
  */
 public class KeyStoreController extends AbstractComponent {
 
-
     public static final String LOCAL_PRIVATE_KEY_ALIAS = "localPrivateKey";
     public static final String KEY_STORE_FILENAME = "encryptText-keystore.bks";
     public static final String KEY_STORE_TYPE = "BKS";
@@ -49,13 +49,14 @@ public class KeyStoreController extends AbstractComponent {
 
     public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);
     private KeyStore keyStore;
+    private File keyStoreFile;
 
     static {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }
 
     /**
-     * This functions allows the Container to initialize the KeyStoreController.
+     * This functions allows the Container to initialize the OdroidKeyStoreController.
      *
      * @param container The Container calling this function will reference itself so that Components
      *                  know by whom they are managed.
@@ -68,8 +69,8 @@ public class KeyStoreController extends AbstractComponent {
             keyStore = KeyStore.getInstance(KEY_STORE_TYPE);
 
             Context containerServiceContext = container.get(ContainerService.KEY_CONTEXT);
-            File file = containerServiceContext.getFileStreamPath(KEY_STORE_FILENAME);
-            if (file.exists()) {
+            keyStoreFile = containerServiceContext.getFileStreamPath(KEY_STORE_FILENAME);
+            if (keyStoreFile.exists()) {
                 char[] keyStorePassword = getKeystorePassword();
                 keyStore.load(containerServiceContext.openFileInput(KEY_STORE_FILENAME), keyStorePassword);
                 Arrays.fill(keyStorePassword, (char) 0);
@@ -78,42 +79,42 @@ public class KeyStoreController extends AbstractComponent {
             }
 
             if (!keyStore.containsAlias(LOCAL_PRIVATE_KEY_ALIAS)) {
-                generateKeyPair();
+                generateAndStoreKeyPair();
             }
         } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException
                 | SignatureException | InvalidKeyException e) {
-            throw new RuntimeException();
+            throw new RuntimeException(); //TODO use StartUpException when implemented
         }
     }
 
     /**
-     * Returns the public key for the associated alias or null if there is no key for this alias
+     * Returns the certificate for the associated alias or null if there is no key for this alias
      *
-     * @param alias identifying the key
-     * @return public key for the associated alias
+     * @param alias identifying the certificate
+     * @return certificate for the associated alias
      * @throws UnrecoverableEntryException
      * @throws NoSuchAlgorithmException
      * @throws KeyStoreException
      */
-    public java.security.Key getPublicKey(String alias) throws UnrecoverableEntryException, NoSuchAlgorithmException,
+    public Certificate getCertificate(String alias) throws UnrecoverableEntryException, NoSuchAlgorithmException,
             KeyStoreException {
 
-        java.security.Key key = null;
+        Certificate cert = null;
 
         if (alias.equals(LOCAL_PRIVATE_KEY_ALIAS)) {
             KeyStore.Entry entry = loadKey(alias);
-            key = ((KeyStore.PrivateKeyEntry) entry).getCertificate().getPublicKey();
+            cert = ((KeyStore.PrivateKeyEntry) entry).getCertificate();
         } else {
             KeyStore.Entry entry = loadKey(PUBLIC_KEY_PREFIX + alias);
             if (entry!= null) {
-                key = ((KeyStore.TrustedCertificateEntry) entry).getTrustedCertificate().getPublicKey();
+                cert = ((KeyStore.TrustedCertificateEntry) entry).getTrustedCertificate();
             }
         }
-        return key;
+        return cert;
     }
 
     /**
-     * Returns the PrivateKey of the device using the KeyStoreController
+     * Returns the PrivateKey of the device using the OdroidKeyStoreController
      *
      * @return PrivateKey of this device
      * @throws UnrecoverableEntryException
@@ -126,7 +127,7 @@ public class KeyStoreController extends AbstractComponent {
     }
 
     /**
-     * Returns the Certificate of the device using the KeyStoreController
+     * Returns the Certificate of the device using the OdroidKeyStoreController
      *
      * @return PrivateKey of this device
      * @throws UnrecoverableEntryException
@@ -141,11 +142,13 @@ public class KeyStoreController extends AbstractComponent {
     /**
      * Saves a certificate and adds an alias to it, so it may be found again.
      *
-     * @param certificate
+     * @param certificate that should be stored
+     * @param alias for the certificate that should be stored
      * @throws KeyStoreException
      */
-    public void savePublicKey(Certificate certificate) throws KeyStoreException {
-        storeKey(certificate, PUBLIC_KEY_PREFIX + ((X509Certificate) certificate).getSignature());
+    public void saveCertifcate(Certificate certificate, String alias) throws KeyStoreException, CertificateException,
+            NoSuchAlgorithmException{
+        storeKey(certificate, PUBLIC_KEY_PREFIX + alias);
     }
 
     /**
@@ -170,11 +173,9 @@ public class KeyStoreController extends AbstractComponent {
 
     /**
      * Generates a KeyPair suited for asymmetric encryption.
-     *
-     * @return Returns the generated KeyPair.
      */
-    private java.security.KeyPair generateKeyPair() throws NoSuchAlgorithmException, KeyStoreException,
-            CertificateEncodingException, SignatureException, InvalidKeyException {
+    private void generateAndStoreKeyPair() throws NoSuchAlgorithmException, KeyStoreException,
+            CertificateException, SignatureException, InvalidKeyException {
 
         KeyPairGenerator generator;
 
@@ -204,7 +205,11 @@ public class KeyStoreController extends AbstractComponent {
 
         Arrays.fill(keyPairPassword, (char) 0);
 
-        return keyPair;
+        try (FileOutputStream fileOutputStream = new FileOutputStream(keyStoreFile)) {
+            keyStore.store(fileOutputStream, getKeystorePassword());
+        } catch (IOException ex) {
+            throw new KeyStoreException(ex);
+        }
     }
 
     /**
@@ -228,9 +233,20 @@ public class KeyStoreController extends AbstractComponent {
      * @param alias The alias with which the specified Key is to be associated.
      *
      * @throws KeyStoreException if certificate cannot be added to the KeyStore
+     * @throws CertificateException
+     * @throws NoSuchAlgorithmException
      */
-    private void storeKey(Certificate certificate, String alias) throws KeyStoreException {
+    private void storeKey(Certificate certificate, String alias) throws KeyStoreException,
+            CertificateException, NoSuchAlgorithmException {
         keyStore.setCertificateEntry(alias, certificate);
+
+        try (FileOutputStream fileOutputStream = new FileOutputStream(keyStoreFile)) {
+            char[] keyStorePassword = getKeystorePassword();
+            keyStore.store(fileOutputStream, keyStorePassword);
+            Arrays.fill(keyStorePassword, (char) 0);
+        } catch (IOException ex) {
+            throw new KeyStoreException(ex);
+        }
     }
 
     private char[] getKeystorePassword() {
