@@ -61,19 +61,21 @@ public class ServerTest extends InstrumentationTestCase {
     }
 
     public void testConnectClient() throws IOException, InterruptedException {
-        SimpleContainer container = new SimpleContainer();
-        addContext(container);
-        Server server = addServer(container);
+        SimpleContainer serverContainer = new SimpleContainer();
+        addContext(serverContainer);
+        Server server = addServer(serverContainer);
         try {
-            container.register(Client.KEY, new Client());
+            SimpleContainer clientContainer = new SimpleContainer();
+            addContext(clientContainer);
+            clientContainer.register(Client.KEY, new Client());
             Thread.sleep(1000); //wait for the connection to be established
 
-            Client client = container.get(Client.KEY);
+            Client client = clientContainer.get(Client.KEY);
             assertTrue(client.isChannelOpen());
             assertTrue(client.isExecutorAlive());
             assertEquals(1, server.getActiveChannels().size());
 
-            container.unregister(Client.KEY);
+            clientContainer.unregister(Client.KEY);
             client.awaitShutdown();
 
             assertFalse(client.isChannelOpen());
@@ -81,7 +83,7 @@ public class ServerTest extends InstrumentationTestCase {
             assertFalse(client.isExecutorAlive());
             assertEquals(0, server.getActiveChannels().size());
         } finally {
-            shutdownServer(container);
+            shutdownServer(serverContainer);
         }
     }
 
@@ -91,13 +93,15 @@ public class ServerTest extends InstrumentationTestCase {
         final Promise<SocketChannel> serverChannel = new DefaultPromise<>(GlobalEventExecutor.INSTANCE);
         final Promise<SocketChannel> clientChannel = new DefaultPromise<>(GlobalEventExecutor.INSTANCE);
 
-        SimpleContainer container = new SimpleContainer();
-        addContext(container);
+        SimpleContainer serverContainer = new SimpleContainer();
+        addContext(serverContainer);
         Server server = new TestServer(serverQueue, serverChannel);
-        container.register(Server.KEY, server);
+        serverContainer.register(Server.KEY, server);
         try {
+            SimpleContainer clientContainer = new SimpleContainer();
+            addContext(clientContainer);
             Client client = new TestClient(clientQueue, clientChannel);
-            container.register(Client.KEY, client);
+            clientContainer.register(Client.KEY, client);
 
             try {
                 serverChannel.await(1000);
@@ -105,11 +109,11 @@ public class ServerTest extends InstrumentationTestCase {
 
                 runRoundTripTests(serverQueue, clientQueue, serverChannel, clientChannel);
             } finally {
-                container.unregister(Client.KEY);
+                clientContainer.unregister(Client.KEY);
                 client.awaitShutdown();
             }
         } finally {
-            shutdownServer(container);
+            shutdownServer(serverContainer);
         }
         assertTrue(serverQueue.isEmpty());
         assertTrue(clientQueue.isEmpty());

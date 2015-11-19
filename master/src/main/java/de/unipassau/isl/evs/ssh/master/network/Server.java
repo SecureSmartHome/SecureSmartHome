@@ -238,7 +238,7 @@ public class Server extends AbstractComponent {
      * @return {@code true}, if the Server TCP channel is currently open
      */
     public boolean isChannelOpen() {
-        return serverChannel.channel() != null && serverChannel.channel().isOpen();
+        return serverChannel != null && serverChannel.channel() != null && serverChannel.channel().isOpen();
     }
 
     /**
