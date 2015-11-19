@@ -13,7 +13,10 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.StartupException;
-import de.unipassau.isl.evs.ssh.core.network.TimeoutHandler;
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.network.ClientIncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
+import de.unipassau.isl.evs.ssh.core.util.DeviceID;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -75,6 +78,10 @@ public class Server extends AbstractComponent {
      */
     private ObjectDecoder sharedObjectDecoder = new ObjectDecoder(
             ClassResolvers.weakCachingConcurrentResolver(ClassLoader.getSystemClassLoader()));
+    /**
+     * Distributes incoming messages to the responsible handlers.
+     */
+    private ServerIncomingDispatcher incomingDispatcher = new ServerIncomingDispatcher(this);
 
     /**
      * Init timeouts and the connection registry and start the netty IO server synchronously
@@ -85,6 +92,7 @@ public class Server extends AbstractComponent {
         try {
             //TODO require device registry
             startServer();
+            container.register(IncomingDispatcher.KEY, incomingDispatcher);
         } catch (InterruptedException e) {
             throw new StartupException("Could not start netty server", e);
         }
@@ -98,7 +106,7 @@ public class Server extends AbstractComponent {
      * @throws IllegalArgumentException is the Server is already running
      */
     private void startServer() throws InterruptedException {
-        if (isExecutorAlive()) {
+        if (isChannelOpen() && isExecutorAlive()) {
             throw new IllegalStateException("Server already running");
         }
 
@@ -130,7 +138,7 @@ public class Server extends AbstractComponent {
      * Configures the per-connection pipeline that is responsible for handling incoming and outgoing data.
      * After an incoming packet is decrypted, decoded and verified,
      * it will be sent to its target {@link de.unipassau.isl.evs.ssh.core.handler.Handler}
-     * by the {@link de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher}.
+     * by the {@link ClientIncomingDispatcher}.
      */
     protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
         Container container = getContainer();
@@ -149,6 +157,8 @@ public class Server extends AbstractComponent {
         ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
                 new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
         ch.pipeline().addLast(TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
+        //Dispatcher
+        ch.pipeline().addLast(ClientIncomingDispatcher.class.getSimpleName(), incomingDispatcher);
 
         //Register connection
         connections.add(ch);
@@ -164,6 +174,7 @@ public class Server extends AbstractComponent {
         if (serverExecutor != null) {
             serverExecutor.shutdownGracefully(1, 5, TimeUnit.SECONDS); //TODO config grace duration
         }
+        getContainer().unregister(incomingDispatcher);
         super.destroy();
     }
 
@@ -173,9 +184,10 @@ public class Server extends AbstractComponent {
      *
      * @return the found Channel, or {@code null} if no Channel matches the given ID
      */
-    public Channel findChannel(String id) {
+    public Channel findChannel(DeviceID id) {
         for (Channel channel : connections) {
-            if (channel.isActive() && channel.id().asShortText().startsWith(id)
+            if (channel.isActive()
+                //&& channel.id().asShortText().startsWith(id)
                 //&& channel.attr(AttributeKey.newInstance("device-uid")).matches(id) //TODO also match device UID
                     ) {
                 return channel;
@@ -183,7 +195,6 @@ public class Server extends AbstractComponent {
         }
         return null;
     }
-
 
     private int getPort() {
         SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
@@ -193,6 +204,20 @@ public class Server extends AbstractComponent {
 
     private ResourceLeakDetector.Level getResourceLeakDetection() {
         return ResourceLeakDetector.Level.PARANOID;
+    }
+
+    /**
+     * EventLoopGroup for the ClientIncomingDispatcher and the ClientOutgoingRouter
+     */
+    EventLoopGroup getExecutor() {
+        return serverExecutor;
+    }
+
+    /**
+     * Channel for the ClientIncomingDispatcher and the ClientOutgoingRouter
+     */
+    Channel getChannel() {
+        return serverChannel != null ? serverChannel.channel() : null;
     }
 
     /**

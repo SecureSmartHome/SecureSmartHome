@@ -12,7 +12,10 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.StartupException;
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
@@ -46,6 +49,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
 public class Client extends AbstractComponent {
     public static final Key<Client> KEY = new Key<>(Client.class);
     private static final String TAG = Client.class.getSimpleName();
+
     /**
      * The EventLoopGroup used for accepting connections
      */
@@ -64,6 +68,10 @@ public class Client extends AbstractComponent {
      */
     private ObjectDecoder sharedObjectDecoder = new ObjectDecoder(
             ClassResolvers.weakCachingConcurrentResolver(ClassLoader.getSystemClassLoader()));
+    /**
+     * Distributes incoming messages to the responsible handlers.
+     */
+    private ClientIncomingDispatcher incomingDispatcher = new ClientIncomingDispatcher(this);
 
     /**
      * Boolean if the client connection is active.
@@ -79,6 +87,7 @@ public class Client extends AbstractComponent {
         super.init(container);
         try {
             startClient();
+            container.register(IncomingDispatcher.KEY, incomingDispatcher);
             isActive = true;
         } catch (InterruptedException e) {
             throw new StartupException("Could not start netty client", e);
@@ -134,7 +143,7 @@ public class Client extends AbstractComponent {
      * Configures the per-connection pipeline that is responsible for handling incoming and outgoing data.
      * After an incoming packet is decrypted, decoded and verified,
      * it will be sent to its target {@link de.unipassau.isl.evs.ssh.core.handler.Handler}
-     * by the {@link de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher}.
+     * by the {@link ClientIncomingDispatcher}.
      */
     protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
         //TODO add remaining necessary handlers
@@ -147,6 +156,8 @@ public class Client extends AbstractComponent {
         ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
                 new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
         ch.pipeline().addLast(TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
+        //Dispatcher
+        ch.pipeline().addLast(ClientIncomingDispatcher.class.getSimpleName(), incomingDispatcher);
     }
 
     /**
@@ -160,6 +171,7 @@ public class Client extends AbstractComponent {
         if (clientExecutor != null) {
             clientExecutor.shutdownGracefully(1, 5, TimeUnit.SECONDS);
         }
+        getContainer().unregister(incomingDispatcher);
         super.destroy();
     }
 
@@ -183,6 +195,20 @@ public class Client extends AbstractComponent {
 
     private ResourceLeakDetector.Level getResourceLeakDetection() {
         return ResourceLeakDetector.Level.PARANOID;
+    }
+
+    /**
+     * EventLoopGroup for the ClientIncomingDispatcher and the ClientOutgoingRouter
+     */
+    EventLoopGroup getExecutor() {
+        return clientExecutor;
+    }
+
+    /**
+     * Channel for the ClientIncomingDispatcher and the ClientOutgoingRouter
+     */
+    Channel getChannel() {
+        return clientChannel != null ? clientChannel.channel() : null;
     }
 
     /**
