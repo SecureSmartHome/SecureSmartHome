@@ -51,7 +51,7 @@ public class UserManagementController extends AbstractComponent {
     public void addGroup(Group group) {
         databaseConnector.executeSql("insert or ignore into "
                         + DatabaseContract.Group.TABLE_NAME
-                        + " ("+ DatabaseContract.Group.TABLE_NAME + ","
+                        + " ("+ DatabaseContract.Group.COLUMN_NAME + ","
                         + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + ") values (?,("
                         + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
                             new String[] { group.getName(), group.getTemplateName() });
@@ -73,7 +73,8 @@ public class UserManagementController extends AbstractComponent {
      * Get a list of all Groups.
      */
     public List<Group> getGroups() {
-        Cursor groupsCursor = databaseConnector.executeSql("select g." + DatabaseContract.Group.COLUMN_NAME
+        Cursor groupsCursor = databaseConnector.executeSql("select g."
+                + DatabaseContract.Group.COLUMN_NAME
                 + ", t." + DatabaseContract.PermissionTemplate.COLUMN_NAME
                 + " from " + DatabaseContract.Group.TABLE_NAME + " g"
                 + " join " + DatabaseContract.PermissionTemplate.TABLE_NAME + " t"
@@ -126,14 +127,10 @@ public class UserManagementController extends AbstractComponent {
                 + DatabaseContract.UserDevice.COLUMN_NAME
                 + ", u." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
                 + ", g." + DatabaseContract.Group.COLUMN_NAME
-                + " from " + DatabaseContract.MemberOf.TABLE_NAME
-                + " m join " + DatabaseContract.Group.TABLE_NAME
-                + " g on " + DatabaseContract.MemberOf.COLUMN_GROUP_ID
-                + " = " + DatabaseContract.Group.COLUMN_ID
-                + " join " + DatabaseContract.UserDevice.TABLE_NAME
-                + " u on " + DatabaseContract.MemberOf.COLUMN_USER_ID
-                + " = " + DatabaseContract.UserDevice.COLUMN_ID,
-                    new String[] {});
+                + " from " + DatabaseContract.UserDevice.TABLE_NAME + " u"
+                + " join " + DatabaseContract.Group.TABLE_NAME + " g"
+                + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID + " = g."
+                + DatabaseContract.Group.COLUMN_ID, new String[] {});
         List<UserDevice> userDevices = new LinkedList<>();
         while (userDevicesCursor.moveToNext()) {
             userDevices.add(new UserDevice(userDevicesCursor.getString(0),
@@ -161,18 +158,14 @@ public class UserManagementController extends AbstractComponent {
      * @param user The new UserDevice.
      */
     public void addUserDevice(UserDevice user) {
-        //TODO: Check if group exists... somehow
         databaseConnector.executeSql("insert or ignore into "
-                + DatabaseContract.UserDevice.TABLE_NAME + "("
-                + DatabaseContract.UserDevice.COLUMN_NAME+ ", "
-                + DatabaseContract.UserDevice.COLUMN_FINGERPRINT+ ") values (? , ?)",
-                    new String[] { user.getName(), user.getUserDeviceID().getFingerprint() });
-        databaseConnector.executeSql("insert or ignore into "
-                        + DatabaseContract.MemberOf.TABLE_NAME + "("
-                        + DatabaseContract.MemberOf.COLUMN_USER_ID + ", "
-                        + DatabaseContract.MemberOf.COLUMN_GROUP_ID + ") values (? , ("
+                        + DatabaseContract.UserDevice.TABLE_NAME
+                        + " ("+ DatabaseContract.UserDevice.COLUMN_NAME + ","
+                        + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + ","
+                        + DatabaseContract.UserDevice.COLUMN_GROUP_ID + ") values (?, ?,("
                         + GROUP_ID_FROM_NAME_SQL_QUERY + "))",
-                            new String[] { user.getName(), user.getUserDeviceID().getFingerprint() });
+                new String[] { user.getName(), user.getUserDeviceID().getFingerprint(),
+                        user.getInGroup() });
     }
 
     /**
@@ -208,16 +201,45 @@ public class UserManagementController extends AbstractComponent {
      * @param groupName    Name of the new Group.
      */
     public void changeGroupMembership(DeviceID userDeviceID, String groupName) {
-        databaseConnector.executeSql("delete from " + DatabaseContract.MemberOf.TABLE_NAME
-                + " where " + DatabaseContract.MemberOf.COLUMN_USER_ID
-                + " = (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY + ")",
-                    new String[] { userDeviceID.getFingerprint() });
-        databaseConnector.executeSql("insert or ignore into" + DatabaseContract.MemberOf.TABLE_NAME
-                + "(" + DatabaseContract.MemberOf.COLUMN_USER_ID + ", "
-                + DatabaseContract.MemberOf.COLUMN_GROUP_ID + ") values (("
-                + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY + ") , ("
-                + GROUP_ID_FROM_NAME_SQL_QUERY + "))",
-                    new String[] { userDeviceID.getFingerprint(), groupName });
+        databaseConnector.executeSql("update " + DatabaseContract.UserDevice.TABLE_NAME
+                        + " set " + DatabaseContract.UserDevice.COLUMN_GROUP_ID
+                        + " = (" + GROUP_ID_FROM_NAME_SQL_QUERY
+                        + ") where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
+                new String[] { groupName, userDeviceID.getFingerprint() });
+    }
+
+    public Group getGroup(String groupName) {
+        Cursor groupCursor = databaseConnector.executeSql("select g."
+                + DatabaseContract.Group.COLUMN_NAME
+                + ", t." + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                + " from " + DatabaseContract.Group.TABLE_NAME + " g"
+                + " join " + DatabaseContract.PermissionTemplate.TABLE_NAME + " t"
+                + " on g." + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + " = t."
+                + DatabaseContract.PermissionTemplate.COLUMN_ID
+                + " where " + DatabaseContract.Group.COLUMN_ID + " = ?",
+                    new String[] { groupName });
+        if (groupCursor.moveToNext()) {
+            return new Group(groupCursor.getString(0), groupCursor.getString(1));
+        }
+        return null;
+    }
+
+    public UserDevice getUserDevice(DeviceID deviceID) {
+        Cursor userDeviceCursor = databaseConnector.executeSql("select u."
+                + DatabaseContract.UserDevice.COLUMN_NAME
+                + ", u." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                + ", g." + DatabaseContract.Group.COLUMN_NAME
+                + " from " + DatabaseContract.UserDevice.TABLE_NAME + " u"
+                + " join " + DatabaseContract.Group.TABLE_NAME + " g"
+                + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID + " = g."
+                + DatabaseContract.Group.COLUMN_ID
+                + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
+                    new String[] { deviceID.getFingerprint() });
+        if (userDeviceCursor.moveToNext()) {
+            return new UserDevice(userDeviceCursor.getString(0),
+                    userDeviceCursor.getString(2), new DeviceID(userDeviceCursor.getString(1)));
+        }
+        return null;
     }
 
 }
