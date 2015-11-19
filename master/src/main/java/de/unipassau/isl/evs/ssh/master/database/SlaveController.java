@@ -167,6 +167,44 @@ public class SlaveController extends AbstractComponent {
         return null;
     }
 
+    public List<Module> getModulesOfSlave(DeviceID slaveDeviceID) {
+        //Notice: again changed order for convenience reasons when creating the ModuleAccessPoint.
+        Cursor modulesCursor = databaseConnector.executeSql("select" +
+                " m." + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_USB_PORT
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_TYPE
+                + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
+                + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
+                + " join " + DatabaseContract.Slave.TABLE_NAME + " s"
+                + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
+                + " = s." + DatabaseContract.Slave.COLUMN_ID
+                + " where s." + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
+                    new String[] { slaveDeviceID.getFingerprint() });
+        List<Module> modules = new LinkedList<>();
+        while (modulesCursor.moveToNext()) {
+            String[] combinedModuleAccessPointInformation =
+                    new String[ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION];
+            for (int i = 0; i < ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION; i++) {
+                combinedModuleAccessPointInformation[i] = modulesCursor.getString(i);
+            }
+            ModuleAccessPoint moduleAccessPoint = ModuleAccessPoint
+                    .fromCombinedModuleAccessPointInformation(combinedModuleAccessPointInformation,
+                            modulesCursor.getString(
+                                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION));
+            modules.add(new Module(modulesCursor.getString(
+                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2), new DeviceID(
+                    modulesCursor.getString(
+                            ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 1)),
+                    moduleAccessPoint));
+        }
+        return modules;
+    }
+
     /**
      * Change the name of a Module.
      *

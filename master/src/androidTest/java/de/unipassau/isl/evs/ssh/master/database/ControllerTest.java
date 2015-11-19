@@ -8,7 +8,7 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
 import de.unipassau.isl.evs.ssh.master.database.dto.Permission;
 
-public class PermissionAndUserManagementControllerTest extends InstrumentationTestCase {
+public class ControllerTest extends InstrumentationTestCase {
 
     public void testAll() {
         SimpleContainer container = new SimpleContainer();
