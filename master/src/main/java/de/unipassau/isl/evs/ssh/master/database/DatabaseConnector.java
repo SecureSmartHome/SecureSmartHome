@@ -66,7 +66,9 @@ public class DatabaseConnector extends AbstractComponent {
         private static final String SQL_CREATE_DB = "CREATE TABLE " + DatabaseContract.UserDevice.TABLE_NAME + " ("
                 + DatabaseContract.UserDevice.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.UserDevice.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
-                + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " VARCHAR NOT NULL UNIQUE"
+                + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " VARCHAR NOT NULL UNIQUE,"
+                + DatabaseContract.UserDevice.COLUMN_GROUP_ID + " INTEGER NOT NULL,"
+                + "FOREIGN KEY(" + DatabaseContract.UserDevice.COLUMN_GROUP_ID + ") REFERENCES " + DatabaseContract.Group.TABLE_NAME + "(" + DatabaseContract.Group.COLUMN_ID + ")"
                 + ");"
 
                 + "CREATE TABLE " + DatabaseContract.Permission.TABLE_NAME + " ("
@@ -77,77 +79,69 @@ public class DatabaseConnector extends AbstractComponent {
                 + "CREATE TABLE " + DatabaseContract.HasPermission.TABLE_NAME + " ("
                 + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID + " INTEGER NOT NULL,"
                 + DatabaseContract.HasPermission.COLUMN_USER_ID + " INTEGER NOT NULL,"
-                + "PRIMARY KEY (permissionId, userId),"
-                + "FOREIGN KEY(userId) REFERENCES UserDevice(_ID),"
-                + "FOREIGN KEY(permissionId) REFERENCES Permission(_ID)"
+                + "PRIMARY KEY (" + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID + ", " + DatabaseContract.HasPermission.COLUMN_USER_ID + "),"
+                + "FOREIGN KEY(" + DatabaseContract.HasPermission.COLUMN_USER_ID + ") REFERENCES " + DatabaseContract.UserDevice.TABLE_NAME + "(" + DatabaseContract.UserDevice.COLUMN_ID + ") ON DELETE CASCADE,"
+                + "FOREIGN KEY(" + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID + ") REFERENCES " + DatabaseContract.Permission.TABLE_NAME + "(" + DatabaseContract.Permission.COLUMN_ID + ") ON DELETE CASCADE"
                 + ");"
 
                 + "CREATE TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + " ("
-                + DatabaseContract.HolidayLog.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
+                + DatabaseContract.HolidayLog.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.HolidayLog.COLUMN_ACTION + " VARCHAR NOT NULL,"
                 + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " INTEGER NOT NULL"
                 + ");"
 
                 + "CREATE TABLE " + DatabaseContract.Group.TABLE_NAME + " ("
-                + DatabaseContract.Group.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
+                + DatabaseContract.Group.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.Group.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
                 + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + " INTEGER NOT NULL,"
-                + "FOREIGN KEY(permissionTemplateId) REFERENCES PermissionTemplate(_ID)"
-                + ");"
-
-                + "CREATE TABLE " + DatabaseContract.MemberOf.TABLE_NAME + " ("
-                + DatabaseContract.MemberOf.COLUMN_USER_ID + " INTEGER NOT NULL,"
-                + DatabaseContract.MemberOf.COLUMN_GROUP_ID + " INTEGER NOT NULL,"
-                + "PRIMARY KEY (userId, groupId),"
-                + "FOREIGN KEY(groupId) REFERENCES 'Group'(_ID),"
-                + "FOREIGN KEY(userId) REFERENCES UserDevice(_ID)"
+                + "FOREIGN KEY(" + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + ") REFERENCES " + DatabaseContract.PermissionTemplate.TABLE_NAME + "(" + DatabaseContract.PermissionTemplate.COLUMN_ID + ")"
                 + ");"
 
                 + "CREATE TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + " ("
-                + DatabaseContract.PermissionTemplate.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
+                + DatabaseContract.PermissionTemplate.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.PermissionTemplate.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE"
                 + ");"
 
                 + "CREATE TABLE " + DatabaseContract.ComposedOfPermission.TABLE_NAME + " ("
                 + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID + " INTEGER NOT NULL,"
                 + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID + " INTEGER NOT NULL,"
-                + "PRIMARY KEY (permissionId, permissionTemplateId),"
-                + "FOREIGN KEY(permissionTemplateId) REFERENCES PermissionTemplate(_ID),"
-                + "FOREIGN KEY(permissionId) REFERENCES Permission(_ID)"
+                + "PRIMARY KEY (" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID + "," + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID + "),"
+                + "FOREIGN KEY(" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID + ") REFERENCES " + DatabaseContract.PermissionTemplate.TABLE_NAME + "(" + DatabaseContract.PermissionTemplate.COLUMN_ID + ") ON DELETE CASCADE,"
+                + "FOREIGN KEY(" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID + ") REFERENCES " + DatabaseContract.Permission.TABLE_NAME + "(" + DatabaseContract.Permission.COLUMN_ID + ") ON DELETE CASCADE"
                 + ");"
 
                 + "CREATE TABLE " + DatabaseContract.ElectronicModule.TABLE_NAME + " ("
-                + DatabaseContract.ElectronicModule.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
+                + DatabaseContract.ElectronicModule.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + " INTEGER NOT NULL,"
                 + DatabaseContract.ElectronicModule.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
                 + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN + " INTEGER,"
                 + DatabaseContract.ElectronicModule.COLUMN_USB_PORT + " INTEGER,"
                 + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT + " INTEGER,"
-                + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME + " INTEGER,"
-                + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD + " INTEGER,"
-                + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP + " INTEGER,"
-                + DatabaseContract.ElectronicModule.COLUMN_TYPE + " INTEGER CHECK(type = 'GPIO' or type = 'USB' or type = 'WLAN'),"
-                + "FOREIGN KEY(slaveId) REFERENCES Slave(_ID)"
+                + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME + " VARCHAR,"
+                + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD + " VARCHAR,"
+                + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP + " VARCHAR,"
+                + DatabaseContract.ElectronicModule.COLUMN_TYPE + " VARCHAR CHECK(" + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'GPIO' or " + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'USB' or " + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'WLAN'),"
+                + "FOREIGN KEY(" + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + ") REFERENCES " + DatabaseContract.Slave.TABLE_NAME + "(" + DatabaseContract.Slave.COLUMN_ID + ")"
                 + ");"
 
                 + "CREATE TABLE " + DatabaseContract.Slave.TABLE_NAME + " ("
-                + DatabaseContract.Slave.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
+                + DatabaseContract.Slave.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.Slave.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
                 + DatabaseContract.Slave.COLUMN_FINGERPRINT + " VARCHAR NOT NULL UNIQUE"
-                + " );";
+                + ");";
+
 
         private static final String SQL_DROP_TABLES = "DROP TABLE " + DatabaseContract.UserDevice.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.Permission.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.HasPermission.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.Group.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.MemberOf.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.ComposedOfPermission.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.ElectronicModule.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.Slave.TABLE_NAME + ";";
 
-        private void execSQLScript(String script, SQLiteDatabase db){
+        private void execSQLScript(String script, SQLiteDatabase db) {
             String[] statements = script.split("\\;");
             for (String statement : statements) {
                 //Log.v(TAG, "executing SQL statement: " + statement + ";");
@@ -163,6 +157,11 @@ public class DatabaseConnector extends AbstractComponent {
         public void onCreate(SQLiteDatabase db) {
             Log.v(TAG, "creating Database");
             execSQLScript(SQL_CREATE_DB, db);
+        }
+
+        @Override
+        public void onConfigure(SQLiteDatabase db) {
+            db.setForeignKeyConstraintsEnabled(true);
         }
 
         @Override

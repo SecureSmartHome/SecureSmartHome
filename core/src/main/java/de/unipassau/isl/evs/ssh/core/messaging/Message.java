@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.messaging;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import de.ncoder.typedmap.Key;
 import de.ncoder.typedmap.TypedMap;
@@ -21,17 +22,26 @@ public class Message implements Serializable {
     private final TypedMap<Object> headers;
     private MessagePayload payload;
 
+    public Message() {
+        this(null);
+    }
+
+    public Message(MessagePayload payload) {
+        this(new TypedMap<>(), payload);
+    }
+
+    @SuppressWarnings("unchecked")
     private Message(TypedMap headers, MessagePayload payload) {
         this.headers = headers;
         this.payload = payload;
     }
 
-    public void setPayload(MessagePayload payload) {
-        this.payload = payload;
-    }
-
     public MessagePayload getPayload() {
         return payload;
+    }
+
+    public void setPayload(MessagePayload payload) {
+        this.payload = payload;
     }
 
     /**
@@ -64,6 +74,26 @@ public class Message implements Serializable {
 
     public TypedMap<Object> getHeaders() {
         return headers;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder bob = new StringBuilder();
+        bob.append(headerString()).append("\n");
+        for (Map.Entry<Key<?>, Object> entry : headers.entrySet()) {
+            bob.append(entry.getKey())
+                    .append(": ")
+                    .append(entry.getValue())
+                    .append("\n");
+        }
+        bob.append("\n")
+                .append(payload)
+                .append("\n");
+        return bob.toString();
+    }
+
+    protected CharSequence headerString() {
+        return getClass().getSimpleName();
     }
 
     /**
@@ -111,6 +141,11 @@ public class Message implements Serializable {
 
         public String getRoutingKey() {
             return routingKey;
+        }
+
+        @Override
+        protected CharSequence headerString() {
+            return super.headerString() + " to " + toID + "/" + routingKey + " from " + fromID;
         }
     }
 }

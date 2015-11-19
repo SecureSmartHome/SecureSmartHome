@@ -88,6 +88,9 @@ allprojects {
                 force 'com.android.support:support-annotations:22.2.1'
             }
         }
+        testOptions {
+            unitTests.returnDefaultValues = true
+        }
     }
 
     dependencies {
