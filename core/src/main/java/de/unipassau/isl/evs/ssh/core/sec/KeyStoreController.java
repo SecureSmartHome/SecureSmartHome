@@ -5,6 +5,7 @@ import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.container.StartupException;
 import org.spongycastle.x509.X509V3CertificateGenerator;
 import javax.crypto.KeyGenerator;
 import javax.security.auth.x500.X500Principal;
@@ -83,7 +84,7 @@ public class KeyStoreController extends AbstractComponent {
             }
         } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException
                 | SignatureException | InvalidKeyException e) {
-            throw new RuntimeException(); //TODO use StartUpException when implemented
+            throw new StartupException(e);
         }
     }
 
@@ -96,7 +97,7 @@ public class KeyStoreController extends AbstractComponent {
      * @throws NoSuchAlgorithmException
      * @throws KeyStoreException
      */
-    public Certificate getCertificate(String alias) throws UnrecoverableEntryException, NoSuchAlgorithmException,
+    public X509Certificate getCertificate(String alias) throws UnrecoverableEntryException, NoSuchAlgorithmException,
             KeyStoreException {
 
         Certificate cert = null;
@@ -110,7 +111,7 @@ public class KeyStoreController extends AbstractComponent {
                 cert = ((KeyStore.TrustedCertificateEntry) entry).getTrustedCertificate();
             }
         }
-        return cert;
+        return (X509Certificate) cert;
     }
 
     /**
@@ -134,9 +135,9 @@ public class KeyStoreController extends AbstractComponent {
      * @throws NoSuchAlgorithmException
      * @throws KeyStoreException
      */
-    public Certificate getOwnCertificate() throws UnrecoverableEntryException,
+    public X509Certificate getOwnCertificate() throws UnrecoverableEntryException,
             NoSuchAlgorithmException, KeyStoreException {
-        return ((KeyStore.PrivateKeyEntry) loadKey(LOCAL_PRIVATE_KEY_ALIAS)).getCertificate();
+        return (X509Certificate) ((KeyStore.PrivateKeyEntry) loadKey(LOCAL_PRIVATE_KEY_ALIAS)).getCertificate();
     }
 
     /**
@@ -146,7 +147,7 @@ public class KeyStoreController extends AbstractComponent {
      * @param alias for the certificate that should be stored
      * @throws KeyStoreException
      */
-    public void saveCertifcate(Certificate certificate, String alias) throws KeyStoreException, CertificateException,
+    public void saveCertifcate(X509Certificate certificate, String alias) throws KeyStoreException, CertificateException,
             NoSuchAlgorithmException{
         storeKey(certificate, PUBLIC_KEY_PREFIX + alias);
     }
