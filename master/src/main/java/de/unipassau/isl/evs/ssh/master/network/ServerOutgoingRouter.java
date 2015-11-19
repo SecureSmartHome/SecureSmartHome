@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.master.network;
 
 import java.io.IOException;
 
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -13,12 +12,7 @@ import io.netty.channel.ChannelFuture;
 /**
  * Receives messages from system components and decides how to route them to the targets.
  */
-public class ServerOutgoingRouter extends AbstractComponent implements OutgoingRouter {
-    @Override
-    public ChannelFuture sendMessageLocal(String routingKey, Message message) {
-        return sendMessage(getLocalID(), routingKey, message);
-    }
-
+public class ServerOutgoingRouter extends OutgoingRouter {
     /**
      * Forwards an add to the ChannelPipeline which is in charge of the connection to the target specified in the AddressedMessage.
      *
@@ -42,10 +36,5 @@ public class ServerOutgoingRouter extends AbstractComponent implements OutgoingR
                 return channel.writeAndFlush(amsg);
             }
         }
-    }
-
-    public DeviceID getLocalID() {
-        //require("KeyStoreManager").getLocalID(); //TODO
-        return null;
     }
 }

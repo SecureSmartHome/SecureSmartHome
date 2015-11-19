@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.core.network;
 
 import android.util.Log;
 
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -12,13 +11,8 @@ import io.netty.channel.ChannelFuture;
 /**
  * Receives messages from system components and decides how to route them to the targets.
  */
-public class ClientOutgoingRouter extends AbstractComponent implements OutgoingRouter {
+public class ClientOutgoingRouter extends OutgoingRouter {
     private static final String TAG = ClientOutgoingRouter.class.getSimpleName();
-
-    @Override
-    public ChannelFuture sendMessageLocal(String routingKey, Message message) {
-        return sendMessage(getLocalID(), routingKey, message);
-    }
 
     /**
      * Forwards an add to the ChannelPipeline which is in charge of the connection to the target specified in the AddressedMessage.
@@ -41,11 +35,6 @@ public class ClientOutgoingRouter extends AbstractComponent implements OutgoingR
             Log.w(TAG, "sendMessage failed", e);
             return requireComponent(Client.KEY).getChannel().newFailedFuture(e);
         }
-    }
-
-    private DeviceID getLocalID() {
-        //require("KeyStoreManager").getLocalID(); //TODO
-        return null;
     }
 
     private DeviceID getMasterID() {

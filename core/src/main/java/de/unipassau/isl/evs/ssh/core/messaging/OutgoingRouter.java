@@ -1,14 +1,21 @@
 package de.unipassau.isl.evs.ssh.core.messaging;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.container.Component;
+import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.util.DeviceID;
 import io.netty.channel.ChannelFuture;
 
-public interface OutgoingRouter extends Component {
-    Key<OutgoingRouter> KEY = new Key<>(OutgoingRouter.class);
+public abstract class OutgoingRouter extends AbstractComponent {
+    public static final Key<OutgoingRouter> KEY = new Key<>(OutgoingRouter.class);
 
-    ChannelFuture sendMessageLocal(String routingKey, Message message);
+    public abstract ChannelFuture sendMessage(DeviceID toID, String routingKey, Message msg);
 
-    ChannelFuture sendMessage(DeviceID toID, String routingKey, Message msg);
+    public ChannelFuture sendMessageLocal(String routingKey, Message message) {
+        return sendMessage(getLocalID(), routingKey, message);
+    }
+
+    protected DeviceID getLocalID() {
+        //require("KeyStoreManager").getLocalID(); //TODO
+        return null;
+    }
 }
