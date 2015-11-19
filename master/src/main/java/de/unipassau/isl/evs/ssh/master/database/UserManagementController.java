@@ -44,13 +44,18 @@ public class UserManagementController extends AbstractComponent {
      *
      * @param group Group to add.
      */
-    public void addGroup(Group group) {
-        databaseConnector.executeSql("insert or ignore into "
-                        + DatabaseContract.Group.TABLE_NAME
-                        + " ("+ DatabaseContract.Group.COLUMN_NAME + ","
-                        + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + ") values (?,("
-                        + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
-                            new String[] { group.getName(), group.getTemplateName() });
+    public void addGroup(Group group) throws IllegalReferenceException {
+        try {
+            databaseConnector.executeSql("insert into "
+                            + DatabaseContract.Group.TABLE_NAME
+                            + " ("+ DatabaseContract.Group.COLUMN_NAME + ","
+                            + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + ") values (?,("
+                            + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
+                    new String[] { group.getName(), group.getTemplateName() });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new IllegalReferenceException(
+                    "The given Template does not exist in the database");
+        }
     }
 
     /**
@@ -140,15 +145,19 @@ public class UserManagementController extends AbstractComponent {
      *
      * @param user The new UserDevice.
      */
-    public void addUserDevice(UserDevice user) {
-        databaseConnector.executeSql("insert or ignore into "
-                        + DatabaseContract.UserDevice.TABLE_NAME
-                        + " ("+ DatabaseContract.UserDevice.COLUMN_NAME + ","
-                        + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + ","
-                        + DatabaseContract.UserDevice.COLUMN_GROUP_ID + ") values (?, ?,("
-                        + GROUP_ID_FROM_NAME_SQL_QUERY + "))",
-                new String[] { user.getName(), user.getUserDeviceID().getFingerprint(),
-                        user.getInGroup() });
+    public void addUserDevice(UserDevice user) throws IllegalReferenceException {
+        try {
+            databaseConnector.executeSql("insert into "
+                            + DatabaseContract.UserDevice.TABLE_NAME
+                            + " ("+ DatabaseContract.UserDevice.COLUMN_NAME + ","
+                            + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + ","
+                            + DatabaseContract.UserDevice.COLUMN_GROUP_ID + ") values (?, ?,("
+                            + GROUP_ID_FROM_NAME_SQL_QUERY + "))",
+                    new String[] { user.getName(), user.getUserDeviceID().getFingerprint(),
+                            user.getInGroup() });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new IllegalReferenceException("The given Group does not exist in the database");
+        }
     }
 
     /**
@@ -169,12 +178,17 @@ public class UserManagementController extends AbstractComponent {
      * @param groupName    Name of the Group.
      * @param templateName Name of the new template.
      */
-    public void changeTemplateOfGroup(String groupName, String templateName) {
-        databaseConnector.executeSql("update " + DatabaseContract.Group.TABLE_NAME
-                        + " set " + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID
-                        + " = (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY
-                        + ") where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
-                new String[] { templateName, groupName });
+    public void changeTemplateOfGroup(String groupName, String templateName) throws IllegalReferenceException {
+        try {
+            databaseConnector.executeSql("update " + DatabaseContract.Group.TABLE_NAME
+                            + " set " + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID
+                            + " = (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY
+                            + ") where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
+                                new String[] { templateName, groupName });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new IllegalReferenceException(
+                    "The given Template does not exist in the database");
+        }
     }
 
     /**
@@ -183,12 +197,16 @@ public class UserManagementController extends AbstractComponent {
      * @param userDeviceID ID of the UserDevice.
      * @param groupName    Name of the new Group.
      */
-    public void changeGroupMembership(DeviceID userDeviceID, String groupName) {
-        databaseConnector.executeSql("update or ignore " + DatabaseContract.UserDevice.TABLE_NAME
-                        + " set " + DatabaseContract.UserDevice.COLUMN_GROUP_ID
-                        + " = (" + GROUP_ID_FROM_NAME_SQL_QUERY
-                        + ") where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
-                new String[] { groupName, userDeviceID.getFingerprint() });
+    public void changeGroupMembership(DeviceID userDeviceID, String groupName) throws IllegalReferenceException {
+        try {
+            databaseConnector.executeSql("update " + DatabaseContract.UserDevice.TABLE_NAME
+                            + " set " + DatabaseContract.UserDevice.COLUMN_GROUP_ID
+                            + " = (" + GROUP_ID_FROM_NAME_SQL_QUERY
+                            + ") where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
+                                new String[] { groupName, userDeviceID.getFingerprint() });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new IllegalReferenceException("The given Group does not exist in the database");
+        }
     }
 
     public Group getGroup(String groupName) {

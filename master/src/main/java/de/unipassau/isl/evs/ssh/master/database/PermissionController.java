@@ -108,17 +108,23 @@ public class PermissionController extends AbstractComponent {
         }
     }
 
-    public void addPermissionToTemplate(String templateName, String permissionName) {
-        databaseConnector.executeSql("insert or ignore into "
-                        + DatabaseContract.ComposedOfPermission.TABLE_NAME
-                        + " (" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
-                        + ", "
-                        + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
-                        + ") values ((" + PERMISSION_ID_FROM_NAME_SQL_QUERY
-                        + "), (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
-                new String[] { permissionName, templateName} );
+    public void addPermissionToTemplate(String templateName, String permissionName) throws IllegalReferenceException {
+        try {
+            databaseConnector.executeSql("insert into "
+                            + DatabaseContract.ComposedOfPermission.TABLE_NAME
+                            + " (" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
+                            + ", "
+                            + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
+                            + ") values ((" + PERMISSION_ID_FROM_NAME_SQL_QUERY
+                            + "), (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
+                    new String[] { permissionName, templateName} );
+        } catch (SQLiteConstraintException sqlce) {
+            throw new IllegalReferenceException(
+                    "The given Template or Permission does not exist in the database");
+        }
     }
 
+    //todo: check
     public void removePermissionFromTemplate(String templateName, String permissionName) {
         databaseConnector.executeSql("delete from "
                         + DatabaseContract.ComposedOfPermission.TABLE_NAME
@@ -129,17 +135,23 @@ public class PermissionController extends AbstractComponent {
                         new String[] { permissionName, templateName });
     }
 
-    public void addUserPermission(DeviceID userDeviceID, String permissionName) {
-            databaseConnector.executeSql("insert or ignore into "
-                            + DatabaseContract.HasPermission.TABLE_NAME
-                            + " (" + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
-                            + ", " + DatabaseContract.HasPermission.COLUMN_USER_ID
-                            + ") values ((" + PERMISSION_ID_FROM_NAME_SQL_QUERY
-                            + "), (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
-                            + "))" , new String[] { permissionName,
-                                userDeviceID.getFingerprint() });
+    public void addUserPermission(DeviceID userDeviceID, String permissionName) throws IllegalReferenceException {
+        try {
+            databaseConnector.executeSql("insert into "
+                    + DatabaseContract.HasPermission.TABLE_NAME
+                    + " (" + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
+                    + ", " + DatabaseContract.HasPermission.COLUMN_USER_ID
+                    + ") values ((" + PERMISSION_ID_FROM_NAME_SQL_QUERY
+                    + "), (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
+                    + "))", new String[]{permissionName,
+                    userDeviceID.getFingerprint()});
+        } catch (SQLiteConstraintException sqlce) {
+            throw new IllegalReferenceException(
+                    "The given UserDevice or Permission does not exist in the database");
+        }
     }
 
+    //todo: check
     public void removeUserPermission(DeviceID userDeviceID, String permissionName) {
         databaseConnector.executeSql("delete from "
                 + DatabaseContract.HasPermission.TABLE_NAME

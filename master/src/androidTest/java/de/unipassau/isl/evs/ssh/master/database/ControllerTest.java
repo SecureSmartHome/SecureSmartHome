@@ -21,7 +21,7 @@ public class ControllerTest extends InstrumentationTestCase {
     //Todo: handle error if none existing group / template ref is given
     //Todo: handle error if unique name is twice
 
-    public void testTemplatesAndPermissions() throws InUseException {
+    public void testTemplatesAndPermissions() throws InUseException, IllegalReferenceException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
@@ -63,6 +63,14 @@ public class ControllerTest extends InstrumentationTestCase {
         permissionController.addPermissionToTemplate("Whaddaup", "test2");
         permissionController.addPermissionToTemplate("Whaddaup", "test3");
         permissionController.addPermissionToTemplate("asdf", "test");
+
+        //Add none existing permissions or template
+        try {
+            permissionController.addPermissionToTemplate("asdf", "zzz");
+            permissionController.addPermissionToTemplate("44", "test");
+        } catch (IllegalReferenceException illegalReferenceException) {
+            assertFalse(false);
+        }
 
         //Check that permissions are in template
         List<String> permissions;
@@ -112,7 +120,7 @@ public class ControllerTest extends InstrumentationTestCase {
         assertTrue(permissionController.getPermissions().contains("test"));
     }
 
-    public void testUserDevicesSlashGroupsAndPermissions() throws InUseException {
+    public void testUserDevicesSlashGroupsAndPermissions() throws InUseException, IllegalReferenceException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
@@ -139,6 +147,13 @@ public class ControllerTest extends InstrumentationTestCase {
         userManagementController.addGroup(new Group("grp2", "tmpl"));
         userManagementController.addGroup(new Group("grp3", "tmpl2"));
 
+        //Test adding group with not existing template
+        try {
+            userManagementController.addGroup(new Group("dkjfkdfj", "aklsdjflasdjlf"));
+        } catch (IllegalReferenceException illegalReferenceException) {
+            assertFalse(false);
+        }
+
         //Check if groups are added
         assertTrue(userManagementController.getGroup("grp1") != null);
         assertTrue(userManagementController.getGroup("grp2") != null);
@@ -153,6 +168,13 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change template of group
         userManagementController.changeTemplateOfGroup("grp1", "tmpl3");
         assertEquals(userManagementController.getGroup("grp1").getTemplateName(), "tmpl3");
+
+        //Change to none existing template
+        try {
+            userManagementController.changeTemplateOfGroup("grp1", "adfdfdsfdfs");
+        } catch (IllegalReferenceException e) {
+            assertFalse(false);
+        }
 
         //Test rename
         userManagementController.changeGroupName("grp1", "such wow");
@@ -180,6 +202,14 @@ public class ControllerTest extends InstrumentationTestCase {
         userManagementController.addUserDevice(new UserDevice("u2", "such wow", new DeviceID("2")));
         userManagementController.addUserDevice(new UserDevice("u3", "grp3", new DeviceID("4")));
 
+        //Test adding userdevice with none existing group
+        try {
+            userManagementController.addUserDevice(
+                    new UserDevice("askdfj", "--", new DeviceID("20")));
+        } catch (IllegalReferenceException illegalReferenceException) {
+            assertFalse(false);
+        }
+
         //Remove group in use
         try {
             userManagementController.removeGroup("such wow");
@@ -188,7 +218,7 @@ public class ControllerTest extends InstrumentationTestCase {
         }
 
         //Check colliding
-        userManagementController.addUserDevice(new UserDevice("u2", "such wow", new DeviceID("3")));
+        //Todo: difference for userManagementController.addUserDevice(new UserDevice("u2", "such wow", new DeviceID("3")));
         assertTrue(userManagementController.getUserDevices().size() == 3);
         assertTrue(userManagementController.getUserDevice(new DeviceID("1")) != null);
         assertTrue(userManagementController.getUserDevice(new DeviceID("2")) != null);
@@ -206,6 +236,14 @@ public class ControllerTest extends InstrumentationTestCase {
         permissionController.addUserPermission(new DeviceID("4"), "perm2");
         permissionController.addUserPermission(new DeviceID("4"), "perm1");
         permissionController.addUserPermission(new DeviceID("4"), "perm3");
+
+        //Add none existing permissions or devices
+        try {
+            permissionController.addUserPermission(new DeviceID("4"), "zzz");
+            permissionController.addUserPermission(new DeviceID("44"), "perm3");
+        } catch (IllegalReferenceException illegalReferenceException) {
+            assertFalse(false);
+        }
 
         //Remove permission
         permissionController.removeUserPermission(new DeviceID("4"), "perm2");
@@ -254,7 +292,11 @@ public class ControllerTest extends InstrumentationTestCase {
         assertEquals(userManagementController.getUserDevice(new DeviceID("1")).getInGroup(), "grp3");
 
         //Change to none existing group
-        userManagementController.changeGroupMembership(new DeviceID("1"), "asdf");
+        try {
+            userManagementController.changeGroupMembership(new DeviceID("1"), "asdf");
+        } catch (IllegalReferenceException e) {
+            assertFalse(false);
+        }
         //Change from none existing user
         userManagementController.changeGroupMembership(new DeviceID("asdfjasldf"), "grp3");
 
@@ -266,7 +308,7 @@ public class ControllerTest extends InstrumentationTestCase {
         userManagementController.removeUserDevice(new DeviceID("200"));
     }
 
-    public void testSlaveController() throws InUseException {
+    public void testSlaveController() throws InUseException, IllegalReferenceException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
@@ -293,6 +335,14 @@ public class ControllerTest extends InstrumentationTestCase {
         assertNotNull(slaveController.getModule("m1"));
         assertNotNull(slaveController.getModule("m2"));
         assertTrue(slaveController.getModules().size() == 2);
+
+        //Test to init modules at none existing slaves
+        try {
+            slaveController.addModule(new Module("m1", new DeviceID("99"), new USBAccessPoint(2)));
+        } catch (IllegalReferenceException illegalReferenceException) {
+            assertFalse(false);
+        }
+
 
         //Check if modules are on slave
         List<String> modules = new LinkedList<>();

@@ -63,24 +63,28 @@ public class SlaveController extends AbstractComponent {
      *
      * @param module Module to add.
      */
-    public void addModule(Module module) {
-        //Notice: Changed order of values to avoid having to concat twice!
-        databaseConnector.executeSql("insert or ignore into "
-                + DatabaseContract.ElectronicModule.TABLE_NAME + " ("
-                + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN + ", "
-                + DatabaseContract.ElectronicModule.COLUMN_USB_PORT + ", "
-                + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT + ", "
-                + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME + ", "
-                + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD + ", "
-                + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP + ", "
-                + DatabaseContract.ElectronicModule.COLUMN_TYPE + ", "
-                + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + ", "
-                + DatabaseContract.ElectronicModule.COLUMN_NAME + ") values "
-                + "(?, ?, ?, ?, ?, ?, ?, (" + SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY + "), ?)",
+    public void addModule(Module module) throws IllegalReferenceException {
+        try {
+            //Notice: Changed order of values to avoid having to concat twice!
+            databaseConnector.executeSql("insert into "
+                            + DatabaseContract.ElectronicModule.TABLE_NAME + " ("
+                            + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_USB_PORT + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_TYPE + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_NAME + ") values "
+                            + "(?, ?, ?, ?, ?, ?, ?, (" + SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY + "), ?)",
                     ObjectArrays.concat(
-                    createCombinedModulesAccessInformationFromSingle(module.getModuleAccessPoint()),
-                    new String[] { module.getModuleAccessPoint().getType(),
-                    module.getAtSlave().getFingerprint(), module.getName() }, String.class));
+                            createCombinedModulesAccessInformationFromSingle(module.getModuleAccessPoint()),
+                            new String[] { module.getModuleAccessPoint().getType(),
+                                    module.getAtSlave().getFingerprint(), module.getName() }, String.class));
+        } catch (SQLiteConstraintException sqlce) {
+            throw new IllegalReferenceException("The given Slave does not exist in the database");
+        }
     }
 
     /**
