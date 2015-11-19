@@ -1,9 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.database;
 
 import android.content.Context;
-import android.provider.ContactsContract;
 import android.test.InstrumentationTestCase;
-import android.util.Log;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -23,7 +21,7 @@ public class ControllerTest extends InstrumentationTestCase {
     //Todo: handle error if none existing group / template ref is given
     //Todo: handle error if unique name is twice
 
-    public void testTemplatesAndPermissions() {
+    public void testTemplatesAndPermissions() throws InUseException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
@@ -114,7 +112,7 @@ public class ControllerTest extends InstrumentationTestCase {
         assertTrue(permissionController.getPermissions().contains("test"));
     }
 
-    public void testUserDevicesSlashGroupsAndPermissions() {
+    public void testUserDevicesSlashGroupsAndPermissions() throws InUseException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
@@ -170,10 +168,24 @@ public class ControllerTest extends InstrumentationTestCase {
         }
         assertTrue(groups.containsAll(Arrays.asList("such wow", "grp3")));
 
+        //Remove template w/ group reference
+        try {
+            permissionController.removeTemplate("tmpl3");
+        } catch (InUseException inUseException) {
+            assertFalse(false);
+        }
+
         //Test userdevice init
         userManagementController.addUserDevice(new UserDevice("u1", "such wow", new DeviceID("1")));
         userManagementController.addUserDevice(new UserDevice("u2", "such wow", new DeviceID("2")));
         userManagementController.addUserDevice(new UserDevice("u3", "grp3", new DeviceID("4")));
+
+        //Remove group in use
+        try {
+            userManagementController.removeGroup("such wow");
+        } catch (InUseException inUseException) {
+            assertFalse(false);
+        }
 
         //Check colliding
         userManagementController.addUserDevice(new UserDevice("u2", "such wow", new DeviceID("3")));
@@ -254,7 +266,7 @@ public class ControllerTest extends InstrumentationTestCase {
         userManagementController.removeUserDevice(new DeviceID("200"));
     }
 
-    public void testSlaveController() {
+    public void testSlaveController() throws InUseException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
@@ -290,8 +302,12 @@ public class ControllerTest extends InstrumentationTestCase {
         assertTrue(modules.containsAll(Arrays.asList("m1", "m2")));
         assertTrue(modules.size() == 2);
 
-        //Todo: Remove locked slave
-        //slaveController.removeSlave(new DeviceID("1"));
+        //Remove locked slave
+        try {
+            slaveController.removeSlave(new DeviceID("1"));
+        } catch (InUseException inUseException) {
+            assertTrue(true);
+        }
         //Remove slave
         slaveController.removeSlave(new DeviceID("2"));
         slaves = new LinkedList<>();
@@ -352,6 +368,12 @@ public class ControllerTest extends InstrumentationTestCase {
         Thread.sleep(1000);
         holidayController.addHolidayLogEntry("3");
         holidayController.addHolidayLogEntry("4");
+        //Check illegal stuff add
+        try {
+            holidayController.addHolidayLogEntry(null);
+        } catch (IllegalArgumentException e) {
+            assertTrue(true);
+        }
         Thread.sleep(1000);
         Date d3 = new Date(System.currentTimeMillis());
         Thread.sleep(1000);

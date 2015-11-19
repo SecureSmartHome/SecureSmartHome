@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.database;
 
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -96,11 +97,15 @@ public class PermissionController extends AbstractComponent {
      *
      * @param templateName Name of the template.
      */
-    public void removeTemplate(String templateName) {
-        databaseConnector.executeSql("delete from "
-                        + DatabaseContract.PermissionTemplate.TABLE_NAME
-                        + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
-                        + " = ?", new String[] { templateName });
+    public void removeTemplate(String templateName) throws InUseException {
+        try {
+            databaseConnector.executeSql("delete from "
+                            + DatabaseContract.PermissionTemplate.TABLE_NAME
+                            + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                            + " = ?", new String[] { templateName });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new InUseException("This template is used by at least one Group");
+        }
     }
 
     public void addPermissionToTemplate(String templateName, String permissionName) {

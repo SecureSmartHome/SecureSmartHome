@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.database;
 
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 
 import com.google.common.collect.ObjectArrays;
 
@@ -268,11 +269,15 @@ public class SlaveController extends AbstractComponent {
      *
      * @param slaveID DeviceID of the Slave.
      */
-    public void removeSlave(DeviceID slaveID) {
-        databaseConnector.executeSql("delete from "
-                        + DatabaseContract.Slave.TABLE_NAME
-                        + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
-                            new String[] { slaveID.getFingerprint() });
+    public void removeSlave(DeviceID slaveID) throws InUseException {
+        try {
+            databaseConnector.executeSql("delete from "
+                            + DatabaseContract.Slave.TABLE_NAME
+                            + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
+                    new String[] { slaveID.getFingerprint() });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new InUseException("This slave is used by at least one Module");
+        }
     }
 
 }

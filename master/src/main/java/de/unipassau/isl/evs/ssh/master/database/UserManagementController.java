@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.database;
 
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -57,11 +58,15 @@ public class UserManagementController extends AbstractComponent {
      *
      * @param groupName Name of the Group.
      */
-    public void removeGroup(String groupName) {
-        databaseConnector.executeSql("delete from "
-                        + DatabaseContract.Group.TABLE_NAME
-                        + " where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
-                            new String[] { groupName });
+    public void removeGroup(String groupName) throws InUseException {
+        try {
+            databaseConnector.executeSql("delete from "
+                            + DatabaseContract.Group.TABLE_NAME
+                            + " where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
+                    new String[] { groupName });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new InUseException("This group is used by at least one UserDevice");
+        }
     }
 
     /**
