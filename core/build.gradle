@@ -11,4 +11,5 @@ dependencies {
     compile 'com.madgag.spongycastle:pkix:1.52.0.0'
     compile 'net.glxn.qrgen:android:2.0'
     compile 'de.ncoder:typedmap:1.0.2'
+    compile 'org.slf4j:slf4j-android:1.7.13'
 }

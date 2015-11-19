@@ -11,7 +11,10 @@ import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.Security;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -19,6 +22,10 @@ import java.util.Date;
  * Instrumentation Test for the KeyStoreController
  */
 public class KeyStoreControllerTest extends InstrumentationTestCase {
+    static {
+        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+    }
+
 
     /**
      * Test method for the initialization of the KeyStoreController
@@ -48,10 +55,10 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
 
         container.register(controller.KEY, controller);
 
-        java.security.Key nonExKey = controller.getPublicKey("TestNonExistent");
-        assertNull(nonExKey);
+        Certificate nonExCert = controller.getCertificate("TestNonExistent");
+        assertNull(nonExCert);
 
-        Key publicKey = controller.getPublicKey(KeyStoreController.LOCAL_PRIVATE_KEY_ALIAS);
+        Key publicKey = controller.getCertificate(KeyStoreController.LOCAL_PRIVATE_KEY_ALIAS).getPublicKey();
         Key privateKey = controller.getOwnPrivateKey();
         assertNotNull(publicKey);
         assertNotNull(privateKey);
@@ -109,7 +116,6 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
 
         container.register(controller.KEY, controller);
 
-
         KeyPairGenerator generator;
 
         generator = KeyPairGenerator.getInstance(KeyStoreController.KEY_PAIR_ALGORITHM);
@@ -129,7 +135,14 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
         certGen.setSignatureAlgorithm(KeyStoreController.KEY_PAIR_SIGNING_ALGORITHM);
         X509Certificate cert = certGen.generate(keyPair.getPrivate());
 
-        controller.savePublicKey(cert);
+        controller.saveCertifcate(cert, "TestAlias");
+
+        container.unregister(controller.KEY);
+        controller = null;
+        controller = new KeyStoreController();
+        container.register(controller.KEY, controller);
+
+        assertTrue(Arrays.equals(controller.getCertificate("TestAlias").getEncoded(), cert.getEncoded()));
     }
 
     /**
