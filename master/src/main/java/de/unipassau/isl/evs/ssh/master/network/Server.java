@@ -16,6 +16,7 @@ import de.unipassau.isl.evs.ssh.core.container.StartupException;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.network.ClientIncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.network.handler.ServerBroadcastHandler;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -159,7 +160,8 @@ public class Server extends AbstractComponent {
         ch.pipeline().addLast(TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
         //Dispatcher
         ch.pipeline().addLast(ClientIncomingDispatcher.class.getSimpleName(), incomingDispatcher);
-
+        //ServerBroadcastHandler
+        ch.pipeline().addLast(ServerBroadcastHandler.class.getSimpleName(), new ServerBroadcastHandler());
         //Register connection
         connections.add(ch);
     }
