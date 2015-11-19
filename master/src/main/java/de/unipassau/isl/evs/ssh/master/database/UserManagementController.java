@@ -1,24 +1,61 @@
 package de.unipassau.isl.evs.ssh.master.database;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
+
+import java.util.LinkedList;
 import java.util.List;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.dto.Group;
 import de.unipassau.isl.evs.ssh.master.database.dto.UserDevice;
 
 public class UserManagementController extends AbstractComponent {
     public static final Key<UserManagementController> KEY = new Key<>(UserManagementController.class);
+    private DatabaseConnector databaseConnector;
+    private static final String TEMPLATE_ID_FROM_NAME_SQL_QUERY =
+                        "select " + DatabaseContract.PermissionTemplate.COLUMN_ID
+                        + " from " + DatabaseContract.PermissionTemplate.TABLE_NAME
+                        + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                        + " = ?";
+    private static final String GROUP_ID_FROM_NAME_SQL_QUERY =
+                        "select " + DatabaseContract.Group.COLUMN_ID
+                                + " from " + DatabaseContract.Group.TABLE_NAME
+                                + " where " + DatabaseContract.Group.COLUMN_NAME
+                                + " = ?";
+
+    @Override
+    public void init(Container container) {
+        super.init(container);
+        databaseConnector = requireComponent(DatabaseConnector.KEY);
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        databaseConnector = null;
+    }
 
     /**
      * Add a new Group.
      *
      * @param group Group to add.
      */
-    public void addGroup(Group group) {
-        // TODO - implement UserManagementController.addGroup
-        throw new UnsupportedOperationException();
+    public void addGroup(Group group) throws DatabaseControllerException {
+        try {
+            databaseConnector.executeSql("insert into "
+                            + DatabaseContract.Group.TABLE_NAME
+                            + " ("+ DatabaseContract.Group.COLUMN_NAME + ","
+                            + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + ") values (?,("
+                            + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
+                    new String[] { group.getName(), group.getTemplateName() });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new DatabaseControllerException("Either the given Template does not exist in the database"
+                    + "or the name is already in use by another Group.");
+        }
     }
 
     /**
@@ -26,17 +63,33 @@ public class UserManagementController extends AbstractComponent {
      *
      * @param groupName Name of the Group.
      */
-    public void deleteGroup(String groupName) {
-        // TODO - implement UserManagementController.deleteGroup
-        throw new UnsupportedOperationException();
+    public void removeGroup(String groupName) throws IsReferencedException {
+        try {
+            databaseConnector.executeSql("delete from "
+                            + DatabaseContract.Group.TABLE_NAME
+                            + " where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
+                    new String[] { groupName });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new IsReferencedException("This group is used by at least one UserDevice");
+        }
     }
 
     /**
      * Get a list of all Groups.
      */
     public List<Group> getGroups() {
-        // TODO - implement UserManagementController.getGroups
-        throw new UnsupportedOperationException();
+        Cursor groupsCursor = databaseConnector.executeSql("select g."
+                + DatabaseContract.Group.COLUMN_NAME
+                + ", t." + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                + " from " + DatabaseContract.Group.TABLE_NAME + " g"
+                + " join " + DatabaseContract.PermissionTemplate.TABLE_NAME + " t"
+                + " on g." + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + " = t."
+                + DatabaseContract.PermissionTemplate.COLUMN_ID, new String[]{});
+        List<Group> groups = new LinkedList<>();
+        while (groupsCursor.moveToNext()) {
+            groups.add(new Group(groupsCursor.getString(0), groupsCursor.getString(1)));
+        }
+        return groups;
     }
 
     /**
@@ -45,9 +98,15 @@ public class UserManagementController extends AbstractComponent {
      * @param oldName Old name of the Group.
      * @param newName New name of the Group.
      */
-    public void changeGroupName(String oldName, String newName) {
-        // TODO - implement UserManagementController.changeGroupName
-        throw new UnsupportedOperationException();
+    public void changeGroupName(String oldName, String newName) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("update " + DatabaseContract.Group.TABLE_NAME
+                            + " set " + DatabaseContract.Group.COLUMN_NAME
+                            + " = ? where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
+                                new String[] { newName, oldName });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The given name is already used by another Group.");
+        }
     }
 
     /**
@@ -56,8 +115,20 @@ public class UserManagementController extends AbstractComponent {
      * @return List of UserDevices.
      */
     public List<UserDevice> getUserDevices() {
-        // TODO - implement UserManagementController.getUserDevices
-        throw new UnsupportedOperationException();
+        Cursor userDevicesCursor = databaseConnector.executeSql("select u."
+                + DatabaseContract.UserDevice.COLUMN_NAME
+                + ", u." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                + ", g." + DatabaseContract.Group.COLUMN_NAME
+                + " from " + DatabaseContract.UserDevice.TABLE_NAME + " u"
+                + " join " + DatabaseContract.Group.TABLE_NAME + " g"
+                + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID + " = g."
+                + DatabaseContract.Group.COLUMN_ID, new String[] {});
+        List<UserDevice> userDevices = new LinkedList<>();
+        while (userDevicesCursor.moveToNext()) {
+            userDevices.add(new UserDevice(userDevicesCursor.getString(0),
+                    userDevicesCursor.getString(2), new DeviceID(userDevicesCursor.getString(1))));
+        }
+        return userDevices;
     }
 
     /**
@@ -66,19 +137,39 @@ public class UserManagementController extends AbstractComponent {
      * @param oldName Old name of the UserDevice.
      * @param newName New name of the UserDevice.
      */
-    public void changeUserDeviceName(String oldName, String newName) {
-        // TODO - implement UserManagementController.changeUserDeviceName
-        throw new UnsupportedOperationException();
+    public void changeUserDeviceName(String oldName, String newName) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("update "
+                            + DatabaseContract.UserDevice.TABLE_NAME
+                            + " set " + DatabaseContract.UserDevice.COLUMN_NAME
+                            + " = ? where " + DatabaseContract.UserDevice.COLUMN_NAME + " = ?",
+                    new String[]{newName, oldName});
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The given name is already used by another UserDevice.");
+        }
     }
 
     /**
      * Add a new UserDevice.
      *
-     * @param user The new UserDevice.
+     * @param userDevice The new UserDevice.
      */
-    public void addUserDevice(UserDevice user) {
-        // TODO - implement UserManagementController.addUserDevice
-        throw new UnsupportedOperationException();
+    public void addUserDevice(UserDevice userDevice) throws DatabaseControllerException {
+        try {
+            databaseConnector.executeSql("insert into "
+                            + DatabaseContract.UserDevice.TABLE_NAME
+                            + " (" + DatabaseContract.UserDevice.COLUMN_NAME + ","
+                            + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + ","
+                            + DatabaseContract.UserDevice.COLUMN_GROUP_ID + ") values (?, ?,("
+                            + GROUP_ID_FROM_NAME_SQL_QUERY + "))",
+                    new String[]{userDevice.getName(), userDevice.getUserDeviceID().getFingerprint(),
+                            userDevice.getInGroup()});
+        } catch (SQLiteConstraintException sqlce) {
+            System.out.println(sqlce.getMessage());
+            throw new DatabaseControllerException(
+                    "Either the given Group does not exist in the database"
+                    + " or a UserDevice already has the given name or fingerprint.");
+        }
     }
 
     /**
@@ -86,9 +177,11 @@ public class UserManagementController extends AbstractComponent {
      *
      * @param userDeviceID ID of the UserDevice.
      */
-    public void deleteUserDevice(DeviceID userDeviceID) {
-        // TODO - implement UserManagementController.deleteUserDevice
-        throw new UnsupportedOperationException();
+    public void removeUserDevice(DeviceID userDeviceID) {
+        databaseConnector.executeSql("delete from "
+                        + DatabaseContract.UserDevice.TABLE_NAME
+                        + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
+                            new String[] { userDeviceID.getFingerprint() });
     }
 
     /**
@@ -97,9 +190,16 @@ public class UserManagementController extends AbstractComponent {
      * @param groupName    Name of the Group.
      * @param templateName Name of the new template.
      */
-    public void changeTemplateOfGroup(String groupName, String templateName) {
-        // TODO - implement UserManagementController.changeTemplateOfGroup
-        throw new UnsupportedOperationException();
+    public void changeTemplateOfGroup(String groupName, String templateName) throws IllegalReferenceException {
+        try {
+            databaseConnector.executeSql("update " + DatabaseContract.Group.TABLE_NAME
+                            + " set " + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID
+                            + " = (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY
+                            + ") where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
+                                new String[] { templateName, groupName });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new IllegalReferenceException("The given Template does not exist in the database");
+        }
     }
 
     /**
@@ -108,9 +208,60 @@ public class UserManagementController extends AbstractComponent {
      * @param userDeviceID ID of the UserDevice.
      * @param groupName    Name of the new Group.
      */
-    public void changeGroupMembership(DeviceID userDeviceID, String groupName) {
-        // TODO - implement UserManagementController.changeGroupMembership
-        throw new UnsupportedOperationException();
+    public void changeGroupMembership(DeviceID userDeviceID, String groupName) throws IllegalReferenceException {
+        try {
+            databaseConnector.executeSql("update " + DatabaseContract.UserDevice.TABLE_NAME
+                            + " set " + DatabaseContract.UserDevice.COLUMN_GROUP_ID
+                            + " = (" + GROUP_ID_FROM_NAME_SQL_QUERY
+                            + ") where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
+                                new String[] { groupName, userDeviceID.getFingerprint() });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new IllegalReferenceException("The given Group does not exist in the database");
+        }
+    }
+
+    /**
+     * Get a single Group by name.
+     * @param groupName Name of the Group.
+     * @return The requested Group.
+     */
+    public Group getGroup(String groupName) {
+        Cursor groupCursor = databaseConnector.executeSql("select g."
+                + DatabaseContract.Group.COLUMN_NAME
+                + ", t." + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                + " from " + DatabaseContract.Group.TABLE_NAME + " g"
+                + " join " + DatabaseContract.PermissionTemplate.TABLE_NAME + " t"
+                + " on g." + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + " = t."
+                + DatabaseContract.PermissionTemplate.COLUMN_ID
+                + " where g." + DatabaseContract.Group.COLUMN_NAME + " = ?",
+                    new String[] { groupName });
+        if (groupCursor.moveToNext()) {
+            return new Group(groupCursor.getString(0), groupCursor.getString(1));
+        }
+        return null;
+    }
+
+    /**
+     * Get a UserDevice by DeviceID.
+     * @param deviceID DeviceID of the UserDevice.
+     * @return The requested UserDevice.
+     */
+    public UserDevice getUserDevice(DeviceID deviceID) {
+        Cursor userDeviceCursor = databaseConnector.executeSql("select u."
+                + DatabaseContract.UserDevice.COLUMN_NAME
+                + ", u." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                + ", g." + DatabaseContract.Group.COLUMN_NAME
+                + " from " + DatabaseContract.UserDevice.TABLE_NAME + " u"
+                + " join " + DatabaseContract.Group.TABLE_NAME + " g"
+                + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID + " = g."
+                + DatabaseContract.Group.COLUMN_ID
+                + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
+                    new String[] { deviceID.getFingerprint() });
+        if (userDeviceCursor.moveToNext()) {
+            return new UserDevice(userDeviceCursor.getString(0),
+                    userDeviceCursor.getString(2), new DeviceID(userDeviceCursor.getString(1)));
+        }
+        return null;
     }
 
 }

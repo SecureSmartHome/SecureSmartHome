@@ -1,11 +1,19 @@
 package de.unipassau.isl.evs.ssh.master.database;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
+
+import com.google.common.collect.ObjectArrays;
+
+import java.util.LinkedList;
 import java.util.List;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.dto.Module;
+import de.unipassau.isl.evs.ssh.master.database.dto.ModuleAccessPoint.ModuleAccessPoint;
 import de.unipassau.isl.evs.ssh.master.database.dto.Slave;
 
 /**
@@ -13,15 +21,71 @@ import de.unipassau.isl.evs.ssh.master.database.dto.Slave;
  */
 public class SlaveController extends AbstractComponent {
     public static final Key<SlaveController> KEY = new Key<>(SlaveController.class);
+    private DatabaseConnector databaseConnector;
+    public static final String SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY =
+            "select " + DatabaseContract.Slave.COLUMN_ID
+                    + " from " + DatabaseContract.Slave.TABLE_NAME
+                    + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT
+                    + " = ?";
+
+    @Override
+    public void init(Container container) {
+        super.init(container);
+        databaseConnector = requireComponent(DatabaseConnector.KEY);
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        databaseConnector = null;
+    }
+
+    private String[] createCombinedModulesAccessInformationFromSingle(
+            ModuleAccessPoint moduleAccessPoint) {
+        String[] allModuleAccessPoints =
+                new String[ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION];
+        for (int i = 0; i < allModuleAccessPoints.length; i++) {
+            allModuleAccessPoints[i] = "NULL";
+        }
+
+        for (int i = 0; i < moduleAccessPoint.getDatabaseIndices().length; i++) {
+            allModuleAccessPoints[moduleAccessPoint.getDatabaseIndices()[i]] =
+                    moduleAccessPoint.getAccessInformation()[i];
+        }
+        for (String allModuleAccessPoint : allModuleAccessPoints) {
+            System.out.println(allModuleAccessPoint);
+        }
+        return allModuleAccessPoints;
+    }
 
     /**
      * Add a new Module.
      *
      * @param module Module to add.
      */
-    public void addModule(Module module) {
-        // TODO - implement SlaveController.addModule
-        throw new UnsupportedOperationException();
+    public void addModule(Module module) throws DatabaseControllerException {
+        try {
+            //Notice: Changed order of values to avoid having to concat twice!
+            databaseConnector.executeSql("insert into "
+                            + DatabaseContract.ElectronicModule.TABLE_NAME + " ("
+                            + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_USB_PORT + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_TYPE + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_NAME + ") values "
+                            + "(?, ?, ?, ?, ?, ?, ?, (" + SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY + "), ?)",
+                    ObjectArrays.concat(
+                            createCombinedModulesAccessInformationFromSingle(module.getModuleAccessPoint()),
+                            new String[] { module.getModuleAccessPoint().getType(),
+                                    module.getAtSlave().getFingerprint(), module.getName() }, String.class));
+        } catch (SQLiteConstraintException sqlce) {
+            throw new DatabaseControllerException("The given Slave does not exist in the database"
+                    + " or the name is already used by another Module");
+        }
     }
 
     /**
@@ -30,16 +94,134 @@ public class SlaveController extends AbstractComponent {
      * @param moduleName Name of the Module to remove.
      */
     public void removeModule(String moduleName) {
-        // TODO - implement SlaveController.removeModule
-        throw new UnsupportedOperationException();
+        databaseConnector.executeSql("delete from "
+                        + DatabaseContract.ElectronicModule.TABLE_NAME
+                        + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME + " = ?",
+                            new String[] { moduleName });
     }
 
     /**
      * Gets a list of all Modules.
      */
     public List<Module> getModules() {
-        // TODO - implement SlaveController.getModules
-        throw new UnsupportedOperationException();
+        //Notice: again changed order for convenience reasons when creating the ModuleAccessPoint.
+        Cursor modulesCursor = databaseConnector.executeSql("select" +
+                " m." + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_USB_PORT
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_TYPE
+                + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
+                + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
+                + " join " + DatabaseContract.Slave.TABLE_NAME + " s"
+                + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
+                + " = s." + DatabaseContract.Slave.COLUMN_ID, new String[] {});
+        List<Module> modules = new LinkedList<>();
+        while (modulesCursor.moveToNext()) {
+            String[] combinedModuleAccessPointInformation =
+                    new String[ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION];
+            for (int i = 0; i < ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION; i++) {
+                combinedModuleAccessPointInformation[i] = modulesCursor.getString(i);
+            }
+            ModuleAccessPoint moduleAccessPoint = ModuleAccessPoint
+                    .fromCombinedModuleAccessPointInformation(combinedModuleAccessPointInformation,
+                            modulesCursor.getString(
+                                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION));
+            modules.add(new Module(modulesCursor.getString(
+                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2), new DeviceID(
+                    modulesCursor.getString(
+                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 1)),
+                    moduleAccessPoint));
+        }
+        return modules;
+    }
+
+    /**
+     * Get all information of a single Module by name.
+     * @param moduleName The name of the Module.
+     * @return The requested Module.
+     */
+    public Module getModule(String moduleName) {
+        //Notice: again changed order for convenience reasons when creating the ModuleAccessPoint.
+        Cursor moduleCursor = databaseConnector.executeSql("select" +
+                " m." + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_USB_PORT
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_TYPE
+                + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
+                + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
+                + " join " + DatabaseContract.Slave.TABLE_NAME + " s"
+                + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
+                + " = s." + DatabaseContract.Slave.COLUMN_ID
+                + " where m." + DatabaseContract.ElectronicModule.COLUMN_NAME + " = ?",
+                    new String[] { moduleName });
+        if (moduleCursor.moveToNext()) {
+            String[] combinedModuleAccessPointInformation =
+                    new String[ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION];
+            for (int i = 0; i < ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION; i++) {
+                combinedModuleAccessPointInformation[i] = moduleCursor.getString(i);
+            }
+            ModuleAccessPoint moduleAccessPoint = ModuleAccessPoint
+                    .fromCombinedModuleAccessPointInformation(combinedModuleAccessPointInformation,
+                            moduleCursor.getString(
+                                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION));
+            return new Module(moduleCursor.getString(
+                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2), new DeviceID(
+                    moduleCursor.getString(
+                            ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 1)),
+                    moduleAccessPoint);
+        }
+        return null;
+    }
+
+    /**
+     * Get all Modules of a given Slave.
+     * @param slaveDeviceID DeviceID of the Slave.
+     * @return All Modules of the Slave as a list.
+     */
+    public List<Module> getModulesOfSlave(DeviceID slaveDeviceID) {
+        //Notice: again changed order for convenience reasons when creating the ModuleAccessPoint.
+        Cursor modulesCursor = databaseConnector.executeSql("select" +
+                " m." + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_USB_PORT
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_TYPE
+                + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
+                + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
+                + " join " + DatabaseContract.Slave.TABLE_NAME + " s"
+                + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
+                + " = s." + DatabaseContract.Slave.COLUMN_ID
+                + " where s." + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
+                    new String[] { slaveDeviceID.getFingerprint() });
+        List<Module> modules = new LinkedList<>();
+        while (modulesCursor.moveToNext()) {
+            String[] combinedModuleAccessPointInformation =
+                    new String[ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION];
+            for (int i = 0; i < ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION; i++) {
+                combinedModuleAccessPointInformation[i] = modulesCursor.getString(i);
+            }
+            ModuleAccessPoint moduleAccessPoint = ModuleAccessPoint
+                    .fromCombinedModuleAccessPointInformation(combinedModuleAccessPointInformation,
+                            modulesCursor.getString(
+                                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION));
+            modules.add(new Module(modulesCursor.getString(
+                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2), new DeviceID(
+                    modulesCursor.getString(
+                            ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 1)),
+                    moduleAccessPoint));
+        }
+        return modules;
     }
 
     /**
@@ -48,17 +230,31 @@ public class SlaveController extends AbstractComponent {
      * @param oldName Old Module name.
      * @param newName New Module name.
      */
-    public void changeModuleName(String oldName, String newName) {
-        // TODO - implement SlaveController.changeModuleName
-        throw new UnsupportedOperationException();
+    public void changeModuleName(String oldName, String newName) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("update " + DatabaseContract.ElectronicModule.TABLE_NAME
+                            + " set " + DatabaseContract.ElectronicModule.COLUMN_NAME
+                            + " = ? where " + DatabaseContract.ElectronicModule.COLUMN_NAME + " = ?",
+                    new String[] { newName, oldName });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The given name is already used by another Module.");
+        }
     }
 
     /**
      * Get a list of all Slaves.
      */
     public List<Slave> getSlaves() {
-        // TODO - implement SlaveController.getSlaves
-        throw new UnsupportedOperationException();
+        Cursor slavesCursor = databaseConnector.executeSql("select "
+                        + DatabaseContract.Slave.COLUMN_NAME
+                        + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT
+                        + " from " + DatabaseContract.Slave.TABLE_NAME, new String[] {});
+        List<Slave> slaves = new LinkedList<>();
+        while (slavesCursor.moveToNext()) {
+            slaves.add(new Slave(slavesCursor.getString(0),
+                    new DeviceID(slavesCursor.getString(1))));
+        }
+        return slaves;
     }
 
     /**
@@ -67,9 +263,15 @@ public class SlaveController extends AbstractComponent {
      * @param oldName Old Slave name.
      * @param newName New Slave name.
      */
-    public void changeSlaveName(String oldName, String newName) {
-        // TODO - implement SlaveController.changeSlaveName
-        throw new UnsupportedOperationException();
+    public void changeSlaveName(String oldName, String newName) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("update " + DatabaseContract.Slave.TABLE_NAME
+                            + " set " + DatabaseContract.Slave.COLUMN_NAME
+                            + " = ? where " + DatabaseContract.Slave.COLUMN_NAME + " = ?",
+                    new String[] { newName, oldName });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The given name is already used by another Slave.");
+        }
     }
 
     /**
@@ -77,9 +279,16 @@ public class SlaveController extends AbstractComponent {
      *
      * @param slave Slave to add.
      */
-    public void addSlave(Slave slave) {
-        // TODO - implement SlaveController.addSlave
-        throw new UnsupportedOperationException();
+    public void addSlave(Slave slave) throws AlreadyInUseException {
+        try {
+            databaseConnector.executeSql("insert into "
+                            + DatabaseContract.Slave.TABLE_NAME
+                            + " (" + DatabaseContract.Slave.COLUMN_NAME
+                            + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT + ") values (?, ?)",
+                    new String[]{slave.getName(), slave.getSlaveID().getFingerprint()});
+        } catch (SQLiteConstraintException sqlce) {
+            throw new AlreadyInUseException("The given name or fingerprint is already used by another Slave.");
+        }
     }
 
     /**
@@ -87,9 +296,15 @@ public class SlaveController extends AbstractComponent {
      *
      * @param slaveID DeviceID of the Slave.
      */
-    public void removeSlave(DeviceID slaveID) {
-        // TODO - implement SlaveController.removeSlave
-        throw new UnsupportedOperationException();
+    public void removeSlave(DeviceID slaveID) throws IsReferencedException {
+        try {
+            databaseConnector.executeSql("delete from "
+                            + DatabaseContract.Slave.TABLE_NAME
+                            + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
+                    new String[] { slaveID.getFingerprint() });
+        } catch (SQLiteConstraintException sqlce) {
+            throw new IsReferencedException("This slave is used by at least one Module");
+        }
     }
 
 }
