@@ -10,6 +10,7 @@ public class DatabaseContract {
         public static final String COLUMN_ID = "_ID";
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_FINGERPRINT = "fingerprint";
+        public static final String COLUMN_GROUP_ID = "GroupId";
     }
 
     public class Permission {
@@ -36,12 +37,6 @@ public class DatabaseContract {
         public static final String COLUMN_ID = "_ID";
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_PERMISSION_TEMPLATE_ID = "permissionTemplateId";
-    }
-
-    public class MemberOf {
-        public static final String TABLE_NAME = "member_of";
-        public static final String COLUMN_USER_ID = "userId";
-        public static final String COLUMN_GROUP_ID = "groupId";
     }
 
     public class PermissionTemplate {
