@@ -19,7 +19,7 @@ import de.unipassau.isl.evs.ssh.master.database.dto.UserDevice;
 
 public class ControllerTest extends InstrumentationTestCase {
 
-    public void testTemplatesAndPermissions() throws IsReferencedException, IllegalReferenceException, AlreadyInUseException {
+    public void testTemplatesAndPermissions() throws IsReferencedException, UnknownReferenceException, AlreadyInUseException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
@@ -72,12 +72,12 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add none existing permissions or template
         try {
             permissionController.addPermissionToTemplate("asdf", "zzz");
-        } catch (IllegalReferenceException illegalReferenceException) {
+        } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
         try {
             permissionController.addPermissionToTemplate("44", "test");
-        } catch (IllegalReferenceException illegalReferenceException) {
+        } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
 
@@ -204,7 +204,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change to none existing template
         try {
             userManagementController.changeTemplateOfGroup("grp1", "adfdfdsfdfs");
-        } catch (IllegalReferenceException e) {
+        } catch (UnknownReferenceException e) {
             assertFalse(false);
         }
 
@@ -283,12 +283,12 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add none existing permissions or devices
         try {
             permissionController.addUserPermission(new DeviceID("4"), "zzz");
-        } catch (IllegalReferenceException illegalReferenceException) {
+        } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
         try {
             permissionController.addUserPermission(new DeviceID("44"), "perm3");
-        } catch (IllegalReferenceException illegalReferenceException) {
+        } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
 
@@ -345,7 +345,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change to none existing group
         try {
             userManagementController.changeGroupMembership(new DeviceID("1"), "asdf");
-        } catch (IllegalReferenceException e) {
+        } catch (UnknownReferenceException e) {
             assertFalse(false);
         }
         //Change from none existing user

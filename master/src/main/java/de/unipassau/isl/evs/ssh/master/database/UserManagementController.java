@@ -190,7 +190,7 @@ public class UserManagementController extends AbstractComponent {
      * @param groupName    Name of the Group.
      * @param templateName Name of the new template.
      */
-    public void changeTemplateOfGroup(String groupName, String templateName) throws IllegalReferenceException {
+    public void changeTemplateOfGroup(String groupName, String templateName) throws UnknownReferenceException {
         try {
             databaseConnector.executeSql("update " + DatabaseContract.Group.TABLE_NAME
                             + " set " + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID
@@ -198,7 +198,7 @@ public class UserManagementController extends AbstractComponent {
                             + ") where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
                                 new String[] { templateName, groupName });
         } catch (SQLiteConstraintException sqlce) {
-            throw new IllegalReferenceException("The given Template does not exist in the database");
+            throw new UnknownReferenceException("The given Template does not exist in the database");
         }
     }
 
@@ -208,7 +208,7 @@ public class UserManagementController extends AbstractComponent {
      * @param userDeviceID ID of the UserDevice.
      * @param groupName    Name of the new Group.
      */
-    public void changeGroupMembership(DeviceID userDeviceID, String groupName) throws IllegalReferenceException {
+    public void changeGroupMembership(DeviceID userDeviceID, String groupName) throws UnknownReferenceException {
         try {
             databaseConnector.executeSql("update " + DatabaseContract.UserDevice.TABLE_NAME
                             + " set " + DatabaseContract.UserDevice.COLUMN_GROUP_ID
@@ -216,7 +216,7 @@ public class UserManagementController extends AbstractComponent {
                             + ") where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
                                 new String[] { groupName, userDeviceID.getFingerprint() });
         } catch (SQLiteConstraintException sqlce) {
-            throw new IllegalReferenceException("The given Group does not exist in the database");
+            throw new UnknownReferenceException("The given Group does not exist in the database");
         }
     }
 
