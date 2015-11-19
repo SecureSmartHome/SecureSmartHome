@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.core.network;
+package de.unipassau.isl.evs.ssh.core.network.handler;
 
 import java.io.Serializable;
 
