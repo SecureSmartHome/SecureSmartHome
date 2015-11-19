@@ -63,14 +63,14 @@ public class UserManagementController extends AbstractComponent {
      *
      * @param groupName Name of the Group.
      */
-    public void removeGroup(String groupName) throws InUseException {
+    public void removeGroup(String groupName) throws IsReferencedException {
         try {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.Group.TABLE_NAME
                             + " where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
                     new String[] { groupName });
         } catch (SQLiteConstraintException sqlce) {
-            throw new InUseException("This group is used by at least one UserDevice");
+            throw new IsReferencedException("This group is used by at least one UserDevice");
         }
     }
 
@@ -152,18 +152,18 @@ public class UserManagementController extends AbstractComponent {
     /**
      * Add a new UserDevice.
      *
-     * @param user The new UserDevice.
+     * @param userDevice The new UserDevice.
      */
-    public void addUserDevice(UserDevice user) throws DatabaseControllerException {
+    public void addUserDevice(UserDevice userDevice) throws DatabaseControllerException {
         try {
             databaseConnector.executeSql("insert into "
                             + DatabaseContract.UserDevice.TABLE_NAME
-                            + " ("+ DatabaseContract.UserDevice.COLUMN_NAME + ","
+                            + " (" + DatabaseContract.UserDevice.COLUMN_NAME + ","
                             + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + ","
                             + DatabaseContract.UserDevice.COLUMN_GROUP_ID + ") values (?, ?,("
                             + GROUP_ID_FROM_NAME_SQL_QUERY + "))",
-                    new String[] { user.getName(), user.getUserDeviceID().getFingerprint(),
-                            user.getInGroup() });
+                    new String[]{userDevice.getName(), userDevice.getUserDeviceID().getFingerprint(),
+                            userDevice.getInGroup()});
         } catch (SQLiteConstraintException sqlce) {
             System.out.println(sqlce.getMessage());
             throw new DatabaseControllerException(
@@ -220,6 +220,11 @@ public class UserManagementController extends AbstractComponent {
         }
     }
 
+    /**
+     * Get a single Group by name.
+     * @param groupName Name of the Group.
+     * @return The requested Group.
+     */
     public Group getGroup(String groupName) {
         Cursor groupCursor = databaseConnector.executeSql("select g."
                 + DatabaseContract.Group.COLUMN_NAME
@@ -236,6 +241,11 @@ public class UserManagementController extends AbstractComponent {
         return null;
     }
 
+    /**
+     * Get a UserDevice by DeviceID.
+     * @param deviceID DeviceID of the UserDevice.
+     * @return The requested UserDevice.
+     */
     public UserDevice getUserDevice(DeviceID deviceID) {
         Cursor userDeviceCursor = databaseConnector.executeSql("select u."
                 + DatabaseContract.UserDevice.COLUMN_NAME

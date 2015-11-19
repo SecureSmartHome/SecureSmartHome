@@ -1,8 +1,18 @@
 package de.unipassau.isl.evs.ssh.master.database.dto.ModuleAccessPoint;
 
+/**
+ * Defines how to access how Module at a given Slave.
+ */
 public abstract class ModuleAccessPoint {
+    //Amount all different possible entries for access information in the database.
     public static int COMBINED_AMOUNT_OF_ACCESS_INFORMATION = 6;
 
+    /**
+     * Builds a ModuleAccessPoint object from the given information and type.
+     * @param combinedModuleAccessPointInformation Combined access information.
+     * @param type Type of access.
+     * @return The constructed ModuleAccessPoint.
+     */
     public static ModuleAccessPoint fromCombinedModuleAccessPointInformation(
             String[] combinedModuleAccessPointInformation, String type) {
         switch (type) {
@@ -20,7 +30,21 @@ public abstract class ModuleAccessPoint {
         }
     }
 
+    /**
+     * Get all the access information of the specific ModuleAccessPoint as a String array.
+     * @return Access information as String array.
+     */
     public abstract String[] getAccessInformation();
+
+    /**
+     * Get all indices of the points to write the information to (on the database).
+     * @return The indices.
+     */
     public abstract int[] getDatabaseIndices();
+
+    /**
+     * Get the type of the ModuleAccessPoint object.
+     * @return Type of ModuleAccessPoint object.
+     */
     public abstract String getType();
 }

@@ -32,6 +32,11 @@ public class WLANAccessPoint extends ModuleAccessPoint {
         return TYPE;
     }
 
+    /**
+     * Create WLANAccessPoint from combined access point information.
+     * @param combinedModuleAccessPointInformation The combined access point information.
+     * @return The constructed WLANAccessPoint.
+     */
     public static WLANAccessPoint fromCombinedModuleAccessPointInformation(
             String[] combinedModuleAccessPointInformation) {
         return new WLANAccessPoint(Integer.valueOf(combinedModuleAccessPointInformation[2]),

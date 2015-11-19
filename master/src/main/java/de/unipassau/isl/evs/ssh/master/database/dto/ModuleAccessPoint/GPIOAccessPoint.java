@@ -1,5 +1,8 @@
 package de.unipassau.isl.evs.ssh.master.database.dto.ModuleAccessPoint;
 
+/**
+ * ModuleAccessPoint class for a GPIO access point.
+ */
 public class GPIOAccessPoint extends ModuleAccessPoint {
     public static final String TYPE = "GPIO";
     private int port;
@@ -26,6 +29,11 @@ public class GPIOAccessPoint extends ModuleAccessPoint {
         return TYPE;
     }
 
+    /**
+     * Create GPIOAccessPoint from combined access point information.
+     * @param combinedModuleAccessPointInformation The combined access point information.
+     * @return The constructed GPIOAccessPoint.
+     */
     public static GPIOAccessPoint fromCombinedModuleAccessPointInformation(
             String[] combinedModuleAccessPointInformation) {
         return new GPIOAccessPoint(Integer.valueOf(combinedModuleAccessPointInformation[0]));

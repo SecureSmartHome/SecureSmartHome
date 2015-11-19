@@ -18,10 +18,8 @@ import de.unipassau.isl.evs.ssh.master.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.master.database.dto.UserDevice;
 
 public class ControllerTest extends InstrumentationTestCase {
-    //Todo: handle error if none existing group / template ref is given
-    //Todo: handle error if unique name is twice
 
-    public void testTemplatesAndPermissions() throws InUseException, IllegalReferenceException, AlreadyInUseException {
+    public void testTemplatesAndPermissions() throws IsReferencedException, IllegalReferenceException, AlreadyInUseException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
@@ -234,7 +232,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Remove template w/ group reference
         try {
             permissionController.removeTemplate("tmpl3");
-        } catch (InUseException inUseException) {
+        } catch (IsReferencedException isReferencedException) {
             assertFalse(false);
         }
 
@@ -254,7 +252,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Remove group in use
         try {
             userManagementController.removeGroup("such wow");
-        } catch (InUseException inUseException) {
+        } catch (IsReferencedException isReferencedException) {
             assertFalse(false);
         }
 
@@ -426,7 +424,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Remove locked slave
         try {
             slaveController.removeSlave(new DeviceID("1"));
-        } catch (InUseException inUseException) {
+        } catch (IsReferencedException isReferencedException) {
             assertTrue(true);
         }
         //Remove slave

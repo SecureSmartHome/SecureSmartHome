@@ -1,5 +1,8 @@
 package de.unipassau.isl.evs.ssh.master.database;
 
+/**
+ * Exception combines any amount of exceptions of subclasses of the DatabaseControllerException.
+ */
 public class DatabaseControllerException extends Exception {
     public DatabaseControllerException() {
     }

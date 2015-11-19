@@ -21,6 +21,11 @@ public class USBAccessPoint extends ModuleAccessPoint {
         return TYPE;
     }
 
+    /**
+     * Create USBAccessPoint from combined access point information.
+     * @param combinedModuleAccessPointInformation The combined access point information.
+     * @return The constructed USBAccessPoint.
+     */
     public static USBAccessPoint fromCombinedModuleAccessPointInformation(
             String[] combinedModuleAccessPointInformation) {
         return new USBAccessPoint(Integer.valueOf(combinedModuleAccessPointInformation[1]));

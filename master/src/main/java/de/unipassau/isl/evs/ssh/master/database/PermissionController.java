@@ -97,17 +97,22 @@ public class PermissionController extends AbstractComponent {
      *
      * @param templateName Name of the template.
      */
-    public void removeTemplate(String templateName) throws InUseException {
+    public void removeTemplate(String templateName) throws IsReferencedException {
         try {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.PermissionTemplate.TABLE_NAME
                             + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
                             + " = ?", new String[] { templateName });
         } catch (SQLiteConstraintException sqlce) {
-            throw new InUseException("This template is used by at least one Group");
+            throw new IsReferencedException("This template is used by at least one Group");
         }
     }
 
+    /**
+     * Add a Permission to a Template.
+     * @param templateName Name of the Template.
+     * @param permissionName Name of the Permission.
+     */
     public void addPermissionToTemplate(String templateName, String permissionName) throws IllegalReferenceException {
         try {
             databaseConnector.executeSql("insert into "
@@ -123,7 +128,11 @@ public class PermissionController extends AbstractComponent {
         }
     }
 
-    //todo: check
+    /**
+     * Remove a Permission from a Template.
+     * @param templateName Name of the Template.
+     * @param permissionName Name of the Permission.
+     */
     public void removePermissionFromTemplate(String templateName, String permissionName) {
         databaseConnector.executeSql("delete from "
                         + DatabaseContract.ComposedOfPermission.TABLE_NAME
@@ -134,6 +143,11 @@ public class PermissionController extends AbstractComponent {
                         new String[] { permissionName, templateName });
     }
 
+    /**
+     * Add a Permission for a UserDevice.
+     * @param userDeviceID DeviceID of the UserDevice.
+     * @param permissionName Name of the Permission.
+     */
     public void addUserPermission(DeviceID userDeviceID, String permissionName) throws IllegalReferenceException {
         try {
             databaseConnector.executeSql("insert into "
@@ -150,7 +164,11 @@ public class PermissionController extends AbstractComponent {
         }
     }
 
-    //todo: check
+    /**
+     * Remove a Permission for a UserDevice.
+     * @param userDeviceID DeviceID of the UserDevice.
+     * @param permissionName Name of the Permission.
+     */
     public void removeUserPermission(DeviceID userDeviceID, String permissionName) {
         databaseConnector.executeSql("delete from "
                 + DatabaseContract.HasPermission.TABLE_NAME
@@ -206,6 +224,10 @@ public class PermissionController extends AbstractComponent {
                         + " = ?", new String[]{permissionName});
     }
 
+    /**
+     * Get the names of all Permissions.
+     * @return All names as a list.
+     */
     public List<String> getPermissions() {
         Cursor permissionsCursor = databaseConnector.executeSql("select "
                 + DatabaseContract.Permission.COLUMN_NAME
@@ -217,6 +239,10 @@ public class PermissionController extends AbstractComponent {
         return permissions;
     }
 
+    /**
+     * Get the name of all Templates.
+     * @return All names as a list.
+     */
     public List<String> getTemplates() {
         Cursor templatesCursor = databaseConnector.executeSql("select "
                 + DatabaseContract.PermissionTemplate.COLUMN_NAME
@@ -228,6 +254,12 @@ public class PermissionController extends AbstractComponent {
         return templates;
     }
 
+    /**
+     * Change the name of a Template.
+     * @param oldName Old name of the Template.
+     * @param newName New name of the Template.
+     * @throws AlreadyInUseException
+     */
     public void changeTemplateName(String oldName, String newName) throws AlreadyInUseException {
         try {
             databaseConnector.executeSql("update " + DatabaseContract.PermissionTemplate.TABLE_NAME

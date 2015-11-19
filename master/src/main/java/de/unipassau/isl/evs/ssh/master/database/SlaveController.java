@@ -139,6 +139,11 @@ public class SlaveController extends AbstractComponent {
         return modules;
     }
 
+    /**
+     * Get all information of a single Module by name.
+     * @param moduleName The name of the Module.
+     * @return The requested Module.
+     */
     public Module getModule(String moduleName) {
         //Notice: again changed order for convenience reasons when creating the ModuleAccessPoint.
         Cursor moduleCursor = databaseConnector.executeSql("select" +
@@ -176,6 +181,11 @@ public class SlaveController extends AbstractComponent {
         return null;
     }
 
+    /**
+     * Get all Modules of a given Slave.
+     * @param slaveDeviceID DeviceID of the Slave.
+     * @return All Modules of the Slave as a list.
+     */
     public List<Module> getModulesOfSlave(DeviceID slaveDeviceID) {
         //Notice: again changed order for convenience reasons when creating the ModuleAccessPoint.
         Cursor modulesCursor = databaseConnector.executeSql("select" +
@@ -286,14 +296,14 @@ public class SlaveController extends AbstractComponent {
      *
      * @param slaveID DeviceID of the Slave.
      */
-    public void removeSlave(DeviceID slaveID) throws InUseException {
+    public void removeSlave(DeviceID slaveID) throws IsReferencedException {
         try {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.Slave.TABLE_NAME
                             + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
                     new String[] { slaveID.getFingerprint() });
         } catch (SQLiteConstraintException sqlce) {
-            throw new InUseException("This slave is used by at least one Module");
+            throw new IsReferencedException("This slave is used by at least one Module");
         }
     }
 
