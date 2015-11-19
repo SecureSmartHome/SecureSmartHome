@@ -113,7 +113,7 @@ public class PermissionController extends AbstractComponent {
      * @param templateName Name of the Template.
      * @param permissionName Name of the Permission.
      */
-    public void addPermissionToTemplate(String templateName, String permissionName) throws IllegalReferenceException {
+    public void addPermissionToTemplate(String templateName, String permissionName) throws UnknownReferenceException {
         try {
             databaseConnector.executeSql("insert into "
                             + DatabaseContract.ComposedOfPermission.TABLE_NAME
@@ -124,7 +124,7 @@ public class PermissionController extends AbstractComponent {
                             + "), (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
                     new String[] { permissionName, templateName} );
         } catch (SQLiteConstraintException sqlce) {
-            throw new IllegalReferenceException("The given Template or Permission does not exist in the database");
+            throw new UnknownReferenceException("The given Template or Permission does not exist in the database");
         }
     }
 
@@ -148,7 +148,7 @@ public class PermissionController extends AbstractComponent {
      * @param userDeviceID DeviceID of the UserDevice.
      * @param permissionName Name of the Permission.
      */
-    public void addUserPermission(DeviceID userDeviceID, String permissionName) throws IllegalReferenceException {
+    public void addUserPermission(DeviceID userDeviceID, String permissionName) throws UnknownReferenceException {
         try {
             databaseConnector.executeSql("insert into "
                     + DatabaseContract.HasPermission.TABLE_NAME
@@ -159,7 +159,7 @@ public class PermissionController extends AbstractComponent {
                     + "))", new String[]{permissionName,
                     userDeviceID.getFingerprint()});
         } catch (SQLiteConstraintException sqlce) {
-            throw new IllegalReferenceException(
+            throw new UnknownReferenceException(
                     "The given UserDevice or Permission does not exist in the database");
         }
     }
