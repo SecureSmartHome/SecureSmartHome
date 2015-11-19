@@ -160,6 +160,11 @@ public class DatabaseConnector extends AbstractComponent {
         }
 
         @Override
+        public void onConfigure(SQLiteDatabase db) {
+            db.setForeignKeyConstraintsEnabled(true);
+        }
+
+        @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             // Drops all tables and creates them again.
             Log.v(TAG, "updating Database");
