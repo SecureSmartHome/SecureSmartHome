@@ -54,6 +54,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_HOST;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.TIMEOUTS_IN_A_ROW;
 
+
 /**
  * A netty stack accepting connections to and from the master and handling communication with them using a netty pipeline.
  * For details about the pipeline, see {@link #startClient()} and {@link #initChannel(SocketChannel)}.
