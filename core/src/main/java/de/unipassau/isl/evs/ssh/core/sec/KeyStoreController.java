@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.sec;
 
 import android.content.Context;
+import android.util.Log;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -30,6 +31,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * The KeyStoreController controls the KeyStore which can load and store keys and provides Key generation.
@@ -41,11 +45,11 @@ public class KeyStoreController extends AbstractComponent {
     public static final String LOCAL_PRIVATE_KEY_ALIAS = "localPrivateKey";
     public static final String KEY_STORE_FILENAME = "encryptText-keystore.bks";
     public static final String KEY_STORE_TYPE = "BKS";
-    public static final String KEY_PAIR_ALGORITHM = "RSA";
-    public static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA256withRSA";
+    public static final String KEY_PAIR_ALGORITHM = "ECIES";
+    public static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA224withECDSA";
     public static final String SYMMETRIC_KEY_ALGORITHM = "AES";
     public static final String PUBLIC_KEY_PREFIX = "public_key:";
-    public static final int ASYMMETRIC_KEY_SIZE = 4096;
+    public static final int ASYMMETRIC_KEY_SIZE = 256;
     public static final int SYMMETRIC_KEY_SIZE = 256;
 
     public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);
@@ -178,9 +182,22 @@ public class KeyStoreController extends AbstractComponent {
     private void generateAndStoreKeyPair() throws NoSuchAlgorithmException, KeyStoreException,
             CertificateException, SignatureException, InvalidKeyException {
 
+        String keyPairAlgorithm;
+
+        if (KEY_PAIR_ALGORITHM.startsWith("EC")) {
+            //Hardcoded Algorithms
+            //see org.spongycastle.jcajce.provider.asymmetric.EC.Mappings.configure(ConfigurableProvider), line 52:
+            //     "KeyPairGenerator.ECIES" -> "KeyPairGeneratorSpi$ECDH"
+            keyPairAlgorithm = "EC";
+            Log.w(KeyStoreController.class.getSimpleName(), "Using 'EC' instead of '" + keyPairAlgorithm
+                    + "' to circumvent wrong BouncyCastle mappings");
+        } else {
+            keyPairAlgorithm = KEY_PAIR_ALGORITHM;
+        }
+
         KeyPairGenerator generator;
 
-        generator = KeyPairGenerator.getInstance(KEY_PAIR_ALGORITHM);
+        generator = KeyPairGenerator.getInstance(keyPairAlgorithm);
         generator.initialize(ASYMMETRIC_KEY_SIZE);
 
         KeyPair keyPair = generator.generateKeyPair();
@@ -248,6 +265,34 @@ public class KeyStoreController extends AbstractComponent {
         } catch (IOException ex) {
             throw new KeyStoreException(ex);
         }
+    }
+
+    public void deleteKeyStoreEntry(String alias) throws KeyStoreException {
+        if (alias.equals(LOCAL_PRIVATE_KEY_ALIAS)) {
+            if (keyStore.containsAlias(alias)) {
+                keyStore.deleteEntry(alias);
+            }
+        } else {
+            if (keyStore.containsAlias(alias)) {
+                keyStore.deleteEntry(alias);
+            }
+        }
+
+        try (FileOutputStream fileOutputStream = new FileOutputStream(keyStoreFile)) {
+            keyStore.store(fileOutputStream, getKeystorePassword());
+        } catch (IOException | CertificateException | NoSuchAlgorithmException ex) {
+            throw new KeyStoreException(ex);
+        }
+    }
+
+    public List<String> listEntries() throws KeyStoreException {
+        Enumeration<String> aliases = keyStore.aliases();
+        List<String> aliasList = new LinkedList<>();
+
+        while (aliases.hasMoreElements()) {
+            aliasList.add(aliases.nextElement());
+        }
+        return aliasList;
     }
 
     private char[] getKeystorePassword() {
