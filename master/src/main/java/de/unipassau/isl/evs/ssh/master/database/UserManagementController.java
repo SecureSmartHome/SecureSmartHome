@@ -162,7 +162,7 @@ public class UserManagementController extends AbstractComponent {
                             + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + ","
                             + DatabaseContract.UserDevice.COLUMN_GROUP_ID + ") values (?, ?,("
                             + GROUP_ID_FROM_NAME_SQL_QUERY + "))",
-                    new String[]{userDevice.getName(), userDevice.getUserDeviceID().getFingerprint(),
+                    new String[]{userDevice.getName(), userDevice.getUserDeviceID().getId(),
                             userDevice.getInGroup()});
         } catch (SQLiteConstraintException sqlce) {
             System.out.println(sqlce.getMessage());
@@ -181,7 +181,7 @@ public class UserManagementController extends AbstractComponent {
         databaseConnector.executeSql("delete from "
                         + DatabaseContract.UserDevice.TABLE_NAME
                         + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
-                            new String[] { userDeviceID.getFingerprint() });
+                            new String[] { userDeviceID.getId() });
     }
 
     /**
@@ -214,7 +214,7 @@ public class UserManagementController extends AbstractComponent {
                             + " set " + DatabaseContract.UserDevice.COLUMN_GROUP_ID
                             + " = (" + GROUP_ID_FROM_NAME_SQL_QUERY
                             + ") where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
-                                new String[] { groupName, userDeviceID.getFingerprint() });
+                                new String[] { groupName, userDeviceID.getId() });
         } catch (SQLiteConstraintException sqlce) {
             throw new UnknownReferenceException("The given Group does not exist in the database");
         }
@@ -256,7 +256,7 @@ public class UserManagementController extends AbstractComponent {
                 + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID + " = g."
                 + DatabaseContract.Group.COLUMN_ID
                 + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
-                    new String[] { deviceID.getFingerprint() });
+                    new String[] { deviceID.getId() });
         if (userDeviceCursor.moveToNext()) {
             return new UserDevice(userDeviceCursor.getString(0),
                     userDeviceCursor.getString(2), new DeviceID(userDeviceCursor.getString(1)));

@@ -14,16 +14,12 @@ public class DeviceID {
         this.id = id;
     }
 
-    public String getFingerprint() {
+    public String getId() {
         return id;
     }
 
     public void setFingerprint(String fingerprint) {
         this.id = fingerprint;
-    }
-
-    public String getId() {
-        return id;
     }
 
     @Override

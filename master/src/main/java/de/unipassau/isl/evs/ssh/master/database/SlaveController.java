@@ -81,7 +81,7 @@ public class SlaveController extends AbstractComponent {
                     ObjectArrays.concat(
                             createCombinedModulesAccessInformationFromSingle(module.getModuleAccessPoint()),
                             new String[] { module.getModuleAccessPoint().getType(),
-                                    module.getAtSlave().getFingerprint(), module.getName() }, String.class));
+                                    module.getAtSlave().getId(), module.getName() }, String.class));
         } catch (SQLiteConstraintException sqlce) {
             throw new DatabaseControllerException("The given Slave does not exist in the database"
                     + " or the name is already used by another Module");
@@ -203,7 +203,7 @@ public class SlaveController extends AbstractComponent {
                 + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
                 + " = s." + DatabaseContract.Slave.COLUMN_ID
                 + " where s." + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
-                    new String[] { slaveDeviceID.getFingerprint() });
+                    new String[] { slaveDeviceID.getId() });
         List<Module> modules = new LinkedList<>();
         while (modulesCursor.moveToNext()) {
             String[] combinedModuleAccessPointInformation =
@@ -285,7 +285,7 @@ public class SlaveController extends AbstractComponent {
                             + DatabaseContract.Slave.TABLE_NAME
                             + " (" + DatabaseContract.Slave.COLUMN_NAME
                             + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT + ") values (?, ?)",
-                    new String[]{slave.getName(), slave.getSlaveID().getFingerprint()});
+                    new String[]{slave.getName(), slave.getSlaveID().getId()});
         } catch (SQLiteConstraintException sqlce) {
             throw new AlreadyInUseException("The given name or fingerprint is already used by another Slave.");
         }
@@ -301,7 +301,7 @@ public class SlaveController extends AbstractComponent {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.Slave.TABLE_NAME
                             + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
-                    new String[] { slaveID.getFingerprint() });
+                    new String[] { slaveID.getId() });
         } catch (SQLiteConstraintException sqlce) {
             throw new IsReferencedException("This slave is used by at least one Module");
         }

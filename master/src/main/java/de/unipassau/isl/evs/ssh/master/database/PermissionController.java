@@ -88,7 +88,7 @@ public class PermissionController extends AbstractComponent {
                         + " = ud." + DatabaseContract.UserDevice.COLUMN_ID
                         + " where p." + DatabaseContract.Permission.COLUMN_NAME
                         + " = ? and ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
-                        + " = ?", new String[] { permissionName, userDeviceID.getFingerprint()});
+                        + " = ?", new String[] { permissionName, userDeviceID.getId()});
         return permissionCursor.moveToNext();
     }
 
@@ -157,7 +157,7 @@ public class PermissionController extends AbstractComponent {
                     + ") values ((" + PERMISSION_ID_FROM_NAME_SQL_QUERY
                     + "), (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
                     + "))", new String[]{permissionName,
-                    userDeviceID.getFingerprint()});
+                    userDeviceID.getId()});
         } catch (SQLiteConstraintException sqlce) {
             throw new UnknownReferenceException(
                     "The given UserDevice or Permission does not exist in the database");
@@ -176,7 +176,7 @@ public class PermissionController extends AbstractComponent {
                 + " = (" + PERMISSION_ID_FROM_NAME_SQL_QUERY
                 + ") and " + DatabaseContract.HasPermission.COLUMN_USER_ID
                 + " = (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
-                +")" , new String[] { permissionName, userDeviceID.getFingerprint() });
+                +")" , new String[] { permissionName, userDeviceID.getId() });
     }
 
 
