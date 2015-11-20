@@ -84,7 +84,7 @@ public class SlaveController extends AbstractComponent {
                                     module.getAtSlave().getId(), module.getName() }, String.class));
         } catch (SQLiteConstraintException sqlce) {
             throw new DatabaseControllerException("The given Slave does not exist in the database"
-                    + " or the name is already used by another Module");
+                    + " or the name is already used by another Module", sqlce);
         }
     }
 
@@ -237,7 +237,7 @@ public class SlaveController extends AbstractComponent {
                             + " = ? where " + DatabaseContract.ElectronicModule.COLUMN_NAME + " = ?",
                     new String[] { newName, oldName });
         } catch (SQLiteConstraintException sqlce) {
-            throw new AlreadyInUseException("The given name is already used by another Module.");
+            throw new AlreadyInUseException("The given name is already used by another Module.", sqlce);
         }
     }
 
@@ -270,7 +270,7 @@ public class SlaveController extends AbstractComponent {
                             + " = ? where " + DatabaseContract.Slave.COLUMN_NAME + " = ?",
                     new String[] { newName, oldName });
         } catch (SQLiteConstraintException sqlce) {
-            throw new AlreadyInUseException("The given name is already used by another Slave.");
+            throw new AlreadyInUseException("The given name is already used by another Slave.", sqlce);
         }
     }
 
@@ -287,7 +287,7 @@ public class SlaveController extends AbstractComponent {
                             + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT + ") values (?, ?)",
                     new String[]{slave.getName(), slave.getSlaveID().getId()});
         } catch (SQLiteConstraintException sqlce) {
-            throw new AlreadyInUseException("The given name or fingerprint is already used by another Slave.");
+            throw new AlreadyInUseException("The given name or fingerprint is already used by another Slave.", sqlce);
         }
     }
 
@@ -303,7 +303,7 @@ public class SlaveController extends AbstractComponent {
                             + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
                     new String[] { slaveID.getId() });
         } catch (SQLiteConstraintException sqlce) {
-            throw new IsReferencedException("This slave is used by at least one Module");
+            throw new IsReferencedException("This slave is used by at least one Module", sqlce);
         }
     }
 
