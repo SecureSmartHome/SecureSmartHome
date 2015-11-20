@@ -33,4 +33,11 @@ public class CoreConstants {
      * Set to infinite.
      */
     public static final int CLIENT_ALL_IDLE_TIME = 0;
+
+    /**
+     * This class contains the key constants of SharedPreferences
+     */
+    public class SharedPrefs {
+        public static final String PREF_MASTER_ID = "ssh.core.MASTER_ID";
+    }
 }
