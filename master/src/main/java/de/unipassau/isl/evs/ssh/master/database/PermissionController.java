@@ -104,7 +104,7 @@ public class PermissionController extends AbstractComponent {
                             + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
                             + " = ?", new String[] { templateName });
         } catch (SQLiteConstraintException sqlce) {
-            throw new IsReferencedException("This template is used by at least one Group");
+            throw new IsReferencedException("This template is used by at least one Group", sqlce);
         }
     }
 
@@ -124,7 +124,8 @@ public class PermissionController extends AbstractComponent {
                             + "), (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
                     new String[] { permissionName, templateName} );
         } catch (SQLiteConstraintException sqlce) {
-            throw new UnknownReferenceException("The given Template or Permission does not exist in the database");
+            throw new UnknownReferenceException("The given Template or Permission does not exist in the database",
+                    sqlce);
         }
     }
 
@@ -160,7 +161,7 @@ public class PermissionController extends AbstractComponent {
                     userDeviceID.getFingerprint()});
         } catch (SQLiteConstraintException sqlce) {
             throw new UnknownReferenceException(
-                    "The given UserDevice or Permission does not exist in the database");
+                    "The given UserDevice or Permission does not exist in the database", sqlce);
         }
     }
 
@@ -192,7 +193,7 @@ public class PermissionController extends AbstractComponent {
                     + " (" + DatabaseContract.PermissionTemplate.COLUMN_NAME + ")"
                     + "values (?)", new String[]{templateName});
         } catch (SQLiteConstraintException sqlce) {
-            throw new AlreadyInUseException("The name is already used by another Template.");
+            throw new AlreadyInUseException("The name is already used by another Template.", sqlce);
         }
     }
 
@@ -208,7 +209,7 @@ public class PermissionController extends AbstractComponent {
                     + " (" + DatabaseContract.Permission.COLUMN_NAME + ")"
                     + "values (?)", new String[]{permissionName});
         } catch (SQLiteConstraintException sqlce) {
-            throw new AlreadyInUseException("The name is already used by another Permission.");
+            throw new AlreadyInUseException("The name is already used by another Permission.", sqlce);
         }
     }
 
@@ -267,7 +268,7 @@ public class PermissionController extends AbstractComponent {
                             + " = ? where " + DatabaseContract.PermissionTemplate.COLUMN_NAME + " = ?",
                     new String[] { newName, oldName });
         } catch (SQLiteConstraintException sqlce) {
-            throw new AlreadyInUseException("The given name is already used by another Template.");
+            throw new AlreadyInUseException("The given name is already used by another Template.", sqlce);
         }
     }
 }

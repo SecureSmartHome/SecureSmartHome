@@ -54,7 +54,7 @@ public class UserManagementController extends AbstractComponent {
                     new String[] { group.getName(), group.getTemplateName() });
         } catch (SQLiteConstraintException sqlce) {
             throw new DatabaseControllerException("Either the given Template does not exist in the database"
-                    + "or the name is already in use by another Group.");
+                    + "or the name is already in use by another Group.", sqlce);
         }
     }
 
@@ -70,7 +70,7 @@ public class UserManagementController extends AbstractComponent {
                             + " where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
                     new String[] { groupName });
         } catch (SQLiteConstraintException sqlce) {
-            throw new IsReferencedException("This group is used by at least one UserDevice");
+            throw new IsReferencedException("This group is used by at least one UserDevice", sqlce);
         }
     }
 
@@ -105,7 +105,7 @@ public class UserManagementController extends AbstractComponent {
                             + " = ? where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
                                 new String[] { newName, oldName });
         } catch (SQLiteConstraintException sqlce) {
-            throw new AlreadyInUseException("The given name is already used by another Group.");
+            throw new AlreadyInUseException("The given name is already used by another Group.", sqlce);
         }
     }
 
@@ -145,7 +145,7 @@ public class UserManagementController extends AbstractComponent {
                             + " = ? where " + DatabaseContract.UserDevice.COLUMN_NAME + " = ?",
                     new String[]{newName, oldName});
         } catch (SQLiteConstraintException sqlce) {
-            throw new AlreadyInUseException("The given name is already used by another UserDevice.");
+            throw new AlreadyInUseException("The given name is already used by another UserDevice.", sqlce);
         }
     }
 
@@ -168,7 +168,7 @@ public class UserManagementController extends AbstractComponent {
             System.out.println(sqlce.getMessage());
             throw new DatabaseControllerException(
                     "Either the given Group does not exist in the database"
-                    + " or a UserDevice already has the given name or fingerprint.");
+                    + " or a UserDevice already has the given name or fingerprint.", sqlce);
         }
     }
 
@@ -198,7 +198,7 @@ public class UserManagementController extends AbstractComponent {
                             + ") where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
                                 new String[] { templateName, groupName });
         } catch (SQLiteConstraintException sqlce) {
-            throw new UnknownReferenceException("The given Template does not exist in the database");
+            throw new UnknownReferenceException("The given Template does not exist in the database", sqlce);
         }
     }
 
@@ -216,7 +216,7 @@ public class UserManagementController extends AbstractComponent {
                             + ") where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
                                 new String[] { groupName, userDeviceID.getFingerprint() });
         } catch (SQLiteConstraintException sqlce) {
-            throw new UnknownReferenceException("The given Group does not exist in the database");
+            throw new UnknownReferenceException("The given Group does not exist in the database", sqlce);
         }
     }
 
