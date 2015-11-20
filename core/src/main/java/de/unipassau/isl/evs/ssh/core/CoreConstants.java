@@ -36,7 +36,7 @@ public class CoreConstants {
     /**
      * Default address used for UDP broadcasts.
      */
-    public static final String BROADCAST_ADDRESS = "ssh.core.192.168.1.255";
+    public static final String BROADCAST_ADDRESS = "ssh.core.BROADCAST_ADDRESS";
     /**
      * Default value for timeouts. Set to zero.
      */
