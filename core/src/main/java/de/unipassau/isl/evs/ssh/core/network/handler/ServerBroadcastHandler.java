@@ -20,6 +20,6 @@ public class ServerBroadcastHandler extends MessageToMessageDecoder<DatagramPack
             ctx.writeAndFlush(new DatagramPacket(Unpooled.copiedBuffer("RESPONSE", CharsetUtil.UTF_8),
                     new InetSocketAddress(CoreConstants.BROADCAST_ADDRESS, DEFAULT_PORT))).sync();
         }//else discard message
-
+        ctx.close();
     }
 }

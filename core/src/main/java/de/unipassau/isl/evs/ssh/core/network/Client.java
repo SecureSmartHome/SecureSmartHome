@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.core.network;
 
 
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -44,9 +45,14 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_ALL_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_READER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_WRITER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.DEFAULT_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.DEFAULT_TIMEOUTS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.MAX_NUMBER_OF_TIMEOUTS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.MAX_SECONDS_BETWEEN_BROADCAST;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.MIN_SECONDS_BETWEEN_TIMEOUTS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_HOST;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.TIMEOUTS_IN_A_ROW;
 
 /**
  * A netty stack accepting connections to and from the master and handling communication with them using a netty pipeline.
@@ -78,7 +84,14 @@ public class Client extends AbstractComponent {
      * Distributes incoming messages to the responsible handlers.
      */
     private ClientIncomingDispatcher incomingDispatcher = new ClientIncomingDispatcher(this);
-
+    /**
+     * SharedPreferences to load, save and edit key-value sets.
+     */
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContainer().get(ContainerService.KEY_CONTEXT));
+    /**
+     * SharedPreferences editor to edit the key-value sets.
+     */
+    SharedPreferences.Editor editor = prefs.edit();
     /**
      * Boolean if the client connection is active.
      */
@@ -90,7 +103,7 @@ public class Client extends AbstractComponent {
     /**
      * Int that saves how many timeouts happened in a row.
      */
-    int timeoutsInARow = 0;
+    int timeoutsInARow;
 
     /**
      * Init timeouts and the connection registry.
@@ -122,55 +135,71 @@ public class Client extends AbstractComponent {
         ResourceLeakDetector.setLevel(getResourceLeakDetection());
 
         if (!isExecutorAlive()) {
-            //Setup the Executor and Connection Pool
+            // Setup the Executor and Connection Pool
             clientExecutor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("client"));
         }
-        if (timeoutsInARow < 3) {
-            Bootstrap b = new Bootstrap()
-                    .group(clientExecutor)
-                    .channel(NioSocketChannel.class)
-                    .handler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            Client.this.initChannel(ch);
-                        }
-                    })
-                    .option(ChannelOption.SO_KEEPALIVE, true);
-
-            //Wait for the start of the client
-            clientChannel = b.connect(getHost(), getPort()).sync();
-            clientChannel.channel().closeFuture().addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) throws Exception {
-                    if (isActive && isExecutorAlive() && !clientExecutor.isShuttingDown()) {
-                        long thisTimeout = System.currentTimeMillis();
-                        if (lastTimeout == 0 || ((thisTimeout - lastTimeout) >= TimeUnit.SECONDS.toMillis(60))) {
-                            lastTimeout = thisTimeout;
-                            timeoutsInARow++; //TODO do in sharedprefs?
-                        } else {
-                            timeoutsInARow = 0;//TODO do in sharedprefs?
-                        }
-                        startClient();
-                    }
-                }
-            });
+        timeoutsInARow = prefs.getInt(TIMEOUTS_IN_A_ROW, DEFAULT_TIMEOUTS);
+        if (timeoutsInARow < MAX_NUMBER_OF_TIMEOUTS) {
+            buildTCP();
+            // TODO when implemented, start handshake
         } else {
-            Bootstrap b = new Bootstrap()
-                    .group(clientExecutor)
-                    .handler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            initBroadcastChannel(ch);
-                        }
-                    })
-                    .option(ChannelOption.SO_BROADCAST, true);
-            clientChannel = b.bind(getPort()).sync();
-            getChannel().writeAndFlush(new DatagramPacket(Unpooled.copiedBuffer("REQUEST", CharsetUtil.UTF_8),
-                    new InetSocketAddress(CoreConstants.BROADCAST_ADDRESS, DEFAULT_PORT))).sync();
-            //TODO handleTimeout ? sendAgain : discard
+            broadcastUDP();
         }
         if (clientChannel == null) {
             throw new StartupException("Could not open client channel");
+        }
+    }
+
+    private void buildTCP() throws InterruptedException {
+        // TCP Connection
+        Bootstrap b = new Bootstrap()
+                .group(clientExecutor)
+                .channel(NioSocketChannel.class)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        Client.this.initChannel(ch);
+                    }
+                })
+                .option(ChannelOption.SO_KEEPALIVE, true);
+
+        // Wait for the start of the client
+        clientChannel = b.connect(getHost(), getPort()).sync();
+        clientChannel.channel().closeFuture().addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if (isActive && isExecutorAlive() && !clientExecutor.isShuttingDown()) {
+                    long thisTimeout = System.currentTimeMillis();
+                    if (lastTimeout == 0 || ((thisTimeout - lastTimeout) >= TimeUnit.SECONDS.toMillis(MIN_SECONDS_BETWEEN_TIMEOUTS))) {
+                        lastTimeout = thisTimeout;
+                        editor.putInt(TIMEOUTS_IN_A_ROW, timeoutsInARow + 1);
+
+                    } else {
+                        editor.putInt(TIMEOUTS_IN_A_ROW, 0);
+                    }
+                    startClient();
+                }
+            }
+        });
+    }
+
+    private void broadcastUDP() throws InterruptedException {
+        Bootstrap b = new Bootstrap()
+                .group(clientExecutor)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        initBroadcastChannel(ch);
+                    }
+                })
+                .option(ChannelOption.SO_BROADCAST, true);
+        // Send broadcast
+        clientChannel = b.bind(getPort()).sync();
+        getChannel().writeAndFlush(new DatagramPacket(Unpooled.copiedBuffer("REQUEST", CharsetUtil.UTF_8),
+                new InetSocketAddress(CoreConstants.BROADCAST_ADDRESS, DEFAULT_PORT))).sync();
+        // Check for timeout
+        if (!getChannel().closeFuture().await(TimeUnit.SECONDS.toMillis(MAX_SECONDS_BETWEEN_BROADCAST))) {
+            broadcastUDP(); // restart broadcast
         }
     }
 
@@ -181,8 +210,7 @@ public class Client extends AbstractComponent {
      * by the {@link ClientIncomingDispatcher}.
      */
     protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
-        //TODO add remaining necessary handlers
-
+        //TODO add remaining necessary handlers, when they are implemented
         //Handler (de-)serialization
         ch.pipeline().addLast(sharedObjectEncoder.getClass().getSimpleName(), sharedObjectEncoder);
         ch.pipeline().addLast(sharedObjectDecoder.getClass().getSimpleName(), sharedObjectDecoder);
@@ -200,13 +228,16 @@ public class Client extends AbstractComponent {
      * by using the {@link ClientIncomingDispatcher}
      */
     private void initBroadcastChannel(SocketChannel ch) {
-        timeoutsInARow = 0;
         //Handler (de-)serialization
         ch.pipeline().addLast(sharedObjectEncoder.getClass().getSimpleName(), sharedObjectEncoder);
         ch.pipeline().addLast(sharedObjectDecoder.getClass().getSimpleName(), sharedObjectDecoder);
         ch.pipeline().addLast(LoggingHandler.class.getSimpleName(), new LoggingHandler(LogLevel.TRACE));
         //ClientBroadcastHandler
         ch.pipeline().addLast(ClientBroadcastHandler.class.getSimpleName(), new ClientBroadcastHandler());
+        //Timeout Handler
+        ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
+                new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
+        ch.pipeline().addLast(TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
         //Dispatcher
         ch.pipeline().addLast(ClientIncomingDispatcher.class.getSimpleName(), incomingDispatcher);
     }

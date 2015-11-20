@@ -15,7 +15,7 @@ public class CoreConstants {
     /**
      * Preferred port used by netty
      */
-    public static final String PREF_PORT = "ssh.core.PREF_PORTPREF_PORT";
+    public static final String PREF_PORT = "ssh.core.PREF_PORT";
     /**
      * Preferred host used by netty, default is {@code null}
      */
@@ -36,5 +36,25 @@ public class CoreConstants {
     /**
      * Default address used for UDP broadcasts.
      */
-    public static final String BROADCAST_ADDRESS = "192.168.1.255";
+    public static final String BROADCAST_ADDRESS = "ssh.core.192.168.1.255";
+    /**
+     * Default value for timeouts. Set to zero.
+     */
+    public static final int DEFAULT_TIMEOUTS = 0;
+    /**
+     * Default value for maximum timeouts.
+     */
+    public static final int MAX_NUMBER_OF_TIMEOUTS = 3;
+    /**
+     * The minimum number of seconds between
+     */
+    public static final int MIN_SECONDS_BETWEEN_TIMEOUTS = 60;
+    /**
+     * The maximum number of seconds the broadcast waits to be sent again.
+     */
+    public static final int MAX_SECONDS_BETWEEN_BROADCAST = 10;
+    /**
+     * Number of how many timeouts occurred in a row.
+     */
+    public static final String TIMEOUTS_IN_A_ROW = "ssh.core.TIMEOUTS_IN_A_ROW";
 }
