@@ -6,12 +6,14 @@ import android.content.SharedPreferences;
 import android.util.Base64;
 
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.UnrecoverableEntryException;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
+import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -25,8 +27,9 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
  */
 public class NamingManager extends AbstractComponent {
 
-    private DeviceID localDeviceID;
-    private DeviceID masterID;
+    public static final Key<NamingManager> KEY = new Key<>(NamingManager.class);
+
+    private String localDeviceID;
 
     private final boolean isMaster;
 
@@ -46,10 +49,17 @@ public class NamingManager extends AbstractComponent {
      * @return the master's id or null if the master is not known
      */
     public DeviceID getMasterID() {
+        SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
+                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        String masterID = prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null);
+
         if (isMaster) {
-            return localDeviceID;
+            return new DeviceID(localDeviceID);
         }
-        return masterID;
+        if (masterID == null) {
+            return null;
+        }
+        return new DeviceID(masterID);
     }
 
     /**
@@ -65,10 +75,10 @@ public class NamingManager extends AbstractComponent {
     /**
      * Gets the id of this device.
      *
-     * @return the id of the device
+     * @return the id of the local device
      */
     public DeviceID getLocalDeviceId() {
-        return localDeviceID;
+        return new DeviceID(localDeviceID);
     }
 
 
@@ -90,8 +100,18 @@ public class NamingManager extends AbstractComponent {
      * @param cert the certificate
      * @return the id corresponding to the given certificate
      */
-    public DeviceID getDeviceID(X509Certificate cert) {
-        return new DeviceID(Base64.encodeToString(cert.getSignature(), Base64.DEFAULT));
+    public DeviceID getDeviceID(X509Certificate cert) throws UnresolvableNamingException {
+        MessageDigest md;
+        byte[] digest;
+
+        try {
+            md = MessageDigest.getInstance("SHA-256", "BC");
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+            throw new UnresolvableNamingException(e);
+        }
+        md.update(cert.getPublicKey().getEncoded());
+        digest = md.digest();
+        return new DeviceID(Base64.encodeToString(digest, Base64.DEFAULT));
     }
 
     /**
@@ -109,38 +129,21 @@ public class NamingManager extends AbstractComponent {
         }
     }
 
-    /**
-     * Updates this NamingManager. This is needed after the master's id is written to the
-     * SharedPreferences.
-     */
-    public void update(){
-        if (isMaster) {
-            masterID = localDeviceID;
-        } else {
-            SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
-                    .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-
-            masterID = new DeviceID(prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null));
-        }
-    }
-
     @Override
     public void init(Container container) {
         super.init(container);
         X509Certificate localCert;
         try {
             localCert = container.require(KeyStoreController.KEY).getOwnCertificate();
-            localDeviceID = getDeviceID(localCert);
-        } catch (UnrecoverableEntryException | NoSuchAlgorithmException | KeyStoreException e) {
+            localDeviceID = getDeviceID(localCert).getId();
+        } catch (UnresolvableNamingException | UnrecoverableEntryException | NoSuchAlgorithmException | KeyStoreException e) {
             throw new StartupException(e);
         }
-        update();
     }
 
     @Override
     public void destroy() {
         localDeviceID = null;
-        masterID = null;
         super.destroy();
     }
 }
