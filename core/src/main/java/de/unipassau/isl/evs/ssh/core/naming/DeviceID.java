@@ -7,19 +7,12 @@ public final class DeviceID {
 
     private final String id;
 
-    public DeviceID() {
-    }
-
     public DeviceID(String id) {
         this.id = id;
     }
 
     public String getId() {
         return id;
-    }
-
-    public void setFingerprint(String fingerprint) {
-        this.id = fingerprint;
     }
 
     @Override
