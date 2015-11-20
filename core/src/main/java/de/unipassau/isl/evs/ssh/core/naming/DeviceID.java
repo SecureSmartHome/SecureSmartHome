@@ -3,9 +3,9 @@ package de.unipassau.isl.evs.ssh.core.naming;
 /**
  * Unique id for all devices (user devices, master, slaves).
  */
-public class DeviceID {
+public final class DeviceID {
 
-    private String id;
+    private final String id;
 
     public DeviceID(String id) {
         this.id = id;
