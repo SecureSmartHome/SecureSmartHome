@@ -3,6 +3,8 @@ package de.unipassau.isl.evs.ssh.master.database;
 import android.content.Context;
 import android.test.InstrumentationTestCase;
 
+import junit.framework.Assert;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -44,6 +46,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add same name
         try {
             permissionController.addPermission("test");
+            Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
@@ -72,11 +75,13 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add none existing permissions or template
         try {
             permissionController.addPermissionToTemplate("asdf", "zzz");
+            Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
         try {
             permissionController.addPermissionToTemplate("44", "test");
+            Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
@@ -156,6 +161,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Rename to already existing
         try {
             permissionController.changeTemplateName("tmpl2", "tmpl");
+            Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
@@ -163,6 +169,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add same name
         try {
             permissionController.addTemplate("tmpl");
+            Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
@@ -175,6 +182,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Use same Groupname twice
         try {
             userManagementController.addGroup(new Group("grp1", "tmpl"));
+            Assert.fail("Permission controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
@@ -182,6 +190,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Test adding group with not existing template
         try {
             userManagementController.addGroup(new Group("dkjfkdfj", "aklsdjflasdjlf"));
+            Assert.fail("Permission controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
@@ -204,6 +213,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change to none existing template
         try {
             userManagementController.changeTemplateOfGroup("grp1", "adfdfdsfdfs");
+            Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException e) {
             assertFalse(false);
         }
@@ -216,6 +226,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change to already existing name
         try {
             userManagementController.changeGroupName("grp3", "such wow");
+            Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
@@ -232,6 +243,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Remove template w/ group reference
         try {
             permissionController.removeTemplate("tmpl3");
+            Assert.fail("Permission controller should have thrown IsReferencedException");
         } catch (IsReferencedException isReferencedException) {
             assertFalse(false);
         }
@@ -245,6 +257,7 @@ public class ControllerTest extends InstrumentationTestCase {
         try {
             userManagementController.addUserDevice(
                     new UserDevice("askdfj", "--", new DeviceID("20")));
+            Assert.fail("Permission controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
@@ -252,6 +265,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Remove group in use
         try {
             userManagementController.removeGroup("such wow");
+            Assert.fail("Permission controller should have thrown IsReferencedException");
         } catch (IsReferencedException isReferencedException) {
             assertFalse(false);
         }
@@ -259,6 +273,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Check colliding
         try {
             userManagementController.addUserDevice(new UserDevice("u2", "such wow", new DeviceID("3")));
+            Assert.fail("Permission controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
@@ -283,11 +298,13 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add none existing permissions or devices
         try {
             permissionController.addUserPermission(new DeviceID("4"), "zzz");
+            Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
         try {
             permissionController.addUserPermission(new DeviceID("44"), "perm3");
+            Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
@@ -322,6 +339,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Rename to same as other
         try {
             userManagementController.changeUserDeviceName("u3", "11u");
+            Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
@@ -345,6 +363,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change to none existing group
         try {
             userManagementController.changeGroupMembership(new DeviceID("1"), "asdf");
+            Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException e) {
             assertFalse(false);
         }
@@ -383,11 +402,13 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add already existing slave
         try {
             slaveController.addSlave(new Slave("s1", new DeviceID("55")));
+            Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e ) {
             assertFalse(false);
         }
         try {
             slaveController.addSlave(new Slave("s55", new DeviceID("2")));
+            Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e ) {
             assertFalse(false);
         }
@@ -402,6 +423,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Test to init modules at none existing slaves
         try {
             slaveController.addModule(new Module("m1", new DeviceID("99"), new USBAccessPoint(2)));
+            Assert.fail("Permission controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
@@ -409,6 +431,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add module with already existing name
         try {
             slaveController.addModule(new Module("m2", new DeviceID("1"), new USBAccessPoint(1)));
+            Assert.fail("Permission controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
@@ -424,6 +447,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Remove locked slave
         try {
             slaveController.removeSlave(new DeviceID("1"));
+            Assert.fail("Permission controller should have thrown IsReferencedException");
         } catch (IsReferencedException isReferencedException) {
             assertTrue(true);
         }
@@ -446,6 +470,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change to existing name
         try {
             slaveController.changeSlaveName("abcd", "abc");
+            Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
@@ -460,6 +485,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change to existing name
         try {
             slaveController.changeModuleName("m2", "asdf");
+            Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertNotNull(slaveController.getModule("asdf"));
             assertNotNull(slaveController.getModule("m2"));
@@ -497,6 +523,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Check illegal stuff add
         try {
             holidayController.addHolidayLogEntry(null);
+            Assert.fail("Permission controller should have thrown IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             assertTrue(true);
         }
