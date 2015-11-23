@@ -11,6 +11,10 @@ import de.ncoder.typedmap.Key;
 import de.ncoder.typedmap.TypedMap;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 
+/**
+ * An Android {@link Service} that manages a {@link SimpleContainer} and its {@link Component}s.
+ * Android Activity can bind to this Service and communicate with the {@link Container}.
+ */
 public class ContainerService extends Service implements Container {
     public static final Key<ContextComponent> KEY_CONTEXT = new Key<>(ContextComponent.class, "ContainerContext");
     private static final String TAG = ContainerService.class.getSimpleName();
@@ -96,10 +100,16 @@ public class ContainerService extends Service implements Container {
         container.shutdown();
     }
 
+    /**
+     * @return an Intent that can be used to address (e.g. start or bind) this ContainerService
+     */
     public Intent getStartIntent() {
         return new Intent(this, getClass());
     }
 
+    /**
+     * A Component that holds a to the {@link Context} of the ContainerService that manages the Container.
+     */
     public static class ContextComponent extends ContextWrapper implements Component {
         private final Intent intent;
 

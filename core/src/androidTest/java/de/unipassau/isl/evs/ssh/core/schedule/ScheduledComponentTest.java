@@ -78,7 +78,7 @@ public class ScheduledComponentTest extends InstrumentationTestCase {
         final SettableFuture<String> result = SettableFuture.create();
         String expected = getName();
 
-        Key<Component> key = new Key<>(Component.class, getName());
+        Key<TestComponent> key = new Key<>(TestComponent.class, getName());
         container.register(key, new TestComponent() {
             @Override
             public void onReceive(Intent intent) {
@@ -89,7 +89,7 @@ public class ScheduledComponentTest extends InstrumentationTestCase {
         Scheduler scheduler = container.get(Scheduler.KEY);
         Bundle extras = new Bundle();
         extras.putString(EXTRA_DATA, expected);
-        PendingIntent pendingIntent = scheduler.getSchedulePendingIntent(key, extras, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = scheduler.getPendingScheduleIntent(key, extras, PendingIntent.FLAG_CANCEL_CURRENT);
 
         long start = SystemClock.elapsedRealtime();
         scheduler.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
@@ -108,7 +108,7 @@ public class ScheduledComponentTest extends InstrumentationTestCase {
         final SettableFuture<Boolean> result = SettableFuture.create();
         Scheduler scheduler = container.get(Scheduler.KEY);
 
-        Key<Component> key = new Key<>(Component.class, getName());
+        Key<TestComponent> key = new Key<>(TestComponent.class, getName());
         container.register(key, new TestComponent() {
             @Override
             public void onReceive(Intent intent) {
@@ -116,7 +116,7 @@ public class ScheduledComponentTest extends InstrumentationTestCase {
             }
         });
 
-        PendingIntent pendingIntent = scheduler.getSchedulePendingIntent(key, null, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = scheduler.getPendingScheduleIntent(key, null, PendingIntent.FLAG_CANCEL_CURRENT);
         scheduler.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + 1000,
                 pendingIntent);
@@ -145,7 +145,7 @@ public class ScheduledComponentTest extends InstrumentationTestCase {
         //    }
         //});
         //
-        //PendingIntent pendingIntent = scheduler.getSchedulePendingIntent(key, null, PendingIntent.FLAG_CANCEL_CURRENT);
+        //PendingIntent pendingIntent = scheduler.getPendingScheduleIntent(key, null, PendingIntent.FLAG_CANCEL_CURRENT);
         //scheduler.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
         //        SystemClock.elapsedRealtime() + 10000, 10000,
         //        pendingIntent);
