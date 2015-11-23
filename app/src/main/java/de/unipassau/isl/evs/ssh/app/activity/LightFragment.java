@@ -1,6 +1,5 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -33,5 +32,4 @@ public class LightFragment extends Fragment implements Handler{
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_light, container, false);
     }
-
 }
