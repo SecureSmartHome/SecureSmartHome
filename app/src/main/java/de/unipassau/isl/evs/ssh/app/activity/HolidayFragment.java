@@ -12,18 +12,17 @@ import de.unipassau.isl.evs.ssh.core.handler.Handler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 
 /**
- * This fragment is used by the door activity and allows to open or lock the door.
- * If this functionality is used a message, containing all needed information,
- * is generated and passed to the OutgoingRouter.
+ * This activity allows to start and stop the holiday simultion. If this functionality is used a message,
+ * containing all needed information, is generated and passed to the OutgoingRouter.
  */
-public class OperateDoorFragment extends Fragment implements Handler {
+public class HolidayFragment extends Fragment implements Handler {
     @Override
     public void handle(Message message) {
         //TODO implement
         throw new UnsupportedOperationException();
     }
 
-    public OperateDoorFragment() {
+    public HolidayFragment() {
         // Required empty public constructor
     }
 

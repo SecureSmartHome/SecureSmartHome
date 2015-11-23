@@ -12,18 +12,17 @@ import de.unipassau.isl.evs.ssh.core.handler.Handler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 
 /**
- * This fragment is used by the door activity and allows to open or lock the door.
- * If this functionality is used a message, containing all needed information,
- * is generated and passed to the OutgoingRouter.
+ * This activity allows to display information contained in light messages which are received from the IncomingDispatcher.
+ * Furthermore it generates a light messages as instructed by the UI and passes it to the OutgoingRouter.
  */
-public class OperateDoorFragment extends Fragment implements Handler {
+public class LightFragment extends Fragment implements Handler{
     @Override
     public void handle(Message message) {
         //TODO implement
         throw new UnsupportedOperationException();
     }
 
-    public OperateDoorFragment() {
+    public LightFragment() {
         // Required empty public constructor
     }
 
