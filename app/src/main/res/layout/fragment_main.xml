@@ -1,37 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="de.unipassau.isl.evs.ssh.app.MainActivity">
+    android:orientation="vertical">
 
-    <TextView
-        android:text="Hello Home!"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Available Components:"
-        android:id="@+id/textView" />
+        <Button
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:id="@+id/doorButton"
+            android:text="Door Button"
+            android:layout_weight="1" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="[]"
-        android:id="@+id/textViewComponents" />
+        <Button
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:id="@+id/lightButton"
+            android:text="Light Button"
+            android:layout_weight="1" />
+    </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Package Information:"
-        android:id="@+id/textView3" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="null"
-        android:id="@+id/textViewPackage" />
+        <Button
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:id="@+id/climateButton"
+            android:text="Climate Button"
+            android:layout_weight="1" />
 
+        <Button
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:id="@+id/holidayButton"
+            android:text="Holiday Button"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:id="@+id/statusButton"
+            android:text="Status Button"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:id="@+id/usersButton"
+            android:background="@drawable/main_fragment_status"
+            android:layout_weight="1" />
+    </LinearLayout>
 </LinearLayout>
