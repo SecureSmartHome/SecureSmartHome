@@ -17,6 +17,54 @@ public class DatabaseContract {
         public static final String TABLE_NAME = "Permission";
         public static final String COLUMN_ID = "_ID";
         public static final String COLUMN_NAME = "name";
+
+        //Does not describe a table but constants for the PermissionTable entries
+        public class Values {
+            //Odroid
+            public static final String ADD_ORDROID = "AddOdroid";
+            public static final String RENAME_ORDROID = "RenameOdroid";
+            public static final String DELETE_ORDROID = "DeleteOdroid";
+            //Sensor
+            public static final String ADD_SENSOR= "AddSensor";
+            public static final String RENAME_SENSOR = "RenameSensor";
+            public static final String DELETE_SENSOR = "DeleteSensor";
+            //Window
+            public static final String REQUEST_WINDOW_STATUS = "RequestWindowStatus";
+            //Lamp
+            public static final String REQUEST_LAMP_STATUS = "RequestLampStatus";
+            public static final String SWITCH_ON_LAMP = "SwitchOnLamp";
+            public static final String SWITCH_OFF_LAMP = "SwitchOffLamp";
+            //Door
+            public static final String REQUEST_DOOR_STATUS = "RequestDoorStatus";
+            public static final String LOCK_DOOR = "LockDoor";
+            public static final String UNLATCH_DOOR = "UnlatchDoor";
+            //Camera
+            public static final String REQUEST_CAMERA_STATUS = "RequestCameraStatus";
+            public static final String TAKE_CAMERA_PICTURE = "TakeCameraPicture";
+            //WeaterStation
+            public static final String REQUEST_WEATHER_STATUS = "RequestWeatherStatus";
+            //HolidaySimulation
+            public static final String START_HOLIDAY_SIMULATION = "StartHolidaySimulation";
+            public static final String STOP_HOLIDAY_SIMULATION = "StopHolidaySimulation";
+            //User
+            public static final String ADD_USER = "AddUser";
+            public static final String DELETE_USER = "DeleteUser";
+            public static final String CHANGE_USER_NAME = "ChangeUserName";
+            public static final String CHANGE_USER_GROUP = "ChangeUserGroup";
+            public static final String GRANT_USER_RIGHT = "GrantUserRight";
+            public static final String WITHDRAW_USER_RIGHT = "WithdrawUserRight";
+            //Groups
+            public static final String ADD_GROUP = "AddGroup";
+            public static final String DELETE_GROUP = "DeleteGroup";
+            public static final String CHANGE_GROUP_NAME = "ChangeGroupName";
+            public static final String SHOW_GROUP_MEMBER = "ShowGroupMembers";
+            public static final String CHANGE_GROUP_TEMPLATE = "ChangeGroupTemplate";
+            //Templates
+            public static final String CREATE_TEMPLATE = "CreateTemplate";
+            public static final String DELETE_TEMPLATE = "DeleteTemplate";
+            public static final String EDIT_TEMPLATE = "EditTemplate";
+            public static final String SHOW_TEMPLATE_PERMISSION = "ShowTemplatePermission";
+        }
     }
 
     public class HasPermission {

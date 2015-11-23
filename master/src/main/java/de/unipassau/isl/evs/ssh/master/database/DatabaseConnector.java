@@ -141,6 +141,43 @@ public class DatabaseConnector extends AbstractComponent {
                 + "DROP TABLE " + DatabaseContract.ElectronicModule.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.Slave.TABLE_NAME + ";";
 
+        private static final String SQL_INSERT_PERMISSIONS = "INSERT INTO " + DatabaseContract.Permission.TABLE_NAME
+                + " ("  + DatabaseContract.Permission.COLUMN_NAME  + ") "
+                + "VALUES ('" +
+                DatabaseContract.Permission.Values.ADD_ORDROID + "'),('" +
+                DatabaseContract.Permission.Values.RENAME_ORDROID + "'),('" +
+                DatabaseContract.Permission.Values.DELETE_ORDROID + "'),('" +
+                DatabaseContract.Permission.Values.ADD_SENSOR + "'),('" +
+                DatabaseContract.Permission.Values.RENAME_SENSOR + "'),('" +
+                DatabaseContract.Permission.Values.DELETE_SENSOR + "'),('" +
+                DatabaseContract.Permission.Values.REQUEST_WINDOW_STATUS + "'),('" +
+                DatabaseContract.Permission.Values.REQUEST_LAMP_STATUS + "'),('" +
+                DatabaseContract.Permission.Values.SWITCH_ON_LAMP + "'),('" +
+                DatabaseContract.Permission.Values.SWITCH_OFF_LAMP + "'),('" +
+                DatabaseContract.Permission.Values.REQUEST_DOOR_STATUS + "'),('" +
+                DatabaseContract.Permission.Values.LOCK_DOOR  + "'),('" +
+                DatabaseContract.Permission.Values.UNLATCH_DOOR + "'),('" +
+                DatabaseContract.Permission.Values.REQUEST_CAMERA_STATUS + "'),('" +
+                DatabaseContract.Permission.Values.TAKE_CAMERA_PICTURE + "'),('" +
+                DatabaseContract.Permission.Values.REQUEST_WEATHER_STATUS + "'),('" +
+                DatabaseContract.Permission.Values.START_HOLIDAY_SIMULATION + "'),('" +
+                DatabaseContract.Permission.Values.STOP_HOLIDAY_SIMULATION + "'),('" +
+                DatabaseContract.Permission.Values.ADD_USER + "'),('" +
+                DatabaseContract.Permission.Values.DELETE_USER  + "'),('" +
+                DatabaseContract.Permission.Values.CHANGE_USER_NAME + "'),('" +
+                DatabaseContract.Permission.Values.CHANGE_USER_GROUP + "'),('" +
+                DatabaseContract.Permission.Values.GRANT_USER_RIGHT + "'),('" +
+                DatabaseContract.Permission.Values.WITHDRAW_USER_RIGHT + "'),('" +
+                DatabaseContract.Permission.Values.ADD_GROUP  + "'),('" +
+                DatabaseContract.Permission.Values.DELETE_GROUP + "'),('" +
+                DatabaseContract.Permission.Values.CHANGE_GROUP_NAME + "'),('" +
+                DatabaseContract.Permission.Values.SHOW_GROUP_MEMBER + "'),('" +
+                DatabaseContract.Permission.Values.CHANGE_GROUP_TEMPLATE + "'),('" +
+                DatabaseContract.Permission.Values.CREATE_TEMPLATE + "'),('" +
+                DatabaseContract.Permission.Values.DELETE_TEMPLATE + "'),('" +
+                DatabaseContract.Permission.Values.EDIT_TEMPLATE + "'),('" +
+                DatabaseContract.Permission.Values.SHOW_TEMPLATE_PERMISSION + "');";
+
         private void execSQLScript(String script, SQLiteDatabase db) {
             String[] statements = script.split("\\;");
             for (String statement : statements) {
@@ -157,6 +194,7 @@ public class DatabaseConnector extends AbstractComponent {
         public void onCreate(SQLiteDatabase db) {
             Log.v(TAG, "creating Database");
             execSQLScript(SQL_CREATE_DB, db);
+            execSQLScript(SQL_INSERT_PERMISSIONS, db);
         }
 
         @Override

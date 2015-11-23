@@ -31,9 +31,14 @@ public class DatabaseConnectorTest extends InstrumentationTestCase {
         c.moveToFirst();
         assertEquals(c.getString(c.getColumnIndex("name")), "bob");
 
-        db.executeSql("delete from UserDevice where _ID = ?;", new String[]{ "1001" });
+        db.executeSql("delete from UserDevice where _ID = ?;", new String[]{"1001"});
         c = db.executeSql("select * from UserDevice where _ID = 1001;", null);
         assertTrue(c.getCount() == 0);
+
+        c = db.executeSql("Select " + DatabaseContract.Permission.COLUMN_NAME + " from " + DatabaseContract.Permission.TABLE_NAME, null);
+        while (c.moveToNext()) {
+            c.getString(c.getColumnIndex(DatabaseContract.Permission.COLUMN_NAME));
+        }
 
     }
 }
