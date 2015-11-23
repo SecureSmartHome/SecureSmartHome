@@ -52,13 +52,13 @@ public class HolidayController extends AbstractComponent {
         Cursor holidayEntriesCursor = databaseConnector.executeSql("select "
                 + DatabaseContract.HolidayLog.COLUMN_ACTION
                 + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
-                + " from " + DatabaseContract.HolidayLog.TABLE_NAME, new String[] {});
+                + " from " + DatabaseContract.HolidayLog.TABLE_NAME
+                + " where " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
+                + " >= ? and " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " <= ?",
+                    new String[] { String.valueOf(from.getTime()), String.valueOf(to.getTime()) });
         List<String> actions = new LinkedList<>();
         while (holidayEntriesCursor.moveToNext()) {
-            Long timestamp = holidayEntriesCursor.getLong(1);
-            if (timestamp >= from.getTime() && timestamp <= to.getTime()) {
-                actions.add(holidayEntriesCursor.getString(0));
-            }
+            actions.add(holidayEntriesCursor.getString(0));
         }
         return actions;
     }
