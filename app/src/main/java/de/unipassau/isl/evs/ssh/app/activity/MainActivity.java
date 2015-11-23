@@ -26,7 +26,6 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         //Set the fragment initially
         MainFragment fragment = new MainFragment();
         android.support.v4.app.FragmentTransaction fragmentTransaction =
