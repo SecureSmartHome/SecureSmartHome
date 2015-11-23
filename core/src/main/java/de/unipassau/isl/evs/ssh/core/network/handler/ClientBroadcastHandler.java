@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.core.network.handler;
 
 import java.util.List;
 
+import de.unipassau.isl.evs.ssh.core.network.Client;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.codec.MessageToMessageDecoder;
@@ -17,15 +18,20 @@ public class ClientBroadcastHandler extends MessageToMessageDecoder<DatagramPack
      * SharedPreferences editor to edit the key-value sets.
      */
 //    SharedPreferences.Editor editor = prefs.edit();
+
+    private final Client client;
+
+    public ClientBroadcastHandler(Client client) {
+        this.client = client;
+    }
+
     @Override
     protected void decode(ChannelHandlerContext ctx, DatagramPacket msg, List<Object> out) throws Exception {
-        if ("RESPONSE".equals(msg.content().toString(CharsetUtil.UTF_8))) {
-//            TODO get context for sharedpreferences
-//            set TIMEOUTS_IN_A_ROW to 0.
-//            set PREF_HOST to address.
-//            String address = msg.sender().getAddress().toString();
-
+        String messageData = msg.content().toString(CharsetUtil.UTF_8);
+        if (messageData.startsWith("RESPONSE")) {
+            String address = msg.sender().getAddress().toString();
+            int port = Integer.parseInt(messageData.substring(0, 8));
+            client.receivedUDPResponse(address, port);
         }//else discard message
-        ctx.close();
     }
 }

@@ -53,8 +53,4 @@ public class CoreConstants {
      * The maximum number of seconds the broadcast waits to be sent again.
      */
     public static final int MAX_SECONDS_BETWEEN_BROADCAST = 10;
-    /**
-     * Number of how many timeouts occurred in a row.
-     */
-    public static final String TIMEOUTS_IN_A_ROW = "ssh.core.TIMEOUTS_IN_A_ROW";
 }
