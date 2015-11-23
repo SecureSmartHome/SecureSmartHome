@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
-import de.unipassau.isl.evs.ssh.core.handler.Handler;
+import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 
 /**
@@ -12,10 +13,20 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  * and from there sent on to the target handler, which eventually,
  * will result in a reset of the whole system.
  */
-public class MasterButtonHandler implements Handler {
+public class MasterButtonHandler implements MessageHandler {
+
     @Override
-    public void handle(Message message) {
-        //TODO implement
-        throw new UnsupportedOperationException();
+    public void handle(Message.AddressedMessage message) {
+
+    }
+
+    @Override
+    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
+
+    }
+
+    @Override
+    public void handlerRemoved(String routingKey) {
+
     }
 }

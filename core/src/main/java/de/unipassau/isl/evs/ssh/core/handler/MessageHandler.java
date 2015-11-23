@@ -7,13 +7,18 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  * In case the executed actions result in the need of notifying another system component,
  * a new message is generated and passed on to the OutgoingRouter.
  */
-public interface Handler {
+public interface MessageHandler {
 
     /**
      * Will perform actions based on the message given, e.g. permission/sanity checks.
      *
      * @param message Message to handle.
      */
-    void handle(Message message);
+    void handle(Message.AddressedMessage message);
 
+    void handlerAdded(de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher dispatcher, String routingKey);
+
+
+    void handlerRemoved(String routingKey);
 }
+
