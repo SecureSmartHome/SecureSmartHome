@@ -9,11 +9,15 @@ import android.util.Log;
 
 import de.ncoder.typedmap.Key;
 import de.ncoder.typedmap.TypedMap;
+import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 
+/**
+ * An Android {@link Service} that manages a {@link SimpleContainer} and its {@link Component}s.
+ * Android Activity can bind to this Service and communicate with the {@link Container}.
+ */
 public class ContainerService extends Service implements Container {
-    public static final String TAG = ContainerService.class.getSimpleName();
-
     public static final Key<ContextComponent> KEY_CONTEXT = new Key<>(ContextComponent.class, "ContainerContext");
+    private static final String TAG = ContainerService.class.getSimpleName();
     private final Container container = new SimpleContainer();
     private final Binder theBinder = new Binder();
 
@@ -21,7 +25,8 @@ public class ContainerService extends Service implements Container {
     public void onCreate() {
         Log.v(TAG, "onCreate:called");
         super.onCreate();
-        container.register(KEY_CONTEXT, new ContextComponent(this));
+        container.register(KEY_CONTEXT, new ContextComponent(this, getStartIntent()));
+        container.register(Scheduler.KEY, new Scheduler());
         init();
         Log.d(TAG, "onCreate:finished");
     }
@@ -40,6 +45,15 @@ public class ContainerService extends Service implements Container {
     @Override
     public IBinder onBind(Intent intent) {
         return theBinder;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Scheduler scheduler = get(Scheduler.KEY);
+        if (scheduler != null) {
+            scheduler.forwardIntent(intent);
+        }
+        return super.onStartCommand(intent, flags, startId);
     }
 
     public Container getContainer() {
@@ -86,9 +100,26 @@ public class ContainerService extends Service implements Container {
         container.shutdown();
     }
 
+    /**
+     * @return an Intent that can be used to address (e.g. start or bind) this ContainerService
+     */
+    public Intent getStartIntent() {
+        return new Intent(this, getClass());
+    }
+
+    /**
+     * A Component that holds a to the {@link Context} of the ContainerService that manages the Container.
+     */
     public static class ContextComponent extends ContextWrapper implements Component {
+        private final Intent intent;
+
         public ContextComponent(Context base) {
+            this(base, null);
+        }
+
+        public ContextComponent(Context base, Intent intent) {
             super(base);
+            this.intent = intent;
         }
 
         @Override
@@ -104,6 +135,14 @@ public class ContainerService extends Service implements Container {
         @Override
         public String toString() {
             return getClass().getSimpleName();
+        }
+
+        public Intent getStartIntent() {
+            if (intent == null) {
+                return null;
+            } else {
+                return new Intent(intent);
+            }
         }
     }
 
@@ -141,6 +180,10 @@ public class ContainerService extends Service implements Container {
 
         public TypedMap<? extends Component> getData() {
             return container.getData();
+        }
+
+        public Intent getStartIntent() {
+            return ContainerService.this.getStartIntent();
         }
     }
 }
