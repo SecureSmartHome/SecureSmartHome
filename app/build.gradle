@@ -16,4 +16,6 @@ dependencies {
     compile project(':core')
 
     compile 'com.android.support:design:22.2.1'
+    compile 'de.hdodenhof:circleimageview:1.2.1'
+
 }

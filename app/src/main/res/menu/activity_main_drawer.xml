@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- TODO add icons android:icon="@android:drawable/ic_"-->
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/nav_home" android:title="@string/nav_home_string"/>
+        <item android:id="@+id/nav_door" android:title="@string/nav_door_string"/>
+        <item android:id="@+id/nav_light" android:title="@string/nav_light_string"/>
+        <item android:id="@+id/nav_climate" android:title="@string/nav_climate_string"/>
+        <item android:id="@+id/nav_holiday" android:title="@string/nav_holiday_string"/>
+        <item android:id="@+id/nav_status" android:title="@string/nav_status_string"/>
+    </group>
+
+    <item android:title="Edit">
+        <menu>
+            <item android:id="@+id/nav_modifyPermissions" android:title="@string/nav_modifyPermissions_string"/>
+            <item android:id="@+id/nav_addNewUserDevice" android:title="@string/nav_addNewUserDevice_sting"/>
+            <item android:id="@+id/nav_addModul" android:title="@string/nav_addModul_string"/>
+        </menu>
+    </item>
+</menu>

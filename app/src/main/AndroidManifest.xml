@@ -16,18 +16,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".activity.AddModulActivity" />
-        <activity android:name=".activity.AddNewUserDeviceActivity" />
-        <activity android:name=".activity.AppRegisterUserDeviceActivity" />
-        <activity android:name=".activity.ClimateActivity" />
-        <activity android:name=".activity.DoorActivity" />
-        <activity android:name=".activity.HolidayActivity" />
-        <activity android:name=".activity.LightActivity" />
-        <activity android:name=".activity.ModifyPermissionActivity" />
+        <!-- Überflüssig?
+        <activity android:name=".activity.AddModulFragment" />
+        <activity android:name=".activity.AddNewUserDeviceFragment" />
+        <activity android:name=".activity.AppRegisterUserDeviceFragment" />
+        <activity android:name=".activity.ClimateFragment" />
+        <activity android:name=".activity.DoorFragment" />
+        <activity android:name=".activity.HolidayFragment" />
+        <activity android:name=".activity.ModifyPermissionFragment" />
         <activity android:name=".activity.OperateDoorFragment" />
-        <activity android:name=".activity.StatusActivity" />
-
+        <activity android:name=".activity.StatusFragment" />
+        -->
         <service android:name=".AppContainer" />
     </application>
 

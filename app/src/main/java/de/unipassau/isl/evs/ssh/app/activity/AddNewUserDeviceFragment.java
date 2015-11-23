@@ -12,18 +12,18 @@ import de.unipassau.isl.evs.ssh.core.handler.Handler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 
 /**
- * This fragment is used by the door activity and allows to open or lock the door.
- * If this functionality is used a message, containing all needed information,
- * is generated and passed to the OutgoingRouter.
+ * This activity allows to enter information describing new user devices and provide a QR-Code
+ * which a given user device has to scan. If this functionality is used a message,
+ * containing all needed information, is generated and passed to the OutgoingRouter.
  */
-public class OperateDoorFragment extends Fragment implements Handler {
+public class AddNewUserDeviceFragment extends Fragment implements Handler {
     @Override
     public void handle(Message message) {
         //TODO implement
         throw new UnsupportedOperationException();
     }
 
-    public OperateDoorFragment() {
+    public AddNewUserDeviceFragment() {
         // Required empty public constructor
     }
 
