@@ -19,6 +19,8 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.StartupException;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.network.handler.ClientBroadcastHandler;
+
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
@@ -63,12 +65,10 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
 public class Client extends AbstractComponent {
     public static final Key<Client> KEY = new Key<>(Client.class);
     private static final String TAG = Client.class.getSimpleName();
-    private Context context;
-
-    public Client(Context context) {
-        this.context = context;
-    }
-
+    /**
+     * Receives messages from system components and decides how to route them to the targets.
+     */
+    private final ClientOutgoingRouter outgoingRouter = new ClientOutgoingRouter();
     /**
      * The EventLoopGroup used for accepting connections
      */
@@ -84,34 +84,25 @@ public class Client extends AbstractComponent {
      */
     private ChannelFuture udpChannel;
     /**
-     * The ObjectEncoder shared by all pipelines used for serializing all sent {@link de.unipassau.isl.evs.ssh.core.messaging.Message}s
-     */
-    private ObjectEncoder sharedObjectEncoder = new ObjectEncoder();
-    /**
-     * The ObjectDecoder shared by all pipelines used for deserializing all sent {@link de.unipassau.isl.evs.ssh.core.messaging.Message}s
-     */
-    private ObjectDecoder sharedObjectDecoder = new ObjectDecoder(
-            ClassResolvers.weakCachingConcurrentResolver(ClassLoader.getSystemClassLoader()));
-    /**
      * Distributes incoming messages to the responsible handlers.
      */
     private ClientIncomingDispatcher incomingDispatcher = new ClientIncomingDispatcher(this);
     /**
      * SharedPreferences to load, save and edit key-value sets.
      */
-    SharedPreferences prefs;
+    private SharedPreferences prefs;
     /**
      * SharedPreferences editor to edit the key-value sets.
      */
-    SharedPreferences.Editor editor;
+    private SharedPreferences.Editor editor;
     /**
      * TODO javadoc
      */
-    WifiManager wifi;
+    private WifiManager wifi;
     /**
      * TODO javadoc
      */
-    WifiManager.MulticastLock multicastLock;
+    private WifiManager.MulticastLock multicastLock;
     /**
      * Boolean if the client connection is active.
      */
@@ -123,7 +114,13 @@ public class Client extends AbstractComponent {
     /**
      * Int that saves how many timeouts happened in a row.
      */
-    int timeoutsInARow = DEFAULT_TIMEOUTS;
+    private int timeoutsInARow = DEFAULT_TIMEOUTS;
+
+    private Context context;
+
+    public Client(Context context) {
+        this.context = context;
+    }
 
     /**
      * Init timeouts and the connection registry.
@@ -135,6 +132,7 @@ public class Client extends AbstractComponent {
         try {
             startClient();
             container.register(IncomingDispatcher.KEY, incomingDispatcher);
+            container.register(OutgoingRouter.KEY, outgoingRouter);
             isActive = true;
         } catch (InterruptedException e) {
             throw new StartupException("Could not start netty client", e);
@@ -262,8 +260,9 @@ public class Client extends AbstractComponent {
     protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
         //TODO add remaining necessary handlers, when they are implemented
         //Handler (de-)serialization
-        ch.pipeline().addLast(sharedObjectEncoder.getClass().getSimpleName(), sharedObjectEncoder);
-        ch.pipeline().addLast(sharedObjectDecoder.getClass().getSimpleName(), sharedObjectDecoder);
+        ch.pipeline().addLast(ObjectEncoder.class.getSimpleName(), new ObjectEncoder());
+        ch.pipeline().addLast(ObjectDecoder.class.getSimpleName(), new ObjectDecoder(
+                ClassResolvers.weakCachingConcurrentResolver(getClass().getClassLoader())));
         ch.pipeline().addLast(LoggingHandler.class.getSimpleName(), new LoggingHandler(LogLevel.TRACE));
         //Timeout Handler
         ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
@@ -295,6 +294,7 @@ public class Client extends AbstractComponent {
             clientExecutor.shutdownGracefully(1, 5, TimeUnit.SECONDS);
         }
         getContainer().unregister(incomingDispatcher);
+        getContainer().unregister(outgoingRouter);
         super.destroy();
     }
 

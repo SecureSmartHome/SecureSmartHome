@@ -14,6 +14,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.StartupException;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.network.ClientIncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.network.handler.ServerBroadcastHandler;
@@ -55,6 +56,18 @@ public class Server extends AbstractComponent {
     public static final Key<Server> KEY = new Key<>(Server.class);
     private static final String TAG = Server.class.getSimpleName();
     /**
+     * The ObjectEncoder shared by all pipelines used for serializing all sent {@link de.unipassau.isl.evs.ssh.core.messaging.Message}s
+     */
+    private final ObjectEncoder sharedObjectEncoder = new ObjectEncoder();
+    /**
+     * Distributes incoming messages to the responsible handlers.
+     */
+    private final ServerIncomingDispatcher incomingDispatcher = new ServerIncomingDispatcher(this);
+    /**
+     * Receives messages from system components and decides how to route them to the targets.
+     */
+    private final ServerOutgoingRouter outgoingRouter = new ServerOutgoingRouter();
+    /**
      * The EventLoopGroup used for accepting connections
      */
     private EventLoopGroup serverExecutor;
@@ -63,26 +76,11 @@ public class Server extends AbstractComponent {
      * Use {@link ChannelFuture#sync()} to wait for server startup.
      */
     private ChannelFuture serverChannel;
-
     /**
      * A ChannelGroup containing really <i>all</i> incoming connections.
      * If it isn't contained here, it is not connected to the Server.
      */
     private ChannelGroup connections;
-
-    /**
-     * The ObjectEncoder shared by all pipelines used for serializing all sent {@link de.unipassau.isl.evs.ssh.core.messaging.Message}s
-     */
-    private ObjectEncoder sharedObjectEncoder = new ObjectEncoder();
-    /**
-     * The ObjectDecoder shared by all pipelines used for deserializing all sent {@link de.unipassau.isl.evs.ssh.core.messaging.Message}s
-     */
-    private ObjectDecoder sharedObjectDecoder = new ObjectDecoder(
-            ClassResolvers.weakCachingConcurrentResolver(ClassLoader.getSystemClassLoader()));
-    /**
-     * Distributes incoming messages to the responsible handlers.
-     */
-    private ServerIncomingDispatcher incomingDispatcher = new ServerIncomingDispatcher(this);
 
     /**
      * Init timeouts and the connection registry and start the netty IO server synchronously
@@ -94,6 +92,7 @@ public class Server extends AbstractComponent {
             //TODO require device registry
             startServer();
             container.register(IncomingDispatcher.KEY, incomingDispatcher);
+            container.register(OutgoingRouter.KEY, outgoingRouter);
         } catch (InterruptedException e) {
             throw new StartupException("Could not start netty server", e);
         }
@@ -152,7 +151,8 @@ public class Server extends AbstractComponent {
         //TODO setup pipeline
         //Handler (de-)serialization
         ch.pipeline().addLast(sharedObjectEncoder.getClass().getSimpleName(), sharedObjectEncoder);
-        ch.pipeline().addLast(sharedObjectDecoder.getClass().getSimpleName(), sharedObjectDecoder);
+        ch.pipeline().addLast(ObjectDecoder.class.getSimpleName(), new ObjectDecoder(
+                ClassResolvers.weakCachingConcurrentResolver(getClass().getClassLoader())));
         ch.pipeline().addLast(LoggingHandler.class.getSimpleName(), new LoggingHandler(LogLevel.TRACE));
         //Timeout Handler
         ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
@@ -177,6 +177,7 @@ public class Server extends AbstractComponent {
             serverExecutor.shutdownGracefully(1, 5, TimeUnit.SECONDS); //TODO config grace duration
         }
         getContainer().unregister(incomingDispatcher);
+        getContainer().unregister(outgoingRouter);
         super.destroy();
     }
 
