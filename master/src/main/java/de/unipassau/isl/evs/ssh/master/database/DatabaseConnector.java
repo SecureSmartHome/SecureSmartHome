@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.master.database;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -73,7 +74,10 @@ public class DatabaseConnector extends AbstractComponent {
 
                 + "CREATE TABLE " + DatabaseContract.Permission.TABLE_NAME + " ("
                 + DatabaseContract.Permission.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
-                + DatabaseContract.Permission.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE"
+                + DatabaseContract.Permission.COLUMN_NAME + " VARCHAR NOT NULL,"
+                + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " INTEGER NOT NULL,"
+                + "UNIQUE(" + DatabaseContract.Permission.COLUMN_NAME + ", " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + "),"
+                + "FOREIGN KEY(" + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + ") REFERENCES " + DatabaseContract.ElectronicModule.TABLE_NAME + "(" + DatabaseContract.ElectronicModule.COLUMN_ID + ") ON DELETE CASCADE"
                 + ");"
 
                 + "CREATE TABLE " + DatabaseContract.HasPermission.TABLE_NAME + " ("
@@ -82,12 +86,6 @@ public class DatabaseConnector extends AbstractComponent {
                 + "PRIMARY KEY (" + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID + ", " + DatabaseContract.HasPermission.COLUMN_USER_ID + "),"
                 + "FOREIGN KEY(" + DatabaseContract.HasPermission.COLUMN_USER_ID + ") REFERENCES " + DatabaseContract.UserDevice.TABLE_NAME + "(" + DatabaseContract.UserDevice.COLUMN_ID + ") ON DELETE CASCADE,"
                 + "FOREIGN KEY(" + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID + ") REFERENCES " + DatabaseContract.Permission.TABLE_NAME + "(" + DatabaseContract.Permission.COLUMN_ID + ") ON DELETE CASCADE"
-                + ");"
-
-                + "CREATE TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + " ("
-                + DatabaseContract.HolidayLog.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
-                + DatabaseContract.HolidayLog.COLUMN_ACTION + " VARCHAR NOT NULL,"
-                + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " INTEGER NOT NULL"
                 + ");"
 
                 + "CREATE TABLE " + DatabaseContract.Group.TABLE_NAME + " ("
@@ -112,7 +110,7 @@ public class DatabaseConnector extends AbstractComponent {
 
                 + "CREATE TABLE " + DatabaseContract.ElectronicModule.TABLE_NAME + " ("
                 + DatabaseContract.ElectronicModule.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
-                + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + " INTEGER NOT NULL,"
+                + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + " INTEGER,"
                 + DatabaseContract.ElectronicModule.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
                 + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN + " INTEGER,"
                 + DatabaseContract.ElectronicModule.COLUMN_USB_PORT + " INTEGER,"
@@ -120,7 +118,11 @@ public class DatabaseConnector extends AbstractComponent {
                 + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME + " VARCHAR,"
                 + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD + " VARCHAR,"
                 + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP + " VARCHAR,"
-                + DatabaseContract.ElectronicModule.COLUMN_TYPE + " VARCHAR CHECK(" + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'GPIO' or " + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'USB' or " + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'WLAN'),"
+                + DatabaseContract.ElectronicModule.COLUMN_TYPE + " VARCHAR CHECK("
+                + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'GPIO' or "
+                + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'USB' or "
+                + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'DUMMY' or "
+                + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'WLAN'),"
                 + "FOREIGN KEY(" + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + ") REFERENCES " + DatabaseContract.Slave.TABLE_NAME + "(" + DatabaseContract.Slave.COLUMN_ID + ")"
                 + ");"
 
@@ -128,8 +130,13 @@ public class DatabaseConnector extends AbstractComponent {
                 + DatabaseContract.Slave.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.Slave.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
                 + DatabaseContract.Slave.COLUMN_FINGERPRINT + " VARCHAR NOT NULL UNIQUE"
-                + ");";
+                + ");"
 
+                + "CREATE TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + " ("
+                + DatabaseContract.HolidayLog.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
+                + DatabaseContract.HolidayLog.COLUMN_ACTION + " VARCHAR NOT NULL,"
+                + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " INTEGER NOT NULL"
+                + ");";
 
         private static final String SQL_DROP_TABLES = "DROP TABLE " + DatabaseContract.UserDevice.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.Permission.TABLE_NAME + ";"
@@ -141,42 +148,41 @@ public class DatabaseConnector extends AbstractComponent {
                 + "DROP TABLE " + DatabaseContract.ElectronicModule.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.Slave.TABLE_NAME + ";";
 
-        private static final String SQL_INSERT_PERMISSIONS = "INSERT INTO " + DatabaseContract.Permission.TABLE_NAME
-                + " ("  + DatabaseContract.Permission.COLUMN_NAME  + ") "
-                + "VALUES ('" +
-                DatabaseContract.Permission.Values.ADD_ORDROID + "'),('" +
-                DatabaseContract.Permission.Values.RENAME_ORDROID + "'),('" +
-                DatabaseContract.Permission.Values.DELETE_ORDROID + "'),('" +
-                DatabaseContract.Permission.Values.ADD_SENSOR + "'),('" +
-                DatabaseContract.Permission.Values.RENAME_SENSOR + "'),('" +
-                DatabaseContract.Permission.Values.DELETE_SENSOR + "'),('" +
-                DatabaseContract.Permission.Values.REQUEST_WINDOW_STATUS + "'),('" +
-                DatabaseContract.Permission.Values.REQUEST_LAMP_STATUS + "'),('" +
-                DatabaseContract.Permission.Values.SWITCH_ON_LAMP + "'),('" +
-                DatabaseContract.Permission.Values.SWITCH_OFF_LAMP + "'),('" +
-                DatabaseContract.Permission.Values.REQUEST_DOOR_STATUS + "'),('" +
-                DatabaseContract.Permission.Values.LOCK_DOOR  + "'),('" +
-                DatabaseContract.Permission.Values.UNLATCH_DOOR + "'),('" +
-                DatabaseContract.Permission.Values.REQUEST_CAMERA_STATUS + "'),('" +
-                DatabaseContract.Permission.Values.TAKE_CAMERA_PICTURE + "'),('" +
-                DatabaseContract.Permission.Values.REQUEST_WEATHER_STATUS + "'),('" +
-                DatabaseContract.Permission.Values.START_HOLIDAY_SIMULATION + "'),('" +
-                DatabaseContract.Permission.Values.STOP_HOLIDAY_SIMULATION + "'),('" +
-                DatabaseContract.Permission.Values.ADD_USER + "'),('" +
-                DatabaseContract.Permission.Values.DELETE_USER  + "'),('" +
-                DatabaseContract.Permission.Values.CHANGE_USER_NAME + "'),('" +
-                DatabaseContract.Permission.Values.CHANGE_USER_GROUP + "'),('" +
-                DatabaseContract.Permission.Values.GRANT_USER_RIGHT + "'),('" +
-                DatabaseContract.Permission.Values.WITHDRAW_USER_RIGHT + "'),('" +
-                DatabaseContract.Permission.Values.ADD_GROUP  + "'),('" +
-                DatabaseContract.Permission.Values.DELETE_GROUP + "'),('" +
-                DatabaseContract.Permission.Values.CHANGE_GROUP_NAME + "'),('" +
-                DatabaseContract.Permission.Values.SHOW_GROUP_MEMBER + "'),('" +
-                DatabaseContract.Permission.Values.CHANGE_GROUP_TEMPLATE + "'),('" +
-                DatabaseContract.Permission.Values.CREATE_TEMPLATE + "'),('" +
-                DatabaseContract.Permission.Values.DELETE_TEMPLATE + "'),('" +
-                DatabaseContract.Permission.Values.EDIT_TEMPLATE + "'),('" +
-                DatabaseContract.Permission.Values.SHOW_TEMPLATE_PERMISSION + "');";
+        private void insertPermissions(SQLiteDatabase db, long defaultModuleId) {
+            String[] binaryPermissions = new String[]{
+                    DatabaseContract.Permission.Values.ADD_ORDROID,
+                    DatabaseContract.Permission.Values.RENAME_ORDROID,
+                    DatabaseContract.Permission.Values.DELETE_ORDROID,
+                    DatabaseContract.Permission.Values.ADD_SENSOR,
+                    DatabaseContract.Permission.Values.RENAME_SENSOR,
+                    DatabaseContract.Permission.Values.DELETE_SENSOR,
+                    DatabaseContract.Permission.Values.START_HOLIDAY_SIMULATION,
+                    DatabaseContract.Permission.Values.STOP_HOLIDAY_SIMULATION,
+                    DatabaseContract.Permission.Values.ADD_USER,
+                    DatabaseContract.Permission.Values.DELETE_USER,
+                    DatabaseContract.Permission.Values.CHANGE_USER_NAME,
+                    DatabaseContract.Permission.Values.CHANGE_USER_GROUP,
+                    DatabaseContract.Permission.Values.GRANT_USER_RIGHT,
+                    DatabaseContract.Permission.Values.WITHDRAW_USER_RIGHT,
+                    DatabaseContract.Permission.Values.ADD_GROUP,
+                    DatabaseContract.Permission.Values.DELETE_GROUP,
+                    DatabaseContract.Permission.Values.CHANGE_GROUP_NAME,
+                    DatabaseContract.Permission.Values.SHOW_GROUP_MEMBER,
+                    DatabaseContract.Permission.Values.CHANGE_GROUP_TEMPLATE,
+                    DatabaseContract.Permission.Values.CREATE_TEMPLATE,
+                    DatabaseContract.Permission.Values.DELETE_TEMPLATE,
+                    DatabaseContract.Permission.Values.EDIT_TEMPLATE,
+                    DatabaseContract.Permission.Values.SHOW_TEMPLATE_PERMISSION
+            };
+
+            for (String permission : binaryPermissions) {
+                ContentValues values = new ContentValues(2);
+                values.put(DatabaseContract.Permission.COLUMN_NAME, permission);
+                values.put(DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID, defaultModuleId);
+                db.insert(DatabaseContract.Permission.TABLE_NAME, null, values);
+            }
+        }
+
 
         private void execSQLScript(String script, SQLiteDatabase db) {
             String[] statements = script.split("\\;");
@@ -194,7 +200,12 @@ public class DatabaseConnector extends AbstractComponent {
         public void onCreate(SQLiteDatabase db) {
             Log.v(TAG, "creating Database");
             execSQLScript(SQL_CREATE_DB, db);
-            execSQLScript(SQL_INSERT_PERMISSIONS, db);
+            ContentValues values = new ContentValues(2);
+            values.put(DatabaseContract.ElectronicModule.COLUMN_NAME, DatabaseContract.ElectronicModule.Values.DEFAULT_NAME);
+            values.put(DatabaseContract.ElectronicModule.COLUMN_TYPE, "DUMMY");
+            long id = db.insert(DatabaseContract.ElectronicModule.TABLE_NAME, null, values);
+            insertPermissions(db, id);
+
         }
 
         @Override

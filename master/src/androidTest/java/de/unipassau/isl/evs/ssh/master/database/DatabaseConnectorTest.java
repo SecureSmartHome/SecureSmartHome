@@ -39,6 +39,9 @@ public class DatabaseConnectorTest extends InstrumentationTestCase {
         while (c.moveToNext()) {
             c.getString(c.getColumnIndex(DatabaseContract.Permission.COLUMN_NAME));
         }
+        c = db.executeSql("Select " + DatabaseContract.Permission.COLUMN_NAME + " from " + DatabaseContract.Permission.TABLE_NAME + " where _ID = 1", null);
+        c.moveToFirst();
+        assertEquals(DatabaseContract.Permission.Values.ADD_ORDROID, c.getString(c.getColumnIndex(DatabaseContract.Permission.COLUMN_NAME)));
 
     }
 }
