@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#FF3D00</color>
-    <color name="colorPrimaryDark">#E64A19</color>
-    <color name="colorPrimaryLight">#FF6E40</color>
-    <color name="colorBackground">#ECEFF1</color>
-    <color name="colorAccent">#1E88E5</color>
-    <color name="colorControlHighlight">#FF6D00</color>
+    <color name="colorPrimary">#2979FF</color>
+    <color name="colorPrimaryDark">#cf2979ff</color>
+    <color name="colorPrimaryLight">#448AFF</color>
+    <color name="colorBackground">#82B1FF</color>
+    <color name="colorAccent">#FF6D00</color>
+    <color name="colorControlHighlight">#90CAF9</color>
 
     <color name="colorPrimaryText">#FFFFFF</color>
     <color name="colorSecondaryText">#000000</color>
 
-    <color name="colorToolbar">#E64A19</color>
+    <color name="colorToolbar">#1E88E5</color>
 
-    <color name="colorNavigationDrawerBackground">#F4511E</color>
+    <color name="colorNavigationDrawerBackground">#1c78c9</color>
 
     <color name="colorIcons">#FFFFFF</color>
     <color name="colorWhite">#FFFFFF</color>

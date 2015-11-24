@@ -6,18 +6,42 @@
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_home_light"
             android:title="@string/nav_home"/>
-        <item android:id="@+id/nav_door" android:icon="@drawable/ic_door_light" android:title="@string/nav_door_string"/>
-        <item android:id="@+id/nav_light" android:icon="@drawable/ic_light_light" android:title="@string/nav_light_string"/>
-        <item android:id="@+id/nav_climate" android:icon="@drawable/ic_weather_light" android:title="@string/nav_climate_string"/>
-        <item android:id="@+id/nav_holiday" android:icon="@drawable/ic_holiday_light" android:title="@string/nav_holiday_string"/>
-        <item android:id="@+id/nav_status" android:icon="@drawable/ic_status_light" android:title="@string/nav_status_string"/>
+        <item
+            android:id="@+id/nav_door"
+            android:icon="@drawable/ic_door_light"
+            android:title="@string/nav_door_string"/>
+        <item
+            android:id="@+id/nav_light"
+            android:icon="@drawable/ic_light_light"
+            android:title="@string/nav_light_string"/>
+        <item
+            android:id="@+id/nav_climate"
+            android:icon="@drawable/ic_weather_light"
+            android:title="@string/nav_climate_string"/>
+        <item
+            android:id="@+id/nav_holiday"
+            android:icon="@drawable/ic_holiday_light"
+            android:title="@string/nav_holiday_string"/>
+        <item
+            android:id="@+id/nav_status"
+            android:icon="@drawable/ic_status_light"
+            android:title="@string/nav_status_string"/>
     </group>
 
     <item android:title="@string/nav_edit">
         <menu>
-            <item android:id="@+id/nav_modifyPermissions" android:icon="@drawable/ic_modifypermissions_light" android:title="@string/nav_modifyPermissions_string"/>
-            <item android:id="@+id/nav_addNewUserDevice" android:icon="@drawable/ic_addnewuser_light" android:title="@string/nav_addNewUserDevice_sting"/>
-            <item android:id="@+id/nav_addModul" android:icon="@drawable/ic_addmodul_light" android:title="@string/nav_addModul_string"/>
+            <item
+                android:id="@+id/nav_modifyPermissions"
+                android:icon="@drawable/ic_modifypermissions_light"
+                android:title="@string/nav_modifyPermissions_string"/>
+            <item
+                android:id="@+id/nav_addNewUserDevice"
+                android:icon="@drawable/ic_addnewuser_light"
+                android:title="@string/nav_addNewUserDevice_sting"/>
+            <item
+                android:id="@+id/nav_addModul"
+                android:icon="@drawable/ic_addmodul_light"
+                android:title="@string/nav_addModul_string"/>
         </menu>
     </item>
 </menu>

@@ -2,12 +2,11 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize"
+    android:layout_height="110dp"
     android:background="@drawable/nav_drawer_background"
     android:elevation="16dp"
     android:orientation="vertical">
     <!--
-
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profile_image"
             xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -37,13 +36,13 @@
         android:id="@+id/nav_draw_ssh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14sp"
-        android:layout_marginBottom="14sp"
+        android:layout_marginTop="65sp"
+        android:layout_marginBottom="12sp"
         android:layout_marginStart="16dp"
         android:gravity="start"
         android:text="@string/secure_smart_home"
         android:textColor="@color/colorPrimaryText"
-        android:textSize="24sp"
+        android:textSize="30sp"
         android:textStyle="bold"/>
 
 </RelativeLayout>
