@@ -112,9 +112,6 @@ public class DatabaseContract {
         public static final String COLUMN_WLAN_PASSWORD = "wlanPassword";
         public static final String COLUMN_WLAN_IP = "wlanIP";
         public static final String COLUMN_TYPE = "type";
-        public class Values{
-            public static final String DEFAULT_NAME = "7e15adbf04854560dd970021df142f6f";
-        }
     }
 
     public class Slave {
