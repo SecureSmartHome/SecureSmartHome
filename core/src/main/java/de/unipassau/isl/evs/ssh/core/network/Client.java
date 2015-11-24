@@ -161,9 +161,6 @@ public class Client extends AbstractComponent {
         if (timeoutsInARow < MAX_NUMBER_OF_TIMEOUTS) {
             buildTCP();
             // TODO when implemented, start handshake
-            if (tcpChannel == null) {
-                throw new StartupException("Could not open client channel");
-            }
         } else {
             broadcastUDP();
         }
@@ -184,6 +181,9 @@ public class Client extends AbstractComponent {
 
         // Wait for the start of the client
         tcpChannel = b.connect(getHost(), getPort());
+        if (tcpChannel == null) {
+            throw new StartupException("Could not open client channel");
+        }
         tcpChannel.channel().closeFuture().addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
