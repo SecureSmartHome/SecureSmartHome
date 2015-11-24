@@ -16,7 +16,7 @@ public class SlaveContainer extends ContainerService {
                 .commit();
 
         register(KeyStoreController.KEY, new KeyStoreController());
-        register(NamingManager.KEY, new NamingManager(true));
+        register(NamingManager.KEY, new NamingManager(false));
         register(Client.KEY, new Client());
     }
 }

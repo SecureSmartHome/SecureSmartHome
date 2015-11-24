@@ -8,6 +8,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import io.netty.channel.ChannelFuture;
 
 /**
@@ -37,10 +38,5 @@ public class ClientOutgoingRouter extends OutgoingRouter {
             Log.w(TAG, "sendMessage failed", e);
             return requireComponent(Client.KEY).getChannel().newFailedFuture(e);
         }
-    }
-
-    private DeviceID getMasterID() {
-        //require("KeyStoreManager").getLocalID(); //TODO
-        return null;
     }
 }
