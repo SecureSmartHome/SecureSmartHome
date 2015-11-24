@@ -14,9 +14,11 @@ public class DatabaseContract {
     }
 
     public class Permission {
+        public static final String ALL_PERMISSIONS_MODULE_NAME = "7e15adbf04854560dd970021df142f6f";
         public static final String TABLE_NAME = "Permission";
         public static final String COLUMN_ID = "_ID";
         public static final String COLUMN_NAME = "name";
+        public static final String COLUMN_ELECTRONIC_MODULE_ID = "electronicModuleId";
 
         //Does not describe a table but constants for the PermissionTable entries
         public class Values {
