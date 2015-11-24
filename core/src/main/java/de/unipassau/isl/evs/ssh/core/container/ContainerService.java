@@ -50,7 +50,7 @@ public class ContainerService extends Service implements Container {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Scheduler scheduler = get(Scheduler.KEY);
-        if (scheduler != null) {
+        if (scheduler != null && intent != null) {
             scheduler.forwardIntent(intent);
         }
         return super.onStartCommand(intent, flags, startId);
