@@ -75,7 +75,7 @@ public class DatabaseConnector extends AbstractComponent {
                 + "CREATE TABLE " + DatabaseContract.Permission.TABLE_NAME + " ("
                 + DatabaseContract.Permission.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.Permission.COLUMN_NAME + " VARCHAR NOT NULL,"
-                + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " INTEGER NOT NULL,"
+                + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " INTEGER,"
                 + "UNIQUE(" + DatabaseContract.Permission.COLUMN_NAME + ", " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + "),"
                 + "FOREIGN KEY(" + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + ") REFERENCES " + DatabaseContract.ElectronicModule.TABLE_NAME + "(" + DatabaseContract.ElectronicModule.COLUMN_ID + ") ON DELETE CASCADE"
                 + ");"
@@ -110,7 +110,7 @@ public class DatabaseConnector extends AbstractComponent {
 
                 + "CREATE TABLE " + DatabaseContract.ElectronicModule.TABLE_NAME + " ("
                 + DatabaseContract.ElectronicModule.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
-                + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + " INTEGER,"
+                + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + " INTEGER NOT NULL,"
                 + DatabaseContract.ElectronicModule.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
                 + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN + " INTEGER,"
                 + DatabaseContract.ElectronicModule.COLUMN_USB_PORT + " INTEGER,"
@@ -121,7 +121,6 @@ public class DatabaseConnector extends AbstractComponent {
                 + DatabaseContract.ElectronicModule.COLUMN_TYPE + " VARCHAR CHECK("
                 + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'GPIO' or "
                 + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'USB' or "
-                + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'DUMMY' or "
                 + DatabaseContract.ElectronicModule.COLUMN_TYPE + " = 'WLAN'),"
                 + "FOREIGN KEY(" + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + ") REFERENCES " + DatabaseContract.Slave.TABLE_NAME + "(" + DatabaseContract.Slave.COLUMN_ID + ")"
                 + ");"
@@ -148,7 +147,7 @@ public class DatabaseConnector extends AbstractComponent {
                 + "DROP TABLE " + DatabaseContract.ElectronicModule.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.Slave.TABLE_NAME + ";";
 
-        private void insertPermissions(SQLiteDatabase db, long defaultModuleId) {
+        private void insertPermissions(SQLiteDatabase db) {
             String[] binaryPermissions = new String[]{
                     DatabaseContract.Permission.Values.ADD_ORDROID,
                     DatabaseContract.Permission.Values.RENAME_ORDROID,
@@ -176,9 +175,8 @@ public class DatabaseConnector extends AbstractComponent {
             };
 
             for (String permission : binaryPermissions) {
-                ContentValues values = new ContentValues(2);
+                ContentValues values = new ContentValues(1);
                 values.put(DatabaseContract.Permission.COLUMN_NAME, permission);
-                values.put(DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID, defaultModuleId);
                 db.insert(DatabaseContract.Permission.TABLE_NAME, null, values);
             }
         }
@@ -200,11 +198,7 @@ public class DatabaseConnector extends AbstractComponent {
         public void onCreate(SQLiteDatabase db) {
             Log.v(TAG, "creating Database");
             execSQLScript(SQL_CREATE_DB, db);
-            ContentValues values = new ContentValues(2);
-            values.put(DatabaseContract.ElectronicModule.COLUMN_NAME, DatabaseContract.ElectronicModule.Values.DEFAULT_NAME);
-            values.put(DatabaseContract.ElectronicModule.COLUMN_TYPE, "DUMMY");
-            long id = db.insert(DatabaseContract.ElectronicModule.TABLE_NAME, null, values);
-            insertPermissions(db, id);
+            insertPermissions(db);
 
         }
 
