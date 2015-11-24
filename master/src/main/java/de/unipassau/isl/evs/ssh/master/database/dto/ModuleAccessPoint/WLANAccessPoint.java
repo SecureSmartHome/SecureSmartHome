@@ -1,5 +1,8 @@
 package de.unipassau.isl.evs.ssh.master.database.dto.ModuleAccessPoint;
 
+/**
+ * @author leon
+ */
 public class WLANAccessPoint extends ModuleAccessPoint {
     public static final String TYPE = "WLAN";
     private int port;
