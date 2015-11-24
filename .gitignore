@@ -89,3 +89,6 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+## C Build Files
+**/obj/local/
