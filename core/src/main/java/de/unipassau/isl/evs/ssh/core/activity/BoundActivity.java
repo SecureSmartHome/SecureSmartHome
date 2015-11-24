@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
@@ -12,6 +13,8 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
 public class BoundActivity extends AppCompatActivity {
+    private static final String TAG = BoundActivity.class.getSimpleName();
+
     private final Class<? extends ContainerService> serviceClass;
     private boolean serviceBound;
     private Container serviceContainer;
@@ -19,12 +22,14 @@ public class BoundActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             serviceContainer = ((Container) service);
+            Log.d(TAG, "Service " + name + " connected: " + service);
             onContainerConnected(serviceContainer);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             serviceContainer = null;
+            Log.d(TAG, "Service " + name + " disconnected");
             onContainerDisconnected();
         }
     };
@@ -39,16 +44,23 @@ public class BoundActivity extends AppCompatActivity {
         Intent intent = new Intent(this, serviceClass);
         startService(intent);
         if (!serviceBound) {
+            Log.v(TAG, "onStart not bound, binding");
             serviceBound = bindService(intent, serviceConn, BIND_AUTO_CREATE);
+            Log.v(TAG, "onStart binding " + (serviceBound ? "successful" : "failed"));
+        } else {
+            Log.v(TAG, "onStart already bound");
         }
     }
 
     @Override
     protected void onStop() {
         if (serviceBound) {
+            Log.v(TAG, "onStop bound, unbinding");
             unbindService(serviceConn);
             serviceContainer = null;
             serviceBound = false;
+        } else {
+            Log.v(TAG, "onStop not bound, unbinding unnecessary");
         }
         super.onStop();
     }
