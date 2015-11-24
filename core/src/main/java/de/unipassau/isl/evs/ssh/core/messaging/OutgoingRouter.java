@@ -14,6 +14,10 @@ public abstract class OutgoingRouter extends AbstractComponent {
         return sendMessage(getLocalID(), routingKey, message);
     }
 
+    public ChannelFuture sendMessageToMaster(String routingKey, Message message) {
+        return sendMessage(getLocalID(), routingKey, message);
+    }
+
     protected DeviceID getLocalID() {
         //require("KeyStoreManager").getLocalID(); //TODO
         return null;

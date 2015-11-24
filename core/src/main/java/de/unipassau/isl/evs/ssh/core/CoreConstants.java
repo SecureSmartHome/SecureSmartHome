@@ -33,6 +33,26 @@ public class CoreConstants {
      * Set to infinite.
      */
     public static final int CLIENT_ALL_IDLE_TIME = 0;
+    /**
+     * Default address used for UDP broadcasts.
+     */
+    public static final String BROADCAST_ADDRESS = "ssh.core.BROADCAST_ADDRESS";
+    /**
+     * Default value for timeouts. Set to zero.
+     */
+    public static final int DEFAULT_TIMEOUTS = 0;
+    /**
+     * Default value for maximum timeouts.
+     */
+    public static final int MAX_NUMBER_OF_TIMEOUTS = 3;
+    /**
+     * The minimum number of seconds between
+     */
+    public static final int MIN_SECONDS_BETWEEN_TIMEOUTS = 60;
+    /**
+     * The maximum number of seconds the broadcast waits to be sent again.
+     */
+    public static final int MAX_SECONDS_BETWEEN_BROADCAST = 10;
 
     /**
      * This class contains the key constants of SharedPreferences

@@ -38,7 +38,7 @@ public class ClientIncomingDispatcher extends IncomingDispatcher {
      */
     @Override
     public boolean dispatch(final Message.AddressedMessage msg) {
-        if (!client.isExecutorAlive() || !client.isChannelOpen()) {
+        if (!client.isExecutorAlive() || !client.isTCPChannelOpen()) {
             Log.w(TAG, "Could not dispatch message as Executor was shut down");
             return false;
         }

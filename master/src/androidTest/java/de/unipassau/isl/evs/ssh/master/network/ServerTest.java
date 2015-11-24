@@ -71,14 +71,14 @@ public class ServerTest extends InstrumentationTestCase {
             Thread.sleep(1000); //wait for the connection to be established
 
             Client client = clientContainer.get(Client.KEY);
-            assertTrue(client.isChannelOpen());
+            assertTrue(client.isTCPChannelOpen());
             assertTrue(client.isExecutorAlive());
             assertEquals(1, server.getActiveChannels().size());
 
             clientContainer.unregister(Client.KEY);
             client.awaitShutdown();
 
-            assertFalse(client.isChannelOpen());
+            assertFalse(client.isTCPChannelOpen());
             assertNotNull(client.getAddress());
             assertFalse(client.isExecutorAlive());
             assertEquals(0, server.getActiveChannels().size());
