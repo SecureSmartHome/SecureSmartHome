@@ -14,7 +14,6 @@ public class DatabaseContract {
     }
 
     public class Permission {
-        public static final String ALL_PERMISSIONS_MODULE_NAME = "7e15adbf04854560dd970021df142f6f";
         public static final String TABLE_NAME = "Permission";
         public static final String COLUMN_ID = "_ID";
         public static final String COLUMN_NAME = "name";
@@ -113,6 +112,9 @@ public class DatabaseContract {
         public static final String COLUMN_WLAN_PASSWORD = "wlanPassword";
         public static final String COLUMN_WLAN_IP = "wlanIP";
         public static final String COLUMN_TYPE = "type";
+        public class Values{
+            public static final String DEFAULT_NAME = "7e15adbf04854560dd970021df142f6f";
+        }
     }
 
     public class Slave {
