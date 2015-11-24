@@ -1,16 +1,20 @@
 <resources>
     <string name="app_name">EVS SSH app</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="secure_smart_home">Secure Smart Home</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="favourite_settings">Favourites</string>
 
     <string name="navigation_drawer_open">Navigation</string>
     <string name="navigation_drawer_close">Navigate</string>
+    <string name="nav_edit">Edit</string>
 
-<!-- TODO: Remove or change this placeholder text -->
+
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="nav_home_string">Home</string>
+    <string name="nav_home">Home</string>
     <string name="nav_door_string">Door</string>
     <string name="nav_light_string">Light</string>
     <string name="nav_climate_string">Climate</string>
