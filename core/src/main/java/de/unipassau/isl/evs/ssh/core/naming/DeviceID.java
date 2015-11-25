@@ -1,9 +1,11 @@
 package de.unipassau.isl.evs.ssh.core.naming;
 
+import java.io.Serializable;
+
 /**
  * Unique id for all devices (user devices, master, slaves).
  */
-public final class DeviceID {
+public final class DeviceID implements Serializable {
 
     private final String id;
 

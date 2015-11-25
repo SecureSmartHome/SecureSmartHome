@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.core.messaging;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import de.ncoder.typedmap.Key;
 import de.ncoder.typedmap.TypedMap;
@@ -18,7 +19,7 @@ public class Message implements Serializable {
     public static final Key<Integer> HEADER_MESSAGE_ID = new Key<>(Integer.class, "messageID");
     public static final Key<Integer> HEADER_REFERENCES_ID = new Key<>(Integer.class, "referencesID");
     public static final Key<String> HEADER_REPLY_TO_KEY = new Key<>(String.class, "replyToKey");
-
+    private static final AtomicInteger sequenceCounter = new AtomicInteger();
     private final TypedMap<Object> headers;
     private MessagePayload payload;
 
@@ -79,15 +80,14 @@ public class Message implements Serializable {
     @Override
     public String toString() {
         StringBuilder bob = new StringBuilder();
-        bob.append(headerString()).append("\n");
+        bob.append("<").append(headerString()).append(">\n");
         for (Map.Entry<Key<?>, Object> entry : headers.entrySet()) {
             bob.append(entry.getKey())
                     .append(": ")
                     .append(entry.getValue())
                     .append("\n");
         }
-        bob.append("\n")
-                .append(payload)
+        bob.append(payload)
                 .append("\n");
         return bob.toString();
     }
@@ -111,19 +111,21 @@ public class Message implements Serializable {
      * An AddressedMessage is a Message with additional information about to sender and the receiver.
      */
     public static class AddressedMessage extends Message {
-        private DeviceID fromID;
-        private DeviceID toID;
-        private String routingKey;
+        private final DeviceID fromID;
+        private final DeviceID toID;
+        private final String routingKey;
+        private final int sequenceNr;
 
         private AddressedMessage(Message from, DeviceID fromID, DeviceID toID, String routingKey) {
-            this(new TypedMap<>(from.headers).unmodifiableView(), from.payload, fromID, toID, routingKey);
+            this(new TypedMap<>(from.headers), from.payload, fromID, toID, routingKey);
         }
 
         private AddressedMessage(TypedMap headers, MessagePayload payload, DeviceID fromID, DeviceID toID, String routingKey) {
-            super(headers, payload);
+            super(headers.unmodifiableView(), payload);
             this.fromID = fromID;
             this.toID = toID;
             this.routingKey = routingKey;
+            sequenceNr = sequenceCounter.getAndIncrement();
         }
 
         @Override
@@ -143,9 +145,14 @@ public class Message implements Serializable {
             return routingKey;
         }
 
+        public int getSequenceNr() {
+            return sequenceNr;
+        }
+
         @Override
         protected CharSequence headerString() {
-            return super.headerString() + " to " + toID + "/" + routingKey + " from " + fromID;
+            return super.headerString() + "#" + sequenceNr + " to " + toID
+                    + (routingKey != null && routingKey.startsWith("/") ? "/" : "") + routingKey + " from " + fromID;
         }
     }
 }

@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.container;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.Iterator;
@@ -75,12 +76,14 @@ public class SimpleContainer implements Container {
         return components.get(key);
     }
 
+    @NonNull
     @Override
     public <T extends Component> T require(Key<T> key) {
-        if (!components.containsKey(key)) {
+        final T t = get(key);
+        if (t == null) { //for HashMap, get(key) has same processing time as containsKey(key)
             throw new ComponentException(key, false);
         }
-        return get(key);
+        return t;
     }
 
     @Override
@@ -103,6 +106,7 @@ public class SimpleContainer implements Container {
         Log.d(TAG, "shutdown:finished");
     }
 
+    @NonNull
     public TypedMap<Component> getData() {
         if (componentsUnmodifiable == null) {
             componentsUnmodifiable = components.unmodifiableView();

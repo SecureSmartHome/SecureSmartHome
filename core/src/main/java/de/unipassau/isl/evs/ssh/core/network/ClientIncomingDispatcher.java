@@ -17,12 +17,6 @@ import io.netty.channel.ChannelHandlerContext;
 public class ClientIncomingDispatcher extends IncomingDispatcher {
     private static final String TAG = ClientIncomingDispatcher.class.getSimpleName();
 
-    private final Client client;
-
-    public ClientIncomingDispatcher(Client client) {
-        this.client = client;
-    }
-
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object in) throws Exception {
         if (in instanceof Message.AddressedMessage) {
@@ -38,6 +32,7 @@ public class ClientIncomingDispatcher extends IncomingDispatcher {
      */
     @Override
     public boolean dispatch(final Message.AddressedMessage msg) {
+        Client client = getContainer().require(Client.KEY);
         if (!client.isExecutorAlive() || !client.isChannelOpen()) {
             Log.w(TAG, "Could not dispatch message as Executor was shut down");
             return false;

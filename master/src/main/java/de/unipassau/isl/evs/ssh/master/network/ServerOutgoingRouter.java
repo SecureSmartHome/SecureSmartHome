@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.network;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -23,7 +24,7 @@ public class ServerOutgoingRouter extends OutgoingRouter {
     @Override
     public ChannelFuture sendMessage(DeviceID toID, String routingKey, Message msg) {
         Message.AddressedMessage amsg = msg.setDestination(getLocalID(), toID, routingKey);
-        if (amsg.getToID().equals(getLocalID())) {
+        if (Objects.equals(amsg.getToID(), getLocalID())) {
             requireComponent(IncomingDispatcher.KEY).dispatch(amsg);
             return requireComponent(Server.KEY).getChannel().newSucceededFuture();
         } else {
