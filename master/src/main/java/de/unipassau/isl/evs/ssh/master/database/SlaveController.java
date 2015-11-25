@@ -18,6 +18,7 @@ import de.unipassau.isl.evs.ssh.master.database.dto.Slave;
 
 /**
  * Offers high level methods to interact with the tables associated with slaves in the database.
+ * @author leon
  */
 public class SlaveController extends AbstractComponent {
     public static final Key<SlaveController> KEY = new Key<>(SlaveController.class);
