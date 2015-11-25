@@ -33,8 +33,7 @@ public class DatabaseContract {
             public static final String REQUEST_WINDOW_STATUS = "RequestWindowStatus";
             //Lamp
             public static final String REQUEST_LAMP_STATUS = "RequestLampStatus";
-            public static final String SWITCH_ON_LAMP = "SwitchOnLamp";
-            public static final String SWITCH_OFF_LAMP = "SwitchOffLamp";
+            public static final String SWITCH_LIGHT = "SwitchLight";
             //Door
             public static final String REQUEST_DOOR_STATUS = "RequestDoorStatus";
             public static final String LOCK_DOOR = "LockDoor";
