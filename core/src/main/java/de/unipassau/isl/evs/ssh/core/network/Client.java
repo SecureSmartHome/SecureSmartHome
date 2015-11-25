@@ -1,29 +1,22 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
 
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.wifi.WifiManager;
-import android.preference.PreferenceManager;
+import android.util.Log;
 
-import java.net.InetSocketAddress;
+import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
-import de.unipassau.isl.evs.ssh.core.container.StartupException;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
-import de.unipassau.isl.evs.ssh.core.network.handler.ClientBroadcastHandler;
-
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -31,7 +24,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
@@ -40,23 +32,20 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.CharsetUtil;
 import io.netty.util.ResourceLeakDetector;
+import io.netty.util.ResourceLeakDetector.Level;
 import io.netty.util.concurrent.DefaultExecutorServiceFactory;
 
 import static android.content.Context.MODE_PRIVATE;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_ALL_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_MAX_DISCONNECTS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_MILLIS_BETWEEN_DISCONNECTS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_READER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_WRITER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.DEFAULT_PORT;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.DEFAULT_TIMEOUTS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.MAX_NUMBER_OF_TIMEOUTS;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.MAX_SECONDS_BETWEEN_BROADCAST;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.MIN_SECONDS_BETWEEN_TIMEOUTS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_HOST;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
-
 
 /**
  * A netty stack accepting connections to and from the master and handling communication with them using a netty pipeline.
@@ -65,10 +54,15 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
 public class Client extends AbstractComponent {
     public static final Key<Client> KEY = new Key<>(Client.class);
     private static final String TAG = Client.class.getSimpleName();
+    private static final Level RESOURCE_LEAK_DETECTION = Level.PARANOID;
     /**
      * Receives messages from system components and decides how to route them to the targets.
      */
     private final ClientOutgoingRouter outgoingRouter = new ClientOutgoingRouter();
+    /**
+     * Boolean if the client connection is active.
+     */
+    private boolean isActive;
     /**
      * The EventLoopGroup used for accepting connections
      */
@@ -77,50 +71,23 @@ public class Client extends AbstractComponent {
      * The channel listening for incoming TCP connections on the port of the client.
      * Use {@link ChannelFuture#sync()} to wait for client startup.
      */
-    private ChannelFuture tcpChannel;
-    /**
-     * The channel listening for incoming UDP connections on the port of the client.
-     * Use {@link ChannelFuture#sync()} to wait for client startup.
-     */
-    private ChannelFuture udpChannel;
+    private ChannelFuture channel;
     /**
      * Distributes incoming messages to the responsible handlers.
      */
-    private ClientIncomingDispatcher incomingDispatcher = new ClientIncomingDispatcher(this);
+    private ClientIncomingDispatcher incomingDispatcher = new ClientIncomingDispatcher();
     /**
-     * SharedPreferences to load, save and edit key-value sets.
+     * Send UDP Broadcasts when the Server can't be reached
      */
-    private SharedPreferences prefs;
-    /**
-     * SharedPreferences editor to edit the key-value sets.
-     */
-    private SharedPreferences.Editor editor;
-    /**
-     * TODO javadoc
-     */
-    private WifiManager wifi;
-    /**
-     * TODO javadoc
-     */
-    private WifiManager.MulticastLock multicastLock;
-    /**
-     * Boolean if the client connection is active.
-     */
-    private boolean isActive;
+    private UDPDiscoveryClient udpDiscovery = new UDPDiscoveryClient();
     /**
      * Int used to calculate the time between the last and the current timeout.
      */
-    private long lastTimeout = 0;
+    private long lastDisconnect = 0;
     /**
      * Int that saves how many timeouts happened in a row.
      */
-    private int timeoutsInARow = DEFAULT_TIMEOUTS;
-
-    private Context context;
-
-    public Client(Context context) {
-        this.context = context;
-    }
+    private int disconnectsInARow = 0;
 
     /**
      * Init timeouts and the connection registry.
@@ -129,42 +96,49 @@ public class Client extends AbstractComponent {
     @Override
     public void init(Container container) {
         super.init(container);
-        try {
-            startClient();
-            container.register(IncomingDispatcher.KEY, incomingDispatcher);
-            container.register(OutgoingRouter.KEY, outgoingRouter);
-            isActive = true;
-        } catch (InterruptedException e) {
-            throw new StartupException("Could not start netty client", e);
-        }
+        container.register(IncomingDispatcher.KEY, incomingDispatcher);
+        container.register(OutgoingRouter.KEY, outgoingRouter);
+        container.register(UDPDiscoveryClient.KEY, udpDiscovery);
+        startClient();
+        isActive = true;
     }
 
     /**
      * Initializes the netty data pipeline and starts the client.
      *
-     * @throws InterruptedException     if interrupted while waiting for the startup
      * @throws IllegalArgumentException is the Client is already running
      */
-    private void startClient() throws InterruptedException {
-        if (isTCPChannelOpen() && isExecutorAlive()) {
-            throw new IllegalStateException("client already running");
+    protected void startClient() {
+        Log.d(TAG, "startClient");
+        if (!isActive) {
+            Log.w(TAG, "Not starting Client that has been shut-down");
+            return;
         }
-
-        ResourceLeakDetector.setLevel(getResourceLeakDetection());
-
+        if (isChannelOpen() && isExecutorAlive()) {
+            Log.w(TAG, "Not starting Client that is already connected");
+            return;
+        }
         if (!isExecutorAlive()) {
             // Setup the Executor and Connection Pool
             clientExecutor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("client"));
         }
-        if (timeoutsInARow < MAX_NUMBER_OF_TIMEOUTS) {
-            buildTCP();
-            // TODO when implemented, start handshake
+        ResourceLeakDetector.setLevel(RESOURCE_LEAK_DETECTION);
+        final String host = getSharedPrefs().getString(PREF_HOST, null);
+        final int port = getSharedPrefs().getInt(PREF_PORT, DEFAULT_PORT);
+        if (disconnectsInARow < CLIENT_MAX_DISCONNECTS && host != null) {
+            connectClient(host, port);
         } else {
-            broadcastUDP();
+            if (host == null) {
+                Log.w(TAG, "No master known, starting UDP discovery");
+            } else {
+                Log.w(TAG, "Too many disconnects from " + host + ":" + port + ", trying UDP discovery");
+            }
+            requireComponent(UDPDiscoveryClient.KEY).startDiscovery();
         }
     }
 
-    private void buildTCP() throws InterruptedException {
+    protected void connectClient(String host, int port) {
+        Log.i(TAG, "Client connecting to " + host + ":" + port);
         // TCP Connection
         Bootstrap b = new Bootstrap()
                 .group(clientExecutor)
@@ -178,20 +152,26 @@ public class Client extends AbstractComponent {
                 .option(ChannelOption.SO_KEEPALIVE, true);
 
         // Wait for the start of the client
-        tcpChannel = b.connect(getHost(), getPort());
-        if (tcpChannel == null) {
-            throw new StartupException("Could not open client channel");
-        }
-        tcpChannel.channel().closeFuture().addListener(new ChannelFutureListener() {
+        channel = b.connect(host, port);
+        channel.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                Log.v(TAG, "Channel open");
+                // TODO when implemented, start handshake
+            }
+        });
+        channel.channel().closeFuture().addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (isActive && isExecutorAlive() && !clientExecutor.isShuttingDown()) {
-                    long thisTimeout = System.currentTimeMillis();
-                    if (lastTimeout == 0 || ((thisTimeout - lastTimeout) >= TimeUnit.SECONDS.toMillis(MIN_SECONDS_BETWEEN_TIMEOUTS))) {
-                        lastTimeout = thisTimeout;
-                        timeoutsInARow++;
+                    long time = System.currentTimeMillis();
+                    if (lastDisconnect <= 0 || time - lastDisconnect <= CLIENT_MILLIS_BETWEEN_DISCONNECTS) {
+                        lastDisconnect = time;
+                        disconnectsInARow++;
+                        Log.w(TAG, disconnectsInARow + ". disconnect within the last " + lastDisconnect + "ms, retrying");
                     } else {
-                        timeoutsInARow = 0;
+                        Log.i(TAG, "Regular disconnect, retrying");
+                        disconnectsInARow = 0;
                     }
                     startClient();
                 }
@@ -199,125 +179,61 @@ public class Client extends AbstractComponent {
         });
     }
 
-    private void broadcastUDP() throws InterruptedException {
-        wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        if (wifi != null) {
-            multicastLock = wifi.createMulticastLock("");
-            multicastLock.acquire();
-        }
-        Bootstrap b = new Bootstrap()
-                .group(clientExecutor)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-                        initBroadcastChannel(ch);
-                    }
-                })
-                .option(ChannelOption.SO_BROADCAST, true);
-        // Send broadcast
-        udpChannel = b.bind(getPort());
-        getChannel().writeAndFlush(new DatagramPacket(Unpooled.copiedBuffer("REQUEST", CharsetUtil.UTF_8),
-                new InetSocketAddress(CoreConstants.BROADCAST_ADDRESS, DEFAULT_PORT)));
-        // Check for timeout
-        clientExecutor.schedule(new Runnable() {
-            @Override
-            public void run() {
-                if (!isUDPClientConnected()) {
-                    try {
-                        broadcastUDP();// restart broadcast
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();//TODO
-                    }
-                }
-            }
-        }, MAX_SECONDS_BETWEEN_BROADCAST, TimeUnit.SECONDS);
-    }
-
-    public void receivedUDPResponse(String address, int port) {
-        if (multicastLock != null) {
-            multicastLock.release();
-            multicastLock = null;
-        }
-        if (prefs == null) {
-            PreferenceManager.getDefaultSharedPreferences(getContainer().get(ContainerService.KEY_CONTEXT));
-        }
-        if (editor == null) {
-            editor = prefs.edit();
-        }
-        editor.putString(PREF_HOST, address);
-        editor.putInt(PREF_PORT, port);
-        editor.apply();
-        timeoutsInARow = 0;
-
-    }
-
     /**
      * Configures the per-connection pipeline that is responsible for handling incoming and outgoing data.
      * After an incoming packet is decrypted, decoded and verified,
-     * it will be sent to its target {@link de.unipassau.isl.evs.ssh.core.handler.Handler}
+     * it will be sent to its target {@link de.unipassau.isl.evs.ssh.core.handler.MessageHandler}
      * by the {@link ClientIncomingDispatcher}.
      */
     protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
-        //TODO add remaining necessary handlers, when they are implemented
+        Log.v(TAG, "initChannel"); //TODO add remaining necessary handlers, when they are implemented
+
         //Handler (de-)serialization
         ch.pipeline().addLast(ObjectEncoder.class.getSimpleName(), new ObjectEncoder());
         ch.pipeline().addLast(ObjectDecoder.class.getSimpleName(), new ObjectDecoder(
                 ClassResolvers.weakCachingConcurrentResolver(getClass().getClassLoader())));
         ch.pipeline().addLast(LoggingHandler.class.getSimpleName(), new LoggingHandler(LogLevel.TRACE));
+
         //Timeout Handler
         ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
                 new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
         ch.pipeline().addLast(TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
+
         //Dispatcher
         ch.pipeline().addLast(ClientIncomingDispatcher.class.getSimpleName(), incomingDispatcher);
     }
 
-    /**
-     * Configures the broadcast sent when 3 timeouts occur by sending the packet to {@link ClientBroadcastHandler}
-     * by using the {@link ClientIncomingDispatcher}
-     */
-    private void initBroadcastChannel(SocketChannel ch) {
-        ch.pipeline().addLast(LoggingHandler.class.getSimpleName(), new LoggingHandler(LogLevel.TRACE));
-        //ClientBroadcastHandler
-        ch.pipeline().addLast(ClientBroadcastHandler.class.getSimpleName(), new ClientBroadcastHandler(this));
+    void onDiscoverySuccessful(InetAddress address, int port) {
+        Log.i(TAG, "UDP discovery successful, found " + address + ":" + port);
+        getSharedPrefs().edit()
+                .putString(PREF_HOST, address.getHostName())
+                .putInt(PREF_PORT, port)
+                .commit();
+        startClient();
     }
 
     /**
      * Stop listening, close all connections and shut down the executors.
      */
     public void destroy() {
+        Log.d(TAG, "stopClient");
         isActive = false;
-        if (tcpChannel != null && tcpChannel.channel() != null) {
-            tcpChannel.channel().close();
+        if (channel != null && channel.channel() != null) {
+            channel.channel().close();
         }
         if (clientExecutor != null) {
             clientExecutor.shutdownGracefully(1, 5, TimeUnit.SECONDS);
         }
-        getContainer().unregister(incomingDispatcher);
+        getContainer().unregister(udpDiscovery);
         getContainer().unregister(outgoingRouter);
+        getContainer().unregister(incomingDispatcher);
         super.destroy();
     }
 
-    /**
-     * @return if available host name, otherwise {@code null}.
-     */
-    private String getHost() {
-        SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
-        return sharedPref.getString(PREF_HOST, null);
-    }
+    //GETTERS///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * @return if available port, otherwise default port
-     */
-    private int getPort() {
-        SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
-        return sharedPref.getInt(PREF_PORT, DEFAULT_PORT);
-    }
-
-    private ResourceLeakDetector.Level getResourceLeakDetection() {
-        return ResourceLeakDetector.Level.PARANOID;
+    private SharedPreferences getSharedPrefs() {
+        return getComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
     }
 
     /**
@@ -331,26 +247,23 @@ public class Client extends AbstractComponent {
      * Channel for the ClientIncomingDispatcher and the ClientOutgoingRouter
      */
     Channel getChannel() {
-        return tcpChannel != null ? tcpChannel.channel() : null;
+        return channel != null ? channel.channel() : null;
     }
 
     /**
      * @return the local Address this client is listening on
      */
     public SocketAddress getAddress() {
-        return tcpChannel.channel().localAddress();
+        return channel.channel().localAddress();
     }
 
     /**
      * @return {@code true}, if the Client TCP channel is currently open
      */
-    public boolean isTCPChannelOpen() {
-        return tcpChannel != null && tcpChannel.channel() != null && tcpChannel.channel().isOpen();
+    public boolean isChannelOpen() {
+        return channel != null && channel.channel() != null && channel.channel().isOpen();
     }
 
-    private boolean isUDPClientConnected() {
-        return false;//TODO
-    }
     /**
      * @return {@code true}, if the Executor that is used for processing data has been shut down
      */
@@ -364,7 +277,7 @@ public class Client extends AbstractComponent {
      * @throws InterruptedException
      */
     public void awaitShutdown() throws InterruptedException {
-        tcpChannel.channel().closeFuture().await();
+        channel.channel().closeFuture().await();
         clientExecutor.terminationFuture().await();
     }
 }

@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.core;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * This Constants class provides constants needed by all modules.
  */
@@ -38,21 +40,24 @@ public class CoreConstants {
      */
     public static final String BROADCAST_ADDRESS = "ssh.core.BROADCAST_ADDRESS";
     /**
-     * Default value for timeouts. Set to zero.
-     */
-    public static final int DEFAULT_TIMEOUTS = 0;
-    /**
      * Default value for maximum timeouts.
      */
-    public static final int MAX_NUMBER_OF_TIMEOUTS = 3;
+    public static final int CLIENT_MAX_DISCONNECTS = 3;
     /**
      * The minimum number of seconds between
      */
-    public static final int MIN_SECONDS_BETWEEN_TIMEOUTS = 60;
+    public static final long CLIENT_MILLIS_BETWEEN_DISCONNECTS = TimeUnit.SECONDS.toMillis(60);
     /**
      * The maximum number of seconds the broadcast waits to be sent again.
      */
-    public static final int MAX_SECONDS_BETWEEN_BROADCAST = 10;
+    public static final long CLIENT_MILLIS_BETWEEN_BROADCASTS = TimeUnit.SECONDS.toMillis(10);
+    /**
+     * Default port used by netty
+     */
+    public static final int DISCOVERY_PORT = 13132;
+
+    public static final String DISCOVERY_PAYLOAD_REQUEST = "de.unipassau.isl.evs.ssh.udp_discovery.REQUEST";
+    public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE";
 
     /**
      * This class contains the key constants of SharedPreferences

@@ -17,7 +17,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.network.ClientIncomingDispatcher;
-import de.unipassau.isl.evs.ssh.core.network.handler.ServerBroadcastHandler;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;

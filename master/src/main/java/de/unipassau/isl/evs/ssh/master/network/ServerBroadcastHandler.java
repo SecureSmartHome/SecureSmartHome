@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.core.network.handler;
+package de.unipassau.isl.evs.ssh.master.network;
 
 import java.net.InetSocketAddress;
 import java.util.List;

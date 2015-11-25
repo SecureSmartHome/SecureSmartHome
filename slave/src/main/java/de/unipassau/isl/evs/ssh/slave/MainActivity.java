@@ -84,7 +84,7 @@ public class MainActivity extends BoundActivity {
         ((TextView) findViewById(R.id.textViewComponents)).setText(container.getData().toString());
         Client client = getComponent(Client.KEY);
         String status = "connected to " + client.getAddress() + " "
-                + "[" + (client.isTCPChannelOpen() ? "open" : "closed") + ", "
+                + "[" + (client.isChannelOpen() ? "open" : "closed") + ", "
                 + (client.isExecutorAlive() ? "alive" : "dead") + "]";
         ((TextView) findViewById(R.id.textViewConnectionStatus)).setText(status);
 
