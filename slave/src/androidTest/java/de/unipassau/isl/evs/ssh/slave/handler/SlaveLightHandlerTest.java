@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.slave.handler;
 
 import android.test.InstrumentationTestCase;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
@@ -28,13 +29,14 @@ public class SlaveLightHandlerTest extends InstrumentationTestCase {
         container.register(dispatcher.KEY, dispatcher);
 
         SlaveLightHandler handler = new SlaveLightHandler();
-        dispatcher.registerHandler(handler, "SlaveLightHandler");
+        dispatcher.registerHandler(handler, CoreConstants.RoutingKeys.SLAVE_LIGHT_GET,
+                CoreConstants.RoutingKeys.SLAVE_LIGHT_SET);
 
         MessagePayload pld = new LightPayload(true);
         Message msg = new Message(pld);
 
         Message.AddressedMessage aMsg = msg.setDestination(new DeviceID("1"),
-                new DeviceID("2"), "SlaveLightHandler");
+                new DeviceID("2"), CoreConstants.RoutingKeys.SLAVE_LIGHT_SET);
         handler.handle(aMsg);
 
         try {
