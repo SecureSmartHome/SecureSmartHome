@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.master.database.dto;
+package de.unipassau.isl.evs.ssh.core.database.dto;
 
 /**
  * A DTO representing permissions. A permission has a name and may only be for a specific module.

@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.master.database;
 
 import android.content.Context;
 import android.test.InstrumentationTestCase;
-import android.util.Log;
 
 import junit.framework.Assert;
 
@@ -14,12 +13,12 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import de.unipassau.isl.evs.ssh.master.database.dto.Group;
-import de.unipassau.isl.evs.ssh.master.database.dto.Module;
-import de.unipassau.isl.evs.ssh.master.database.dto.ModuleAccessPoint.USBAccessPoint;
-import de.unipassau.isl.evs.ssh.master.database.dto.Permission;
-import de.unipassau.isl.evs.ssh.master.database.dto.Slave;
-import de.unipassau.isl.evs.ssh.master.database.dto.UserDevice;
+import de.unipassau.isl.evs.ssh.core.database.dto.Group;
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
+import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 public class ControllerTest extends InstrumentationTestCase {
 

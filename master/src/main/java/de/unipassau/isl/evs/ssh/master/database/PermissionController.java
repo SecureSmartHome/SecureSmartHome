@@ -10,7 +10,7 @@ import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import de.unipassau.isl.evs.ssh.master.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 
 /**
  * Offers high level methods to interact with the tables associated with permissions in the database.

@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.master.database.dto.ModuleAccessPoint;
+package de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint;
 
 /**
  * @author leon
