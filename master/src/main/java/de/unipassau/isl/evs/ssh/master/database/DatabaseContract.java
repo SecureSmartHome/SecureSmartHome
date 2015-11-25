@@ -31,8 +31,8 @@ public class DatabaseContract {
             public static final String DELETE_SENSOR = "DeleteSensor";
             //Window
             public static final String REQUEST_WINDOW_STATUS = "RequestWindowStatus";
-            //Lamp
-            public static final String REQUEST_LAMP_STATUS = "RequestLampStatus";
+            //Light
+            public static final String REQUEST_LIGHT_STATUS = "RequestLightStatus";
             public static final String SWITCH_LIGHT = "SwitchLight";
             //Door
             public static final String REQUEST_DOOR_STATUS = "RequestDoorStatus";
