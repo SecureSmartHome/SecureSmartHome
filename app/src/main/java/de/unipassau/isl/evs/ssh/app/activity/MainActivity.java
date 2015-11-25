@@ -18,20 +18,30 @@ import de.unipassau.isl.evs.ssh.app.R;
  */
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final String SAVED_LAST_ACTIVE_FRAGMENT = "de.unipassau.isl.evs.ssh.app.activity.SAVED_LAST_ACTIVE_FRAGMENT";
+
     //TODO toolbar
-    NavigationView navigationView = null;
-    Toolbar toolbar = null;
+    private NavigationView navigationView = null;
+    private Toolbar toolbar = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //Set the fragment initially
-        MainFragment fragment = new MainFragment();
-        android.support.v4.app.FragmentTransaction fragmentTransaction =
-                getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, fragment);
-        fragmentTransaction.commit();
+
+        MainFragment fragment;
+        if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
+            int id = savedInstanceState.getInt(SAVED_LAST_ACTIVE_FRAGMENT);
+            showFragmentByID(id);
+        } else {
+            fragment = new MainFragment();
+            android.support.v4.app.FragmentTransaction fragmentTransaction =
+                    getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, fragment);
+            fragmentTransaction.commit();
+        }
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -80,10 +90,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        int fragmentId = getSupportFragmentManager().getBackStackEntryAt(0).getId();
+        outState.putInt(SAVED_LAST_ACTIVE_FRAGMENT, fragmentId);
+    }
 
+    private void showFragmentByID(int id){
         if (id == R.id.nav_home) {
             //Set the fragment initially
             MainFragment fragment = new MainFragment();
@@ -157,6 +170,13 @@ public class MainActivity extends AppCompatActivity
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+        showFragmentByID(id);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
