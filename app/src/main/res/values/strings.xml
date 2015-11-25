@@ -21,4 +21,5 @@
     <string name="nav_addModul_string">Add Modul</string>
     <string name="deviceSatusConnectedSlaves">Connected Slaves</string>
     <string name="deviceStatusConnectedSlaves">Connected Slaves</string>
+    <string name="deviceStatusConnectedModules">Connected Modules</string>
 </resources>
