@@ -17,6 +17,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  */
 public class LightFragment extends Fragment implements MessageHandler {
 
+    private static final int BUTTON_HEIGHT = 50;
+
     public LightFragment() {
         // Required empty public constructor
     }
@@ -26,7 +28,33 @@ public class LightFragment extends Fragment implements MessageHandler {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
+        /*FIXME outcomment and fix
+        List lightModules = getLightModules();
+        for (Module m : lightModules) {
+            Button light_button = new Button(getActivity());
+            light_button.setHeight(BUTTON_HEIGHT);
+            light_button.setId("@+id/" + m.getID());
+            light_button.setText(m.getName());
+            light_button.setTextColor();
+            if (m.getStatus) {
+                light_button.setBackground(Drawable.createFromPath("/drawable-hdpi/ic_light_on.png"));
+            } else {
+                light_button.setBackground(Drawable.createFromPath("/drawable-hdpi/light_off.png"));
+            }
+        }
         return inflater.inflate(R.layout.fragment_light, container, false);
+    }
+
+    private List<Module> getLightModules() {
+        List<Module> list = new LinkedList<>();
+        *//*
+        ask database which modules are light-modules. maybe enum with module types
+        get them
+        add them to the list
+        *//*
+        return list;*/
+        return inflater.inflate(R.layout.fragment_light, container, false); // FIXME delete fater outcommenting
     }
 
     @Override

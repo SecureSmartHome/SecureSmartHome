@@ -1,5 +1,6 @@
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
@@ -15,11 +16,34 @@
         android:id="@+id/light_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:clickable="true"
-        android:elevation="6dp"
-        android:layout_gravity="bottom|right"
-        android:longClickable="false"/>
-    <!--android:src="@drawable/ic_done"-->
-</LinearLayout>
+        android:longClickable="false"
+        android:scaleType="center"
+        android:src="@drawable/ic_add"
+        app:borderWidth="0dp"
+        app:elevation="6dp"
+        app:pressedTranslationZ="12dp"
+        app:rippleColor="@color/colorWhite"
+        />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_gravity="left|top"
+        android:text="text"
+        />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_gravity="left|top"
+        android:text="text"
+        />
+
+
+</FrameLayout>
 
