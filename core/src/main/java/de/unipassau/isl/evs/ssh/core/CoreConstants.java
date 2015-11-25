@@ -2,6 +2,8 @@ package de.unipassau.isl.evs.ssh.core;
 
 import java.util.concurrent.TimeUnit;
 
+import io.netty.util.ResourceLeakDetector;
+
 /**
  * This Constants class provides constants needed by all modules.
  */
@@ -36,10 +38,6 @@ public class CoreConstants {
      */
     public static final int CLIENT_ALL_IDLE_TIME = 0;
     /**
-     * Default address used for UDP broadcasts.
-     */
-    public static final String BROADCAST_ADDRESS = "ssh.core.BROADCAST_ADDRESS";
-    /**
      * Default value for maximum timeouts.
      */
     public static final int CLIENT_MAX_DISCONNECTS = 3;
@@ -50,7 +48,7 @@ public class CoreConstants {
     /**
      * The maximum number of seconds the broadcast waits to be sent again.
      */
-    public static final long CLIENT_MILLIS_BETWEEN_BROADCASTS = TimeUnit.SECONDS.toMillis(10);
+    public static final long CLIENT_MILLIS_BETWEEN_BROADCASTS = TimeUnit.SECONDS.toMillis(2);
     /**
      * Default port used by netty
      */
@@ -58,6 +56,8 @@ public class CoreConstants {
 
     public static final String DISCOVERY_PAYLOAD_REQUEST = "de.unipassau.isl.evs.ssh.udp_discovery.REQUEST";
     public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE";
+    public static final ResourceLeakDetector.Level RESOURCE_LEAK_DETECTION = ResourceLeakDetector.Level.PARANOID;
+    public static final String DISCOVERY_HOST = "255.255.255.255";
 
     /**
      * This class contains the key constants of SharedPreferences
