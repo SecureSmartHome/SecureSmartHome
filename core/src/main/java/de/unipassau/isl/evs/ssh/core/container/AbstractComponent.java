@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.container;
 
+import android.util.Log;
+
 import de.ncoder.typedmap.Key;
 
 public class AbstractComponent implements Component {
@@ -8,11 +10,13 @@ public class AbstractComponent implements Component {
     @Override
     public void init(Container container) {
         this.container = container;
+        Log.v(getClass().getSimpleName(), "init");
     }
 
     @Override
     public void destroy() {
         container = null;
+        Log.v(getClass().getSimpleName(), "destroy");
     }
 
     protected boolean isActive() {

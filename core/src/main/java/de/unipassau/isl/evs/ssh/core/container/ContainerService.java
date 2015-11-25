@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import de.ncoder.typedmap.Key;
@@ -80,6 +81,7 @@ public class ContainerService extends Service implements Container {
         return container.get(key);
     }
 
+    @NonNull
     @Override
     public <T extends Component> T require(Key<T> key) {
         return container.require(key);
@@ -90,6 +92,7 @@ public class ContainerService extends Service implements Container {
         return container.isRegistered(key);
     }
 
+    @NonNull
     @Override
     public TypedMap<? extends Component> getData() {
         return container.getData();
@@ -155,6 +158,7 @@ public class ContainerService extends Service implements Container {
             return container.get(key);
         }
 
+        @NonNull
         @Override
         public <T extends Component> T require(Key<T> key) {
             return container.require(key);
@@ -178,6 +182,7 @@ public class ContainerService extends Service implements Container {
             stopSelf();
         }
 
+        @NonNull
         public TypedMap<? extends Component> getData() {
             return container.getData();
         }
