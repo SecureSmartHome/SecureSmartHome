@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.master.database.dto;
+package de.unipassau.isl.evs.ssh.core.database.dto;
 
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
