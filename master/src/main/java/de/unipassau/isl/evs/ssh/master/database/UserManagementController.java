@@ -13,6 +13,9 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.dto.Group;
 import de.unipassau.isl.evs.ssh.master.database.dto.UserDevice;
 
+/**
+ * @author leon
+ */
 public class UserManagementController extends AbstractComponent {
     public static final Key<UserManagementController> KEY = new Key<>(UserManagementController.class);
     private DatabaseConnector databaseConnector;

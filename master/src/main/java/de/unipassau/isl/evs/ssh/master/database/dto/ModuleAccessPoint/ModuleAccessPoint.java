@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.master.database.dto.ModuleAccessPoint;
 
 /**
  * Defines how to access how Module at a given Slave.
+ * @author leon
  */
 public abstract class ModuleAccessPoint {
     //Amount all different possible entries for access information in the database.

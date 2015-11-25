@@ -5,6 +5,7 @@ import de.unipassau.isl.evs.ssh.master.database.dto.ModuleAccessPoint.ModuleAcce
 
 /**
  * A DTO representing modules which are connected to slave devices, e..g. a light.
+ * @author leon
  */
 public class Module {
 

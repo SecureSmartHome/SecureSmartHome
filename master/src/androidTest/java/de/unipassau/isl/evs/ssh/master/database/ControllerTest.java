@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.master.database;
 
 import android.content.Context;
 import android.test.InstrumentationTestCase;
+import android.util.Log;
 
 import junit.framework.Assert;
 
@@ -16,12 +17,13 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.dto.Group;
 import de.unipassau.isl.evs.ssh.master.database.dto.Module;
 import de.unipassau.isl.evs.ssh.master.database.dto.ModuleAccessPoint.USBAccessPoint;
+import de.unipassau.isl.evs.ssh.master.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.master.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.master.database.dto.UserDevice;
 
 public class ControllerTest extends InstrumentationTestCase {
 
-    public void testTemplatesAndPermissions() throws IsReferencedException, UnknownReferenceException, AlreadyInUseException {
+    public void testTemplatesAndPermissions() throws DatabaseControllerException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
@@ -30,108 +32,141 @@ public class ControllerTest extends InstrumentationTestCase {
                 new ContainerService.ContextComponent(context));
         container.register(DatabaseConnector.KEY, new DatabaseConnector());
         container.register(PermissionController.KEY, new PermissionController());
+        container.register(SlaveController.KEY, new SlaveController());
         PermissionController permissionController = container.require(PermissionController.KEY);
+        SlaveController slaveController = container.require(SlaveController.KEY);
 
         //Test Templates w/ permissions
         //Add Templates
         permissionController.addTemplate("Whaddaup");
         permissionController.addTemplate("asdf");
 
-        //Add Permissions
-        permissionController.addPermission("test");
-        permissionController.addPermission("test2");
-        permissionController.addPermission("test3");
-        permissionController.addPermission("test4");
+        //Modules w/ Slaves to test Permissions
+        slaveController.addSlave(new Slave("s1", new DeviceID("1")));
+        slaveController.addModule(new Module("m1", new DeviceID("1"), new USBAccessPoint(1)));
 
-        //Add same name
+        //Add Permissions
+        permissionController.addPermission(new Permission("test"));
+        permissionController.addPermission(new Permission("test2", null));
+        permissionController.addPermission(new Permission("test3", "m1"));
+        permissionController.addPermission(new Permission("test4", "m1"));
+
+        //Add same name. Will not fail when module is null for both and name is same.
         try {
-            permissionController.addPermission("test");
+            permissionController.addPermission(new Permission("test3", "m1"));
             Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
 
         //Check that permissions are inserted
-        assertTrue(permissionController.getPermissions().containsAll(Arrays.asList("test", "test2", "test3", "test4")));
+        List<String> permissions = new LinkedList<>();
+        for (Permission permission : permissionController.getPermissions()) {
+            permissions.add(permission.getName()); // as they are unique in this testcase and i don't want to implement
+                                                   // hashcode just for this test, just the name works fine.
+        }
+        assertTrue(permissions.containsAll(Arrays.asList("test", "test2", "test3", "test4")));
 
         //Remove Permission
-        permissionController.removePermission("test4");
+        permissionController.removePermission(new Permission("test4", "m1"));
 
         //Check that permission is removed
-        assertFalse(permissionController.getPermissions().contains("test4"));
+        permissions = new LinkedList<>();
+        for (Permission permission : permissionController.getPermissions()) {
+            permissions.add(permission.getName());
+        }
+        assertFalse(permissions.contains("test4"));
 
         //Remove element that is already removed
-        permissionController.removePermission("test4");
+        permissionController.removePermission(new Permission("test4", "m1"));
 
         //Check that it's still not in database and not getting added again magically ~~~
-        assertFalse(permissionController.getPermissions().contains("test4"));
+        permissions = new LinkedList<>();
+        for (Permission permission : permissionController.getPermissions()) {
+            permissions.add(permission.getName());
+        }
+        assertFalse(permissions.contains("test4"));
 
         //Add permissions to templates.
-        permissionController.addPermissionToTemplate("Whaddaup", "test");
-        permissionController.addPermissionToTemplate("Whaddaup", "test2");
-        permissionController.addPermissionToTemplate("Whaddaup", "test3");
-        permissionController.addPermissionToTemplate("asdf", "test");
+        permissionController.addPermissionToTemplate("Whaddaup", new Permission("test"));
+        permissionController.addPermissionToTemplate("Whaddaup", new Permission("test2"));
+        permissionController.addPermissionToTemplate("Whaddaup", new Permission("test3", "m1"));
+        permissionController.addPermissionToTemplate("asdf", new Permission("test"));
 
         //Add none existing permissions or template
         try {
-            permissionController.addPermissionToTemplate("asdf", "zzz");
+            permissionController.addPermissionToTemplate("asdf", new Permission("zzz"));
             Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
         try {
-            permissionController.addPermissionToTemplate("44", "test");
+            permissionController.addPermissionToTemplate("44", new Permission("test"));
             Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
 
         //Check that permissions are in template
-        List<String> permissions;
-        permissions = permissionController.getPermissionsOfTemplate("Whaddaup");
+        permissions = new LinkedList<>();
+        for (Permission permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
+            permissions.add(permission.getName());
+        }
         assertTrue(permissions.containsAll(Arrays.asList("test", "test2", "test3")));
 
-        //Check that no additional stuff is there
-        assertTrue(permissions.size() == 3);
-
         //Check that permissions are in template
-        permissions = permissionController.getPermissionsOfTemplate("asdf");
+        permissions = new LinkedList<>();
+        for (Permission permission : permissionController.getPermissionsOfTemplate("asdf")) {
+            permissions.add(permission.getName());
+        }
         assertTrue(permissions.contains("test"));
 
-        //Check that no additional stuff is there
-        assertTrue(permissions.size() == 1);
-
         //Remove permissions from template
-        permissionController.removePermissionFromTemplate("Whaddaup", "test3");
+        permissionController.removePermissionFromTemplate("Whaddaup", new Permission("test3", "m1"));
 
         //Check that template and permission removed from template still exist
-        assertTrue(permissionController.getPermissions().contains("test3"));
+        permissions = new LinkedList<>();
+        for (Permission permission : permissionController.getPermissions()) {
+            permissions.add(permission.getName());
+        }
+
+        assertTrue(permissions.contains("test3"));
         assertTrue(permissionController.getTemplates().contains("Whaddaup"));
 
         //Check remove of none existing permission
-        assertFalse(permissionController.getPermissions().contains("test4"));
-        permissionController.removePermissionFromTemplate("Whaddaup", "test4");
+        assertFalse(permissions.contains("test4"));
+        permissionController.removePermissionFromTemplate("Whaddaup", new Permission("test4"));
 
         //Check that permissions are removed from template
-        permissions = permissionController.getPermissionsOfTemplate("Whaddaup");
+        permissions = new LinkedList<>();
+        for (Permission permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
+            permissions.add(permission.getName());
+        }
         assertFalse(permissions.contains("test3"));
         assertFalse(permissions.contains("test4"));
 
         //Remove permission w/ template refs
-        permissionController.removePermission("test3");
+        permissionController.removePermission(new Permission("test3", "m1"));
 
         //Check that permission is gone
-        assertFalse(permissionController.getPermissions().contains("test3"));
+        permissions = new LinkedList<>();
+        for (Permission permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
+            permissions.add(permission.getName());
+        }
+        assertFalse(permissions.contains("test3"));
 
         //Remove template w/ permission refs
         permissionController.removeTemplate("asdf");
 
         //Check that template is really gone
-        permissions = permissionController.getPermissionsOfTemplate("asdf");
-        assertEquals(permissions.size(), 0);
+        assertEquals(permissionController.getPermissionsOfTemplate("asdf").size(), 0);
 
         //Check that permission is still there
-        assertTrue(permissionController.getPermissions().contains("test"));
+        permissions = new LinkedList<>();
+        for (Permission permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
+            permissions.add(permission.getName());
+        }
+        assertTrue(permissions.contains("test"));
     }
 
     public void testUserDevicesSlashGroupsAndPermissions() throws DatabaseControllerException {
@@ -144,9 +179,11 @@ public class ControllerTest extends InstrumentationTestCase {
         container.register(DatabaseConnector.KEY, new DatabaseConnector());
         container.register(PermissionController.KEY, new PermissionController());
         container.register(UserManagementController.KEY, new UserManagementController());
+        container.register(SlaveController.KEY, new SlaveController());
         PermissionController permissionController = container.require(PermissionController.KEY);
         UserManagementController userManagementController =
                 container.require(UserManagementController.KEY);
+        SlaveController slaveController = container.require(SlaveController.KEY);
 
         //Init stuff to test with. init already tested in testTemplatesAndPermissions
         permissionController.addTemplate("tmplll");
@@ -154,9 +191,12 @@ public class ControllerTest extends InstrumentationTestCase {
         permissionController.changeTemplateName("tmplll", "tmpl");
         permissionController.addTemplate("tmpl2");
         permissionController.addTemplate("tmpl3");
-        permissionController.addPermission("perm1");
-        permissionController.addPermission("perm2");
-        permissionController.addPermission("perm3");
+        permissionController.addPermission(new Permission("perm1"));
+        permissionController.addPermission(new Permission("perm2"));
+        //Permission w/ module
+        slaveController.addSlave(new Slave("abc", new DeviceID("111")));
+        slaveController.addModule(new Module("m1", new DeviceID("111"), new USBAccessPoint(1)));
+        permissionController.addPermission(new Permission("perm3", "m1"));
 
         //Rename to already existing
         try {
@@ -289,34 +329,34 @@ public class ControllerTest extends InstrumentationTestCase {
         assertEquals(userManagementController.getUserDevice(new DeviceID("4")).getInGroup(), "grp3");
 
         //Test permissions w/ userdevices
-        permissionController.addUserPermission(new DeviceID("1"), "perm1");
-        permissionController.addUserPermission(new DeviceID("2"), "perm2");
-        permissionController.addUserPermission(new DeviceID("4"), "perm2");
-        permissionController.addUserPermission(new DeviceID("4"), "perm1");
-        permissionController.addUserPermission(new DeviceID("4"), "perm3");
+        permissionController.addUserPermission(new DeviceID("1"), new Permission("perm1"));
+        permissionController.addUserPermission(new DeviceID("2"), new Permission("perm2"));
+        permissionController.addUserPermission(new DeviceID("4"), new Permission("perm2"));
+        permissionController.addUserPermission(new DeviceID("4"), new Permission("perm1"));
+        permissionController.addUserPermission(new DeviceID("4"), new Permission("perm3", "m1"));
 
         //Add none existing permissions or devices
         try {
-            permissionController.addUserPermission(new DeviceID("4"), "zzz");
+            permissionController.addUserPermission(new DeviceID("4"), new Permission("zzz"));
             Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
         try {
-            permissionController.addUserPermission(new DeviceID("44"), "perm3");
-            Assert.fail("Permission controller should have thrown UnknownReferenceException");
+            permissionController.addUserPermission(new DeviceID("44"), new Permission("perm3", "m1"));
+                    Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
 
         //Remove permission
-        permissionController.removeUserPermission(new DeviceID("4"), "perm2");
+        permissionController.removeUserPermission(new DeviceID("4"), new Permission("perm2"));
         //Remove permission user doesn't have
-        permissionController.removeUserPermission(new DeviceID("1"), "perm2");
+        permissionController.removeUserPermission(new DeviceID("1"), new Permission("perm2"));
         //Remove permission user that doesn't exist
-        permissionController.removeUserPermission(new DeviceID("1"), "asdfas");
+        permissionController.removeUserPermission(new DeviceID("1"), new Permission("asdfas"));
         //Remove permission from user that doesn't exist
-        permissionController.removeUserPermission(new DeviceID("1000"), "perm2");
+        permissionController.removeUserPermission(new DeviceID("1000"), new Permission("perm2"));
 
         //Check no changes to userdevices in database
         assertTrue(userManagementController.getUserDevices().size() == 3);
@@ -326,12 +366,12 @@ public class ControllerTest extends InstrumentationTestCase {
         assertTrue(userManagementController.getUserDevice(new DeviceID("4")) != null);
 
         //check removal of permissions
-        assertTrue(permissionController.hasPermission(new DeviceID("2"), "perm2"));
-        assertFalse(permissionController.hasPermission(new DeviceID("2"), "asdf"));
-        assertFalse(permissionController.hasPermission(new DeviceID("1"), "perm2"));
-        assertFalse(permissionController.hasPermission(new DeviceID("4"), "perm2"));
-        assertTrue(permissionController.hasPermission(new DeviceID("4"), "perm1"));
-        assertTrue(permissionController.hasPermission(new DeviceID("4"), "perm3"));
+        assertTrue(permissionController.hasPermission(new DeviceID("2"), new Permission("perm2")));
+        assertFalse(permissionController.hasPermission(new DeviceID("2"), new Permission("asdf")));
+        assertFalse(permissionController.hasPermission(new DeviceID("1"), new Permission("perm2")));
+        assertFalse(permissionController.hasPermission(new DeviceID("4"), new Permission("perm2")));
+        assertTrue(permissionController.hasPermission(new DeviceID("4"), new Permission("perm1")));
+        assertTrue(permissionController.hasPermission(new DeviceID("4"), new Permission("perm3", "m1")));
 
         //Test name change
         userManagementController.changeUserDeviceName("u1", "1u");
