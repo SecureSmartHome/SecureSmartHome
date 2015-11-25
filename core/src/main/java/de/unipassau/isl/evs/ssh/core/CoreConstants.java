@@ -40,4 +40,14 @@ public class CoreConstants {
     public class SharedPrefs {
         public static final String PREF_MASTER_ID = "ssh.core.MASTER_ID";
     }
+
+    public class RoutingKeys {
+        //Master
+        public static final String MASTER_LIGHT_GET = "/master/light/get";
+        public static final String MASTER_LIGHT_SET = "/master/light/set";
+
+        //Slave
+        public static final String SLAVE_LIGHT_GET = "/slave/light/get";
+        public static final String SLAVE_LIGHT_SET = "/slave/light/set";
+    }
 }
