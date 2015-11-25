@@ -34,15 +34,11 @@ public class SlaveLightHandler implements MessageHandler {
         DeviceID fromID = message.getFromID();
 
         if (message.getPayload() instanceof LightPayload) {
-            LightPayload payload = (LightPayload) message.getPayload();
-
-            String moduleName = payload.getModuleName();
-
             if (message.getRoutingKey().equals(CoreConstants.RoutingKeys.SLAVE_LIGHT_SET)) {
-                switchLight(payload, fromID, plugSwitch);
-                replyStatus(fromID,moduleName);
+                switchLight(message, plugSwitch);
+                replyStatus(message);
             } else if (message.getRoutingKey().equals(CoreConstants.RoutingKeys.SLAVE_LIGHT_GET)) {
-                replyStatus(fromID,moduleName);
+                replyStatus(message);
             }
         } else {
             //TODO check Routing key
@@ -76,12 +72,11 @@ public class SlaveLightHandler implements MessageHandler {
 
     /**
      * Method the hides switching the light on and off
-     *
-     * @param payload which contains the info if the light should be switched on and off
-     * @param fromID DeviceID which requested switching the light (needed for possible responses)
+     * @param original message that should get a reply
      * @param plugSwitch representing the driver of the lamp which is to be switched
      */
-    private void switchLight(LightPayload payload, DeviceID fromID, EdimaxPlugSwitch plugSwitch) {
+    private void switchLight(Message.AddressedMessage original, EdimaxPlugSwitch plugSwitch) {
+        LightPayload payload = (LightPayload) original.getPayload();
         try {
             if (payload.getOn()) {
                 if (!plugSwitch.isOn()) {
@@ -93,34 +88,42 @@ public class SlaveLightHandler implements MessageHandler {
                 }
             }
         } catch (EvsIoException | SAXException | IOException | ParserConfigurationException e) {
-            String routingKey = CoreConstants.RoutingKeys.MASTER_LIGHT_SET;
-
             Log.e(this.getClass().getSimpleName(), "Cannot switch lamp due to error", e);
-            Message reply = new Message(new MessageErrorPayload(routingKey, payload));
-            OutgoingRouter router = dispatcher.getContainer().require(OutgoingRouter.KEY);
-            router.sendMessage(fromID, routingKey, reply);
+            sendErrorMessage(original);
         }
     }
 
     /**
      * Sends a reply containing an info whether the light is on or off
      *
-     * @param fromID DeviceID of the device that requested the light status
-     * @param moduleName of the module which is to be checked
+     * @param original message that should get a reply
      */
-    private void replyStatus(DeviceID fromID, String moduleName) {
+    private void replyStatus(Message.AddressedMessage original) {
+        LightPayload payload = (LightPayload) original.getPayload();
+        String moduleName = payload.getModuleName();
+
         Message reply;
         try {
             reply = new Message(new LightPayload(plugSwitch.isOn(), moduleName));
-            OutgoingRouter router = dispatcher.getContainer().require(OutgoingRouter.KEY);
-            router.sendMessage(fromID, CoreConstants.RoutingKeys.MASTER_LIGHT_GET, reply);
-        } catch (IOException | ParserConfigurationException | EvsIoException | SAXException e) {
-            String routingKey = CoreConstants.RoutingKeys.MASTER_LIGHT_GET;
+            reply.putHeader(Message.HEADER_REFERENCES_ID, original.getHeader(Message.HEADER_MESSAGE_ID)); //TODO: getSequenzeNumber
+            reply.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
+            OutgoingRouter router = dispatcher.getContainer().require(OutgoingRouter.KEY);
+            router.sendMessage(original.getFromID(), original.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
+        } catch (IOException | ParserConfigurationException | EvsIoException | SAXException e) {
             Log.e(this.getClass().getSimpleName(), "Cannot retrieve lamp status due to error", e);
-            reply = new Message(new MessageErrorPayload(routingKey, null));
-            dispatcher.getContainer().require(OutgoingRouter.KEY).sendMessage(fromID, routingKey,
-                    reply);
+            sendErrorMessage(original);
         }
+    }
+
+    private void sendErrorMessage(Message.AddressedMessage original) {
+        Message reply;
+
+        String routingKey = original.getHeader(Message.HEADER_REPLY_TO_KEY);
+        reply = new Message(new MessageErrorPayload(routingKey, null));
+        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getHeader(Message.HEADER_MESSAGE_ID)); //TODO: getSequenzeNumber
+        reply.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
+
+        dispatcher.getContainer().require(OutgoingRouter.KEY).sendMessage(original.getFromID(), routingKey, reply);
     }
 }
