@@ -99,14 +99,4 @@ public class MasterLightHandler extends AbstractMasterHandler {
         }
 
     }
-
-    @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-
-    }
 }

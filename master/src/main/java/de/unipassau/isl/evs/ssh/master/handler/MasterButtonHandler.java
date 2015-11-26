@@ -24,16 +24,4 @@ import de.unipassau.isl.evs.ssh.master.database.SlaveController;
  * @author leon
  */
 public class MasterButtonHandler extends AbstractMasterHandler {
-
-    @Override
-    public void handle(Message.AddressedMessage message) {
-    }
-
-    @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-    }
 }
