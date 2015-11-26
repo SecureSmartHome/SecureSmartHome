@@ -94,11 +94,17 @@ public class CoreConstants {
         public static final String APP_MODULES_GET = "/app/module/get";
     }
 
+    /**
+     * @author leon
+     */
     public class LogActions {
         public static final String LIGHT_ON_ACTION = "LightOn";
         public static final String LIGHT_OFF_ACTION = "LightOff";
     }
 
+    /**
+     * @author leon
+     */
     public class NotificationTypes {
         public static final String ODROID_ADDED = "OdroidAdded";
         public static final String HUMIDITY_WARNING = "HumidityWarning";
