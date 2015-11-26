@@ -19,6 +19,7 @@ public class MasterNotificationHandler extends AbstractMasterHandler {
         if (message.getPayload() instanceof NotificationPayload) {
             NotificationPayload notificationPayload = (NotificationPayload) message.getPayload();
             Message messageToSend = new Message(notificationPayload);
+            messageToSend.putHeader(Message.HEADER_REFERENCES_ID, message.getHeader(Message.HEADER_REFERENCES_ID));
 
             //which functionality
             if (true) { //Todo: check permission
@@ -39,6 +40,7 @@ public class MasterNotificationHandler extends AbstractMasterHandler {
             NotificationWithPicturePayload notificationWithPicturePayload =
                     (NotificationWithPicturePayload) message.getPayload();
             Message messageToSend = new Message(notificationWithPicturePayload);
+            messageToSend.putHeader(Message.HEADER_REFERENCES_ID, message.getHeader(Message.HEADER_REFERENCES_ID));
 
             //which functionality
             if (true) { //Todo: check permission
