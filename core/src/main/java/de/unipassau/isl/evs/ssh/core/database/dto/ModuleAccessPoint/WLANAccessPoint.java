@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint;
 
 /**
+ * ModuleAccessPoint class for a WLAN access point.
  * @author leon
  */
 public class WLANAccessPoint extends ModuleAccessPoint {
