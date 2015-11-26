@@ -8,6 +8,7 @@ package de.unipassau.isl.evs.ssh.drivers.lib;
 
 import android.util.Base64;
 
+import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import org.w3c.dom.Document;
@@ -29,6 +30,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 public class EdimaxPlugSwitch implements Component {
+    public static final Key<EdimaxPlugSwitch> KEY = new Key<>(EdimaxPlugSwitch.class);
+
     String URL;
     String USER;
     String PASS;
