@@ -14,6 +14,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 /**
+ * Offers high level methods to interact with the tables associated with users and groups in the database.
  * @author leon
  */
 public class UserManagementController extends AbstractComponent {
