@@ -8,6 +8,7 @@ import de.ncoder.typedmap.Key;
 import de.ncoder.typedmap.TypedMap;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import io.netty.channel.ChannelFuture;
 
 /**
  * Message are used to exchange information between devices and handlers.
@@ -103,7 +104,7 @@ public class Message implements Serializable {
      * @param toID       ID of the receiving device.
      * @param routingKey Alias of the receiving Handler.
      */
-    public AddressedMessage setDestination(DeviceID fromID, DeviceID toID, String routingKey) {
+    AddressedMessage setDestination(DeviceID fromID, DeviceID toID, String routingKey) {
         this.putHeader(HEADER_TIMESTAMP, System.currentTimeMillis());
         return new AddressedMessage(this, fromID, toID, routingKey);
     }
@@ -116,6 +117,8 @@ public class Message implements Serializable {
         private final DeviceID toID;
         private final String routingKey;
         private final int sequenceNr;
+
+        private transient ChannelFuture sendFuture;
 
         private AddressedMessage(Message from, DeviceID fromID, DeviceID toID, String routingKey) {
             this(new TypedMap<>(from.headers), from.payload, fromID, toID, routingKey);
@@ -148,6 +151,14 @@ public class Message implements Serializable {
 
         public int getSequenceNr() {
             return sequenceNr;
+        }
+
+        public ChannelFuture getSendFuture() {
+            return sendFuture;
+        }
+
+        void setSendFuture(ChannelFuture sendFuture) {
+            this.sendFuture = sendFuture;
         }
 
         @Override
