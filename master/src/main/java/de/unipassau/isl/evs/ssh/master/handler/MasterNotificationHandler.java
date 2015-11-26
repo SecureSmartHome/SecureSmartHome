@@ -7,6 +7,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationWithPicturePayload;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 
 /**
@@ -18,28 +19,55 @@ public class MasterNotificationHandler extends AbstractMasterHandler {
         if (message.getPayload() instanceof NotificationPayload) {
             NotificationPayload notificationPayload = (NotificationPayload) message.getPayload();
             Message messageToSend = new Message(notificationPayload);
-            messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
-            messageToSend.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
             //which functionality
-            switch (message.getRoutingKey()) {
-                //Send notification
-                case CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND:
-                    for (UserDevice userDevice : incomingDispatcher.getContainer().require(PermissionController.KEY)
-                            .getAllUserDevicesWithPermission(new Permission(notificationPayload.getMessage(), null))) {
-                            incomingDispatcher.getContainer().require(OutgoingRouter.KEY)
-                                    .sendMessage(userDevice.getUserDeviceID(),
-                                            CoreConstants.RoutingKeys.MASTER_NOTIFICATION_RECEIVE, messageToSend);
-                    }
-                    break;
-                default:
-                    sendErrorMessage(message);
-                    break;
+            if (true) { //Todo: check permission
+                switch (message.getRoutingKey()) {
+                    //Send notification
+                    case CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND:
+                        sendMessageToAllReceivers(messageToSend, notificationPayload.getType(),
+                                CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE);
+                        break;
+                    default:
+                        sendErrorMessage(message);
+                        break;
+                }
+            } else {
+                sendErrorMessage(message);
             }
+        } else if (message.getPayload() instanceof NotificationWithPicturePayload) {
+            NotificationWithPicturePayload notificationWithPicturePayload =
+                    (NotificationWithPicturePayload) message.getPayload();
+            Message messageToSend = new Message(notificationWithPicturePayload);
+
+            //which functionality
+            if (true) { //Todo: check permission
+                switch (message.getRoutingKey()) {
+                    //Send notification with picture
+                    case CoreConstants.RoutingKeys.MASTER_NOTIFICATION_PICTURE_SEND:
+                        sendMessageToAllReceivers(messageToSend, notificationWithPicturePayload.getType(),
+                                CoreConstants.RoutingKeys.APP_NOTIFICATION_PICTURE_RECEIVE);
+                        break;
+                    default:
+                        sendErrorMessage(message);
+                        break;
+                }
+            } else {
+                sendErrorMessage(message);
+            }
+
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             //Todo: handle error
         } else {
             sendErrorMessage(message);
+        }
+    }
+
+    private void sendMessageToAllReceivers(Message messageToSend, String type, String routingKey) {
+        for (UserDevice userDevice : incomingDispatcher.getContainer().require(PermissionController.KEY)
+                .getAllUserDevicesWithPermission(new Permission(type, null))) {
+            incomingDispatcher.getContainer().require(OutgoingRouter.KEY)
+                    .sendMessage(userDevice.getUserDeviceID(), routingKey, messageToSend);
         }
     }
 }

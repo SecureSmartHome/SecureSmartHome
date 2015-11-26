@@ -88,15 +88,17 @@ public class CoreConstants {
         public static final String MASTER_DOOR_RINGS = "/master/doorbell/ring";
         public static final String MASTER_CAMERA_GET = "/master/camera/get";
         public static final String MASTER_NOTIFICATION_SEND = "/master/notification/send";
+        public static final String MASTER_NOTIFICATION_PICTURE_SEND = "/master/notification/picture_send";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
         public static final String SLAVE_LIGHT_SET = "/slave/light/set";
         public static final String SLAVE_CAMERA_GET = "slave/camera/get";
-        public static final String MASTER_NOTIFICATION_RECEIVE = "/app/notification/receive";
 
         //App
         public static final String APP_MODULES_GET = "/app/module/get";
+        public static final String APP_NOTIFICATION_RECEIVE = "/app/notification/receive";
+        public static final String APP_NOTIFICATION_PICTURE_RECEIVE = "/app/notification/picture_receive";
     }
 
     public class LogActions {
