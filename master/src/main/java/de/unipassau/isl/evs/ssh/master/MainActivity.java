@@ -58,8 +58,10 @@ public class MainActivity extends BoundActivity {
             @Override
             public void onClick(View v) {
                 Message message = new Message();
-                ChannelFuture future = requireComponent(OutgoingRouter.KEY).sendMessageToMaster("/demo", message);
+                //ChannelFuture future =
+                requireComponent(OutgoingRouter.KEY).sendMessageToMaster("/demo", message);
                 log("OUT:" + message.toString());
+                /*
                 future.addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(final ChannelFuture future) throws Exception {
@@ -77,6 +79,7 @@ public class MainActivity extends BoundActivity {
                         });
                     }
                 });
+                */
             }
         });
     }
