@@ -122,7 +122,7 @@ public class DatabaseConnector extends AbstractComponent {
                 + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME + " VARCHAR,"
                 + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD + " VARCHAR,"
                 + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP + " VARCHAR,"
-                + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE + "VARCHAR NOT NULL,"
+                + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE + " VARCHAR NOT NULL,"
                 + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE + " VARCHAR CHECK("
                 + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE + " = '" + GPIOAccessPoint.TYPE + "' or "
                 + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE + " = '" + USBAccessPoint.TYPE + "' or "

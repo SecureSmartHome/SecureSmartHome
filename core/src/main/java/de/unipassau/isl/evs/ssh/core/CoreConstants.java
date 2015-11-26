@@ -67,7 +67,7 @@ public class CoreConstants {
     }
 
     public class ModuleType {
-        public static final String LAMP = "Lamp";
+        public static final String LIGHT = "Light";
         public static final String WEATHER_BOARD = "WeatherBoard";
         public static final String DOOR_BUZZER = "DoorBuzzer";
         public static final String DOOR_SENSOR = "DoorSensor";

@@ -75,13 +75,14 @@ public class SlaveController extends AbstractComponent {
                             + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME + ", "
                             + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD + ", "
                             + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE + ", "
                             + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE + ", "
                             + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + ", "
                             + DatabaseContract.ElectronicModule.COLUMN_NAME + ") values "
-                            + "(?, ?, ?, ?, ?, ?, ?, (" + SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY + "), ?)",
+                            + "(?, ?, ?, ?, ?, ?, ?, ?, (" + SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY + "), ?)",
                     ObjectArrays.concat(
                             createCombinedModulesAccessInformationFromSingle(module.getModuleAccessPoint()),
-                            new String[] { module.getModuleAccessPoint().getType(),
+                            new String[] { module.getModuleType(), module.getModuleAccessPoint().getType(),
                                     module.getAtSlave().getId(), module.getName() }, String.class));
         } catch (SQLiteConstraintException sqlce) {
             throw new DatabaseControllerException("The given Slave does not exist in the database"
@@ -113,6 +114,7 @@ public class SlaveController extends AbstractComponent {
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE
                 + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
@@ -129,12 +131,12 @@ public class SlaveController extends AbstractComponent {
             }
             ModuleAccessPoint moduleAccessPoint = ModuleAccessPoint
                     .fromCombinedModuleAccessPointInformation(combinedModuleAccessPointInformation,
-                            modulesCursor.getString(
-                                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION));
+                            modulesCursor.getString(ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 1));
             modules.add(new Module(modulesCursor.getString(
-                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2), new DeviceID(
+                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 3), new DeviceID(
                     modulesCursor.getString(
-                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 1)),
+                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2)),
+                    modulesCursor.getString(ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION),
                     moduleAccessPoint));
         }
         return modules;
@@ -154,6 +156,7 @@ public class SlaveController extends AbstractComponent {
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE
                 + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
@@ -171,12 +174,11 @@ public class SlaveController extends AbstractComponent {
             }
             ModuleAccessPoint moduleAccessPoint = ModuleAccessPoint
                     .fromCombinedModuleAccessPointInformation(combinedModuleAccessPointInformation,
-                            moduleCursor.getString(
-                                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION));
+                            moduleCursor.getString(ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 1));
             return new Module(moduleCursor.getString(
-                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2), new DeviceID(
-                    moduleCursor.getString(
-                            ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 1)),
+                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 3), new DeviceID(
+                    moduleCursor.getString(ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2)),
+                    moduleCursor.getString(ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION),
                     moduleAccessPoint);
         }
         return null;
@@ -196,6 +198,7 @@ public class SlaveController extends AbstractComponent {
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE
                 + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
@@ -214,12 +217,11 @@ public class SlaveController extends AbstractComponent {
             }
             ModuleAccessPoint moduleAccessPoint = ModuleAccessPoint
                     .fromCombinedModuleAccessPointInformation(combinedModuleAccessPointInformation,
-                            modulesCursor.getString(
-                                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION));
+                            modulesCursor.getString(ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 1));
             modules.add(new Module(modulesCursor.getString(
-                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2), new DeviceID(
-                    modulesCursor.getString(
-                            ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 1)),
+                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 3), new DeviceID(
+                    modulesCursor.getString(ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2)),
+                    modulesCursor.getString(ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION),
                     moduleAccessPoint));
         }
         return modules;
