@@ -428,7 +428,7 @@ public class PermissionController extends AbstractComponent {
                     + " = g." + DatabaseContract.Group.COLUMN_ID
                     + " where p." + DatabaseContract.Permission.COLUMN_NAME
                     + " = ? and p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
-                    + " = NULL", new String[]{ permission.getName(), permission.getModuleName() });
+                    + " is NULL", new String[]{ permission.getName(), permission.getModuleName() });
         } else {
             userDevicesCursor = databaseConnector.executeSql("select"
                     + "u." + DatabaseContract.UserDevice.COLUMN_NAME
