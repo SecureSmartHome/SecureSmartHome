@@ -7,16 +7,10 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
  */
 public class MessageErrorPayload implements MessagePayload {
 
-    String receiver;
     MessagePayload original;
 
-    public MessageErrorPayload(String receiver, MessagePayload original) {
-        this.receiver = receiver;
+    public MessageErrorPayload(MessagePayload original) {
         this.original = original;
-    }
-
-    public String getReceiver() {
-        return receiver;
     }
 
     public MessagePayload getOriginal() {

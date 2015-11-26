@@ -44,7 +44,7 @@ public class SlaveLightHandler implements MessageHandler {
             //TODO check Routing key
             String routingKey = CoreConstants.RoutingKeys.MASTER_LIGHT_GET;
 
-            Message reply = new Message(new MessageErrorPayload(routingKey, message.getPayload()));
+            Message reply = new Message(new MessageErrorPayload(message.getPayload()));
             dispatcher.getContainer().require(OutgoingRouter.KEY).sendMessage(fromID, routingKey, reply);
         }
     }
@@ -105,7 +105,7 @@ public class SlaveLightHandler implements MessageHandler {
         Message reply;
         try {
             reply = new Message(new LightPayload(plugSwitch.isOn(), moduleName));
-            reply.putHeader(Message.HEADER_REFERENCES_ID, original.getHeader(Message.HEADER_MESSAGE_ID)); //TODO: getSequenzeNumber
+            reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr()); //TODO: getSequenzeNumber
             reply.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
             OutgoingRouter router = dispatcher.getContainer().require(OutgoingRouter.KEY);
@@ -120,8 +120,8 @@ public class SlaveLightHandler implements MessageHandler {
         Message reply;
 
         String routingKey = original.getHeader(Message.HEADER_REPLY_TO_KEY);
-        reply = new Message(new MessageErrorPayload(routingKey, null));
-        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getHeader(Message.HEADER_MESSAGE_ID)); //TODO: getSequenzeNumber
+        reply = new Message(new MessageErrorPayload(null));
+        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr()); //TODO: getSequenzeNumber
         reply.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
         dispatcher.getContainer().require(OutgoingRouter.KEY).sendMessage(original.getFromID(), routingKey, reply);
