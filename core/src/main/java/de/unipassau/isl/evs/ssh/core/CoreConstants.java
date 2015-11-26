@@ -90,6 +90,9 @@ public class CoreConstants {
         public static final String MASTER_NOTIFICATION_SEND = "/master/notification/send";
         public static final String MASTER_NOTIFICATION_PICTURE_SEND = "/master/notification/picture_send";
         public static final String MASTER_DOOR_BELL_CAMERA_GET = "/master/doorbell/camera/get";
+        public static final String MASTER_DOOR_UNLATCH = "/master/door/unlatch";
+        public static final String MASTER_DOOR_LOCK_SET = "/master/door/lock_set";
+        public static final String MASTER_DOOR_LOCK_GET = "/master/door/lock_get";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
