@@ -155,11 +155,11 @@ public class MainFragment extends Fragment implements MessageHandler {
      *
      * @return All modules from the type door.
      */
-    private List<Module> getDoorModules() {
+/*    private List<Module> getDoorModules() {
         // get list
         // filter door modules
         return null;
-    }
+    }*/
 
     /**
      * Checks if one of the registered lights is turned on.

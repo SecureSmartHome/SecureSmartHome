@@ -54,14 +54,13 @@ public class LightFragment extends Fragment implements MessageHandler {
         }
         return inflater.inflate(R.layout.fragment_light, container, false);
     }
-
     private List<Module> getLightModules() {
         List<Module> list = new LinkedList<>();
-        /*
-        ask database which modules are light-modules. maybe enum with module types
-        get them
-        add them to the list
-        */
+
+        //ask database which modules are light-modules. maybe enum with module types
+//        get them
+//        add them to the list
+
         return list;
     }
 
