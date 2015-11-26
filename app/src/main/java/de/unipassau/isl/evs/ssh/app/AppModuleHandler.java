@@ -9,7 +9,10 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Objects;
 
+import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
@@ -21,7 +24,9 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
  *
  * @author bucher
  */
-public class AppModuleHandler implements MessageHandler {
+public class AppModuleHandler extends AbstractComponent implements MessageHandler {
+    public static final Key<AppModuleHandler> KEY = new Key<>(AppModuleHandler.class);
+
     /**
      * Use sample code to filter for specific components
      * <pre>
@@ -92,5 +97,17 @@ public class AppModuleHandler implements MessageHandler {
 
     @Override
     public void handlerRemoved(String routingKey) {
+    }
+
+    @Override
+    public void init(Container container) {
+        super.init(container);
+        requireComponent(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.APP_MODULES_GET);
+    }
+
+    @Override
+    public void destroy() {
+        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.APP_MODULES_GET);
+        super.destroy();
     }
 }

@@ -11,13 +11,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
+import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
 /**
  * As this Activity also displays information like wether the light is on or not, this Activity also
  * needs to messages concerning that information.
  */
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BoundActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String SAVED_LAST_ACTIVE_FRAGMENT = "de.unipassau.isl.evs.ssh.app.activity.SAVED_LAST_ACTIVE_FRAGMENT";
@@ -25,6 +28,10 @@ public class MainActivity extends AppCompatActivity
     //TODO toolbar
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
+
+    public MainActivity() {
+        super(AppContainer.class);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
