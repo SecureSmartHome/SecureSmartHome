@@ -85,10 +85,11 @@ public class CoreConstants {
         //Master
         public static final String MASTER_LIGHT_GET = "/master/light/get";
         public static final String MASTER_LIGHT_SET = "/master/light/set";
-        public static final String MASTER_DOOR_RINGS = "/master/doorbell/ring";
+        public static final String MASTER_DOOR_BELL_RING = "/master/doorbell/ring";
         public static final String MASTER_CAMERA_GET = "/master/camera/get";
         public static final String MASTER_NOTIFICATION_SEND = "/master/notification/send";
         public static final String MASTER_NOTIFICATION_PICTURE_SEND = "/master/notification/picture_send";
+        public static final String MASTER_DOOR_BELL_CAMERA_GET = "/master/doorbell/camera/get";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";

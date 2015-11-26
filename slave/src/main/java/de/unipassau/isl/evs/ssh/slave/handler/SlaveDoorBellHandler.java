@@ -6,7 +6,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
-import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 
 /**
@@ -47,6 +46,6 @@ public class SlaveDoorBellHandler implements MessageHandler {
         message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
         OutgoingRouter router = dispatcher.getContainer().require(OutgoingRouter.KEY);
-        router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_DOOR_RINGS, message);
+        router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_DOOR_BELL_RING, message);
     }
 }
