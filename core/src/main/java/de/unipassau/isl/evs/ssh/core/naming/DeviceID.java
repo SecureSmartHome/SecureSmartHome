@@ -1,14 +1,15 @@
 package de.unipassau.isl.evs.ssh.core.naming;
 
+import java.io.Serializable;
+
 /**
  * Unique id for all devices (user devices, master, slaves).
  */
-public final class DeviceID {
-
+public final class DeviceID implements Serializable {
     private final String id;
 
     public DeviceID(String id) {
-        this.id = id;
+        this.id = id != null ? id.trim() : id;
     }
 
     public String getId() {
@@ -25,13 +26,11 @@ public final class DeviceID {
         }
 
         DeviceID deviceID = (DeviceID) o;
-
         if (id != null) {
             return id.equals(deviceID.id);
         } else {
             return deviceID.id == null;
         }
-
     }
 
     @Override
@@ -41,6 +40,6 @@ public final class DeviceID {
 
     @Override
     public String toString() {
-        return "DeviceID{id='" + id + '\'' + '}';
+        return '\'' + id + '\'';
     }
 }

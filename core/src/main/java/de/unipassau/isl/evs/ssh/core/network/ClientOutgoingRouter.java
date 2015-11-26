@@ -2,10 +2,13 @@ package de.unipassau.isl.evs.ssh.core.network;
 
 import android.util.Log;
 
+import java.util.Objects;
+
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import io.netty.channel.ChannelFuture;
 
 /**
@@ -24,10 +27,10 @@ public class ClientOutgoingRouter extends OutgoingRouter {
     @Override
     public ChannelFuture sendMessage(DeviceID toID, String routingKey, Message msg) {
         Message.AddressedMessage amsg = msg.setDestination(getLocalID(), toID, routingKey);
-        if (amsg.getToID().equals(getLocalID())) {
+        if (Objects.equals(amsg.getToID(), getLocalID())) {
             requireComponent(IncomingDispatcher.KEY).dispatch(amsg);
             return requireComponent(Client.KEY).getChannel().newSucceededFuture();
-        } else if (amsg.getToID().equals(getMasterID())) {
+        } else if (Objects.equals(amsg.getToID(), getMasterID())) {
             return requireComponent(Client.KEY).getChannel().writeAndFlush(amsg);
         } else {
             IllegalArgumentException e = new IllegalArgumentException("Client " + getLocalID() + " can't send message to other client " + toID);
@@ -35,10 +38,5 @@ public class ClientOutgoingRouter extends OutgoingRouter {
             Log.w(TAG, "sendMessage failed", e);
             return requireComponent(Client.KEY).getChannel().newFailedFuture(e);
         }
-    }
-
-    private DeviceID getMasterID() {
-        //require("KeyStoreManager").getLocalID(); //TODO
-        return null;
     }
 }

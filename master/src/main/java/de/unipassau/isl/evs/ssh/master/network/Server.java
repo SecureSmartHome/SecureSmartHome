@@ -6,16 +6,18 @@ import android.content.SharedPreferences;
 
 import java.net.SocketAddress;
 import java.security.GeneralSecurityException;
-import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.StartupException;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.network.ClientIncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.network.NettyInternalLogger;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -37,6 +39,9 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.DefaultExecutorServiceFactory;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_ALL_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_READER_IDLE_TIME;
@@ -49,10 +54,28 @@ import static de.unipassau.isl.evs.ssh.master.MasterConstants.PREF_SERVER_PORT;
  * The heart of the master server: a netty stack accepting connections from devices and handling communication with them using a netty pipeline.
  * Additionally, it keeps track of timeouts and holds the global connection registry.
  * For details about the pipeline, see {@link #startServer()} and {@link #initChannel(SocketChannel)}.
+ * As this component is only active on the Master, the terms "Master" and "Server" are used interchangeably.
  */
 public class Server extends AbstractComponent {
     public static final Key<Server> KEY = new Key<>(Server.class);
+
     private static final String TAG = Server.class.getSimpleName();
+    /**
+     * The ObjectEncoder shared by all pipelines used for serializing all sent {@link de.unipassau.isl.evs.ssh.core.messaging.Message}s
+     */
+    private final ObjectEncoder sharedObjectEncoder = new ObjectEncoder();
+    /**
+     * Distributes incoming messages to the responsible handlers.
+     */
+    private final ServerIncomingDispatcher incomingDispatcher = new ServerIncomingDispatcher(this);
+    /**
+     * Receives messages from system components and decides how to route them to the targets.
+     */
+    private final ServerOutgoingRouter outgoingRouter = new ServerOutgoingRouter();
+    /**
+     * Reply to UDP Broadcasts from Clients that don't know my IP yet
+     */
+    private UDPDiscoveryServer udpDiscovery = new UDPDiscoveryServer();
     /**
      * The EventLoopGroup used for accepting connections
      */
@@ -62,26 +85,11 @@ public class Server extends AbstractComponent {
      * Use {@link ChannelFuture#sync()} to wait for server startup.
      */
     private ChannelFuture serverChannel;
-
     /**
      * A ChannelGroup containing really <i>all</i> incoming connections.
      * If it isn't contained here, it is not connected to the Server.
      */
     private ChannelGroup connections;
-
-    /**
-     * The ObjectEncoder shared by all pipelines used for serializing all sent {@link de.unipassau.isl.evs.ssh.core.messaging.Message}s
-     */
-    private ObjectEncoder sharedObjectEncoder = new ObjectEncoder();
-    /**
-     * The ObjectDecoder shared by all pipelines used for deserializing all sent {@link de.unipassau.isl.evs.ssh.core.messaging.Message}s
-     */
-    private ObjectDecoder sharedObjectDecoder = new ObjectDecoder(
-            ClassResolvers.weakCachingConcurrentResolver(ClassLoader.getSystemClassLoader()));
-    /**
-     * Distributes incoming messages to the responsible handlers.
-     */
-    private ServerIncomingDispatcher incomingDispatcher = new ServerIncomingDispatcher(this);
 
     /**
      * Init timeouts and the connection registry and start the netty IO server synchronously
@@ -90,9 +98,21 @@ public class Server extends AbstractComponent {
     public void init(Container container) {
         super.init(container);
         try {
-            //TODO require device registry
+            // Configure netty
+            InternalLoggerFactory.setDefaultFactory(new Slf4JLoggerFactory() {
+                @Override
+                public InternalLogger newInstance(String name) {
+                    return new NettyInternalLogger(name);
+                }
+            });
+            ResourceLeakDetector.setLevel(CoreConstants.RESOURCE_LEAK_DETECTION);
+            // Start server
             startServer();
+            // Add related components
             container.register(IncomingDispatcher.KEY, incomingDispatcher);
+            container.register(OutgoingRouter.KEY, outgoingRouter);
+            container.register(UDPDiscoveryServer.KEY, udpDiscovery);
+            //TODO require device registry
         } catch (InterruptedException e) {
             throw new StartupException("Could not start netty server", e);
         }
@@ -109,8 +129,6 @@ public class Server extends AbstractComponent {
         if (isChannelOpen() && isExecutorAlive()) {
             throw new IllegalStateException("Server already running");
         }
-
-        ResourceLeakDetector.setLevel(getResourceLeakDetection());
 
         //Setup the Executor and Connection Pool
         serverExecutor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("server"));
@@ -137,7 +155,7 @@ public class Server extends AbstractComponent {
     /**
      * Configures the per-connection pipeline that is responsible for handling incoming and outgoing data.
      * After an incoming packet is decrypted, decoded and verified,
-     * it will be sent to its target {@link de.unipassau.isl.evs.ssh.core.handler.Handler}
+     * it will be sent to its target {@link de.unipassau.isl.evs.ssh.core.handler.MessageHandler}
      * by the {@link ClientIncomingDispatcher}.
      */
     protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
@@ -151,7 +169,8 @@ public class Server extends AbstractComponent {
         //TODO setup pipeline
         //Handler (de-)serialization
         ch.pipeline().addLast(sharedObjectEncoder.getClass().getSimpleName(), sharedObjectEncoder);
-        ch.pipeline().addLast(sharedObjectDecoder.getClass().getSimpleName(), sharedObjectDecoder);
+        ch.pipeline().addLast(ObjectDecoder.class.getSimpleName(), new ObjectDecoder(
+                ClassResolvers.weakCachingConcurrentResolver(getClass().getClassLoader())));
         ch.pipeline().addLast(LoggingHandler.class.getSimpleName(), new LoggingHandler(LogLevel.TRACE));
         //Timeout Handler
         ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
@@ -159,7 +178,6 @@ public class Server extends AbstractComponent {
         ch.pipeline().addLast(TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
         //Dispatcher
         ch.pipeline().addLast(ClientIncomingDispatcher.class.getSimpleName(), incomingDispatcher);
-
         //Register connection
         connections.add(ch);
     }
@@ -172,12 +190,13 @@ public class Server extends AbstractComponent {
             serverChannel.channel().close();
         }
         if (serverExecutor != null) {
-            serverExecutor.shutdownGracefully(1, 5, TimeUnit.SECONDS); //TODO config grace duration
+            serverExecutor.shutdownGracefully();
         }
+        getContainer().unregister(udpDiscovery);
+        getContainer().unregister(outgoingRouter);
         getContainer().unregister(incomingDispatcher);
         super.destroy();
     }
-
 
     /**
      * Finds the Channel that is contained in a pipeline of a netty IO channel matching the given ID.
@@ -196,28 +215,27 @@ public class Server extends AbstractComponent {
         return null;
     }
 
-    private int getPort() {
-        SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-        return sharedPref.getInt(PREF_SERVER_PORT, DEFAULT_PORT);
-    }
-
-    private ResourceLeakDetector.Level getResourceLeakDetection() {
-        return ResourceLeakDetector.Level.PARANOID;
-    }
-
     /**
-     * EventLoopGroup for the ClientIncomingDispatcher and the ClientOutgoingRouter
+     * EventLoopGroup for the {@link ServerIncomingDispatcher} and the {@link ServerOutgoingRouter}
      */
     EventLoopGroup getExecutor() {
         return serverExecutor;
     }
 
     /**
-     * Channel for the ClientIncomingDispatcher and the ClientOutgoingRouter
+     * Channel for the {@link ServerIncomingDispatcher} and the {@link ServerOutgoingRouter}
      */
     Channel getChannel() {
         return serverChannel != null ? serverChannel.channel() : null;
+    }
+
+    /**
+     * @return the port of the Server set in the SharedPreferences or {@link de.unipassau.isl.evs.ssh.core.CoreConstants#DEFAULT_PORT}
+     */
+    private int getPort() {
+        SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
+                .getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        return sharedPref.getInt(PREF_SERVER_PORT, DEFAULT_PORT);
     }
 
     /**
