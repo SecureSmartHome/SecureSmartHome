@@ -15,8 +15,6 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 public class MasterNotificationHandler extends AbstractMasterHandler {
 
     public void handle(Message.AddressedMessage message) {
-        saveMessage(message);
-
         if (message.getPayload() instanceof NotificationPayload) {
             NotificationPayload notificationPayload = (NotificationPayload) message.getPayload();
             Message messageToSend = new Message(notificationPayload);
