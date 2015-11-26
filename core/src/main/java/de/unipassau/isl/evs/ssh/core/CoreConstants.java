@@ -93,4 +93,9 @@ public class CoreConstants {
         //App
         public static final String APP_MODULES_GET = "/app/module/get";
     }
+
+    public class LogActions {
+        public static final String LIGHT_ON_ACTION = "LightOn";
+        public static final String LIGHT_OFF_ACTION = "LightOff";
+    }
 }
