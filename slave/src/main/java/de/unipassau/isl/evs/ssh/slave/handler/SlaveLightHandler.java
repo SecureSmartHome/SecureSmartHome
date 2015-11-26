@@ -69,7 +69,8 @@ public class SlaveLightHandler implements MessageHandler {
 
     /**
      * Method the hides switching the light on and off
-     * @param original message that should get a reply
+     *
+     * @param original   message that should get a reply
      * @param plugSwitch representing the driver of the lamp which is to be switched
      */
     private void switchLight(Message.AddressedMessage original, EdimaxPlugSwitch plugSwitch) {

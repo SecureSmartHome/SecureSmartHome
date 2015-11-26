@@ -14,10 +14,15 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
+import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
+import de.unipassau.isl.evs.ssh.slave.handler.SlaveLightHandler;
 
 /**
  * This Container class manages dependencies needed in the Slave part of the architecture.
@@ -29,6 +34,10 @@ public class SlaveContainer extends ContainerService {
         register(NamingManager.KEY, new NamingManager(false));
         register(Client.KEY, new Client());
 
+        //FIXME this is temporary for testing until we got everything needed
+        Key<EdimaxPlugSwitch> key = new Key<EdimaxPlugSwitch>(EdimaxPlugSwitch.class, "TestPlugswitch");
+        register(key, new EdimaxPlugSwitch("192.168.0.20", 10000, "admin", "1234"));
+
         // read the master id and cert from local storage as long as adding new devices is not implemented
         readMasterId();
         readMasterCert();
@@ -39,6 +48,12 @@ public class SlaveContainer extends ContainerService {
         // write the slave id and cert to local storage as long as adding new devices is not implemented
         writeSlaveId();
         writeSlaveCert();
+        registerSlaveHandler();
+    }
+
+    private void registerSlaveHandler() {
+        this.require(IncomingDispatcher.KEY).registerHandler(new SlaveLightHandler(),
+                CoreConstants.RoutingKeys.SLAVE_LIGHT_GET, CoreConstants.RoutingKeys.SLAVE_LIGHT_SET);
     }
 
     private void readMasterId() {

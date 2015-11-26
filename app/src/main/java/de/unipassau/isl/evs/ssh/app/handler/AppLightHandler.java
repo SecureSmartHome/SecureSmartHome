@@ -1,42 +1,71 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 
 public class AppLightHandler extends AbstractComponent implements MessageHandler {
+    public static final Key<AppLightHandler> KEY = new Key<>(AppLightHandler.class);
+
     private Container container;
     private IncomingDispatcher dispatcher;
+    private List<HandlerUpdateListener> listeners;
     /**
-     *
+     * todo
      */
     private Map<Module, Boolean> lightStatusMapping;
     /**
-     *
+     * todo
      */
     private long timeStamp;
     /**
-     *
+     * todo
      */
     private final int REFRESH_DELAY = 20000;
 
-    public AppLightHandler(List<Module> list) {
+    /**
+     * todo
+     */
+    public AppLightHandler() {
+        timeStamp = System.currentTimeMillis() - REFRESH_DELAY;
+        listeners = new ArrayList<HandlerUpdateListener>();
+    }
+
+    private void updateList(List<Module> list) {
         lightStatusMapping = new HashMap<Module, Boolean>();
         for (Module m : list) {
             lightStatusMapping.put(m, false);
         }
-        timeStamp = System.currentTimeMillis() - REFRESH_DELAY;
+    }
+
+    public void switchLight(Module module, boolean status) {
+        LightPayload lightPayload = new LightPayload(status, module);
+
+        Message message;
+        message = new Message(lightPayload);
+
+        OutgoingRouter router = dispatcher.getContainer().require(OutgoingRouter.KEY);
+        NamingManager namingManager = dispatcher.getContainer().require(NamingManager.KEY);
+        router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, message);
+    }
+
+    public void toggleLight(Module module) {
+        switchLight(module, !lightStatusMapping.get(module));
     }
 
     public boolean isModuleOn(Module m) {
@@ -46,6 +75,7 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
             }
             timeStamp = System.currentTimeMillis();
         }
+
         return lightStatusMapping.get(m);
     }
 
@@ -61,17 +91,39 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     }
 
     public Map<Module, Boolean> getAllLightModuleStates() {
-        Map copy = new HashMap<Module, Boolean>();
-        for (Module module : lightStatusMapping.keySet()) {
-            copy.put(module, lightStatusMapping.get(module));
+        Map<Module, Boolean> copy = new HashMap<>();
+        if (lightStatusMapping != null) {
+            for (Module module : lightStatusMapping.keySet()) {
+                copy.put(module, lightStatusMapping.get(module));
+            }
         }
+        //fixme delete hardcored object after tests
+        Module m = new Module("TestPlugswitch", new DeviceID("1"), CoreConstants.ModuleType.LIGHT, new WLANAccessPoint());
+        copy.put(m, true);
         return copy;
+    }
+
+    private void updatePerformed() {
+        for (HandlerUpdateListener listener : listeners) {
+            listener.updatePerformed();
+        }
+    }
+
+    public void addHandlerUpdateListener(HandlerUpdateListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeHandlerUpdateListener(HandlerUpdateListener listener) {
+        if (listeners.contains(listener)) {
+            listeners.remove(listener);
+        }
     }
 
     @Override
     public void handle(Message.AddressedMessage message) {
         LightPayload lightPayload = (LightPayload) message.getPayload();
         lightStatusMapping.put(lightPayload.getModule(), lightPayload.getOn());
+        updatePerformed();
     }
 
     @Override
