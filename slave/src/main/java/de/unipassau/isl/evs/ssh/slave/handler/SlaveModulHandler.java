@@ -17,7 +17,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
  */
 public class SlaveModulHandler implements MessageHandler {
 
-    private IncomingDispatcher incomingDispatcher;
     private List<Module> components;
 
     public void updateModule(List<Module> components) {
