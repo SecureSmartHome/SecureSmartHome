@@ -1,10 +1,16 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
+
+import java.util.LinkedList;
+import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
@@ -12,7 +18,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 
 /**
- * This activity allows to display information contained in light messages which are received from the IncomingDispatcher.
+ * This fragment allows to display information contained in light messages which are received from the IncomingDispatcher.
  * Furthermore it generates a light messages as instructed by the UI and passes it to the OutgoingRouter.
  */
 public class LightFragment extends Fragment implements MessageHandler {
@@ -28,8 +34,10 @@ public class LightFragment extends Fragment implements MessageHandler {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
-        /*FIXME outcomment and fix
+        LinearLayout mLinearLayout = (LinearLayout) inflater.inflate(R.layout.fragment_light,
+                container, false);
+        LinearLayout lightButtonLayout = (LinearLayout) mLinearLayout.findViewById(R.id.lightButtonLayout);
+//        FIXME out comment and fix
         List lightModules = getLightModules();
         for (Module m : lightModules) {
             Button light_button = new Button(getActivity());
@@ -42,19 +50,19 @@ public class LightFragment extends Fragment implements MessageHandler {
             } else {
                 light_button.setBackground(Drawable.createFromPath("/drawable-hdpi/light_off.png"));
             }
+            lightButtonLayout.addView(light_button);
         }
         return inflater.inflate(R.layout.fragment_light, container, false);
     }
 
     private List<Module> getLightModules() {
         List<Module> list = new LinkedList<>();
-        *//*
+        /*
         ask database which modules are light-modules. maybe enum with module types
         get them
         add them to the list
-        *//*
-        return list;*/
-        return inflater.inflate(R.layout.fragment_light, container, false); // FIXME delete fater outcommenting
+        */
+        return list;
     }
 
     @Override

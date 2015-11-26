@@ -1,3 +1,4 @@
+<!--@author Phil-->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -9,41 +10,144 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:weightSum="1"
     tools:context="de.unipassau.isl.evs.ssh.app.MainActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/lightButtonLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:orientation="horizontal"
+                android:weightSum="1"
+                android:elevation="8dp">
+
+                <LinearLayout
+                    android:layout_width="125dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginLeft="25dp"
+                    android:layout_gravity="center">
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8sp"
+                        android:layout_marginBottom="25sp"
+                        android:textSize="@dimen/typography_display1"
+                        android:textColor="@color/colorSecondaryText"
+                        android:text="@string/nav_light_string"
+                        />
+
+                    <Button
+                        android:id="@+id/button1"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/button_green"
+                        android:padding="16dp"
+                        android:text="@string/string_turn_on"
+                        android:textSize="18sp"
+                        />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/image1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center|top"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_weight="1"
+                    android:adjustViewBounds="true"
+
+                    android:background="?android:selectableItemBackground"
+                    android:padding="20dp"
+                    android:src="@drawable/ic_light_off"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:orientation="horizontal"
+                android:weightSum="1"
+                android:elevation="8dp">
+
+                <LinearLayout
+                    android:layout_width="125dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginLeft="25dp"
+                    android:layout_gravity="center">
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8sp"
+                        android:layout_marginBottom="25sp"
+                        android:textSize="@dimen/typography_display1"
+                        android:textColor="@color/colorSecondaryText"
+                        android:text="@string/nav_light_string"
+                        />
+
+                    <Button
+                        android:id="@+id/button2"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/button_red"
+                        android:padding="16dp"
+                        android:text="@string/string_turn_off"
+                        android:textSize="18sp"
+                        />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/image2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center|top"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_weight="1"
+                    android:adjustViewBounds="true"
+
+                    android:background="?android:selectableItemBackground"
+                    android:padding="20dp"
+                    android:src="@drawable/ic_light_on"
+                    />
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </ScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/light_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="@dimen/activity_vertical_margin"
         android:clickable="true"
+        android:elevation="6dp"
         android:longClickable="false"
         android:scaleType="center"
         android:src="@drawable/ic_add"
         app:borderWidth="0dp"
-        app:elevation="6dp"
-        app:pressedTranslationZ="12dp"
-        app:rippleColor="@color/colorWhite"
-        />
-
-    <Button
-        android:id="@+id/button"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_gravity="left|top"
-        android:text="text"
-        />
-
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_gravity="left|top"
-        android:text="text"
-        />
-
+        app:pressedTranslationZ="12dp"/>
 
 </FrameLayout>
 

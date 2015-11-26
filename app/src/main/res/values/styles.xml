@@ -1,11 +1,5 @@
 <resources>
 
-    <style name="DarkAppTheme" parent="Theme.AppCompat.Light">
-        <!-- Settings for pre-Android 5 devices -->
-
-    </style>
-
-
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>

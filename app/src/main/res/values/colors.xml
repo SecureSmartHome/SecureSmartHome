@@ -3,8 +3,8 @@
     <color name="colorPrimary">#2979FF</color>
     <color name="colorPrimaryDark">#cf2979ff</color>
     <color name="colorPrimaryLight">#448AFF</color>
-    <color name="colorBackground">#82B1FF</color>
-    <color name="colorAccent">#FF6D00</color>
+    <color name="colorBackground">#f5ffffff</color>
+    <color name="colorAccent">#fb8c00</color>
     <color name="colorControlHighlight">#90CAF9</color>
 
     <color name="colorPrimaryText">#FFFFFF</color>
@@ -17,6 +17,11 @@
     <color name="colorIcons">#FFFFFF</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorDivider">#B6B6B6</color>
+
+    <!--button status-->
+    <color name="button_red">#F44336</color>
+    <color name="button_green">#4CAF50</color>
+
 
     <!-- google's material design colors from
     http://www.google.com/design/spec/style/color.html#color-ui-color-palette -->

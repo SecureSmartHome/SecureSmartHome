@@ -2,47 +2,23 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="110dp"
+    android:layout_height="@dimen/nav_header_height"
+    android:paddingTop="@dimen/nav_header_vertical_spacing"
     android:background="@drawable/nav_drawer_background"
     android:elevation="16dp"
     android:orientation="vertical">
-    <!--
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/profile_image"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="24dp"
-            android:src="@drawable/nav_house"
-            app:border_color="#FF000000"/>
-    -->
-    <!--
-        <TextView
-            android:id="@+id/username"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignStart="@+id/profile_image"
-            android:layout_below="@+id/profile_image"
-            android:layout_marginBottom="8dp"
-            android:gravity="start"
-            android:text="@string/secure_smart_home"
-            android:textColor="@color/colorPrimaryText"
-            android:textSize="24sp"
-            android:textStyle="bold"/>
-        -->
+
     <TextView
         android:id="@+id/nav_draw_ssh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="65sp"
-        android:layout_marginBottom="12sp"
-        android:layout_marginStart="16dp"
+        android:layout_marginBottom="@dimen/nav_text_margin_bottom"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/nav_text_margin_top"
         android:gravity="start"
         android:text="@string/secure_smart_home"
         android:textColor="@color/colorPrimaryText"
-        android:textSize="30sp"
+        android:textSize="@dimen/typography_headline2"
         android:textStyle="bold"/>
 
 </RelativeLayout>
