@@ -35,6 +35,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
                 switch (message.getRoutingKey()) {
                     //Get status
                     case CoreConstants.RoutingKeys.MASTER_CAMERA_GET:
+                        //Check permission. Todo: give master permission.
                         if (incomingDispatcher.getContainer().require(PermissionController.KEY).
                                 hasPermission(message.getFromID(),
                                         new Permission(DatabaseContract.Permission.Values.REQUEST_CAMERA_STATUS,
