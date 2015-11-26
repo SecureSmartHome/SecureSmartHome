@@ -56,7 +56,8 @@ public class MainActivity extends BoundActivity {
             @Override
             public void onClick(View v) {
                 Message message = new Message();
-                ChannelFuture future = requireComponent(OutgoingRouter.KEY).sendMessageToMaster("/demo", message);
+                ChannelFuture future = requireComponent(OutgoingRouter.KEY).sendMessageToMaster("/demo", message)
+                        .getSendFuture();
                 log("OUT:" + message.toString());
                 future.addListener(new ChannelFutureListener() {
                     @Override

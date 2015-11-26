@@ -29,7 +29,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         doorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                parent.showFragmentByID(R.id.nav_door);
+                parent.showFragmentByClass(DoorFragment.class);
             }
         });
 
@@ -37,7 +37,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         lightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                parent.showFragmentByID(R.id.nav_light);
+                parent.showFragmentByClass(LightFragment.class);
             }
         });
 
@@ -45,7 +45,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         climateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                parent.showFragmentByID(R.id.nav_climate);
+                parent.showFragmentByClass(ClimateFragment.class);
             }
         });
 
@@ -53,7 +53,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         holidayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                parent.showFragmentByID(R.id.nav_holiday);
+                parent.showFragmentByClass(HolidayFragment.class);
             }
         });
 
@@ -61,7 +61,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         statusButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                parent.showFragmentByID(R.id.nav_status);
+                parent.showFragmentByClass(StatusFragment.class);
             }
         });
 
@@ -69,7 +69,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         usersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                parent.showFragmentByID(R.id.nav_addNewUserDevice);
+                parent.showFragmentByClass(ModifyPermissionFragment.class);
             }
         });
         return mLinearLayout;

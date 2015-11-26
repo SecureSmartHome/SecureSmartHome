@@ -44,7 +44,13 @@ public class MainActivity extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        if (savedInstanceState == null || !savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
+        if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
+            try {
+                showFragmentByClass(Class.forName(savedInstanceState.getString(SAVED_LAST_ACTIVE_FRAGMENT)));
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        } else {
             MainFragment fragment = new MainFragment();
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
@@ -90,50 +96,69 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(SAVED_LAST_ACTIVE_FRAGMENT, true);
+        outState.putString(SAVED_LAST_ACTIVE_FRAGMENT, getCurrentFragment().getClass().getSimpleName());
+    }
+
+    private Fragment getCurrentFragment(){
+        return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
     }
 
     /**
      * Displays a fragment and takes care of livecycle actions like saving state when rotating the
      * screen or managing the back button behavior.
      *
-     * @param id the resource id of the fragment
+     * @param clazz the class of the fragment to show
      */
-    public void showFragmentByID(int id) {
-        Fragment fragment;
+    public void showFragmentByClass(Class clazz){
+        Class oldFragment = getCurrentFragment().getClass();
+        Fragment fragment = null;
+        try {
+            fragment = (Fragment) clazz.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        if (fragment != null) {
+            android.support.v4.app.FragmentTransaction fragmentTransaction =
+                    getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, fragment);
+            if (!oldFragment.isInstance(fragment)) {
+                fragmentTransaction.addToBackStack(null);
+            }
+            fragmentTransaction.commit();
+        }
+    }
+
+    private void showFragmentByClass(int id) {
+        Class clazz;
         if (id == R.id.nav_home) {
-            fragment = new MainFragment();
+            clazz = MainFragment.class;
         } else if (id == R.id.nav_door) {
-            fragment = new DoorFragment();
+            clazz = DoorFragment.class;
         } else if (id == R.id.nav_light) {
-            fragment = new LightFragment();
+            clazz = LightFragment.class;
         } else if (id == R.id.nav_climate) {
-            fragment = new ClimateFragment();
+            clazz = ClimateFragment.class;
         } else if (id == R.id.nav_holiday) {
-            fragment = new HolidayFragment();
+            clazz = HolidayFragment.class;
         } else if (id == R.id.nav_status) {
-            fragment = new StatusFragment();
+            clazz = StatusFragment.class;
         } else if (id == R.id.nav_modifyPermissions) {
-            fragment = new ModifyPermissionFragment();
+            clazz = ModifyPermissionFragment.class;
         } else if (id == R.id.nav_addNewUserDevice) {
-            fragment = new AddNewUserDeviceFragment();
+            clazz = AddNewUserDeviceFragment.class;
         } else if (id == R.id.nav_addModul) {
-            fragment = new AddModulFragment();
+            clazz = AddModulFragment.class;
         } else {
             throw new IllegalArgumentException("Unknown id: " + id);
         }
-        android.support.v4.app.FragmentTransaction fragmentTransaction =
-                getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, fragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+        showFragmentByClass(clazz);
     }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        showFragmentByID(id);
+        showFragmentByClass(id);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
