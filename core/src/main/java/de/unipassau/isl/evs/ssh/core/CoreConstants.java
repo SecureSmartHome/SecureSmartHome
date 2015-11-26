@@ -49,5 +49,8 @@ public class CoreConstants {
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
         public static final String SLAVE_LIGHT_SET = "/slave/light/set";
+
+        //App
+        public static final String APP_MODULES_GET = "/app/module/get";
     }
 }

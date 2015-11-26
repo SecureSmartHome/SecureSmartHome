@@ -21,8 +21,10 @@ public class SlaveDoorHandler implements MessageHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         //TODO Benötigt keine Payload, da nur eine Funktion öffnen
+        //TODO Antwort an Master zurückschicken, dass Tür betätigt wurde
         try {
             doorBuzzer.unlock(3000);
+            //reply Message
         } catch (EvsIoException e) {
             Log.e(this.getClass().getSimpleName(), "Cannot unlock Door", e);
         }
