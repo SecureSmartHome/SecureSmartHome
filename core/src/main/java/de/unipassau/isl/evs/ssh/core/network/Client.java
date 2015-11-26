@@ -207,6 +207,7 @@ public class Client extends AbstractComponent {
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
                     Log.v(TAG, "Channel open");
+                    requireComponent(UDPDiscoveryClient.KEY).stopDiscovery();
                     // TODO when implemented, start handshake
                 } else {
                     Log.v(TAG, "Channel open failed");

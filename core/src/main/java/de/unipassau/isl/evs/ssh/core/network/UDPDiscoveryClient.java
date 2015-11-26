@@ -106,8 +106,13 @@ public class UDPDiscoveryClient extends AbstractComponent {
      * @return the Future returned by {@link io.netty.channel.EventLoop#schedule(Callable, long, TimeUnit)}
      */
     private synchronized ScheduledFuture<?> scheduleDiscoveryRetry() {
-        Log.v(TAG, "scheduleDiscoveryRetry, status: " + retryFuture);
-        if (retryFuture == null || retryFuture.isDone()) { // don't schedule a second execution if one is already pending
+        Log.v(TAG, "scheduleDiscoveryRetry()");
+        // don't schedule a second execution if one is already pending
+        final boolean isExecutionPending = retryFuture != null && !retryFuture.isDone();
+        if (isDiscoveryRunning && !isExecutionPending) {
+            if (requireComponent(Client.KEY).isChannelOpen()) {
+                Log.d(TAG, "scheduleDiscoveryRetry(), but Client Channel is open. Was stopDiscovery called?");
+            }
             retryFuture = requireComponent(Client.KEY).getExecutor().schedule(new Runnable() {
                 @Override
                 public void run() {
@@ -121,6 +126,10 @@ public class UDPDiscoveryClient extends AbstractComponent {
                     }
                 }
             }, CLIENT_MILLIS_BETWEEN_BROADCASTS, TimeUnit.MILLISECONDS);
+        } else {
+            Log.d(TAG, "not scheduling another retry because " +
+                    "isDiscoveryRunning = " + isDiscoveryRunning +
+                    ", retryFuture = " + retryFuture);
         }
         return retryFuture;
     }

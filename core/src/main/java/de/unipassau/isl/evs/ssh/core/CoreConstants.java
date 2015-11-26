@@ -44,7 +44,7 @@ public class CoreConstants {
     /**
      * The minimum number of seconds between
      */
-    public static final long CLIENT_MILLIS_BETWEEN_DISCONNECTS = TimeUnit.SECONDS.toMillis(60);
+    public static final long CLIENT_MILLIS_BETWEEN_DISCONNECTS = TimeUnit.SECONDS.toMillis(10);
     /**
      * The maximum number of seconds the broadcast waits to be sent again.
      */
