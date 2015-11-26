@@ -66,6 +66,9 @@ public class CoreConstants {
         public static final String PREF_MASTER_ID = "ssh.core.MASTER_ID";
     }
 
+    /**
+     * This class contains constants for ModuleTypes
+     */
     public class ModuleType {
         public static final String LAMP = "Lamp";
         public static final String WEATHER_BOARD = "WeatherBoard";
@@ -73,5 +76,18 @@ public class CoreConstants {
         public static final String DOOR_SENSOR = "DoorSensor";
         public static final String WINDOW_SENSOR = "WindowSensor";
         public static final String WEBCAM = "Webcam";
+    }
+
+    /**
+     * This class contains constants for RoutingKeys
+     */
+    public class RoutingKeys {
+        //Master
+        public static final String MASTER_LIGHT_GET = "/master/light/get";
+        public static final String MASTER_LIGHT_SET = "/master/light/set";
+
+        //Slave
+        public static final String SLAVE_LIGHT_GET = "/slave/light/get";
+        public static final String SLAVE_LIGHT_SET = "/slave/light/set";
     }
 }
