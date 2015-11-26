@@ -98,4 +98,16 @@ public class CoreConstants {
         public static final String LIGHT_ON_ACTION = "LightOn";
         public static final String LIGHT_OFF_ACTION = "LightOff";
     }
+
+    public class NotificationTypes {
+        public static final String ODROID_ADDED = "OdroidAdded";
+        public static final String HUMIDITY_WARNING = "HumidityWarning";
+        public static final String BRIGHTNESS_WARNING = "BrightnessWarning";
+        public static final String HOLIDAY_MODE_SWITCHED_ON = "HolidayModeSwitchedOn";
+        public static final String HOLIDAY_MODE_SWITCHED_OFF = "HolidayModeSwitchedOff";
+        public static final String SYSTEM_HEALT_WARNING = "SystemHealthWarning";
+        public static final String BELL_RANG = "BellRang";
+        public static final String WEATHER_WARNING = "WeatherWarning";
+        public static final String DOOR_OPENED = "DoorOpened";
+    }
 }
