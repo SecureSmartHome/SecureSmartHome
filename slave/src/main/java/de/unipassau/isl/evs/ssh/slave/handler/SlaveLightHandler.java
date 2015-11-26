@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.slave.handler;
 
 import android.util.Log;
+import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
@@ -21,7 +22,6 @@ import java.io.IOException;
  */
 public class SlaveLightHandler implements MessageHandler {
 
-    private EdimaxPlugSwitch plugSwitch;
     private IncomingDispatcher dispatcher;
 
     /**
@@ -34,11 +34,16 @@ public class SlaveLightHandler implements MessageHandler {
         DeviceID fromID = message.getFromID();
 
         if (message.getPayload() instanceof LightPayload) {
+            Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, ((LightPayload) message.getPayload())
+                    .getModuleName());
+            EdimaxPlugSwitch plugSwitch = dispatcher.getContainer().require(key);
+
             if (message.getRoutingKey().equals(CoreConstants.RoutingKeys.SLAVE_LIGHT_SET)) {
+
                 switchLight(message, plugSwitch);
-                replyStatus(message);
+                replyStatus(message, plugSwitch);
             } else if (message.getRoutingKey().equals(CoreConstants.RoutingKeys.SLAVE_LIGHT_GET)) {
-                replyStatus(message);
+                replyStatus(message, plugSwitch);
             }
         } else {
             //TODO check Routing key
@@ -52,18 +57,6 @@ public class SlaveLightHandler implements MessageHandler {
     @Override
     public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
         this.dispatcher = dispatcher;
-
-        //TODO get the following values via dispatcher
-
-        String lampAddress = "192.168.0.20";
-        String lampUser = "admin";
-        String lampPassword = "1234";
-        int lampPort = 10000;
-
-
-        //new Key<>(EdimaxPlugSwitch.class, moduleName);
-
-        plugSwitch = new EdimaxPlugSwitch(lampAddress, lampPort, lampUser, lampPassword);
     }
 
     @Override
@@ -98,7 +91,7 @@ public class SlaveLightHandler implements MessageHandler {
      *
      * @param original message that should get a reply
      */
-    private void replyStatus(Message.AddressedMessage original) {
+    private void replyStatus(Message.AddressedMessage original, EdimaxPlugSwitch plugSwitch) {
         LightPayload payload = (LightPayload) original.getPayload();
         String moduleName = payload.getModuleName();
 
