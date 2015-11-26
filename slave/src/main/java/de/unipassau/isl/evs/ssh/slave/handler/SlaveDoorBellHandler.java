@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.slave.handler;
 
+import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
@@ -8,6 +9,11 @@ import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
+import de.unipassau.isl.evs.ssh.drivers.lib.ButtonSensor;
+import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * This handler receives an event when the door bell is rang, generates a message containing
@@ -21,12 +27,15 @@ public class SlaveDoorBellHandler implements MessageHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         //TODO register listener
-        sendDoorBellInfo();
+        //sendDoorBellInfo();
     }
 
     @Override
     public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-        this.dispatcher = dispatcher;
+       /* this.dispatcher = dispatcher;
+        dispatcher.getContainer().require(ExecutionServiceComponent.KEY).scheduleAtFixedRate(
+                new DoorPollingRunnable(), 0, 200, TimeUnit.MILLISECONDS
+        );*/
     }
 
     @Override
@@ -34,19 +43,6 @@ public class SlaveDoorBellHandler implements MessageHandler {
 
     }
 
-    /**
-     * Sends info about doorbell being used
-     */
-    private void sendDoorBellInfo() {
-        DoorBellPayload payload = new DoorBellPayload(modulName);
 
-        NamingManager namingManager = dispatcher.getContainer().require(NamingManager.KEY);
 
-        Message message;
-        message = new Message(payload);
-        message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
-
-        OutgoingRouter router = dispatcher.getContainer().require(OutgoingRouter.KEY);
-        router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_DOOR_RINGS, message);
-    }
 }
