@@ -25,6 +25,7 @@ public class TimeoutHandler extends ChannelHandlerAdapter {
         if (!(msg instanceof PingMessage)) {
             super.channelRead(ctx, msg);
         } // else discard message
+        ctx.close();
     }
 
     public static class PingMessage implements Serializable {

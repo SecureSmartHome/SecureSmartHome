@@ -28,10 +28,8 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 public class NamingManager extends AbstractComponent {
 
     public static final Key<NamingManager> KEY = new Key<>(NamingManager.class);
-
-    private String localDeviceID;
-
     private final boolean isMaster;
+    private String localDeviceID;
 
     /**
      * Creates a new NamingManager.
@@ -49,13 +47,12 @@ public class NamingManager extends AbstractComponent {
      * @return the master's id or null if the master is not known
      */
     public DeviceID getMasterID() {
-        SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-        String masterID = prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null);
-
         if (isMaster) {
             return new DeviceID(localDeviceID);
         }
+        SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
+                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        String masterID = prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null);
         if (masterID == null) {
             return null;
         }

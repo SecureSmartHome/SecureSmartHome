@@ -23,15 +23,13 @@ public class MainFragment extends Fragment implements MessageHandler {
         LinearLayout mLinearLayout = (LinearLayout) inflater.inflate(R.layout.fragment_main,
                 container, false);
 
+        final MainActivity parent = (MainActivity) getActivity();
+
         Button doorButton = (Button) mLinearLayout.findViewById(R.id.doorButton);
         doorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DoorFragment fragment = new DoorFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(DoorFragment.class);
             }
         });
 
@@ -39,11 +37,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         lightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LightFragment fragment = new LightFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(LightFragment.class);
             }
         });
 
@@ -51,11 +45,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         climateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ClimateFragment fragment = new ClimateFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(ClimateFragment.class);
             }
         });
 
@@ -63,11 +53,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         holidayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                HolidayFragment fragment = new HolidayFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(HolidayFragment.class);
             }
         });
 
@@ -75,11 +61,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         statusButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StatusFragment fragment = new StatusFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(StatusFragment.class);
             }
         });
 
@@ -87,11 +69,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         usersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ModifyPermissionFragment fragment = new ModifyPermissionFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(ModifyPermissionFragment.class);
             }
         });
         return mLinearLayout;
