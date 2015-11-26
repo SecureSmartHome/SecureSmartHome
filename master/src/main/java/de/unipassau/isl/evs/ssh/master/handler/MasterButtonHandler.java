@@ -5,10 +5,13 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
+import de.unipassau.isl.evs.ssh.master.database.PermissionController;
+import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 /**
  * In case a hardware button on the Odroid is pressed, a message, of which the content depends on
@@ -21,7 +24,6 @@ import de.unipassau.isl.evs.ssh.master.database.HolidayController;
  * @author leon
  */
 public class MasterButtonHandler extends AbstractMasterHandler {
-    HolidayController holidayController;
 
     @Override
     public void handle(Message.AddressedMessage message) {
@@ -32,7 +34,8 @@ public class MasterButtonHandler extends AbstractMasterHandler {
             //Response or request?
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
                 //Request
-                Module atModule = slaveController.getModule(lightPayload.getModuleName());
+                Module atModule = incomingDispatcher.getContainer().require(SlaveController.KEY)
+                        .getModule(lightPayload.getModuleName());
                 Message messageToSend = new Message(lightPayload);
                 messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
                 messageToSend.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
@@ -41,15 +44,20 @@ public class MasterButtonHandler extends AbstractMasterHandler {
                 switch (message.getRoutingKey()) {
                     //Set Light
                     case CoreConstants.RoutingKeys.MASTER_LIGHT_SET:
-                        if (permissionController.hasPermission(message.getFromID(),
-                                new Permission(DatabaseContract.Permission.Values.SWITCH_LIGHT, atModule.getName()))) {
-                            Message.AddressedMessage sendMessage = outgoingRouter.sendMessage(atModule.getAtSlave(),
+                        if (incomingDispatcher.getContainer().require(PermissionController.KEY)
+                                .hasPermission(message.getFromID(),
+                                        new Permission(DatabaseContract.Permission.Values.SWITCH_LIGHT,
+                                                atModule.getName()))) {
+                            Message.AddressedMessage sendMessage = incomingDispatcher.getContainer().
+                                    require(OutgoingRouter.KEY).sendMessage(atModule.getAtSlave(),
                                     CoreConstants.RoutingKeys.SLAVE_LIGHT_SET, messageToSend);
                             putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
                             if (lightPayload.getOn()) {
-                                holidayController.addHolidayLogEntry(CoreConstants.LogActions.LIGHT_ON_ACTION);
+                                incomingDispatcher.getContainer().require(HolidayController.KEY)
+                                        .addHolidayLogEntry(CoreConstants.LogActions.LIGHT_ON_ACTION);
                             } else {
-                                holidayController.addHolidayLogEntry(CoreConstants.LogActions.LIGHT_OFF_ACTION);
+                                incomingDispatcher.getContainer().require(HolidayController.KEY)
+                                        .addHolidayLogEntry(CoreConstants.LogActions.LIGHT_OFF_ACTION);
                             }
                         } else {
                             //no permission
@@ -59,10 +67,12 @@ public class MasterButtonHandler extends AbstractMasterHandler {
 
                     //Get status
                     case CoreConstants.RoutingKeys.MASTER_LIGHT_GET:
-                        if (permissionController.hasPermission(message.getFromID(),
-                                new Permission(DatabaseContract.Permission.Values.REQUEST_LIGHT_STATUS,
-                                        atModule.getName()))) {
-                            Message.AddressedMessage sendMessage = outgoingRouter.sendMessage(atModule.getAtSlave(),
+                        if (incomingDispatcher.getContainer().require(PermissionController.KEY).
+                                hasPermission(message.getFromID(),
+                                        new Permission(DatabaseContract.Permission.Values.REQUEST_LIGHT_STATUS,
+                                                atModule.getName()))) {
+                            Message.AddressedMessage sendMessage = incomingDispatcher.getContainer()
+                                    .require(OutgoingRouter.KEY).sendMessage(atModule.getAtSlave(),
                                     CoreConstants.RoutingKeys.SLAVE_LIGHT_GET, messageToSend);
                             putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
                         } else {
@@ -83,8 +93,9 @@ public class MasterButtonHandler extends AbstractMasterHandler {
                 messageToSend.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
                 //for both, that's why no switch. easy money easy life
-                outgoingRouter.sendMessage(correspondingMessage.getFromID(),
-                        correspondingMessage.getHeader(Message.HEADER_REPLY_TO_KEY), messageToSend);
+                incomingDispatcher.getContainer().require(OutgoingRouter.KEY)
+                        .sendMessage(correspondingMessage.getFromID(),
+                                correspondingMessage.getHeader(Message.HEADER_REPLY_TO_KEY), messageToSend);
             }
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             //Todo: handle error
@@ -95,15 +106,9 @@ public class MasterButtonHandler extends AbstractMasterHandler {
 
     @Override
     public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-        super.handlerAdded(dispatcher, routingKey);
-        holidayController = container.require(HolidayController.KEY);
     }
 
     @Override
     public void handlerRemoved(String routingKey) {
-        super.handlerRemoved(routingKey);
-        if (routingKeys.isEmpty()) {
-            holidayController = null;
-        }
     }
 }

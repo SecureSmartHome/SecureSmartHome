@@ -16,13 +16,8 @@ import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 public abstract class AbstractMasterHandler implements MessageHandler {
     protected IncomingDispatcher incomingDispatcher;
-    protected PermissionController permissionController;
-    protected Container container;
-    protected OutgoingRouter outgoingRouter;
-    protected SlaveController slaveController;
     private Map<Integer, Message.AddressedMessage> inbox = new HashMap<>();
     private Map<Integer, Integer> onBehalfOfMessage = new HashMap<>();
-    protected Set<String> routingKeys = new HashSet<>();
 
     @Override
     public void handle(Message.AddressedMessage message) {
@@ -31,24 +26,11 @@ public abstract class AbstractMasterHandler implements MessageHandler {
 
     @Override
     public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-        routingKeys.add(routingKey);
         incomingDispatcher = dispatcher;
-        container = dispatcher.getContainer();
-        outgoingRouter = container.require(OutgoingRouter.KEY);
-        permissionController = container.require(PermissionController.KEY);
-        slaveController = container.require(SlaveController.KEY);
     }
 
     @Override
     public void handlerRemoved(String routingKey) {
-        routingKeys.remove(routingKey);
-        if (routingKey.isEmpty()) {
-            incomingDispatcher = null;
-            container = null;
-            outgoingRouter = null;
-            permissionController = null;
-            slaveController = null;
-        }
     }
 
     protected void saveMessage(Message.AddressedMessage message) {
@@ -76,6 +58,7 @@ public abstract class AbstractMasterHandler implements MessageHandler {
     protected void sendErrorMessage(Message.AddressedMessage original) {
         Message reply = new Message(new MessageErrorPayload(original.getPayload()));
         reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
-        outgoingRouter.sendMessage(original.getFromID(), original.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
+        incomingDispatcher.getContainer().require(OutgoingRouter.KEY).sendMessage(original.getFromID(),
+                original.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
     }
 }
