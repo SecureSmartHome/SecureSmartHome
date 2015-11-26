@@ -66,8 +66,8 @@ public class SlaveCameraHandler implements MessageHandler {
         Message reply;
 
         String routingKey = original.getHeader(Message.HEADER_REPLY_TO_KEY);
-        reply = new Message(new MessageErrorPayload(routingKey, original.getPayload()));
-        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getHeader(Message.HEADER_MESSAGE_ID));
+        reply = new Message(new MessageErrorPayload(original.getPayload()));
+        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
         reply.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
         dispatcher.getContainer().require(OutgoingRouter.KEY).sendMessage(original.getFromID(), routingKey, reply);
