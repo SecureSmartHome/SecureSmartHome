@@ -22,6 +22,7 @@ public class SlaveModulHandler implements MessageHandler{
         @Override
         public boolean apply(Module input) {
             return false;
+            //NamingManager
             //Objects.equals(input.getAtSlave().getId(), require("KeyStoreManager").getLocalID());
         }
     };

@@ -1,10 +1,14 @@
 package de.unipassau.isl.evs.ssh.app;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
 //import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
@@ -25,34 +29,31 @@ public class AppModuleHandler implements MessageHandler {
      * ArrayList<Module> modules = Lists.newArrayList(filtered);
      * </pre>
      */
-    public static final Predicate<Module> PREDICATE_GPIO = new Predicate<Module>() {
+    public static final Predicate<Module> PREDICATE_LIGHT = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
-            return Objects.equals(input.getModuleAccessPoint().getType(), GPIOAccessPoint.TYPE);
+            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.LIGHT);
+        }
+    };
+
+    public static final Predicate<Module> PREDICATE_DOOR = new Predicate<Module>() {
+        @Override
+        public boolean apply(Module input) {
+            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.DOOR_SENSOR);
+        }
+    };
+
+    public static final Predicate<Module> PREDICATE_WEATHER = new Predicate<Module>() {
+        @Override
+        public boolean apply(Module input) {
+            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.WEATHER_BOARD);
         }
     };
 
     private List<Module> components;
-    private List<Module> lights;
-    private List<Module> sensors;
 
     public void UpdateList(List<Module> components) {
         this.components = components;
-//        while (!components.isEmpty()) {
-//            String type = components.get(0).getModuleAccessPoint().getType();
-//            Module firstInList = components.get(0);
-//            components.remove(0);
-//            switch (type) {
-//                case GPIOAccessPoint.TYPE:
-//                    sensors.add(firstInList);
-//                case USBAccessPoint.TYPE:
-//                    //USB only in camera?
-//                case WLANAccessPoint.TYPE:
-//                    lights.add(firstInList);
-//                default:
-//                    throw new IllegalArgumentException("Type " + type + "is not known.");
-//            }
-//        }
     }
 
 
@@ -60,9 +61,23 @@ public class AppModuleHandler implements MessageHandler {
         return components;
     }
 
-//    public List<Module> getLights() {
-//        return lights;
-//    }
+    public List<Module> getLights(){
+         Iterable<Module> filtered = Iterables.filter(components, PREDICATE_LIGHT);
+         ArrayList<Module> lights = Lists.newArrayList(filtered);
+        return lights;
+    }
+
+    public List<Module> getDoors(){
+        Iterable<Module> filtered = Iterables.filter(components, PREDICATE_DOOR);
+        ArrayList<Module> doors = Lists.newArrayList(filtered);
+        return doors;
+    }
+
+    public List<Module> getWeather(){
+        Iterable<Module> filtered = Iterables.filter(components, PREDICATE_WEATHER);
+        ArrayList<Module> weather = Lists.newArrayList(filtered);
+        return weather;
+    }
 
     @Override
     public void handle(Message.AddressedMessage message) {
