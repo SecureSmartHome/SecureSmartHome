@@ -42,8 +42,8 @@ public class MasterLightHandler extends AbstractMasterHandler {
                                 .hasPermission(message.getFromID(),
                                         new Permission(DatabaseContract.Permission.Values.SWITCH_LIGHT,
                                                 atModule.getName()))) {
-                            Message.AddressedMessage sendMessage = incomingDispatcher.getContainer().
-                                    require(OutgoingRouter.KEY).sendMessage(atModule.getAtSlave(),
+                            Message.AddressedMessage sendMessage = incomingDispatcher.getContainer()
+                                    .require(OutgoingRouter.KEY).sendMessage(atModule.getAtSlave(),
                                     CoreConstants.RoutingKeys.SLAVE_LIGHT_SET, messageToSend);
                             putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
                             if (lightPayload.getOn()) {
