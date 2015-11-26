@@ -53,7 +53,7 @@ public class AppModuleHandler implements MessageHandler {
     private List<Module> components;
     private IncomingDispatcher incomingDispatcher;
 
-    public void UpdateList(List<Module> components) {
+    public void updateList(List<Module> components) {
         this.components = components;
     }
 
@@ -81,7 +81,7 @@ public class AppModuleHandler implements MessageHandler {
     public void handle(Message.AddressedMessage message) {
         if (message.getPayload() instanceof ModulesPayload) {
             List<Module> modules = (List<Module>) message.getPayload();
-            UpdateList(modules);
+            updateList(modules);
         } else {
             Log.e(this.getClass().getSimpleName(), "Error! Unknown message Payload");
         }
@@ -89,7 +89,6 @@ public class AppModuleHandler implements MessageHandler {
 
     @Override
     public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-        this.incomingDispatcher = dispatcher;
     }
 
     @Override

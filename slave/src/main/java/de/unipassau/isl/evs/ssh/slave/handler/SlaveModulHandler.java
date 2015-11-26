@@ -20,7 +20,7 @@ public class SlaveModulHandler implements MessageHandler {
     private IncomingDispatcher incomingDispatcher;
     private List<Module> components;
 
-    public void UpdateModule(List<Module> components) {
+    public void updateModule(List<Module> components) {
         this.components = components;
     }
 
@@ -32,7 +32,7 @@ public class SlaveModulHandler implements MessageHandler {
     public void handle(Message.AddressedMessage message) {
         if (message.getPayload() instanceof ModulesPayload) {
             List<Module> modules = (List<Module>) message.getPayload();
-            UpdateModule(modules);
+            updateModule(modules);
         } else {
             Log.e(this.getClass().getSimpleName(), "Error! Unknown message Payload");
         }
@@ -40,7 +40,6 @@ public class SlaveModulHandler implements MessageHandler {
 
     @Override
     public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-        this.incomingDispatcher = dispatcher;
     }
 
     @Override
