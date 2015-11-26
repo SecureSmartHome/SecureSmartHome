@@ -8,6 +8,8 @@ package de.unipassau.isl.evs.ssh.drivers.lib;
 
 import android.util.Base64;
 
+import de.unipassau.isl.evs.ssh.core.container.Component;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -26,10 +28,20 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-public class EdimaxPlugSwitch {
+public class EdimaxPlugSwitch implements Component {
     String URL;
     String USER;
     String PASS;
+
+    @Override
+    public void init(Container container) {
+        //No need to do anything here
+    }
+
+    @Override
+    public void destroy() {
+        //No need to do anything here
+    }
 
     /**
      * Constructor
