@@ -16,9 +16,9 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  */
 public class Message implements Serializable {
     public static final Key<Long> HEADER_TIMESTAMP = new Key<>(Long.class, "timestamp");
-    public static final Key<Integer> HEADER_MESSAGE_ID = new Key<>(Integer.class, "messageID");
     public static final Key<Integer> HEADER_REFERENCES_ID = new Key<>(Integer.class, "referencesID");
     public static final Key<String> HEADER_REPLY_TO_KEY = new Key<>(String.class, "replyToKey");
+
     private static final AtomicInteger sequenceCounter = new AtomicInteger();
     private final TypedMap<Object> headers;
     private MessagePayload payload;
@@ -104,6 +104,7 @@ public class Message implements Serializable {
      * @param routingKey Alias of the receiving Handler.
      */
     public AddressedMessage setDestination(DeviceID fromID, DeviceID toID, String routingKey) {
+        this.putHeader(HEADER_TIMESTAMP, System.currentTimeMillis());
         return new AddressedMessage(this, fromID, toID, routingKey);
     }
 
