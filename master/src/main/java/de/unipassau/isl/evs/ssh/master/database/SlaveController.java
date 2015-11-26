@@ -75,7 +75,7 @@ public class SlaveController extends AbstractComponent {
                             + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME + ", "
                             + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD + ", "
                             + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP + ", "
-                            + DatabaseContract.ElectronicModule.COLUMN_TYPE + ", "
+                            + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE + ", "
                             + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + ", "
                             + DatabaseContract.ElectronicModule.COLUMN_NAME + ") values "
                             + "(?, ?, ?, ?, ?, ?, ?, (" + SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY + "), ?)",
@@ -113,7 +113,7 @@ public class SlaveController extends AbstractComponent {
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_TYPE
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE
                 + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
                 + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
@@ -154,7 +154,7 @@ public class SlaveController extends AbstractComponent {
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_TYPE
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE
                 + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
                 + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
@@ -196,7 +196,7 @@ public class SlaveController extends AbstractComponent {
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_TYPE
+                + ", m." + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE
                 + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
                 + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
                 + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
