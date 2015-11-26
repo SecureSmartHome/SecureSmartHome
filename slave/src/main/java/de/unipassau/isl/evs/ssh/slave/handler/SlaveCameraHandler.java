@@ -33,9 +33,9 @@ public class SlaveCameraHandler implements MessageHandler {
      */
     @Override
     public void handle(Message.AddressedMessage message) {
-        CameraPayload payload = (CameraPayload) message.getPayload();
+        if (message.getPayload() instanceof CameraPayload) {
+            CameraPayload payload = (CameraPayload) message.getPayload();
 
-        if (payload instanceof CameraPayload) {
             Camera camera;
             camera = Camera.open(payload.getCameraID());
 
