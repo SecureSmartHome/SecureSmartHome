@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint;
 
 /**
+ * ModuleAccessPoint class for a USB access point.
  * @author leon
  */
 public class USBAccessPoint extends ModuleAccessPoint {

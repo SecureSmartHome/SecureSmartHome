@@ -94,11 +94,17 @@ public class CoreConstants {
         public static final String APP_MODULES_GET = "/app/module/get";
     }
 
+    /**
+     * @author leon
+     */
     public class LogActions {
         public static final String LIGHT_ON_ACTION = "LightOn";
         public static final String LIGHT_OFF_ACTION = "LightOff";
     }
 
+    /**
+     * @author leon
+     */
     public class NotificationTypes {
         public static final String ODROID_ADDED = "OdroidAdded";
         public static final String HUMIDITY_WARNING = "HumidityWarning";
@@ -108,6 +114,8 @@ public class CoreConstants {
         public static final String SYSTEM_HEALT_WARNING = "SystemHealthWarning";
         public static final String BELL_RANG = "BellRang";
         public static final String WEATHER_WARNING = "WeatherWarning";
-        public static final String DOOR_OPENED = "DoorOpened";
+        public static final String DOOR_UNLATCHED = "DoorOpened";
+        public static final String DOOR_LOCKED = "DoorLocked";
+        public static final String DOOR_UNLOCKED = "DoorUnlocked";
     }
 }
