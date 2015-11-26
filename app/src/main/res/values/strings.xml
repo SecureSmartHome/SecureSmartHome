@@ -26,4 +26,5 @@
     <string name="deviceStatusConnectedModules">Connected Modules</string>
     <string name="string_turn_off">Turn Off</string>
     <string name="string_turn_on">Turn On</string>
+    <string name="status_of_light">Status of the Light</string>
 </resources>

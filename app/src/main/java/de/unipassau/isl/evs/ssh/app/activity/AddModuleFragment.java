@@ -15,9 +15,9 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  * This activity allows to add new sensors to the system. If this functionality is used a message,
  * containing all needed information, is generated and passed to the OutgoingRouter.
  */
-public class AddModulFragment extends Fragment implements MessageHandler {
+public class AddModuleFragment extends Fragment implements MessageHandler {
 
-    public AddModulFragment() {
+    public AddModuleFragment() {
         // Required empty public constructor
     }
 
@@ -26,7 +26,7 @@ public class AddModulFragment extends Fragment implements MessageHandler {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_addmodul, container, false);
+        return inflater.inflate(R.layout.fragment_addmodule, container, false);
     }
 
     @Override

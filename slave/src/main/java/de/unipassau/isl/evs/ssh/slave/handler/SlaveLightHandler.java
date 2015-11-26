@@ -1,8 +1,16 @@
 package de.unipassau.isl.evs.ssh.slave.handler;
 
 import android.util.Log;
+
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -12,10 +20,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
 import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 
 /**
  * Handles light messages and makes API calls accordingly.
@@ -35,7 +39,7 @@ public class SlaveLightHandler implements MessageHandler {
 
         if (message.getPayload() instanceof LightPayload) {
             Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, ((LightPayload) message.getPayload())
-                    .getModuleName());
+                    .getModule().getName());
             EdimaxPlugSwitch plugSwitch = dispatcher.getContainer().require(key);
 
             if (message.getRoutingKey().equals(CoreConstants.RoutingKeys.SLAVE_LIGHT_SET)) {
@@ -93,11 +97,11 @@ public class SlaveLightHandler implements MessageHandler {
      */
     private void replyStatus(Message.AddressedMessage original, EdimaxPlugSwitch plugSwitch) {
         LightPayload payload = (LightPayload) original.getPayload();
-        String moduleName = payload.getModuleName();
+        Module module = payload.getModule();
 
         Message reply;
         try {
-            reply = new Message(new LightPayload(plugSwitch.isOn(), moduleName));
+            reply = new Message(new LightPayload(plugSwitch.isOn(), module));
             reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr()); //TODO: getSequenzeNumber
             reply.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 

@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_addNewUserDevice) {
             clazz = AddNewUserDeviceFragment.class;
         } else if (id == R.id.nav_addModul) {
-            clazz = AddModulFragment.class;
+            clazz = AddModuleFragment.class;
         } else {
             throw new IllegalArgumentException("Unknown id: " + id);
         }

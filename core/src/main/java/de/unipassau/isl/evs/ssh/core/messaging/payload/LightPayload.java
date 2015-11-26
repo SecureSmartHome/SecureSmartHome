@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+
 /**
  * Payload class for Light Messages
  *
@@ -7,13 +9,13 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
  */
 public class LightPayload implements MessagePayload {
 
-    private String moduleName;
+    private Module module;
     private boolean on;
 
     //TODO change constructors so only a boolean is contained once we have the component which handles address stuff
-    public LightPayload(boolean on, String moduleName) {
+    public LightPayload(boolean on, Module module) {
         this.on = on;
-        this.moduleName = moduleName;
+        this.module = module;
     }
 
     /**
@@ -33,7 +35,7 @@ public class LightPayload implements MessagePayload {
      *
      * @return String indicating the module name
      */
-    public String getModuleName() {
-        return moduleName;
+    public Module getModule() {
+        return module;
     }
 }
