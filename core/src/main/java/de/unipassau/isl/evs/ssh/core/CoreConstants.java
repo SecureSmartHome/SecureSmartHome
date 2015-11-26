@@ -108,6 +108,8 @@ public class CoreConstants {
         public static final String SYSTEM_HEALT_WARNING = "SystemHealthWarning";
         public static final String BELL_RANG = "BellRang";
         public static final String WEATHER_WARNING = "WeatherWarning";
-        public static final String DOOR_OPENED = "DoorOpened";
+        public static final String DOOR_UNLATCHED = "DoorOpened";
+        public static final String DOOR_LOCKED = "DoorLocked";
+        public static final String DOOR_UNLOCKED = "DoorUnlocked";
     }
 }
