@@ -13,6 +13,10 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 
+/**
+ * Main page if you start App
+ * @author bucher
+ */
 public class MainFragment extends Fragment implements MessageHandler {
 
     public MainFragment() {

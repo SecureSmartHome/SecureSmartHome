@@ -1,27 +1,32 @@
 package de.unipassau.isl.evs.ssh.app;
 
+import android.util.Log;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
-//import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
-//import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 
 /**
  * AppModuleHandler offers a list of all Modules that are active in the System.
+ *
  * @author bucher
  */
-public class AppModuleHandler implements MessageHandler {
+public class AppModuleHandler extends AbstractComponent implements MessageHandler {
+    public static final Key<AppModuleHandler> KEY = new Key<>(AppModuleHandler.class);
+
     /**
      * Use sample code to filter for specific components
      * <pre>
@@ -52,7 +57,7 @@ public class AppModuleHandler implements MessageHandler {
 
     private List<Module> components;
 
-    public void UpdateList(List<Module> components) {
+    public void updateList(List<Module> components) {
         this.components = components;
     }
 
@@ -61,26 +66,29 @@ public class AppModuleHandler implements MessageHandler {
         return components;
     }
 
-    public List<Module> getLights(){
-         Iterable<Module> filtered = Iterables.filter(components, PREDICATE_LIGHT);
-         ArrayList<Module> lights = Lists.newArrayList(filtered);
-        return lights;
+    public List<Module> getLights() {
+        Iterable<Module> filtered = Iterables.filter(components, PREDICATE_LIGHT);
+        return Lists.newArrayList(filtered);
     }
 
-    public List<Module> getDoors(){
+    public List<Module> getDoors() {
         Iterable<Module> filtered = Iterables.filter(components, PREDICATE_DOOR);
-        ArrayList<Module> doors = Lists.newArrayList(filtered);
-        return doors;
+        return Lists.newArrayList(filtered);
     }
 
-    public List<Module> getWeather(){
+    public List<Module> getWeather() {
         Iterable<Module> filtered = Iterables.filter(components, PREDICATE_WEATHER);
-        ArrayList<Module> weather = Lists.newArrayList(filtered);
-        return weather;
+        return Lists.newArrayList(filtered);
     }
 
     @Override
     public void handle(Message.AddressedMessage message) {
+        if (message.getPayload() instanceof ModulesPayload) {
+            List<Module> modules = (List<Module>) message.getPayload();
+            updateList(modules);
+        } else {
+            Log.e(this.getClass().getSimpleName(), "Error! Unknown message Payload");
+        }
     }
 
     @Override
@@ -89,5 +97,17 @@ public class AppModuleHandler implements MessageHandler {
 
     @Override
     public void handlerRemoved(String routingKey) {
+    }
+
+    @Override
+    public void init(Container container) {
+        super.init(container);
+        requireComponent(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.APP_MODULES_GET);
+    }
+
+    @Override
+    public void destroy() {
+        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.APP_MODULES_GET);
+        super.destroy();
     }
 }

@@ -1,10 +1,12 @@
 package de.unipassau.isl.evs.ssh.drivers.lib;
 
 import android.util.Log;
+import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 
 public class Weather implements Component {
+    public static final Key<Weather> KEY = new Key<>(Weather.class);
     private static final String TAG = "Odroid Weather";
 
     static {
