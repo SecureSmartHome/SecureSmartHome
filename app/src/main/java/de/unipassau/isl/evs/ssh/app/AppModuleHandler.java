@@ -51,7 +51,6 @@ public class AppModuleHandler implements MessageHandler {
     };
 
     private List<Module> components;
-    private IncomingDispatcher incomingDispatcher;
 
     public void updateList(List<Module> components) {
         this.components = components;
