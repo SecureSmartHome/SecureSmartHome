@@ -1,10 +1,11 @@
-package de.unipassau.isl.evs.ssh.master.database.dto;
+package de.unipassau.isl.evs.ssh.core.database.dto;
 
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import de.unipassau.isl.evs.ssh.master.database.dto.ModuleAccessPoint.ModuleAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccessPoint;
 
 /**
  * A DTO representing modules which are connected to slave devices, e..g. a light.
+ * @author leon
  */
 public class Module {
 

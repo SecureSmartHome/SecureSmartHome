@@ -17,6 +17,7 @@ public class DatabaseContract {
         public static final String TABLE_NAME = "Permission";
         public static final String COLUMN_ID = "_ID";
         public static final String COLUMN_NAME = "name";
+        public static final String COLUMN_ELECTRONIC_MODULE_ID = "electronicModuleId";
 
         //Does not describe a table but constants for the PermissionTable entries
         public class Values {
@@ -30,10 +31,9 @@ public class DatabaseContract {
             public static final String DELETE_SENSOR = "DeleteSensor";
             //Window
             public static final String REQUEST_WINDOW_STATUS = "RequestWindowStatus";
-            //Lamp
-            public static final String REQUEST_LAMP_STATUS = "RequestLampStatus";
-            public static final String SWITCH_ON_LAMP = "SwitchOnLamp";
-            public static final String SWITCH_OFF_LAMP = "SwitchOffLamp";
+            //Light
+            public static final String REQUEST_LIGHT_STATUS = "RequestLightStatus";
+            public static final String SWITCH_LIGHT = "SwitchLight";
             //Door
             public static final String REQUEST_DOOR_STATUS = "RequestDoorStatus";
             public static final String LOCK_DOOR = "LockDoor";

@@ -1,7 +1,8 @@
-package de.unipassau.isl.evs.ssh.master.database.dto;
+package de.unipassau.isl.evs.ssh.core.database.dto;
 
 /**
  * A DTO representing a group. User devices are part of a group. Every group has a permission template.
+ * @author leon
  */
 public class Group {
 

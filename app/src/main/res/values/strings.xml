@@ -22,6 +22,8 @@
     <string name="nav_modifyPermissions_string">Modify Permissions</string>
     <string name="nav_addNewUserDevice_sting">Add User</string>
     <string name="nav_addModule_string">Add Module</string>
+    <string name="deviceStatusConnectedSlaves">Connected Slaves</string>
+    <string name="deviceStatusConnectedModules">Connected Modules</string>
     <string name="string_turn_off">Turn Off</string>
     <string name="string_turn_on">Turn On</string>
 </resources>

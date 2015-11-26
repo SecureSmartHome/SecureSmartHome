@@ -22,6 +22,7 @@ public class MainFragment extends Fragment implements MessageHandler {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout mLinearLayout = (LinearLayout) inflater.inflate(R.layout.fragment_main,
                 container, false);
+        final MainActivity parent = (MainActivity) getActivity();
 
         ImageButton doorButtonOpen = (ImageButton) mLinearLayout.findViewById(R.id.doorButtonOpen);
         ImageButton doorButtonClosed = (ImageButton) mLinearLayout.findViewById(R.id.doorButtonClosed);
@@ -36,21 +37,13 @@ public class MainFragment extends Fragment implements MessageHandler {
         doorButtonOpen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DoorFragment fragment = new DoorFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(DoorFragment.class);
             }
         });
         doorButtonClosed.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DoorFragment fragment = new DoorFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(DoorFragment.class);
             }
         });
 
@@ -67,21 +60,13 @@ public class MainFragment extends Fragment implements MessageHandler {
         lightButtonOn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LightFragment fragment = new LightFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(LightFragment.class);
             }
         });
         lightButtonOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LightFragment fragment = new LightFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(LightFragment.class);
             }
         });
 
@@ -89,11 +74,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         climateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ClimateFragment fragment = new ClimateFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(ClimateFragment.class);
             }
         });
 
@@ -101,11 +82,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         holidayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                HolidayFragment fragment = new HolidayFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(HolidayFragment.class);
             }
         });
 
@@ -113,11 +90,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         statusButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                StatusFragment fragment = new StatusFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(StatusFragment.class);
             }
         });
 
@@ -125,11 +98,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         usersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ModifyPermissionFragment fragment = new ModifyPermissionFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
+                parent.showFragmentByClass(ModifyPermissionFragment.class);
             }
         });
         return mLinearLayout;
@@ -155,11 +124,11 @@ public class MainFragment extends Fragment implements MessageHandler {
      *
      * @return All modules from the type door.
      */
-/*    private List<Module> getDoorModules() {
+    private List<Module> getDoorModules() {
         // get list
         // filter door modules
         return null;
-    }*/
+    }
 
     /**
      * Checks if one of the registered lights is turned on.
