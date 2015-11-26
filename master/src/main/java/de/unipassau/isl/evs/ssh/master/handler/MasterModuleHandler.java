@@ -14,8 +14,8 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 /**
+ * The MasterModuleHandler sends updated lists of active Modules to ODROIDs and Clients
  * @author bucher
- * The MEDH ...
  */
 public class MasterModuleHandler implements MessageHandler {
     private SlaveController slaveController;
@@ -23,17 +23,12 @@ public class MasterModuleHandler implements MessageHandler {
     private Container container;
     private IncomingDispatcher incomingDispatcher;
 
-    public MasterModuleHandler() {
-    }
-
     public void UpdateDevices(DeviceID id) {
-        //TODO get the List of devices and send it to the device which should be updated
         List<Module> components = slaveController.getModules();
         Message message = new Message(new ModulesPayload(components));
         message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_MODULES_GET);
         message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
         outgoing.sendMessage(id, CoreConstants.RoutingKeys.APP_MODULES_GET, message);
-        //set Timeout?
     }
 
     @Override
