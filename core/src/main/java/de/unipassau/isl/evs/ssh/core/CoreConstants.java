@@ -75,4 +75,9 @@ public class CoreConstants {
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
         public static final String SLAVE_LIGHT_SET = "/slave/light/set";
     }
+
+    public class LogActions {
+        public static final String LIGHT_ON_ACTION = "LightOn";
+        public static final String LIGHT_OFF_ACTION = "LightOff";
+    }
 }
