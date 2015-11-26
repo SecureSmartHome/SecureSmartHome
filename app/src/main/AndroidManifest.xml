@@ -22,19 +22,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-        <!-- Überflüssig?
-        <activity android:name=".activity.AddModulFragment" />
-        <activity android:name=".activity.AddNewUserDeviceFragment" />
-        <activity android:name=".activity.AppRegisterUserDeviceFragment" />
-        <activity android:name=".activity.ClimateFragment" />
-        <activity android:name=".activity.DoorFragment" />
-        <activity android:name=".activity.HolidayFragment" />
-        <activity android:name=".activity.LightActivity"/>
-        <activity android:name=".activity.ModifyPermissionFragment" />
-        <activity android:name=".activity.OperateDoorFragment" />
-        <activity android:name=".activity.StatusFragment" />
-        -->
         <service android:name=".AppContainer" />
     </application>
 
