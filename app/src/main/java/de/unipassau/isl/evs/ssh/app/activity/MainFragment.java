@@ -26,7 +26,8 @@ public class MainFragment extends Fragment implements MessageHandler {
 
         ImageButton doorButtonOpen = (ImageButton) mLinearLayout.findViewById(R.id.doorButtonOpen);
         ImageButton doorButtonClosed = (ImageButton) mLinearLayout.findViewById(R.id.doorButtonClosed);
-        if (doorIsOpen()) {
+//        if (doorIsOpen()) {
+        if (true) {
             doorButtonOpen.setVisibility(View.VISIBLE);
             doorButtonClosed.setVisibility(View.GONE);
         } else {
@@ -50,7 +51,8 @@ public class MainFragment extends Fragment implements MessageHandler {
         ImageButton lightButtonOn = (ImageButton) mLinearLayout.findViewById(R.id.lightButtonOn);
         ImageButton lightButtonOff = (ImageButton) mLinearLayout.findViewById(R.id.lightButtonOff);
         //The status of the light imageButton depends in the status of the lights.
-        if (lightTurnedOn()) {
+//        if (lightTurnedOn()) {
+        if (true) {
             lightButtonOff.setVisibility(View.GONE);
             lightButtonOn.setVisibility(View.VISIBLE);
         } else {
@@ -109,6 +111,7 @@ public class MainFragment extends Fragment implements MessageHandler {
      *
      * @return If one of the registered doors is open.
      */
+/*
     private boolean doorIsOpen() {
         List<Module> list = getDoorModules();
         for (Module m : list) {
@@ -119,22 +122,26 @@ public class MainFragment extends Fragment implements MessageHandler {
         return false;
     }
 
-    /**
+    */
+/**
      * todo
      *
      * @return All modules from the type door.
-     */
+ *//*
+
     private List<Module> getDoorModules() {
         // get list
         // filter door modules
         return null;
     }
 
-    /**
+    */
+/**
      * Checks if one of the registered lights is turned on.
      *
      * @return If one of all registered lights is turned on.
-     */
+ *//*
+
     private boolean lightTurnedOn() {
         List<Module> list = getLightModules(); //TODO get light modules from database
         for (Module m : list) {
@@ -145,16 +152,20 @@ public class MainFragment extends Fragment implements MessageHandler {
         return false;
     }
 
+    */
+
     /**
      * todo
      *
      * @return All modules from the type light.
-     */
+     *//*
+
     private List<Module> getLightModules() {
         // get list
         // filter light modules
         return null;
     }
+*/
 
     @Override
     public void handle(Message.AddressedMessage message) {

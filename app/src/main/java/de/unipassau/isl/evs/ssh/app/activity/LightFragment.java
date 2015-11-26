@@ -1,16 +1,10 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
-
-import java.util.LinkedList;
-import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
@@ -33,7 +27,7 @@ public class LightFragment extends Fragment implements MessageHandler {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    /*    // Inflate the layout for this fragment
         LinearLayout mLinearLayout = (LinearLayout) inflater.inflate(R.layout.fragment_light,
                 container, false);
         LinearLayout lightButtonLayout = (LinearLayout) mLinearLayout.findViewById(R.id.lightButtonLayout);
@@ -53,7 +47,9 @@ public class LightFragment extends Fragment implements MessageHandler {
             lightButtonLayout.addView(light_button);
         }
         return inflater.inflate(R.layout.fragment_light, container, false);
+
     }
+
     private List<Module> getLightModules() {
         List<Module> list = new LinkedList<>();
 
@@ -62,8 +58,9 @@ public class LightFragment extends Fragment implements MessageHandler {
 //        add them to the list
 
         return list;
+*/
+        return inflater.inflate(R.layout.fragment_light, container, false);
     }
-
     @Override
     public void handle(Message.AddressedMessage message) {
 
