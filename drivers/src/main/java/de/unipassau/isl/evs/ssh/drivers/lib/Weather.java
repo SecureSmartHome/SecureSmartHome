@@ -1,8 +1,12 @@
 package de.unipassau.isl.evs.ssh.drivers.lib;
 
 import android.util.Log;
+import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.container.Component;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 
-public class Weather {
+public class Weather implements Component {
+    public static final Key<Weather> KEY = new Key<>(Weather.class);
     private static final String TAG = "Odroid Weather";
 
     static {
@@ -100,5 +104,15 @@ public class Weather {
         Log.d(TAG, "Now closing file descriptor.");
         close();
         Log.d(TAG, "finished!");
+    }
+
+    @Override
+    public void init(Container container) {
+        initSerialInterface();
+    }
+
+    @Override
+    public void destroy() {
+        close();
     }
 }

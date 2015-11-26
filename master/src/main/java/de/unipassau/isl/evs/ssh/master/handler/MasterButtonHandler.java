@@ -1,8 +1,17 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
+import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
+import de.unipassau.isl.evs.ssh.master.database.HolidayController;
+import de.unipassau.isl.evs.ssh.master.database.PermissionController;
+import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 /**
  * In case a hardware button on the Odroid is pressed, a message, of which the content depends on
@@ -12,21 +21,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  * Then a message containing the reset command is generated an passed to the OutgoingRouter
  * and from there sent on to the target handler, which eventually,
  * will result in a reset of the whole system.
+ * @author leon
  */
-public class MasterButtonHandler implements MessageHandler {
-
-    @Override
-    public void handle(Message.AddressedMessage message) {
-
-    }
-
-    @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-
-    }
+public class MasterButtonHandler extends AbstractMasterHandler {
 }
