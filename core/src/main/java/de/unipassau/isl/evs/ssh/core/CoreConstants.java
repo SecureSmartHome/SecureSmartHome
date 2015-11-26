@@ -45,6 +45,7 @@ public class CoreConstants {
         //Master
         public static final String MASTER_LIGHT_GET = "/master/light/get";
         public static final String MASTER_LIGHT_SET = "/master/light/set";
+        public static final String MASTER_DOOR_RINGS = "/master/doorbell/ring";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";

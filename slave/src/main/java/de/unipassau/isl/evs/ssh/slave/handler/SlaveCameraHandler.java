@@ -12,6 +12,7 @@ public class SlaveCameraHandler implements MessageHandler {
 
     @Override
     public void handle(Message.AddressedMessage message) {
+        CaptureDeviceManager manager;
 
     }
 
