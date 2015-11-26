@@ -101,6 +101,7 @@ public class DatabaseContract {
 
     public class ElectronicModule {
         public static final String TABLE_NAME = "ElectronicModule";
+        public static final String COLUMN_MODULE_TYPE = "moduleType";
         public static final String COLUMN_ID = "_ID";
         public static final String COLUMN_SLAVE_ID = "slaveId";
         public static final String COLUMN_NAME = "name";
@@ -110,7 +111,7 @@ public class DatabaseContract {
         public static final String COLUMN_WLAN_USERNAME = "wlanUsername";
         public static final String COLUMN_WLAN_PASSWORD = "wlanPassword";
         public static final String COLUMN_WLAN_IP = "wlanIP";
-        public static final String COLUMN_TYPE = "type";
+        public static final String COLUMN_CONNECTOR_TYPE = "type";
     }
 
     public class Slave {

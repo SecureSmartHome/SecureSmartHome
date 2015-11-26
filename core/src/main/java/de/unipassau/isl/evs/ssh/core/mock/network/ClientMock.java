@@ -48,7 +48,7 @@ public class ClientMock extends Client {
     /**
      * Distributes incoming messages to the responsible handlers.
      */
-    private ClientIncomingDispatcher incomingDispatcher = new ClientIncomingDispatcher(this);
+    private ClientIncomingDispatcher incomingDispatcher = new ClientIncomingDispatcher();
 
     /**
      * Boolean if the client connection is active.
@@ -57,7 +57,6 @@ public class ClientMock extends Client {
 
     /**
      * Init timeouts and the connection registry.
-     * Calls {@link #startClient()} method and to start the netty IO client synchronously.
      */
     @Override
     public void init(Container container) {

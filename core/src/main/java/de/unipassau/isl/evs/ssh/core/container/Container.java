@@ -1,5 +1,8 @@
 package de.unipassau.isl.evs.ssh.core.container;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,6 +40,7 @@ public interface Container {
      * @param key The key whose associated value is to be returned.
      * @return Returns to associated Component.
      */
+    @Nullable
     <T extends Component> T get(Key<T> key);
 
     /**
@@ -49,10 +53,12 @@ public interface Container {
      * @return Returns to associated Component.
      * @throws IllegalStateException if this map contains no mapping for the key
      */
+    @NonNull
     <T extends Component> T require(Key<T> key);
 
     boolean isRegistered(Key<?> key);
 
+    @NonNull
     TypedMap<? extends Component> getData();
 
     void shutdown();

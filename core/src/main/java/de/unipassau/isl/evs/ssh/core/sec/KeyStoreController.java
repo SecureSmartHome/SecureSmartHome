@@ -2,14 +2,9 @@ package de.unipassau.isl.evs.ssh.core.sec;
 
 import android.content.Context;
 import android.util.Log;
-import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.container.Container;
-import de.unipassau.isl.evs.ssh.core.container.ContainerService;
-import de.unipassau.isl.evs.ssh.core.container.StartupException;
+
 import org.spongycastle.x509.X509V3CertificateGenerator;
-import javax.crypto.KeyGenerator;
-import javax.security.auth.x500.X500Principal;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,11 +15,11 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.Security;
 import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
@@ -34,6 +29,15 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.crypto.KeyGenerator;
+import javax.security.auth.x500.X500Principal;
+
+import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.container.StartupException;
 
 /**
  * The KeyStoreController controls the KeyStore which can load and store keys and provides Key generation.
@@ -53,12 +57,13 @@ public class KeyStoreController extends AbstractComponent {
     public static final int SYMMETRIC_KEY_SIZE = 256;
 
     public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);
-    private KeyStore keyStore;
-    private File keyStoreFile;
 
     static {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }
+
+    private KeyStore keyStore;
+    private File keyStoreFile;
 
     /**
      * This functions allows the Container to initialize the OdroidKeyStoreController.
@@ -126,7 +131,7 @@ public class KeyStoreController extends AbstractComponent {
      * @throws NoSuchAlgorithmException
      * @throws KeyStoreException
      */
-    public java.security.Key getOwnPrivateKey() throws UnrecoverableEntryException, NoSuchAlgorithmException,
+    public PrivateKey getOwnPrivateKey() throws UnrecoverableEntryException, NoSuchAlgorithmException,
             KeyStoreException {
         return ((KeyStore.PrivateKeyEntry) loadKey(LOCAL_PRIVATE_KEY_ALIAS)).getPrivateKey();
     }
