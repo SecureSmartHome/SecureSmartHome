@@ -33,7 +33,6 @@ public class MasterLightHandler extends AbstractMasterHandler {
                         .getModule(lightPayload.getModuleName());
                 Message messageToSend = new Message(lightPayload);
                 messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
-                messageToSend.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
                 //which functionality
                 switch (message.getRoutingKey()) {
@@ -85,7 +84,6 @@ public class MasterLightHandler extends AbstractMasterHandler {
                         getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
                 Message messageToSend = new Message(lightPayload);
                 messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
-                messageToSend.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
                 //for both, that's why no switch. easy money easy life
                 incomingDispatcher.getContainer().require(OutgoingRouter.KEY)

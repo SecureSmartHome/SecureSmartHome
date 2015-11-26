@@ -109,6 +109,11 @@ public class SlaveLightHandler implements MessageHandler {
         }
     }
 
+    /**
+     * Sends an error message to original sender
+     *
+     * @param original message
+     */
     private void sendErrorMessage(Message.AddressedMessage original) {
         Message reply;
 
