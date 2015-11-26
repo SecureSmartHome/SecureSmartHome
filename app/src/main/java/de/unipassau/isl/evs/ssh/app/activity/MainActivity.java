@@ -22,7 +22,6 @@ public class MainActivity extends AppCompatActivity
 
     private static final String SAVED_LAST_ACTIVE_FRAGMENT = "de.unipassau.isl.evs.ssh.app.activity.SAVED_LAST_ACTIVE_FRAGMENT";
 
-    //TODO toolbar
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
 
