@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
@@ -55,7 +56,7 @@ public class Scheduler extends AbstractComponent {
      * @param intent the Intent received by {@link ContainerService#onStartCommand(Intent, int, int)}
      */
     public void forwardIntent(Intent intent) {
-        if (ACTION_BROADCAST.equals(intent.getAction())) {
+        if (Objects.equals(ACTION_BROADCAST, intent.getAction())) {
             Serializable key = intent.getSerializableExtra(EXTRA_BROADCAST_TARGET);
             if (key instanceof Key) {
                 Component target = getComponent(((Key) key));
