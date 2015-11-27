@@ -14,6 +14,7 @@ import io.netty.channel.ChannelFuture;
  * Message are used to exchange information between devices and handlers.
  * A Message contains a header with information about the Message itself and
  * a payload which contains to information for the intended device and handler.
+ * @author Niko
  */
 public class Message implements Serializable {
     public static final Key<Long> HEADER_TIMESTAMP = new Key<>(Long.class, "timestamp");
