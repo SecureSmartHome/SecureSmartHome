@@ -3,14 +3,22 @@ package de.unipassau.isl.evs.ssh.master.database;
 import android.content.Context;
 import android.database.Cursor;
 import android.test.InstrumentationTestCase;
-
-import junit.framework.TestCase;
-
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
 
+/**
+ * Instrumentation test for the DatabaseConnector.
+ * Creates a database and tests connecting to it.
+ *
+ * @author Wolfgang Popp
+ */
 public class DatabaseConnectorTest extends InstrumentationTestCase {
 
+    /**
+     * Test method for this instrumentation test
+     *
+     * @throws Exception
+     */
     public void testExecuteSql() throws Exception {
         SimpleContainer container = new SimpleContainer();
         Context context = getInstrumentation().getTargetContext();

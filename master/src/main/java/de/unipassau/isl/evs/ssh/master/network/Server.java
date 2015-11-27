@@ -3,10 +3,6 @@ package de.unipassau.isl.evs.ssh.master.network;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
-import java.net.SocketAddress;
-import java.security.GeneralSecurityException;
-
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
@@ -43,6 +39,9 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
+import java.net.SocketAddress;
+import java.security.GeneralSecurityException;
+
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_ALL_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_READER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_WRITER_IDLE_TIME;
@@ -55,6 +54,8 @@ import static de.unipassau.isl.evs.ssh.master.MasterConstants.PREF_SERVER_PORT;
  * Additionally, it keeps track of timeouts and holds the global connection registry.
  * For details about the pipeline, see {@link #startServer()} and {@link #initChannel(SocketChannel)}.
  * As this component is only active on the Master, the terms "Master" and "Server" are used interchangeably.
+ *
+ * @author Niko
  */
 public class Server extends AbstractComponent {
     public static final Key<Server> KEY = new Key<>(Server.class);

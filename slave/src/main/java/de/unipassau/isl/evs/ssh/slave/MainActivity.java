@@ -8,7 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
@@ -19,6 +18,11 @@ import de.unipassau.isl.evs.ssh.core.network.Client;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
+/**
+ * MainActivity for the slave app.
+ *
+ * @author Team
+ */
 public class MainActivity extends BoundActivity {
     private final MessageHandler handler = new MessageHandler() {
         @Override

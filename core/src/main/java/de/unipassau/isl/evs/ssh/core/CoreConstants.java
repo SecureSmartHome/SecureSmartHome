@@ -1,11 +1,13 @@
 package de.unipassau.isl.evs.ssh.core;
 
-import java.util.concurrent.TimeUnit;
-
 import io.netty.util.ResourceLeakDetector;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * This Constants class provides constants needed by all modules.
+ *
+ * @author Team
  */
 public class CoreConstants {
     /**

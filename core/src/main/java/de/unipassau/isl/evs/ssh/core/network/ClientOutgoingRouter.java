@@ -1,12 +1,17 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
-import java.util.Objects;
-
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import io.netty.channel.ChannelFuture;
 
+import java.util.Objects;
+
+/**
+ * Receives messages from system components and decides how to route them to the targets.
+ *
+ * @author Niko
+ */
 public class ClientOutgoingRouter extends OutgoingRouter {
 
     @Override

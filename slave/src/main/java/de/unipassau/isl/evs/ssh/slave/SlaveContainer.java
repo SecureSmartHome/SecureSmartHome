@@ -2,19 +2,8 @@ package de.unipassau.isl.evs.ssh.slave;
 
 import android.os.Environment;
 import android.util.Log;
-
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
@@ -25,8 +14,19 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveLightHandler;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
 /**
  * This Container class manages dependencies needed in the Slave part of the architecture.
+ *
+ * @author Niko
  */
 public class SlaveContainer extends ContainerService {
     @Override

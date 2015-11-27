@@ -2,13 +2,18 @@ package de.unipassau.isl.evs.ssh.core.messaging;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
-
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import io.netty.channel.ChannelHandlerAdapter;
 
+/**
+ * Abstract class providing base methods for IncomingDispatchers.
+ * IncomingDispatchers distribute incoming messages to the specific handler.
+ *
+ * @author Niko
+ */
 public abstract class IncomingDispatcher extends ChannelHandlerAdapter implements Component {
     public static final Key<IncomingDispatcher> KEY = new Key<>(IncomingDispatcher.class);
 

@@ -1,19 +1,20 @@
 package de.unipassau.isl.evs.ssh.master;
 
 import android.util.Log;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseConnector;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 /**
  * This Container class manages dependencies needed in the Master part of the architecture.
+ *
+ * @author Niko
  */
 public class MasterContainer extends ContainerService {
     @Override

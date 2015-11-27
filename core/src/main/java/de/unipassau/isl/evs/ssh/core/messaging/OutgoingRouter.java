@@ -1,7 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.messaging;
 
 import android.util.Log;
-
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
@@ -11,6 +10,8 @@ import io.netty.channel.ChannelFutureListener;
 
 /**
  * Receives messages from system components and decides how to route them to the targets.
+ *
+ * @author Niko
  */
 public abstract class OutgoingRouter extends AbstractComponent {
     public static final Key<OutgoingRouter> KEY = new Key<>(OutgoingRouter.class);

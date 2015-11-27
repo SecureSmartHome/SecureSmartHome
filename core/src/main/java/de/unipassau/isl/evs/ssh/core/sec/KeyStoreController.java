@@ -2,9 +2,15 @@ package de.unipassau.isl.evs.ssh.core.sec;
 
 import android.content.Context;
 import android.util.Log;
-
+import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.container.StartupException;
 import org.spongycastle.x509.X509V3CertificateGenerator;
 
+import javax.crypto.KeyGenerator;
+import javax.security.auth.x500.X500Principal;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,19 +36,12 @@ import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.crypto.KeyGenerator;
-import javax.security.auth.x500.X500Principal;
-
-import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.container.Container;
-import de.unipassau.isl.evs.ssh.core.container.ContainerService;
-import de.unipassau.isl.evs.ssh.core.container.StartupException;
-
 /**
  * The KeyStoreController controls the KeyStore which can load and store keys and provides Key generation.
  * It also initiates the private Key which will be associated with this device if it doesn't exist yet.
  * (Notice: the Keys handled by the KeyStoreController are not the Keys from the TypedMap package.)
+ *
+ * @author Chris
  */
 public class KeyStoreController extends AbstractComponent {
 

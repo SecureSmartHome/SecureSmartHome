@@ -1,13 +1,6 @@
 package de.unipassau.isl.evs.ssh.slave.handler;
 
 import android.util.Log;
-
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
@@ -20,9 +13,15 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
 import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 
 /**
  * Handles light messages and makes API calls accordingly.
+ *
+ * @author Chris
  */
 public class SlaveLightHandler implements MessageHandler {
 
@@ -114,12 +113,17 @@ public class SlaveLightHandler implements MessageHandler {
         }
     }
 
+    /**
+     * Method the sends error message in case the original message was faulty
+     *
+     * @param original message received
+     */
     private void sendErrorMessage(Message.AddressedMessage original) {
         Message reply;
 
         String routingKey = original.getHeader(Message.HEADER_REPLY_TO_KEY);
         reply = new Message(new MessageErrorPayload(null));
-        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr()); //TODO: getSequenzeNumber
+        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
         reply.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
         dispatcher.getContainer().require(OutgoingRouter.KEY).sendMessage(original.getFromID(), routingKey, reply);

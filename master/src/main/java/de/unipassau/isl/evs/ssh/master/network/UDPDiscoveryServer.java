@@ -3,9 +3,6 @@ package de.unipassau.isl.evs.ssh.master.network;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.util.Log;
-
-import java.net.InetSocketAddress;
-
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
@@ -24,9 +21,13 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 
+import java.net.InetSocketAddress;
+
 /**
  * This component is responsible for responding to UDP discovery packets, signalling the address and port back to
  * {@link Client}s searching for this Master.
+ *
+ * @author Niko
  */
 public class UDPDiscoveryServer extends AbstractComponent {
     public static final Key<UDPDiscoveryServer> KEY = new Key<>(UDPDiscoveryServer.class);
