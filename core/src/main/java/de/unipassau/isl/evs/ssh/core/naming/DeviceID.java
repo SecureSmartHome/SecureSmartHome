@@ -4,14 +4,24 @@ import java.io.Serializable;
 
 /**
  * Unique id for all devices (user devices, master, slaves).
+ *
+ * @author Wolfgang Popp
  */
 public final class DeviceID implements Serializable {
     private final String id;
 
+    /**
+     * Creates a new DeviceID from the given string.
+     * @param id the id as string
+     */
     public DeviceID(String id) {
         this.id = id != null ? id.trim() : id;
     }
 
+    /**
+     * Returns the device id string.
+     * @return the device id
+     */
     public String getId() {
         return id;
     }

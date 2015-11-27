@@ -24,6 +24,8 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 /**
  * The NamingManager class maps certificates to IDs that are unique within the SecureSmartHome
  * System. The IDs are assigned to the master, slaves and smarphones.
+ *
+ * @author Wolfgang Popp
  */
 public class NamingManager extends AbstractComponent {
 
