@@ -1,6 +1,8 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
 /**
+ * Payload class for DoorMessages.
+ *
  * @author leon
  */
 public class DoorPayload implements MessagePayload {
