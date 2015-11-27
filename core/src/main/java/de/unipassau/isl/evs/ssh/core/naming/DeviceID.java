@@ -12,6 +12,7 @@ public final class DeviceID implements Serializable {
 
     /**
      * Creates a new DeviceID from the given string.
+     *
      * @param id the id as string
      */
     public DeviceID(String id) {
@@ -20,6 +21,7 @@ public final class DeviceID implements Serializable {
 
     /**
      * Returns the device id string.
+     *
      * @return the device id
      */
     public String getId() {
@@ -46,6 +48,14 @@ public final class DeviceID implements Serializable {
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
+    }
+
+    public String toShortString() {
+        if (id == null) {
+            return "???";
+        } else {
+            return id.substring(0, Math.min(id.length(), 7));
+        }
     }
 
     @Override

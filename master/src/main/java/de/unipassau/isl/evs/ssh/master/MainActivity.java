@@ -9,16 +9,20 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
-import de.unipassau.isl.evs.ssh.core.network.Client;
+import de.unipassau.isl.evs.ssh.master.network.Server;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.group.ChannelGroup;
 
 /**
  * MainActivitiy for the Master App
@@ -115,14 +119,23 @@ public class MainActivity extends BoundActivity {
     }
 
     private void updateConnectionStatus() {
-        Client client = getComponent(Client.KEY);
+        Server server = getComponent(Server.KEY);
         String status;
-        if (client == null) {
-            status = "disconnected";
+        if (server == null) {
+            status = "server not started";
         } else {
-            status = "connected to " + client.getAddress() + " "
-                    + "[" + (client.isChannelOpen() ? "open" : "closed") + ", "
-                    + (client.isExecutorAlive() ? "alive" : "dead") + "]";
+            final ChannelGroup channels = server.getActiveChannels();
+            status = channels.size() + " connected to " + server.getAddress() + " "
+                    + "[" + (server.isChannelOpen() ? "open" : "closed") + ", "
+                    + (server.isExecutorAlive() ? "alive" : "dead") + "]";
+            if (!channels.isEmpty()) {
+                status += ":\n";
+                for (Channel channel : channels) {
+                    final DeviceID deviceID = channel.attr(CoreConstants.ATTR_CLIENT_ID).get();
+                    status += channel.id().asShortText() + " " + channel.remoteAddress() + " " +
+                            (deviceID != null ? deviceID.toShortString() : "???") + "\n";
+                }
+            }
         }
         ((TextView) findViewById(R.id.textViewConnectionStatus)).setText(status);
     }
