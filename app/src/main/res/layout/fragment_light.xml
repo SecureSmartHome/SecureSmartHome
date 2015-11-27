@@ -18,12 +18,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/lightButtonLayout"
+        <!--    <LinearLayout
+                android:id="@+id/lightButtonContainerLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+            </Layout>-->
+
+        <ListView
+            android:id="@+id/lightButtonContainer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-        </LinearLayout>
+            android:layout_height="wrap_content"></ListView>
 
     </ScrollView>
 
