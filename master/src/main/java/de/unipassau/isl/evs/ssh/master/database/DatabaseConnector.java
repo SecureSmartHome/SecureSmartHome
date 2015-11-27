@@ -179,7 +179,18 @@ public class DatabaseConnector extends AbstractComponent {
                     DatabaseContract.Permission.Values.CREATE_TEMPLATE,
                     DatabaseContract.Permission.Values.DELETE_TEMPLATE,
                     DatabaseContract.Permission.Values.EDIT_TEMPLATE,
-                    DatabaseContract.Permission.Values.SHOW_TEMPLATE_PERMISSION
+                    DatabaseContract.Permission.Values.SHOW_TEMPLATE_PERMISSION,
+                    CoreConstants.NotificationTypes.ODROID_ADDED,
+                    CoreConstants.NotificationTypes.HUMIDITY_WARNING,
+                    CoreConstants.NotificationTypes.BRIGHTNESS_WARNING,
+                    CoreConstants.NotificationTypes.HOLIDAY_MODE_SWITCHED_ON,
+                    CoreConstants.NotificationTypes.HOLIDAY_MODE_SWITCHED_OFF,
+                    CoreConstants.NotificationTypes.SYSTEM_HEALT_WARNING,
+                    CoreConstants.NotificationTypes.BELL_RANG,
+                    CoreConstants.NotificationTypes.WEATHER_WARNING,
+                    CoreConstants.NotificationTypes.DOOR_UNLATCHED,
+                    CoreConstants.NotificationTypes.DOOR_LOCKED,
+                    CoreConstants.NotificationTypes.DOOR_UNLOCKED
             };
 
             for (String permission : binaryPermissions) {
