@@ -13,6 +13,7 @@ import de.unipassau.isl.evs.ssh.core.network.ClientIncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.network.handler.PipelinePlug;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.serialization.ClassResolvers;
@@ -26,6 +27,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_ALL_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_READER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_WRITER_IDLE_TIME;
 
+@ChannelHandler.Sharable
 public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     private static final String TAG = ServerHandshakeHandler.class.getSimpleName();
 
@@ -44,7 +46,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         Log.v(TAG, "channelRegistered " + ctx);
-        if (getContainer() != null) {
+        if (getContainer() == null) {
             //Do not accept new connections after the Server has been shut down
             Log.v(TAG, "channelRegistered:closed");
             ctx.close();
@@ -64,6 +66,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         server.getActiveChannels().add(ctx.channel());
 
         super.channelRegistered(ctx);
+        Log.v(TAG, "Pipeline after register: " + ctx.pipeline());
     }
 
     @Override
@@ -99,14 +102,15 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         Log.v(TAG, "clientAuthenticated " + ctx);
 
         //Timeout Handler
-        ctx.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
+        ctx.pipeline().addBefore(ctx.name(), IdleStateHandler.class.getSimpleName(),
                 new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
-        ctx.pipeline().addLast(TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
+        ctx.pipeline().addBefore(ctx.name(), TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
 
         //Dispatcher
-        ctx.pipeline().addLast(ServerIncomingDispatcher.class.getSimpleName(), server.getIncomingDispatcher());
+        ctx.pipeline().addBefore(ctx.name(), ServerIncomingDispatcher.class.getSimpleName(), server.getIncomingDispatcher());
 
         ctx.pipeline().remove(this);
+        Log.v(TAG, "Pipeline after authenticate: " + ctx.pipeline());
     }
 
     protected Container getContainer() {

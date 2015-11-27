@@ -55,6 +55,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         ctx.pipeline().addAfter(ctx.name(), PipelinePlug.class.getSimpleName(), new PipelinePlug());
 
         super.channelRegistered(ctx);
+        Log.v(TAG, "Pipeline after register: " + ctx.pipeline());
     }
 
     @Override
@@ -84,13 +85,14 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         Log.v(TAG, "handshakeComplete " + ctx);
 
         //Timeout Handler
-        ctx.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
+        ctx.pipeline().addBefore(ctx.name(), IdleStateHandler.class.getSimpleName(),
                 new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
-        ctx.pipeline().addLast(TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
+        ctx.pipeline().addBefore(ctx.name(), TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
 
         //Dispatcher
-        ctx.pipeline().addLast(ClientIncomingDispatcher.class.getSimpleName(), client.getIncomingDispatcher());
+        ctx.pipeline().addBefore(ctx.name(), ClientIncomingDispatcher.class.getSimpleName(), client.getIncomingDispatcher());
 
         ctx.pipeline().remove(this);
+        Log.v(TAG, "Pipeline after handshake: " + ctx.pipeline());
     }
 }
