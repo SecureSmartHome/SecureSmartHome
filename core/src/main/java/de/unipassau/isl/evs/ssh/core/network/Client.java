@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.net.InetAddress;
@@ -179,7 +180,7 @@ public class Client extends AbstractComponent {
         Bootstrap b = new Bootstrap()
                 .group(executor)
                 .channel(NioSocketChannel.class)
-                .handler(new ClientHandshakeHandler(this, getContainer()))
+                .handler(getHandshakeHandler())
                 .option(ChannelOption.SO_KEEPALIVE, true);
 
         // Wait for the start of the client
@@ -209,6 +210,16 @@ public class Client extends AbstractComponent {
                 channelClosed(future.channel());
             }
         });
+    }
+
+    /**
+     * HandshakeHandle can be changed or mocked for testing
+     *
+     * @return the ClientHandshakeHandler to use
+     */
+    @NonNull
+    protected ClientHandshakeHandler getHandshakeHandler() {
+        return new ClientHandshakeHandler(this, getContainer());
     }
 
     /**

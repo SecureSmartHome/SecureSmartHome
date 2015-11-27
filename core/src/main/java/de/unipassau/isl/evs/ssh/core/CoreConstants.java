@@ -1,7 +1,10 @@
 package de.unipassau.isl.evs.ssh.core;
 
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import io.netty.util.AttributeKey;
 import io.netty.util.ResourceLeakDetector;
 
+import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -60,6 +63,9 @@ public class CoreConstants {
     public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE";
     public static final ResourceLeakDetector.Level RESOURCE_LEAK_DETECTION = ResourceLeakDetector.Level.PARANOID;
     public static final String DISCOVERY_HOST = "255.255.255.255";
+
+    public static final AttributeKey<X509Certificate> ATTR_CLIENT_CERT = AttributeKey.valueOf(X509Certificate.class.getName());
+    public static final AttributeKey<DeviceID> ATTR_CLIENT_ID = AttributeKey.valueOf(DeviceID.class.getName());
 
     /**
      * This class contains the key constants of SharedPreferences

@@ -11,7 +11,7 @@ public class PipelinePlug extends ChannelHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        Log.w(TAG, (msg != null ? msg.getClass().getName() : "null") + " packet reached end of pipeline: "
+        Log.e(TAG, (msg != null ? msg.getClass().getName() : "null") + " packet reached end of pipeline: "
                 + String.valueOf(msg));
         ReferenceCountUtil.release(msg);
     }

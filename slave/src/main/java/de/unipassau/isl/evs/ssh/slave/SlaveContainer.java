@@ -1,18 +1,9 @@
 package de.unipassau.isl.evs.ssh.slave;
 
-import android.os.Environment;
 import android.util.Log;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.ContainerService;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
-import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
-import de.unipassau.isl.evs.ssh.core.network.Client;
-import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
-import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
-import de.unipassau.isl.evs.ssh.slave.handler.SlaveLightHandler;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +13,16 @@ import java.security.GeneralSecurityException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+
+import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import de.unipassau.isl.evs.ssh.core.network.Client;
+import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
+import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
+import de.unipassau.isl.evs.ssh.slave.handler.SlaveLightHandler;
 
 /**
  * This Container class manages dependencies needed in the Slave part of the architecture.
@@ -37,29 +38,30 @@ public class SlaveContainer extends ContainerService {
         register(NamingManager.KEY, new NamingManager(false));
         register(Client.KEY, new Client());
 
-        dir.mkdirs();
+        final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
+        incomingDispatcher.registerHandler(new SlaveLightHandler(),
+                CoreConstants.RoutingKeys.SLAVE_LIGHT_GET, CoreConstants.RoutingKeys.SLAVE_LIGHT_SET);
 
         //FIXME this is temporary for testing until we got everything needed
         Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, "TestPlugswitch");
         register(key, new EdimaxPlugSwitch("192.168.0.20", 10000, "admin", "1234"));
+        syncKeyStore();
+
+        final NamingManager namingManager = require(NamingManager.KEY);
+        Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getLocalDeviceId()
+                + "; Master is " + namingManager.getMasterID());
+    }
+
+    private void syncKeyStore() {
+        dir.mkdirs();
 
         // read the master id and cert from local storage as long as adding new devices is not implemented
         readMasterId();
         readMasterCert();
 
-        final NamingManager namingManager = require(NamingManager.KEY);
-        Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getLocalDeviceId()
-                + "; Master is " + namingManager.getMasterID());
-
         // write the slave id and cert to local storage as long as adding new devices is not implemented
         writeSlaveId();
         writeSlaveCert();
-        registerSlaveHandler();
-    }
-
-    private void registerSlaveHandler() {
-        this.require(IncomingDispatcher.KEY).registerHandler(new SlaveLightHandler(),
-                CoreConstants.RoutingKeys.SLAVE_LIGHT_GET, CoreConstants.RoutingKeys.SLAVE_LIGHT_SET);
     }
 
     private void readMasterId() {
