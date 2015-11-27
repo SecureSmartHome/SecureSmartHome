@@ -44,6 +44,7 @@ public class ySlaveController extends AbstractComponent {
     /**
      * Create a String array suitable to be inserted into the database. This function will fill in null values for all
      * columns not used by the given ModuleAccessPoint.
+     *
      * @param moduleAccessPoint ModulesAccessPoint to create String array from.
      * @return Generated String array.
      */

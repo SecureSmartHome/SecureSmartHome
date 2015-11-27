@@ -6,7 +6,7 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 
-public class DoorHandler extends AbstractComponent implements MessageHandler{
+public class DoorHandler extends AbstractComponent implements MessageHandler {
     public static final Key<DoorHandler> KEY = new Key<>(DoorHandler.class);
 
 
@@ -31,6 +31,7 @@ public class DoorHandler extends AbstractComponent implements MessageHandler{
 
     /**
      * Checks if the door is open.
+     *
      * @return true if the door is open
      */
     public boolean isOpen() {
@@ -39,6 +40,7 @@ public class DoorHandler extends AbstractComponent implements MessageHandler{
 
     /**
      * Checks if the door is blocked.
+     *
      * @return true if the door is blocked
      */
     public boolean isBlocked() {
@@ -48,21 +50,21 @@ public class DoorHandler extends AbstractComponent implements MessageHandler{
     /**
      * Sends a "OpenDoor" message to the master.
      */
-    public void openDoor(){
+    public void openDoor() {
         isDoorOpen = true;
     }
 
     /**
      * Sends a "BlockDoor" message to the master.
      */
-    public void blockDoor(){
+    public void blockDoor() {
         isDoorBlocked = true;
     }
 
     /**
      * Sends a "UnblockDoor" message to the master.
      */
-    public void unblockDoor(){
+    public void unblockDoor() {
         isDoorBlocked = false;
     }
 }
