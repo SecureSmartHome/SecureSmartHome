@@ -13,7 +13,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginLeft="25dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_weight="0.15">
 
         <TextView
             android:id="@+id/lightButtonTextView"
@@ -21,9 +22,9 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="25sp"
             android:padding="8sp"
-            android:text="@string/nav_light_string"
+            android:text="Kitchen Light"
             android:textColor="@color/colorSecondaryText"
-            android:textSize="@dimen/typography_display1"
+            android:textSize="@dimen/typography_subheadline"
             />
 
         <Button
@@ -33,7 +34,7 @@
             android:background="@color/button_green"
             android:padding="16dp"
             android:text="@string/string_turn_on"
-            android:textSize="18sp"
+            android:textSize="14sp"
             />
 
     </LinearLayout>
@@ -71,6 +72,6 @@
         android:contentDescription="@string/status_of_light"
         android:padding="20dp"
         android:src="@drawable/ic_light_off"
-        android:visibility="gone"
+        android:visibility="visible"
         />
 </LinearLayout>

@@ -40,7 +40,9 @@ public class LightFragment extends Fragment {
     public LightFragment() {
         // Required empty public constructor
     }
-   @Nullable
+
+
+    @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_light, container, false);
@@ -129,63 +131,6 @@ public class LightFragment extends Fragment {
 
        return root;
     }
-
-
- /*public View onCreateView2(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        FrameLayout mLinearLayout = (FrameLayout) inflater.inflate(R.layout.fragment_light,
-                container, false);
-        LinearLayout lightButtonContainer = (LinearLayout) mLinearLayout.findViewById(R.id.lightButtonContainerLayout);
-
-        Map<Module, Boolean> lightModules = getLightModules();
-        for (final Module m : lightModules.keySet()) {
-            //create linearlayout as defined in lightbutton.xml file
-            LinearLayout lightButtonLayout = (LinearLayout) inflater.inflate(R.layout.lightbutton, container, false);
-
-            TextView textView = (TextView) lightButtonLayout.findViewById(R.id.lightButtonTextView);
-            Button button = (Button) lightButtonLayout.findViewById(R.id.lightButtonButton);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    (A(MainActivity) getActivity()).getContainer().require(AppLightHandler.KEY).toggleLight(m);
-                }
-            });
-            // set up TextView
-            char[] name = getName(m);
-            textView.setText(name, 0, name.length);
-
-            // set up ImageView and button
-            ImageView imageViewOn = (ImageView) lightButtonLayout.findViewById(R.id.lightButtonImageViewOn);
-            ImageView imageViewOff = (ImageView) lightButtonLayout.findViewById(R.id.lightButtonImageViewOff);
-            if (lightModules.get(m)) {
-                imageViewOff.setVisibility(View.GONE);
-                imageViewOn.setVisibility(View.VISIBLE);
-                button.setText(getResources().getString(R.string.string_turn_off));
-                button.setBackgroundColor(getResources().getColor(R.color.button_red));
-            } else {
-                imageViewOn.setVisibility(View.GONE);
-                imageViewOff.setVisibility(View.VISIBLE);
-                button.setText(getResources().getString(R.string.string_turn_on));
-                button.setBackgroundColor(getResources().getColor(R.color.button_green));
-            }
-
-            lightButtonContainer.addView(lightButtonLayout);
-        }
-
-        handlerUpdateListener = new LightHandlerUpdateListener();
-        ((MainActivity) getActivity()).getContainer().require(AppLightHandler.KEY).addHandlerUpdateListener(
-                handlerUpdateListener);
-
-        FloatingActionButton fab = (FloatingActionButton) mLinearLayout.findViewById(R.id.light_fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //fixme call add light module fragment
-            }
-        });
-        return mLinearLayout;
-    }*/
 
     @Override
     public void onDestroyView() {
