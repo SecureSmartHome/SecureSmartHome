@@ -1,6 +1,5 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,26 +16,23 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
-import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * This activity allows to visualize status information of the system. If this functionality is used a message,
  * requesting all needed information, is generated and passed to the OutgoingRouter.
+ *
+ * @author Wolfgang Popp
  */
 public class StatusFragment extends Fragment {
 
     public StatusFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -117,7 +113,6 @@ public class StatusFragment extends Fragment {
             };
             moduleListView.setAdapter(moduleAdapter);
         }
-
 
         return view;
     }
