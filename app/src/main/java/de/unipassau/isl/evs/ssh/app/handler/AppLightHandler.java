@@ -22,32 +22,20 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 public class AppLightHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppLightHandler> KEY = new Key<>(AppLightHandler.class);
 
-    private Container container;
-    private IncomingDispatcher dispatcher;
-    private List<HandlerUpdateListener> listeners;
-    /**
-     * todo
-     */
-    private Map<Module, Boolean> lightStatusMapping;
-    /**
-     * todo
-     */
+    private final List<HandlerUpdateListener> listeners = new ArrayList<>();
+
+    private final Map<Module, Boolean> lightStatusMapping = new HashMap<>();
+
     private long timeStamp;
-    /**
-     * todo
-     */
+
     private final int REFRESH_DELAY = 20000;
 
-    /**
-     * todo
-     */
     public AppLightHandler() {
         timeStamp = System.currentTimeMillis() - REFRESH_DELAY;
-        listeners = new ArrayList<HandlerUpdateListener>();
     }
 
     private void updateList(List<Module> list) {
-        lightStatusMapping = new HashMap<Module, Boolean>();
+        lightStatusMapping.clear();
         for (Module m : list) {
             lightStatusMapping.put(m, false);
         }
@@ -59,13 +47,16 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
         Message message;
         message = new Message(lightPayload);
 
-        OutgoingRouter router = dispatcher.getContainer().require(OutgoingRouter.KEY);
-        NamingManager namingManager = dispatcher.getContainer().require(NamingManager.KEY);
+        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
+        NamingManager namingManager = getContainer().require(NamingManager.KEY);
         router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, message);
     }
 
     public void toggleLight(Module module) {
-        switchLight(module, !lightStatusMapping.get(module));
+        Map<Module, Boolean> map = getAllLightModuleStates();
+        if (module != null && map != null) {
+            switchLight(module, !map.get(module));
+        }
     }
 
     public boolean isModuleOn(Module m) {
@@ -85,21 +76,21 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
         Message message;
         message = new Message(lightPayload);
 
-        OutgoingRouter router = dispatcher.getContainer().require(OutgoingRouter.KEY);
-        NamingManager namingManager = dispatcher.getContainer().require(NamingManager.KEY);
+        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
+        NamingManager namingManager = getContainer().require(NamingManager.KEY);
         router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_LIGHT_GET, message);
     }
 
     public Map<Module, Boolean> getAllLightModuleStates() {
         Map<Module, Boolean> copy = new HashMap<>();
+        //fixme delete hardcoded object after tests
+        Module m = new Module("TestPlugswitch", new DeviceID("1"), CoreConstants.ModuleType.LIGHT, new WLANAccessPoint());
         if (lightStatusMapping != null) {
+            lightStatusMapping.put(m, true);
             for (Module module : lightStatusMapping.keySet()) {
                 copy.put(module, lightStatusMapping.get(module));
             }
         }
-        //fixme delete hardcored object after tests
-        Module m = new Module("TestPlugswitch", new DeviceID("1"), CoreConstants.ModuleType.LIGHT, new WLANAccessPoint());
-        copy.put(m, true);
         return copy;
     }
 
@@ -128,23 +119,20 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
 
     @Override
     public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-        this.dispatcher = dispatcher;
-
     }
 
     @Override
     public void handlerRemoved(String routingKey) {
-
     }
 
     @Override
     public void init(Container container) {
         super.init(container);
-        this.container = container;
+        requireComponent(IncomingDispatcher.KEY).registerHandler(this, "mzkey");
     }
 
     @Override
     public void destroy() {
-
+        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, "mzkey");
     }
 }
