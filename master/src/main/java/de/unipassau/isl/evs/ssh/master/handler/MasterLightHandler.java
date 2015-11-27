@@ -29,7 +29,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
                 //Request
                 Module atModule = incomingDispatcher.getContainer().require(SlaveController.KEY)
-                        .getModule(lightPayload.getModuleName());
+                        .getModule(lightPayload.getModule().getName());
                 Message messageToSend = new Message(lightPayload);
                 messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
 
