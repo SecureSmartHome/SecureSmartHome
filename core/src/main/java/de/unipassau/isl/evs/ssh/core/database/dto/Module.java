@@ -1,13 +1,15 @@
 package de.unipassau.isl.evs.ssh.core.database.dto;
 
-import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import java.io.Serializable;
+
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccessPoint;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * A DTO representing modules which are connected to slave devices, e..g. a light.
  * @author leon
  */
-public class Module {
+public class Module implements Serializable {
 
     private String name;
     private DeviceID atSlave;

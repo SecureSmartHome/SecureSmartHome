@@ -1,10 +1,12 @@
 package de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint;
 
+import java.io.Serializable;
+
 /**
  * Defines how to access how Module at a given Slave.
  * @author leon
  */
-public abstract class ModuleAccessPoint {
+public abstract class ModuleAccessPoint implements Serializable {
     //Amount all different possible entries for access information in the database.
     public static int COMBINED_AMOUNT_OF_ACCESS_INFORMATION = 6;
 

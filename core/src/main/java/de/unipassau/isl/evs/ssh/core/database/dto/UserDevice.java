@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.database.dto;
 
+import java.io.Serializable;
+
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
@@ -7,7 +9,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  * User devices are part of a group.
  * @author leon
  */
-public class UserDevice {
+public class UserDevice implements Serializable {
 
     private String name;
     private String inGroup;
