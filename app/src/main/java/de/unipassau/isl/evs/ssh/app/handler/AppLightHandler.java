@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,8 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
 
     public AppLightHandler() {
         timeStamp = System.currentTimeMillis() - REFRESH_DELAY;
+        Module m = new Module("TestPlugswitch", new DeviceID("H5f4ahpVmoVL6GKAYqZY7m73k9i9nDCnsiJLbw+0n3E="), CoreConstants.ModuleType.LIGHT, new WLANAccessPoint()); //FIXME resolve DeviceID
+        lightStatusMapping.put(m, false);
     }
 
     private void updateList(List<Module> list) {
@@ -46,6 +49,7 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
 
         Message message;
         message = new Message(lightPayload);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_LIGHT_UPDATE);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         NamingManager namingManager = getContainer().require(NamingManager.KEY);
@@ -53,9 +57,8 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     }
 
     public void toggleLight(Module module) {
-        Map<Module, Boolean> map = getAllLightModuleStates();
-        if (module != null && map != null) {
-            switchLight(module, !map.get(module));
+        if (module != null && lightStatusMapping != null) {
+            switchLight(module, !lightStatusMapping.get(module));
         }
     }
 
@@ -82,16 +85,7 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     }
 
     public Map<Module, Boolean> getAllLightModuleStates() {
-        Map<Module, Boolean> copy = new HashMap<>();
-        //fixme delete hardcoded object after tests
-        Module m = new Module("TestPlugswitch", new DeviceID("1"), CoreConstants.ModuleType.LIGHT, new WLANAccessPoint());
-        if (lightStatusMapping != null) {
-            lightStatusMapping.put(m, true);
-            for (Module module : lightStatusMapping.keySet()) {
-                copy.put(module, lightStatusMapping.get(module));
-            }
-        }
-        return copy;
+        return Collections.unmodifiableMap(lightStatusMapping);
     }
 
     private void updatePerformed() {
@@ -128,11 +122,11 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     @Override
     public void init(Container container) {
         super.init(container);
-        requireComponent(IncomingDispatcher.KEY).registerHandler(this, "mzkey");
+        requireComponent(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.APP_LIGHT_UPDATE);
     }
 
     @Override
     public void destroy() {
-        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, "mzkey");
+        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.APP_LIGHT_UPDATE);
     }
 }

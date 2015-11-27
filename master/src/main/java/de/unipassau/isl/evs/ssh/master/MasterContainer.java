@@ -7,15 +7,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseConnector;
+import de.unipassau.isl.evs.ssh.master.database.HolidayController;
+import de.unipassau.isl.evs.ssh.master.database.PermissionController;
+import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 /**
  * This Container class manages dependencies needed in the Master part of the architecture.
@@ -31,6 +33,12 @@ public class MasterContainer extends ContainerService {
         register(KeyStoreController.KEY, new KeyStoreController());
         register(NamingManager.KEY, new NamingManager(true));
         register(Server.KEY, new Server());
+        register(SlaveController.KEY, new SlaveController());
+        register(PermissionController.KEY, new PermissionController());
+        register(HolidayController.KEY, new HolidayController());
+
+        final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
+        incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
 
         dir.mkdirs();
 

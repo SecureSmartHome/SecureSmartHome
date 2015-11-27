@@ -10,7 +10,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
-import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 /**
  * Handles light messages, logs them for the holiday simulation and generates messages
@@ -28,8 +27,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
             //Response or request?
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
                 //Request
-                Module atModule = incomingDispatcher.getContainer().require(SlaveController.KEY)
-                        .getModule(lightPayload.getModule().getName());
+                Module atModule = lightPayload.getModule();
                 Message messageToSend = new Message(lightPayload);
                 messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
 

@@ -1,11 +1,11 @@
 package de.unipassau.isl.evs.ssh.core;
 
+import java.security.cert.X509Certificate;
+import java.util.concurrent.TimeUnit;
+
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import io.netty.util.AttributeKey;
 import io.netty.util.ResourceLeakDetector;
-
-import java.security.cert.X509Certificate;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This Constants class provides constants needed by all modules.
@@ -100,6 +100,7 @@ public class CoreConstants {
 
         //App
         public static final String APP_MODULES_GET = "/app/module/get";
+        public static final String APP_LIGHT_UPDATE = "/app/light/update";
     }
 
     /**

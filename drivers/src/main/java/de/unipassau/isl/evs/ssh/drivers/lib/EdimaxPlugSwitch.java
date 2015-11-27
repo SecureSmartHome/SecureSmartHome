@@ -143,7 +143,7 @@ public class EdimaxPlugSwitch implements Component {
                 throw new EvsIoException("Could not parse response");
             }
 
-            ret = true;
+            //ret = true;
         }
         return ret;
     }
