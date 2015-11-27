@@ -69,7 +69,7 @@ public class DatabaseConnector extends AbstractComponent {
 
     public class DBOpenHelper extends SQLiteOpenHelper {
         // If you change the database schema, you must increment the database version.
-        public static final int DATABASE_VERSION = 1;
+        public static final int DATABASE_VERSION = 2;
         public static final String DATABASE_NAME = "SecureSmartHome.db";
         private static final String SQL_CREATE_DB = "CREATE TABLE " + DatabaseContract.UserDevice.TABLE_NAME + " ("
                 + DatabaseContract.UserDevice.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
@@ -145,15 +145,15 @@ public class DatabaseConnector extends AbstractComponent {
                 + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " INTEGER NOT NULL"
                 + ");";
 
-        private static final String SQL_DROP_TABLES = "DROP TABLE " + DatabaseContract.UserDevice.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.Permission.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.HasPermission.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.Group.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + ";"
+        private static final String SQL_DROP_TABLES = "DROP TABLE " + DatabaseContract.HasPermission.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.ComposedOfPermission.TABLE_NAME + ";"
+                + "DROP TABLE " + DatabaseContract.UserDevice.TABLE_NAME + ";"
+                + "DROP TABLE " + DatabaseContract.Permission.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.ElectronicModule.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.Slave.TABLE_NAME + ";";
+                + "DROP TABLE " + DatabaseContract.Group.TABLE_NAME + ";"
+                + "DROP TABLE " + DatabaseContract.Slave.TABLE_NAME + ";"
+                + "DROP TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + ";"
+                + "DROP TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + ";";
 
         private void insertPermissions(SQLiteDatabase db) {
             String[] binaryPermissions = new String[]{
@@ -199,7 +199,6 @@ public class DatabaseConnector extends AbstractComponent {
                 db.insert(DatabaseContract.Permission.TABLE_NAME, null, values);
             }
         }
-
 
         private void execSQLScript(String script, SQLiteDatabase db) {
             String[] statements = script.split("\\;");
