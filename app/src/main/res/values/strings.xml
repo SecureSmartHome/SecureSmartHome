@@ -27,4 +27,7 @@
     <string name="string_turn_off">Turn Off</string>
     <string name="string_turn_on">Turn On</string>
     <string name="status_of_light">Status of the Light</string>
+    <string name="deviceSatusConnectedSlaves">Connected Slaves</string>
+    <string name="NoSlavesConnected">No Slaves connected</string>
+    <string name="NoModulesConnected">No modules connected</string>
 </resources>
