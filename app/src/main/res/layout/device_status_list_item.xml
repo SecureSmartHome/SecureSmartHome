@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<!--Author: Wolfgang Popp-->
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:baselineAligned="false"
     android:columnCount="2"
+    android:rowCount="3"
+    android:baselineAligned="false"
     android:measureWithLargestChild="false"
-    android:orientation="vertical"
-    android:paddingBottom="10dp"
     android:paddingTop="10dp"
-    android:rowCount="3">
+    android:paddingBottom="10dp">
 
     <TableRow
         android:layout_width="match_parent"
@@ -18,40 +17,16 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_column="0"
             android:text="Name: "
-            android:textColor="@color/colorSecondaryText"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:id="@+id/deviceStatusSlaveName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="1"
-            android:text="New Text"
-            android:textColor="@color/colorSecondaryText"/>
-    </TableRow>
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:baselineAligned="false">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_column="0"
-            android:text="Status: "
-            android:textColor="@color/colorSecondaryText"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/deviceStatusSlaveStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_column="1"
             android:text="New Text"
-            android:textColor="@color/colorSecondaryText"/>
+            android:id="@+id/deviceStatusSlaveName"
+            android:layout_column="1" />
     </TableRow>
 
     <TableRow
@@ -61,17 +36,17 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="ID:"
+            android:id="@+id/deviceStatusSlaveId"
             android:layout_column="0"
-            android:text="IP Adress: "
-            android:textColor="@color/colorSecondaryText"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/deviceStatusSlaveIP"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_column="1"
             android:text="New Text"
-            android:textColor="@color/colorSecondaryText"/>
+            android:id="@+id/textView4"
+            android:layout_column="1" />
     </TableRow>
+
 </TableLayout>

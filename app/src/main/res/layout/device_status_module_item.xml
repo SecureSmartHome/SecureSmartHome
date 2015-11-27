@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:baselineAligned="false"
-             android:columnCount="2"
-             android:measureWithLargestChild="false"
-             android:orientation="vertical"
-             android:paddingBottom="10dp"
-             android:paddingTop="10dp"
-             android:rowCount="3">
+<!--Author: Wolfgang Popp-->
+<TableLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:columnCount="2"
+    android:rowCount="3"
+    android:baselineAligned="false"
+    android:measureWithLargestChild="false"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
     <TableRow
         android:layout_width="match_parent"
@@ -17,40 +18,16 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_column="0"
             android:text="Name: "
-            android:textColor="@color/colorSecondaryText"
-            android:textStyle="bold"/>
+            android:layout_column="0"
+            android:textStyle="bold" />
 
         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Text"
             android:id="@+id/deviceStatusModuleName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="1"
-            android:text="New Text"
-            android:textColor="@color/colorSecondaryText"/>
-    </TableRow>
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:baselineAligned="false">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:text="Status: "
-            android:textColor="@color/colorSecondaryText"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:id="@+id/deviceStatusModuleStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="1"
-            android:text="New Text"
-            android:textColor="@color/colorSecondaryText"/>
+            android:layout_column="1" />
     </TableRow>
 
     <TableRow
@@ -60,38 +37,34 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Module Type: "
             android:layout_column="0"
-            android:text="Connected to: "
-            android:textColor="@color/colorSecondaryText"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/deviceStatusModuleConnectedTo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_column="1"
             android:text="New Text"
-            android:textColor="@color/colorSecondaryText"/>
-    </TableRow>
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:text="Type: "
-            android:textColor="@color/colorSecondaryText"
-            android:textStyle="bold"/>
-
-        <TextView
             android:id="@+id/deviceStatusModuleType"
+            android:layout_column="1" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_column="1"
+            android:text="Connector Type: "
+            android:layout_column="0"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="New Text"
-            android:textColor="@color/colorSecondaryText"/>
+            android:id="@+id/deviceStatusConnectionType"
+            android:layout_column="1" />
     </TableRow>
 </TableLayout>

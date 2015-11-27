@@ -1,19 +1,16 @@
 <resources>
     <string name="app_name">EVS SSH app</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="secure_smart_home">Secure Smart Home</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="favourite_settings">Favourites</string>
 
     <string name="navigation_drawer_open">Navigation</string>
     <string name="navigation_drawer_close">Navigate</string>
-    <string name="nav_edit">Edit</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
+<!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="nav_home">Home</string>
+    <string name="nav_home_string">Home</string>
     <string name="nav_door_string">Door</string>
     <string name="nav_light_string">Light</string>
     <string name="nav_climate_string">Climate</string>
@@ -21,10 +18,10 @@
     <string name="nav_status_string">Status</string>
     <string name="nav_modifyPermissions_string">Modify Permissions</string>
     <string name="nav_addNewUserDevice_sting">Add User</string>
-    <string name="nav_addModule_string">Add Module</string>
+    <string name="nav_addModul_string">Add Modul</string>
+    <string name="deviceSatusConnectedSlaves">Connected Slaves</string>
     <string name="deviceStatusConnectedSlaves">Connected Slaves</string>
     <string name="deviceStatusConnectedModules">Connected Modules</string>
-    <string name="string_turn_off">Turn Off</string>
-    <string name="string_turn_on">Turn On</string>
-    <string name="status_of_light">Status of the Light</string>
+    <string name="NoSlavesConnected">No Slaves connected</string>
+    <string name="NoModulesConnected">No modules connected</string>
 </resources>

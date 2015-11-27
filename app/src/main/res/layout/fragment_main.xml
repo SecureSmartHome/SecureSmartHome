@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!--@author bucher-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -11,69 +11,19 @@
         android:layout_weight="1"
         android:orientation="horizontal">
 
-        <ImageButton
-            android:id="@+id/doorButtonOpen"
-            android:layout_width="0dp"
+        <Button
+            android:layout_width="0dip"
             android:layout_height="match_parent"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:background="?android:selectableItemBackground"
-            android:padding="20dp"
-            android:visibility="gone"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_door_open"/>
+            android:id="@+id/doorButton"
+            android:text="Door Button"
+            android:layout_weight="1" />
 
-        <ImageButton
-            android:id="@+id/doorButtonClosed"
-            android:layout_width="0dp"
+        <Button
+            android:layout_width="0dip"
             android:layout_height="match_parent"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:background="?android:selectableItemBackground"
-            android:padding="20dp"
-            android:visibility="visible"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_door_closed"/>
-
-        <ImageButton
-            android:id="@+id/lightButtonOn"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:background="?android:selectableItemBackground"
-            android:visibility="gone"
-            android:padding="20dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_light_bulb_on"/>
-
-        <ImageButton
-            android:id="@+id/lightButtonOff"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="35dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:background="?android:selectableItemBackground"
-            android:padding="20dp"
-            android:visibility="visible"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_light_bulb_off"/>
+            android:id="@+id/lightButton"
+            android:text="Light Button"
+            android:layout_weight="1" />
     </LinearLayout>
 
     <LinearLayout
@@ -82,35 +32,19 @@
         android:layout_weight="1"
         android:orientation="horizontal">
 
-        <ImageButton
+        <Button
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
             android:id="@+id/climateButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:background="?android:selectableItemBackground"
-            android:padding="20dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_thermometer"/>
+            android:text="Climate Button"
+            android:layout_weight="1" />
 
-        <ImageButton
-            android:id="@+id/holidayButton"
-            android:layout_width="0dp"
+        <Button
+            android:layout_width="0dip"
             android:layout_height="match_parent"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:background="?android:selectableItemBackground"
-            android:padding="20dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_holiday_island"/>
+            android:id="@+id/holidayButton"
+            android:text="Holiday Button"
+            android:layout_weight="1" />
     </LinearLayout>
 
     <LinearLayout
@@ -119,34 +53,18 @@
         android:layout_weight="1"
         android:orientation="horizontal">
 
-        <ImageButton
+        <Button
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
             android:id="@+id/statusButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:background="?android:selectableItemBackground"
-            android:padding="20dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_status_tool"/>
+            android:text="Status Button"
+            android:layout_weight="1" />
 
-        <ImageButton
-            android:id="@+id/usersButton"
-            android:layout_width="0dp"
+        <Button
+            android:layout_width="0dip"
             android:layout_height="match_parent"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:background="?android:selectableItemBackground"
-            android:padding="20dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_user_big"/>
+            android:id="@+id/usersButton"
+            android:background="@drawable/main_fragment_status"
+            android:layout_weight="1" />
     </LinearLayout>
 </LinearLayout>

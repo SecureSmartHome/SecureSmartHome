@@ -23,7 +23,7 @@ public class MasterModuleHandler implements MessageHandler {
     private Container container;
     private IncomingDispatcher incomingDispatcher;
 
-    public void UpdateDevices(DeviceID id) {
+    public void updateDevices(DeviceID id) {
         List<Module> components = slaveController.getModules();
         Message message = new Message(new ModulesPayload(components));
         message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_MODULES_GET);
