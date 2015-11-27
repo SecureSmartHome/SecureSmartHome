@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
@@ -18,6 +19,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPo
 
 /**
  * The DatabaseConnector allows to establish connections to the used database and execute operations on it.
+ *
+ * @author Wolfgang Popp
  */
 public class DatabaseConnector extends AbstractComponent {
     public static final Key<DatabaseConnector> KEY = new Key<>(DatabaseConnector.class);

@@ -3,6 +3,8 @@ package de.unipassau.isl.evs.ssh.master.database;
 /**
  * The DatabaseContract class contains constants that describe the database layout. These constants
  * are the names of tables and their columns.
+ *
+ * @author Wolfgang Popp
  */
 public class DatabaseContract {
     public class UserDevice {
