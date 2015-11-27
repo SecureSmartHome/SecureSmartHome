@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
@@ -18,7 +19,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 
 /**
  * AppLightHandler class handles message from and to the
@@ -29,46 +29,15 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 public class AppLightHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppLightHandler> KEY = new Key<>(AppLightHandler.class);
 
-    private final List<HandlerUpdateListener> listeners = new ArrayList<>();
+    private final List<LightHandlerListener> listeners = new ArrayList<>();
+    private final Map<Module, LightStatus> lightStatusMapping = new HashMap<>();
 
-    private final Map<Module, Boolean> lightStatusMapping = new HashMap<>();
+    private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(20);
 
-    private long timeStamp;
-
-    private final int REFRESH_DELAY = 20000;
-
-    /**
-     * Public constructor which sets the timestamp with the current time.
-     */
     public AppLightHandler() {
-        timeStamp = System.currentTimeMillis() - REFRESH_DELAY;
-        Module m = new Module("TestPlugswitch", new DeviceID("H5f4ahpVmoVL6GKAYqZY7m73k9i9nDCnsiJLbw+0n3E="), CoreConstants.ModuleType.LIGHT, new WLANAccessPoint()); //FIXME resolve DeviceID
-        lightStatusMapping.put(m, false);
-    }
-
-    private void updateList(List<Module> list) {
-        lightStatusMapping.clear();
-        for (Module m : list) {
-            lightStatusMapping.put(m, false);
-        }
-    }
-
-    /**
-     * Sends a SET-request with the light-module and it's status.
-     *
-     * @param module The light-module which status should be changed.
-     * @param status The status of the module.
-     */
-    public void switchLight(Module module, boolean status) {
-        LightPayload lightPayload = new LightPayload(status, module);
-
-        Message message;
-        message = new Message(lightPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_LIGHT_UPDATE);
-
-        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        NamingManager namingManager = getContainer().require(NamingManager.KEY);
-        router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, message);
+        Module m = new Module("TestPlugswitch", new DeviceID("H5f4ahpVmoVL6GKAYqZY7m73k9i9nDCnsiJLbw+0n3E="),
+                CoreConstants.ModuleType.LIGHT, new WLANAccessPoint()); //FIXME resolve DeviceID
+        lightStatusMapping.put(m, new LightStatus(false));
     }
 
     /**
@@ -77,8 +46,19 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
      * @param module The module which status is changed.
      */
     public void toggleLight(Module module) {
-        if (module != null && lightStatusMapping != null) {
-            switchLight(module, !lightStatusMapping.get(module));
+        setLight(module, !isLightOnCached(module));
+    }
+
+    private void setCachedStatus(Module module, boolean isOn) {
+        LightStatus status = lightStatusMapping.get(module);
+        if (status == null) {
+            status = new LightStatus(isOn);
+            lightStatusMapping.put(module, status);
+        } else {
+            status.setOn(isOn);
+        }
+        for (LightHandlerListener listener : listeners) {
+            listener.statusChanged(module);
         }
     }
 
@@ -86,16 +66,27 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
      * @param module The module which status will be returned.
      * @return The status of the parameter module.
      */
-    public boolean isModuleOn(Module module) {
-        if (System.currentTimeMillis() - timeStamp >= REFRESH_DELAY) {
-            for (Module m : lightStatusMapping.keySet()) {
-                requestLightStatus(m);
-            }
-            timeStamp = System.currentTimeMillis();
+    public boolean isLightOn(Module module) {
+        final LightStatus status = lightStatusMapping.get(module);
+        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+            requestLightStatus(module);
         }
-
-        return lightStatusMapping.get(module);
+        return isLightOnCached(module);
     }
+
+    private boolean isLightOnCached(Module module) {
+        final LightStatus status = lightStatusMapping.get(module);
+        return status != null && status.isOn();
+    }
+
+    /**
+     * @return All light modules with it's statuses.
+     */
+    public Map<Module, LightStatus> getAllLightModuleStates() {
+        return Collections.unmodifiableMap(lightStatusMapping);
+    }
+
+    //Network///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Sends a request for the status of a module.
@@ -103,60 +94,58 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     private void requestLightStatus(Module m) {
         LightPayload lightPayload = new LightPayload(false, m);
 
-        Message message;
-        message = new Message(lightPayload);
+        Message message = new Message(lightPayload);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        NamingManager namingManager = getContainer().require(NamingManager.KEY);
-        router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_LIGHT_GET, message);
+        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_GET, message);
     }
 
     /**
-     * @return All light modules with it's statuses.
+     * Sends a SET-request with the light-module and it's status.
+     *
+     * @param module The light-module which status should be changed.
+     * @param status The status of the module.
      */
-    public Map<Module, Boolean> getAllLightModuleStates() {
-        return Collections.unmodifiableMap(lightStatusMapping);
+    public void setLight(Module module, boolean status) {
+        LightPayload lightPayload = new LightPayload(status, module);
+
+        Message message;
+        message = new Message(lightPayload);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_LIGHT_UPDATE);
+
+        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
+        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_SET, message);
     }
 
-    /**
-     * Updates all registered handlers.
-     */
-    private void updatePerformed() {
-        for (HandlerUpdateListener listener : listeners) {
-            listener.updatePerformed();
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public interface LightHandlerListener {
+        void statusChanged(Module module);
+    }
+
+    public class LightStatus {
+        private boolean isOn;
+        private long timestamp;
+
+        public LightStatus(boolean isOn) {
+            setOn(isOn);
+        }
+
+        void setOn(boolean isOn) {
+            this.isOn = isOn;
+            timestamp = System.currentTimeMillis();
+        }
+
+        public boolean isOn() {
+            return isOn;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
         }
     }
 
-    /**
-     * Adds parameter handler to listeners.
-     */
-    public void addHandlerUpdateListener(HandlerUpdateListener listener) {
-        listeners.add(listener);
-    }
-
-    /**
-     * Removes parameter handler from listeners.
-     */
-    public void removeHandlerUpdateListener(HandlerUpdateListener listener) {
-        if (listeners.contains(listener)) {
-            listeners.remove(listener);
-        }
-    }
-
-    @Override
-    public void handle(Message.AddressedMessage message) {
-        LightPayload lightPayload = (LightPayload) message.getPayload();
-        lightStatusMapping.put(lightPayload.getModule(), lightPayload.getOn());
-        updatePerformed();
-    }
-
-    @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-    }
+    //Lifecycle & Callbacks/////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Registers the {@link IncomingDispatcher} as an component.
@@ -165,6 +154,35 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     public void init(Container container) {
         super.init(container);
         requireComponent(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.APP_LIGHT_UPDATE);
+    }
+
+    @Override
+    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
+    }
+
+
+    @Override
+    public void handle(Message.AddressedMessage message) {
+        LightPayload lightPayload = (LightPayload) message.getPayload();
+        setCachedStatus(lightPayload.getModule(), lightPayload.getOn());
+    }
+
+    /**
+     * Adds parameter handler to listeners.
+     */
+    public void addListener(LightHandlerListener listener) {
+        listeners.add(listener);
+    }
+
+    /**
+     * Removes parameter handler from listeners.
+     */
+    public void removeListener(LightHandlerListener listener) {
+        listeners.remove(listener);
+    }
+
+    @Override
+    public void handlerRemoved(String routingKey) {
     }
 
     /**
