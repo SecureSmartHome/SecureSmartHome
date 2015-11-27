@@ -22,4 +22,6 @@
     <string name="deviceSatusConnectedSlaves">Connected Slaves</string>
     <string name="deviceStatusConnectedSlaves">Connected Slaves</string>
     <string name="deviceStatusConnectedModules">Connected Modules</string>
+    <string name="NoSlavesConnected">No Slaves connected</string>
+    <string name="NoModulesConnected">No modules connected</string>
 </resources>
