@@ -53,6 +53,8 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
  * For details about the pipeline, see {@link #initChannel(SocketChannel)}.
  * For details about switching to UDP discovery, see {@link #initClient()} and {@link #shouldReconnectTCP()}.
  * This component is used by the Slave and the end-user android App.
+ *
+ * @author Phil
  */
 public class Client extends AbstractComponent {
     public static final Key<Client> KEY = new Key<>(Client.class);

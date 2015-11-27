@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.slave;
 
+import android.os.Environment;
 import android.util.Log;
 
 import com.google.common.base.Charsets;
@@ -35,7 +36,7 @@ public class SlaveContainer extends ContainerService {
         register(Client.KEY, new Client());
 
         //FIXME this is temporary for testing until we got everything needed
-        Key<EdimaxPlugSwitch> key = new Key<EdimaxPlugSwitch>(EdimaxPlugSwitch.class, "TestPlugswitch");
+        Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, "TestPlugswitch");
         register(key, new EdimaxPlugSwitch("192.168.0.20", 10000, "admin", "1234"));
 
         // read the master id and cert from local storage as long as adding new devices is not implemented
@@ -43,7 +44,8 @@ public class SlaveContainer extends ContainerService {
         readMasterCert();
 
         final NamingManager namingManager = require(NamingManager.KEY);
-        Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getLocalDeviceId() + "; Master is " + namingManager.getMasterID());
+        Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getLocalDeviceId()
+                + "; Master is " + namingManager.getMasterID());
 
         // write the slave id and cert to local storage as long as adding new devices is not implemented
         writeSlaveId();
@@ -57,7 +59,8 @@ public class SlaveContainer extends ContainerService {
     }
 
     private void readMasterId() {
-        final File masterId = new File("/sdcard/ssh/master.id");
+        final File masterId = new File(Environment.getExternalStorageDirectory().getPath()
+                + "/ssh/master.id");
         if (masterId.exists()) {
             try {
                 final String id = Files.readFirstLine(masterId, Charsets.US_ASCII);
@@ -72,7 +75,8 @@ public class SlaveContainer extends ContainerService {
     }
 
     private void readMasterCert() {
-        final File masterCert = new File("/sdcard/ssh/master.der");
+        final File masterCert = new File(Environment.getExternalStorageDirectory().getPath()
+                + "/ssh/master.der");
         if (masterCert.exists()) {
             try {
                 CertificateFactory certFact = CertificateFactory.getInstance("X.509");
@@ -87,7 +91,8 @@ public class SlaveContainer extends ContainerService {
     }
 
     private void writeSlaveCert() {
-        try (final FileOutputStream os = new FileOutputStream("/sdcard/ssh/slave.der")) {
+        try (final FileOutputStream os = new FileOutputStream(Environment.getExternalStorageDirectory().getPath()
+                + "/ssh/slave.der")) {
             os.write(require(KeyStoreController.KEY).getOwnCertificate().getEncoded());
         } catch (IOException | GeneralSecurityException e) {
             e.printStackTrace();
@@ -95,7 +100,8 @@ public class SlaveContainer extends ContainerService {
     }
 
     private void writeSlaveId() {
-        try (final FileOutputStream os = new FileOutputStream("/sdcard/ssh/slave.id")) {
+        try (final FileOutputStream os = new FileOutputStream(Environment.getExternalStorageDirectory().getPath()
+                + "/ssh/slave.id")) {
             os.write(require(NamingManager.KEY).getLocalDeviceId().getId().getBytes());
         } catch (IOException e) {
             e.printStackTrace();

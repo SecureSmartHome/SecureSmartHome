@@ -7,7 +7,16 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 
+/**
+ * TimeoutHandler class is part of the netty pipeline. Handles timeouts by sending {@link PingMessage}.
+ *
+ * @author Phil
+ */
 public class TimeoutHandler extends ChannelHandlerAdapter {
+    /**
+     * Handles received timeout event.
+     * Sends a {@link PingMessage}.
+     */
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
@@ -20,6 +29,11 @@ public class TimeoutHandler extends ChannelHandlerAdapter {
         }
     }
 
+    /**
+     * Calls {@link ChannelHandlerAdapter#channelRead(ChannelHandlerContext, Object)} when the sent message
+     * is not an object of
+     * {@link de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler.PingMessage PingMessage} class.
+     */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (!(msg instanceof PingMessage)) {
@@ -28,6 +42,9 @@ public class TimeoutHandler extends ChannelHandlerAdapter {
         ctx.close();
     }
 
+    /**
+     * Empty class used for simple ping messages.
+     */
     public static class PingMessage implements Serializable {
 
     }
