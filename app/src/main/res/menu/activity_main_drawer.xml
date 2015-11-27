@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--@author bucher-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- TODO add icons android:icon="@android:drawable/ic_"-->
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
