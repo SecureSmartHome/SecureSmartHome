@@ -5,7 +5,6 @@ import android.util.Log;
 
 import java.net.InetAddress;
 import java.net.SocketAddress;
-import java.security.GeneralSecurityException;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
@@ -14,23 +13,15 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.DefaultExecutorServiceFactory;
 import io.netty.util.internal.logging.InternalLogger;
@@ -38,11 +29,8 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
 import static android.content.Context.MODE_PRIVATE;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_ALL_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_MAX_DISCONNECTS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_MILLIS_BETWEEN_DISCONNECTS;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_READER_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_WRITER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.DEFAULT_PORT;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_HOST;
@@ -191,12 +179,7 @@ public class Client extends AbstractComponent {
         Bootstrap b = new Bootstrap()
                 .group(executor)
                 .channel(NioSocketChannel.class)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-                        Client.this.initChannel(ch);
-                    }
-                })
+                .handler(new ClientHandshakeHandler(this, getContainer()))
                 .option(ChannelOption.SO_KEEPALIVE, true);
 
         // Wait for the start of the client
@@ -209,8 +192,7 @@ public class Client extends AbstractComponent {
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
                     Log.v(TAG, "Channel open");
-                    requireComponent(UDPDiscoveryClient.KEY).stopDiscovery();
-                    // TODO when implemented, start handshake
+                    channelOpen(future.channel());
                 } else {
                     Log.v(TAG, "Channel open failed");
                     channelClosed(future.channel());
@@ -230,10 +212,17 @@ public class Client extends AbstractComponent {
     }
 
     /**
+     * Called once the TCP connection is established.
+     */
+    protected void channelOpen(Channel channel) {
+        requireComponent(UDPDiscoveryClient.KEY).stopDiscovery();
+    }
+
+    /**
      * Called once the TCP connection is closed or if it couldn't be established at all.
      * Increments the disconnect counter and tries to re-establish the connection.
      */
-    private synchronized void channelClosed(Channel channel) {
+    protected synchronized void channelClosed(Channel channel) {
         if (channel != this.channelFuture.channel()) {
             return; //channel has already been exchanged by new one, don't start another client
         }
@@ -271,31 +260,6 @@ public class Client extends AbstractComponent {
     }
 
     /**
-     * Called once the TCP connection is established.
-     * Configures the per-connection pipeline that is responsible for handling incoming and outgoing data.
-     * After an incoming packet is decrypted, decoded and verified,
-     * it will be sent to its target {@link de.unipassau.isl.evs.ssh.core.handler.MessageHandler}
-     * by the {@link ClientIncomingDispatcher}.
-     */
-    protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
-        Log.v(TAG, "initChannel " + ch); //TODO add remaining necessary handlers, when they are implemented
-
-        //Handler (de-)serialization
-        ch.pipeline().addLast(ObjectEncoder.class.getSimpleName(), new ObjectEncoder());
-        ch.pipeline().addLast(ObjectDecoder.class.getSimpleName(), new ObjectDecoder(
-                ClassResolvers.weakCachingConcurrentResolver(getClass().getClassLoader())));
-        ch.pipeline().addLast(LoggingHandler.class.getSimpleName(), new LoggingHandler(LogLevel.TRACE));
-
-        //Timeout Handler
-        ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
-                new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
-        ch.pipeline().addLast(TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
-
-        //Dispatcher
-        ch.pipeline().addLast(ClientIncomingDispatcher.class.getSimpleName(), incomingDispatcher);
-    }
-
-    /**
      * Stop listening, close all connections and shut down the executors.
      */
     public void destroy() {
@@ -325,6 +289,13 @@ public class Client extends AbstractComponent {
      */
     Channel getChannel() {
         return channelFuture != null ? channelFuture.channel() : null;
+    }
+
+    /**
+     * {@link IncomingDispatcher} that will be registered to the Pipeline by the {@link ClientHandshakeHandler}
+     */
+    ClientIncomingDispatcher getIncomingDispatcher() {
+        return incomingDispatcher;
     }
 
     private SharedPreferences getSharedPrefs() {
