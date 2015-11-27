@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,11 +13,13 @@ import android.view.MenuItem;
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
-import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
 /**
  * As this Activity also displays information like wether the light is on or not, this Activity also
  * needs to messages concerning that information.
+ *
+ * @author bucher
+ * @author Wolfgang Popp
  */
 public class MainActivity extends BoundActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -106,6 +107,7 @@ public class MainActivity extends BoundActivity
         outState.putString(SAVED_LAST_ACTIVE_FRAGMENT, getCurrentFragment().getClass().getSimpleName());
     }
 
+    // returns the currently displayed Fragment
     private Fragment getCurrentFragment(){
         return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
     }
@@ -135,6 +137,7 @@ public class MainActivity extends BoundActivity
         }
     }
 
+    // maps button resource ids to Fragment classes.
     private void showFragmentByClass(int id) {
         Class clazz;
         if (id == R.id.nav_home) {
