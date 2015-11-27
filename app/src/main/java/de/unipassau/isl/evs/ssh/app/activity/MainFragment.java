@@ -30,14 +30,13 @@ public class MainFragment extends Fragment implements MessageHandler {
 
         ImageButton doorButtonOpen = (ImageButton) mLinearLayout.findViewById(R.id.doorButtonOpen);
         ImageButton doorButtonClosed = (ImageButton) mLinearLayout.findViewById(R.id.doorButtonClosed);
-//        if (doorIsOpen()) {
+//fixme        if (doorIsOpen()) {
         if (true) {
             doorButtonOpen.setVisibility(View.VISIBLE);
             doorButtonClosed.setVisibility(View.GONE);
         } else {
             doorButtonClosed.setVisibility(View.VISIBLE);
             doorButtonOpen.setVisibility(View.GONE);
-
         }
         doorButtonOpen.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,7 +54,7 @@ public class MainFragment extends Fragment implements MessageHandler {
         ImageButton lightButtonOn = (ImageButton) mLinearLayout.findViewById(R.id.lightButtonOn);
         ImageButton lightButtonOff = (ImageButton) mLinearLayout.findViewById(R.id.lightButtonOff);
         //The status of the light imageButton depends in the status of the lights.
-//        if (lightTurnedOn()) {
+//fixme        if (lightTurnedOn()) {
         if (true) {
             lightButtonOff.setVisibility(View.GONE);
             lightButtonOn.setVisibility(View.VISIBLE);

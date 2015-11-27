@@ -38,7 +38,6 @@
         android:longClickable="false"
         android:scaleType="center"
         android:src="@drawable/ic_add"
-        app:rippleColor="@color/colorWhite"
         app:borderWidth="0dp"
         app:pressedTranslationZ="12dp"/>
 

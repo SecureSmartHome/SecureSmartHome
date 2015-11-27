@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,13 +74,24 @@ public class LightFragment extends Fragment {
                 button.setText(getResources().getString(R.string.string_turn_on));
                 button.setBackgroundColor(getResources().getColor(R.color.button_green));
             }
-            lightButtonLayout.addView(lightButtonContainer);
+            lightButtonLayout.addView(textView);
+            lightButtonLayout.addView(button);
+            lightButtonLayout.addView(imageViewOff);
+            lightButtonLayout.addView(imageViewOn);
+            lightButtonContainer.addView(lightButtonLayout);
         }
 
         handlerUpdateListener = new LightHandlerUpdateListener();
         ((MainActivity) getActivity()).getContainer().require(AppLightHandler.KEY).addHandlerUpdateListener(
                 handlerUpdateListener);
 
+        FloatingActionButton fab = (FloatingActionButton) mLinearLayout.findViewById(R.id.light_fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //fixme call add light module fragment
+            }
+        });
         return inflater.inflate(R.layout.fragment_light, container, false);
     }
 
