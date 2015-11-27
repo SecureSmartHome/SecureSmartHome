@@ -21,7 +21,6 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.DefaultExecutorServiceFactory;
@@ -39,7 +38,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
 
 /**
  * A netty stack accepting connections to and from the master and handling communication with them using a netty pipeline.
- * For details about the pipeline, see {@link #initChannel(SocketChannel)}.
+ * For details about the pipeline, see {@link ClientHandshakeHandler}.
  * For details about switching to UDP discovery, see {@link #initClient()} and {@link #shouldReconnectTCP()}.
  * This component is used by the Slave and the end-user android App.
  *
@@ -110,10 +109,6 @@ public class Client extends AbstractComponent {
 
     /**
      * Initializes the netty client and tries to connect to the server.
-     * If the connect ist successful, {@link #initChannel(SocketChannel)} is called in order to add the
-     * required Handlers to the pipeline.
-     * If the connection fails, {@link #channelClosed(Channel)} is called until to many retries are made and the Client
-     * switches to searching the master via UDP discovery using the {@link UDPDiscoveryClient}.
      */
     protected synchronized void initClient() {
         Log.d(TAG, "initClient");
@@ -172,6 +167,10 @@ public class Client extends AbstractComponent {
 
     /**
      * Tries to establish a TCP connection to the Server with the given host and port.
+     * If the connect ist successful, {@link #getHandshakeHandler()} is used to add the
+     * required Handlers to the pipeline.
+     * If the connection fails, {@link #channelClosed(Channel)} is called until to many retries are made and the Client
+     * switches to searching the master via UDP discovery using the {@link UDPDiscoveryClient}.
      */
     protected void connectClient(String host, int port) {
         Log.i(TAG, "Client connecting to " + host + ":" + port);
