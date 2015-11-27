@@ -29,11 +29,15 @@ import java.security.cert.X509Certificate;
  * @author Niko
  */
 public class SlaveContainer extends ContainerService {
+    private static final File dir = new File("/sdcard/ssh");
+
     @Override
     protected void init() {
         register(KeyStoreController.KEY, new KeyStoreController());
         register(NamingManager.KEY, new NamingManager(false));
         register(Client.KEY, new Client());
+
+        dir.mkdirs();
 
         //FIXME this is temporary for testing until we got everything needed
         Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, "TestPlugswitch");
@@ -59,8 +63,7 @@ public class SlaveContainer extends ContainerService {
     }
 
     private void readMasterId() {
-        final File masterId = new File(Environment.getExternalStorageDirectory().getPath()
-                + "/ssh/master.id");
+        final File masterId = new File(dir, "master.id");
         if (masterId.exists()) {
             try {
                 final String id = Files.readFirstLine(masterId, Charsets.US_ASCII);
@@ -75,8 +78,7 @@ public class SlaveContainer extends ContainerService {
     }
 
     private void readMasterCert() {
-        final File masterCert = new File(Environment.getExternalStorageDirectory().getPath()
-                + "/ssh/master.der");
+        final File masterCert = new File(dir, "master.der");
         if (masterCert.exists()) {
             try {
                 CertificateFactory certFact = CertificateFactory.getInstance("X.509");
@@ -91,8 +93,7 @@ public class SlaveContainer extends ContainerService {
     }
 
     private void writeSlaveCert() {
-        try (final FileOutputStream os = new FileOutputStream(Environment.getExternalStorageDirectory().getPath()
-                + "/ssh/slave.der")) {
+        try (final FileOutputStream os = new FileOutputStream(new File(dir, "slave.der"))) {
             os.write(require(KeyStoreController.KEY).getOwnCertificate().getEncoded());
         } catch (IOException | GeneralSecurityException e) {
             e.printStackTrace();
@@ -100,8 +101,7 @@ public class SlaveContainer extends ContainerService {
     }
 
     private void writeSlaveId() {
-        try (final FileOutputStream os = new FileOutputStream(Environment.getExternalStorageDirectory().getPath()
-                + "/ssh/slave.id")) {
+        try (final FileOutputStream os = new FileOutputStream(new File(dir, "slave.id"))) {
             os.write(require(NamingManager.KEY).getLocalDeviceId().getId().getBytes());
         } catch (IOException e) {
             e.printStackTrace();

@@ -138,6 +138,11 @@ public class Message implements Serializable {
             throw new UnsupportedOperationException();
         }
 
+        @Override
+        AddressedMessage setDestination(DeviceID fromID, DeviceID toID, String routingKey) {
+            throw new UnsupportedOperationException("destination already set");
+        }
+
         public DeviceID getFromID() {
             return fromID;
         }

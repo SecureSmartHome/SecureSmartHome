@@ -122,6 +122,9 @@ public class NamingManager extends AbstractComponent {
      */
     public X509Certificate getCertificate(DeviceID id) throws UnresolvableNamingException {
         try {
+            if (id == null) {
+                throw new UnresolvableNamingException("id == null");
+            }
             return getContainer().require(KeyStoreController.KEY).getCertificate(id.getId());
         } catch (UnrecoverableEntryException | NoSuchAlgorithmException | KeyStoreException e) {
             throw new UnresolvableNamingException(e);
