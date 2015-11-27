@@ -44,7 +44,7 @@ public class SlaveContainer extends ContainerService {
 
         //FIXME this is temporary for testing until we got everything needed
         Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, "TestPlugswitch");
-        register(key, new EdimaxPlugSwitch("192.168.0.20", 10000, "admin", "1234"));
+        register(key, new EdimaxPlugSwitch("192.168.0.111", 10000, "admin", "1234"));
         syncKeyStore();
 
         final NamingManager namingManager = require(NamingManager.KEY);
