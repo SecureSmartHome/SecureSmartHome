@@ -20,7 +20,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  * Offers high level methods to interact with the tables associated with slaves and modules in the database.
  * @author leon
  */
-public class ySlaveController extends AbstractComponent {
+public class SlaveController extends AbstractComponent {
     public static final Key<SlaveController> KEY = new Key<>(SlaveController.class);
     private DatabaseConnector databaseConnector;
     public static final String SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY =
