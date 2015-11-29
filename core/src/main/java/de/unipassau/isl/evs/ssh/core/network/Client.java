@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import java.net.InetAddress;
 import java.net.SocketAddress;
 
 import de.ncoder.typedmap.Key;
@@ -258,10 +257,10 @@ public class Client extends AbstractComponent {
      * Called by {@link UDPDiscoveryClient} once it found a possible address of the master.
      * Saves the new address
      */
-    void onDiscoverySuccessful(InetAddress address, int port) {
+    void onDiscoverySuccessful(String address, int port) {
         Log.i(TAG, "UDP discovery successful, found " + address + ":" + port);
         getSharedPrefs().edit()
-                .putString(PREF_HOST, address.getHostName())
+                .putString(PREF_HOST, address)
                 .putInt(PREF_PORT, port)
                 .commit();
         lastDisconnect = 0;
