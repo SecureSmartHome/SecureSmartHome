@@ -1,14 +1,16 @@
 #include <termios.h>
-#include <stdio.h>
 #include <string.h> //memset
 #include <fcntl.h> // O_RDWR, etc.
 #include <stdlib.h>
+#include "ssh-drivers.h"
 #include "jni.h"
 
 struct termios ios; //parameters for IO access
 int fd; // file descriptor
 
-void initSerial() {
+extern "C" {
+JNIEXPORT void JNICALL
+Java_de_unipassau_isl_evs_ssh_drivers_lib_WeatherSensor_initSerialInterface(JNIEnv *env, jobject instance) {
     LOGD("initializing serial interface");
     fd = -1;
     fd = open(port0, O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -45,16 +47,11 @@ void initSerial() {
     LOGD("serial interface initialized");
 }
 
-extern "C" {
-
-void Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_initSerialInterface() {
-    initSerial();
-}
-
-void Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_readData(JNIEnv *env, jobject thiz) {
+JNIEXPORT void JNICALL
+Java_de_unipassau_isl_evs_ssh_drivers_lib_WeatherSensor_readData(JNIEnv *env, jobject instance) {
     LOGD("readData()");
 
-    jclass thisWeather = env->GetObjectClass(thiz);
+    jclass thisWeather = env->GetObjectClass(instance);
     jfieldID temp1ID = env->GetFieldID(thisWeather, "temp1", "D");
     jfieldID pressureID = env->GetFieldID(thisWeather, "pressure", "D");
 
@@ -85,42 +82,42 @@ void Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_readData(JNIEnv *env, job
             case '0':
                 temperature1 = atof(&readBuf[1]);
                 LOGD("Found value for temperature1: %f", temperature1);
-                env->SetDoubleField(thiz, temp1ID, temperature1);
+                env->SetDoubleField(instance, temp1ID, temperature1);
                 break;
             case '1':
                 pressure = atof(&readBuf[1]);
                 LOGD("Found value for pressure: %f", pressure);
-                env->SetDoubleField(thiz, pressureID, pressure);
+                env->SetDoubleField(instance, pressureID, pressure);
                 break;
             case '2':
                 altitude = atof(&readBuf[1]);
                 LOGD("Found value for altitude: %f", altitude);
-                env->SetDoubleField(thiz, env->GetFieldID(thisWeather, "altitude", "D"), altitude);
+                env->SetDoubleField(instance, env->GetFieldID(thisWeather, "altitude", "D"), altitude);
                 break;
             case '3':
                 temperature2 = atof(&readBuf[1]);
                 LOGD("Found value for temperature2: %f", temperature2);
-                env->SetDoubleField(thiz, env->GetFieldID(thisWeather, "temp2", "D"), temperature2);
+                env->SetDoubleField(instance, env->GetFieldID(thisWeather, "temp2", "D"), temperature2);
                 break;
             case '4':
                 humidity = atof(&readBuf[1]);
                 LOGD("Found value for humidity: %f", humidity);
-                env->SetDoubleField(thiz, env->GetFieldID(thisWeather, "humidity", "D"), humidity);
+                env->SetDoubleField(instance, env->GetFieldID(thisWeather, "humidity", "D"), humidity);
                 break;
             case '5':
                 uv = atof(&readBuf[1]);
                 LOGD("Found value for UV: %f", uv);
-                env->SetDoubleField(thiz, env->GetFieldID(thisWeather, "uv", "D"), uv);
+                env->SetDoubleField(instance, env->GetFieldID(thisWeather, "uv", "D"), uv);
                 break;
             case '6':
                 visible = atoi(&readBuf[1]);
                 LOGD("Found value for visible light: %d", visible);
-                env->SetIntField(thiz, env->GetFieldID(thisWeather, "visible", "I"), visible);
+                env->SetIntField(instance, env->GetFieldID(thisWeather, "visible", "I"), visible);
                 break;
             case '7':
                 ir = atoi(&readBuf[1]);
                 LOGD("Found value for infrared: %d", ir);
-                env->SetIntField(thiz, env->GetFieldID(thisWeather, "ir", "I"), ir);
+                env->SetIntField(instance, env->GetFieldID(thisWeather, "ir", "I"), ir);
                 break;
             default:
                 LOGW("Unknown code: %c", code);
@@ -128,40 +125,8 @@ void Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_readData(JNIEnv *env, job
     }
 }
 
-void Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_close() {
+JNIEXPORT void JNICALL
+Java_de_unipassau_isl_evs_ssh_drivers_lib_WeatherSensor_close(JNIEnv *env, jobject instance) {
     close(fd);
 }
-
-/*jdouble Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_getTemperature1() {
-    return temperature1;
-}
-
-jdouble Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_getTemperature2() {
-    return temperature2;
-}
-
-jdouble Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_getPressure() {
-    return pressure;
-}
-
-jdouble Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_getAltitude() {
-    return altitude;
-}
-
-jdouble Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_getHumidity() {
-    return humidity;
-}
-
-jdouble Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_getUV() {
-    return uv;
-}
-
-jint Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_getVisibleLight() {
-    return visible;
-}
-
-jint Java_de_unipassau_isl_evs_ssh_drivers_lib_Weather_getInfrared() {
-    return ir;
-}*/
-
 }
