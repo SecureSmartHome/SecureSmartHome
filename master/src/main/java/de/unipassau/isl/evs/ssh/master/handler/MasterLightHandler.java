@@ -4,13 +4,10 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
-import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
-import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 
 /**
  * Handles light messages, logs them for the holiday simulation and generates messages
@@ -66,11 +63,9 @@ public class MasterLightHandler extends AbstractMasterHandler {
             );
             putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
             if (((LightPayload) message.getPayload()).getOn()) {
-                incomingDispatcher.getContainer().require(HolidayController.KEY)
-                        .addHolidayLogEntry(CoreConstants.LogActions.LIGHT_ON_ACTION);
+                requireComponent(HolidayController.KEY).addHolidayLogEntry(CoreConstants.LogActions.LIGHT_ON_ACTION);
             } else {
-                incomingDispatcher.getContainer().require(HolidayController.KEY)
-                        .addHolidayLogEntry(CoreConstants.LogActions.LIGHT_OFF_ACTION);
+                requireComponent(HolidayController.KEY).addHolidayLogEntry(CoreConstants.LogActions.LIGHT_OFF_ACTION);
             }
         } else {
             //no permission
@@ -127,13 +122,5 @@ public class MasterLightHandler extends AbstractMasterHandler {
                     new Message(message.getPayload())
             );
         } //else ignore
-    }
-
-    private Message.AddressedMessage sendMessage(DeviceID toID, String routingKey, Message msg) {
-        return incomingDispatcher.getContainer().require(OutgoingRouter.KEY).sendMessage(toID, routingKey, msg);
-    }
-
-    private boolean hasPermission(DeviceID userDeviceID, Permission permission) {
-        return incomingDispatcher.getContainer().require(PermissionController.KEY).hasPermission(userDeviceID, permission);
     }
 }
