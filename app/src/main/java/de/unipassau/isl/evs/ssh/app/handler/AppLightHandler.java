@@ -36,7 +36,7 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
 
     public AppLightHandler() {
         Module m = new Module("TestPlugswitch", new DeviceID("H5f4ahpVmoVL6GKAYqZY7m73k9i9nDCnsiJLbw+0n3E="),
-                CoreConstants.ModuleType.LIGHT, new WLANAccessPoint()); //FIXME resolve DeviceID
+                CoreConstants.ModuleType.LIGHT, new WLANAccessPoint()); //FIXME resolve DeviceID / delete hardcoded example
         lightStatusMapping.put(m, new LightStatus(false));
     }
 
@@ -89,7 +89,8 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     //Network///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Sends a request for the status of a module.
+     * Sends a get request for the status of a module.
+     * @param m The module which status is requested.
      */
     private void requestLightStatus(Module m) {
         LightPayload lightPayload = new LightPayload(false, m);
@@ -101,7 +102,7 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     }
 
     /**
-     * Sends a SET-request with the light-module and it's status.
+     * Sends a set request with the light-module and its status.
      *
      * @param module The light-module which status should be changed.
      * @param status The status of the module.
@@ -109,8 +110,7 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     public void setLight(Module module, boolean status) {
         LightPayload lightPayload = new LightPayload(status, module);
 
-        Message message;
-        message = new Message(lightPayload);
+        Message message = new Message(lightPayload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_LIGHT_UPDATE);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
@@ -123,6 +123,9 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
         void statusChanged(Module module);
     }
 
+    /**
+     * LightStatus class saves the status of every registered light and its timestamp.
+     */
     public class LightStatus {
         private boolean isOn;
         private long timestamp;

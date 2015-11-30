@@ -15,7 +15,7 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 
 /**
- * As this Activity also displays information like wether the light is on or not, this Activity also
+ * As this Activity also displays information like whether the light is on or not, this Activity also
  * needs to messages concerning that information.
  *
  * @author bucher
@@ -112,7 +112,7 @@ public class MainActivity extends BoundActivity
     }
 
     /**
-     * Displays a fragment and takes care of livecycle actions like saving state when rotating the
+     * Displays a fragment and takes care of lifecycle actions like saving state when rotating the
      * screen or managing the back button behavior.
      *
      * @param clazz the class of the fragment to show
@@ -155,7 +155,9 @@ public class MainActivity extends BoundActivity
             clazz = ModifyPermissionFragment.class;
         } else if (id == R.id.nav_addNewUserDevice) {
             clazz = AddNewUserDeviceFragment.class;
-        } else if (id == R.id.nav_addModul) {
+        } else if (id == R.id.nav_addNewUserDevice) {
+            clazz = AddNewUserDeviceFragment.class;
+        } else if (id == R.id.light_fab) {
             clazz = AddModuleFragment.class;
         } else {
             throw new IllegalArgumentException("Unknown id: " + id);

@@ -29,4 +29,6 @@
     <string name="deviceSatusConnectedSlaves">Connected Slaves</string>
     <string name="NoSlavesConnected">No Slaves connected</string>
     <string name="NoModulesConnected">No modules connected</string>
+    <string name="qr_code_description">This is a QR-Code.</string>
+    <string name="please_scan_device">Scan the QR-Code with your device.</string>
 </resources>

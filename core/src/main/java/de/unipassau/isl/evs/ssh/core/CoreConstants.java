@@ -120,7 +120,7 @@ public class CoreConstants {
         public static final String BRIGHTNESS_WARNING = "BrightnessWarning";
         public static final String HOLIDAY_MODE_SWITCHED_ON = "HolidayModeSwitchedOn";
         public static final String HOLIDAY_MODE_SWITCHED_OFF = "HolidayModeSwitchedOff";
-        public static final String SYSTEM_HEALT_WARNING = "SystemHealthWarning";
+        public static final String SYSTEM_HEALTH_WARNING = "SystemHealthWarning";
         public static final String BELL_RANG = "BellRang";
         public static final String WEATHER_WARNING = "WeatherWarning";
         public static final String DOOR_UNLATCHED = "DoorOpened";
