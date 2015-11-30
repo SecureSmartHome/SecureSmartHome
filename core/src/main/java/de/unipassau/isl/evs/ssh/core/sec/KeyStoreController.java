@@ -270,6 +270,9 @@ public class KeyStoreController extends AbstractComponent {
         return Collections.list(keyStore.aliases());
     }
 
+    // generate password from device ID
+    // https://stackoverflow.com/questions/2785485/is-there-a-unique-android-device-id/2853253#2853253
+
     private char[] getKeystorePassword() {
         return "titBewgOt2".toCharArray();
     }
