@@ -57,11 +57,11 @@ public class NamingManagerTest extends InstrumentationTestCase {
         // Generate a master certificate,
         X509Certificate certificate = createCert();
         // write master id to SharedPreferences,
-        DeviceID masterId = naming.getDeviceID(certificate);
-        editor.putString(CoreConstants.SharedPrefs.PREF_MASTER_ID, masterId.getId());
+        DeviceID masterId = DeviceID.fromCertificate(certificate);
+        editor.putString(CoreConstants.SharedPrefs.PREF_MASTER_ID, masterId.getIDString());
         editor.commit();
         // save the certificate
-        container.require(KeyStoreController.KEY).saveCertificate(certificate, masterId.getId());
+        container.require(KeyStoreController.KEY).saveCertificate(certificate, masterId.getIDString());
 
         return masterId;
     }
@@ -134,7 +134,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
         Container container = createDefaultEnvironment(true);
         NamingManager naming = container.require(NamingManager.KEY);
         X509Certificate cert = createCert();
-        assertNotNull(naming.getDeviceID(cert));
+        assertNotNull(DeviceID.fromCertificate(cert));
 
     }
 
@@ -144,8 +144,8 @@ public class NamingManagerTest extends InstrumentationTestCase {
 
         // generate and save the certificate
         X509Certificate cert = createCert();
-        DeviceID id = naming.getDeviceID(cert);
-        container.require(KeyStoreController.KEY).saveCertificate(cert, id.getId());
+        DeviceID id = DeviceID.fromCertificate(cert);
+        container.require(KeyStoreController.KEY).saveCertificate(cert, id.getIDString());
 
         assertEquals(naming.getCertificate(id), cert);
     }
