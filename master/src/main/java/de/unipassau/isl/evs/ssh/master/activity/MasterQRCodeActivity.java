@@ -1,12 +1,18 @@
 package de.unipassau.isl.evs.ssh.master.activity;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.google.zxing.WriterException;
+
+import java.io.Serializable;
+
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
 
@@ -17,6 +23,9 @@ import de.unipassau.isl.evs.ssh.master.R;
  */
 public class MasterQRCodeActivity extends BoundActivity {
 
+    public static final String EXTRA_QR_DEVICE_INFORMATION = "EXTRA_QR_DEVICE_INFORMATION";
+
+
     private Container container = this.getContainer();
     private Bitmap bitmap;
 
@@ -24,9 +33,17 @@ public class MasterQRCodeActivity extends BoundActivity {
         super(MasterContainer.class);
     }
 
-    private Bitmap getBitmap() {
-//        return getContainer().require(QRCodeGenerator.KEY).getBitmap;
-        return null;
+    private Bitmap createQRCodeBitmap() {
+        Serializable extra = getIntent().getExtras().getSerializable(EXTRA_QR_DEVICE_INFORMATION);
+        if (extra instanceof QRDeviceInformation) {
+            try {
+                return ((QRDeviceInformation) extra).toQRBitmap(Bitmap.Config.ALPHA_8, Color.BLACK, Color.WHITE);
+            } catch (WriterException e) {
+                throw new IllegalArgumentException("illegal QRCode data", e);
+            }
+        } else {
+            throw new IllegalArgumentException("missing EXTRA_QR_DEVICE_INFORMATION as extra " + EXTRA_QR_DEVICE_INFORMATION);
+        }
     }
 
     @Override
@@ -49,8 +66,9 @@ public class MasterQRCodeActivity extends BoundActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qrcode);
 
+
         ImageView imageview = ((ImageView) findViewById(R.id.qrcode_activity_qr_code));
-        bitmap = getBitmap();
+        bitmap = createQRCodeBitmap();
 
         if (bitmap != null) {
             imageview.setImageBitmap(bitmap);
