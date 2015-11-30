@@ -74,7 +74,7 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
         return isLightOnCached(module);
     }
 
-    private boolean isLightOnCached(Module module) {
+    public boolean isLightOnCached(Module module) {
         final LightStatus status = lightStatusMapping.get(module);
         return status != null && status.isOn();
     }
