@@ -5,7 +5,7 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
+import java.security.cert.CertificateEncodingException;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
@@ -42,7 +42,7 @@ public class MasterContainer extends ContainerService {
 
         dir.mkdirs();
 
-        Log.i(getClass().getSimpleName(), "Master set up! ID is " + require(NamingManager.KEY).getLocalDeviceId());
+        Log.i(getClass().getSimpleName(), "Master set up! ID is " + require(NamingManager.KEY).getOwnID());
 
         // write the master id and cert to local storage so that it can be copied to slaves as long as
         // adding new devices is not implemented
@@ -52,7 +52,7 @@ public class MasterContainer extends ContainerService {
 
     private void writeMasterId() {
         try (final FileOutputStream os = new FileOutputStream(new File(dir, "master.id"))) {
-            os.write(require(NamingManager.KEY).getLocalDeviceId().getId().getBytes());
+            os.write(require(NamingManager.KEY).getOwnID().getId().getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -60,8 +60,8 @@ public class MasterContainer extends ContainerService {
 
     private void writeMasterCert() {
         try (final FileOutputStream os = new FileOutputStream(new File(dir, "master.der"))) {
-            os.write(require(KeyStoreController.KEY).getOwnCertificate().getEncoded());
-        } catch (IOException | GeneralSecurityException e) {
+            os.write(require(NamingManager.KEY).getOwnCertificate().getEncoded());
+        } catch (IOException | CertificateEncodingException e) {
             e.printStackTrace();
         }
     }

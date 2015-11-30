@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -71,7 +72,7 @@ public class AppContainer extends ContainerService {
             try {
                 CertificateFactory certFact = CertificateFactory.getInstance("X.509");
                 final Certificate certificate = certFact.generateCertificate(new FileInputStream(masterCert));
-                require(KeyStoreController.KEY).saveCertifcate(((X509Certificate) certificate),
+                require(KeyStoreController.KEY).saveCertificate(((X509Certificate) certificate),
                         require(NamingManager.KEY).getMasterID().getId());
                 Log.i(getClass().getSimpleName(), "Certificate for Master loaded:\n" + certificate);
             } catch (GeneralSecurityException | IOException e) {
@@ -82,15 +83,15 @@ public class AppContainer extends ContainerService {
 
     private void writeSlaveCert() {
         try (final FileOutputStream os = new FileOutputStream(new File(dir, "app.der"))) {
-            os.write(require(KeyStoreController.KEY).getOwnCertificate().getEncoded());
-        } catch (IOException | GeneralSecurityException e) {
+            os.write(require(NamingManager.KEY).getOwnCertificate().getEncoded());
+        } catch (IOException | CertificateEncodingException e) {
             e.printStackTrace();
         }
     }
 
     private void writeSlaveId() {
         try (final FileOutputStream os = new FileOutputStream(new File(dir, "app.id"))) {
-            os.write(require(NamingManager.KEY).getLocalDeviceId().getId().getBytes());
+            os.write(require(NamingManager.KEY).getOwnID().getId().getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }

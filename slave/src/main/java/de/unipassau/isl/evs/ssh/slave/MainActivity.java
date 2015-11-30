@@ -103,7 +103,7 @@ public class MainActivity extends BoundActivity {
             ((TextView) findViewById(R.id.textViewMasterID)).setText("???");
         } else {
             ((TextView) findViewById(R.id.textViewDeviceID)).setText(
-                    namingManager.getLocalDeviceId().getId()
+                    namingManager.getOwnID().getId()
             );
             ((TextView) findViewById(R.id.textViewMasterID)).setText(
                     namingManager.getMasterID().getId()
