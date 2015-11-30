@@ -122,7 +122,7 @@ public class NamingManager extends AbstractComponent {
         }
         md.update(cert.getPublicKey().getEncoded());
         digest = md.digest();
-        return new DeviceID(Base64.encodeToString(digest, Base64.DEFAULT));
+        return new DeviceID(Base64.encodeToString(digest, Base64.NO_WRAP));
     }
 
     /**
