@@ -4,4 +4,6 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="please_scan_device">Scan the QR-Code with your device.</string>
+    <string name="qr_code_description">This is a QR-Code.</string>
 </resources>

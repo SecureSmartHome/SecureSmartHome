@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.master;
+package de.unipassau.isl.evs.ssh.master.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,6 +18,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import de.unipassau.isl.evs.ssh.master.MasterContainer;
+import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -25,7 +27,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.group.ChannelGroup;
 
 /**
- * MainActivitiy for the Master App
+ * MainActivity for the Master App
  *
  * @author Team
  */
