@@ -9,6 +9,7 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.security.SecureRandom;
@@ -22,7 +23,7 @@ import io.netty.handler.codec.base64.Base64;
 /**
  * @author Niko Fink
  */
-public class QRDeviceInformation {
+public class QRDeviceInformation implements Serializable {
     private static final QRCodeWriter writer = new QRCodeWriter();
     private static final int ADDRESS_LENGTH = 4;
     public static final int TOKEN_LENGTH = 35;
