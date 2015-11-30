@@ -137,7 +137,7 @@ public class MainActivity extends BoundActivity
     }
 
     // maps button resource ids to Fragment classes.
-    private void showFragmentByClass(int id) {
+    private void showFragmentById(int id) {
         Class clazz;
         if (id == R.id.nav_home) {
             clazz = MainFragment.class;
@@ -167,7 +167,7 @@ public class MainActivity extends BoundActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        showFragmentByClass(id);
+        showFragmentById(id);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
