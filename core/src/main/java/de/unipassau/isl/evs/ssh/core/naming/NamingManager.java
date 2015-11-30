@@ -3,8 +3,10 @@ package de.unipassau.isl.evs.ssh.core.naming;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 import android.util.Base64;
 
+import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -31,12 +33,15 @@ public class NamingManager extends AbstractComponent {
 
     public static final Key<NamingManager> KEY = new Key<>(NamingManager.class);
     private final boolean isMaster;
-    private String localDeviceID;
+    private DeviceID ownID;
+    private DeviceID masterID;
+    private X509Certificate ownCert;
+    private X509Certificate masterCert;
 
     /**
      * Creates a new NamingManager.
      *
-     * @param isMaster describes if this NamaingManager is running on the master
+     * @param isMaster describes if this NamingManager is running on the master
      */
     public NamingManager(boolean isMaster) {
         this.isMaster = isMaster;
@@ -46,29 +51,21 @@ public class NamingManager extends AbstractComponent {
      * Gets the master's DeviceID. If invoked on a master itself, then
      * {@code getMasterID().equals(getLocalDeviceID)}.
      *
-     * @return the master's id or null if the master is not known
+     * @return the master's id
      */
+    @NonNull
     public DeviceID getMasterID() {
-        if (isMaster) {
-            return new DeviceID(localDeviceID);
-        }
-        SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-        String masterID = prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null);
-        if (masterID == null) {
-            return null;
-        }
-        return new DeviceID(masterID);
+        return masterID;
     }
 
     /**
      * Gets the master's certificate.
      *
-     * @return the master's certificate or null if the certificate cannot be found.
-     * @throws UnresolvableNamingException if the query fails
+     * @return the master's certificate
      */
-    public X509Certificate getMasterCert() throws UnresolvableNamingException {
-        return getCertificate(getMasterID());
+    @NonNull
+    public X509Certificate getMasterCertificate() {
+        return masterCert;
     }
 
     /**
@@ -76,10 +73,24 @@ public class NamingManager extends AbstractComponent {
      *
      * @return the id of the local device
      */
-    public DeviceID getLocalDeviceId() {
-        return new DeviceID(localDeviceID);
+    @NonNull
+    public DeviceID getOwnID() {
+        return ownID;
     }
 
+    /**
+     * Gets the local devices's certificate.
+     *
+     * @return the local devices's certificate
+     */
+    @NonNull
+    public X509Certificate getOwnCertificate() {
+        return ownCert;
+    }
+
+    public boolean isMaster() {
+        return isMaster;
+    }
 
     /**
      * Gets the public key of the given DeviceID.
@@ -88,10 +99,10 @@ public class NamingManager extends AbstractComponent {
      * @return the publicKey of the given DeviceID
      * @throws UnresolvableNamingException if the query fails
      */
+    @NonNull
     public PublicKey getPublicKey(DeviceID id) throws UnresolvableNamingException {
         return getCertificate(id).getPublicKey();
     }
-
 
     /**
      * Gets the id of a given certificate.
@@ -99,6 +110,7 @@ public class NamingManager extends AbstractComponent {
      * @param cert the certificate
      * @return the id corresponding to the given certificate
      */
+    @NonNull
     public DeviceID getDeviceID(X509Certificate cert) throws UnresolvableNamingException {
         MessageDigest md;
         byte[] digest;
@@ -110,7 +122,7 @@ public class NamingManager extends AbstractComponent {
         }
         md.update(cert.getPublicKey().getEncoded());
         digest = md.digest();
-        return new DeviceID(Base64.encodeToString(digest, Base64.DEFAULT));
+        return new DeviceID(Base64.encodeToString(digest, Base64.NO_WRAP));
     }
 
     /**
@@ -120,12 +132,17 @@ public class NamingManager extends AbstractComponent {
      * @return the certificate of the given DeviceID
      * @throws UnresolvableNamingException if the query fails
      */
+    @NonNull
     public X509Certificate getCertificate(DeviceID id) throws UnresolvableNamingException {
         try {
             if (id == null) {
                 throw new UnresolvableNamingException("id == null");
             }
-            return getContainer().require(KeyStoreController.KEY).getCertificate(id.getId());
+            final X509Certificate certificate = getContainer().require(KeyStoreController.KEY).getCertificate(id.getId());
+            if (certificate == null) {
+                throw new UnresolvableNamingException("certificate not found");
+            }
+            return certificate;
         } catch (UnrecoverableEntryException | NoSuchAlgorithmException | KeyStoreException e) {
             throw new UnresolvableNamingException(e);
         }
@@ -134,18 +151,36 @@ public class NamingManager extends AbstractComponent {
     @Override
     public void init(Container container) {
         super.init(container);
-        X509Certificate localCert;
         try {
-            localCert = container.require(KeyStoreController.KEY).getOwnCertificate();
-            localDeviceID = getDeviceID(localCert).getId();
-        } catch (UnresolvableNamingException | UnrecoverableEntryException | NoSuchAlgorithmException | KeyStoreException e) {
+            final KeyStoreController keyStoreController = container.require(KeyStoreController.KEY);
+            ownCert = keyStoreController.getOwnCertificate();
+            ownID = getDeviceID(ownCert);
+
+            if (isMaster) {
+                masterCert = ownCert;
+                masterID = ownID;
+            } else {
+                final SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
+                        .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+
+                String masterIDStr = prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null);
+                if (masterIDStr == null) {
+                    throw new StartupException("MasterID from SharedPrefs (" + CoreConstants.SharedPrefs.PREF_MASTER_ID + ") is null");
+                }
+                masterID = new DeviceID(masterIDStr);
+                masterCert = getCertificate(masterID);
+            }
+        } catch (UnresolvableNamingException | GeneralSecurityException e) {
             throw new StartupException(e);
         }
     }
 
     @Override
     public void destroy() {
-        localDeviceID = null;
+        ownID = null;
+        masterID = null;
+        ownCert = null;
+        masterCert = null;
         super.destroy();
     }
 }

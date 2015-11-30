@@ -48,7 +48,7 @@ public class SlaveContainer extends ContainerService {
         syncKeyStore();
 
         final NamingManager namingManager = require(NamingManager.KEY);
-        Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getLocalDeviceId()
+        Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getOwnID()
                 + "; Master is " + namingManager.getMasterID());
     }
 
@@ -85,7 +85,7 @@ public class SlaveContainer extends ContainerService {
             try {
                 CertificateFactory certFact = CertificateFactory.getInstance("X.509");
                 final Certificate certificate = certFact.generateCertificate(new FileInputStream(masterCert));
-                require(KeyStoreController.KEY).saveCertifcate(((X509Certificate) certificate),
+                require(KeyStoreController.KEY).saveCertificate(((X509Certificate) certificate),
                         require(NamingManager.KEY).getMasterID().getId());
                 Log.i(getClass().getSimpleName(), "Certificate for Master loaded:\n" + certificate);
             } catch (GeneralSecurityException | IOException e) {
@@ -104,7 +104,7 @@ public class SlaveContainer extends ContainerService {
 
     private void writeSlaveId() {
         try (final FileOutputStream os = new FileOutputStream(new File(dir, "slave.id"))) {
-            os.write(require(NamingManager.KEY).getLocalDeviceId().getId().getBytes());
+            os.write(require(NamingManager.KEY).getOwnID().getId().getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }

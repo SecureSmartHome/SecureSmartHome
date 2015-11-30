@@ -111,7 +111,7 @@ public class MainActivity extends BoundActivity {
             ((TextView) findViewById(R.id.textViewDeviceID)).setText("???");
         } else {
             ((TextView) findViewById(R.id.textViewDeviceID)).setText(
-                    namingManager.getLocalDeviceId().getId()
+                    namingManager.getOwnID().getId()
             );
         }
 

@@ -6,13 +6,13 @@ android {
 
 dependencies {
     compile project(':core')
-    //compile 'ODROID-libs'
 }
 
 android {
-    sourceSets {
-        main {
-            jni.srcDirs = []
+    defaultConfig {
+        ndk {
+            moduleName "ssh-drivers"
+            ldLibs "log"
         }
     }
 }

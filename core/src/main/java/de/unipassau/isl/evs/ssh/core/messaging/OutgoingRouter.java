@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.messaging;
 
 import android.util.Log;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
@@ -26,7 +27,7 @@ public abstract class OutgoingRouter extends AbstractComponent {
      * @param msg        AddressedMessage to forward.
      */
     public Message.AddressedMessage sendMessage(DeviceID toID, String routingKey, Message msg) {
-        final Message.AddressedMessage amsg = msg.setDestination(getLocalID(), toID, routingKey);
+        final Message.AddressedMessage amsg = msg.setDestination(getOwnID(), toID, routingKey);
         final ChannelFuture future = doSendMessage(amsg);
         amsg.setSendFuture(future);
         future.addListener(new ChannelFutureListener() {
@@ -42,7 +43,7 @@ public abstract class OutgoingRouter extends AbstractComponent {
     }
 
     public Message.AddressedMessage sendMessageLocal(String routingKey, Message message) {
-        return sendMessage(getLocalID(), routingKey, message);
+        return sendMessage(getOwnID(), routingKey, message);
     }
 
     public Message.AddressedMessage sendMessageToMaster(String routingKey, Message message) {
@@ -53,7 +54,7 @@ public abstract class OutgoingRouter extends AbstractComponent {
         return requireComponent(NamingManager.KEY).getMasterID();
     }
 
-    protected DeviceID getLocalID() {
-        return requireComponent(NamingManager.KEY).getLocalDeviceId();
+    protected DeviceID getOwnID() {
+        return requireComponent(NamingManager.KEY).getOwnID();
     }
 }

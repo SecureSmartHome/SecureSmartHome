@@ -154,7 +154,7 @@ public class LightFragment extends Fragment {
             // set up ImageView and button
             ImageView imageViewOn = (ImageView) lightButtonLayout.findViewById(R.id.lightButtonImageViewOn);
             ImageView imageViewOff = (ImageView) lightButtonLayout.findViewById(R.id.lightButtonImageViewOff);
-            boolean isLightOn = getContainer().require(AppLightHandler.KEY).isLightOn(m);
+            boolean isLightOn = getContainer().require(AppLightHandler.KEY).isLightOnCached(m);
             if (isLightOn) {
                 imageViewOff.setVisibility(View.GONE);
                 imageViewOn.setVisibility(View.VISIBLE);

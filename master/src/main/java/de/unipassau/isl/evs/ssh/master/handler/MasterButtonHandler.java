@@ -1,17 +1,6 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
-import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
-import de.unipassau.isl.evs.ssh.master.database.HolidayController;
-import de.unipassau.isl.evs.ssh.master.database.PermissionController;
-import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 /**
  * In case a hardware button on the Odroid is pressed, a message, of which the content depends on
@@ -24,4 +13,7 @@ import de.unipassau.isl.evs.ssh.master.database.SlaveController;
  * @author leon
  */
 public class MasterButtonHandler extends AbstractMasterHandler {
+    @Override
+    public void handle(Message.AddressedMessage message) {
+    }
 }

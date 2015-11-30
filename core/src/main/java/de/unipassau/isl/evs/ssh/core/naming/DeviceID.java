@@ -16,7 +16,17 @@ public final class DeviceID implements Serializable {
      * @param id the id as string
      */
     public DeviceID(String id) {
-        this.id = id != null ? id.trim() : id;
+        this.id = id != null ? id.trim() : "";
+    }
+
+    /**
+     * Returns the device id string.
+     *
+     * @return the device id
+     * @deprecated use {@link #getIDString()} instead
+     */
+    public String getId() {
+        return id;
     }
 
     /**
@@ -24,7 +34,7 @@ public final class DeviceID implements Serializable {
      *
      * @return the device id
      */
-    public String getId() {
+    public String getIDString() {
         return id;
     }
 
@@ -38,20 +48,16 @@ public final class DeviceID implements Serializable {
         }
 
         DeviceID deviceID = (DeviceID) o;
-        if (id != null) {
-            return id.equals(deviceID.id);
-        } else {
-            return deviceID.id == null;
-        }
+        return id.equals(deviceID.id);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        return id.hashCode();
     }
 
     public String toShortString() {
-        if (id == null) {
+        if (id.isEmpty()) {
             return "???";
         } else {
             return id.substring(0, Math.min(id.length(), 7));
@@ -60,6 +66,6 @@ public final class DeviceID implements Serializable {
 
     @Override
     public String toString() {
-        return '\'' + id + '\'';
+        return getIDString();
     }
 }
