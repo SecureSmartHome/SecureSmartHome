@@ -4,13 +4,10 @@ package de.unipassau.isl.evs.ssh.core.naming;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
-import android.util.Base64;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.X509Certificate;
@@ -45,6 +42,10 @@ public class NamingManager extends AbstractComponent {
      */
     public NamingManager(boolean isMaster) {
         this.isMaster = isMaster;
+    }
+
+    public boolean isMaster() {
+        return isMaster;
     }
 
     /**
@@ -126,10 +127,6 @@ public class NamingManager extends AbstractComponent {
         return ownCert;
     }
 
-    public boolean isMaster() {
-        return isMaster;
-    }
-
     /**
      * Gets the public key of the given DeviceID.
      *
@@ -140,27 +137,6 @@ public class NamingManager extends AbstractComponent {
     @NonNull
     public PublicKey getPublicKey(DeviceID id) throws UnresolvableNamingException {
         return getCertificate(id).getPublicKey();
-    }
-
-    /**
-     * Gets the id of a given certificate.
-     *
-     * @param cert the certificate
-     * @return the id corresponding to the given certificate
-     */
-    @NonNull
-    public DeviceID getDeviceID(X509Certificate cert) throws UnresolvableNamingException {
-        MessageDigest md;
-        byte[] digest;
-
-        try {
-            md = MessageDigest.getInstance("SHA-256", "BC");
-        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-            throw new UnresolvableNamingException(e);
-        }
-        md.update(cert.getPublicKey().getEncoded());
-        digest = md.digest();
-        return new DeviceID(Base64.encodeToString(digest, Base64.NO_WRAP));
     }
 
     /**
@@ -192,7 +168,7 @@ public class NamingManager extends AbstractComponent {
         try {
             final KeyStoreController keyStoreController = container.require(KeyStoreController.KEY);
             ownCert = keyStoreController.getOwnCertificate();
-            ownID = getDeviceID(ownCert);
+            ownID = DeviceID.fromCertificate(ownCert);
 
             if (isMaster) {
                 masterCert = ownCert;

@@ -1,6 +1,12 @@
 package de.unipassau.isl.evs.ssh.core.naming;
 
+import android.util.Base64;
+
 import java.io.Serializable;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.X509Certificate;
 
 /**
  * Unique id for all devices (user devices, master, slaves).
@@ -8,7 +14,11 @@ import java.io.Serializable;
  * @author Wolfgang Popp
  */
 public final class DeviceID implements Serializable {
+    private static final String ID_MD_ALG = "SHA-256";
+    public static final int ID_LENGTH = 32;
+
     private final String id;
+    private final byte[] bytes;
 
     /**
      * Creates a new DeviceID from the given string.
@@ -16,7 +26,31 @@ public final class DeviceID implements Serializable {
      * @param id the id as string
      */
     public DeviceID(String id) {
-        this.id = id != null ? id.trim() : "";
+        this.id = id.trim();
+        this.bytes = Base64.decode(id, Base64.DEFAULT);
+        validateLength();
+    }
+
+    public DeviceID(byte[] bytes) {
+        this.id = Base64.encodeToString(bytes, Base64.NO_WRAP).trim();
+        this.bytes = bytes;
+        validateLength();
+    }
+
+    private void validateLength() {
+        if (bytes.length != ID_LENGTH) {
+            throw new IllegalArgumentException("ID '" + id + "' has invalid length " + bytes.length + "!=" + ID_LENGTH);
+        }
+    }
+
+    public static DeviceID fromCertificate(X509Certificate cert) throws NoSuchProviderException, NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(ID_MD_ALG, "SC");
+        if (md.getDigestLength() != ID_LENGTH) {
+            throw new AssertionError("Message digest " + ID_MD_ALG + " returns invalid length " + md.getDigestLength() + "!=" + ID_LENGTH);
+        }
+        md.update(cert.getPublicKey().getEncoded());
+        byte[] digest = md.digest();
+        return new DeviceID(digest);
     }
 
     /**
@@ -38,6 +72,10 @@ public final class DeviceID implements Serializable {
         return id;
     }
 
+    public byte[] getIDBytes() {
+        return bytes;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -57,11 +95,7 @@ public final class DeviceID implements Serializable {
     }
 
     public String toShortString() {
-        if (id.isEmpty()) {
-            return "???";
-        } else {
-            return id.substring(0, Math.min(id.length(), 7));
-        }
+        return id.substring(0, Math.min(id.length(), 7));
     }
 
     @Override
