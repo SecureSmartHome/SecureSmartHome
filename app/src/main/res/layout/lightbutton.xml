@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:background="@color/button_green"
             android:padding="16dp"
-            android:text="@string/string_turn_on"
+            android:text="@string/turn_on"
             android:textSize="14sp"
             />
 

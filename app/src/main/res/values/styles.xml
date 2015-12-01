@@ -2,19 +2,21 @@
 <!--@author Phil Werli-->
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+    <!--Overall app theme based on the Material Light theme without ActionBar, as we build it ourself-->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:colorBackground">@color/colorBackground</item>
         <item name="colorAccent">@color/colorAccent</item>
+
         <item name="android:windowTranslucentNavigation">false</item>
         <item name="android:windowTranslucentStatus">true</item>
     </style>
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
+
+    <!--Theme used for design.widget.AppBarLayout-->
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <!--Theme used for v7.widget.Toolbar-->
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 

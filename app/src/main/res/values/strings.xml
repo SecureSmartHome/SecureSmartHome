@@ -5,13 +5,11 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="favourite_settings">Favourites</string>
 
     <string name="navigation_drawer_open">Navigation</string>
     <string name="navigation_drawer_close">Navigate</string>
     <string name="nav_edit">Edit</string>
 
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="nav_home">Home</string>
     <string name="nav_door_string">Door</string>
     <string name="nav_light_string">Light</string>
@@ -23,12 +21,22 @@
     <string name="nav_addModule_string">Add Module</string>
     <string name="deviceStatusConnectedSlaves">Connected Slaves</string>
     <string name="deviceStatusConnectedModules">Connected Modules</string>
-    <string name="string_turn_off">Turn Off</string>
-    <string name="string_turn_on">Turn On</string>
+
+    <!--Strings used in the LightFragment-->
+    <string name="turn_off">Turn Off</string>
+    <string name="turn_on">Turn On</string>
+
+
     <string name="status_of_light">Status of the Light</string>
-    <string name="deviceSatusConnectedSlaves">Connected Slaves</string>
     <string name="NoSlavesConnected">No Slaves connected</string>
-    <string name="NoModulesConnected">No modules connected</string>
+    <string name="NoModulesConnected">No Modules connected</string>
+
+    <!--Strings used for QR-Codes-->
     <string name="qr_code_description">This is a QR-Code.</string>
     <string name="please_scan_device">Scan the QR-Code with your device.</string>
+
+    <!--Strings used for the Welcome Screen-->
+    <string name="welcome_to_ssh">Welcome to the Secure Smart Home App.</string>
+    <string name="click_to_register">Click below to register in a system.</string>
+    <string name="register">Register</string>
 </resources>
