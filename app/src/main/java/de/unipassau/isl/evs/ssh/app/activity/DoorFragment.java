@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import java.lang.ref.WeakReference;
 
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.app.handler.DoorHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 
 /**
  * This activity uses the OperateDoorFragment and allows to display information contained in door messages
@@ -24,12 +24,33 @@ import de.unipassau.isl.evs.ssh.app.handler.DoorHandler;
  */
 public class DoorFragment extends Fragment {
 
-    Button openButton;
-    Button blockButton;
-    ImageView imageView;
+    private Button openButton;
+    private Button blockButton;
+    private ImageView imageView;
 
-    public DoorFragment() {
-        // Required empty public constructor
+    private final ImageListener imageListener = new ImageListener() {
+        @Override
+        public void onPictureChanged(byte[] image) {
+            displayImage(image);
+        }
+    };
+
+    public interface ImageListener {
+        void onPictureChanged(byte[] image);
+    }
+
+    @Override
+    public void onStart() {
+        AppDoorHandler handler = ((MainActivity) getActivity()).getContainer().require(AppDoorHandler.KEY);
+        handler.addListener(imageListener);
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        AppDoorHandler handler = ((MainActivity) getActivity()).getContainer().require(AppDoorHandler.KEY);
+        handler.removeListener(imageListener);
+        super.onStop();
     }
 
     @Override
@@ -60,14 +81,16 @@ public class DoorFragment extends Fragment {
      *
      * @param image the image to display as byte[]
      */
-    public void displayImage(byte[] image) {
+    private void displayImage(byte[] image) {
         BitmapWorkerTask task = new BitmapWorkerTask(imageView);
         task.execute(image);
     }
 
-    // executed, when the "Open" button was pressed.
+    /**
+     * executed, when the "Open" button was pressed.
+     */
     private void openButtonAction() {
-        DoorHandler handler = ((MainActivity) getActivity()).getContainer().require(DoorHandler.KEY);
+        AppDoorHandler handler = ((MainActivity) getActivity()).getContainer().require(AppDoorHandler.KEY);
 
         if (!handler.isOpen() && !handler.isBlocked()) {
             handler.openDoor();
@@ -76,9 +99,11 @@ public class DoorFragment extends Fragment {
         updateButtons();
     }
 
-    // executed, when the "Block" button was pressed.
+    /**
+     * executed, when the "Block" button was pressed.
+     */
     private void blockButtonAction() {
-        DoorHandler handler = ((MainActivity) getActivity()).getContainer().require(DoorHandler.KEY);
+        AppDoorHandler handler = ((MainActivity) getActivity()).getContainer().require(AppDoorHandler.KEY);
 
         if (handler.isBlocked()) {
             handler.unblockDoor();
@@ -91,8 +116,8 @@ public class DoorFragment extends Fragment {
     /**
      * Updates the buttons in this fragment's to represent the current door status.
      */
-    public void updateButtons() {
-        DoorHandler handler = ((MainActivity) getActivity()).getContainer().require(DoorHandler.KEY);
+    private void updateButtons() {
+        AppDoorHandler handler = ((MainActivity) getActivity()).getContainer().require(AppDoorHandler.KEY);
 
         if (handler.isBlocked()) {
             blockButton.setText("Unblock door");
