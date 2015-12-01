@@ -17,6 +17,7 @@ import java.security.cert.X509Certificate;
 
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
 import de.unipassau.isl.evs.ssh.app.handler.DoorHandler;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
@@ -26,6 +27,8 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
  * This Container class manages dependencies needed in the Android App.
  */
 public class AppContainer extends ContainerService {
+    private static final File dir = new File("/sdcard/ssh");
+
     @Override
     protected void init() {
         register(KeyStoreController.KEY, new KeyStoreController());
@@ -36,8 +39,6 @@ public class AppContainer extends ContainerService {
         register(DoorHandler.KEY, new DoorHandler());
         register(AppLightHandler.KEY, new AppLightHandler());
     }
-
-    private static final File dir = new File("/sdcard/ssh");
 
     private void syncKeyStore() {
         dir.mkdirs();
@@ -56,7 +57,7 @@ public class AppContainer extends ContainerService {
         if (masterId.exists()) {
             try {
                 final String id = Files.readFirstLine(masterId, Charsets.US_ASCII);
-                getSharedPreferences(AppConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
+                getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
                         .putString(AppConstants.SharedPrefs.PREF_MASTER_ID, id)
                         .commit();
                 Log.i(getClass().getSimpleName(), "ID for Master loaded: " + id);

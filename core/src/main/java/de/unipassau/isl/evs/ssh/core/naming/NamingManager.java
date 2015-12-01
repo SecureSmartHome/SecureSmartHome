@@ -161,7 +161,7 @@ public class NamingManager extends AbstractComponent {
                 masterID = ownID;
             } else {
                 final SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
-                        .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+                        .getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
 
                 String masterIDStr = prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null);
                 if (masterIDStr == null) {

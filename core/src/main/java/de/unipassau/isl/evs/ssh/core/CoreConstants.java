@@ -13,59 +13,66 @@ import io.netty.util.ResourceLeakDetector;
  * @author Team
  */
 public class CoreConstants {
-    /**
-     * Name used for SharedPreferences file
-     */
-    public static final String FILE_SHARED_PREFS = "shared-preferences";
-    /**
-     * Default port used by netty
-     */
-    public static final int DEFAULT_PORT = 13131;
-    /**
-     * Preferred port used by netty
-     */
-    public static final String PREF_PORT = "PREF_PORT";
-    /**
-     * Preferred host used by netty, default is {@code null}
-     */
-    public static final String PREF_HOST = "PREF_HOST";
-    /**
-     * The time it takes in seconds after the client starts idle when reader isn't active.
-     */
-    public static final int CLIENT_READER_IDLE_TIME = 60;
-    /**
-     * The time it takes in seconds after the client starts idle when writer isn't active.
-     */
-    public static final int CLIENT_WRITER_IDLE_TIME = 30;
-    /**
-     * The time it takes in seconds after the client starts idle when reader or writer isn't active.
-     * Set to infinite.
-     */
-    public static final int CLIENT_ALL_IDLE_TIME = 0;
-    /**
-     * Default value for maximum timeouts.
-     */
-    public static final int CLIENT_MAX_DISCONNECTS = 3;
-    /**
-     * The minimum number of seconds between
-     */
-    public static final long CLIENT_MILLIS_BETWEEN_DISCONNECTS = TimeUnit.SECONDS.toMillis(10);
-    /**
-     * The maximum number of seconds the broadcast waits to be sent again.
-     */
-    public static final long CLIENT_MILLIS_BETWEEN_BROADCASTS = TimeUnit.SECONDS.toMillis(2);
-    /**
-     * Default port used by netty
-     */
-    public static final int DISCOVERY_PORT = 13132;
 
-    public static final String DISCOVERY_PAYLOAD_REQUEST = "de.unipassau.isl.evs.ssh.udp_discovery.REQUEST";
-    public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE";
-    public static final ResourceLeakDetector.Level RESOURCE_LEAK_DETECTION = ResourceLeakDetector.Level.PARANOID;
-    public static final String DISCOVERY_HOST = "255.255.255.255";
+    /**
+     * The class contains constants for the Netty Framework
+     *
+     * @author Niko Fink & Phil Werli
+     */
+    public static class NettyConstants {
 
-    public static final AttributeKey<X509Certificate> ATTR_CLIENT_CERT = AttributeKey.valueOf(X509Certificate.class.getName());
-    public static final AttributeKey<DeviceID> ATTR_CLIENT_ID = AttributeKey.valueOf(DeviceID.class.getName());
+        /**
+         * Name used for SharedPreferences file
+         */
+        public static final String FILE_SHARED_PREFS = "shared-preferences";
+        /**
+         * Default port used by netty
+         */
+        public static final int DEFAULT_PORT = 13131;
+        /**
+         * Preferred port used by netty
+         */
+        public static final String PREF_PORT = "PREF_PORT";
+        /**
+         * Preferred host used by netty, default is {@code null}
+         */
+        public static final String PREF_HOST = "PREF_HOST";
+        /**
+         * The time it takes in seconds after the client starts idle when reader isn't active.
+         */
+        public static final int CLIENT_READER_IDLE_TIME = 60;
+        /**
+         * The time it takes in seconds after the client starts idle when writer isn't active.
+         */
+        public static final int CLIENT_WRITER_IDLE_TIME = 30;
+        /**
+         * The time it takes in seconds after the client starts idle when reader or writer isn't active.
+         * Set to infinite.
+         */
+        public static final int CLIENT_ALL_IDLE_TIME = 0;
+        /**
+         * Default value for maximum timeouts.
+         */
+        public static final int CLIENT_MAX_DISCONNECTS = 3;
+        /**
+         * The minimum number of seconds between
+         */
+        public static final long CLIENT_MILLIS_BETWEEN_DISCONNECTS = TimeUnit.SECONDS.toMillis(10);
+        /**
+         * The maximum number of seconds the broadcast waits to be sent again.
+         */
+        public static final long CLIENT_MILLIS_BETWEEN_BROADCASTS = TimeUnit.SECONDS.toMillis(2);
+        /**
+         * Default discovery port used by netty
+         */
+        public static final int DISCOVERY_PORT = 13132;
+        public static final String DISCOVERY_PAYLOAD_REQUEST = "de.unipassau.isl.evs.ssh.udp_discovery.REQUEST";
+        public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE";
+        public static final ResourceLeakDetector.Level RESOURCE_LEAK_DETECTION = ResourceLeakDetector.Level.PARANOID;
+        public static final String DISCOVERY_HOST = "255.255.255.255";
+        public static final AttributeKey<X509Certificate> ATTR_CLIENT_CERT = AttributeKey.valueOf(X509Certificate.class.getName());
+        public static final AttributeKey<DeviceID> ATTR_CLIENT_ID = AttributeKey.valueOf(DeviceID.class.getName());
+    }
 
     /**
      * This class contains the key constants of SharedPreferences
@@ -120,7 +127,7 @@ public class CoreConstants {
         public static final String BRIGHTNESS_WARNING = "BrightnessWarning";
         public static final String HOLIDAY_MODE_SWITCHED_ON = "HolidayModeSwitchedOn";
         public static final String HOLIDAY_MODE_SWITCHED_OFF = "HolidayModeSwitchedOff";
-        public static final String SYSTEM_HEALT_WARNING = "SystemHealthWarning";
+        public static final String SYSTEM_HEALTH_WARNING = "SystemHealthWarning";
         public static final String BELL_RANG = "BellRang";
         public static final String WEATHER_WARNING = "WeatherWarning";
         public static final String DOOR_UNLATCHED = "DoorOpened";

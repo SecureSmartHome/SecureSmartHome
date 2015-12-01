@@ -69,7 +69,7 @@ public class SlaveContainer extends ContainerService {
         if (masterId.exists()) {
             try {
                 final String id = Files.readFirstLine(masterId, Charsets.US_ASCII);
-                getSharedPreferences(SlaveConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
+                getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
                         .putString(SlaveConstants.SharedPrefs.PREF_MASTER_ID, id)
                         .commit();
                 Log.i(getClass().getSimpleName(), "ID for Master loaded: " + id);

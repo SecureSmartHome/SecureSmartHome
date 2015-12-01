@@ -13,7 +13,6 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
-import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 
@@ -155,6 +154,10 @@ public class DatabaseConnector extends AbstractComponent {
                 + "DROP TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + ";";
 
+        public DBOpenHelper(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        }
+
         private void insertPermissions(SQLiteDatabase db) {
             String[] binaryPermissions = new String[]{
                     DatabaseContract.Permission.Values.ADD_ORDROID,
@@ -185,7 +188,7 @@ public class DatabaseConnector extends AbstractComponent {
                     CoreConstants.NotificationTypes.BRIGHTNESS_WARNING,
                     CoreConstants.NotificationTypes.HOLIDAY_MODE_SWITCHED_ON,
                     CoreConstants.NotificationTypes.HOLIDAY_MODE_SWITCHED_OFF,
-                    CoreConstants.NotificationTypes.SYSTEM_HEALT_WARNING,
+                    CoreConstants.NotificationTypes.SYSTEM_HEALTH_WARNING,
                     CoreConstants.NotificationTypes.BELL_RANG,
                     CoreConstants.NotificationTypes.WEATHER_WARNING,
                     CoreConstants.NotificationTypes.DOOR_UNLATCHED,
@@ -206,10 +209,6 @@ public class DatabaseConnector extends AbstractComponent {
                 //Log.v(TAG, "executing SQL statement: " + statement + ";");
                 db.execSQL(statement + ";");
             }
-        }
-
-        public DBOpenHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
         @Override
