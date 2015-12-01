@@ -4,6 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+/**
+ * Start Service if Master has finished boot up
+ * @author bucher
+ */
 public class OnBootReceiver extends BroadcastReceiver {
     public OnBootReceiver() {
     }

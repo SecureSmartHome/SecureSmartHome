@@ -10,6 +10,7 @@ import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 
 /**
  * Handles door messages and makes API calls accordingly.
+ *
  * @author bucher
  */
 public class SlaveDoorHandler implements MessageHandler {
@@ -20,7 +21,7 @@ public class SlaveDoorHandler implements MessageHandler {
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        //TODO Benötigt keine Payload, da nur eine Funktion öffnen
+        //Does not need a Payload, because there is only one function (unlock)
         try {
             doorBuzzer.unlock(3000);
         } catch (EvsIoException e) {
@@ -32,10 +33,9 @@ public class SlaveDoorHandler implements MessageHandler {
     public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
         this.routingKey = routingKey;
         this.dispatcher = dispatcher;
-
+        //TODO implement: how to get IoAdress
         //get the following values via dispatcher
         int IoAdress = 0;
-
         doorBuzzer = new DoorBuzzer(IoAdress);
     }
 

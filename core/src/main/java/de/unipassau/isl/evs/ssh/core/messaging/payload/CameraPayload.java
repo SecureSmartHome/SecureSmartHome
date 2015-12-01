@@ -7,8 +7,9 @@ import android.hardware.Camera;
  *
  * @author Chris
  */
-public class CameraPayload {
+public class CameraPayload implements MessagePayload {
 
+    String moduleName;
     int cameraID;
     PictureCallback pictureCallback;
 
@@ -20,9 +21,18 @@ public class CameraPayload {
      *
      * @param cameraID of the camera which we interact with
      */
-    public CameraPayload(int cameraID) {
+    public CameraPayload(int cameraID, String moduleName) {
         this.cameraID = cameraID;
+        this.moduleName = moduleName;
         this.pictureCallback = new PictureCallback();
+    }
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
     }
 
     /**
