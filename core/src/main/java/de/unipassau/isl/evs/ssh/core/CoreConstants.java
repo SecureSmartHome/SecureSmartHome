@@ -103,7 +103,6 @@ public class CoreConstants {
         public static final String MASTER_DOOR_BELL_RING = "/master/doorbell/ring";
         public static final String MASTER_CAMERA_GET = "/master/camera/get";
         public static final String MASTER_NOTIFICATION_SEND = "/master/notification/send";
-        public static final String MASTER_NOTIFICATION_PICTURE_SEND = "/master/notification/picture_send";
         public static final String MASTER_DOOR_BELL_CAMERA_GET = "/master/doorbell/camera/get";
         public static final String MASTER_DOOR_UNLATCH = "/master/door/unlatch";
         public static final String MASTER_DOOR_LOCK_SET = "/master/door/lock_set";
@@ -118,7 +117,7 @@ public class CoreConstants {
         public static final String APP_MODULES_GET = "/app/module/get";
         public static final String APP_LIGHT_UPDATE = "/app/light/update";
         public static final String APP_NOTIFICATION_RECEIVE = "/app/notification/receive";
-        public static final String APP_NOTIFICATION_PICTURE_RECEIVE = "/app/notification/picture_receive";
+        public static final String APP_DOOR_RING = "/app/door/ring";
     }
 
     /**
@@ -133,6 +132,7 @@ public class CoreConstants {
      * @author leon
      */
     public class NotificationTypes {
+        //Each type also acts as a permission in the database
         public static final String ODROID_ADDED = "OdroidAdded";
         public static final String HUMIDITY_WARNING = "HumidityWarning";
         public static final String BRIGHTNESS_WARNING = "BrightnessWarning";
