@@ -55,6 +55,7 @@ public class KeyStoreController extends AbstractComponent {
     private static final String PUBLIC_KEY_PREFIX = "public_key:";
     private static final int ASYMMETRIC_KEY_SIZE = 256;
 
+
     public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);
 
     static {
