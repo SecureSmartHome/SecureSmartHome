@@ -1,15 +1,25 @@
 package de.unipassau.isl.evs.ssh.drivers.lib;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
+
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class to get weather information from the Odroid Show and Weather board.
  *
  * @author Wolfram Gottschlich
  * @author Niko Fink
- * @version 2.0
+ * @author Chris
+ * @version 2.1
  */
 public class WeatherSensor extends AbstractComponent {
     public static final Key<WeatherSensor> KEY = new Key<>(WeatherSensor.class);
@@ -21,10 +31,15 @@ public class WeatherSensor extends AbstractComponent {
 
     private double temp1, temp2, pressure, altitude, humidity, uv;
     private int visible, ir;
+    private Container container;
 
     @Override
     public void init(Container container) {
         initSerialInterface();
+        this.container = container;
+
+        ScheduledFuture future = container.require(ExecutionServiceComponent.KEY).scheduleAtFixedRate(
+                new WeatherPollingRunnable(this), 0, 200, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -34,6 +49,39 @@ public class WeatherSensor extends AbstractComponent {
 
     public void updateData() {
         readData();
+    }
+
+    private class WeatherPollingRunnable implements Runnable {
+
+        WeatherSensor sensor;
+
+        public WeatherPollingRunnable(WeatherSensor sensor) {
+            this.sensor = sensor;
+        }
+
+        @Override
+        public void run() {
+            updateData();
+            sendWeatherInfo();
+        }
+
+        /**
+         * Sends info about doorbell being used
+         */
+        private void sendWeatherInfo() {
+            WeatherPayload payload = new WeatherPayload();
+
+            //Todo set values
+
+            NamingManager namingManager = container.require(NamingManager.KEY);
+
+            Message message;
+            message = new Message(payload);
+            message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
+
+            OutgoingRouter router = container.require(OutgoingRouter.KEY);
+            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_WEATHER_INFO, message);
+        }
     }
 
     //Natives///////////////////////////////////////////////////////////////////////////////////////////////////////////

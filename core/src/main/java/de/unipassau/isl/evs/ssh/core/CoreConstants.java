@@ -102,6 +102,7 @@ public class CoreConstants {
         public static final String MASTER_LIGHT_SET = "/master/light/set";
         public static final String MASTER_DOOR_RINGS = "/master/doorbell/ring";
         public static final String MASTER_CAMERA_GET = "/master/camera/get";
+        public static final String MASTER_WEATHER_INFO = "/master/weather/info";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
@@ -111,6 +112,7 @@ public class CoreConstants {
         //App
         public static final String APP_MODULES_GET = "/app/module/get";
         public static final String APP_LIGHT_UPDATE = "/app/light/update";
+
     }
 
     /**
