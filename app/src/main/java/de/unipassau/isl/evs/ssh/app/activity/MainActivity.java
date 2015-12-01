@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -13,6 +14,10 @@ import android.view.MenuItem;
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
+import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.SharedPrefs.PREF_MASTER_ID;
 
 /**
  * As this Activity also displays information like whether the light is on or not, this Activity also
@@ -58,13 +63,28 @@ public class MainActivity extends BoundActivity
                 e.printStackTrace();
             }
         } else {
-            MainFragment fragment = new MainFragment();
+            // starts the main fragment when already registered, the welcomescreen fragment so the user can register.
+            Fragment fragment = (deviceNotRegistered() ? new WelcomeScreenFragment() : new MainFragment());
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
         }
 
+    }
+
+    /**
+     * Checks whether the device is registered in the system by checking the master_id in the SharedPreferences.
+     *
+     * @return If the device is already registered or not.
+     */
+    private boolean deviceNotRegistered() {
+        String master_id = getSharedPrefs().getString(PREF_MASTER_ID, null);
+        return master_id == null;
+    }
+
+    private SharedPreferences getSharedPrefs() {
+        return getComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
     }
 
     @Override

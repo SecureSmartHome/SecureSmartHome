@@ -9,7 +9,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import de.unipassau.isl.evs.ssh.app.R;
 
@@ -36,7 +36,7 @@ public class ScanQRCodeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_scan_qrcode, container, false);
+        LinearLayout root = (LinearLayout) inflater.inflate(R.layout.fragment_scan_qrcode, container, false);
 
         return root;
     }
