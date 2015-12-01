@@ -39,7 +39,7 @@ public class WeatherSensor extends AbstractComponent {
         initSerialInterface();
         this.container = container;
 
-        ScheduledFuture future = container.require(ExecutionServiceComponent.KEY).scheduleAtFixedRate(
+        this.future =  container.require(ExecutionServiceComponent.KEY).scheduleAtFixedRate(
                 new WeatherPollingRunnable(this), 0, 200, TimeUnit.MILLISECONDS);
     }
 
