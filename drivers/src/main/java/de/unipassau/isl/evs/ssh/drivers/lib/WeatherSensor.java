@@ -32,6 +32,7 @@ public class WeatherSensor extends AbstractComponent {
     private double temp1, temp2, pressure, altitude, humidity, uv;
     private int visible, ir;
     private Container container;
+    private ScheduledFuture future;
 
     @Override
     public void init(Container container) {
@@ -45,6 +46,7 @@ public class WeatherSensor extends AbstractComponent {
     @Override
     public void destroy() {
         close();
+        future.cancel(true);
     }
 
     public void updateData() {
@@ -61,8 +63,10 @@ public class WeatherSensor extends AbstractComponent {
 
         @Override
         public void run() {
-            updateData();
-            sendWeatherInfo();
+            if (future != null) {
+                updateData();
+                sendWeatherInfo();
+            }
         }
 
         /**
