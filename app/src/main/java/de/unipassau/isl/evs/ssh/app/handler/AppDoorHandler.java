@@ -12,7 +12,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
 
 public class AppDoorHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppDoorHandler> KEY = new Key<>(AppDoorHandler.class);
@@ -87,12 +87,11 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
      * Sends a "BlockDoor" message to the master.
      */
     public void blockDoor() {
-        DoorPayload doorPayload = new DoorPayload(true);
+        DoorLockPayload doorPayload = new DoorLockPayload(false, ""); //FIXME
 
         Message message;
         message = new Message(doorPayload);
-        // TODO set RoutingKey
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.MASTER_DOOR_RINGS);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_SET);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_SET, message);

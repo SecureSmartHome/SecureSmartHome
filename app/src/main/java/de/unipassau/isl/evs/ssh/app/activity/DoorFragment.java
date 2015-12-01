@@ -17,7 +17,7 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 
 /**
- * This activity uses the OperateDoorFragment and allows to display information contained in door messages
+ * This fragment allows to display information contained in door messages
  * which are received from the IncomingDispatcher.
  *
  * @author Wolfgang Popp

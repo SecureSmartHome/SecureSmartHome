@@ -106,7 +106,7 @@ public class ButtonSensor extends AbstractComponent{
             message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
             OutgoingRouter router = container.require(OutgoingRouter.KEY);
-            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_DOOR_RINGS, message);
+            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_DOOR_BELL_RING, message);
         }
     }
 }

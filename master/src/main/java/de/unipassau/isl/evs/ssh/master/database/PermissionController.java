@@ -9,8 +9,9 @@ import java.util.List;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 
 /**
  * Offers high level methods to interact with the tables associated with permissions in the database.
@@ -401,5 +402,60 @@ public class PermissionController extends AbstractComponent {
         } catch (SQLiteConstraintException sqlce) {
             throw new AlreadyInUseException("The given name is already used by another Template.", sqlce);
         }
+    }
+
+    /**
+     * //Todo unit test, doc
+     * @param permission
+     * @return
+     */
+    public List<UserDevice> getAllUserDevicesWithPermission(Permission permission) {
+        Cursor userDevicesCursor;
+        if (permission.getModuleName() == null) {
+            userDevicesCursor = databaseConnector.executeSql("select"
+                    + "u." + DatabaseContract.UserDevice.COLUMN_NAME
+                    + ", u." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                    + ", g." + DatabaseContract.Group.COLUMN_NAME
+                    + " from " + DatabaseContract.HasPermission.TABLE_NAME + " hp"
+                    + " join " + DatabaseContract.Permission.TABLE_NAME + " p"
+                    + " on hp." + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
+                    + " = p." + DatabaseContract.Permission.COLUMN_ID
+                    + " join " + DatabaseContract.UserDevice.TABLE_NAME + " u"
+                    + " on hp." + DatabaseContract.HasPermission.COLUMN_USER_ID
+                    + " = u." + DatabaseContract.UserDevice.COLUMN_ID
+                    + " join " + DatabaseContract.Group.TABLE_NAME + " g"
+                    + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID
+                    + " = g." + DatabaseContract.Group.COLUMN_ID
+                    + " where p." + DatabaseContract.Permission.COLUMN_NAME
+                    + " = ? and p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
+                    + " is NULL", new String[]{ permission.getName(), permission.getModuleName() });
+        } else {
+            userDevicesCursor = databaseConnector.executeSql("select"
+                    + "u." + DatabaseContract.UserDevice.COLUMN_NAME
+                    + ", u." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                    + ", g." + DatabaseContract.Group.COLUMN_NAME
+                    + " from " + DatabaseContract.HasPermission.TABLE_NAME + " hp"
+                    + " join " + DatabaseContract.Permission.TABLE_NAME + " p"
+                    + " on hp." + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
+                    + " = p." + DatabaseContract.Permission.COLUMN_ID
+                    + " join " + DatabaseContract.UserDevice.TABLE_NAME + " u"
+                    + " on hp." + DatabaseContract.HasPermission.COLUMN_USER_ID
+                    + " = u." + DatabaseContract.UserDevice.COLUMN_ID
+                    + " join " + DatabaseContract.Group.TABLE_NAME + " g"
+                    + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID
+                    + " = g." + DatabaseContract.Group.COLUMN_ID
+                    + " join " + DatabaseContract.ElectronicModule.TABLE_NAME + "m"
+                    + " on p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
+                    + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
+                    + " where p." + DatabaseContract.Permission.COLUMN_NAME
+                    + " = ? and m." + DatabaseContract.ElectronicModule.COLUMN_NAME
+                    + " = ?", new String[]{ permission.getName(), permission.getModuleName() });
+        }
+        List<UserDevice> userDevices = new LinkedList<>();
+        while (userDevicesCursor.moveToNext()) {
+            userDevices.add(new UserDevice(userDevicesCursor.getString(0),
+                    userDevicesCursor.getString(2), new DeviceID(userDevicesCursor.getString(1))));
+        }
+        return userDevices;
     }
 }
