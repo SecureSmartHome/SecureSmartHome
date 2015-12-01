@@ -3,6 +3,12 @@ package de.unipassau.isl.evs.ssh.core.network;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.util.Log;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
@@ -20,18 +26,13 @@ import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.ScheduledFuture;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_MILLIS_BETWEEN_BROADCASTS;
 
 /**
  * This component is responsible for sending UDP discovery packets and signalling the new address and port back to the
  * {@link Client} if a new Master has been found.
  *
- * @author Phil, Niko
+ * @author Phil Werli, Niko Fink
  */
 public class UDPDiscoveryClient extends AbstractComponent {
     public static final Key<UDPDiscoveryClient> KEY = new Key<>(UDPDiscoveryClient.class);

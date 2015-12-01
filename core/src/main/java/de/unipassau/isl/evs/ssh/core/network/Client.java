@@ -42,7 +42,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
  * For details about switching to UDP discovery, see {@link #initClient()} and {@link #shouldReconnectTCP()}.
  * This component is used by the Slave and the end-user android App.
  *
- * @author Phil
+ * @author Phil Werli
  */
 public class Client extends AbstractComponent {
     public static final Key<Client> KEY = new Key<>(Client.class);
