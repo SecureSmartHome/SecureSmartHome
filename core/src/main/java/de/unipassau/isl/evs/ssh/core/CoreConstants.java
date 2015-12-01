@@ -119,6 +119,9 @@ public class CoreConstants {
         public static final String APP_LIGHT_UPDATE = "/app/light/update";
         public static final String APP_NOTIFICATION_RECEIVE = "/app/notification/receive";
         public static final String APP_NOTIFICATION_PICTURE_RECEIVE = "/app/notification/picture_receive";
+        public static final String APP_CAMERA_GET = "/app/camera/get";
+        public static final String APP_DOOR_BLOCK = "/app/door/block";
+        public static final String APP_DOOR_GET = "/app/door/get";
     }
 
     /**
