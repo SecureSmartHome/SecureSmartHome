@@ -8,6 +8,7 @@ import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 
 /**
@@ -73,6 +74,7 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler imple
     }
 
     protected boolean hasPermission(DeviceID userDeviceID, Permission permission) {
-        return requireComponent(PermissionController.KEY).hasPermission(userDeviceID, permission);
+        return userDeviceID.equals(requireComponent(NamingManager.KEY).getOwnID())
+                || requireComponent(PermissionController.KEY).hasPermission(userDeviceID, permission);
     }
 }
