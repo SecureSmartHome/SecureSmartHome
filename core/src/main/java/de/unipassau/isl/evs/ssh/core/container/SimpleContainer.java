@@ -2,6 +2,8 @@ package de.unipassau.isl.evs.ssh.core.container;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
+import de.ncoder.typedmap.Key;
+import de.ncoder.typedmap.TypedMap;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -11,9 +13,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.ncoder.typedmap.Key;
-import de.ncoder.typedmap.TypedMap;
-
+/**
+ * Container classes deal with instantiation and set up of dependencies for all Components.
+ * <p/>
+ * Containers are the root element of the systems using the dependency injection design pattern.
+ * Containers manage Components and store them in a typed map.
+ *
+ * @author Niko
+ */
 public class SimpleContainer implements Container {
     public final String TAG = "SContainer@" + Objects.hashCode(this);
 

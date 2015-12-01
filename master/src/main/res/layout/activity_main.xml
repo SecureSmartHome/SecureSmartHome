@@ -14,22 +14,24 @@
         android:paddingTop="@dimen/activity_vertical_margin">
 
         <TextView
-            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Available Components:"/>
+            android:text="Device ID (Master):"
+            android:id="@+id/textView"
+            android:textStyle="bold"/>
 
         <TextView
-            android:id="@+id/textViewComponents"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="[]"/>
+            android:text="ABC"
+            android:id="@+id/textViewDeviceID"/>
 
         <TextView
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Connection:"/>
+            android:text="Connection:"
+            android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/textViewConnectionStatus"

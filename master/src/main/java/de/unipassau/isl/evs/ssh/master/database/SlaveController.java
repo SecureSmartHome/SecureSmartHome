@@ -11,13 +11,13 @@ import java.util.List;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
-import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
- * Offers high level methods to interact with the tables associated with slaves in the database.
+ * Offers high level methods to interact with the tables associated with slaves and modules in the database.
  * @author leon
  */
 public class SlaveController extends AbstractComponent {
@@ -41,6 +41,13 @@ public class SlaveController extends AbstractComponent {
         databaseConnector = null;
     }
 
+    /**
+     * Create a String array suitable to be inserted into the database. This function will fill in null values for all
+     * columns not used by the given ModuleAccessPoint.
+     *
+     * @param moduleAccessPoint ModulesAccessPoint to create String array from.
+     * @return Generated String array.
+     */
     private String[] createCombinedModulesAccessInformationFromSingle(
             ModuleAccessPoint moduleAccessPoint) {
         String[] allModuleAccessPoints =

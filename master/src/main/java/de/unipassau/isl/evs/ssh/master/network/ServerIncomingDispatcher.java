@@ -1,17 +1,18 @@
 package de.unipassau.isl.evs.ssh.master.network;
 
 import android.util.Log;
-
-import java.util.Set;
-
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 
+import java.util.Set;
+
 /**
  * Distributes incoming messages from one of the multiple connections a master has to the responsible handlers.
+ *
+ * @author Niko
  */
 @ChannelHandler.Sharable
 public class ServerIncomingDispatcher extends IncomingDispatcher {

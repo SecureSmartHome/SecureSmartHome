@@ -8,7 +8,6 @@ import android.test.InstrumentationTestCase;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +23,11 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
 import de.unipassau.isl.evs.ssh.core.network.Client;
-import de.unipassau.isl.evs.ssh.master.MasterConstants;
+import de.unipassau.isl.evs.ssh.core.network.ClientHandshakeHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.MessageToMessageDecoder;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
@@ -143,11 +143,11 @@ public class ServerTest extends InstrumentationTestCase {
                 new ContainerService.ContextComponent(getInstrumentation().getTargetContext()));
 
         SharedPreferences sharedPref = container.get(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(MasterConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+                .getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         assertTrue(
                 sharedPref.edit()
                         .clear()
-                        .putString(CoreConstants.PREF_HOST, "localhost")
+                        .putString(CoreConstants.NettyConstants.PREF_HOST, "localhost")
                         .commit()
         );
     }
@@ -182,16 +182,23 @@ public class ServerTest extends InstrumentationTestCase {
             this.serverChannel = serverChannel;
         }
 
+        @NonNull
         @Override
-        protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
-            super.initChannel(ch);
-            ch.pipeline().addLast(new MessageToMessageDecoder<Object>() {
+        protected ServerHandshakeHandler getHandshakeHandler() {
+            return new ServerHandshakeHandler(this) {
                 @Override
-                protected void decode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
-                    serverQueue.add(msg);
+                public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+                    super.channelRegistered(ctx);
+                    ctx.pipeline().addAfter(LoggingHandler.class.getSimpleName(), "serverQueue",
+                            new MessageToMessageDecoder<Object>() {
+                                @Override
+                                protected void decode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
+                                    serverQueue.add(msg);
+                                }
+                            });
+                    serverChannel.setSuccess((SocketChannel) ctx.channel());
                 }
-            });
-            serverChannel.setSuccess(ch);
+            };
         }
     }
 
@@ -204,16 +211,23 @@ public class ServerTest extends InstrumentationTestCase {
             this.clientChannel = clientChannel;
         }
 
+        @NonNull
         @Override
-        protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
-            super.initChannel(ch);
-            ch.pipeline().addLast(new MessageToMessageDecoder<Object>() {
+        protected ClientHandshakeHandler getHandshakeHandler() {
+            return new ClientHandshakeHandler(this, getContainer()) {
                 @Override
-                protected void decode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
-                    clientQueue.add(msg);
+                public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+                    super.channelRegistered(ctx);
+                    ctx.pipeline().addAfter(LoggingHandler.class.getSimpleName(), "clientQueue",
+                            new MessageToMessageDecoder<Object>() {
+                                @Override
+                                protected void decode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
+                                    clientQueue.add(msg);
+                                }
+                            });
+                    clientChannel.setSuccess((SocketChannel) ctx.channel());
                 }
-            });
-            clientChannel.setSuccess(ch);
+            };
         }
     }
 }

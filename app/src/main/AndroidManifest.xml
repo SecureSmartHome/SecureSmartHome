@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -15,6 +17,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name="de.unipassau.isl.evs.ssh.app.activity.MainActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -22,19 +25,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-        <!-- Überflüssig?
-        <activity android:name=".activity.AddModulFragment" />
-        <activity android:name=".activity.AddNewUserDeviceFragment" />
-        <activity android:name=".activity.AppRegisterUserDeviceFragment" />
-        <activity android:name=".activity.ClimateFragment" />
-        <activity android:name=".activity.DoorFragment" />
-        <activity android:name=".activity.HolidayFragment" />
-        <activity android:name=".activity.LightActivity"/>
-        <activity android:name=".activity.ModifyPermissionFragment" />
-        <activity android:name=".activity.OperateDoorFragment" />
-        <activity android:name=".activity.StatusFragment" />
-        -->
         <service android:name=".AppContainer" />
     </application>
 

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Phil-->
+<resources>
+
+    <style name="DarkAppTheme" parent="Theme.AppCompat.Light">
+        <!-- Settings for Android 5+ devices -->
+        <item name="android:colorPrimary">@color/colorPrimary</item>
+        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:textColorPrimary">@color/colorPrimaryText</item>
+        <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="android:colorAccent">@color/colorAccent</item>
+        <item name="android:colorControlHighlight">@color/colorControlHighlight</item>
+
+    </style>
+</resources>

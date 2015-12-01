@@ -9,16 +9,26 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.master.network.Server;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.group.ChannelGroup;
 
+/**
+ * MainActivitiy for the Master App
+ *
+ * @author Team
+ */
 public class MainActivity extends BoundActivity {
     private final MessageHandler handler = new MessageHandler() {
         @Override
@@ -51,15 +61,24 @@ public class MainActivity extends BoundActivity {
         super.onCreate(savedInstanceState);
         startService(new Intent(this, MasterContainer.class));
         setContentView(R.layout.activity_main);
-        ((TextView) findViewById(R.id.textViewComponents)).setText(Container.components.toString());
-        //((TextView) findViewById(R.id.textViewPackage)).setText(getApplicationContext().getApplicationInfo().toString());
+
+        findViewById(R.id.textViewConnectionStatus).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateConnectionStatus();
+            }
+        });
 
         findViewById(R.id.buttonSend).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Message message = new Message();
-                ChannelFuture future = requireComponent(OutgoingRouter.KEY).sendMessageToMaster("/demo", message)
-                        .getSendFuture();
+                final Message message = new Message();
+                final OutgoingRouter outgoingRouter = getComponent(OutgoingRouter.KEY);
+                if (outgoingRouter == null) {
+                    Toast.makeText(MainActivity.this, "Container not connected", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                final ChannelFuture future = outgoingRouter.sendMessageToMaster("/demo", message).getSendFuture();
                 log("OUT:" + message.toString());
                 future.addListener(new ChannelFutureListener() {
                     @Override
@@ -82,20 +101,48 @@ public class MainActivity extends BoundActivity {
         });
     }
 
+
     @Override
     public void onContainerConnected(Container container) {
-        ((TextView) findViewById(R.id.textViewComponents)).setText(container.getData().toString());
-        Server server = getComponent(Server.KEY);
-        String status = server.getActiveChannels().size() + " connected to " + server.getAddress() + " "
-                + "[" + (server.isChannelOpen() ? "open" : "closed") + ", "
-                + (server.isExecutorAlive() ? "alive" : "dead") + "]";
-        ((TextView) findViewById(R.id.textViewConnectionStatus)).setText(status);
+        final NamingManager namingManager = getComponent(NamingManager.KEY);
+        if (namingManager == null) {
+            ((TextView) findViewById(R.id.textViewDeviceID)).setText("???");
+        } else {
+            ((TextView) findViewById(R.id.textViewDeviceID)).setText(
+                    namingManager.getOwnID().getId()
+            );
+        }
+
+        updateConnectionStatus();
 
         requireComponent(IncomingDispatcher.KEY).registerHandler(handler, "/demo");
     }
 
+    private void updateConnectionStatus() {
+        Server server = getComponent(Server.KEY);
+        String status;
+        if (server == null) {
+            status = "server not started";
+        } else {
+            final ChannelGroup channels = server.getActiveChannels();
+            status = channels.size() + " connected to " + server.getAddress() + " "
+                    + "[" + (server.isChannelOpen() ? "open" : "closed") + ", "
+                    + (server.isExecutorAlive() ? "alive" : "dead") + "]";
+            if (!channels.isEmpty()) {
+                status += ":\n";
+                for (Channel channel : channels) {
+                    final DeviceID deviceID = channel.attr(CoreConstants.NettyConstants.ATTR_CLIENT_ID).get();
+                    status += channel.id().asShortText() + " " + channel.remoteAddress() + " " +
+                            (deviceID != null ? deviceID.toShortString() : "???") + "\n";
+                }
+            }
+        }
+        ((TextView) findViewById(R.id.textViewConnectionStatus)).setText(status);
+    }
+
     @Override
     public void onContainerDisconnected() {
+        updateConnectionStatus();
         requireComponent(IncomingDispatcher.KEY).unregisterHandler(handler, "/demo");
     }
 

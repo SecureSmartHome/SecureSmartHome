@@ -4,15 +4,37 @@ import java.io.Serializable;
 
 /**
  * Unique id for all devices (user devices, master, slaves).
+ *
+ * @author Wolfgang Popp
  */
 public final class DeviceID implements Serializable {
     private final String id;
 
+    /**
+     * Creates a new DeviceID from the given string.
+     *
+     * @param id the id as string
+     */
     public DeviceID(String id) {
-        this.id = id != null ? id.trim() : id;
+        this.id = id != null ? id.trim() : "";
     }
 
+    /**
+     * Returns the device id string.
+     *
+     * @return the device id
+     * @deprecated use {@link #getIDString()} instead
+     */
     public String getId() {
+        return id;
+    }
+
+    /**
+     * Returns the device id string.
+     *
+     * @return the device id
+     */
+    public String getIDString() {
         return id;
     }
 
@@ -26,20 +48,24 @@ public final class DeviceID implements Serializable {
         }
 
         DeviceID deviceID = (DeviceID) o;
-        if (id != null) {
-            return id.equals(deviceID.id);
-        } else {
-            return deviceID.id == null;
-        }
+        return id.equals(deviceID.id);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        return id.hashCode();
+    }
+
+    public String toShortString() {
+        if (id.isEmpty()) {
+            return "???";
+        } else {
+            return id.substring(0, Math.min(id.length(), 7));
+        }
     }
 
     @Override
     public String toString() {
-        return '\'' + id + '\'';
+        return getIDString();
     }
 }

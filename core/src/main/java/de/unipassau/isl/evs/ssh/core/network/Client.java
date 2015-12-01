@@ -1,11 +1,11 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.net.InetAddress;
 import java.net.SocketAddress;
-import java.security.GeneralSecurityException;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
@@ -14,23 +14,14 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.DefaultExecutorServiceFactory;
 import io.netty.util.internal.logging.InternalLogger;
@@ -38,21 +29,20 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
 import static android.content.Context.MODE_PRIVATE;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_ALL_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_MAX_DISCONNECTS;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_MILLIS_BETWEEN_DISCONNECTS;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_READER_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_WRITER_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.DEFAULT_PORT;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_HOST;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_MAX_DISCONNECTS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_MILLIS_BETWEEN_DISCONNECTS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.FILE_SHARED_PREFS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.PREF_HOST;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.PREF_PORT;
 
 /**
  * A netty stack accepting connections to and from the master and handling communication with them using a netty pipeline.
- * For details about the pipeline, see {@link #initChannel(SocketChannel)}.
+ * For details about the pipeline, see {@link ClientHandshakeHandler}.
  * For details about switching to UDP discovery, see {@link #initClient()} and {@link #shouldReconnectTCP()}.
  * This component is used by the Slave and the end-user android App.
+ *
+ * @author Phil
  */
 public class Client extends AbstractComponent {
     public static final Key<Client> KEY = new Key<>(Client.class);
@@ -107,7 +97,7 @@ public class Client extends AbstractComponent {
                 return new NettyInternalLogger(name);
             }
         });
-        ResourceLeakDetector.setLevel(CoreConstants.RESOURCE_LEAK_DETECTION);
+        ResourceLeakDetector.setLevel(CoreConstants.NettyConstants.RESOURCE_LEAK_DETECTION);
         // Add related components
         container.register(IncomingDispatcher.KEY, incomingDispatcher);
         container.register(OutgoingRouter.KEY, outgoingRouter);
@@ -119,10 +109,6 @@ public class Client extends AbstractComponent {
 
     /**
      * Initializes the netty client and tries to connect to the server.
-     * If the connect ist successful, {@link #initChannel(SocketChannel)} is called in order to add the
-     * required Handlers to the pipeline.
-     * If the connection fails, {@link #channelClosed(Channel)} is called until to many retries are made and the Client
-     * switches to searching the master via UDP discovery using the {@link UDPDiscoveryClient}.
      */
     protected synchronized void initClient() {
         Log.d(TAG, "initClient");
@@ -181,6 +167,10 @@ public class Client extends AbstractComponent {
 
     /**
      * Tries to establish a TCP connection to the Server with the given host and port.
+     * If the connect ist successful, {@link #getHandshakeHandler()} is used to add the
+     * required Handlers to the pipeline.
+     * If the connection fails, {@link #channelClosed(Channel)} is called until to many retries are made and the Client
+     * switches to searching the master via UDP discovery using the {@link UDPDiscoveryClient}.
      */
     protected void connectClient(String host, int port) {
         Log.i(TAG, "Client connecting to " + host + ":" + port);
@@ -189,12 +179,7 @@ public class Client extends AbstractComponent {
         Bootstrap b = new Bootstrap()
                 .group(executor)
                 .channel(NioSocketChannel.class)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-                        Client.this.initChannel(ch);
-                    }
-                })
+                .handler(getHandshakeHandler())
                 .option(ChannelOption.SO_KEEPALIVE, true);
 
         // Wait for the start of the client
@@ -207,8 +192,7 @@ public class Client extends AbstractComponent {
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
                     Log.v(TAG, "Channel open");
-                    requireComponent(UDPDiscoveryClient.KEY).stopDiscovery();
-                    // TODO when implemented, start handshake
+                    channelOpen(future.channel());
                 } else {
                     Log.v(TAG, "Channel open failed");
                     channelClosed(future.channel());
@@ -228,10 +212,27 @@ public class Client extends AbstractComponent {
     }
 
     /**
+     * HandshakeHandle can be changed or mocked for testing
+     *
+     * @return the ClientHandshakeHandler to use
+     */
+    @NonNull
+    protected ClientHandshakeHandler getHandshakeHandler() {
+        return new ClientHandshakeHandler(this, getContainer());
+    }
+
+    /**
+     * Called once the TCP connection is established.
+     */
+    protected void channelOpen(Channel channel) {
+        requireComponent(UDPDiscoveryClient.KEY).stopDiscovery();
+    }
+
+    /**
      * Called once the TCP connection is closed or if it couldn't be established at all.
      * Increments the disconnect counter and tries to re-establish the connection.
      */
-    private synchronized void channelClosed(Channel channel) {
+    protected synchronized void channelClosed(Channel channel) {
         if (channel != this.channelFuture.channel()) {
             return; //channel has already been exchanged by new one, don't start another client
         }
@@ -269,31 +270,6 @@ public class Client extends AbstractComponent {
     }
 
     /**
-     * Called once the TCP connection is established.
-     * Configures the per-connection pipeline that is responsible for handling incoming and outgoing data.
-     * After an incoming packet is decrypted, decoded and verified,
-     * it will be sent to its target {@link de.unipassau.isl.evs.ssh.core.handler.MessageHandler}
-     * by the {@link ClientIncomingDispatcher}.
-     */
-    protected void initChannel(SocketChannel ch) throws GeneralSecurityException {
-        Log.v(TAG, "initChannel " + ch); //TODO add remaining necessary handlers, when they are implemented
-
-        //Handler (de-)serialization
-        ch.pipeline().addLast(ObjectEncoder.class.getSimpleName(), new ObjectEncoder());
-        ch.pipeline().addLast(ObjectDecoder.class.getSimpleName(), new ObjectDecoder(
-                ClassResolvers.weakCachingConcurrentResolver(getClass().getClassLoader())));
-        ch.pipeline().addLast(LoggingHandler.class.getSimpleName(), new LoggingHandler(LogLevel.TRACE));
-
-        //Timeout Handler
-        ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(),
-                new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
-        ch.pipeline().addLast(TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
-
-        //Dispatcher
-        ch.pipeline().addLast(ClientIncomingDispatcher.class.getSimpleName(), incomingDispatcher);
-    }
-
-    /**
      * Stop listening, close all connections and shut down the executors.
      */
     public void destroy() {
@@ -323,6 +299,13 @@ public class Client extends AbstractComponent {
      */
     Channel getChannel() {
         return channelFuture != null ? channelFuture.channel() : null;
+    }
+
+    /**
+     * {@link IncomingDispatcher} that will be registered to the Pipeline by the {@link ClientHandshakeHandler}
+     */
+    ClientIncomingDispatcher getIncomingDispatcher() {
+        return incomingDispatcher;
     }
 
     private SharedPreferences getSharedPrefs() {

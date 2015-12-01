@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,18 +13,19 @@ import android.view.MenuItem;
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
-import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
 /**
  * As this Activity also displays information like wether the light is on or not, this Activity also
  * needs to messages concerning that information.
+ *
+ * @author bucher
+ * @author Wolfgang Popp
  */
 public class MainActivity extends BoundActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String SAVED_LAST_ACTIVE_FRAGMENT = "de.unipassau.isl.evs.ssh.app.activity.SAVED_LAST_ACTIVE_FRAGMENT";
 
-    //TODO toolbar
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
 
@@ -106,6 +106,7 @@ public class MainActivity extends BoundActivity
         outState.putString(SAVED_LAST_ACTIVE_FRAGMENT, getCurrentFragment().getClass().getSimpleName());
     }
 
+    // returns the currently displayed Fragment
     private Fragment getCurrentFragment(){
         return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
     }
@@ -135,7 +136,8 @@ public class MainActivity extends BoundActivity
         }
     }
 
-    private void showFragmentByClass(int id) {
+    // maps button resource ids to Fragment classes.
+    private void showFragmentById(int id) {
         Class clazz;
         if (id == R.id.nav_home) {
             clazz = MainFragment.class;
@@ -154,7 +156,7 @@ public class MainActivity extends BoundActivity
         } else if (id == R.id.nav_addNewUserDevice) {
             clazz = AddNewUserDeviceFragment.class;
         } else if (id == R.id.nav_addModul) {
-            clazz = AddModulFragment.class;
+            clazz = AddModuleFragment.class;
         } else {
             throw new IllegalArgumentException("Unknown id: " + id);
         }
@@ -165,7 +167,7 @@ public class MainActivity extends BoundActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        showFragmentByClass(id);
+        showFragmentById(id);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

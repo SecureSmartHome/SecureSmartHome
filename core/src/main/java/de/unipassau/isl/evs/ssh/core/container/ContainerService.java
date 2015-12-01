@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import de.ncoder.typedmap.Key;
 import de.ncoder.typedmap.TypedMap;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
@@ -15,6 +14,8 @@ import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 /**
  * An Android {@link Service} that manages a {@link SimpleContainer} and its {@link Component}s.
  * Android Activity can bind to this Service and communicate with the {@link Container}.
+ *
+ * @author Niko
  */
 public class ContainerService extends Service implements Container {
     public static final Key<ContextComponent> KEY_CONTEXT = new Key<>(ContextComponent.class, "ContainerContext");

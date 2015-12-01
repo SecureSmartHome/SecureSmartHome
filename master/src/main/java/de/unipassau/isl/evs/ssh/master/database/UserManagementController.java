@@ -9,11 +9,12 @@ import java.util.List;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
-import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
+ * Offers high level methods to interact with the tables associated with users and groups in the database.
  * @author leon
  */
 public class UserManagementController extends AbstractComponent {

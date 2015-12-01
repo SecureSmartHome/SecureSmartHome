@@ -6,12 +6,16 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
+/**
+ * Activity that binds itself to the container service to enable activities to access the container.
+ *
+ * @author Niko
+ */
 public class BoundActivity extends AppCompatActivity {
     private static final String TAG = BoundActivity.class.getSimpleName();
 
@@ -34,6 +38,11 @@ public class BoundActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * Constructor for the BoundActivity
+     *
+     * @param serviceClass representing the ContainerService
+     */
     public BoundActivity(Class<? extends ContainerService> serviceClass) {
         this.serviceClass = serviceClass;
     }

@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.core.schedule;
 
 import android.content.Intent;
 import android.os.Bundle;
-
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 
@@ -10,6 +9,7 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
  * A {@link Component} that can receive alarms scheduled by the {@link Scheduler}.
  *
  * @see Scheduler
+ * @author Chris
  */
 public interface ScheduledComponent extends Component {
     /**

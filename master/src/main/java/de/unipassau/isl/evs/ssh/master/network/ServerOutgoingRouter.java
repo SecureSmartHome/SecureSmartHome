@@ -9,10 +9,15 @@ import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 
+/**
+ * Receives messages from system components and decides how to route them to the targets.
+ *
+ * @author Niko
+ */
 public class ServerOutgoingRouter extends OutgoingRouter {
     @Override
     protected ChannelFuture doSendMessage(Message.AddressedMessage amsg) {
-        if (Objects.equals(amsg.getToID(), getLocalID())) {
+        if (Objects.equals(amsg.getToID(), getOwnID())) {
             //Send Local
             requireComponent(IncomingDispatcher.KEY).dispatch(amsg);
             return requireComponent(Server.KEY).getChannel().newSucceededFuture();

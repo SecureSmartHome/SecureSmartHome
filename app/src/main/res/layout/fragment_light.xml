@@ -1,41 +1,45 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Phil-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
     tools:context="de.unipassau.isl.evs.ssh.app.MainActivity">
 
-    <TextView
-        android:text="Hello Light!"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <ScrollView
+        android:id="@+id/lightButtonScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Available Components:"
-        android:id="@+id/textView" />
+        <ListView
+            android:id="@+id/lightButtonContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="[]"
-        android:id="@+id/textViewComponents" />
+        </ListView>
 
-    <TextView
+    </ScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/light_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Package Information:"
-        android:id="@+id/textView3" />
+        android:layout_gravity="bottom|right"
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:clickable="true"
+        android:elevation="6dp"
+        android:longClickable="false"
+        android:scaleType="center"
+        android:src="@drawable/ic_add"
+        app:borderWidth="0dp"
+        app:pressedTranslationZ="12dp"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="null"
-        android:id="@+id/textViewPackage" />
+</FrameLayout>
 
-</LinearLayout>

@@ -21,6 +21,10 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
+/**
+ * Test class for all controller functionality (database interface)
+ * @author leon
+ */
 public class ControllerTest extends InstrumentationTestCase {
 
     public void testTemplatesAndPermissions() throws DatabaseControllerException {

@@ -27,6 +27,8 @@ import io.netty.util.ReferenceCountUtil;
 /**
  * This component is responsible for responding to UDP discovery packets, signalling the address and port back to
  * {@link Client}s searching for this Master.
+ *
+ * @author Niko
  */
 public class UDPDiscoveryServer extends AbstractComponent {
     public static final Key<UDPDiscoveryServer> KEY = new Key<>(UDPDiscoveryServer.class);
@@ -59,7 +61,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
                 .group(requireComponent(Server.KEY).getExecutor())
                 .handler(new RequestHandler())
                 .option(ChannelOption.SO_BROADCAST, true);
-        channel = b.bind(CoreConstants.DISCOVERY_PORT);
+        channel = b.bind(CoreConstants.NettyConstants.DISCOVERY_PORT);
     }
 
     @Override
@@ -84,7 +86,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
      */
     private ChannelFuture sendDiscoveryResponse(DatagramPacket request) {
         final int port = ((InetSocketAddress) requireComponent(Server.KEY).getAddress()).getPort();
-        final String string = CoreConstants.DISCOVERY_PAYLOAD_RESPONSE + port;
+        final String string = CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_RESPONSE + port;
         Log.i(TAG, "sendDiscoveryResponse: " + string);
         final ByteBuf payload = Unpooled.copiedBuffer(string, CharsetUtil.UTF_8);
         final DatagramPacket response = new DatagramPacket(payload, request.sender());
@@ -101,7 +103,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
             if (msg instanceof DatagramPacket) {
                 final DatagramPacket request = (DatagramPacket) msg;
                 String messageData = request.content().toString(CharsetUtil.UTF_8);
-                if (messageData.startsWith(CoreConstants.DISCOVERY_PAYLOAD_REQUEST)) {
+                if (messageData.startsWith(CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_REQUEST)) {
                     Log.d(TAG, "UDP request " + request.sender() + " received: " + messageData);
                     sendDiscoveryResponse(request);
                     ReferenceCountUtil.release(request);

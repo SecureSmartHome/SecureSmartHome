@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/doorButtonOpen"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="?android:selectableItemBackground"
+            android:padding="20dp"
+            android:visibility="gone"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_door_open"/>
+
+        <ImageButton
+            android:id="@+id/doorButtonClosed"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="?android:selectableItemBackground"
+            android:padding="20dp"
+            android:visibility="visible"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_door_closed"/>
+
+        <ImageButton
+            android:id="@+id/lightButtonOn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="?android:selectableItemBackground"
+            android:visibility="gone"
+            android:padding="20dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_light_bulb_on"/>
+
+        <ImageButton
+            android:id="@+id/lightButtonOff"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="35dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="?android:selectableItemBackground"
+            android:padding="20dp"
+            android:visibility="visible"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_light_bulb_off"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/climateButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="?android:selectableItemBackground"
+            android:padding="20dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_thermometer"/>
+
+        <ImageButton
+            android:id="@+id/holidayButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="?android:selectableItemBackground"
+            android:padding="20dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_holiday_travel"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/statusButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="?android:selectableItemBackground"
+            android:padding="20dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_status_tool"/>
+
+        <ImageButton
+            android:id="@+id/usersButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="?android:selectableItemBackground"
+            android:padding="20dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_user_big"/>
+    </LinearLayout>
+</LinearLayout>

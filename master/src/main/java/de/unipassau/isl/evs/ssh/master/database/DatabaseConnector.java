@@ -8,16 +8,18 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
-import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 
 /**
  * The DatabaseConnector allows to establish connections to the used database and execute operations on it.
+ *
+ * @author Wolfgang Popp
  */
 public class DatabaseConnector extends AbstractComponent {
     public static final Key<DatabaseConnector> KEY = new Key<>(DatabaseConnector.class);
@@ -66,7 +68,7 @@ public class DatabaseConnector extends AbstractComponent {
 
     public class DBOpenHelper extends SQLiteOpenHelper {
         // If you change the database schema, you must increment the database version.
-        public static final int DATABASE_VERSION = 1;
+        public static final int DATABASE_VERSION = 2;
         public static final String DATABASE_NAME = "SecureSmartHome.db";
         private static final String SQL_CREATE_DB = "CREATE TABLE " + DatabaseContract.UserDevice.TABLE_NAME + " ("
                 + DatabaseContract.UserDevice.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
@@ -142,15 +144,19 @@ public class DatabaseConnector extends AbstractComponent {
                 + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " INTEGER NOT NULL"
                 + ");";
 
-        private static final String SQL_DROP_TABLES = "DROP TABLE " + DatabaseContract.UserDevice.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.Permission.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.HasPermission.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.Group.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + ";"
+        private static final String SQL_DROP_TABLES = "DROP TABLE " + DatabaseContract.HasPermission.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.ComposedOfPermission.TABLE_NAME + ";"
+                + "DROP TABLE " + DatabaseContract.UserDevice.TABLE_NAME + ";"
+                + "DROP TABLE " + DatabaseContract.Permission.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.ElectronicModule.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.Slave.TABLE_NAME + ";";
+                + "DROP TABLE " + DatabaseContract.Group.TABLE_NAME + ";"
+                + "DROP TABLE " + DatabaseContract.Slave.TABLE_NAME + ";"
+                + "DROP TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + ";"
+                + "DROP TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + ";";
+
+        public DBOpenHelper(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        }
 
         private void insertPermissions(SQLiteDatabase db) {
             String[] binaryPermissions = new String[]{
@@ -176,7 +182,18 @@ public class DatabaseConnector extends AbstractComponent {
                     DatabaseContract.Permission.Values.CREATE_TEMPLATE,
                     DatabaseContract.Permission.Values.DELETE_TEMPLATE,
                     DatabaseContract.Permission.Values.EDIT_TEMPLATE,
-                    DatabaseContract.Permission.Values.SHOW_TEMPLATE_PERMISSION
+                    DatabaseContract.Permission.Values.SHOW_TEMPLATE_PERMISSION,
+                    CoreConstants.NotificationTypes.ODROID_ADDED,
+                    CoreConstants.NotificationTypes.HUMIDITY_WARNING,
+                    CoreConstants.NotificationTypes.BRIGHTNESS_WARNING,
+                    CoreConstants.NotificationTypes.HOLIDAY_MODE_SWITCHED_ON,
+                    CoreConstants.NotificationTypes.HOLIDAY_MODE_SWITCHED_OFF,
+                    CoreConstants.NotificationTypes.SYSTEM_HEALTH_WARNING,
+                    CoreConstants.NotificationTypes.BELL_RANG,
+                    CoreConstants.NotificationTypes.WEATHER_WARNING,
+                    CoreConstants.NotificationTypes.DOOR_UNLATCHED,
+                    CoreConstants.NotificationTypes.DOOR_LOCKED,
+                    CoreConstants.NotificationTypes.DOOR_UNLOCKED
             };
 
             for (String permission : binaryPermissions) {
@@ -186,17 +203,12 @@ public class DatabaseConnector extends AbstractComponent {
             }
         }
 
-
         private void execSQLScript(String script, SQLiteDatabase db) {
             String[] statements = script.split("\\;");
             for (String statement : statements) {
                 //Log.v(TAG, "executing SQL statement: " + statement + ";");
                 db.execSQL(statement + ";");
             }
-        }
-
-        public DBOpenHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
         @Override
