@@ -158,12 +158,12 @@ public class LightFragment extends Fragment {
             if (isLightOn) {
                 imageViewOff.setVisibility(View.GONE);
                 imageViewOn.setVisibility(View.VISIBLE);
-                button.setText(getResources().getString(R.string.string_turn_off));
+                button.setText(getResources().getString(R.string.turn_off));
                 button.setBackgroundColor(getResources().getColor(R.color.button_red));
             } else {
                 imageViewOn.setVisibility(View.GONE);
                 imageViewOff.setVisibility(View.VISIBLE);
-                button.setText(getResources().getString(R.string.string_turn_on));
+                button.setText(getResources().getString(R.string.turn_on));
                 button.setBackgroundColor(getResources().getColor(R.color.button_green));
             }
 
