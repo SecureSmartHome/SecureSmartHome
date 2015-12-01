@@ -127,4 +127,14 @@ public class CoreConstants {
         public static final String DOOR_LOCKED = "DoorLocked";
         public static final String DOOR_UNLOCKED = "DoorUnlocked";
     }
+
+    /**
+     * This class contains constants for the information sent to create and display a QR-Code.
+     *
+     * @author Phil Werli
+     */
+    public class QRCodeInformation {
+        public static final String EXTRA_QR_DEVICE_INFORMATION = "EXTRA_QR_DEVICE_INFORMATION";
+        public static final String EXTRA_QR_MESSAGE = "EXTRA_QR_MESSAGE";
+    }
 }
