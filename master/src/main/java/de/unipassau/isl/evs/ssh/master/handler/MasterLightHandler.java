@@ -111,16 +111,4 @@ public class MasterLightHandler extends AbstractMasterHandler {
                 messageToSend
         );
     }
-
-    private void handleErrorMessage(Message.AddressedMessage message) {
-        if (message.getHeader(Message.HEADER_REFERENCES_ID) != null) {
-            final Message.AddressedMessage correspondingMessage = getMessageOnBehalfOfSequenceNr(
-                    message.getHeader(Message.HEADER_REFERENCES_ID));
-            sendMessage(
-                    correspondingMessage.getFromID(),
-                    correspondingMessage.getHeader(Message.HEADER_REPLY_TO_KEY),
-                    new Message(message.getPayload())
-            );
-        } //else ignore
-    }
 }
