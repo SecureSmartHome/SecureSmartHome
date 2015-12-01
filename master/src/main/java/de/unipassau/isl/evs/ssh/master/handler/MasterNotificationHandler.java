@@ -17,9 +17,6 @@ public class MasterNotificationHandler extends AbstractMasterHandler {
 
     public void handle(Message.AddressedMessage message) {
         if (message.getPayload() instanceof NotificationPayload) {
-            NotificationPayload notificationPayload = (NotificationPayload) message.getPayload();
-            Message messageToSend = new Message(notificationPayload);
-            messageToSend.putHeader(Message.HEADER_REFERENCES_ID, message.getHeader(Message.HEADER_REFERENCES_ID));
 
             //Check if message is from master.
             if (requireComponent(NamingManager.KEY).getMasterID().equals(message.getFromID())) {
@@ -27,12 +24,10 @@ public class MasterNotificationHandler extends AbstractMasterHandler {
                 switch (message.getRoutingKey()) {
                     //Send notification
                     case CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND:
-                        sendMessageToAllReceivers(messageToSend, notificationPayload.getType(),
-                                CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE);
+                        handleNotificationSend(message);
                         break;
                     default:
-                        sendErrorMessage(message);
-                        break;
+                        throw new UnsupportedOperationException("Unsupported routing key: " + message.getRoutingKey());
                 }
             } else {
                 sendErrorMessage(message);
@@ -42,6 +37,18 @@ public class MasterNotificationHandler extends AbstractMasterHandler {
         } else {
             sendErrorMessage(message);
         }
+    }
+
+    private void handleNotificationSend(Message.AddressedMessage message) {
+        NotificationPayload notificationPayload = (NotificationPayload) message.getPayload();
+        Message messageToSend = new Message(notificationPayload);
+        messageToSend.putHeader(Message.HEADER_REFERENCES_ID, message.getHeader(Message.HEADER_REFERENCES_ID));
+
+        sendMessageToAllReceivers(
+                messageToSend,
+                notificationPayload.getType(),
+                CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE
+        );
     }
 
     private void sendMessageToAllReceivers(Message messageToSend, String type, String routingKey) {
