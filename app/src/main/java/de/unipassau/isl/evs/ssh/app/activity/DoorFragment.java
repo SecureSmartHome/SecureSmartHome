@@ -17,7 +17,7 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.DoorHandler;
 
 /**
- * This activity uses the OperateDoorFragment and allows to display information contained in door messages
+ * This fragment allows to display information contained in door messages
  * which are received from the IncomingDispatcher.
  *
  * @author Wolfgang Popp
@@ -27,10 +27,6 @@ public class DoorFragment extends Fragment {
     Button openButton;
     Button blockButton;
     ImageView imageView;
-
-    public DoorFragment() {
-        // Required empty public constructor
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
