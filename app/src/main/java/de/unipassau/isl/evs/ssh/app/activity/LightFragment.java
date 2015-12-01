@@ -30,16 +30,16 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  * This fragment allows to display information contained in light messages which are received from the IncomingDispatcher.
  * Furthermore it generates a light messages as instructed by the UI and passes it to the OutgoingRouter.
  *
- * @author Phil
+ * @author Phil Werli
  */
 public class LightFragment extends Fragment {
+    private LightListAdapter adapter;
     private final AppLightHandler.LightHandlerListener listener = new AppLightHandler.LightHandlerListener() {
         @Override
         public void statusChanged(Module module) {
             adapter.notifyDataSetChanged();
         }
     };
-    private LightListAdapter adapter;
 
     @Override
     public void onStart() {
@@ -71,8 +71,8 @@ public class LightFragment extends Fragment {
     }
 
     private class LightListAdapter extends BaseAdapter {
-        private List<Module> lightModules;
         private final LayoutInflater inflater;
+        private List<Module> lightModules;
 
         public LightListAdapter(LayoutInflater inflater) {
             this.inflater = inflater;
