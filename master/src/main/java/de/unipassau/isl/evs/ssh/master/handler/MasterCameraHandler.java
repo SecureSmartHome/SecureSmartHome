@@ -26,8 +26,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
             //Response or request?
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
                 //Request
-                Module atModule = getContainer().require(SlaveController.KEY)
-                        .getModule(cameraPayload.getModuleName());
+                Module atModule = requireComponent(SlaveController.KEY).getModule(cameraPayload.getModuleName());
                 Message messageToSend = new Message(cameraPayload);
                 messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
 
@@ -36,12 +35,11 @@ public class MasterCameraHandler extends AbstractMasterHandler {
                     //Get status
                     case CoreConstants.RoutingKeys.MASTER_CAMERA_GET:
                         //Check permission. Todo: give master permission.
-                        if (getContainer().require(PermissionController.KEY).
-                                hasPermission(message.getFromID(),
+                        if (requireComponent(PermissionController.KEY).hasPermission(message.getFromID(),
                                         new Permission(DatabaseContract.Permission.Values.REQUEST_CAMERA_STATUS,
                                                 atModule.getName()))) {
-                            Message.AddressedMessage sendMessage = getContainer()
-                                    .require(OutgoingRouter.KEY).sendMessage(atModule.getAtSlave(),
+                            Message.AddressedMessage sendMessage = requireComponent(OutgoingRouter.KEY)
+                                    .sendMessage(atModule.getAtSlave(),
                                             CoreConstants.RoutingKeys.SLAVE_CAMERA_GET, messageToSend);
                             putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
                         } else {
@@ -60,8 +58,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
                 Message messageToSend = new Message(cameraPayload);
                 messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
-                getContainer().require(OutgoingRouter.KEY)
-                        .sendMessage(correspondingMessage.getFromID(),
+                requireComponent(OutgoingRouter.KEY).sendMessage(correspondingMessage.getFromID(),
                                 correspondingMessage.getHeader(Message.HEADER_REPLY_TO_KEY), messageToSend);
             }
         } else if (message.getPayload() instanceof MessageErrorPayload) {
