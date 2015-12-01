@@ -100,14 +100,25 @@ public class CoreConstants {
         //Master
         public static final String MASTER_LIGHT_GET = "/master/light/get";
         public static final String MASTER_LIGHT_SET = "/master/light/set";
+        public static final String MASTER_DOOR_BELL_RING = "/master/doorbell/ring";
+        public static final String MASTER_CAMERA_GET = "/master/camera/get";
+        public static final String MASTER_NOTIFICATION_SEND = "/master/notification/send";
+        public static final String MASTER_NOTIFICATION_PICTURE_SEND = "/master/notification/picture_send";
+        public static final String MASTER_DOOR_BELL_CAMERA_GET = "/master/doorbell/camera/get";
+        public static final String MASTER_DOOR_UNLATCH = "/master/door/unlatch";
+        public static final String MASTER_DOOR_LOCK_SET = "/master/door/lock_set";
+        public static final String MASTER_DOOR_LOCK_GET = "/master/door/lock_get";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
         public static final String SLAVE_LIGHT_SET = "/slave/light/set";
+        public static final String SLAVE_CAMERA_GET = "slave/camera/get";
 
         //App
         public static final String APP_MODULES_GET = "/app/module/get";
         public static final String APP_LIGHT_UPDATE = "/app/light/update";
+        public static final String APP_NOTIFICATION_RECEIVE = "/app/notification/receive";
+        public static final String APP_NOTIFICATION_PICTURE_RECEIVE = "/app/notification/picture_receive";
     }
 
     /**

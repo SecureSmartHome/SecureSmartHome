@@ -317,4 +317,16 @@ public class SlaveController extends AbstractComponent {
         }
     }
 
+    public Integer getModuleID(String moduleName) {
+        Cursor moduleCursor = databaseConnector.executeSql("select "
+                        + DatabaseContract.ElectronicModule.COLUMN_ID
+                        + " from " + DatabaseContract.ElectronicModule.TABLE_NAME
+                        + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME
+                        + " = ?", new String[] { moduleName });
+        if (moduleCursor.moveToNext()) {
+            return moduleCursor.getInt(0);
+        }
+        return null;
+    }
+
 }
