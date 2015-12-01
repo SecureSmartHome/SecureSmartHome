@@ -27,7 +27,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
 
             //Check permission
             if (true) { //Todo: check this message comes from a slave!
-                Module atModule = incomingDispatcher.getContainer().require(SlaveController.KEY)
+                Module atModule = requireComponent(SlaveController.KEY)
                         .getModule(doorBellPayload.getModuleName());
 
                 Message messageToSend;
@@ -39,8 +39,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
                         messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY,
                                 CoreConstants.RoutingKeys.MASTER_DOOR_BELL_CAMERA_GET);
 
-                        Message.AddressedMessage sendMessage = incomingDispatcher.getContainer()
-                                .require(OutgoingRouter.KEY).sendMessageLocal(
+                        Message.AddressedMessage sendMessage = requireComponent(OutgoingRouter.KEY).sendMessageLocal(
                                         CoreConstants.RoutingKeys.MASTER_CAMERA_GET, messageToSend);
                         putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
                         break;
@@ -66,8 +65,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
                         messageToSend = new Message(new NotificationWithPicturePayload(
                                 CoreConstants.NotificationTypes.BELL_RANG, DOOR_RANG_MESSAGE, cameraPayload)); //Todo: add name of door to message.
 
-                        incomingDispatcher.getContainer()
-                                .require(OutgoingRouter.KEY).sendMessageLocal(
+                        requireComponent(OutgoingRouter.KEY).sendMessageLocal(
                                         CoreConstants.RoutingKeys.MASTER_NOTIFICATION_PICTURE_SEND, messageToSend);
                         break;
                     default:

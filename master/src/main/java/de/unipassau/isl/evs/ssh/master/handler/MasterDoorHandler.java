@@ -27,11 +27,11 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
     private synchronized void setLocked(String moduleName, boolean locked) {
         //Todo: null check
-        lockedFor.put(incomingDispatcher.getContainer().require(SlaveController.KEY).getModuleID(moduleName), locked);
+        lockedFor.put(requireComponent(SlaveController.KEY).getModuleID(moduleName), locked);
     }
 
     private synchronized boolean getLocked(String moduleName) {
-        return lockedFor.get(incomingDispatcher.getContainer().require(SlaveController.KEY).getModuleID(moduleName));
+        return lockedFor.get(requireComponent(SlaveController.KEY).getModuleID(moduleName));
     }
 
     @Override
@@ -43,7 +43,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             //Response or request?
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
                 //Request
-                Module atModule = incomingDispatcher.getContainer().require(SlaveController.KEY)
+                Module atModule = requireComponent(SlaveController.KEY)
                         .getModule(doorUnlatchPayload.getModuleName());
                 Message messageToSend = new Message(doorUnlatchPayload);
                 messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
@@ -52,13 +52,13 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                 switch (message.getRoutingKey()) {
                     //Unlatch door
                     case CoreConstants.RoutingKeys.MASTER_DOOR_UNLATCH:
-                        if (incomingDispatcher.getContainer().require(PermissionController.KEY)
+                        if (requireComponent(PermissionController.KEY)
                                 .hasPermission(message.getFromID(), new Permission(
                                         DatabaseContract.Permission.Values.UNLATCH_DOOR, atModule.getName()))) {
 
                             if (!getLocked(atModule.getName())) {
-                                Message.AddressedMessage sendMessage = incomingDispatcher.getContainer()
-                                        .require(OutgoingRouter.KEY).sendMessage(atModule.getAtSlave(),
+                                Message.AddressedMessage sendMessage = requireComponent(OutgoingRouter.KEY)
+                                        .sendMessage(atModule.getAtSlave(),
                                                 CoreConstants.RoutingKeys.SLAVE_LIGHT_SET, messageToSend);
                                 putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
                             } else {
@@ -83,20 +83,20 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                 //TODO: do i want to do this?!
                 messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
-                incomingDispatcher.getContainer().require(OutgoingRouter.KEY)
+                requireComponent(OutgoingRouter.KEY)
                         .sendMessageLocal(CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND, messageToSend);
             }
         } else if (message.getPayload() instanceof DoorLockPayload) {
             DoorLockPayload doorLockPayload = (DoorLockPayload) message.getPayload();
             //Request
-            Module atModule = incomingDispatcher.getContainer().require(SlaveController.KEY)
+            Module atModule = requireComponent(SlaveController.KEY)
                     .getModule(doorLockPayload.getModuleName());
 
             //which functionality
             switch (message.getRoutingKey()) {
                 //(Un)Lock door
                 case CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_SET:
-                    if (incomingDispatcher.getContainer().require(PermissionController.KEY)
+                    if (requireComponent(PermissionController.KEY)
                             .hasPermission(message.getFromID(), new Permission(
                                     DatabaseContract.Permission.Values.LOCK_DOOR, atModule.getName()))) {
 
@@ -104,12 +104,12 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
                         //Send notification
                         if (doorLockPayload.isUnlock()) {
-                            incomingDispatcher.getContainer().require(OutgoingRouter.KEY).sendMessageLocal(
+                            requireComponent(OutgoingRouter.KEY).sendMessageLocal(
                                     CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND, new Message(
                                             new NotificationPayload(CoreConstants.NotificationTypes.DOOR_UNLOCKED,
                                                     DOOR_UNLOCKED_MESSAGE)));
                         } else {
-                            incomingDispatcher.getContainer().require(OutgoingRouter.KEY).sendMessageLocal(
+                            requireComponent(OutgoingRouter.KEY).sendMessageLocal(
                                     CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND, new Message(
                                             new NotificationPayload(CoreConstants.NotificationTypes.DOOR_LOCKED,
                                                     DOOR_LOCKED_MESSAGE)));
@@ -122,7 +122,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                     break;
                 //Get door lock state
                 case CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_GET:
-                    if (incomingDispatcher.getContainer().require(PermissionController.KEY)
+                    if (requireComponent(PermissionController.KEY)
                             .hasPermission(message.getFromID(), new Permission(
                                     DatabaseContract.Permission.Values.REQUEST_DOOR_STATUS, atModule.getName()))) {
 
@@ -131,7 +131,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                                 atModule.getName()));
                         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, message.getSequenceNr());
 
-                        incomingDispatcher.getContainer().require(OutgoingRouter.KEY).sendMessage(
+                        requireComponent(OutgoingRouter.KEY).sendMessage(
                                 message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), message);
 
                     } else {
