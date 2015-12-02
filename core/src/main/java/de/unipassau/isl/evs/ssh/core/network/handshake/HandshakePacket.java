@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.network.handshake;
 
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 
@@ -30,12 +32,12 @@ public abstract class HandshakePacket implements Serializable {
 
     public static class ClientHello extends HandshakePacket {
         public final X509Certificate clientCertificate;
-        public final X509Certificate masterCertificate;
+        public final DeviceID masterID;
         public final SerializableBuildConfig buildConfig;
 
-        public ClientHello(X509Certificate clientCertificate, X509Certificate masterCertificate) {
+        public ClientHello(X509Certificate clientCertificate, DeviceID masterID) {
             this.clientCertificate = clientCertificate;
-            this.masterCertificate = masterCertificate;
+            this.masterID = masterID;
             SerializableBuildConfig bc;
             try {
                 bc = new SerializableBuildConfig("de.unipassau.isl.evs.ssh.app.BuildConfig");
@@ -63,6 +65,16 @@ public abstract class HandshakePacket implements Serializable {
                 bc = null;
             }
             this.buildConfig = bc;
+        }
+    }
+
+    public static class ClientRegistration extends HandshakePacket {
+        public final X509Certificate clientCertificate;
+        public final byte[] token;
+
+        public ClientRegistration(X509Certificate clientCertificate, byte[] token) {
+            this.clientCertificate = clientCertificate;
+            this.token = token;
         }
     }
 }

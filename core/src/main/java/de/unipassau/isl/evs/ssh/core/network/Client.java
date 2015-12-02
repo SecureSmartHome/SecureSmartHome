@@ -18,6 +18,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -217,7 +218,7 @@ public class Client extends AbstractComponent {
      * @return the ClientHandshakeHandler to use
      */
     @NonNull
-    protected ClientHandshakeHandler getHandshakeHandler() {
+    protected ChannelHandler getHandshakeHandler() {
         return new ClientHandshakeHandler(this, getContainer());
     }
 

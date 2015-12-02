@@ -94,6 +94,8 @@ public class CoreConstants {
         public static final String MASTER_LIGHT_GET = "/master/light/get";
         public static final String MASTER_LIGHT_SET = "/master/light/set";
 
+        public static final String MASTER_DEVICE_REGISTER = "/master/device/register";
+
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
         public static final String SLAVE_LIGHT_SET = "/slave/light/set";

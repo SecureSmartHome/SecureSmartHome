@@ -78,7 +78,9 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof HandshakePacket.ClientHello) {
+        if (msg instanceof HandshakePacket.ClientRegistration) {
+
+        } else if (msg instanceof HandshakePacket.ClientHello) {
             final HandshakePacket.ClientHello hello = (HandshakePacket.ClientHello) msg;
             ctx.attr(CoreConstants.ATTR_CLIENT_CERT).set(hello.clientCertificate);
             final DeviceID deviceID = DeviceID.fromCertificate(hello.clientCertificate);
@@ -112,6 +114,13 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         ctx.pipeline().remove(this);
         Log.v(TAG, "Pipeline after authenticate: " + ctx.pipeline());
     }
+
+
+    private void handshakeClientRegisters(ChannelHandlerContext ctx, Object msg) {
+        HandshakePacket.ClientRegistration clientReg = ((HandshakePacket.ClientRegistration) msg);
+        //DO Stuff
+    }
+
 
     protected Container getContainer() {
         return server._getContainer();
