@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,23 +22,22 @@ import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 
 /**
  * This fragment allows to display information contained in light messages which are received from the IncomingDispatcher.
  * Furthermore it generates a light messages as instructed by the UI and passes it to the OutgoingRouter.
  *
- * @author Phil
+ * @author Phil Werli
  */
-public class LightFragment extends Fragment {
+public class LightFragment extends BoundFragment {
+    private LightListAdapter adapter;
     private final AppLightHandler.LightHandlerListener listener = new AppLightHandler.LightHandlerListener() {
         @Override
         public void statusChanged(Module module) {
             adapter.notifyDataSetChanged();
         }
     };
-    private LightListAdapter adapter;
 
     @Override
     public void onStart() {
@@ -66,13 +64,9 @@ public class LightFragment extends Fragment {
         return root;
     }
 
-    private Container getContainer() {
-        return ((MainActivity) getActivity()).getContainer();
-    }
-
     private class LightListAdapter extends BaseAdapter {
-        private List<Module> lightModules;
         private final LayoutInflater inflater;
+        private List<Module> lightModules;
 
         public LightListAdapter(LayoutInflater inflater) {
             this.inflater = inflater;
