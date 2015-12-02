@@ -32,6 +32,13 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }
 
+    private static final String LOCAL_PRIVATE_KEY_ALIAS = "localPrivateKey";
+    private static final String KEY_STORE_FILENAME = "encryptText-keystore.bks";
+    private static final String KEY_STORE_TYPE = "BKS";
+    private static final String KEY_PAIR_ALGORITHM = "ECIES";
+    private static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA224withECDSA";
+    private static final String PUBLIC_KEY_PREFIX = "public_key:";
+    private static final int ASYMMETRIC_KEY_SIZE = 256;
 
     /**
      * Test method for the initialization of the KeyStoreController
@@ -70,12 +77,12 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
         Certificate nonExCert = controller.getCertificate("TestNonExistent");
         assertNull(nonExCert);
 
-        Key publicKey = controller.getCertificate(KeyStoreController.LOCAL_PRIVATE_KEY_ALIAS).getPublicKey();
+        Key publicKey = controller.getCertificate(LOCAL_PRIVATE_KEY_ALIAS).getPublicKey();
         Key privateKey = controller.getOwnPrivateKey();
         assertNotNull(publicKey);
         assertNotNull(privateKey);
 
-        Cipher cipher = Cipher.getInstance(KeyStoreController.KEY_PAIR_ALGORITHM);
+        Cipher cipher = Cipher.getInstance(KEY_PAIR_ALGORITHM);
 
         String input = "Test-String";
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
@@ -106,7 +113,7 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
         assertNotNull(publicKey);
         assertNotNull(privateKey);
 
-        Cipher cipher = Cipher.getInstance(KeyStoreController.KEY_PAIR_ALGORITHM);
+        Cipher cipher = Cipher.getInstance(KEY_PAIR_ALGORITHM);
 
         String input = "Test-String";
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
@@ -133,8 +140,8 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
 
         KeyPairGenerator generator;
 
-        generator = KeyPairGenerator.getInstance(KeyStoreController.KEY_PAIR_ALGORITHM);
-        generator.initialize(KeyStoreController.ASYMMETRIC_KEY_SIZE);
+        generator = KeyPairGenerator.getInstance(KEY_PAIR_ALGORITHM);
+        generator.initialize(ASYMMETRIC_KEY_SIZE);
         KeyPair keyPair = generator.generateKeyPair();
 
         //Check Certificate
@@ -147,7 +154,7 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.YEAR, 100);
         certGen.setNotAfter(calendar.getTime());
-        certGen.setSignatureAlgorithm(KeyStoreController.KEY_PAIR_SIGNING_ALGORITHM);
+        certGen.setSignatureAlgorithm(KEY_PAIR_SIGNING_ALGORITHM);
         X509Certificate cert = certGen.generate(keyPair.getPrivate());
 
         controller.saveCertificate(cert, "TestAlias");
@@ -159,38 +166,7 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
         assertTrue(Arrays.equals(controller.getCertificate("TestAlias").getEncoded(), cert.getEncoded()));
     }
 
-    ///**
-    // * Test method for the generating symmetric keys
-    // *
-    // * @throws Exception
-    // */
-    //public void testGenerateSymmetricKey() throws Exception {
-    //    SimpleContainer container = new SimpleContainer();
-    //    container.register(ContainerService.KEY_CONTEXT,
-    //            new ContainerService.ContextComponent(getInstrumentation().getTargetContext()));
-    //    KeyStoreController controller = new KeyStoreController();
-    //
-    //    container.register(KEY, controller);
-    //    purgeKeyStore(controller);
-    //    container.unregister(KEY);
-    //    container.register(KEY, controller);
-    //
-    //    assertNotNull(controller.generateKey());
-    //
-    //    Key key = controller.generateKey();
-    //    Cipher cipher = Cipher.getInstance(KeyStoreController.SYMMETRIC_KEY_ALGORITHM);
-    //
-    //    String input = "Test-String";
-    //    cipher.init(Cipher.ENCRYPT_MODE, key);
-    //    byte[] encrypted = cipher.doFinal(input.getBytes());
-    //
-    //    cipher.init(Cipher.DECRYPT_MODE, key);
-    //    String decrypted = new String(cipher.doFinal(encrypted));
-    //
-    //    assertEquals(input, decrypted);
-    //}
-
     private void purgeKeyStore(KeyStoreController controller) throws KeyStoreException {
-        getInstrumentation().getTargetContext().deleteFile(KeyStoreController.KEY_STORE_FILENAME);
+        getInstrumentation().getTargetContext().deleteFile(KEY_STORE_FILENAME);
     }
 }

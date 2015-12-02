@@ -26,13 +26,13 @@ import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.ScheduledFuture;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_MILLIS_BETWEEN_BROADCASTS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_MILLIS_BETWEEN_BROADCASTS;
 
 /**
  * This component is responsible for sending UDP discovery packets and signalling the new address and port back to the
  * {@link Client} if a new Master has been found.
  *
- * @author Phil Werli, Niko Fink
+ * @author Phil, Niko
  */
 public class UDPDiscoveryClient extends AbstractComponent {
     public static final Key<UDPDiscoveryClient> KEY = new Key<>(UDPDiscoveryClient.class);
@@ -81,7 +81,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
                         .group(requireComponent(Client.KEY).getExecutor())
                         .handler(new ResponseHandler())
                         .option(ChannelOption.SO_BROADCAST, true);
-                channel = b.bind(CoreConstants.DISCOVERY_PORT);
+                channel = b.bind(CoreConstants.NettyConstants.DISCOVERY_PORT);
             }
 
             sendDiscoveryRequest();
@@ -96,8 +96,8 @@ public class UDPDiscoveryClient extends AbstractComponent {
      */
     private ChannelFuture sendDiscoveryRequest() {
         Log.v(TAG, "sendDiscoveryRequest");
-        final ByteBuf payload = Unpooled.copiedBuffer(CoreConstants.DISCOVERY_PAYLOAD_REQUEST, CharsetUtil.UTF_8);
-        final InetSocketAddress recipient = new InetSocketAddress(CoreConstants.DISCOVERY_HOST, CoreConstants.DISCOVERY_PORT);
+        final ByteBuf payload = Unpooled.copiedBuffer(CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_REQUEST, CharsetUtil.UTF_8);
+        final InetSocketAddress recipient = new InetSocketAddress(CoreConstants.NettyConstants.DISCOVERY_HOST, CoreConstants.NettyConstants.DISCOVERY_PORT);
         final DatagramPacket request = new DatagramPacket(payload, recipient);
         return channel.channel().writeAndFlush(request);
     }
@@ -164,9 +164,9 @@ public class UDPDiscoveryClient extends AbstractComponent {
                 final DatagramPacket response = (DatagramPacket) msg;
                 String messageData = response.content().toString(CharsetUtil.UTF_8);
 
-                if (messageData.startsWith(CoreConstants.DISCOVERY_PAYLOAD_RESPONSE)) {
+                if (messageData.startsWith(CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_RESPONSE)) {
                     final InetAddress address = response.sender().getAddress();
-                    int port = Integer.parseInt(messageData.substring(CoreConstants.DISCOVERY_PAYLOAD_RESPONSE.length()));
+                    int port = Integer.parseInt(messageData.substring(CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_RESPONSE.length()));
                     ReferenceCountUtil.release(response);
                     // got a new address for the master!
                     Log.i(TAG, "UDP response received " + address + ":" + port);
@@ -174,7 +174,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
                     stopDiscovery();
                     requireComponent(Client.KEY).onDiscoverySuccessful(address, port);
                     return;
-                } else if (messageData.startsWith(CoreConstants.DISCOVERY_PAYLOAD_REQUEST)) {
+                } else if (messageData.startsWith(CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_REQUEST)) {
                     // discard own requests that are echoed by the router
                     ReferenceCountUtil.release(response);
                     return;

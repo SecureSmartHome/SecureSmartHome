@@ -24,7 +24,6 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.network.ClientHandshakeHandler;
-import de.unipassau.isl.evs.ssh.master.MasterConstants;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.MessageToMessageDecoder;
@@ -144,11 +143,11 @@ public class ServerTest extends InstrumentationTestCase {
                 new ContainerService.ContextComponent(getInstrumentation().getTargetContext()));
 
         SharedPreferences sharedPref = container.get(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(MasterConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+                .getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         assertTrue(
                 sharedPref.edit()
                         .clear()
-                        .putString(CoreConstants.PREF_HOST, "localhost")
+                        .putString(CoreConstants.NettyConstants.PREF_HOST, "localhost")
                         .commit()
         );
     }

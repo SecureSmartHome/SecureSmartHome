@@ -8,7 +8,9 @@ import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
+import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 /**
  * This is a MasterHandler providing functionality all MasterHandlers need. This will avoid needing to implement the
@@ -72,7 +74,29 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler imple
         return onBehalfOfMessage.get(sequenceNr);
     }
 
+    /**
+     * Returns whether the device with the given DeviceID is a Slave.
+     * @param deviceID DeviceID for the device to check for whether it a Slave or not.
+     * @return Whether or not the device with given DeviceID is a Slave.
+     */
+    public boolean isSlave(DeviceID deviceID) {
+        return requireComponent(SlaveController.KEY).getSlave(deviceID) != null;
+    }
+
     protected boolean hasPermission(DeviceID userDeviceID, Permission permission) {
-        return requireComponent(PermissionController.KEY).hasPermission(userDeviceID, permission);
+        return userDeviceID.equals(requireComponent(NamingManager.KEY).getOwnID())
+                || requireComponent(PermissionController.KEY).hasPermission(userDeviceID, permission);
+    }
+
+    protected void handleErrorMessage(Message.AddressedMessage message) {
+        if (message.getHeader(Message.HEADER_REFERENCES_ID) != null) {
+            final Message.AddressedMessage correspondingMessage = getMessageOnBehalfOfSequenceNr(
+                    message.getHeader(Message.HEADER_REFERENCES_ID));
+            sendMessage(
+                    correspondingMessage.getFromID(),
+                    correspondingMessage.getHeader(Message.HEADER_REPLY_TO_KEY),
+                    new Message(message.getPayload())
+            );
+        } //else ignore
     }
 }

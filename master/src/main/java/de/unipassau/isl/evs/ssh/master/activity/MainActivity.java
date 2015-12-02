@@ -159,7 +159,7 @@ public class MainActivity extends BoundActivity {
             if (!channels.isEmpty()) {
                 status += ":\n";
                 for (Channel channel : channels) {
-                    final DeviceID deviceID = channel.attr(CoreConstants.ATTR_CLIENT_ID).get();
+                    final DeviceID deviceID = channel.attr(CoreConstants.NettyConstants.ATTR_CLIENT_ID).get();
                     status += channel.id().asShortText() + " " + channel.remoteAddress() + " " +
                             (deviceID != null ? deviceID.toShortString() : "???") + "\n";
                 }

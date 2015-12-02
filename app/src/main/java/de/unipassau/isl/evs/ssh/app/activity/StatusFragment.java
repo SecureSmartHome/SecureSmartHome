@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +27,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  *
  * @author Wolfgang Popp
  */
-public class StatusFragment extends Fragment {
+public class StatusFragment extends BoundFragment {
 
     public StatusFragment() {
         // Required empty public constructor
@@ -58,7 +57,7 @@ public class StatusFragment extends Fragment {
             connectedSlaves.setText(R.string.NoSlavesConnected);
         } else {
             ArrayAdapter<Slave> slaveAdapter = new ArrayAdapter<Slave>(getActivity().getApplicationContext(),
-                    R.layout.device_status_list_item, slaves.toArray(new Slave[2])) {
+                    R.layout.device_status_list_item, slaves) {
 
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
@@ -88,7 +87,7 @@ public class StatusFragment extends Fragment {
 
         } else {
             ArrayAdapter<Module> moduleAdapter = new ArrayAdapter<Module>(getActivity().getApplicationContext(),
-                    R.layout.device_status_module_item, modules.toArray(new Module[0])) {
+                    R.layout.device_status_module_item, modules) {
 
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {

@@ -1,7 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  * which a given user device has to scan. If this functionality is used a message,
  * containing all needed information, is generated and passed to the OutgoingRouter.
  */
-public class AddNewUserDeviceFragment extends Fragment implements MessageHandler {
+public class AddNewUserDeviceFragment extends BoundFragment implements MessageHandler {
 
     public AddNewUserDeviceFragment() {
         // Required empty public constructor

@@ -29,12 +29,12 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
 import static android.content.Context.MODE_PRIVATE;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_MAX_DISCONNECTS;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_MILLIS_BETWEEN_DISCONNECTS;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.DEFAULT_PORT;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_HOST;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.PREF_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_MAX_DISCONNECTS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_MILLIS_BETWEEN_DISCONNECTS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.FILE_SHARED_PREFS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.PREF_HOST;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.PREF_PORT;
 
 /**
  * A netty stack accepting connections to and from the master and handling communication with them using a netty pipeline.
@@ -97,7 +97,7 @@ public class Client extends AbstractComponent {
                 return new NettyInternalLogger(name);
             }
         });
-        ResourceLeakDetector.setLevel(CoreConstants.RESOURCE_LEAK_DETECTION);
+        ResourceLeakDetector.setLevel(CoreConstants.NettyConstants.RESOURCE_LEAK_DETECTION);
         // Add related components
         container.register(IncomingDispatcher.KEY, incomingDispatcher);
         container.register(OutgoingRouter.KEY, outgoingRouter);

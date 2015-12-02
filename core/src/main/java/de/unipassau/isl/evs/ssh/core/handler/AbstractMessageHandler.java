@@ -50,6 +50,10 @@ public abstract class AbstractMessageHandler implements MessageHandler {
         return requireComponent(OutgoingRouter.KEY).sendMessage(toID, routingKey, msg);
     }
 
+    protected Message.AddressedMessage sendMessageLocal(String routingKey, Message msg) {
+        return requireComponent(OutgoingRouter.KEY).sendMessageLocal(routingKey, msg);
+    }
+
     /**
      * Respond with an error message to a given AddressedMessage.
      *

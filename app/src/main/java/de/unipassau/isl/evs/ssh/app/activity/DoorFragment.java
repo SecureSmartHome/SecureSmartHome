@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,20 +16,16 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.DoorHandler;
 
 /**
- * This activity uses the OperateDoorFragment and allows to display information contained in door messages
+ * This fragment allows to display information contained in door messages
  * which are received from the IncomingDispatcher.
  *
  * @author Wolfgang Popp
  */
-public class DoorFragment extends Fragment {
+public class DoorFragment extends BoundFragment {
 
     Button openButton;
     Button blockButton;
     ImageView imageView;
-
-    public DoorFragment() {
-        // Required empty public constructor
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

@@ -1,7 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  * Main page if you start App
  * @author bucher
  */
-public class MainFragment extends Fragment implements MessageHandler {
+public class MainFragment extends BoundFragment implements MessageHandler {
 
     public MainFragment() {
         // Required empty public constructor

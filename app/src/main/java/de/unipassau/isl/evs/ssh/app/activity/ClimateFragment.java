@@ -1,7 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  * the IncomingDispatcher.
  * Furthermore it generates a climate messages as instructed by the UI and passes it to the OutgoingRouter.
  */
-public class ClimateFragment extends Fragment implements MessageHandler {
+public class ClimateFragment extends BoundFragment implements MessageHandler {
 
     public ClimateFragment() {
         // Required empty public constructor
