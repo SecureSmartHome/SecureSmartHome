@@ -70,6 +70,7 @@ public class WeatherSensor extends AbstractComponent {
         }
 
         /**
+         * TODO doorbell?
          * Sends info about doorbell being used
          */
         private void sendWeatherInfo() {
