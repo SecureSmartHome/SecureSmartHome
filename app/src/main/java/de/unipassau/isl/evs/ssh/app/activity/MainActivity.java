@@ -15,7 +15,7 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 
 /**
- * As this Activity also displays information like wether the light is on or not, this Activity also
+ * As this Activity also displays information like whether the light is on or not, this Activity also
  * needs to messages concerning that information.
  *
  * @author bucher
