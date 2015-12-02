@@ -2,9 +2,6 @@ package de.unipassau.isl.evs.ssh.slave;
 
 import android.util.Log;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,6 +15,7 @@ import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
@@ -56,38 +54,27 @@ public class SlaveContainer extends ContainerService {
         dir.mkdirs();
 
         // read the master id and cert from local storage as long as adding new devices is not implemented
-        readMasterId();
-        readMasterCert();
+        readMasterData();
 
         // write the slave id and cert to local storage as long as adding new devices is not implemented
         writeSlaveId();
         writeSlaveCert();
     }
 
-    private void readMasterId() {
-        final File masterId = new File(dir, "master.id");
-        if (masterId.exists()) {
-            try {
-                final String id = Files.readFirstLine(masterId, Charsets.US_ASCII);
-                getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
-                        .putString(SlaveConstants.SharedPrefs.PREF_MASTER_ID, id)
-                        .commit();
-                Log.i(getClass().getSimpleName(), "ID for Master loaded: " + id);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void readMasterCert() {
+    private void readMasterData() {
         final File masterCert = new File(dir, "master.der");
         if (masterCert.exists()) {
             try {
                 CertificateFactory certFact = CertificateFactory.getInstance("X.509");
                 final Certificate certificate = certFact.generateCertificate(new FileInputStream(masterCert));
-                require(KeyStoreController.KEY).saveCertificate(((X509Certificate) certificate),
-                        require(NamingManager.KEY).getMasterID().getId());
-                Log.i(getClass().getSimpleName(), "Certificate for Master loaded:\n" + certificate);
+
+                final DeviceID id = DeviceID.fromCertificate((X509Certificate) certificate);
+                getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
+                        .putString(SlaveConstants.SharedPrefs.PREF_MASTER_ID, id.getIDString())
+                        .commit();
+
+                require(KeyStoreController.KEY).saveCertificate(((X509Certificate) certificate), id.getIDString());
+                Log.i(getClass().getSimpleName(), "Certificate for Master " + id + " loaded:\n" + certificate);
             } catch (GeneralSecurityException | IOException e) {
                 e.printStackTrace();
             }
