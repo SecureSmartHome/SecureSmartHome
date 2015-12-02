@@ -33,7 +33,17 @@ public class SlaveContainer extends ContainerService {
     @Override
     protected void init() {
         register(KeyStoreController.KEY, new KeyStoreController());
+
+        // read the master id and cert from local storage as long as adding new devices is not implemented
+        readMasterData();
+
         register(NamingManager.KEY, new NamingManager(false));
+
+        // write the app id and cert to local storage as long as adding new devices is not implemented
+        dir.mkdirs();
+        writeSlaveId();
+        writeSlaveCert();
+
         register(Client.KEY, new Client());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
@@ -43,22 +53,10 @@ public class SlaveContainer extends ContainerService {
         //FIXME this is temporary for testing until we got everything needed
         Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, "TestPlugswitch");
         register(key, new EdimaxPlugSwitch("192.168.0.111", 10000, "admin", "1234"));
-        syncKeyStore();
 
         final NamingManager namingManager = require(NamingManager.KEY);
         Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getOwnID()
                 + "; Master is " + namingManager.getMasterID());
-    }
-
-    private void syncKeyStore() {
-        dir.mkdirs();
-
-        // read the master id and cert from local storage as long as adding new devices is not implemented
-        readMasterData();
-
-        // write the slave id and cert to local storage as long as adding new devices is not implemented
-        writeSlaveId();
-        writeSlaveCert();
     }
 
     private void readMasterData() {

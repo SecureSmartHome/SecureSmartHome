@@ -30,23 +30,21 @@ public class AppContainer extends ContainerService {
     @Override
     protected void init() {
         register(KeyStoreController.KEY, new KeyStoreController());
-        register(NamingManager.KEY, new NamingManager(false));
-        syncKeyStore();
-        register(Client.KEY, new Client());
-        register(AppModuleHandler.KEY, new AppModuleHandler());
-        register(DoorHandler.KEY, new DoorHandler());
-        register(AppLightHandler.KEY, new AppLightHandler());
-    }
-
-    private void syncKeyStore() {
-        dir.mkdirs();
 
         // read the master id and cert from local storage as long as adding new devices is not implemented
         readMasterData();
 
+        register(NamingManager.KEY, new NamingManager(false));
+
         // write the app id and cert to local storage as long as adding new devices is not implemented
+        dir.mkdirs();
         writeSlaveId();
         writeSlaveCert();
+
+        register(Client.KEY, new Client());
+        register(AppModuleHandler.KEY, new AppModuleHandler());
+        register(DoorHandler.KEY, new DoorHandler());
+        register(AppLightHandler.KEY, new AppLightHandler());
     }
 
     private void readMasterData() {

@@ -4,6 +4,7 @@ package de.unipassau.isl.evs.ssh.core.naming;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
@@ -27,6 +28,7 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
  * @author Wolfgang Popp
  */
 public class NamingManager extends AbstractComponent {
+    private static final String TAG = NamingManager.class.getSimpleName();
     public static final Key<NamingManager> KEY = new Key<>(NamingManager.class);
 
     private final boolean isMaster;
@@ -152,9 +154,9 @@ public class NamingManager extends AbstractComponent {
             if (id == null) {
                 throw new UnresolvableNamingException("id == null");
             }
-            final X509Certificate certificate = getContainer().require(KeyStoreController.KEY).getCertificate(id.getId());
+            final X509Certificate certificate = getContainer().require(KeyStoreController.KEY).getCertificate(id.getIDString());
             if (certificate == null) {
-                throw new UnresolvableNamingException("certificate not found");
+                throw new UnresolvableNamingException("Certificate for Device " + id + " not found");
             }
             return certificate;
         } catch (UnrecoverableEntryException | NoSuchAlgorithmException | KeyStoreException e) {
@@ -174,9 +176,13 @@ public class NamingManager extends AbstractComponent {
                 masterCert = ownCert;
                 masterID = ownID;
             } else {
-                loadMasterData();
+                try {
+                    loadMasterData();
+                } catch (UnresolvableNamingException e) {
+                    Log.w(TAG, "Master ID is set to " + masterID + " but certificate is unknown", e);
+                }
             }
-        } catch (UnresolvableNamingException | GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw new StartupException(e);
         }
     }
