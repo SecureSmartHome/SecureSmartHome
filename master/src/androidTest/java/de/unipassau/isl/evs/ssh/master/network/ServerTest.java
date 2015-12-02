@@ -143,7 +143,7 @@ public class ServerTest extends InstrumentationTestCase {
                 new ContainerService.ContextComponent(getInstrumentation().getTargetContext()));
 
         SharedPreferences sharedPref = container.get(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         assertTrue(
                 sharedPref.edit()
                         .clear()

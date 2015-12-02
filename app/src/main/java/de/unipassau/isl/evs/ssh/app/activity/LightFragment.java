@@ -33,13 +33,13 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  * @author Phil Werli
  */
 public class LightFragment extends Fragment {
+    private LightListAdapter adapter;
     private final AppLightHandler.LightHandlerListener listener = new AppLightHandler.LightHandlerListener() {
         @Override
         public void statusChanged(Module module) {
             adapter.notifyDataSetChanged();
         }
     };
-    private LightListAdapter adapter;
 
     @Override
     public void onStart() {

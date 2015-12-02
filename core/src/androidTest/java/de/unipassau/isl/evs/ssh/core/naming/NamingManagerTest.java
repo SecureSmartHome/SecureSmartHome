@@ -53,7 +53,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
         NamingManager naming = container.require(NamingManager.KEY);
 
         // Clear SharedPreferences
-        SharedPreferences sharedPref = context.getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = context.getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.remove(CoreConstants.SharedPrefs.PREF_MASTER_ID);
         editor.commit();
@@ -79,7 +79,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
         container.register(NamingManager.KEY, new NamingManager(isMasterEnv));
 
         // Clear SharedPreferences
-        SharedPreferences sharedPref = context.getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = context.getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.remove(CoreConstants.SharedPrefs.PREF_MASTER_ID);
         editor.commit();

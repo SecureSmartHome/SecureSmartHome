@@ -55,7 +55,7 @@ public class AppContainer extends ContainerService {
                 final Certificate certificate = certFact.generateCertificate(new FileInputStream(masterCert));
 
                 final DeviceID id = DeviceID.fromCertificate((X509Certificate) certificate);
-                getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
+                getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
                         .putString(AppConstants.SharedPrefs.PREF_MASTER_ID, id.getIDString())
                         .commit();
 

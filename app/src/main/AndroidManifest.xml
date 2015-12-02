@@ -26,7 +26,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <service android:name=".AppContainer" />
+        <service android:name=".AppContainer"/>
     </application>
 
 </manifest>
