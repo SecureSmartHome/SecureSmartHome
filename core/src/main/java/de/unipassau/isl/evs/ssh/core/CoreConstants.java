@@ -91,6 +91,7 @@ public class CoreConstants {
         public static final String DOOR_SENSOR = "DoorSensor";
         public static final String WINDOW_SENSOR = "WindowSensor";
         public static final String WEBCAM = "Webcam";
+        public static final String DOORBELL = "Doorbell";
     }
 
     /**
@@ -115,6 +116,7 @@ public class CoreConstants {
         public static final String SLAVE_CAMERA_GET = "/slave/camera/get";
         public static final String SLAVE_DOOR_STATUS_GET = "/slave/door/status_get";
         public static final String SLAVE_DOOR_UNLATCH = "/slave/door/unlatch";
+        public static final String SLAVE_MODULES_UPDATE = "/slave/modules/update";
 
         //App
         public static final String APP_MODULES_GET = "/app/module/get";
