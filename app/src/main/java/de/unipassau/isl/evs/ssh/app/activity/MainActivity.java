@@ -79,12 +79,23 @@ public class MainActivity extends BoundActivity
      * @return If the device is already registered or not.
      */
     private boolean deviceNotRegistered() {
-        String master_id = getSharedPrefs().getString(PREF_MASTER_ID, null);
+        SharedPreferences sharedPreferences = getSharedPrefs();
+        String master_id;
+        if (sharedPreferences == null) {
+            master_id = null;
+        } else {
+            master_id = sharedPreferences.getString(PREF_MASTER_ID, null);
+        }
         return master_id == null;
     }
 
     private SharedPreferences getSharedPrefs() {
-        return getComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        if (sharedPreferences == null) {
+            return getComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        } else {
+            return null;
+        }
     }
 
     @Override
