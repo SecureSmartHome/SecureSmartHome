@@ -18,7 +18,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
  */
 public class EditUserDeviceFragment extends Fragment {
 
-    UserDevice device;
+    private UserDevice device;
 
     @Override
     public void onStart() {
