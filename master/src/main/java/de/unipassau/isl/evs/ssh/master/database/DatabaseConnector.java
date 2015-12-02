@@ -154,6 +154,10 @@ public class DatabaseConnector extends AbstractComponent {
                 + "DROP TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + ";";
 
+        public DBOpenHelper(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        }
+
         private void insertPermissions(SQLiteDatabase db) {
             String[] binaryPermissions = new String[]{
                     DatabaseContract.Permission.Values.ADD_ORDROID,
@@ -205,10 +209,6 @@ public class DatabaseConnector extends AbstractComponent {
                 //Log.v(TAG, "executing SQL statement: " + statement + ";");
                 db.execSQL(statement + ";");
             }
-        }
-
-        public DBOpenHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
         @Override

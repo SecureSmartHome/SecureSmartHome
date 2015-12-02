@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.container;
 
 import android.util.Log;
+
 import de.ncoder.typedmap.Key;
 
 /**
@@ -80,7 +81,7 @@ public class AbstractComponent implements Component {
     @Override
     public String toString() {
         String name = getClass().getSimpleName();
-        if (name == null || name.isEmpty()) {
+        if (name.isEmpty()) {
             name = getClass().getName();
             int index = name.lastIndexOf(".");
             if (index >= 0 && index + 1 < name.length()) {

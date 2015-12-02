@@ -1,7 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  * This activity allows to modify permissions of user devices. If this functionality is used a message,
  * containing all needed information, is generated and passed to the OutgoingRouter.
  */
-public class ModifyPermissionFragment extends Fragment implements MessageHandler {
+public class ModifyPermissionFragment extends BoundFragment implements MessageHandler {
 
     public ModifyPermissionFragment() {
         // Required empty public constructor

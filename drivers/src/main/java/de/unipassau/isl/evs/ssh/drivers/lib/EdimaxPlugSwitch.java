@@ -28,6 +28,7 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
  * Class to control EDIMAX WiFi Smart Plug Switch
  *
  * @author Wolfram Gottschlich
+ * @author Niko Fink
  * @version 2.0
  */
 public class EdimaxPlugSwitch extends AbstractComponent {

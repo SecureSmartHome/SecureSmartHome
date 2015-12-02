@@ -47,15 +47,14 @@ import de.unipassau.isl.evs.ssh.core.container.StartupException;
  * @author Chris
  */
 public class KeyStoreController extends AbstractComponent {
-    public static final String LOCAL_PRIVATE_KEY_ALIAS = "localPrivateKey";
-    public static final String KEY_STORE_FILENAME = "encryptText-keystore.bks";
-    public static final String KEY_STORE_TYPE = "BKS";
-    public static final String KEY_PAIR_ALGORITHM = "ECIES";
-    public static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA224withECDSA";
-    public static final String SYMMETRIC_KEY_ALGORITHM = "AES";
-    public static final String PUBLIC_KEY_PREFIX = "public_key:";
-    public static final int ASYMMETRIC_KEY_SIZE = 256;
-    public static final int SYMMETRIC_KEY_SIZE = 256;
+    private static final String LOCAL_PRIVATE_KEY_ALIAS = "localPrivateKey";
+    private static final String KEY_STORE_FILENAME = "encryptText-keystore.bks";
+    private static final String KEY_STORE_TYPE = "BKS";
+    private static final String KEY_PAIR_ALGORITHM = "ECIES";
+    private static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA224withECDSA";
+    private static final String PUBLIC_KEY_PREFIX = "public_key:";
+    private static final int ASYMMETRIC_KEY_SIZE = 256;
+
 
     public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);
 
@@ -270,7 +269,7 @@ public class KeyStoreController extends AbstractComponent {
         return Collections.list(keyStore.aliases());
     }
 
-    // generate password from device ID
+    // TODO: generate password from device ID
     // https://stackoverflow.com/questions/2785485/is-there-a-unique-android-device-id/2853253#2853253
 
     private char[] getKeystorePassword() {
