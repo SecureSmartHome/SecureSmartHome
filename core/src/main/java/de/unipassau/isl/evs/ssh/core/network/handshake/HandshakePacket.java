@@ -77,4 +77,16 @@ public abstract class HandshakePacket implements Serializable {
             this.token = token;
         }
     }
+
+    public static class ServerRegistrationResponse extends HandshakePacket {
+        public final boolean success;
+        public final String message;
+        public final X509Certificate serverCertificate;
+
+        public ServerRegistrationResponse(boolean success, String message, X509Certificate serverCertificate) {
+            this.success = success;
+            this.message = message;
+            this.serverCertificate = serverCertificate;
+        }
+    }
 }

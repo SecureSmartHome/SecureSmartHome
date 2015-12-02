@@ -69,7 +69,6 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         final NamingManager namingManager = container.require(NamingManager.KEY);
         if (!namingManager.isMasterKnown()) {
             ctx.writeAndFlush(new HandshakePacket.ClientRegistration(namingManager.getOwnCertificate(), token));
-
         } else {
             ctx.writeAndFlush(new HandshakePacket.ClientHello(namingManager.getOwnCertificate(), namingManager.getMasterID()));
         }
@@ -79,25 +78,32 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof HandshakePacket.ServerHello) {
-            handshakeComplete(ctx, msg);
+        if (msg instanceof HandshakePacket.ServerRegistrationResponse) {
+            registrationExecuted(msg);
+        } else if (msg instanceof HandshakePacket.ServerHello) {
+            handshakeComplete(ctx);
         } else {
             super.channelRead(ctx, msg);
+        }
+    }
+
+    private void registrationExecuted(Object msg) throws GeneralSecurityException {
+        HandshakePacket.ServerRegistrationResponse message = (HandshakePacket.ServerRegistrationResponse) msg;
+        if (message.success) {
+            X509Certificate cert =  message.serverCertificate;
+            KeyStoreController keyStoreController = container.require(KeyStoreController.KEY);
+            if (keyStoreController.listEntries().contains(cert)) {
+                DeviceID alias = DeviceID.fromCertificate(cert);
+                keyStoreController.saveCertificate(cert, alias.getIDString());
+            }
         }
     }
 
     /**
      * Called once the Handshake is complete
      */
-    protected void handshakeComplete(ChannelHandlerContext ctx, Object msg) throws GeneralSecurityException {
+    protected void handshakeComplete(ChannelHandlerContext ctx) {
         Log.v(TAG, "handshakeComplete " + ctx);
-
-        X509Certificate cert =  ((HandshakePacket.ServerHello) msg).serverCertificate;
-        KeyStoreController keyStoreController = container.require(KeyStoreController.KEY);
-        if (keyStoreController.listEntries().contains(cert)) {
-            DeviceID alias = DeviceID.fromCertificate(cert);
-            keyStoreController.saveCertificate(cert, alias.getIDString());
-        }
 
         //Timeout Handler
         ctx.pipeline().addBefore(ctx.name(), IdleStateHandler.class.getSimpleName(),
