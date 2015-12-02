@@ -21,6 +21,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
@@ -29,6 +30,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.group.ChannelGroup;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION;
 
 /**
  * MainActivity for the Master App
@@ -108,14 +111,17 @@ public class MainActivity extends BoundActivity {
         // start MasterQRCodeActivity when no devices are registered yet
         if (hasNoRegisteredDevice()) {
             Intent intent = new Intent(this, MasterQRCodeActivity.class);
+//             TODO: create QRCodeInformation from data
+//            QRDeviceInformation deviceInformation = new QRDeviceInformation();
+//            intent.putExtra(EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
             startActivity(intent);
         }
     }
 
     /**
-     * Checks if there are registered devices in the system.
+     * Checks if there are no registered devices in the system.
      *
-     * @return Whether devices are registered in the master or not.
+     * @return Whether no devices are registered in the master.
      * author Phil Werli
      */
     private boolean hasNoRegisteredDevice() {
