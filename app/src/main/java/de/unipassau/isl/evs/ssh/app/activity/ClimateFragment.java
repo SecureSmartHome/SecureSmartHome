@@ -31,7 +31,7 @@ public class ClimateFragment extends Fragment implements MessageHandler {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        climateWarning = new NotificationCompat.Builder(this);
+        //climateWarning = new NotificationCompat.Builder(this);
         climateWarning.setAutoCancel(true);
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_climate, container, false);
@@ -59,13 +59,13 @@ public class ClimateFragment extends Fragment implements MessageHandler {
         climateWarning.setWhen(System.currentTimeMillis());
         climateWarning.setContentText("Humidity in Room is to high! Please open Window.");
 
-        //If Notification is clicked send to this Page
-        Intent intent = new Intent(this, ClimateFragment.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        climateWarning.setContentIntent(pendingIntent);
-
-        //Send notification out to Device
-        NotificationManager nm = {NotificationManager} getSystemService{NOTIFICATION_SERVICE};
-        nm.notify(uniqueID, climateWarning.build());
+//        //If Notification is clicked send to this Page
+//        Intent intent = new Intent(this, ClimateFragment.class);
+//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//        climateWarning.setContentIntent(pendingIntent);
+//
+//        //Send notification out to Device
+//        NotificationManager nm = {NotificationManager} getSystemService{NOTIFICATION_SERVICE};
+//        nm.notify(uniqueID, climateWarning.build());
     }
 }

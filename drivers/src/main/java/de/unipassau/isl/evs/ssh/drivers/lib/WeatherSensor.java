@@ -70,11 +70,11 @@ public class WeatherSensor extends AbstractComponent {
         }
 
         /**
-         * TODO doorbell?
-         * Sends info about doorbell being used
+         * Sends Weather Information to Master
          */
         private void sendWeatherInfo() {
-            WeatherPayload payload = new WeatherPayload();
+            WeatherPayload payload = new WeatherPayload(getTemperature1(), getTemperature2(), getPressure(),
+                    getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), false);
 
             //Todo set values
 

@@ -42,4 +42,36 @@ public class WeatherPayload implements MessagePayload {
     public boolean climateWarning() {
         return climate;
     }
+
+    public double getTemp1() {
+        return temp1;
+    }
+
+    public double getTemp2() {
+        return temp2;
+    }
+
+    public double getPressure() {
+        return pressure;
+    }
+
+    public double getAltitude() {
+        return altitude;
+    }
+
+    public double getHumidity() {
+        return humidity;
+    }
+
+    public double getUv() {
+        return uv;
+    }
+
+    public int getVisible() {
+        return visible;
+    }
+
+    public int getIr() {
+        return ir;
+    }
 }
