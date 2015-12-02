@@ -2,8 +2,6 @@ package de.unipassau.isl.evs.ssh.core.container;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
-import de.ncoder.typedmap.Key;
-import de.ncoder.typedmap.TypedMap;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,13 +11,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.ncoder.typedmap.Key;
+import de.ncoder.typedmap.TypedMap;
+
 /**
  * Container classes deal with instantiation and set up of dependencies for all Components.
  * <p/>
  * Containers are the root element of the systems using the dependency injection design pattern.
  * Containers manage Components and store them in a typed map.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public class SimpleContainer implements Container {
     public final String TAG = "SContainer@" + Objects.hashCode(this);
@@ -32,6 +33,12 @@ public class SimpleContainer implements Container {
         Log.v(TAG, "constructor");
     }
 
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Also records the order in which the Components were added, so that they can be removed in shutdown without
+     * violating any dependency constraints.
+     */
     @Override
     public synchronized <T extends Component, V extends T> void register(Key<T> key, V component) {
         if (key == null) {
@@ -98,6 +105,12 @@ public class SimpleContainer implements Container {
         return components.containsKey(key);
     }
 
+
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Removes the Components in the order they were added, so that no dependency constraints are violated.
+     */
     @Override
     public void shutdown() {
         Log.v(TAG, "shutdown:called");
