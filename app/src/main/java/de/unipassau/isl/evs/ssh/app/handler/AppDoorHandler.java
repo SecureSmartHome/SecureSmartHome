@@ -18,6 +18,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
 
 public class AppDoorHandler extends AbstractComponent implements MessageHandler {
@@ -83,8 +84,8 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
             isDoorBlocked = !payload.isUnlock();
             fireStatusUpdated();
         } else if (routingKey.equals(CoreConstants.RoutingKeys.APP_DOOR_GET)) {
-            // TODO get actual door status. payload is missing
-            isDoorOpen = true;
+            DoorStatusPayload payload = (DoorStatusPayload) message.getPayload();
+            isDoorOpen = !payload.isClosed();
             fireStatusUpdated();
         } else {
             throw new IllegalArgumentException("Unkown Routing Key: " + routingKey);
@@ -115,15 +116,29 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
             Log.e(TAG, "Could not get door status. No door installed");
             return;
         }
-        DoorUnlatchPayload doorPayload = new DoorUnlatchPayload(doors.get(0).getName());
+        refreshBlockStatus(doors.get(0).getName());
+        refreshOpenStatus(doors.get(0).getName());
+    }
+
+    private void refreshOpenStatus(String door) {
+        DoorStatusPayload doorPayload = new DoorStatusPayload(door);
 
         Message message = new Message(doorPayload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_DOOR_GET);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_GET, message);
+        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_DOOR_STATUS_GET, message);
 
-        // TODO door open or closed??
+    }
+
+    private void refreshBlockStatus(String door) {
+        DoorUnlatchPayload doorPayload = new DoorUnlatchPayload(door);
+
+        Message message = new Message(doorPayload);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_DOOR_BLOCK);
+
+        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
+        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_GET, message);
     }
 
     /**

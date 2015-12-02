@@ -2,8 +2,16 @@ package de.unipassau.isl.evs.ssh.slave.handler;
 
 import android.util.Log;
 
-import java.util.List;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
+import java.util.List;
+import java.util.Objects;
+
+import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
@@ -11,15 +19,17 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 
 /**
- * SlaveModulHandler offers a list of all Modules that are active in the System.
+ * SlaveModuleHandler offers a list of all Modules that are active in the System.
  *
  * @author bucher
  */
-public class SlaveModulHandler implements MessageHandler {
+public class SlaveModuleHandler extends AbstractComponent implements MessageHandler {
+    public static final Key<SlaveModuleHandler> KEY = new Key<>(SlaveModuleHandler.class);
 
     private List<Module> components;
 
     public void updateModule(List<Module> components) {
+        //TODO update container
         this.components = components;
     }
 
