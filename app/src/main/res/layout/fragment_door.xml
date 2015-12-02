@@ -45,5 +45,6 @@
         android:id="@+id/doorFragmentRefreshButton"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:elevation="2dp"
         android:layout_alignTop="@+id/doorFragmentOpenButton" />
 </RelativeLayout>
