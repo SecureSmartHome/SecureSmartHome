@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.container;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
+
 import de.ncoder.typedmap.Key;
 import de.ncoder.typedmap.TypedMap;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
@@ -15,7 +17,7 @@ import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
  * An Android {@link Service} that manages a {@link SimpleContainer} and its {@link Component}s.
  * Android Activity can bind to this Service and communicate with the {@link Container}.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public class ContainerService extends Service implements Container {
     public static final Key<ContextComponent> KEY_CONTEXT = new Key<>(ContextComponent.class, "ContainerContext");
@@ -33,6 +35,10 @@ public class ContainerService extends Service implements Container {
         Log.d(TAG, "onCreate:finished");
     }
 
+    /**
+     * Overwrite this method to register your own Components to the Container once the Service is started and
+     * {@link #onCreate()} is called.
+     */
     protected void init() {
     }
 
@@ -49,6 +55,13 @@ public class ContainerService extends Service implements Container {
         return theBinder;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Also forwards Intents fired by the {@link android.app.AlarmManager} to the {@link Scheduler}.
+     *
+     * @see Scheduler#set(int, long, PendingIntent)
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Scheduler scheduler = get(Scheduler.KEY);

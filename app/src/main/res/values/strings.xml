@@ -32,4 +32,9 @@
     <string name="addUser">Add User</string>
     <string name="group">Group</string>
     <string name="name">Name</string>
+    <string name="refreshImage">Refresh Image</string>
+    <string name="openDoor">Open door</string>
+    <string name="doorStatusOpen">Status: open</string>
+    <string name="blockDoor">Block door</string>
+    <string name="unblockDoor">Unblock door</string>
 </resources>

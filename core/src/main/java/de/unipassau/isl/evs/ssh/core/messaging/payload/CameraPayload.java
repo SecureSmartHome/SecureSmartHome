@@ -62,6 +62,10 @@ public class CameraPayload implements MessagePayload {
         this.pictureCallback = pictureCallback;
     }
 
+    public byte[] getPicture() {
+        return this.pictureCallback.pictureData;
+    }
+
     public class PictureCallback implements Camera.PictureCallback {
         byte[] pictureData;
 

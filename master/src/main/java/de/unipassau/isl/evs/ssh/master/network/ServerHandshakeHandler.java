@@ -81,7 +81,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         if (msg instanceof HandshakePacket.ClientHello) {
             final HandshakePacket.ClientHello hello = (HandshakePacket.ClientHello) msg;
             ctx.attr(CoreConstants.NettyConstants.ATTR_CLIENT_CERT).set(hello.clientCertificate);
-            final DeviceID deviceID = getContainer().require(NamingManager.KEY).getDeviceID(hello.clientCertificate);
+            final DeviceID deviceID = DeviceID.fromCertificate(hello.clientCertificate);
             ctx.attr(CoreConstants.NettyConstants.ATTR_CLIENT_ID).set(deviceID);
             Log.i(TAG, "Client " + deviceID + " connected");
 

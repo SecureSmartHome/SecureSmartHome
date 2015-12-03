@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.container;
 
 import android.util.Log;
+
 import de.ncoder.typedmap.Key;
 
 /**
@@ -10,7 +11,7 @@ import de.ncoder.typedmap.Key;
  *
  * AbstractComponent provides implementations for standard methods, that will be used multiple times.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public class AbstractComponent implements Component {
     private Container container;
@@ -42,10 +43,18 @@ public class AbstractComponent implements Component {
         return container != null;
     }
 
+    /**
+     * @return the Container this Component is registered to or {@code null}
+     */
     protected Container getContainer() {
         return container;
     }
 
+    /**
+     * Fetch the Component from the Container or return {@code null} if the Component or the Container itself are not available.
+     *
+     * @see Container#get(Key)
+     */
     protected <T extends Component> T getComponent(Key<T> key) {
         Container container = getContainer();
         if (container != null) {
@@ -56,13 +65,10 @@ public class AbstractComponent implements Component {
     }
 
     /**
-     * Checks and returns whether a component required by the given component is
+     * Checks and returns whether a required Component required by the given component is
      * already registered in the container.
      *
-     * @param key of the component thats needed
-     * @param <T> type of the component thats needed
-     *
-     * @return component thats needed
+     * @see Container#require(Key)
      */
     protected <T extends Component> T requireComponent(Key<T> key) {
         Container container = getContainer();
@@ -80,7 +86,7 @@ public class AbstractComponent implements Component {
     @Override
     public String toString() {
         String name = getClass().getSimpleName();
-        if (name == null || name.isEmpty()) {
+        if (name.isEmpty()) {
             name = getClass().getName();
             int index = name.lastIndexOf(".");
             if (index >= 0 && index + 1 < name.length()) {

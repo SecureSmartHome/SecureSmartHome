@@ -12,7 +12,7 @@ import io.netty.channel.ChannelFuture;
 /**
  * Receives messages from system components and decides how to route them to the targets.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public class ServerOutgoingRouter extends OutgoingRouter {
     @Override

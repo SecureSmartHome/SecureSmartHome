@@ -6,8 +6,8 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
@@ -64,9 +64,67 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                     sendErrorMessage(message);
                     break;
             }
+        } else if (message.getPayload() instanceof DoorStatusPayload) {
+            //Response or request?
+            if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
+                //Request
+
+                //which functionality
+                switch (message.getRoutingKey()) {
+                    //Get status
+                    case CoreConstants.RoutingKeys.MASTER_DOOR_STATUS_GET:
+                        handleDoorStatusGet(message);
+                        break;
+                    default:
+                        throw new UnsupportedOperationException("Unsupported routing key: " + message.getRoutingKey());
+                }
+            } else {
+                //Response
+                handleDoorStatusGetResponse(message);
+            }
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
+            sendErrorMessage(message);
+        }
+    }
+
+    private void handleDoorStatusGetResponse(Message.AddressedMessage message) {
+        //Response
+        final Message.AddressedMessage correspondingMessage =
+                getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
+        final Message messageToSend = new Message(message.getPayload());
+        messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
+
+        //works for get and set, so no switch required
+        sendMessage(
+                correspondingMessage.getFromID(),
+                correspondingMessage.getHeader(Message.HEADER_REPLY_TO_KEY),
+                messageToSend
+        );
+    }
+
+    private void handleDoorStatusGet(Message.AddressedMessage message) {
+        DoorStatusPayload doorStatusPayload = (DoorStatusPayload) message.getPayload();
+        final Module atModule = requireComponent(SlaveController.KEY).getModule(doorStatusPayload.getModuleName());
+        //Get status
+        if (hasPermission(
+                message.getFromID(),
+                new Permission(
+                        DatabaseContract.Permission.Values.REQUEST_DOOR_STATUS,
+                        atModule.getName()
+                )
+        )) {
+            final Message messageToSend = new Message(message.getPayload());
+            messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
+            final Message.AddressedMessage sendMessage = sendMessage(
+                    atModule.getAtSlave(),
+                    CoreConstants.RoutingKeys.SLAVE_DOOR_STATUS_GET,
+                    messageToSend
+            );
+            putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
+        } else {
+            //no permission
             sendErrorMessage(message);
         }
     }
@@ -154,7 +212,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                 Message.AddressedMessage sendMessage =
                         sendMessage(
                                 atModule.getAtSlave(),
-                                CoreConstants.RoutingKeys.SLAVE_LIGHT_SET,
+                                CoreConstants.RoutingKeys.SLAVE_DOOR_UNLATCH,
                                 messageToSend
                         );
                 putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
