@@ -84,8 +84,6 @@ public class MainActivity extends BoundActivity
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
         }
-
-        getContainer().require(AppNotificationHandler.KEY).addNotificationObjects(notificationBuilder, notificationManager);
     }
 
     @Override
@@ -202,6 +200,7 @@ public class MainActivity extends BoundActivity
         if (fragment instanceof BoundFragment) {
             ((BoundFragment) fragment).onContainerConnected(container);
         }
+        container.require(AppNotificationHandler.KEY).addNotificationObjects(notificationBuilder, notificationManager);
     }
 
     @Override
