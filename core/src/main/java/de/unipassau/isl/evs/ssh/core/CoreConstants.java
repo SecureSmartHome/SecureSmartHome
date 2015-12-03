@@ -76,11 +76,6 @@ public class CoreConstants {
     }
 
     /**
-     * Name used for SharedPreferences file
-     */
-    public static final String FILE_SHARED_PREFS = "shared-preferences";
-
-    /**
      * This class contains the key constants of SharedPreferences
      */
     public class SharedPrefs {

@@ -66,10 +66,6 @@ public class LightFragment extends BoundFragment {
         return root;
     }
 
-    private Container getContainer() {
-        return ((MainActivity) getActivity()).getContainer();
-    }
-
     private class LightListAdapter extends BaseAdapter {
         private final LayoutInflater inflater;
         private List<Module> lightModules;
