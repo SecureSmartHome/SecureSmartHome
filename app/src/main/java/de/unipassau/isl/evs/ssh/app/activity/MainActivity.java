@@ -52,8 +52,8 @@ public class MainActivity extends BoundActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //Set the fragment initially
 
+        //Set the fragment initially
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -62,15 +62,16 @@ public class MainActivity extends BoundActivity
         notificationBuilder.setAutoCancel(true);
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
+        //Initialise NavigationDrawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //Initialise fragmentTransaction
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
             try {
                 showFragmentByClass(Class.forName(savedInstanceState.getString(SAVED_LAST_ACTIVE_FRAGMENT)));
@@ -210,7 +211,8 @@ public class MainActivity extends BoundActivity
             ((BoundFragment) fragment).onContainerDisconnected();
         }
     }
-    
+
+    //TODO remove, just for testing!
     public void notificationButtonClicked(View view) {
         //Build notification
         notificationBuilder.setSmallIcon(R.drawable.ic_home_light);
