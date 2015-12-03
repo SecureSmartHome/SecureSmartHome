@@ -2,6 +2,9 @@ package de.unipassau.isl.evs.ssh.master.network;
 
 import android.util.Log;
 
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
@@ -10,9 +13,14 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.ClientIncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.network.handler.Decrypter;
+import de.unipassau.isl.evs.ssh.core.network.handler.Encrypter;
 import de.unipassau.isl.evs.ssh.core.network.handler.PipelinePlug;
+import de.unipassau.isl.evs.ssh.core.network.handler.SignatureChecker;
+import de.unipassau.isl.evs.ssh.core.network.handler.SignatureGenerator;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket;
+import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
@@ -102,6 +110,18 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
      */
     private void clientAuthenticated(ChannelHandlerContext ctx, X509Certificate clientCertificate) {
         Log.v(TAG, "clientAuthenticated " + ctx);
+
+        //Security
+        final PublicKey remotePublicKey = clientCertificate.getPublicKey();
+        final PrivateKey localPrivateKey = container.require(KeyStoreController.KEY).getOwnPrivateKey();
+        try {
+            ctx.pipeline().addBefore(ctx.name(), Encrypter.class.getSimpleName(), new Encrypter(remotePublicKey));
+            ctx.pipeline().addBefore(ctx.name(), Decrypter.class.getSimpleName(), new Decrypter(localPrivateKey));
+            ctx.pipeline().addBefore(ctx.name(), SignatureChecker.class.getSimpleName(), new SignatureChecker(remotePublicKey));
+            ctx.pipeline().addBefore(ctx.name(), SignatureGenerator.class.getSimpleName(), new SignatureGenerator(localPrivateKey));
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException("Could not set up Security Handlers", e);//TODO handle
+        }
 
         //Timeout Handler
         ctx.pipeline().addBefore(ctx.name(), IdleStateHandler.class.getSimpleName(),

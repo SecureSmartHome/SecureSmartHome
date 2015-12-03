@@ -78,6 +78,11 @@ public class CoreConstants {
         public static final AttributeKey<DeviceID> ATTR_CLIENT_ID = AttributeKey.valueOf(DeviceID.class.getName());
     }
 
+    public static class Security {
+        public static final String MESSAGE_CRYPT_ALG = "ECIES";
+        public static final String MESSAGE_SIGN_ALG = "SHA224withECDSA";
+    }
+
     /**
      * This class contains the key constants of SharedPreferences
      */
