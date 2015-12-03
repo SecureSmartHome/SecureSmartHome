@@ -113,5 +113,6 @@ public class SlaveCameraHandler implements MessageHandler {
         };
 
         camera.setOneShotPreviewCallback(previewCallback);
+        camera.startPreview();
     }
 }

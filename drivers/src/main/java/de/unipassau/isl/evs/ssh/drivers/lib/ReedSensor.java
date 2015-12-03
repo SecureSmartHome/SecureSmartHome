@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.drivers.lib;
 
+import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+
 /**
  * Class to get the values form a window/door sensor
  *
@@ -7,7 +9,7 @@ package de.unipassau.isl.evs.ssh.drivers.lib;
  * @version 0.1
  */
 
-public class ReedSensor {
+public class ReedSensor extends AbstractComponent {
     int address;
     int dummyCount;
 

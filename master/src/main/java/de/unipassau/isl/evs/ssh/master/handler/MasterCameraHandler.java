@@ -23,7 +23,6 @@ public class MasterCameraHandler extends AbstractMasterHandler {
             //Response or request?
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
                 //Request
-
                 //which functionality
                 switch (message.getRoutingKey()) {
                     //Get status

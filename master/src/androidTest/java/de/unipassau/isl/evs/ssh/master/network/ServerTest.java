@@ -214,7 +214,8 @@ public class ServerTest extends InstrumentationTestCase {
         @NonNull
         @Override
         protected ClientHandshakeHandler getHandshakeHandler() {
-            return new ClientHandshakeHandler(this, getContainer()) {
+            //FIXME, use correct token
+            return new ClientHandshakeHandler(this, getContainer(), "".getBytes()) {
                 @Override
                 public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
                     super.channelRegistered(ctx);

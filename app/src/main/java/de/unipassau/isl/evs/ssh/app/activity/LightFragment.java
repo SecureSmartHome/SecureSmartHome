@@ -32,7 +32,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  *
  * @author Phil Werli
  */
-public class LightFragment extends Fragment {
+public class LightFragment extends BoundFragment {
     private LightListAdapter adapter;
     private final AppLightHandler.LightHandlerListener listener = new AppLightHandler.LightHandlerListener() {
         @Override
@@ -64,10 +64,6 @@ public class LightFragment extends Fragment {
         list.setAdapter(adapter);
 
         return root;
-    }
-
-    private Container getContainer() {
-        return ((MainActivity) getActivity()).getContainer();
     }
 
     private class LightListAdapter extends BaseAdapter {

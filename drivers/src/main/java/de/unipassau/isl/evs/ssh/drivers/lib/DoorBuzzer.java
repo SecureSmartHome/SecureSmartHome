@@ -1,12 +1,14 @@
 package de.unipassau.isl.evs.ssh.drivers.lib;
 
+import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+
 /**
  * Class to get the state of the door buzzer actuator
  *
  * @author Wolfram Gottschlich
  * @version 0.1
  */
-public class DoorBuzzer {
+public class DoorBuzzer extends AbstractComponent{
     int address;
 
     /**

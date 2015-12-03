@@ -3,10 +3,12 @@ package de.unipassau.isl.evs.ssh.core.network;
 import android.util.Log;
 
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.handler.PipelinePlug;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket;
+import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.serialization.ClassResolvers;
@@ -15,6 +17,9 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+
+import java.security.GeneralSecurityException;
+import java.security.cert.X509Certificate;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_ALL_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_READER_IDLE_TIME;
@@ -25,10 +30,12 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
 
     private final Client client;
     private final Container container;
+    private final byte[] token;
 
-    public ClientHandshakeHandler(Client client, Container container) {
+    public ClientHandshakeHandler(Client client, Container container, byte[] token) {
         this.client = client;
         this.container = container;
+        this.token = token;
     }
 
     /**
@@ -60,24 +67,42 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         Log.v(TAG, "channelActive " + ctx);
 
         final NamingManager namingManager = container.require(NamingManager.KEY);
-        ctx.writeAndFlush(new HandshakePacket.ClientHello(namingManager.getOwnCertificate(), namingManager.getMasterCertificate()));
+        if (!namingManager.isMasterKnown()) {
+            ctx.writeAndFlush(new HandshakePacket.ClientRegistration(namingManager.getOwnCertificate(), token));
+        } else {
+            ctx.writeAndFlush(new HandshakePacket.ClientHello(namingManager.getOwnCertificate(), namingManager.getMasterID()));
+        }
 
         super.channelActive(ctx);
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof HandshakePacket.ServerHello) {
+        if (msg instanceof HandshakePacket.ServerRegistrationResponse) {
+            registrationExecuted(msg);
+        } else if (msg instanceof HandshakePacket.ServerHello) {
             handshakeComplete(ctx);
         } else {
             super.channelRead(ctx, msg);
         }
     }
 
+    private void registrationExecuted(Object msg) throws GeneralSecurityException {
+        HandshakePacket.ServerRegistrationResponse message = (HandshakePacket.ServerRegistrationResponse) msg;
+        if (message.success) {
+            X509Certificate cert =  message.serverCertificate;
+            KeyStoreController keyStoreController = container.require(KeyStoreController.KEY);
+            if (keyStoreController.listEntries().contains(cert)) {
+                DeviceID alias = DeviceID.fromCertificate(cert);
+                keyStoreController.saveCertificate(cert, alias.getIDString());
+            }
+        }
+    }
+
     /**
      * Called once the Handshake is complete
      */
-    private void handshakeComplete(ChannelHandlerContext ctx) {
+    protected void handshakeComplete(ChannelHandlerContext ctx) {
         Log.v(TAG, "handshakeComplete " + ctx);
 
         //Timeout Handler
