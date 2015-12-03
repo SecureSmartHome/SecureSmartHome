@@ -18,7 +18,6 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserDeviceHandler;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
@@ -61,10 +60,6 @@ public class ListGroupFragment extends BoundFragment {
         return root;
     }
 
-    private Container getContainer() {
-        return ((MainActivity) getActivity()).getContainer();
-    }
-
     private class GroupListAdapter extends BaseAdapter {
 
         private final LayoutInflater inflater;
@@ -83,19 +78,21 @@ public class ListGroupFragment extends BoundFragment {
 
         private void updateGroupList() {
             final List<Group> groups =
-                    getContainer().require(AppUserDeviceHandler.KEY).getAllGroups();
-            Collections.sort(groups, new Comparator<Group>() {
-                @Override
-                public int compare(Group lhs, Group rhs) {
-                    if (lhs.getName() == null) {
-                        return rhs.getName() == null ? 0 : 1;
+                    getComponent(AppUserDeviceHandler.KEY).getAllGroups();
+            if (groups != null) {
+                Collections.sort(groups, new Comparator<Group>() {
+                    @Override
+                    public int compare(Group lhs, Group rhs) {
+                        if (lhs.getName() == null) {
+                            return rhs.getName() == null ? 0 : 1;
+                        }
+                        if (rhs.getName() == null) {
+                            return -1;
+                        }
+                        return lhs.getName().compareTo(rhs.getName());
                     }
-                    if (rhs.getName() == null) {
-                        return -1;
-                    }
-                    return lhs.getName().compareTo(rhs.getName());
-                }
-            });
+                });
+            }
         }
 
         @Override
@@ -146,17 +143,19 @@ public class ListGroupFragment extends BoundFragment {
         }
 
         private String createGroupMemberText(Group group) {
-            String groupMemberText;
-            List<UserDevice> groupMembers = getContainer().require(AppUserDeviceHandler.KEY).getAllGroupMembers(group);
-            int numberOfMembers = groupMembers.size();
-            if (numberOfMembers <= 0) {
-                groupMemberText = "This group has no members.";
-            } else if (numberOfMembers == 1) {
-                groupMemberText = groupMembers.get(0).getName() + " is the only member.";
-            } else if (numberOfMembers == 2) {
-                groupMemberText = groupMembers.get(0).getName() + " and " + groupMembers.get(1).getName() + " are members..";
-            } else {
-                groupMemberText = groupMembers.get(0).getName() + " and " + groupMembers.get(1).getName() + " and more are members";
+            String groupMemberText = "";
+            List<UserDevice> groupMembers = getComponent(AppUserDeviceHandler.KEY).getAllGroupMembers(group);
+            if (groupMembers != null) {
+                int numberOfMembers = groupMembers.size();
+                if (numberOfMembers <= 0) {
+                    groupMemberText = "This group has no members.";
+                } else if (numberOfMembers == 1) {
+                    groupMemberText = groupMembers.get(0).getName() + " is the only member.";
+                } else if (numberOfMembers == 2) {
+                    groupMemberText = groupMembers.get(0).getName() + " and " + groupMembers.get(1).getName() + " are members..";
+                } else {
+                    groupMemberText = groupMembers.get(0).getName() + " and " + groupMembers.get(1).getName() + " and more are members";
+                }
             }
             return groupMemberText;
         }
