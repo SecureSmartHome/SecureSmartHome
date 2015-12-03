@@ -24,7 +24,6 @@ public class MasterLightHandler extends AbstractMasterHandler {
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
                 //which functionality
                 switch (message.getRoutingKey()) {
-                    //Set Light
                     case CoreConstants.RoutingKeys.MASTER_LIGHT_SET:
                         handleSetRequest(message);
                         break;
@@ -75,7 +74,6 @@ public class MasterLightHandler extends AbstractMasterHandler {
 
     private void handleGetRequest(Message.AddressedMessage message) {
         final Module atModule = ((LightPayload) message.getPayload()).getModule();
-        //Get status
         if (hasPermission(
                 message.getFromID(),
                 new Permission(
@@ -98,7 +96,6 @@ public class MasterLightHandler extends AbstractMasterHandler {
     }
 
     private void handleResponse(Message.AddressedMessage message) {
-        //Response
         final Message.AddressedMessage correspondingMessage =
                 getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
         final Message messageToSend = new Message(message.getPayload());

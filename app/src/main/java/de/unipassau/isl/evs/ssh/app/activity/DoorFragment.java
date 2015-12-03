@@ -8,12 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
 
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.app.handler.DoorHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 
 /**
@@ -24,28 +25,66 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
  */
 public class DoorFragment extends BoundFragment {
 
-    Button openButton;
-    Button blockButton;
-    ImageView imageView;
+    private Button openButton;
+    private Button blockButton;
+    private ImageButton refreshButton;
+    private ImageView imageView;
+
+    private final DoorListener doorListener = new DoorListener() {
+        @Override
+        public void onPictureChanged(byte[] image) {
+            displayImage(image);
+        }
+
+        @Override
+        public void onDoorStatusChanged() {
+            updateButtons();
+        }
+    };
+
+    @Override
+    public void onStart() {
+        getDoorHandler().addListener(doorListener);
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        getDoorHandler().removeListener(doorListener);
+        super.onStop();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_door, container, false);
         openButton = (Button) view.findViewById(R.id.doorFragmentOpenButton);
         blockButton = (Button) view.findViewById(R.id.doorFragmentBlockButton);
+        refreshButton = (ImageButton) view.findViewById(R.id.doorFragmentRefreshButton);
         imageView = (ImageView) view.findViewById(R.id.doorFragmentImageView);
+
         openButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openButtonAction();
             }
         });
+
         blockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 blockButtonAction();
             }
         });
+
+        refreshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refreshImage();
+            }
+        });
+
+        getDoorHandler().refresh();
+        updateButtons();
         return view;
     }
 
@@ -53,19 +92,17 @@ public class DoorFragment extends BoundFragment {
     public void onContainerConnected(Container container) {
         updateButtons();
     }
-
-    /**
-     * Displays the given image on this fragment's ImageView.
-     *
-     * @param image the image to display as byte[]
-     */
-    public void displayImage(byte[] image) {
-        BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-        task.execute(image);
+    
+    private AppDoorHandler getDoorHandler(){
+        return ((MainActivity) getActivity()).getContainer().require(AppDoorHandler.KEY);
     }
 
-    // executed, when the "Open" button was pressed.
+    /**
+     * executed, when the "Open" button was pressed.
+     */
     private void openButtonAction() {
+        AppDoorHandler handler = getDoorHandler();
+
         DoorHandler handler = getComponent(DoorHandler.KEY);
         if (handler == null) return;
         if (!handler.isOpen() && !handler.isBlocked()) {
@@ -74,8 +111,12 @@ public class DoorFragment extends BoundFragment {
         updateButtons();
     }
 
-    // executed, when the "Block" button was pressed.
+    /**
+     * executed, when the "Block" button was pressed.
+     */
     private void blockButtonAction() {
+        AppDoorHandler handler = getDoorHandler();
+
         DoorHandler handler = getComponent(DoorHandler.KEY);
         if (handler == null) return;
         if (handler.isBlocked()) {
@@ -86,9 +127,26 @@ public class DoorFragment extends BoundFragment {
         updateButtons();
     }
 
+    private void refreshImage() {
+        getDoorHandler().refreshImage();
+
+    }
+
+    /**
+     * Displays the given image on this fragment's ImageView.
+     *
+     * @param image the image to display as byte[]
+     */
+    private void displayImage(byte[] image) {
+        BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+        task.execute(image);
+    }
+
     /**
      * Updates the buttons in this fragment's to represent the current door status.
      */
+    private void updateButtons() {
+        AppDoorHandler handler = getDoorHandler();
     public void updateButtons() {
         DoorHandler handler = getComponent(DoorHandler.KEY);
         if (handler == null) {
@@ -96,16 +154,16 @@ public class DoorFragment extends BoundFragment {
         }
 
         if (handler.isBlocked()) {
-            blockButton.setText("Unblock door");
+            blockButton.setText(R.string.unblockDoor);
         } else {
-            blockButton.setText("Block door");
+            blockButton.setText(R.string.blockDoor);
         }
 
         if (handler.isOpen()) {
             openButton.setEnabled(false);
-            openButton.setText("Status: open");
+            openButton.setText(R.string.doorStatusOpen);
         } else {
-            openButton.setText("Open door");
+            openButton.setText(R.string.openDoor);
             if (handler.isBlocked()) {
                 openButton.setEnabled(false);
             } else {
@@ -115,11 +173,18 @@ public class DoorFragment extends BoundFragment {
     }
 
     /**
+     * The listener interface to receive door events.
+     */
+    public interface DoorListener {
+        void onPictureChanged(byte[] image);
+        void onDoorStatusChanged();
+    }
+
+    /**
      * Decodes a byte array image in a background task.
      */
     private class BitmapWorkerTask extends AsyncTask<byte[], Void, Bitmap> {
         private final WeakReference<ImageView> imageViewReference;
-        private int data = 0;
 
         private BitmapWorkerTask(ImageView imageView) {
             // Use a WeakReference to ensure the ImageView can be garbage collected

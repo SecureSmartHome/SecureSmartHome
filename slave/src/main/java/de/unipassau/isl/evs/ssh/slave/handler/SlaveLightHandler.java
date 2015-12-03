@@ -83,7 +83,7 @@ public class SlaveLightHandler extends AbstractSlaveHandler {
         final Module module = payload.getModule();
         try {
             final Message reply = new Message(new LightPayload(plugSwitch.isOn(), module));
-            reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr()); //TODO: getSequenzeNumber
+            reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
             sendMessage(
                     original.getFromID(),
                     original.getHeader(Message.HEADER_REPLY_TO_KEY),
