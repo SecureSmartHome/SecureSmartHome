@@ -16,7 +16,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
-import de.unipassau.isl.evs.ssh.app.handler.DoorHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -36,7 +36,7 @@ public class AppContainer extends ContainerService {
         syncKeyStore();
         register(Client.KEY, new Client());
         register(AppModuleHandler.KEY, new AppModuleHandler());
-        register(DoorHandler.KEY, new DoorHandler());
+        register(AppDoorHandler.KEY, new AppDoorHandler());
         register(AppLightHandler.KEY, new AppLightHandler());
     }
 

@@ -91,6 +91,7 @@ public class CoreConstants {
         public static final String DOOR_SENSOR = "DoorSensor";
         public static final String WINDOW_SENSOR = "WindowSensor";
         public static final String WEBCAM = "Webcam";
+        public static final String DOORBELL = "Doorbell";
     }
 
     /**
@@ -100,20 +101,33 @@ public class CoreConstants {
         //Master
         public static final String MASTER_LIGHT_GET = "/master/light/get";
         public static final String MASTER_LIGHT_SET = "/master/light/set";
-        public static final String MASTER_DOOR_RINGS = "/master/doorbell/ring";
+        public static final String MASTER_DOOR_BELL_RING = "/master/doorbell/ring";
         public static final String MASTER_CAMERA_GET = "/master/camera/get";
         public static final String MASTER_WEATHER_INFO = "/master/weather/info";
+        public static final String MASTER_NOTIFICATION_SEND = "/master/notification/send";
+        public static final String MASTER_DOOR_BELL_CAMERA_GET = "/master/doorbell/camera/get";
+        public static final String MASTER_DOOR_UNLATCH = "/master/door/unlatch";
+        public static final String MASTER_DOOR_LOCK_SET = "/master/door/lock_set";
+        public static final String MASTER_DOOR_LOCK_GET = "/master/door/lock_get";
+        public static final String MASTER_DOOR_STATUS_GET = "/master/door/status_get";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
         public static final String SLAVE_LIGHT_SET = "/slave/light/set";
-        public static final String SLAVE_CAMERA_GET = "slave/camera/get";
+        public static final String SLAVE_CAMERA_GET = "/slave/camera/get";
+        public static final String SLAVE_DOOR_STATUS_GET = "/slave/door/status_get";
+        public static final String SLAVE_DOOR_UNLATCH = "/slave/door/unlatch";
+        public static final String SLAVE_MODULES_UPDATE = "/slave/modules/update";
 
         //App
         public static final String APP_MODULES_GET = "/app/module/get";
         public static final String APP_LIGHT_UPDATE = "/app/light/update";
-        public static final String APP_WEATHER_INFO = "/app/weather/warning";
-
+        public static final String APP_NOTIFICATION_RECEIVE = "/app/notification/receive";
+        public static final String APP_NOTIFICATION_PICTURE_RECEIVE = "/app/notification/picture_receive";
+        public static final String APP_CAMERA_GET = "/app/camera/get";
+        public static final String APP_DOOR_BLOCK = "/app/door/block";
+        public static final String APP_DOOR_GET = "/app/door/get";
+        public static final String APP_DOOR_RING = "/app/door/ring";
     }
 
     /**
@@ -128,6 +142,7 @@ public class CoreConstants {
      * @author leon
      */
     public class NotificationTypes {
+        //Each type also acts as a permission in the database
         public static final String ODROID_ADDED = "OdroidAdded";
         public static final String HUMIDITY_WARNING = "HumidityWarning";
         public static final String BRIGHTNESS_WARNING = "BrightnessWarning";

@@ -74,7 +74,7 @@ public class WeatherSensor extends AbstractComponent {
          */
         private void sendWeatherInfo() {
             WeatherPayload payload = new WeatherPayload(getTemperature1(), getTemperature2(), getPressure(),
-                    getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), false);
+                    getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), "");
 
             //Todo set values
 

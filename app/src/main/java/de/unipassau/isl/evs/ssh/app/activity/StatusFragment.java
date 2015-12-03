@@ -58,7 +58,7 @@ public class StatusFragment extends Fragment {
             connectedSlaves.setText(R.string.NoSlavesConnected);
         } else {
             ArrayAdapter<Slave> slaveAdapter = new ArrayAdapter<Slave>(getActivity().getApplicationContext(),
-                    R.layout.device_status_list_item, slaves.toArray(new Slave[2])) {
+                    R.layout.device_status_list_item, slaves) {
 
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
@@ -88,7 +88,7 @@ public class StatusFragment extends Fragment {
 
         } else {
             ArrayAdapter<Module> moduleAdapter = new ArrayAdapter<Module>(getActivity().getApplicationContext(),
-                    R.layout.device_status_module_item, modules.toArray(new Module[0])) {
+                    R.layout.device_status_module_item, modules) {
 
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {

@@ -22,7 +22,9 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
+import de.unipassau.isl.evs.ssh.slave.handler.SlaveDoorHandler;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveLightHandler;
+import de.unipassau.isl.evs.ssh.slave.handler.SlaveModuleHandler;
 
 /**
  * This Container class manages dependencies needed in the Slave part of the architecture.
@@ -37,10 +39,15 @@ public class SlaveContainer extends ContainerService {
         register(KeyStoreController.KEY, new KeyStoreController());
         register(NamingManager.KEY, new NamingManager(false));
         register(Client.KEY, new Client());
+        register(SlaveModuleHandler.KEY, new SlaveModuleHandler());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
         incomingDispatcher.registerHandler(new SlaveLightHandler(),
                 CoreConstants.RoutingKeys.SLAVE_LIGHT_GET, CoreConstants.RoutingKeys.SLAVE_LIGHT_SET);
+
+        incomingDispatcher.registerHandler(new SlaveDoorHandler(),
+                CoreConstants.RoutingKeys.SLAVE_DOOR_STATUS_GET,
+                CoreConstants.RoutingKeys.SLAVE_DOOR_UNLATCH);
 
         //FIXME this is temporary for testing until we got everything needed
         Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, "TestPlugswitch");

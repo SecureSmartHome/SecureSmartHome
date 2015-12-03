@@ -29,4 +29,9 @@
     <string name="deviceSatusConnectedSlaves">Connected Slaves</string>
     <string name="NoSlavesConnected">No Slaves connected</string>
     <string name="NoModulesConnected">No modules connected</string>
+    <string name="refreshImage">Refresh Image</string>
+    <string name="openDoor">Open door</string>
+    <string name="doorStatusOpen">Status: open</string>
+    <string name="blockDoor">Block door</string>
+    <string name="unblockDoor">Unblock door</string>
 </resources>

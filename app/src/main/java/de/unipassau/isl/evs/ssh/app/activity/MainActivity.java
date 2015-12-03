@@ -103,7 +103,7 @@ public class MainActivity extends BoundActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(SAVED_LAST_ACTIVE_FRAGMENT, getCurrentFragment().getClass().getSimpleName());
+        outState.putString(SAVED_LAST_ACTIVE_FRAGMENT, getCurrentFragment().getClass().getName());
     }
 
     // returns the currently displayed Fragment
