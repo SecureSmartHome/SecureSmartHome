@@ -8,7 +8,6 @@ import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -31,8 +30,11 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.ScheduledFuture;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_MILLIS_BETWEEN_BROADCASTS;
-
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_MILLIS_BETWEEN_BROADCASTS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_HOST;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_REQUEST;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_RESPONSE;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_PORT;
 
 /**
  * This component is responsible for sending UDP discovery packets and signalling the new address and port back to the
@@ -87,7 +89,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
                         .group(requireComponent(Client.KEY).getExecutor())
                         .handler(new ResponseHandler())
                         .option(ChannelOption.SO_BROADCAST, true);
-                channel = b.bind(CoreConstants.DISCOVERY_PORT);
+                channel = b.bind(DISCOVERY_PORT);
             }
 
             sendDiscoveryRequest();
@@ -155,7 +157,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
     }
 
     /**
-     * Send a single UDP discovery request. It contains of {@link CoreConstants#DISCOVERY_PAYLOAD_REQUEST}
+     * Send a single UDP discovery request. It contains of {@link CoreConstants.NettyConstants#DISCOVERY_PAYLOAD_REQUEST}
      * as header followed by the Public Key of the sought-after Master.
      * Both byte arrays are prefixed by their length as int.
      *
@@ -164,15 +166,16 @@ public class UDPDiscoveryClient extends AbstractComponent {
     private ChannelFuture sendDiscoveryRequest() {
         Log.v(TAG, "sendDiscoveryRequest");
 
-        final X509Certificate masterCert;
-        try {
-            masterCert = requireComponent(NamingManager.KEY).getMasterCert();
-        } catch (UnresolvableNamingException e) {
+        final NamingManager namingManager = requireComponent(NamingManager.KEY);
+        if (!namingManager.isMasterKnown()) {
+            final IllegalStateException e = new IllegalStateException("NamingManager.isMasterKnown() == false");
+            e.fillInStackTrace();
             Log.w(TAG, "Can't search for Master via UDP discovery when no Master Certificate is available," +
                     "will retry later", e);
             return channel.channel().newFailedFuture(e);
         }
-        final byte[] header = CoreConstants.DISCOVERY_PAYLOAD_REQUEST.getBytes();
+        final X509Certificate masterCert = namingManager.getMasterCertificate();
+        final byte[] header = DISCOVERY_PAYLOAD_REQUEST.getBytes();
         final byte[] pubKeyEncoded = masterCert.getPublicKey().getEncoded();
         final ByteBuf buffer = channel.channel().alloc().buffer(
                 header.length + pubKeyEncoded.length + (Integer.SIZE / Byte.SIZE) * 2);
@@ -181,8 +184,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
         buffer.writeInt(pubKeyEncoded.length);
         buffer.writeBytes(pubKeyEncoded);
 
-        final InetSocketAddress recipient = new InetSocketAddress(
-                CoreConstants.DISCOVERY_HOST, CoreConstants.DISCOVERY_PORT);
+        final InetSocketAddress recipient = new InetSocketAddress(DISCOVERY_HOST, DISCOVERY_PORT);
         final DatagramPacket request = new DatagramPacket(buffer, recipient);
         return channel.channel().writeAndFlush(request);
     }
@@ -199,19 +201,23 @@ public class UDPDiscoveryClient extends AbstractComponent {
                 final ByteBuf buffer = request.content();
 
                 final int dataStart = buffer.readerIndex();
-                final boolean headerValid = checkHeader(buffer);
-                if (headerValid) {
-                    final String address = readHeader(buffer);
+                final String messageType = readString(buffer);
+                if (DISCOVERY_PAYLOAD_RESPONSE.equals(messageType)) {
+                    final String address = readString(buffer);
                     final int port = buffer.readInt();
                     final int dataEnd = buffer.readerIndex();
                     if (checkSignature(buffer, dataStart, dataEnd)) {
                         // got a new address for the master!
                         ReferenceCountUtil.release(request);
                         Log.i(TAG, "UDP response received " + address + ":" + port);
-
                         stopDiscovery();
                         requireComponent(Client.KEY).onDiscoverySuccessful(address, port);
+                        return;
                     }
+                } else if (DISCOVERY_PAYLOAD_REQUEST.equals(messageType)) {
+                    // discard own requests that are echoed by the router
+                    ReferenceCountUtil.release(request);
+                    return;
                 }
             }
             // forward all other packets to the pipeline
@@ -221,7 +227,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
         private boolean checkSignature(ByteBuf buffer, int dataStart, int dataEnd) throws UnresolvableNamingException {
             try {
                 Signature signature = Signature.getInstance("ECDSA");
-                signature.initVerify(requireComponent(NamingManager.KEY).getMasterCert());
+                signature.initVerify(requireComponent(NamingManager.KEY).getMasterCertificate());
                 signature.update(buffer.nioBuffer(0, dataEnd - dataStart));
                 final byte[] sign = readSign(buffer);
                 return signature.verify(sign);
@@ -232,25 +238,11 @@ public class UDPDiscoveryClient extends AbstractComponent {
         }
 
         /**
-         * Read and verify header.
+         * Read a string.
          */
-        private boolean checkHeader(ByteBuf buffer) {
-            final int headerLength = buffer.readInt();
-            final byte[] expectedHeader = CoreConstants.DISCOVERY_PAYLOAD_REQUEST.getBytes();
-            if (headerLength != expectedHeader.length) {
-                return false;
-            }
-            byte[] actualHeader = new byte[expectedHeader.length];
-            buffer.readBytes(actualHeader);
-            return Arrays.equals(expectedHeader, actualHeader);
-        }
-
-        /**
-         * Read master address.
-         */
-        private String readHeader(ByteBuf buffer) {
+        private String readString(ByteBuf buffer) {
             final int length = buffer.readInt();
-            if (length < 0) {
+            if (length < 0 || length > 0xFFFF) {
                 return null;
             }
             byte[] value = new byte[length];

@@ -2,14 +2,11 @@ package de.unipassau.isl.evs.ssh.core.network;
 
 import android.util.Log;
 
-import java.security.cert.X509Certificate;
-
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.handler.PipelinePlug;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket;
-import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.serialization.ClassResolvers;
@@ -19,9 +16,9 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_ALL_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_READER_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_WRITER_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_ALL_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_READER_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_WRITER_IDLE_TIME;
 
 public class ClientHandshakeHandler extends ChannelHandlerAdapter {
     private static final String TAG = ClientHandshakeHandler.class.getSimpleName();
@@ -62,9 +59,8 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         Log.v(TAG, "channelActive " + ctx);
 
-        final X509Certificate clientCert = container.require(KeyStoreController.KEY).getOwnCertificate();
-        final X509Certificate masterCert = container.require(NamingManager.KEY).getMasterCert();
-        ctx.writeAndFlush(new HandshakePacket.ClientHello(clientCert, masterCert));
+        final NamingManager namingManager = container.require(NamingManager.KEY);
+        ctx.writeAndFlush(new HandshakePacket.ClientHello(namingManager.getOwnCertificate(), namingManager.getMasterCertificate()));
 
         super.channelActive(ctx);
     }

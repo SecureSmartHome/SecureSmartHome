@@ -27,7 +27,11 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_REQUEST;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_RESPONSE;
 
 /**
  * This component is responsible for responding to UDP discovery packets, signalling the address and port back to
@@ -66,7 +70,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
                 .group(requireComponent(Server.KEY).getExecutor())
                 .handler(new RequestHandler())
                 .option(ChannelOption.SO_BROADCAST, true);
-        channel = b.bind(CoreConstants.DISCOVERY_PORT);
+        channel = b.bind(CoreConstants.NettyConstants.DISCOVERY_PORT);
     }
 
     @Override
@@ -92,7 +96,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
     private ChannelFuture sendDiscoveryResponse(DatagramPacket request) {
         final ByteBuf buffer = channel.channel().alloc().heapBuffer();
 
-        final byte[] header = CoreConstants.DISCOVERY_PAYLOAD_RESPONSE.getBytes();
+        final byte[] header = DISCOVERY_PAYLOAD_RESPONSE.getBytes();
         final String addressString = request.recipient().getAddress().getHostAddress();
         final byte[] address = addressString.getBytes();
         final int port = ((InetSocketAddress) requireComponent(Server.KEY).getAddress()).getPort();
@@ -145,7 +149,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
          */
         private boolean checkHeader(ByteBuf buffer) {
             final int headerLength = buffer.readInt();
-            final byte[] expectedHeader = CoreConstants.DISCOVERY_PAYLOAD_REQUEST.getBytes();
+            final byte[] expectedHeader = DISCOVERY_PAYLOAD_REQUEST.getBytes();
             if (headerLength != expectedHeader.length) {
                 return false;
             }
@@ -158,13 +162,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
          * Read and verify public key.
          */
         private boolean checkPubKey(ByteBuf buffer) {
-            final X509Certificate masterCert;
-            try {
-                masterCert = requireComponent(NamingManager.KEY).getMasterCert();
-            } catch (UnresolvableNamingException e) {
-                Log.w(TAG, "Can't respond to UDP inquiries while Master has no certificate", e);
-                return false;
-            }
+            final X509Certificate masterCert = requireComponent(NamingManager.KEY).getMasterCertificate();
             final int pubKeyLength = buffer.readInt();
             final byte[] expectedPubKey = masterCert.getPublicKey().getEncoded();
             if (pubKeyLength != expectedPubKey.length) {

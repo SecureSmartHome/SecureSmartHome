@@ -23,9 +23,9 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_ALL_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_READER_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.CLIENT_WRITER_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_ALL_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_READER_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_WRITER_IDLE_TIME;
 
 @ChannelHandler.Sharable
 public class ServerHandshakeHandler extends ChannelHandlerAdapter {
@@ -80,12 +80,12 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof HandshakePacket.ClientHello) {
             final HandshakePacket.ClientHello hello = (HandshakePacket.ClientHello) msg;
-            ctx.attr(CoreConstants.ATTR_CLIENT_CERT).set(hello.clientCertificate);
-            final DeviceID deviceID = getContainer().require(NamingManager.KEY).getDeviceID(hello.clientCertificate);
-            ctx.attr(CoreConstants.ATTR_CLIENT_ID).set(deviceID);
+            ctx.attr(CoreConstants.NettyConstants.ATTR_CLIENT_CERT).set(hello.clientCertificate);
+            final DeviceID deviceID = DeviceID.fromCertificate(hello.clientCertificate);
+            ctx.attr(CoreConstants.NettyConstants.ATTR_CLIENT_ID).set(deviceID);
             Log.i(TAG, "Client " + deviceID + " connected");
 
-            final X509Certificate masterCert = getContainer().require(NamingManager.KEY).getMasterCert();
+            final X509Certificate masterCert = getContainer().require(NamingManager.KEY).getMasterCertificate();
             ctx.writeAndFlush(new HandshakePacket.ServerHello(masterCert));
 
             //TODO check authentication and protocol version and close connection on fail

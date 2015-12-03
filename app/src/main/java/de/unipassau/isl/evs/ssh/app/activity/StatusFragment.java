@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,12 +27,9 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  *
  * @author Wolfgang Popp
  */
-public class StatusFragment extends Fragment {
+public class StatusFragment extends BoundFragment {
 
-    public StatusFragment() {
-        // Required empty public constructor
-    }
-
+    // TODO onContainerConnected
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -41,24 +37,23 @@ public class StatusFragment extends Fragment {
         ListView slaveListView = (ListView) view.findViewById(R.id.deviceStatusListView);
         ListView moduleListView = (ListView) view.findViewById(R.id.deviceStatusModelsListView);
 
-        Container diContainer = ((BoundActivity) getActivity()).getContainer();
-        AppModuleHandler moduleHandler = diContainer.require(AppModuleHandler.KEY);
+        AppModuleHandler moduleHandler = getComponent(AppModuleHandler.KEY);
 
+        List<Module> modules = null;
+        List<Slave> slaves = null;
 
-        List<Module> modules = moduleHandler.getComponents();
-        // Dummy data
-        List<Slave> slaves = new LinkedList<>();
-        Slave slave1 = new Slave("sl1", new DeviceID("1.1.1.1"));
-        Slave slave2 = new Slave("sl2", new DeviceID("1.1.1.2"));
-        slaves.add(slave1);
-        slaves.add(slave2);
+        if (moduleHandler != null) {
+            modules = moduleHandler.getComponents();
+            // TODO get Slaves
+            slaves = null;
+        }
 
         if (slaves == null) {
             TextView connectedSlaves = (TextView) view.findViewById(R.id.deviceStatusConnectedSlaves);
             connectedSlaves.setText(R.string.NoSlavesConnected);
         } else {
             ArrayAdapter<Slave> slaveAdapter = new ArrayAdapter<Slave>(getActivity().getApplicationContext(),
-                    R.layout.device_status_list_item, slaves.toArray(new Slave[2])) {
+                    R.layout.device_status_list_item, slaves) {
 
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
@@ -88,7 +83,7 @@ public class StatusFragment extends Fragment {
 
         } else {
             ArrayAdapter<Module> moduleAdapter = new ArrayAdapter<Module>(getActivity().getApplicationContext(),
-                    R.layout.device_status_module_item, modules.toArray(new Module[0])) {
+                    R.layout.device_status_module_item, modules) {
 
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {

@@ -18,7 +18,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.network.NettyInternalLogger;
-import de.unipassau.isl.evs.ssh.core.network.UDPDiscoveryClient;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -36,8 +35,8 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.DEFAULT_PORT;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.master.MasterConstants.PREF_SERVER_PORT;
 
 /**
@@ -94,7 +93,7 @@ public class Server extends AbstractComponent {
                     return new NettyInternalLogger(name);
                 }
             });
-            ResourceLeakDetector.setLevel(CoreConstants.RESOURCE_LEAK_DETECTION);
+            ResourceLeakDetector.setLevel(CoreConstants.NettyConstants.RESOURCE_LEAK_DETECTION);
             // Start server
             startServer();
             // Add related components
@@ -168,7 +167,7 @@ public class Server extends AbstractComponent {
      */
     public Channel findChannel(DeviceID id) {
         for (Channel channel : connections) {
-            if (channel.isActive() && Objects.equals(channel.attr(CoreConstants.ATTR_CLIENT_ID).get(), id)) {
+            if (channel.isActive() && Objects.equals(channel.attr(CoreConstants.NettyConstants.ATTR_CLIENT_ID).get(), id)) {
                 return channel;
             }
         }
@@ -204,7 +203,7 @@ public class Server extends AbstractComponent {
     }
 
     /**
-     * @return the port of the Server set in the SharedPreferences or {@link de.unipassau.isl.evs.ssh.core.CoreConstants#DEFAULT_PORT}
+     * @return the port of the Server set in the SharedPreferences or {@link CoreConstants.NettyConstants#DEFAULT_PORT}
      */
     private int getPort() {
         SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)

@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 
 /**
  * As this Activity also displays information like wether the light is on or not, this Activity also
@@ -73,7 +74,8 @@ public class MainActivity extends BoundActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStack();
+            super.onBackPressed();
+            getSupportFragmentManager().popBackStackImmediate();
         } else {
             super.onBackPressed();
         }
@@ -103,11 +105,11 @@ public class MainActivity extends BoundActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(SAVED_LAST_ACTIVE_FRAGMENT, getCurrentFragment().getClass().getSimpleName());
+        outState.putString(SAVED_LAST_ACTIVE_FRAGMENT, getCurrentFragment().getClass().getName());
     }
 
     // returns the currently displayed Fragment
-    private Fragment getCurrentFragment(){
+    private Fragment getCurrentFragment() {
         return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
     }
 
@@ -117,7 +119,7 @@ public class MainActivity extends BoundActivity
      *
      * @param clazz the class of the fragment to show
      */
-    public void showFragmentByClass(Class clazz){
+    public void showFragmentByClass(Class clazz) {
         Class oldFragment = getCurrentFragment().getClass();
         Fragment fragment = null;
         try {
@@ -137,7 +139,7 @@ public class MainActivity extends BoundActivity
     }
 
     // maps button resource ids to Fragment classes.
-    private void showFragmentByClass(int id) {
+    private void showFragmentById(int id) {
         Class clazz;
         if (id == R.id.nav_home) {
             clazz = MainFragment.class;
@@ -167,10 +169,26 @@ public class MainActivity extends BoundActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        showFragmentByClass(id);
+        showFragmentById(id);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onContainerConnected(Container container) {
+        final Fragment fragment = getCurrentFragment();
+        if (fragment instanceof BoundFragment) {
+            ((BoundFragment) fragment).onContainerConnected(container);
+        }
+    }
+
+    @Override
+    public void onContainerDisconnected() {
+        final Fragment fragment = getCurrentFragment();
+        if (fragment instanceof BoundFragment) {
+            ((BoundFragment) fragment).onContainerDisconnected();
+        }
     }
 }

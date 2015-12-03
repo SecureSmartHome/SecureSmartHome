@@ -1,23 +1,23 @@
 package de.unipassau.isl.evs.ssh.master.network;
 
+import java.io.IOException;
+import java.util.Objects;
+
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 
-import java.io.IOException;
-import java.util.Objects;
-
 /**
  * Receives messages from system components and decides how to route them to the targets.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public class ServerOutgoingRouter extends OutgoingRouter {
     @Override
     protected ChannelFuture doSendMessage(Message.AddressedMessage amsg) {
-        if (Objects.equals(amsg.getToID(), getLocalID())) {
+        if (Objects.equals(amsg.getToID(), getOwnID())) {
             //Send Local
             requireComponent(IncomingDispatcher.KEY).dispatch(amsg);
             return requireComponent(Server.KEY).getChannel().newSucceededFuture();

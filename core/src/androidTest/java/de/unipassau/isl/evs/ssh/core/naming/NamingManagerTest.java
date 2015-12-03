@@ -4,28 +4,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.test.InstrumentationTestCase;
 
-import junit.framework.TestCase;
-
 import org.spongycastle.x509.X509V3CertificateGenerator;
 
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
 import javax.security.auth.x500.X500Principal;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.R;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
@@ -33,9 +24,13 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 
 public class NamingManagerTest extends InstrumentationTestCase {
 
+    private static final int ASYMMETRIC_KEY_SIZE = 256;
+    private static final String KEY_PAIR_ALGORITHM = "ECIES";
+    private static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA224withECDSA";
+
     private X509Certificate createCert() throws java.security.GeneralSecurityException {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance(KeyStoreController.KEY_PAIR_ALGORITHM);
-        generator.initialize(KeyStoreController.ASYMMETRIC_KEY_SIZE);
+        KeyPairGenerator generator = KeyPairGenerator.getInstance(KEY_PAIR_ALGORITHM);
+        generator.initialize(ASYMMETRIC_KEY_SIZE);
         KeyPair keyPair = generator.generateKeyPair();
 
         //Check Certificate
@@ -48,7 +43,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.YEAR, 100);
         certGen.setNotAfter(calendar.getTime());
-        certGen.setSignatureAlgorithm(KeyStoreController.KEY_PAIR_SIGNING_ALGORITHM);
+        certGen.setSignatureAlgorithm(KEY_PAIR_SIGNING_ALGORITHM);
         return  certGen.generate(keyPair.getPrivate());
 
     }
@@ -58,7 +53,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
         NamingManager naming = container.require(NamingManager.KEY);
 
         // Clear SharedPreferences
-        SharedPreferences sharedPref = context.getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = context.getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.remove(CoreConstants.SharedPrefs.PREF_MASTER_ID);
         editor.commit();
@@ -66,11 +61,11 @@ public class NamingManagerTest extends InstrumentationTestCase {
         // Generate a master certificate,
         X509Certificate certificate = createCert();
         // write master id to SharedPreferences,
-        DeviceID masterId = naming.getDeviceID(certificate);
-        editor.putString(CoreConstants.SharedPrefs.PREF_MASTER_ID, masterId.getId());
+        DeviceID masterId = DeviceID.fromCertificate(certificate);
+        editor.putString(CoreConstants.SharedPrefs.PREF_MASTER_ID, masterId.getIDString());
         editor.commit();
         // save the certificate
-        container.require(KeyStoreController.KEY).saveCertifcate(certificate, masterId.getId());
+        container.require(KeyStoreController.KEY).saveCertificate(certificate, masterId.getIDString());
 
         return masterId;
     }
@@ -84,7 +79,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
         container.register(NamingManager.KEY, new NamingManager(isMasterEnv));
 
         // Clear SharedPreferences
-        SharedPreferences sharedPref = context.getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = context.getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.remove(CoreConstants.SharedPrefs.PREF_MASTER_ID);
         editor.commit();
@@ -111,8 +106,8 @@ public class NamingManagerTest extends InstrumentationTestCase {
         naming = container.require(NamingManager.KEY);
 
         assertNotNull(naming.getMasterID());
-        assertNotNull(naming.getLocalDeviceId());
-        assertEquals(naming.getLocalDeviceId(), naming.getMasterID());
+        assertNotNull(naming.getOwnID());
+        assertEquals(naming.getOwnID(), naming.getMasterID());
     }
 
     public void testGetMasterCert() throws Exception {
@@ -121,29 +116,29 @@ public class NamingManagerTest extends InstrumentationTestCase {
         DeviceID masterId = createEnvironmentAsAfterHandshake(container);
         NamingManager naming = container.require(NamingManager.KEY);
 
-        assertNotNull(naming.getMasterCert());
+        assertNotNull(naming.getMasterCertificate());
 
         // simulate a master environment
         container = createDefaultEnvironment(false);
         masterId = createEnvironmentAsAfterHandshake(container);
         naming = container.require(NamingManager.KEY);
 
-        assertNotNull(naming.getMasterCert());
+        assertNotNull(naming.getMasterCertificate());
         assertNotNull(naming.getCertificate(naming.getMasterID()));
-        assertEquals(naming.getMasterCert(), naming.getCertificate(naming.getMasterID()));
+        assertEquals(naming.getMasterCertificate(), naming.getCertificate(naming.getMasterID()));
     }
 
     public void testGetLocalDeviceId() throws Exception {
         Container container = createDefaultEnvironment(false);
         NamingManager naming = container.require(NamingManager.KEY);
-        assertNotNull(naming.getLocalDeviceId());
+        assertNotNull(naming.getOwnID());
     }
 
     public void testGetDeviceID() throws Exception {
         Container container = createDefaultEnvironment(true);
         NamingManager naming = container.require(NamingManager.KEY);
         X509Certificate cert = createCert();
-        assertNotNull(naming.getDeviceID(cert));
+        assertNotNull(DeviceID.fromCertificate(cert));
 
     }
 
@@ -153,8 +148,8 @@ public class NamingManagerTest extends InstrumentationTestCase {
 
         // generate and save the certificate
         X509Certificate cert = createCert();
-        DeviceID id = naming.getDeviceID(cert);
-        container.require(KeyStoreController.KEY).saveCertifcate(cert, id.getId());
+        DeviceID id = DeviceID.fromCertificate(cert);
+        container.require(KeyStoreController.KEY).saveCertificate(cert, id.getIDString());
 
         assertEquals(naming.getCertificate(id), cert);
     }

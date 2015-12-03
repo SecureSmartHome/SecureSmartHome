@@ -317,4 +317,66 @@ public class SlaveController extends AbstractComponent {
         }
     }
 
+    public Integer getModuleID(String moduleName) {
+        Cursor moduleCursor = databaseConnector.executeSql("select "
+                        + DatabaseContract.ElectronicModule.COLUMN_ID
+                        + " from " + DatabaseContract.ElectronicModule.TABLE_NAME
+                        + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME
+                        + " = ?", new String[] { moduleName });
+        if (moduleCursor.moveToNext()) {
+            return moduleCursor.getInt(0);
+        }
+        return null;
+    }
+
+    public Slave getSlave(DeviceID slaveID) {
+        Cursor slavesCursor = databaseConnector.executeSql("select "
+                + DatabaseContract.Slave.COLUMN_NAME
+                + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT
+                + " from " + DatabaseContract.Slave.TABLE_NAME
+                + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT
+                + " = ?", new String[] {slaveID.getIDString()});
+        if (slavesCursor.moveToNext()) {
+            return new Slave(slavesCursor.getString(0), new DeviceID(slavesCursor.getString(1)));
+        }
+        return null;
+    }
+
+    public List<Module> getModulesByType(String type) {
+        //Notice: again changed order for convenience reasons when creating the ModuleAccessPoint.
+        Cursor modulesCursor = databaseConnector.executeSql("select" +
+                        " m." + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_USB_PORT
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE
+                        + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
+                        + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
+                        + " join " + DatabaseContract.Slave.TABLE_NAME + " s"
+                        + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
+                        + " = s." + DatabaseContract.Slave.COLUMN_ID
+                        + " where s." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE + " = ?",
+                new String[] { type });
+        List<Module> modules = new LinkedList<>();
+        while (modulesCursor.moveToNext()) {
+            String[] combinedModuleAccessPointInformation =
+                    new String[ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION];
+            for (int i = 0; i < ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION; i++) {
+                combinedModuleAccessPointInformation[i] = modulesCursor.getString(i);
+            }
+            ModuleAccessPoint moduleAccessPoint = ModuleAccessPoint
+                    .fromCombinedModuleAccessPointInformation(combinedModuleAccessPointInformation,
+                            modulesCursor.getString(ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 1));
+            modules.add(new Module(modulesCursor.getString(
+                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 3), new DeviceID(
+                    modulesCursor.getString(ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2)),
+                    modulesCursor.getString(ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION),
+                    moduleAccessPoint));
+        }
+        return modules;
+    }
 }

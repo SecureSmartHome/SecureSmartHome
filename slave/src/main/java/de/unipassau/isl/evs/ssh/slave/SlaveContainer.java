@@ -2,9 +2,6 @@ package de.unipassau.isl.evs.ssh.slave;
 
 import android.util.Log;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,11 +15,14 @@ import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
+import de.unipassau.isl.evs.ssh.slave.handler.SlaveDoorHandler;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveLightHandler;
+import de.unipassau.isl.evs.ssh.slave.handler.SlaveModuleHandler;
 
 /**
  * This Container class manages dependencies needed in the Slave part of the architecture.
@@ -30,64 +30,59 @@ import de.unipassau.isl.evs.ssh.slave.handler.SlaveLightHandler;
  * @author Niko
  */
 public class SlaveContainer extends ContainerService {
-    private static final File dir = new File("/sdcard/ssh");
+    private static File dir = new File("/sdcard/ssh");
 
     @Override
     protected void init() {
         register(KeyStoreController.KEY, new KeyStoreController());
+
+        // read the master id and cert from local storage as long as adding new devices is not implemented
+        if (!dir.mkdirs()) {
+            dir = getFilesDir();
+        }
+        Log.i("ContainerService", "Storing IDs in " + dir);
+        readMasterData();
+
         register(NamingManager.KEY, new NamingManager(false));
+
+        // write the app id and cert to local storage as long as adding new devices is not implemented
+        writeSlaveId();
+        writeSlaveCert();
+
         register(Client.KEY, new Client());
+        register(SlaveModuleHandler.KEY, new SlaveModuleHandler());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
         incomingDispatcher.registerHandler(new SlaveLightHandler(),
                 CoreConstants.RoutingKeys.SLAVE_LIGHT_GET, CoreConstants.RoutingKeys.SLAVE_LIGHT_SET);
 
+        incomingDispatcher.registerHandler(new SlaveDoorHandler(),
+                CoreConstants.RoutingKeys.SLAVE_DOOR_STATUS_GET,
+                CoreConstants.RoutingKeys.SLAVE_DOOR_UNLATCH);
+
         //FIXME this is temporary for testing until we got everything needed
         Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, "TestPlugswitch");
         register(key, new EdimaxPlugSwitch("192.168.0.111", 10000, "admin", "1234"));
-        syncKeyStore();
 
         final NamingManager namingManager = require(NamingManager.KEY);
-        Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getLocalDeviceId()
-                + "; Master is " + namingManager.getMasterID());
+        Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getOwnID()
+                + "; Master is " + (namingManager.isMasterKnown() ? namingManager.getMasterID() : "unknown"));
     }
 
-    private void syncKeyStore() {
-        dir.mkdirs();
-
-        // read the master id and cert from local storage as long as adding new devices is not implemented
-        readMasterId();
-        readMasterCert();
-
-        // write the slave id and cert to local storage as long as adding new devices is not implemented
-        writeSlaveId();
-        writeSlaveCert();
-    }
-
-    private void readMasterId() {
-        final File masterId = new File(dir, "master.id");
-        if (masterId.exists()) {
-            try {
-                final String id = Files.readFirstLine(masterId, Charsets.US_ASCII);
-                getSharedPreferences(SlaveConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
-                        .putString(SlaveConstants.SharedPrefs.PREF_MASTER_ID, id)
-                        .commit();
-                Log.i(getClass().getSimpleName(), "ID for Master loaded: " + id);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void readMasterCert() {
+    private void readMasterData() {
         final File masterCert = new File(dir, "master.der");
         if (masterCert.exists()) {
             try {
                 CertificateFactory certFact = CertificateFactory.getInstance("X.509");
                 final Certificate certificate = certFact.generateCertificate(new FileInputStream(masterCert));
-                require(KeyStoreController.KEY).saveCertifcate(((X509Certificate) certificate),
-                        require(NamingManager.KEY).getMasterID().getId());
-                Log.i(getClass().getSimpleName(), "Certificate for Master loaded:\n" + certificate);
+
+                final DeviceID id = DeviceID.fromCertificate((X509Certificate) certificate);
+                getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
+                        .putString(SlaveConstants.SharedPrefs.PREF_MASTER_ID, id.getIDString())
+                        .commit();
+
+                require(KeyStoreController.KEY).saveCertificate(((X509Certificate) certificate), id.getIDString());
+                Log.i(getClass().getSimpleName(), "Certificate for Master " + id + " loaded:\n" + certificate);
             } catch (GeneralSecurityException | IOException e) {
                 e.printStackTrace();
             }
@@ -104,7 +99,7 @@ public class SlaveContainer extends ContainerService {
 
     private void writeSlaveId() {
         try (final FileOutputStream os = new FileOutputStream(new File(dir, "slave.id"))) {
-            os.write(require(NamingManager.KEY).getLocalDeviceId().getId().getBytes());
+            os.write(require(NamingManager.KEY).getOwnID().getId().getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }

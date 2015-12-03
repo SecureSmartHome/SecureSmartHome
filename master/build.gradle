@@ -14,5 +14,4 @@ android {
 
 dependencies {
     compile project(':core')
-    compile project(':drivers')
 }
