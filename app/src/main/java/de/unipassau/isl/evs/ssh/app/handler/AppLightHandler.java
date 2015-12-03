@@ -24,15 +24,13 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  * AppLightHandler class handles message from and to the
  * {@link de.unipassau.isl.evs.ssh.app.activity.LightFragment LightFragment}
  *
- * @author Phil
+ * @author Phil Werli
  */
 public class AppLightHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppLightHandler> KEY = new Key<>(AppLightHandler.class);
-
+    private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(20);
     private final List<LightHandlerListener> listeners = new ArrayList<>();
     private final Map<Module, LightStatus> lightStatusMapping = new HashMap<>();
-
-    private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(20);
 
     public AppLightHandler() {
         Module m = new Module("TestPlugswitch", new DeviceID("H5f4ahpVmoVL6GKAYqZY7m73k9i9nDCnsiJLbw+0n3E="),
@@ -41,7 +39,7 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     }
 
     /**
-     * Changes the light-status of a module.
+     * Changes the light status of a module.
      *
      * @param module The module which status is changed.
      */
@@ -80,7 +78,7 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     }
 
     /**
-     * @return All light modules with it's statuses.
+     * @return All light modules with its status.
      */
     public Map<Module, LightStatus> getAllLightModuleStates() {
         return Collections.unmodifiableMap(lightStatusMapping);
@@ -119,34 +117,6 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public interface LightHandlerListener {
-        void statusChanged(Module module);
-    }
-
-    public class LightStatus {
-        private boolean isOn;
-        private long timestamp;
-
-        public LightStatus(boolean isOn) {
-            setOn(isOn);
-        }
-
-        void setOn(boolean isOn) {
-            this.isOn = isOn;
-            timestamp = System.currentTimeMillis();
-        }
-
-        public boolean isOn() {
-            return isOn;
-        }
-
-        public long getTimestamp() {
-            return timestamp;
-        }
-    }
-
-    //Lifecycle & Callbacks/////////////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * Registers the {@link IncomingDispatcher} as an component.
      */
@@ -160,6 +130,7 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
     }
 
+    //Lifecycle & Callbacks/////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void handle(Message.AddressedMessage message) {
@@ -191,5 +162,31 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     @Override
     public void destroy() {
         requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.APP_LIGHT_UPDATE);
+    }
+
+    public interface LightHandlerListener {
+        void statusChanged(Module module);
+    }
+
+    public class LightStatus {
+        private boolean isOn;
+        private long timestamp;
+
+        public LightStatus(boolean isOn) {
+            setOn(isOn);
+        }
+
+        public boolean isOn() {
+            return isOn;
+        }
+
+        void setOn(boolean isOn) {
+            this.isOn = isOn;
+            timestamp = System.currentTimeMillis();
+        }
+
+        public long getTimestamp() {
+            return timestamp;
+        }
     }
 }
