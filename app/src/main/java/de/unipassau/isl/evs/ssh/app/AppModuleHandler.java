@@ -55,6 +55,13 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
         }
     };
 
+    public static final Predicate<Module> PREDICATE_CAMERA = new Predicate<Module>() {
+        @Override
+        public boolean apply(Module input) {
+            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.WEBCAM);
+        }
+    };
+
     private List<Module> components;
 
     public void updateList(List<Module> components) {
@@ -67,16 +74,33 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
     }
 
     public List<Module> getLights() {
+        if (getComponents() == null) {
+            return null;
+        }
         Iterable<Module> filtered = Iterables.filter(components, PREDICATE_LIGHT);
         return Lists.newArrayList(filtered);
     }
 
     public List<Module> getDoors() {
+        if (getComponents() == null) {
+            return null;
+        }
         Iterable<Module> filtered = Iterables.filter(components, PREDICATE_DOOR);
         return Lists.newArrayList(filtered);
     }
 
+    public List<Module> getCameras() {
+        if (getComponents() == null) {
+            return null;
+        }
+        Iterable<Module> filtered = Iterables.filter(components, PREDICATE_CAMERA);
+        return Lists.newArrayList(filtered);
+    }
+
     public List<Module> getWeather() {
+        if (getComponents() == null) {
+            return null;
+        }
         Iterable<Module> filtered = Iterables.filter(components, PREDICATE_WEATHER);
         return Lists.newArrayList(filtered);
     }

@@ -19,7 +19,7 @@
         android:adjustViewBounds="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_above="@+id/doorFragmentOpenButton" />
+        android:layout_above="@+id/doorFragmentRefreshButton" />
 
     <Button
         android:layout_width="wrap_content"
@@ -37,4 +37,14 @@
         android:layout_gravity="right"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/stat_notify_sync_noanim"
+        android:id="@+id/doorFragmentRefreshButton"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:elevation="2dp"
+        android:layout_alignTop="@+id/doorFragmentOpenButton" />
 </RelativeLayout>

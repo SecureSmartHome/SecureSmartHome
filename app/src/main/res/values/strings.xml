@@ -38,5 +38,11 @@
     <!--Strings used for the Welcome Screen-->
     <string name="welcome_to_ssh">Welcome to the Secure Smart Home App.</string>
     <string name="click_to_register">Click below to register in a system.</string>
+
     <string name="register">Register</string>
+    <string name="refreshImage">Refresh Image</string>
+    <string name="openDoor">Open door</string>
+    <string name="doorStatusOpen">Status: open</string>
+    <string name="blockDoor">Block door</string>
+    <string name="unblockDoor">Unblock door</string>
 </resources>
