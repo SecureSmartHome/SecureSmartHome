@@ -186,8 +186,6 @@ public class MainActivity extends BoundActivity
             clazz = ModifyPermissionFragment.class;
         } else if (id == R.id.nav_addNewUserDevice) {
             clazz = AddNewUserDeviceFragment.class;
-        } else if (id == R.id.nav_addNewUserDevice) {
-            clazz = AddNewUserDeviceFragment.class;
         } else if (id == R.id.light_fab) {
             clazz = AddModuleFragment.class;
         } else {

@@ -75,6 +75,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
                 //Todo: yeah, what do?
             }
             allowRegistrationFor.remove(registerUserDevicePayload.getToken());
+            System.out.println("Yeahalsdjflkasdjflkjaksdfjlaksjdflkjasdlkfjöalsdkjf");
         } //Todo: else error, ignore?
     }
 
