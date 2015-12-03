@@ -25,6 +25,15 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".activity.MasterQRCodeActivity"
+            android:label="@string/add_initial_device">
+            <intent-filter>
+                <action android:name="android.intent.action.QRCODE" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <service android:name=".MasterContainer" />
 
         <!-- Start Service on boot -->

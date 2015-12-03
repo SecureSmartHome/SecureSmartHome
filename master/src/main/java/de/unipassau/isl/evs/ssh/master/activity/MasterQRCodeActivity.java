@@ -45,7 +45,7 @@ public class MasterQRCodeActivity extends BoundActivity {
         Serializable extra = getIntent().getExtras().getSerializable(EXTRA_QR_DEVICE_INFORMATION);
         if (extra instanceof QRDeviceInformation) {
             try {
-                return ((QRDeviceInformation) extra).toQRBitmap(Bitmap.Config.ALPHA_8, Color.BLACK, Color.WHITE);
+                return ((QRDeviceInformation) extra).toQRBitmap(Bitmap.Config.ARGB_8888, Color.BLACK, Color.WHITE);
             } catch (WriterException e) {
                 throw new IllegalArgumentException("illegal QRCode data", e);
             }
