@@ -16,7 +16,7 @@ import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 
 /**
- * As this Activity also displays information like wether the light is on or not, this Activity also
+ * As this Activity also displays information like whether the light is on or not, this Activity also
  * needs to messages concerning that information.
  *
  * @author bucher
@@ -113,27 +113,41 @@ public class MainActivity extends BoundActivity
     }
 
     /**
-     * Displays a fragment and takes care of livecycle actions like saving state when rotating the
+     * Displays a fragment and takes care of lifecycle actions like saving state when rotating the
      * screen or managing the back button behavior.
      *
      * @param clazz the class of the fragment to show
      */
     public void showFragmentByClass(Class clazz) {
+        showFragmentByClass(clazz, null);
+    }
+
+    /**
+     * Displays a fragment and takes care of lifecycle actions like saving state when rotating the
+     * screen or managing the back button behavior.
+     *
+     * @param clazz  the class of the fragment to show
+     * @param bundle the information given with the new fragment
+     */
+    public void showFragmentByClass(Class clazz, Bundle bundle) {
         Class oldFragment = getCurrentFragment().getClass();
         Fragment fragment = null;
-        try {
-            fragment = (Fragment) clazz.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        if (fragment != null) {
-            android.support.v4.app.FragmentTransaction fragmentTransaction =
-                    getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, fragment);
-            if (!oldFragment.isInstance(fragment)) {
-                fragmentTransaction.addToBackStack(null);
+        if (bundle != null) {
+            try {
+                fragment = (Fragment) clazz.newInstance();
+                fragment.setArguments(bundle);
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
             }
-            fragmentTransaction.commit();
+            if (fragment != null) {
+                android.support.v4.app.FragmentTransaction fragmentTransaction =
+                        getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_container, fragment);
+                if (!oldFragment.isInstance(fragment)) {
+                    fragmentTransaction.addToBackStack(null);
+                }
+                fragmentTransaction.commit();
+            }
         }
     }
 

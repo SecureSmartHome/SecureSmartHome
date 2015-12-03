@@ -52,7 +52,7 @@ public class ListGroupFragment extends BoundFragment {
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                             Group item = adapter.getItem(position);
                                             Bundle bundle = new Bundle();
-                                            bundle.putSerializable(AppConstants.Fragment_Arguments.ARGUMENT_GROUP, item);
+                                            bundle.putSerializable(AppConstants.Fragment_Arguments.ARGUMENT_FRAGMENT, item);
                                             ((MainActivity) getActivity()).showFragmentByClass(ListUserDeviceFragment.class, bundle);
                                         }
                                     }
