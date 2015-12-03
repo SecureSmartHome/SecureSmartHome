@@ -165,13 +165,13 @@ public class NamingManager extends AbstractComponent {
 
                 String masterIDStr = prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null);
                 if (masterIDStr == null) {
-                    throw new StartupException("MasterID from SharedPrefs (" + CoreConstants.SharedPrefs.PREF_MASTER_ID + ") is null");
+                   // throw new StartupException("MasterID from SharedPrefs (" + CoreConstants.SharedPrefs.PREF_MASTER_ID + ") is null");
                 }
                 masterID = new DeviceID(masterIDStr);
                 masterCert = getCertificate(masterID);
             }
         } catch (UnresolvableNamingException | GeneralSecurityException e) {
-            throw new StartupException(e);
+           // throw new StartupException(e);
         }
     }
 
