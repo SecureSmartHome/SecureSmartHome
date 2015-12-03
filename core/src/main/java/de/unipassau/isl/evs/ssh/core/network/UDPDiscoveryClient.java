@@ -32,7 +32,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_
  * This component is responsible for sending UDP discovery packets and signalling the new address and port back to the
  * {@link Client} if a new Master has been found.
  *
- * @author Phil Werli, Niko Fink
+ * @author Phil, Niko
  */
 public class UDPDiscoveryClient extends AbstractComponent {
     public static final Key<UDPDiscoveryClient> KEY = new Key<>(UDPDiscoveryClient.class);

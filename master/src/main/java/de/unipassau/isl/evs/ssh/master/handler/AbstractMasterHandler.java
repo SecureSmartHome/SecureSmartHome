@@ -76,6 +76,7 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler imple
 
     /**
      * Returns whether the device with the given DeviceID is a Slave.
+     *
      * @param deviceID DeviceID for the device to check for whether it a Slave or not.
      * @return Whether or not the device with given DeviceID is a Slave.
      */

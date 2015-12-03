@@ -9,9 +9,12 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
+
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -20,6 +23,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
+import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -101,6 +105,25 @@ public class MainActivity extends BoundActivity {
                 });
             }
         });
+        // start MasterQRCodeActivity when no devices are registered yet
+        if (hasNoRegisteredDevice()) {
+            Intent intent = new Intent(this, MasterQRCodeActivity.class);
+//             TODO: create QRCodeInformation from data
+//            QRDeviceInformation deviceInformation = new QRDeviceInformation();
+//            intent.putExtra(EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
+            startActivity(intent);
+        }
+    }
+
+    /**
+     * Checks if there are no registered devices in the system.
+     *
+     * @return Whether no devices are registered in the master.
+     * author Phil Werli
+     */
+    private boolean hasNoRegisteredDevice() {
+        List<UserDevice> list = getContainer().require(UserManagementController.KEY).getUserDevices();
+        return list.size() == 0;
     }
 
 

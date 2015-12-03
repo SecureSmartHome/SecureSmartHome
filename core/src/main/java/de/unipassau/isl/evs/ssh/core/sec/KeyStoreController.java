@@ -47,6 +47,7 @@ import de.unipassau.isl.evs.ssh.core.container.StartupException;
  * @author Chris
  */
 public class KeyStoreController extends AbstractComponent {
+    public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);
     private static final String LOCAL_PRIVATE_KEY_ALIAS = "localPrivateKey";
     private static final String KEY_STORE_FILENAME = "encryptText-keystore.bks";
     private static final String KEY_STORE_TYPE = "BKS";
@@ -54,9 +55,6 @@ public class KeyStoreController extends AbstractComponent {
     private static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA224withECDSA";
     private static final String PUBLIC_KEY_PREFIX = "public_key:";
     private static final int ASYMMETRIC_KEY_SIZE = 256;
-
-
-    public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);
 
     static {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);

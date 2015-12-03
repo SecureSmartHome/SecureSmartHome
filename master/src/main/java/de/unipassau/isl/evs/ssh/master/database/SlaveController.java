@@ -22,12 +22,12 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  */
 public class SlaveController extends AbstractComponent {
     public static final Key<SlaveController> KEY = new Key<>(SlaveController.class);
-    private DatabaseConnector databaseConnector;
     public static final String SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY =
             "select " + DatabaseContract.Slave.COLUMN_ID
                     + " from " + DatabaseContract.Slave.TABLE_NAME
                     + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT
                     + " = ?";
+    private DatabaseConnector databaseConnector;
 
     @Override
     public void init(Container container) {
@@ -319,10 +319,10 @@ public class SlaveController extends AbstractComponent {
 
     public Integer getModuleID(String moduleName) {
         Cursor moduleCursor = databaseConnector.executeSql("select "
-                        + DatabaseContract.ElectronicModule.COLUMN_ID
-                        + " from " + DatabaseContract.ElectronicModule.TABLE_NAME
-                        + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME
-                        + " = ?", new String[] { moduleName });
+                + DatabaseContract.ElectronicModule.COLUMN_ID
+                + " from " + DatabaseContract.ElectronicModule.TABLE_NAME
+                + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME
+                + " = ?", new String[]{moduleName});
         if (moduleCursor.moveToNext()) {
             return moduleCursor.getInt(0);
         }
@@ -335,7 +335,7 @@ public class SlaveController extends AbstractComponent {
                 + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT
                 + " from " + DatabaseContract.Slave.TABLE_NAME
                 + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT
-                + " = ?", new String[] {slaveID.getIDString()});
+                + " = ?", new String[]{slaveID.getIDString()});
         if (slavesCursor.moveToNext()) {
             return new Slave(slavesCursor.getString(0), new DeviceID(slavesCursor.getString(1)));
         }
@@ -360,7 +360,7 @@ public class SlaveController extends AbstractComponent {
                         + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
                         + " = s." + DatabaseContract.Slave.COLUMN_ID
                         + " where s." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE + " = ?",
-                new String[] { type });
+                new String[]{type});
         List<Module> modules = new LinkedList<>();
         while (modulesCursor.moveToNext()) {
             String[] combinedModuleAccessPointInformation =

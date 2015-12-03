@@ -10,8 +10,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import java.io.IOException;
 
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+
+import static android.widget.Toast.LENGTH_SHORT;
 
 /**
  * ScanQRCodeFragment class to scan a QR-Code in the app UI.
@@ -20,6 +26,7 @@ import de.unipassau.isl.evs.ssh.app.R;
  */
 public class ScanQRCodeFragment extends Fragment {
 
+    public static final int RESULT_OK = -1;
     private static final int REQUEST_CODE_SCAN_QR = 1;
 
     ////////////// @author Phil Werli ///////////////////////////////////////////////////////////
@@ -63,10 +70,10 @@ public class ScanQRCodeFragment extends Fragment {
             startActivity(marketIntent);
         }
     }
-/*
+
     @Override
     public void onActivityResult(int requestCode, int resultCode,
-                                    Intent data) {
+                                 Intent data) {
         if (requestCode == REQUEST_CODE_SCAN_QR) {
             if (resultCode == RESULT_OK) {
                 String contents = data.getStringExtra("SCAN_RESULT");
@@ -76,13 +83,12 @@ public class ScanQRCodeFragment extends Fragment {
                     //TODO do something with info
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Toast.makeText(this, "Malformed QR-Code",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Malformed QR-Code",
+                            LENGTH_SHORT).show();
                 }
             }
         }
         // forward the intent to child fragments
         super.onActivityResult(requestCode, resultCode, data);
     }
-    */
 }

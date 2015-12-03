@@ -28,10 +28,6 @@ import static de.unipassau.isl.evs.ssh.core.sec.KeyStoreController.KEY;
  * Instrumentation Test for the KeyStoreController
  */
 public class KeyStoreControllerTest extends InstrumentationTestCase {
-    static {
-        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
-    }
-
     private static final String LOCAL_PRIVATE_KEY_ALIAS = "localPrivateKey";
     private static final String KEY_STORE_FILENAME = "encryptText-keystore.bks";
     private static final String KEY_STORE_TYPE = "BKS";
@@ -39,6 +35,10 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
     private static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA224withECDSA";
     private static final String PUBLIC_KEY_PREFIX = "public_key:";
     private static final int ASYMMETRIC_KEY_SIZE = 256;
+
+    static {
+        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+    }
 
     /**
      * Test method for the initialization of the KeyStoreController

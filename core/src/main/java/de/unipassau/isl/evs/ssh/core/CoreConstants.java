@@ -15,6 +15,11 @@ import io.netty.util.ResourceLeakDetector;
 public class CoreConstants {
 
     /**
+     * Name used for SharedPreferences file
+     */
+    public static final String FILE_SHARED_PREFS = "shared-preferences";
+
+    /**
      * The class contains constants for the Netty Framework
      *
      * @author Niko Fink & Phil Werli

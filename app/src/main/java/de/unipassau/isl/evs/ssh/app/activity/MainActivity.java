@@ -13,7 +13,6 @@ import android.view.MenuItem;
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
@@ -79,12 +78,23 @@ public class MainActivity extends BoundActivity
      * @return If the device is already registered or not.
      */
     private boolean deviceNotRegistered() {
-        String master_id = getSharedPrefs().getString(PREF_MASTER_ID, null);
+        SharedPreferences sharedPreferences = getSharedPrefs();
+        String master_id;
+        if (sharedPreferences == null) {
+            master_id = null;
+        } else {
+            master_id = sharedPreferences.getString(PREF_MASTER_ID, null);
+        }
         return master_id == null;
     }
 
     private SharedPreferences getSharedPrefs() {
-        return getComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        if (sharedPreferences == null) {
+            return getComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -123,11 +133,11 @@ public class MainActivity extends BoundActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(SAVED_LAST_ACTIVE_FRAGMENT, getCurrentFragment().getClass().getName());
+        outState.putString(SAVED_LAST_ACTIVE_FRAGMENT, getCurrentFragment().getClass().getSimpleName());
     }
 
     // returns the currently displayed Fragment
-    private Fragment getCurrentFragment() {
+    private Fragment getCurrentFragment(){
         return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
     }
 
@@ -137,7 +147,7 @@ public class MainActivity extends BoundActivity
      *
      * @param clazz the class of the fragment to show
      */
-    public void showFragmentByClass(Class clazz) {
+    public void showFragmentByClass(Class clazz){
         Class oldFragment = getCurrentFragment().getClass();
         Fragment fragment = null;
         try {
@@ -194,21 +204,5 @@ public class MainActivity extends BoundActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    @Override
-    public void onContainerConnected(Container container) {
-        final Fragment fragment = getCurrentFragment();
-        if (fragment instanceof BoundFragment) {
-            ((BoundFragment) fragment).onContainerConnected(container);
-        }
-    }
-
-    @Override
-    public void onContainerDisconnected() {
-        final Fragment fragment = getCurrentFragment();
-        if (fragment instanceof BoundFragment) {
-            ((BoundFragment) fragment).onContainerDisconnected();
-        }
     }
 }

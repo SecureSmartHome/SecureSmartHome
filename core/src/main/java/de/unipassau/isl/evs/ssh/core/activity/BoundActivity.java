@@ -1,20 +1,24 @@
 package de.unipassau.isl.evs.ssh.core.activity;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
 /**
- * Activity that binds itself to the container service to enable activities to access the container.
+ * Activity that automatically binds itself to the ContainerService to enable Activities to access the Container.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public class BoundActivity extends AppCompatActivity {
     private static final String TAG = BoundActivity.class.getSimpleName();
@@ -41,12 +45,18 @@ public class BoundActivity extends AppCompatActivity {
     /**
      * Constructor for the BoundActivity
      *
-     * @param serviceClass representing the ContainerService
+     * @param serviceClass class of the ContainerService to start, used for generating the Intent with {@link Intent#Intent(Context, Class)}
      */
     public BoundActivity(Class<? extends ContainerService> serviceClass) {
         this.serviceClass = serviceClass;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Also calls {@link #startService(Intent)} and {@link #bindService(Intent, ServiceConnection, int)} in order
+     * to connect to the {@link ContainerService}.
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -61,6 +71,11 @@ public class BoundActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Also unbinds the Connection to the ContainerService.
+     */
     @Override
     protected void onStop() {
         if (serviceBound) {
@@ -74,16 +89,43 @@ public class BoundActivity extends AppCompatActivity {
         super.onStop();
     }
 
+    /**
+     * Overwrite this method if you want to receive a callback as soon as the Container is connected and available,
+     * i.e. this BoundActivity is bound to a ContainerService.
+     *
+     * @param container the Container of the ContainerService this Activity is bound to
+     * @see #getContainer()
+     * @see ServiceConnection#onServiceConnected(ComponentName, IBinder) called from
+     * ServiceConnection.onServiceConnected(ComponentName, IBinder)
+     */
     public void onContainerConnected(Container container) {
     }
 
+    /**
+     * Overwrite this method if you want to receive a callback as soon as the Container is no longer connected and available,
+     * i.e. this BoundActivity is no longer bound to a ContainerService.
+     *
+     * @see ServiceConnection#onServiceDisconnected(ComponentName) called from
+     * ServiceConnection.onServiceDisconnected(ComponentName)
+     */
     public void onContainerDisconnected() {
     }
 
+    /**
+     * @return the Container of the ContainerService this Activity is bound to, or {@code null} if this Activity
+     * isn't currently bound
+     */
+    @Nullable
     public Container getContainer() {
         return serviceContainer;
     }
 
+    /**
+     * Fetch the Component from the Container or return {@code null} if the Component or the Container itself are not available.
+     *
+     * @see Container#get(Key)
+     */
+    @Nullable
     protected <T extends Component> T getComponent(Key<T> key) {
         Container container = getContainer();
         if (container != null) {
@@ -93,6 +135,13 @@ public class BoundActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Fetch the Component from the Container or throw an {@link IllegalStateException} if the Component or the
+     * Container itself are not available.
+     *
+     * @see Container#require(Key)
+     */
+    @NonNull
     protected <T extends Component> T requireComponent(Key<T> key) {
         Container container = getContainer();
         if (container != null) {

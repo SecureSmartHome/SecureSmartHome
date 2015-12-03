@@ -10,10 +10,9 @@ import io.netty.channel.ChannelFuture;
 /**
  * Receives messages from system components and decides how to route them to the targets.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public class ClientOutgoingRouter extends OutgoingRouter {
-
     @Override
     protected ChannelFuture doSendMessage(Message.AddressedMessage amsg) {
         if (Objects.equals(amsg.getToID(), getOwnID())) {
