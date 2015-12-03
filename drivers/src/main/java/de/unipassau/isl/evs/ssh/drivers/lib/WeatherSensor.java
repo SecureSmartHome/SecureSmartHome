@@ -31,6 +31,7 @@ public class WeatherSensor extends AbstractComponent {
 
     private double temp1, temp2, pressure, altitude, humidity, uv;
     private int visible, ir;
+    private String modulName;
     private Container container;
     private ScheduledFuture future;
 
@@ -74,7 +75,7 @@ public class WeatherSensor extends AbstractComponent {
          */
         private void sendWeatherInfo() {
             WeatherPayload payload = new WeatherPayload(getTemperature1(), getTemperature2(), getPressure(),
-                    getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), "");
+                    getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), " " , " ");
 
             //Todo set values
 
@@ -166,4 +167,9 @@ public class WeatherSensor extends AbstractComponent {
     public int getInfrared() {
         return ir;
     }
+
+    /*
+    * returns last value from readData() for module Name of the sensor
+     */
+    public String getModulName(){ return modulName; }
 }

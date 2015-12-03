@@ -2,48 +2,83 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
     tools:context="de.unipassau.isl.evs.ssh.app.MainActivity">
 
     <TextView
-        android:text="Hello Climate!"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="46dp"
+        android:text="Climate data:"
+        android:id="@+id/climateData"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/colorSecondaryText" />
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Available Components:"
-        android:id="@+id/textView" />
+        android:layout_height="26dp"
+        android:text="Temperature 1:"
+        android:id="@+id/temp1"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorSecondaryText" />
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="[]"
-        android:id="@+id/textViewComponents" />
+        android:layout_height="26dp"
+        android:text="Temperature 2:"
+        android:id="@+id/temp2"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorSecondaryText" />
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Package Information:"
-        android:id="@+id/textView3" />
+        android:layout_height="26dp"
+        android:text="Pressure:"
+        android:id="@+id/pressure"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorSecondaryText" />
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="null"
-        android:id="@+id/textViewPackage" />
+        android:layout_height="26dp"
+        android:text="Altitude:"
+        android:id="@+id/altitude"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorSecondaryText" />
 
-    <Button
+    <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Test Climate Notification"
-        android:id="@+id/notificationButton"
-        android:layout_gravity="center_horizontal"
-        android:onClick="notificationButtonClicked" />
+        android:layout_height="26dp"
+        android:text="Humidity:"
+        android:id="@+id/humidity"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorSecondaryText" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="26dp"
+        android:text="UV:"
+        android:id="@+id/uv"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorSecondaryText" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="26dp"
+        android:text="Visible Light:"
+        android:id="@+id/visible"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorSecondaryText" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="26dp"
+        android:text="Infrared:"
+        android:id="@+id/ir"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorSecondaryText" />
 
 </LinearLayout>

@@ -11,10 +11,10 @@ public class WeatherPayload implements MessagePayload {
 
     private double temp1, temp2, pressure, altitude, humidity, uv;
     private int visible, ir;
-    private String notificationType;
+    private String notificationType, modulName;
 
     public WeatherPayload(double temp1, double temp2, double pressure, double altitude, double humidity,
-                          double uv, int visible, int ir, String notificationType ) {
+                          double uv, int visible, int ir, String notificationType, String modulName ) {
         this.temp1 = temp1;
         this.temp2 = temp2;
         this.pressure = pressure;
@@ -24,6 +24,7 @@ public class WeatherPayload implements MessagePayload {
         this.visible = visible;
         this.ir = ir;
         this.notificationType = notificationType; //see CoreConstants.NotificationTypd
+        this.modulName = modulName;
     }
 
     /**
@@ -42,6 +43,7 @@ public class WeatherPayload implements MessagePayload {
         this.visible = payload.visible;
         this.ir = payload.ir;
         this.notificationType = notificationType;
+        this.modulName = modulName;
     }
 
     /**
@@ -84,6 +86,8 @@ public class WeatherPayload implements MessagePayload {
     public int getIr() {
         return ir;
     }
+
+    public String getModulName() { return modulName; }
 
     /**
      * Depending on the notification type a client decides if a warning shall be shown or not.

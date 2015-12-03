@@ -122,6 +122,7 @@ public class CoreConstants {
         //App
         public static final String APP_MODULES_GET = "/app/module/get";
         public static final String APP_LIGHT_UPDATE = "/app/light/update";
+        public static final String APP_CLIMATE_UPDATE = "/app/climate/update";
         public static final String APP_NOTIFICATION_RECEIVE = "/app/notification/receive";
         public static final String APP_NOTIFICATION_PICTURE_RECEIVE = "/app/notification/picture_receive";
         public static final String APP_CAMERA_GET = "/app/camera/get";
