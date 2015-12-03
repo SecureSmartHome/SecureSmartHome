@@ -74,7 +74,7 @@ public class WeatherSensor extends AbstractComponent {
          * Sends info about doorbell being used
          */
         private void sendWeatherInfo() {
-            WeatherPayload payload = new WeatherPayload();
+            WeatherPayload payload = new WeatherPayload(getTemperature1(), getTemperature2(), getPressure(), getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), true);
 
             //Todo set values
 

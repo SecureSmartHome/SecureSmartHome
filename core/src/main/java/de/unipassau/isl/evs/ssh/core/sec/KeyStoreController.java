@@ -209,6 +209,7 @@ public class KeyStoreController extends AbstractComponent {
             char[] keyPairPassword = getKeyPairPassword();
             keyStore.store(fileOutputStream, keyPairPassword);
             Arrays.fill(keyPairPassword, (char) 0);
+            fileOutputStream.flush();
         } catch (IOException ex) {
             throw new KeyStoreException(ex);
         }
@@ -261,6 +262,7 @@ public class KeyStoreController extends AbstractComponent {
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(keyStoreFile)) {
             keyStore.store(fileOutputStream, getKeystorePassword());
+            fileOutputStream.flush();
         } catch (IOException ex) {
             throw new KeyStoreException(ex);
         }
