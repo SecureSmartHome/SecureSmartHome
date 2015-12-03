@@ -17,7 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.app.handler.AppUserDeviceHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
@@ -78,7 +78,7 @@ public class ListGroupFragment extends BoundFragment {
 
         private void updateGroupList() {
             final List<Group> groups =
-                    getComponent(AppUserDeviceHandler.KEY).getAllGroups();
+                    getComponent(AppUserConfigurationHandler.KEY).getAllGroups();
             if (groups != null) {
                 Collections.sort(groups, new Comparator<Group>() {
                     @Override
@@ -144,7 +144,7 @@ public class ListGroupFragment extends BoundFragment {
 
         private String createGroupMemberText(Group group) {
             String groupMemberText = "";
-            List<UserDevice> groupMembers = getComponent(AppUserDeviceHandler.KEY).getAllGroupMembers(group);
+            List<UserDevice> groupMembers = getComponent(AppUserConfigurationHandler.KEY).getAllGroupMembers(group);
             if (groupMembers != null) {
                 int numberOfMembers = groupMembers.size();
                 if (numberOfMembers <= 0) {

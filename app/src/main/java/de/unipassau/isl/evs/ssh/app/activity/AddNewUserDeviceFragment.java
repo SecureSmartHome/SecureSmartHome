@@ -13,17 +13,12 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import java.util.LinkedList;
 import java.util.List;
 
-import de.unipassau.isl.evs.ssh.app.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.app.handler.AppUserDeviceHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
-import de.unipassau.isl.evs.ssh.core.messaging.Message;
 
 /**
  * This activity allows to enter information describing new user devices and provide a QR-Code
@@ -43,14 +38,14 @@ public class AddNewUserDeviceFragment extends BoundFragment {
         spinner = (Spinner) view.findViewById(R.id.groupSpinner);
         spinner.setAdapter(new ArrayAdapter<>(getActivity().getApplicationContext(),
                 android.R.layout.simple_list_item_1, new String[]{"Querying groups"}));
-        //spinner.setEnabled(false);
+        spinner.setEnabled(false);
         return view;
     }
 
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        List<Group> allGroups = container.require(AppUserDeviceHandler.KEY).getAllGroups();
+        List<Group> allGroups = container.require(AppUserConfigurationHandler.KEY).getAllGroups();
         if (allGroups == null) {
             Log.i(TAG, "No groups available, yet.");
             return;
