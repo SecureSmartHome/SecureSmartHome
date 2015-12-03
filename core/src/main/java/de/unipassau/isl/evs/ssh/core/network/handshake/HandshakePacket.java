@@ -4,10 +4,13 @@ import java.io.Serializable;
 import java.security.cert.X509Certificate;
 
 public abstract class HandshakePacket implements Serializable {
+    public static final int PROTOCOL_VERSION = 1;
+
     /**
      * Used for debugging purposes to easier identify HandshakePackets in network dumps
      */
     private final String packetIdentifier = getClass().getSimpleName();
+    private final int protocolVersion = PROTOCOL_VERSION;
 
     public static class SerializableBuildConfig implements Serializable {
         public final boolean debug;
