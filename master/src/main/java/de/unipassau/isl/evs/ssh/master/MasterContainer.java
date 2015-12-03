@@ -17,7 +17,7 @@ import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
-import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
 /**
@@ -40,7 +40,7 @@ public class MasterContainer extends ContainerService {
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
         incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
-        incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(), CoreConstants.RoutingKeys.MASTER_USERINFO_GET);
+        incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(), CoreConstants.RoutingKeys.MASTER_USERINFO_GET);
 
         dir.mkdirs();
 
