@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import de.unipassau.isl.evs.ssh.app.AppConstants;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserDeviceHandler;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
@@ -50,10 +51,18 @@ public class ListGroupFragment extends BoundFragment {
                                         @Override
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                             Group item = adapter.getItem(position);
-                                            //todo start ListUserDeviceFragment with group item
+                                            Bundle bundle = new Bundle();
+                                            bundle.putSerializable(AppConstants.Fragment_Arguments.ARGUMENT_GROUP, item);
+                                            ((MainActivity) getActivity()).showFragmentByClass(ListUserDeviceFragment.class, bundle);
                                         }
                                     }
         );
+        list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                return false; // TODO switch to edit group fragment
+            }
+        });
         adapter = new GroupListAdapter(inflater);
         list.setAdapter(adapter);
 
