@@ -90,11 +90,11 @@ public class DoorFragment extends BoundFragment {
 
     @Override
     public void onContainerConnected(Container container) {
-        updateButtons();
+        super.onContainerConnected(container);
     }
     
-    private AppDoorHandler getDoorHandler(){
-        return ((MainActivity) getActivity()).getContainer().require(AppDoorHandler.KEY);
+    private AppDoorHandler getDoorHandler() {
+        return getComponent(AppDoorHandler.KEY);
     }
 
     /**
@@ -103,8 +103,10 @@ public class DoorFragment extends BoundFragment {
     private void openButtonAction() {
         AppDoorHandler handler = getDoorHandler();
 
-        DoorHandler handler = getComponent(DoorHandler.KEY);
-        if (handler == null) return;
+        if (handler == null){
+            return;
+        }
+
         if (!handler.isOpen() && !handler.isBlocked()) {
             handler.openDoor();
         }
@@ -117,8 +119,10 @@ public class DoorFragment extends BoundFragment {
     private void blockButtonAction() {
         AppDoorHandler handler = getDoorHandler();
 
-        DoorHandler handler = getComponent(DoorHandler.KEY);
-        if (handler == null) return;
+        if (handler == null){
+            return;
+        }
+
         if (handler.isBlocked()) {
             handler.unblockDoor();
         } else {
@@ -129,7 +133,6 @@ public class DoorFragment extends BoundFragment {
 
     private void refreshImage() {
         getDoorHandler().refreshImage();
-
     }
 
     /**
@@ -147,8 +150,6 @@ public class DoorFragment extends BoundFragment {
      */
     private void updateButtons() {
         AppDoorHandler handler = getDoorHandler();
-    public void updateButtons() {
-        DoorHandler handler = getComponent(DoorHandler.KEY);
         if (handler == null) {
             return;
         }

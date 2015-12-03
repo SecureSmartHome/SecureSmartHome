@@ -43,7 +43,7 @@ public class AppContainer extends ContainerService {
 
         register(Client.KEY, new Client());
         register(AppModuleHandler.KEY, new AppModuleHandler());
-        register(DoorHandler.KEY, new DoorHandler());
+        register(AppDoorHandler.KEY, new AppDoorHandler());
         register(AppLightHandler.KEY, new AppLightHandler());
     }
 
