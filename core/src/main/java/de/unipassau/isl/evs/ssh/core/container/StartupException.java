@@ -1,9 +1,9 @@
 package de.unipassau.isl.evs.ssh.core.container;
 
 /**
- * Exception which is to be thrown if StartUp of Component fails
+ * Exception which is to be thrown if the startup of a Component fails.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public class StartupException extends RuntimeException {
     public StartupException() {

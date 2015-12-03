@@ -14,6 +14,7 @@ import java.lang.ref.WeakReference;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.DoorHandler;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 
 /**
  * This fragment allows to display information contained in door messages
@@ -45,9 +46,12 @@ public class DoorFragment extends BoundFragment {
                 blockButtonAction();
             }
         });
-
-        updateButtons();
         return view;
+    }
+
+    @Override
+    public void onContainerConnected(Container container) {
+        updateButtons();
     }
 
     /**
@@ -62,19 +66,18 @@ public class DoorFragment extends BoundFragment {
 
     // executed, when the "Open" button was pressed.
     private void openButtonAction() {
-        DoorHandler handler = ((MainActivity) getActivity()).getContainer().require(DoorHandler.KEY);
-
+        DoorHandler handler = getComponent(DoorHandler.KEY);
+        if (handler == null) return;
         if (!handler.isOpen() && !handler.isBlocked()) {
             handler.openDoor();
         }
-
         updateButtons();
     }
 
     // executed, when the "Block" button was pressed.
     private void blockButtonAction() {
-        DoorHandler handler = ((MainActivity) getActivity()).getContainer().require(DoorHandler.KEY);
-
+        DoorHandler handler = getComponent(DoorHandler.KEY);
+        if (handler == null) return;
         if (handler.isBlocked()) {
             handler.unblockDoor();
         } else {
@@ -87,7 +90,10 @@ public class DoorFragment extends BoundFragment {
      * Updates the buttons in this fragment's to represent the current door status.
      */
     public void updateButtons() {
-        DoorHandler handler = ((MainActivity) getActivity()).getContainer().require(DoorHandler.KEY);
+        DoorHandler handler = getComponent(DoorHandler.KEY);
+        if (handler == null) {
+            return;
+        }
 
         if (handler.isBlocked()) {
             blockButton.setText("Unblock door");

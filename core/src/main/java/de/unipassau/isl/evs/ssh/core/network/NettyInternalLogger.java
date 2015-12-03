@@ -1,13 +1,15 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
 import android.util.Log;
-import io.netty.util.internal.logging.AbstractInternalLogger;
+
 import org.slf4j.helpers.MessageFormatter;
+
+import io.netty.util.internal.logging.AbstractInternalLogger;
 
 /**
  * Simple InternalNetty logger for the netty framework which will, unlike the default logger, also log VERBOSE and DEBUG entries.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public class NettyInternalLogger extends AbstractInternalLogger {
     public NettyInternalLogger(String name) {

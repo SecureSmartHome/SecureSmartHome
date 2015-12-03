@@ -2,12 +2,13 @@ package de.unipassau.isl.evs.ssh.core.container;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import de.ncoder.typedmap.Key;
-import de.ncoder.typedmap.TypedMap;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import de.ncoder.typedmap.Key;
+import de.ncoder.typedmap.TypedMap;
 
 /**
  * Container classes deal with instantiation and set up of dependencies for all Components.
@@ -15,7 +16,7 @@ import java.util.Set;
  * Containers are the root element of the systems using the dependency injection design pattern.
  * Containers manage Components and store them in a typed map.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public interface Container {
     Set<String> components = new HashSet<>(Arrays.asList(new String[]{"core"}));
