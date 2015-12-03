@@ -20,7 +20,9 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
+import de.unipassau.isl.evs.ssh.slave.handler.SlaveDoorHandler;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveLightHandler;
+import de.unipassau.isl.evs.ssh.slave.handler.SlaveModuleHandler;
 
 /**
  * This Container class manages dependencies needed in the Slave part of the architecture.
@@ -28,27 +30,35 @@ import de.unipassau.isl.evs.ssh.slave.handler.SlaveLightHandler;
  * @author Niko
  */
 public class SlaveContainer extends ContainerService {
-    private static final File dir = new File("/sdcard/ssh");
+    private static File dir = new File("/sdcard/ssh");
 
     @Override
     protected void init() {
         register(KeyStoreController.KEY, new KeyStoreController());
 
         // read the master id and cert from local storage as long as adding new devices is not implemented
+        if (!dir.mkdirs()) {
+            dir = getFilesDir();
+        }
+        Log.i("ContainerService", "Storing IDs in " + dir);
         readMasterData();
 
         register(NamingManager.KEY, new NamingManager(false));
 
         // write the app id and cert to local storage as long as adding new devices is not implemented
-        dir.mkdirs();
         writeSlaveId();
         writeSlaveCert();
 
         register(Client.KEY, new Client());
+        register(SlaveModuleHandler.KEY, new SlaveModuleHandler());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
         incomingDispatcher.registerHandler(new SlaveLightHandler(),
                 CoreConstants.RoutingKeys.SLAVE_LIGHT_GET, CoreConstants.RoutingKeys.SLAVE_LIGHT_SET);
+
+        incomingDispatcher.registerHandler(new SlaveDoorHandler(),
+                CoreConstants.RoutingKeys.SLAVE_DOOR_STATUS_GET,
+                CoreConstants.RoutingKeys.SLAVE_DOOR_UNLATCH);
 
         //FIXME this is temporary for testing until we got everything needed
         Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, "TestPlugswitch");
@@ -56,7 +66,7 @@ public class SlaveContainer extends ContainerService {
 
         final NamingManager namingManager = require(NamingManager.KEY);
         Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getOwnID()
-                + "; Master is " + namingManager.getMasterID());
+                + "; Master is " + (namingManager.isMasterKnown() ? namingManager.getMasterID() : "unknown"));
     }
 
     private void readMasterData() {

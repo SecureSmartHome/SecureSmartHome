@@ -29,10 +29,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  */
 public class StatusFragment extends BoundFragment {
 
-    public StatusFragment() {
-        // Required empty public constructor
-    }
-
+    // TODO onContainerConnected
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -40,17 +37,16 @@ public class StatusFragment extends BoundFragment {
         ListView slaveListView = (ListView) view.findViewById(R.id.deviceStatusListView);
         ListView moduleListView = (ListView) view.findViewById(R.id.deviceStatusModelsListView);
 
-        Container diContainer = ((BoundActivity) getActivity()).getContainer();
-        AppModuleHandler moduleHandler = diContainer.require(AppModuleHandler.KEY);
+        AppModuleHandler moduleHandler = getComponent(AppModuleHandler.KEY);
 
+        List<Module> modules = null;
+        List<Slave> slaves = null;
 
-        List<Module> modules = moduleHandler.getComponents();
-        // Dummy data
-        List<Slave> slaves = new LinkedList<>();
-        Slave slave1 = new Slave("sl1", new DeviceID("1.1.1.1"));
-        Slave slave2 = new Slave("sl2", new DeviceID("1.1.1.2"));
-        slaves.add(slave1);
-        slaves.add(slave2);
+        if (moduleHandler != null) {
+            modules = moduleHandler.getComponents();
+            // TODO get Slaves
+            slaves = null;
+        }
 
         if (slaves == null) {
             TextView connectedSlaves = (TextView) view.findViewById(R.id.deviceStatusConnectedSlaves);
