@@ -127,6 +127,7 @@ public class CoreConstants {
         public static final String APP_DOOR_BLOCK = "/app/door/block";
         public static final String APP_DOOR_GET = "/app/door/get";
         public static final String APP_DOOR_RING = "/app/door/ring";
+        public static final String APP_USERINFO_GET = "/app/userdevice/get";
     }
 
     /**
