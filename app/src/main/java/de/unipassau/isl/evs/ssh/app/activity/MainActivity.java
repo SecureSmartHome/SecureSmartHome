@@ -37,16 +37,10 @@ public class MainActivity extends BoundActivity
 
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
-    private AppNotificationHandler notificationHandler;
     private static final int uniqueID = 037735;
 
     public MainActivity() {
         super(AppContainer.class);
-        notificationBuilder = new NotificationCompat.Builder(this);
-        notificationBuilder.setAutoCancel(true);
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationHandler = new AppNotificationHandler(notificationManager, notificationBuilder);
-        getContainer().register(AppNotificationHandler.KEY, notificationHandler);
     }
 
     @Override
@@ -79,6 +73,10 @@ public class MainActivity extends BoundActivity
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
         }
+        notificationBuilder = new NotificationCompat.Builder(this);
+        notificationBuilder.setAutoCancel(true);
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        getContainer().require(AppNotificationHandler.KEY).addNotificationObjects(notificationBuilder, notificationManager);
     }
 
     @Override

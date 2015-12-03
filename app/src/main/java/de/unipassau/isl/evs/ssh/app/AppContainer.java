@@ -39,6 +39,7 @@ public class AppContainer extends ContainerService {
         register(AppModuleHandler.KEY, new AppModuleHandler());
         register(AppDoorHandler.KEY, new AppDoorHandler());
         register(AppLightHandler.KEY, new AppLightHandler());
+        register(AppNotificationHandler.KEY, new AppNotificationHandler());
     }
 
     private void syncKeyStore() {

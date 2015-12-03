@@ -24,13 +24,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 public class AppNotificationHandler extends AbstractComponent implements MessageHandler{
     public static final Key<AppNotificationHandler> KEY = new Key<>(AppNotificationHandler.class);
 
-    private final NotificationManager notificationManager;
-    private final NotificationCompat.Builder notificationBuilder;
-
-    public AppNotificationHandler(NotificationManager notficationManager, NotificationCompat.Builder notificationBuilder) {
-        this.notificationManager = notficationManager;
-        this.notificationBuilder = notificationBuilder;
-    }
+    private NotificationManager notificationManager;
+    private  NotificationCompat.Builder notificationBuilder;
 
     @Override
     public void handle(Message.AddressedMessage message) {
@@ -71,5 +66,11 @@ public class AppNotificationHandler extends AbstractComponent implements Message
 
         //Send notification out to Device
         notificationManager.notify(notificationID, notificationBuilder.build());
+    }
+
+    public void addNotificationObjects(NotificationCompat.Builder notificationBuilder,
+                                       NotificationManager notificationManager) {
+        this.notificationBuilder = notificationBuilder;
+        this.notificationManager = notificationManager;
     }
 }
