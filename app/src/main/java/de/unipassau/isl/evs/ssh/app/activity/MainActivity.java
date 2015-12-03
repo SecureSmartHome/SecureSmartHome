@@ -162,23 +162,24 @@ public class MainActivity extends BoundActivity
     public void showFragmentByClass(Class clazz, Bundle bundle) {
         Class oldFragment = getCurrentFragment().getClass();
         Fragment fragment = null;
-        if (bundle != null) {
-            try {
-                fragment = (Fragment) clazz.newInstance();
+        try {
+            fragment = (Fragment) clazz.newInstance();
+            if (bundle != null) {
                 fragment.setArguments(bundle);
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
             }
-            if (fragment != null) {
-                android.support.v4.app.FragmentTransaction fragmentTransaction =
-                        getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                if (!oldFragment.isInstance(fragment)) {
-                    fragmentTransaction.addToBackStack(null);
-                }
-                fragmentTransaction.commit();
-            }
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
         }
+        if (fragment != null) {
+            android.support.v4.app.FragmentTransaction fragmentTransaction =
+                    getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, fragment);
+            if (!oldFragment.isInstance(fragment)) {
+                fragmentTransaction.addToBackStack(null);
+            }
+            fragmentTransaction.commit();
+        }
+
     }
 
     // maps button resource ids to Fragment classes.
