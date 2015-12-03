@@ -158,6 +158,9 @@ public class DoorFragment extends Fragment {
         }
     }
 
+    /**
+     * The listener interface to receive door events.
+     */
     public interface DoorListener {
         void onPictureChanged(byte[] image);
         void onDoorStatusChanged();

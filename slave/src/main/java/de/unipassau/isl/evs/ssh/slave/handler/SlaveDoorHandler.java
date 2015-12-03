@@ -15,6 +15,7 @@ import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
  * Handles door messages and makes API calls accordingly.
  *
  * @author bucher
+ * @author Wolfgang Popp
  */
 public class SlaveDoorHandler extends AbstractSlaveHandler {
     private static final String TAG = SlaveDoorHandler.class.getSimpleName();
@@ -61,6 +62,4 @@ public class SlaveDoorHandler extends AbstractSlaveHandler {
             sendErrorMessage(message);
         }
     }
-
-
 }

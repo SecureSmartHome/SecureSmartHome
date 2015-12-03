@@ -21,6 +21,11 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
 
+/**
+ * The AppDoorHandler class sends and receives messages for door events.
+ *
+ * @author Wolfgang Popp
+ */
 public class AppDoorHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppDoorHandler> KEY = new Key<>(AppDoorHandler.class);
     private static final String TAG = AppDoorHandler.class.getSimpleName();
@@ -29,10 +34,20 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
     private boolean isDoorOpen = false;
     private List<DoorFragment.DoorListener> listeners = new LinkedList<>();
 
+    /**
+     * Adds a DoorListener to this handler.
+     *
+     * @param listener
+     */
     public void addListener(DoorFragment.DoorListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Removes the given DoorListener from this handler.
+     *
+     * @param listener
+     */
     public void removeListener(DoorFragment.DoorListener listener) {
         listeners.remove(listener);
     }
@@ -110,6 +125,9 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
         return isDoorBlocked;
     }
 
+    /**
+     * Refreshs the door status by sending a status request message.
+     */
     public void refresh(){
         List<Module> doors = getContainer().require(AppModuleHandler.KEY).getDoors();
         if (doors == null) {
@@ -190,6 +208,10 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
         blockDoor(true);
     }
 
+
+    /**
+     * Refreshes the door photo by sending a message.
+     */
     public void refreshImage() {
         List<Module> cameras = getContainer().require(AppModuleHandler.KEY).getCameras();
         if (cameras == null) {
