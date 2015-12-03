@@ -23,8 +23,8 @@ public class BoundFragment extends Fragment {
      * Also redelivers {@link #onContainerConnected(Container)} if the Activity is already connected to the container.
      */
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onStart() {
+        super.onStart();
         final Container container = getContainer();
         if (container != null) {
             onContainerConnected(container);
@@ -37,9 +37,12 @@ public class BoundFragment extends Fragment {
      * Also calls {@link #onContainerDisconnected()} as the Container is no longer available.
      */
     @Override
-    public void onDetach() {
-        onContainerDisconnected();
-        super.onDetach();
+    public void onStop() {
+        final Container container = getContainer();
+        if (container != null) {
+            onContainerDisconnected();
+        }
+        super.onStop();
     }
 
     /**
