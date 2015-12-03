@@ -1,8 +1,12 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -38,6 +42,7 @@ public class MainActivity extends BoundActivity
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
     private AppNotificationHandler notificationHandler;
+    private NotificationCompat.Builder climateWarning;
     private static final int uniqueID = 037735;
 
     public MainActivity() {
@@ -56,6 +61,10 @@ public class MainActivity extends BoundActivity
         //Set the fragment initially
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //Initialise Notifications
+        climateWarning = new NotificationCompat.Builder(this);
+        climateWarning.setAutoCancel(true);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
@@ -121,7 +130,7 @@ public class MainActivity extends BoundActivity
     }
 
     // returns the currently displayed Fragment
-    private Fragment getCurrentFragment(){
+    private Fragment getCurrentFragment() {
         return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
     }
 
@@ -131,7 +140,7 @@ public class MainActivity extends BoundActivity
      *
      * @param clazz the class of the fragment to show
      */
-    public void showFragmentByClass(Class clazz){
+    public void showFragmentByClass(Class clazz) {
         Class oldFragment = getCurrentFragment().getClass();
         Fragment fragment = null;
         try {
@@ -188,19 +197,24 @@ public class MainActivity extends BoundActivity
         return true;
     }
 
-    public void notificationButtonClicked(View view){
+    public void notificationButtonClicked(View view) {
         //Build notification
-        notificationBuilder.setSmallIcon(R.drawable.ic_home_light);
-        notificationBuilder.setContentTitle("Climate Warning!");
-        notificationBuilder.setWhen(System.currentTimeMillis());
-        notificationBuilder.setContentText("Please open Window! Humidity high.");
+        climateWarning.setSmallIcon(R.drawable.ic_home_light);
+        climateWarning.setContentTitle("Climate Warning!");
+        climateWarning.setWhen(System.currentTimeMillis());
+        climateWarning.setColor(2718207);
+        climateWarning.setContentText("Please open a Window, Humidity too high.");
 
+        //TODO does not work for fragments
         //If Notification is clicked send to this Page
-        Intent intent = new Intent(this, ClimateFragment.class);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction("OpenClimateFragment");
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notificationBuilder.setContentIntent(pendingIntent);
 
+        //TODO own method: sendNotification(uniqueID){}
         //Send notification out to Device
-        notificationManager.notify(uniqueID, notificationBuilder.build());
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        nm.notify(uniqueID, climateWarning.build());
     }
 }
