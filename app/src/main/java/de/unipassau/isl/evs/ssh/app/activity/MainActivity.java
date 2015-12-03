@@ -17,6 +17,7 @@ import android.view.View;
 
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 
 /**
@@ -34,19 +35,24 @@ public class MainActivity extends BoundActivity
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
 
-    NotificationCompat.Builder climateWarning;
+    private NotificationCompat.Builder notificationBuilder;
+    private NotificationManager notificationManager;
+    private AppNotificationHandler notificationHandler;
     private static final int uniqueID = 037735;
 
     public MainActivity() {
         super(AppContainer.class);
+        notificationBuilder = new NotificationCompat.Builder(this);
+        notificationBuilder.setAutoCancel(true);
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationHandler = new AppNotificationHandler(notificationManager, notificationBuilder);
+        getContainer().register(AppNotificationHandler.KEY, notificationHandler);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        climateWarning = new NotificationCompat.Builder(this);
-        climateWarning.setAutoCancel(true);
         //Set the fragment initially
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -73,7 +79,6 @@ public class MainActivity extends BoundActivity
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
         }
-
     }
 
     @Override
@@ -185,18 +190,17 @@ public class MainActivity extends BoundActivity
 
     public void notificationButtonClicked(View view){
         //Build notification
-        climateWarning.setSmallIcon(R.drawable.ic_home_light);
-        climateWarning.setContentTitle("Climate Warning!");
-        climateWarning.setWhen(System.currentTimeMillis());
-        climateWarning.setContentText("Please open Window! Humidity high.");
+        notificationBuilder.setSmallIcon(R.drawable.ic_home_light);
+        notificationBuilder.setContentTitle("Climate Warning!");
+        notificationBuilder.setWhen(System.currentTimeMillis());
+        notificationBuilder.setContentText("Please open Window! Humidity high.");
 
         //If Notification is clicked send to this Page
         Intent intent = new Intent(this, ClimateFragment.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        climateWarning.setContentIntent(pendingIntent);
+        notificationBuilder.setContentIntent(pendingIntent);
 
         //Send notification out to Device
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        nm.notify(uniqueID, climateWarning.build());
+        notificationManager.notify(uniqueID, notificationBuilder.build());
     }
 }
