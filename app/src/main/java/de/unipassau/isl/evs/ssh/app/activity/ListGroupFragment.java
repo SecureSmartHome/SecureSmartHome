@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -23,7 +24,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 /**
- * ListGroupFragment to show a list of all groups of user devices registered in the system.
+ * This fragment shows a list of all groups of user devices registered in the system.
+ * It gets its information through the {@link AppUserDeviceHandler} which sends and receives necessary messages.
  *
  * @author Phil Werli
  * @see ListUserDeviceFragment
@@ -44,10 +46,11 @@ public class ListGroupFragment extends BoundFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FrameLayout root = (FrameLayout) inflater.inflate(R.layout.listgroupfragment, container, false);
         ListView list = (ListView) root.findViewById(R.id.listGroupContainer);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                        // when a user clicks short on an item, he opens the ListUserDeviceFragment
                                         @Override
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                             Group item = adapter.getItem(position);
@@ -58,9 +61,20 @@ public class ListGroupFragment extends BoundFragment {
                                     }
         );
         list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            // when a user clicks long on an item, the app opens a dialog
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                return false; // TODO switch to edit group fragment
+                Group item = adapter.getItem(position);
+                // TODO edit group dialog
+
+                return item == null;
+            }
+        });
+        Button fab = ((Button) root.findViewById(R.id.addgroup_fab));
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO add new group dialog
             }
         });
         adapter = new GroupListAdapter(inflater);
@@ -129,6 +143,9 @@ public class ListGroupFragment extends BoundFragment {
             return true;
         }
 
+        /**
+         * Creates a view for every registered group.
+         */
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             // the Group the list item is created for
@@ -151,6 +168,12 @@ public class ListGroupFragment extends BoundFragment {
             return groupLayout;
         }
 
+        /**
+         * Creates a text describes a group in one sentence.
+         *
+         * @param group The group the text is created for.
+         * @return the text to display
+         */
         private String createGroupMemberText(Group group) {
             String groupMemberText = "";
             List<UserDevice> groupMembers = getComponent(AppUserDeviceHandler.KEY).getAllGroupMembers(group);
@@ -161,7 +184,7 @@ public class ListGroupFragment extends BoundFragment {
                 } else if (numberOfMembers == 1) {
                     groupMemberText = groupMembers.get(0).getName() + " is the only member.";
                 } else if (numberOfMembers == 2) {
-                    groupMemberText = groupMembers.get(0).getName() + " and " + groupMembers.get(1).getName() + " are members..";
+                    groupMemberText = groupMembers.get(0).getName() + " and " + groupMembers.get(1).getName() + " are members.";
                 } else {
                     groupMemberText = groupMembers.get(0).getName() + " and " + groupMembers.get(1).getName() + " and more are members";
                 }

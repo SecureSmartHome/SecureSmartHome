@@ -6,10 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import de.unipassau.isl.evs.ssh.app.handler.AppUserDeviceHandler;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 /**
- * EditUserDeviceFragment to view, edit and delete all information regarding a single user device.
+ * This fragment lets the user view, edit and delete information regarding a single user device.
+ * It gets its information through the {@link AppUserDeviceHandler} which sends and receives necessary messages.
  *
  * @author Phil Werli
  * @see ListGroupFragment
