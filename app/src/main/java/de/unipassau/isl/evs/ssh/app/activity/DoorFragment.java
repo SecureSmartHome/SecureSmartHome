@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
  */
 public class DoorFragment extends BoundFragment {
 
+    private static final String TAG = DoorFragment.class.getSimpleName();
     private Button openButton;
     private Button blockButton;
     private ImageButton refreshButton;
@@ -41,18 +43,6 @@ public class DoorFragment extends BoundFragment {
             updateButtons();
         }
     };
-
-    @Override
-    public void onStart() {
-        getDoorHandler().addListener(doorListener);
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        getDoorHandler().removeListener(doorListener);
-        super.onStop();
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -83,16 +73,22 @@ public class DoorFragment extends BoundFragment {
             }
         });
 
-        getDoorHandler().refresh();
-        updateButtons();
         return view;
     }
 
     @Override
     public void onContainerConnected(Container container) {
-        super.onContainerConnected(container);
+        getDoorHandler().addListener(doorListener);
+        getDoorHandler().refresh();
+        updateButtons();
     }
-    
+
+    @Override
+    public void onContainerDisconnected() {
+        getDoorHandler().removeListener(doorListener);
+        super.onContainerDisconnected();
+    }
+
     private AppDoorHandler getDoorHandler() {
         return getComponent(AppDoorHandler.KEY);
     }
@@ -104,6 +100,7 @@ public class DoorFragment extends BoundFragment {
         AppDoorHandler handler = getDoorHandler();
 
         if (handler == null){
+            Log.i(TAG, "Container not bound.");
             return;
         }
 
@@ -120,6 +117,7 @@ public class DoorFragment extends BoundFragment {
         AppDoorHandler handler = getDoorHandler();
 
         if (handler == null){
+            Log.i(TAG, "Container not bound.");
             return;
         }
 
@@ -151,6 +149,7 @@ public class DoorFragment extends BoundFragment {
     private void updateButtons() {
         AppDoorHandler handler = getDoorHandler();
         if (handler == null) {
+            Log.i(TAG, "Container not bound.");
             return;
         }
 

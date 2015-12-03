@@ -103,7 +103,8 @@ public class MainActivity extends BoundActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStack();
+            super.onBackPressed();
+            getSupportFragmentManager().popBackStackImmediate();
         } else {
             super.onBackPressed();
         }
