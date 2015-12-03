@@ -107,11 +107,14 @@ public class CoreConstants {
         public static final String MASTER_DOOR_UNLATCH = "/master/door/unlatch";
         public static final String MASTER_DOOR_LOCK_SET = "/master/door/lock_set";
         public static final String MASTER_DOOR_LOCK_GET = "/master/door/lock_get";
+        public static final String MASTER_DOOR_STATUS_GET = "/master/door/status_get";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
         public static final String SLAVE_LIGHT_SET = "/slave/light/set";
-        public static final String SLAVE_CAMERA_GET = "slave/camera/get";
+        public static final String SLAVE_CAMERA_GET = "/slave/camera/get";
+        public static final String SLAVE_DOOR_STATUS_GET = "/slave/door/status_get";
+        public static final String SLAVE_DOOR_UNLATCH = "/slave/door/unlatch";
 
         //App
         public static final String APP_MODULES_GET = "/app/module/get";
