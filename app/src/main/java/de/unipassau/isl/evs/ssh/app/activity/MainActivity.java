@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
@@ -218,5 +219,21 @@ public class MainActivity extends BoundActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onContainerConnected(Container container) {
+        final Fragment fragment = getCurrentFragment();
+        if (fragment instanceof BoundFragment) {
+            ((BoundFragment) fragment).onContainerConnected(container);
+        }
+    }
+
+    @Override
+    public void onContainerDisconnected() {
+        final Fragment fragment = getCurrentFragment();
+        if (fragment instanceof BoundFragment) {
+            ((BoundFragment) fragment).onContainerDisconnected();
+        }
     }
 }
