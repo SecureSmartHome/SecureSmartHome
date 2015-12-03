@@ -30,19 +30,22 @@ import de.unipassau.isl.evs.ssh.slave.handler.SlaveModuleHandler;
  * @author Niko
  */
 public class SlaveContainer extends ContainerService {
-    private static final File dir = new File("/sdcard/ssh");
+    private static File dir = new File("/sdcard/ssh");
 
     @Override
     protected void init() {
         register(KeyStoreController.KEY, new KeyStoreController());
 
         // read the master id and cert from local storage as long as adding new devices is not implemented
+        if (!dir.mkdirs()) {
+            dir = getFilesDir();
+        }
+        Log.i("ContainerService", "Storing IDs in " + dir);
         readMasterData();
 
         register(NamingManager.KEY, new NamingManager(false));
 
         // write the app id and cert to local storage as long as adding new devices is not implemented
-        dir.mkdirs();
         writeSlaveId();
         writeSlaveCert();
 
@@ -63,7 +66,7 @@ public class SlaveContainer extends ContainerService {
 
         final NamingManager namingManager = require(NamingManager.KEY);
         Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getOwnID()
-                + "; Master is " + namingManager.getMasterID());
+                + "; Master is " + (namingManager.isMasterKnown() ? namingManager.getMasterID() : "unknown"));
     }
 
     private void readMasterData() {

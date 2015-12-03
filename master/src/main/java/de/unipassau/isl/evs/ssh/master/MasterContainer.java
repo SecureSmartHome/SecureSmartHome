@@ -26,7 +26,7 @@ import de.unipassau.isl.evs.ssh.master.network.Server;
  * @author Niko
  */
 public class MasterContainer extends ContainerService {
-    private static final File dir = new File("/sdcard/ssh");
+    private static File dir = new File("/sdcard/ssh");
 
     @Override
     protected void init() {
@@ -42,7 +42,10 @@ public class MasterContainer extends ContainerService {
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
         incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
 
-        dir.mkdirs();
+        if (!dir.mkdirs()) {
+            dir = getFilesDir();
+        }
+        Log.i("ContainerService", "Storing IDs in " + dir);
 
         Log.i(getClass().getSimpleName(), "Master set up! ID is " + require(NamingManager.KEY).getOwnID());
 

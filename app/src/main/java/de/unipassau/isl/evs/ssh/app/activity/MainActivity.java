@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
@@ -138,7 +139,7 @@ public class MainActivity extends BoundActivity
     }
 
     // returns the currently displayed Fragment
-    private Fragment getCurrentFragment(){
+    private Fragment getCurrentFragment() {
         return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
     }
 
@@ -148,11 +149,25 @@ public class MainActivity extends BoundActivity
      *
      * @param clazz the class of the fragment to show
      */
-    public void showFragmentByClass(Class clazz){
+    public void showFragmentByClass(Class clazz) {
+        showFragmentByClass(clazz, null);
+    }
+
+    /**
+     * Displays a fragment and takes care of lifecycle actions like saving state when rotating the
+     * screen or managing the back button behavior.
+     *
+     * @param clazz  the class of the fragment to show
+     * @param bundle the bundle that is given with the new fragment
+     */
+    public void showFragmentByClass(Class clazz, Bundle bundle) {
         Class oldFragment = getCurrentFragment().getClass();
         Fragment fragment = null;
         try {
             fragment = (Fragment) clazz.newInstance();
+            if (bundle != null) {
+                fragment.setArguments(bundle);
+            }
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -184,9 +199,7 @@ public class MainActivity extends BoundActivity
             clazz = StatusFragment.class;
         } else if (id == R.id.nav_modifyPermissions) {
             clazz = ModifyPermissionFragment.class;
-        } else if (id == R.id.nav_addNewUserDevice) {
-            clazz = AddNewUserDeviceFragment.class;
-        } else if (id == R.id.nav_addNewUserDevice) {
+        } else if (id == R.id.nav_addNewUserDevice) {{
             clazz = AddNewUserDeviceFragment.class;
         } else if (id == R.id.light_fab) {
             clazz = AddModuleFragment.class;

@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +32,9 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  * @author Phil Werli
  */
 public class LightFragment extends BoundFragment {
+    private static final String TAG = LightFragment.class.getSimpleName();
     private LightListAdapter adapter;
+    private ListView listView;
     private final AppLightHandler.LightHandlerListener listener = new AppLightHandler.LightHandlerListener() {
         @Override
         public void statusChanged(Module module) {
@@ -42,27 +43,25 @@ public class LightFragment extends BoundFragment {
     };
 
     @Override
-    public void onStart() {
-        super.onStart();
-        getContainer().require(AppLightHandler.KEY).addListener(listener);
-
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        container.require(AppLightHandler.KEY).addListener(listener);
+        adapter = new LightListAdapter();
+        listView.setAdapter(adapter);
     }
 
+
     @Override
-    public void onStop() {
-        getContainer().require(AppLightHandler.KEY).removeListener(listener);
-        super.onStop();
+    public void onContainerDisconnected() {
+        getComponent(AppLightHandler.KEY).removeListener(listener);
+        super.onContainerDisconnected();
     }
 
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_light, container, false);
-        ListView list = (ListView) root.findViewById(R.id.lightButtonContainer);
-
-        adapter = new LightListAdapter(inflater);
-        list.setAdapter(adapter);
-
+        listView = (ListView) root.findViewById(R.id.lightButtonContainer);
         return root;
     }
 
@@ -70,8 +69,8 @@ public class LightFragment extends BoundFragment {
         private final LayoutInflater inflater;
         private List<Module> lightModules;
 
-        public LightListAdapter(LayoutInflater inflater) {
-            this.inflater = inflater;
+        public LightListAdapter() {
+            this.inflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             updateModuleList();
         }
 
@@ -82,8 +81,13 @@ public class LightFragment extends BoundFragment {
         }
 
         private void updateModuleList() {
-            final Map<Module, AppLightHandler.LightStatus> lightModulesStatus =
-                    getContainer().require(AppLightHandler.KEY).getAllLightModuleStates();
+            AppLightHandler handler = getComponent(AppLightHandler.KEY);
+            if (handler == null) {
+                Log.i(TAG, "Container not yet connected!");
+                return;
+            }
+
+            final Map<Module, AppLightHandler.LightStatus> lightModulesStatus = handler.getAllLightModuleStates();
             lightModules = Lists.newArrayList(lightModulesStatus.keySet());
             Collections.sort(lightModules, new Comparator<Module>() {
                 @Override
