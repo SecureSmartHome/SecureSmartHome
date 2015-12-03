@@ -20,7 +20,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  * the IncomingDispatcher.
  * Furthermore it generates a climate messages as instructed by the UI and passes it to the OutgoingRouter.
  */
-public class ClimateFragment extends Fragment implements MessageHandler {
+public class ClimateFragment extends BoundFragment implements MessageHandler {
     NotificationCompat.Builder climateWarning;
     private static final int uniqueID = 037735;
 

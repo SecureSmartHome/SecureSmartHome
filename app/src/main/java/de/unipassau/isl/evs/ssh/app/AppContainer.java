@@ -2,9 +2,6 @@ package de.unipassau.isl.evs.ssh.app;
 
 import android.util.Log;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,6 +17,7 @@ import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
@@ -33,8 +31,17 @@ public class AppContainer extends ContainerService {
     @Override
     protected void init() {
         register(KeyStoreController.KEY, new KeyStoreController());
+
+        // read the master id and cert from local storage as long as adding new devices is not implemented
+        readMasterData();
+
         register(NamingManager.KEY, new NamingManager(false));
-        syncKeyStore();
+
+        // write the app id and cert to local storage as long as adding new devices is not implemented
+        dir.mkdirs();
+        writeSlaveId();
+        writeSlaveCert();
+
         register(Client.KEY, new Client());
         register(AppModuleHandler.KEY, new AppModuleHandler());
         register(AppDoorHandler.KEY, new AppDoorHandler());
@@ -42,42 +49,20 @@ public class AppContainer extends ContainerService {
         register(AppNotificationHandler.KEY, new AppNotificationHandler());
     }
 
-    private void syncKeyStore() {
-        dir.mkdirs();
-
-        // read the master id and cert from local storage as long as adding new devices is not implemented
-        readMasterId();
-        readMasterCert();
-
-        // write the app id and cert to local storage as long as adding new devices is not implemented
-        writeSlaveId();
-        writeSlaveCert();
-    }
-
-    private void readMasterId() {
-        final File masterId = new File(dir, "master.id");
-        if (masterId.exists()) {
-            try {
-                final String id = Files.readFirstLine(masterId, Charsets.US_ASCII);
-                getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
-                        .putString(AppConstants.SharedPrefs.PREF_MASTER_ID, id)
-                        .commit();
-                Log.i(getClass().getSimpleName(), "ID for Master loaded: " + id);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void readMasterCert() {
+    private void readMasterData() {
         final File masterCert = new File(dir, "master.der");
         if (masterCert.exists()) {
             try {
                 CertificateFactory certFact = CertificateFactory.getInstance("X.509");
                 final Certificate certificate = certFact.generateCertificate(new FileInputStream(masterCert));
-                require(KeyStoreController.KEY).saveCertificate(((X509Certificate) certificate),
-                        require(NamingManager.KEY).getMasterID().getId());
-                Log.i(getClass().getSimpleName(), "Certificate for Master loaded:\n" + certificate);
+
+                final DeviceID id = DeviceID.fromCertificate((X509Certificate) certificate);
+                getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
+                        .putString(AppConstants.SharedPrefs.PREF_MASTER_ID, id.getIDString())
+                        .commit();
+
+                require(KeyStoreController.KEY).saveCertificate(((X509Certificate) certificate), id.getIDString());
+                Log.i(getClass().getSimpleName(), "Certificate for Master " + id + " loaded:\n" + certificate);
             } catch (GeneralSecurityException | IOException e) {
                 e.printStackTrace();
             }

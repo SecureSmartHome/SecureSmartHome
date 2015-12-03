@@ -4,11 +4,10 @@ package de.unipassau.isl.evs.ssh.core.naming;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
-import android.util.Base64;
+import android.util.Log;
 
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
@@ -30,8 +29,9 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
  * @author Wolfgang Popp
  */
 public class NamingManager extends AbstractComponent {
-
+    private static final String TAG = NamingManager.class.getSimpleName();
     public static final Key<NamingManager> KEY = new Key<>(NamingManager.class);
+
     private final boolean isMaster;
     private DeviceID ownID;
     private DeviceID masterID;
@@ -47,14 +47,29 @@ public class NamingManager extends AbstractComponent {
         this.isMaster = isMaster;
     }
 
+    public boolean isMaster() {
+        return isMaster;
+    }
+
     /**
      * Gets the master's DeviceID. If invoked on a master itself, then
      * {@code getMasterID().equals(getLocalDeviceID)}.
      *
      * @return the master's id
+     * @throws IllegalStateException if the Master ID is not known
      */
     @NonNull
     public DeviceID getMasterID() {
+        if (masterID == null) {
+            try {
+                loadMasterData();
+            } catch (UnresolvableNamingException e) {
+                throw new IllegalStateException("Could not load Master Certificate", e);
+            }
+        }
+        if (masterID == null) {
+            throw new IllegalStateException("Master ID not known");
+        }
         return masterID;
     }
 
@@ -62,10 +77,37 @@ public class NamingManager extends AbstractComponent {
      * Gets the master's certificate.
      *
      * @return the master's certificate
+     * @throws IllegalStateException if the Master Certificate is not known
      */
     @NonNull
     public X509Certificate getMasterCertificate() {
+        if (masterCert == null) {
+            try {
+                loadMasterData();
+            } catch (UnresolvableNamingException e) {
+                throw new IllegalStateException("Could not load Master Certificate", e);
+            }
+        }
+        if (masterCert == null) {
+            throw new IllegalStateException("Master ID not known");
+        }
         return masterCert;
+    }
+
+    /**
+     * @return {@code true}, if the ID and Certificate of the Master are known, i.e. they are stored in the
+     * SharedPreferences and the KeyStore respectively
+     */
+    public boolean isMasterKnown() {
+        if (isMaster || (masterID != null && masterCert != null)) {
+            return true;
+        }
+        try {
+            loadMasterData();
+        } catch (UnresolvableNamingException e) {
+            return false;
+        }
+        return (masterID != null && masterCert != null);
     }
 
     /**
@@ -87,11 +129,7 @@ public class NamingManager extends AbstractComponent {
     public X509Certificate getOwnCertificate() {
         return ownCert;
     }
-
-    public boolean isMaster() {
-        return isMaster;
-    }
-
+    
     /**
      * Gets the public key of the given DeviceID.
      *
@@ -105,24 +143,16 @@ public class NamingManager extends AbstractComponent {
     }
 
     /**
-     * Gets the id of a given certificate.
-     *
-     * @param cert the certificate
-     * @return the id corresponding to the given certificate
+     * @deprecated use {@link DeviceID#fromCertificate(X509Certificate)} instead
      */
+    @Deprecated
     @NonNull
     public DeviceID getDeviceID(X509Certificate cert) throws UnresolvableNamingException {
-        MessageDigest md;
-        byte[] digest;
-
         try {
-            md = MessageDigest.getInstance("SHA-256", "BC");
-        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+            return DeviceID.fromCertificate(cert);
+        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
             throw new UnresolvableNamingException(e);
         }
-        md.update(cert.getPublicKey().getEncoded());
-        digest = md.digest();
-        return new DeviceID(Base64.encodeToString(digest, Base64.NO_WRAP));
     }
 
     /**
@@ -138,9 +168,9 @@ public class NamingManager extends AbstractComponent {
             if (id == null) {
                 throw new UnresolvableNamingException("id == null");
             }
-            final X509Certificate certificate = getContainer().require(KeyStoreController.KEY).getCertificate(id.getId());
+            final X509Certificate certificate = getContainer().require(KeyStoreController.KEY).getCertificate(id.getIDString());
             if (certificate == null) {
-                throw new UnresolvableNamingException("certificate not found");
+                throw new UnresolvableNamingException("Certificate for Device " + id + " not found");
             }
             return certificate;
         } catch (UnrecoverableEntryException | NoSuchAlgorithmException | KeyStoreException e) {
@@ -154,24 +184,31 @@ public class NamingManager extends AbstractComponent {
         try {
             final KeyStoreController keyStoreController = container.require(KeyStoreController.KEY);
             ownCert = keyStoreController.getOwnCertificate();
-            ownID = getDeviceID(ownCert);
+            ownID = DeviceID.fromCertificate(ownCert);
 
             if (isMaster) {
                 masterCert = ownCert;
                 masterID = ownID;
             } else {
-                final SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
-                        .getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-
-                String masterIDStr = prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null);
-                if (masterIDStr == null) {
-                   // throw new StartupException("MasterID from SharedPrefs (" + CoreConstants.SharedPrefs.PREF_MASTER_ID + ") is null");
+                try {
+                    loadMasterData();
+                } catch (UnresolvableNamingException e) {
+                    Log.w(TAG, "Master ID is set to " + masterID + " but certificate is unknown", e);
                 }
-                masterID = new DeviceID(masterIDStr);
-                masterCert = getCertificate(masterID);
             }
-        } catch (UnresolvableNamingException | GeneralSecurityException e) {
-           // throw new StartupException(e);
+        } catch (GeneralSecurityException e) {
+            throw new StartupException(e);
+        }
+    }
+
+    private void loadMasterData() throws UnresolvableNamingException {
+        final SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
+                .getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+
+        String masterIDStr = prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null);
+        if (masterIDStr != null) {
+            masterID = new DeviceID(masterIDStr);
+            masterCert = getCertificate(masterID);
         }
     }
 

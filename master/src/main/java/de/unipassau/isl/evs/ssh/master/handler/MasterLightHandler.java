@@ -31,8 +31,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
                         handleGetRequest(message);
                         break;
                     default:
-                        sendErrorMessage(message);
-                        break;
+                        throw new UnsupportedOperationException("Unsupported routing key: " + message.getRoutingKey());
                 }
             } else {
                 handleResponse(message);

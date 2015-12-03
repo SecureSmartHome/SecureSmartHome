@@ -23,6 +23,7 @@ import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 
 /**
  * As this Activity also displays information like whether the light is on or not, this Activity also
@@ -52,6 +53,7 @@ public class MainActivity extends BoundActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //Set the fragment initially
+
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -92,7 +94,8 @@ public class MainActivity extends BoundActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStack();
+            super.onBackPressed();
+            getSupportFragmentManager().popBackStackImmediate();
         } else {
             super.onBackPressed();
         }
@@ -193,6 +196,22 @@ public class MainActivity extends BoundActivity
         return true;
     }
 
+    @Override
+    public void onContainerConnected(Container container) {
+        final Fragment fragment = getCurrentFragment();
+        if (fragment instanceof BoundFragment) {
+            ((BoundFragment) fragment).onContainerConnected(container);
+        }
+    }
+
+    @Override
+    public void onContainerDisconnected() {
+        final Fragment fragment = getCurrentFragment();
+        if (fragment instanceof BoundFragment) {
+            ((BoundFragment) fragment).onContainerDisconnected();
+        }
+    }
+    
     public void notificationButtonClicked(View view) {
         //Build notification
         notificationBuilder.setSmallIcon(R.drawable.ic_home_light);

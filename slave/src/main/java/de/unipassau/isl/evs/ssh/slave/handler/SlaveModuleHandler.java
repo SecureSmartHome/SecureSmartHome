@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.common.collect.Sets;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -26,25 +27,38 @@ import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.WeatherSensor;
 
 /**
- * SlaveModuleHandler offers a list of all Modules that are active in the System.
+ * SlaveModuleHandler offers a list of all Modules that are active in the System and (un)registers
+ * modules in the SlaveContainer when they become (un)available.
  *
  * @author bucher
+ * @author Wolfgang Popp
  */
 public class SlaveModuleHandler extends AbstractComponent implements MessageHandler {
-    private static final String TAG = SlaveModuleHandler.class.getSimpleName();
     public static final Key<SlaveModuleHandler> KEY = new Key<>(SlaveModuleHandler.class);
 
-    private List<Module> components;
+    private static final String TAG = SlaveModuleHandler.class.getSimpleName();
+    private List<Module> components = null;
 
+    /**
+     * Updates the SlaveContainer. Registers new modules and unregisters unused modules.
+     *
+     * @param components a list of modules to add. All modules in the given list are registered in
+     *                   the SaveContainer. All modules that are in the container but not in the
+     *                   list are unregistered.
+     */
     public void updateModule(List<Module> components) {
-        Set<Module> oldComponents = Sets.newHashSet(this.components);
-        Set<Module> newComponents = Sets.newHashSet(components);
+        if (this.components == null) {
+            Set<Module> newComponents = Sets.newHashSet(components);
+            registerModules(newComponents);
+        } else {
+            Set<Module> oldComponents = Sets.newHashSet(this.components);
+            Set<Module> newComponents = Sets.newHashSet(components);
+            Set<Module> componentsToRemove = Sets.difference(oldComponents, newComponents);
+            Set<Module> componentsToAdd = Sets.difference(newComponents, oldComponents);
 
-        Set<Module> componentsToRemove = Sets.difference(oldComponents, newComponents);
-        Set<Module> componentsToAdd = Sets.difference(newComponents, oldComponents);
-
-        unregisterModule(componentsToRemove);
-        registerModules(componentsToAdd);
+            unregisterModule(componentsToRemove);
+            registerModules(componentsToAdd);
+        }
         this.components = components;
     }
 
@@ -130,8 +144,13 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         return clazz;
     }
 
+    /**
+     * Gets a list of currently registered components.
+     *
+     * @return a list of registered components
+     */
     public List<Module> getComponents() {
-        return components;
+        return new ArrayList<>(components);
     }
 
     @Override

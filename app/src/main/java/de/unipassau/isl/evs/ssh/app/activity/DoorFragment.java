@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +16,7 @@ import java.lang.ref.WeakReference;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 
 /**
  * This fragment allows to display information contained in door messages
@@ -23,8 +24,9 @@ import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
  *
  * @author Wolfgang Popp
  */
-public class DoorFragment extends Fragment {
+public class DoorFragment extends BoundFragment {
 
+    private static final String TAG = DoorFragment.class.getSimpleName();
     private Button openButton;
     private Button blockButton;
     private ImageButton refreshButton;
@@ -41,18 +43,6 @@ public class DoorFragment extends Fragment {
             updateButtons();
         }
     };
-
-    @Override
-    public void onStart() {
-        getDoorHandler().addListener(doorListener);
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        getDoorHandler().removeListener(doorListener);
-        super.onStop();
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -83,13 +73,24 @@ public class DoorFragment extends Fragment {
             }
         });
 
-        getDoorHandler().refresh();
-        updateButtons();
         return view;
     }
 
-    private AppDoorHandler getDoorHandler(){
-        return ((MainActivity) getActivity()).getContainer().require(AppDoorHandler.KEY);
+    @Override
+    public void onContainerConnected(Container container) {
+        getDoorHandler().addListener(doorListener);
+        getDoorHandler().refresh();
+        updateButtons();
+    }
+
+    @Override
+    public void onContainerDisconnected() {
+        getDoorHandler().removeListener(doorListener);
+        super.onContainerDisconnected();
+    }
+
+    private AppDoorHandler getDoorHandler() {
+        return getComponent(AppDoorHandler.KEY);
     }
 
     /**
@@ -97,6 +98,11 @@ public class DoorFragment extends Fragment {
      */
     private void openButtonAction() {
         AppDoorHandler handler = getDoorHandler();
+
+        if (handler == null){
+            Log.i(TAG, "Container not bound.");
+            return;
+        }
 
         if (!handler.isOpen() && !handler.isBlocked()) {
             handler.openDoor();
@@ -110,6 +116,11 @@ public class DoorFragment extends Fragment {
     private void blockButtonAction() {
         AppDoorHandler handler = getDoorHandler();
 
+        if (handler == null){
+            Log.i(TAG, "Container not bound.");
+            return;
+        }
+
         if (handler.isBlocked()) {
             handler.unblockDoor();
         } else {
@@ -120,7 +131,6 @@ public class DoorFragment extends Fragment {
 
     private void refreshImage() {
         getDoorHandler().refreshImage();
-
     }
 
     /**
@@ -138,6 +148,10 @@ public class DoorFragment extends Fragment {
      */
     private void updateButtons() {
         AppDoorHandler handler = getDoorHandler();
+        if (handler == null) {
+            Log.i(TAG, "Container not bound.");
+            return;
+        }
 
         if (handler.isBlocked()) {
             blockButton.setText(R.string.unblockDoor);
@@ -158,6 +172,9 @@ public class DoorFragment extends Fragment {
         }
     }
 
+    /**
+     * The listener interface to receive door events.
+     */
     public interface DoorListener {
         void onPictureChanged(byte[] image);
         void onDoorStatusChanged();
