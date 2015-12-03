@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
  * @see ListGroupFragment
  * @see ListUserDeviceFragment
  */
-public class EditUserDeviceFragment extends Fragment {
+public class EditUserDeviceFragment extends BoundFragment {
 
     private UserDevice device;
 

@@ -3,7 +3,6 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,7 @@ import android.view.ViewGroup;
  *
  * @author Wolfgang Popp
  */
-public class ListUserDeviceFragment extends Fragment {
+public class ListUserDeviceFragment extends BoundFragment {
     @Override
     public void onStart() {
         super.onStart();
