@@ -9,6 +9,7 @@ import android.util.Log;
 import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.X509Certificate;
@@ -138,6 +139,19 @@ public class NamingManager extends AbstractComponent {
     @NonNull
     public PublicKey getPublicKey(DeviceID id) throws UnresolvableNamingException {
         return getCertificate(id).getPublicKey();
+    }
+
+    /**
+     * @deprecated use {@link DeviceID#fromCertificate(X509Certificate)} instead
+     */
+    @Deprecated
+    @NonNull
+    public DeviceID getDeviceID(X509Certificate cert) throws UnresolvableNamingException {
+        try {
+            return DeviceID.fromCertificate(cert);
+        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
+            throw new UnresolvableNamingException(e);
+        }
     }
 
     /**

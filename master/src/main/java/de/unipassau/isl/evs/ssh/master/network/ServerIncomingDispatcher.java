@@ -1,16 +1,17 @@
 package de.unipassau.isl.evs.ssh.master.network;
 
 import android.util.Log;
+
+import java.util.Set;
+
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 
-import java.util.Set;
-
 /**
- * Distributes incoming messages from one of the multiple connections a master has to the responsible handlers.
+ * Distributes incoming messages from one of the multiple connections a Server has to the responsible handlers.
  *
  * @author Niko
  */
@@ -33,9 +34,10 @@ public class ServerIncomingDispatcher extends IncomingDispatcher {
     }
 
     /**
-     * Dispatches an AddressedMessage to its target handler using the EventExecutor of this Dispatcher.
+     * Dispatches an AddressedMessage to its target handler using the EventExecutor of the Server.
      *
-     * @param msg AddressedMessage to Dispatch.
+     * @param msg AddressedMessage to dispatch.
+     * @return {@code true} if the Message was forwarded to at least one MessageHandler.
      */
     @Override
     public boolean dispatch(final Message.AddressedMessage msg) {

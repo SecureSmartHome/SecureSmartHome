@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.core.messaging;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -9,10 +10,9 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import io.netty.channel.ChannelHandlerAdapter;
 
 /**
- * Abstract class providing base methods for IncomingDispatchers.
- * IncomingDispatchers distribute incoming messages to the specific handler.
+ * Distributes incoming messages to their target MessageHandlers.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public abstract class IncomingDispatcher extends ChannelHandlerAdapter implements Component {
     public static final Key<IncomingDispatcher> KEY = new Key<>(IncomingDispatcher.class);
@@ -20,6 +20,12 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
     public SetMultimap<String, MessageHandler> mappings = HashMultimap.create();
     private Container container;
 
+    /**
+     * Dispatches an AddressedMessage to its target handler using an EventExecutor.
+     *
+     * @param msg AddressedMessage to dispatch.
+     * @return {@code true} if the Message was forwarded to at least one MessageHandler.
+     */
     public abstract boolean dispatch(Message.AddressedMessage msg);
 
     @Override

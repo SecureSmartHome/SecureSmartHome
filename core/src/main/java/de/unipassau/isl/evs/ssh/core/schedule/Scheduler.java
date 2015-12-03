@@ -5,13 +5,14 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import java.io.Serializable;
+import java.util.Objects;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
-
-import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * Scheduler is a component that allows periodic or delayed execution of tasks, similar to the Android {@link AlarmManager} class.
@@ -41,7 +42,8 @@ import java.util.Objects;
  * </pre>
  *
  * @see AlarmManager
- * @author Niko
+ * @see ContainerService
+ * @author Niko Fink
  */
 public class Scheduler extends AbstractComponent {
     public static final Key<Scheduler> KEY = new Key<>(Scheduler.class);
