@@ -18,6 +18,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.util.Queue;
 
+import de.unipassau.isl.evs.ssh.app.AppConstants;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -90,10 +91,9 @@ public class ScanQRCodeFragment extends BoundFragment {
                             QRDeviceInformation.fromDataString(contents);
                     qrScanResult = info;
                     System.out.println("occ: what is going on here");
-                    //((MainActivity) getActivity()).showFragmentByClass(WelcomeScreenFragment.class);
-                    Intent intent = new Intent(getActivity(), WelcomeScreenFragment.class);
-                    intent.putExtra(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, info);
-                    //setResul
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable(AppConstants.Fragment_Arguments.ARGUMENT_FRAGMENT, info);
+                    ((MainActivity) getActivity()).showFragmentByClass(WelcomeScreenFragment.class, bundle);
                 } catch (IOException e) {
                     e.printStackTrace();
                     Toast.makeText(getActivity(), "Malformed QR-Code",
@@ -103,41 +103,5 @@ public class ScanQRCodeFragment extends BoundFragment {
         }
         // forward the intent to child fragments
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    public void onContainerConnected(Container container) {
-        super.onContainerConnected(container);
-        System.out.println("occ: something went down");
-        System.out.println("occ: " + String.valueOf(qrScanResult == null));
-        //System.out.println("occ: " + qrScanResult.getID().getIDString());
-
-        if (qrScanResult != null) {
-            System.out.println("occ: something more went down");
-            //TODO: wait on container
-            //TODO do something with info
-            //SharedPreferences sharedPreferences =
-
-            if (getContainer().get(ContainerService.KEY_CONTEXT) == null) {
-                System.out.println("NOCONTEXT");
-            } else {
-                System.out.println("CONTEXT");
-            }
-
-            SharedPreferences sharedPreferences = getContainer().require(ContainerService.KEY_CONTEXT).getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt(CoreConstants.NettyConstants.PREF_PORT, qrScanResult.getPort());
-            StringBuilder hostNameBuilder = new StringBuilder();
-            for (byte b : qrScanResult.getAddress().getAddress()) {
-                hostNameBuilder.append(b).append('.');
-            }
-            hostNameBuilder.deleteCharAt(hostNameBuilder.length() - 1);
-            System.out.println("HostNAME:" + hostNameBuilder.toString());
-            editor.putString(CoreConstants.NettyConstants.PREF_HOST, hostNameBuilder.toString());
-            editor.putString(CoreConstants.SharedPrefs.PREF_TOKEN, new String(qrScanResult.getToken()));
-            editor.commit();
-            editor.apply();
-            qrScanResult = null;
-        }
     }
 }

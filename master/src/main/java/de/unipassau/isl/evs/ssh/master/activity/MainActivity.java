@@ -145,14 +145,23 @@ public class MainActivity extends BoundActivity {
             QRDeviceInformation deviceInformation = null;
             try {
                 deviceInformation = new QRDeviceInformation(
-                        (Inet4Address) Inet4Address.getByAddress(new byte[] {127, 0, 0, 1}),
-                        12,
+                        (Inet4Address) Inet4Address.getByAddress(new byte[] {192-128, 168-128, 0-128, 101-128}),
+                        CoreConstants.NettyConstants.DEFAULT_PORT,
                         getContainer().require(NamingManager.KEY).getMasterID(),
                         QRDeviceInformation.getRandomToken()
                 );
             } catch (UnknownHostException e) {
                 //Todo: handle error
             }
+            StringBuilder hostNameBuilder = new StringBuilder();
+            for (byte b : deviceInformation.getAddress().getAddress()) {
+                hostNameBuilder.append(b + 128).append('.');
+            }
+            hostNameBuilder.deleteCharAt(hostNameBuilder.length() - 1);
+            System.out.println("HostNAME:" + hostNameBuilder.toString());
+            System.out.println("ID:" + deviceInformation.getID());
+            System.out.println("Port:" + deviceInformation.getPort());
+            System.out.println("Token:" + new String(deviceInformation.getToken()));
             intent.putExtra(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
             startActivity(intent);
         }
