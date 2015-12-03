@@ -16,7 +16,6 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
-import de.unipassau.isl.evs.ssh.core.naming.UnresolvableNamingException;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import io.netty.bootstrap.Bootstrap;
@@ -27,7 +26,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_REQUEST;
@@ -133,11 +131,16 @@ public class UDPDiscoveryServer extends AbstractComponent {
             if (msg instanceof DatagramPacket) {
                 final DatagramPacket request = (DatagramPacket) msg;
                 final ByteBuf buffer = request.content();
-                if (checkHeader(buffer) && checkPubKey(buffer)) {
-                    Log.d(TAG, "UDP inquiry received from " + request.sender());
-                    sendDiscoveryResponse(request);
-                    ReferenceCountUtil.release(request);
-                    return;
+                final String messageType = readString(buffer);
+                if (DISCOVERY_PAYLOAD_REQUEST.equals(messageType)) {
+                    if (checkPubKey(buffer)) {
+                        Log.d(TAG, "UDP inquiry received from " + request.sender() + " looking for me");
+                        sendDiscoveryResponse(request);
+                        ReferenceCountUtil.release(request);
+                        return;
+                    } else {
+                        Log.d(TAG, "UDP inquiry received from " + request.sender() + ", but looking for another master");
+                    }
                 }
             }
             // forward all other packets to the pipeline
@@ -145,17 +148,16 @@ public class UDPDiscoveryServer extends AbstractComponent {
         }
 
         /**
-         * Read and verify header.
+         * Read a string.
          */
-        private boolean checkHeader(ByteBuf buffer) {
-            final int headerLength = buffer.readInt();
-            final byte[] expectedHeader = DISCOVERY_PAYLOAD_REQUEST.getBytes();
-            if (headerLength != expectedHeader.length) {
-                return false;
+        private String readString(ByteBuf buffer) {
+            final int length = buffer.readInt();
+            if (length < 0 || length > 0xFFFF) {
+                return null;
             }
-            byte[] actualHeader = new byte[expectedHeader.length];
-            buffer.readBytes(actualHeader);
-            return Arrays.equals(expectedHeader, actualHeader);
+            byte[] value = new byte[length];
+            buffer.readBytes(value);
+            return new String(value);
         }
 
         /**

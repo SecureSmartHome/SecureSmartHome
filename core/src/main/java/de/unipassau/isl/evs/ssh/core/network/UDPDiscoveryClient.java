@@ -203,7 +203,11 @@ public class UDPDiscoveryClient extends AbstractComponent {
                 final int dataStart = buffer.readerIndex();
                 final String messageType = readString(buffer);
                 if (DISCOVERY_PAYLOAD_RESPONSE.equals(messageType)) {
-                    final String address = readString(buffer);
+                    String address = readString(buffer);
+                    // the address originally sent from the master is discarded, as using the address from which the
+                    // message came works even if I'm in a different subnet
+                    address = request.sender().getHostString();
+
                     final int port = buffer.readInt();
                     final int dataEnd = buffer.readerIndex();
                     if (checkSignature(buffer, dataStart, dataEnd)) {
@@ -213,6 +217,8 @@ public class UDPDiscoveryClient extends AbstractComponent {
                         stopDiscovery();
                         requireComponent(Client.KEY).onDiscoverySuccessful(address, port);
                         return;
+                    } else {
+                        Log.i(TAG, "UDP response received " + address + ":" + port + ", but signature is invalid");
                     }
                 } else if (DISCOVERY_PAYLOAD_REQUEST.equals(messageType)) {
                     // discard own requests that are echoed by the router
