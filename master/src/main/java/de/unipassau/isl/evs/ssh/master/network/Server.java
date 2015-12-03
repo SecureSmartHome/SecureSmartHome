@@ -55,7 +55,7 @@ public class Server extends AbstractComponent {
     /**
      * Distributes incoming messages to the responsible handlers.
      */
-    private final ServerIncomingDispatcher incomingDispatcher = new ServerIncomingDispatcher(this);
+    private final ServerIncomingDispatcher incomingDispatcher = new ServerIncomingDispatcher();
     /**
      * Receives messages from system components and decides how to route them to the targets.
      */
@@ -141,7 +141,7 @@ public class Server extends AbstractComponent {
      */
     @NonNull
     protected ServerHandshakeHandler getHandshakeHandler() {
-        return new ServerHandshakeHandler(this);
+        return new ServerHandshakeHandler(this, getContainer());
     }
 
     /**
@@ -193,13 +193,6 @@ public class Server extends AbstractComponent {
      */
     ServerIncomingDispatcher getIncomingDispatcher() {
         return incomingDispatcher;
-    }
-
-    /**
-     * Provide the container to {@link ServerHandshakeHandler}
-     */
-    Container _getContainer() {
-        return super.getContainer();
     }
 
     /**

@@ -32,9 +32,11 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     private static final String TAG = ServerHandshakeHandler.class.getSimpleName();
 
     private final Server server;
+    private final Container container;
 
-    public ServerHandshakeHandler(Server server) {
+    public ServerHandshakeHandler(Server server, Container container) {
         this.server = server;
+        this.container = container;
     }
 
     /**
@@ -46,7 +48,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         Log.v(TAG, "channelRegistered " + ctx);
-        if (getContainer() == null) {
+        if (container == null) {
             //Do not accept new connections after the Server has been shut down
             Log.v(TAG, "channelRegistered:closed");
             ctx.close();
@@ -85,11 +87,11 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
             ctx.attr(CoreConstants.NettyConstants.ATTR_CLIENT_ID).set(deviceID);
             Log.i(TAG, "Client " + deviceID + " connected");
 
-            final X509Certificate masterCert = getContainer().require(NamingManager.KEY).getMasterCertificate();
+            final X509Certificate masterCert = container.require(NamingManager.KEY).getMasterCertificate();
             ctx.writeAndFlush(new HandshakePacket.ServerHello(masterCert));
 
             //TODO check authentication and protocol version and close connection on fail
-            clientAuthenticated(ctx);
+            clientAuthenticated(ctx, hello.clientCertificate);
         } else {
             super.channelRead(ctx, msg);
         }
@@ -98,7 +100,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     /**
      * Called once the Handshake is complete
      */
-    private void clientAuthenticated(ChannelHandlerContext ctx) {
+    private void clientAuthenticated(ChannelHandlerContext ctx, X509Certificate clientCertificate) {
         Log.v(TAG, "clientAuthenticated " + ctx);
 
         //Timeout Handler
@@ -111,9 +113,5 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
 
         ctx.pipeline().remove(this);
         Log.v(TAG, "Pipeline after authenticate: " + ctx.pipeline());
-    }
-
-    protected Container getContainer() {
-        return server._getContainer();
     }
 }

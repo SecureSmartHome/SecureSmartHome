@@ -8,6 +8,7 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
 
 /**
  * Distributes incoming messages to their target MessageHandlers.
@@ -19,6 +20,15 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
 
     public SetMultimap<String, MessageHandler> mappings = HashMultimap.create();
     private Container container;
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object in) throws Exception {
+        if (in instanceof Message.AddressedMessage) {
+            //TODO check that in.getFromID() matched Public Key for Connection, i.e. Sender has sent his correct ID
+            if (dispatch((Message.AddressedMessage) in)) return;
+        }
+        super.channelRead(ctx, in);
+    }
 
     /**
      * Dispatches an AddressedMessage to its target handler using an EventExecutor.

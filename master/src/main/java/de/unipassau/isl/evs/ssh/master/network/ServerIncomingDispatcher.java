@@ -8,30 +8,15 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
  * Distributes incoming messages from one of the multiple connections a Server has to the responsible handlers.
  *
- * @author Niko
+ * @author Niko Fink
  */
 @ChannelHandler.Sharable
 public class ServerIncomingDispatcher extends IncomingDispatcher {
     private static final String TAG = ServerIncomingDispatcher.class.getSimpleName();
-
-    private final Server server;
-
-    public ServerIncomingDispatcher(Server server) {
-        this.server = server;
-    }
-
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object in) throws Exception {
-        if (in instanceof Message.AddressedMessage) {
-            if (dispatch((Message.AddressedMessage) in)) return;
-        }
-        super.channelRead(ctx, in);
-    }
 
     /**
      * Dispatches an AddressedMessage to its target handler using the EventExecutor of the Server.
@@ -41,6 +26,7 @@ public class ServerIncomingDispatcher extends IncomingDispatcher {
      */
     @Override
     public boolean dispatch(final Message.AddressedMessage msg) {
+        Server server = getContainer().require(Server.KEY);
         if (!server.isExecutorAlive() || !server.isChannelOpen()) {
             Log.w(TAG, "Could not dispatch message as Executor was shut down");
             return false;
