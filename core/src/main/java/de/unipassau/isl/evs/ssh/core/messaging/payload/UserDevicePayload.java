@@ -3,6 +3,7 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableListMultimap;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
@@ -12,21 +13,22 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
  */
 public class UserDevicePayload implements MessagePayload {
 
-    private Map<UserDevice, List<Permission>> usersToPermissions;
-    private Map<Group, List<UserDevice>> groupToUserDevice;
+    private ImmutableListMultimap<UserDevice, Permission> usersToPermissions; //If a device has no permissions, it is still in the map with an empty permission list
+    private ImmutableListMultimap<Group, UserDevice> groupToUserDevice; //If a group contains no devices, it is still in the map with an empty devicelist
     private List<Permission> allPermissions;
 
-    public UserDevicePayload(Map<UserDevice, List<Permission>> usersToPermissions, Map<Group, List<UserDevice>> groupToUserDevice, List<Permission> allPermissions) {
+    public UserDevicePayload(ImmutableListMultimap<UserDevice, Permission> usersToPermissions,
+                             ImmutableListMultimap<Group, UserDevice> groupToUserDevice, List<Permission> allPermissions) {
         this.usersToPermissions = usersToPermissions;
         this.groupToUserDevice = groupToUserDevice;
         this.allPermissions = allPermissions;
     }
 
-    public Map<UserDevice, List<Permission>> getUsersToPermissions() {
+    public ImmutableListMultimap<UserDevice, Permission> getUsersToPermissions() {
         return usersToPermissions;
     }
 
-    public Map<Group, List<UserDevice>> getGroupToUserDevice() {
+    public ImmutableListMultimap<Group, UserDevice> getGroupToUserDevice() {
         return groupToUserDevice;
     }
 

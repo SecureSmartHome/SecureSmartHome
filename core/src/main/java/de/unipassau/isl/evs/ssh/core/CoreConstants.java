@@ -109,6 +109,7 @@ public class CoreConstants {
         public static final String MASTER_DOOR_LOCK_SET = "/master/door/lock_set";
         public static final String MASTER_DOOR_LOCK_GET = "/master/door/lock_get";
         public static final String MASTER_DOOR_STATUS_GET = "/master/door/status_get";
+        public static final String MASTER_USERINFO_GET = "/master/userdevice/get";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
