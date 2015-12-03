@@ -148,22 +148,36 @@ public class MainActivity extends BoundActivity
      *
      * @param clazz the class of the fragment to show
      */
-    public void showFragmentByClass(Class clazz){
+    public void showFragmentByClass(Class clazz) {
+        showFragmentByClass(clazz, null);
+    }
+
+    /**
+     * Displays a fragment and takes care of lifecycle actions like saving state when rotating the
+     * screen or managing the back button behavior.
+     *
+     * @param clazz  the class of the fragment to show
+     * @param bundle the bundle that is given with the new fragment
+     */
+    public void showFragmentByClass(Class clazz, Bundle bundle) {
         Class oldFragment = getCurrentFragment().getClass();
         Fragment fragment = null;
-        try {
-            fragment = (Fragment) clazz.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        if (fragment != null) {
-            android.support.v4.app.FragmentTransaction fragmentTransaction =
-                    getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, fragment);
-            if (!oldFragment.isInstance(fragment)) {
-                fragmentTransaction.addToBackStack(null);
+        if (bundle != null) {
+            try {
+                fragment = (Fragment) clazz.newInstance();
+                fragment.setArguments(bundle);
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
             }
-            fragmentTransaction.commit();
+            if (fragment != null) {
+                android.support.v4.app.FragmentTransaction fragmentTransaction =
+                        getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragment_container, fragment);
+                if (!oldFragment.isInstance(fragment)) {
+                    fragmentTransaction.addToBackStack(null);
+                }
+                fragmentTransaction.commit();
+            }
         }
     }
 
