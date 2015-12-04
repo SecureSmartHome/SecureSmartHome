@@ -44,7 +44,7 @@ public class MasterContainer extends ContainerService {
         incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
         incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(), CoreConstants.RoutingKeys.MASTER_REGISTER_INIT, CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE);
 
-        if (!dir.mkdirs()) {
+        if (!dir.isDirectory() && !dir.mkdirs()) {
             dir = getFilesDir();
         }
         Log.i("ContainerService", "Storing IDs in " + dir);
