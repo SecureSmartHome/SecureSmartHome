@@ -58,8 +58,8 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
     @Override
     public void handle(Message.AddressedMessage message) {
         if (message.getPayload() instanceof ModulesPayload) {
-            List<> modules = (List<Module>) message.getPayload();
-            updateList(modules);
+           // List<> modules = (List<Module>) message.getPayload();
+            //updateList(modules);
         } else {
             Log.e(this.getClass().getSimpleName(), "Error! Unknown message Payload");
         }
