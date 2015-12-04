@@ -37,7 +37,7 @@ public class SlaveContainer extends ContainerService {
         register(KeyStoreController.KEY, new KeyStoreController());
 
         // read the master id and cert from local storage as long as adding new devices is not implemented
-        if (!dir.mkdirs()) {
+        if (!dir.isDirectory() && !dir.mkdirs()) {
             dir = getFilesDir();
         }
         Log.i("ContainerService", "Storing IDs in " + dir);
