@@ -11,7 +11,7 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="46dp"
+        android:layout_height="41dp"
         android:text="Climate data:"
         android:id="@+id/climateData"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -19,7 +19,7 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="26dp"
+        android:layout_height="21dp"
         android:text="Temperature 1:"
         android:id="@+id/temp1"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -27,7 +27,7 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="26dp"
+        android:layout_height="21dp"
         android:text="Temperature 2:"
         android:id="@+id/temp2"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -35,7 +35,7 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="26dp"
+        android:layout_height="21dp"
         android:text="Pressure:"
         android:id="@+id/pressure"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -43,7 +43,7 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="26dp"
+        android:layout_height="21dp"
         android:text="Altitude:"
         android:id="@+id/altitude"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -51,7 +51,7 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="26dp"
+        android:layout_height="21dp"
         android:text="Humidity:"
         android:id="@+id/humidity"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -59,7 +59,7 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="26dp"
+        android:layout_height="21dp"
         android:text="UV:"
         android:id="@+id/uv"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -67,7 +67,7 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="26dp"
+        android:layout_height="21dp"
         android:text="Visible Light:"
         android:id="@+id/visible"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -75,7 +75,7 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="26dp"
+        android:layout_height="21dp"
         android:text="Infrared:"
         android:id="@+id/ir"
         android:textAppearance="?android:attr/textAppearanceMedium"

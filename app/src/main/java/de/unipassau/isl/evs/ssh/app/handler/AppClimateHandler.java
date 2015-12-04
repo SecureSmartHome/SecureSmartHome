@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -12,7 +14,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 
 /**
  * AppLightHandler class handles message from and to the
@@ -22,19 +24,18 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
  */
 public class AppClimateHandler extends AbstractComponent implements MessageHandler {
 
-    private double temp1;
-    private double temp2;
-    private double pressure;
-    private double altitude;
-    private double humidity;
-    private double uv;
-    private int visible;
-    private int ir;
+    private double temp1 = 0.0;
+    private double temp2 = 0.0;
+    private double pressure = 0.0;
+    private double altitude = 0.0;
+    private double humidity = 0.0;
+    private double uv = 0.0;
+    private int visible = 0;
+    private int ir = 0;
 
     public static final Key<AppClimateHandler> KEY = new Key<>(AppClimateHandler.class);
 
     private final List<ClimateHandlerListener> listeners = new ArrayList<>();
-
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(200);
 
 
@@ -56,8 +57,12 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        WeatherPayload weatherPayload = (WeatherPayload) message.getPayload();
-        setCachedStatus(WeatherPayload.getModule(), WeatherPayload.getOn());
+        if (message.getPayload() instanceof ModulesPayload) {
+            List<> modules = (List<Module>) message.getPayload();
+            updateList(modules);
+        } else {
+            Log.e(this.getClass().getSimpleName(), "Error! Unknown message Payload");
+        }
     }
 
     @Override
