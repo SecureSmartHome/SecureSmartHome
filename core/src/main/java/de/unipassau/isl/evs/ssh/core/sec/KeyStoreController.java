@@ -207,9 +207,9 @@ public class KeyStoreController extends AbstractComponent {
         keyStore.setCertificateEntry(alias, certificate);
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(keyStoreFile)) {
-            char[] keyPairPassword = getKeyPairPassword();
-            keyStore.store(fileOutputStream, keyPairPassword);
-            Arrays.fill(keyPairPassword, (char) 0);
+            final char[] keystorePassword = getKeystorePassword();
+            keyStore.store(fileOutputStream, keystorePassword);
+            Arrays.fill(keystorePassword, (char) 0);
         } catch (IOException ex) {
             throw new KeyStoreException(ex);
         }
@@ -261,7 +261,9 @@ public class KeyStoreController extends AbstractComponent {
         Arrays.fill(keyPairPassword, (char) 0);
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(keyStoreFile)) {
-            keyStore.store(fileOutputStream, getKeystorePassword());
+            final char[] keystorePassword = getKeystorePassword();
+            keyStore.store(fileOutputStream, keystorePassword);
+            Arrays.fill(keystorePassword, (char) 0);
         } catch (IOException ex) {
             throw new KeyStoreException(ex);
         }
