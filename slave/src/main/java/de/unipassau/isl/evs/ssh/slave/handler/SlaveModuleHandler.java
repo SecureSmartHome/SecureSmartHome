@@ -97,7 +97,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         String moduleName = reedSensor.getName();
         Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
         GPIOAccessPoint accessPoint = (GPIOAccessPoint) reedSensor.getModuleAccessPoint();
-        getContainer().register(key, new ReedSensor(accessPoint.getPort()));
+        getContainer().register(key, new ReedSensor(accessPoint.getPort(), moduleName));
     }
 
     private void registerWeatherSensor(Module weatherSensor) {

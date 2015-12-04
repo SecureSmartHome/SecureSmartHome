@@ -1,15 +1,25 @@
 package de.unipassau.isl.evs.ssh.drivers.lib;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
+
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class to get weather information from the Odroid Show and Weather board.
  *
  * @author Wolfram Gottschlich
  * @author Niko Fink
- * @version 2.0
+ * @author Chris
+ * @version 2.1
  */
 public class WeatherSensor extends AbstractComponent {
     public static final Key<WeatherSensor> KEY = new Key<>(WeatherSensor.class);
@@ -21,19 +31,63 @@ public class WeatherSensor extends AbstractComponent {
 
     private double temp1, temp2, pressure, altitude, humidity, uv;
     private int visible, ir;
+    private String modulName;
+    private Container container;
+    private ScheduledFuture future;
 
     @Override
     public void init(Container container) {
         initSerialInterface();
+        this.container = container;
+
+        this.future =  container.require(ExecutionServiceComponent.KEY).scheduleAtFixedRate(
+                new WeatherPollingRunnable(this), 0, 200, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void destroy() {
         close();
+        future.cancel(true);
     }
 
     public void updateData() {
         readData();
+    }
+
+    private class WeatherPollingRunnable implements Runnable {
+
+        WeatherSensor sensor;
+
+        public WeatherPollingRunnable(WeatherSensor sensor) {
+            this.sensor = sensor;
+        }
+
+        @Override
+        public void run() {
+            if (future != null) {
+                updateData();
+                sendWeatherInfo();
+            }
+        }
+
+        /**
+         * Sends Weather Information to Master
+         */
+        private void sendWeatherInfo() {
+            ClimatePayload payload = new ClimatePayload(getTemperature1(), getTemperature2(), getPressure(),
+                    getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), " " , " ");
+
+            //Todo set values
+
+            NamingManager namingManager = container.require(NamingManager.KEY);
+
+            Message message;
+            message = new Message(payload);
+            message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
+
+            OutgoingRouter router = container.require(OutgoingRouter.KEY);
+            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_WEATHER_INFO, message);
+        }
     }
 
     //Natives///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,4 +167,9 @@ public class WeatherSensor extends AbstractComponent {
     public int getInfrared() {
         return ir;
     }
+
+    /*
+    * returns last value from readData() for module Name of the sensor
+     */
+    public String getModulName(){ return modulName; }
 }
