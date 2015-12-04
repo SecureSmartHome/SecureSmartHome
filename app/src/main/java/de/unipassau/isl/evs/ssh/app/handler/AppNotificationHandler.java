@@ -16,6 +16,7 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 
 /**
  * Notification Handler for the App that receives Messages from the MasterNotificationHandler
@@ -36,6 +37,7 @@ public class AppNotificationHandler extends AbstractComponent implements Message
      */
     @Override
     public void handle(Message.AddressedMessage message) {
+        //Climate Warnings
         if (message.getPayload() instanceof ClimatePayload) {
             ClimatePayload payload = (ClimatePayload) message.getPayload();
             Context context = getContainer().get(ContainerService.KEY_CONTEXT);
@@ -43,9 +45,13 @@ public class AppNotificationHandler extends AbstractComponent implements Message
                 case CoreConstants.NotificationTypes.BRIGHTNESS_WARNING:
                     issueBrightnessWarning(2, context);
                 case CoreConstants.NotificationTypes.HUMIDITY_WARNING:
-                    issueWeatherNotification(1, context);
+                    issueClimateNotification(1, context);
                     break;
             }
+        //Weather Warnings
+        }else if (message.getPayload() instanceof WeatherPayload){
+            WeatherPayload payload = (WeatherPayload) message.getPayload();
+            issueWeatherWarning(3, payload.getWarnText(), getContainer().get(ContainerService.KEY_CONTEXT));
         }
     }
 
@@ -66,7 +72,7 @@ public class AppNotificationHandler extends AbstractComponent implements Message
      * @param notificationID Is a unique ID for the Notification
      * @param context        Context
      */
-    private void issueWeatherNotification(int notificationID, Context context) {
+    private void issueClimateNotification(int notificationID, Context context) {
         String title = "Climate Warning!";
         String text = "Please open Window! Humidity high.";
         displayNotification(title, text, notificationID, context);
@@ -76,6 +82,11 @@ public class AppNotificationHandler extends AbstractComponent implements Message
         String title = "Light Warning!";
         String text = "Please turn off lights to save energy.";
         displayNotification(title, text, notificationID, context);
+    }
+
+    private void issueWeatherWarning(int notificationID, String warnText, Context context){
+        String title = "Weather Warning!";
+        displayNotification(title, warnText, notificationID, context);
     }
 
     /**
