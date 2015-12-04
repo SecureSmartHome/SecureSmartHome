@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @author Chris
  */
-public class MasterRegisterDeviceHandler extends AbstractMasterHandler{
+public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 
     @Override
     public void handle(Message.AddressedMessage message) {
@@ -28,7 +28,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler{
             UserDeviceInformationPayload payload = generatePayload();
             final Message messageToSend = new Message(message.getPayload());
             messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
-            sendMessage(message.getFromID(),CoreConstants.RoutingKeys.APP_USERINFO_GET,messageToSend);
+            sendMessage(message.getFromID(), CoreConstants.RoutingKeys.APP_USERINFO_GET,messageToSend);
         } else {
             sendErrorMessage(message); //wrong payload received
         }
