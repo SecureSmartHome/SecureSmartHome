@@ -17,6 +17,10 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupEditPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 
 /**
@@ -33,7 +37,7 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
 
     private List<UserInfoListener> listeners = new LinkedList<>();
 
-    public interface UserInfoListener{
+    public interface UserInfoListener {
         void userInfoUpdated();
     }
 
@@ -45,7 +49,7 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
         listeners.remove(listener);
     }
 
-    private void fireUserInfoUpdated(){
+    private void fireUserInfoUpdated() {
         for (UserInfoListener listener : listeners) {
             listener.userInfoUpdated();
         }
@@ -109,10 +113,45 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
         return usersToPermissions.get(user);
     }
 
-    //addGroup(Group group)
-    //removeGroup(Group group)
-    //editGroup(Group newGroup, Group oldGroup)
-    //setPermission(UserDevice device, Permission permission)
-    //editUserDevice(UserDevice newDevice, UserDevice oldDevice)
-    //removeUserDevice(UserDevice userDevice)
+    private void sendEditMessage(MessagePayload payload) {
+        Message message = new Message(payload);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_USERINFO_GET);
+        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
+        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_GET, message);
+    }
+
+    public void addGroup(Group group) {
+        GroupEditPayload payload = GroupEditPayload.newAddGroupPayload(group);
+        sendEditMessage(payload);
+    }
+
+    public void removeGroup(Group group) {
+        GroupEditPayload payload = GroupEditPayload.newRemoveGroupPayload(group);
+        sendEditMessage(payload);
+    }
+
+    public void editGroup(Group oldGroup, Group newGroup) {
+        GroupEditPayload payload = GroupEditPayload.newEditGroupPayload(oldGroup, newGroup);
+        sendEditMessage(payload);
+    }
+
+    public void grantPermission(UserDevice device, Permission permission) {
+        UserDeviceEditPayload payload = UserDeviceEditPayload.newGrantPermissionPayload(device, permission);
+        sendEditMessage(payload);
+    }
+
+    public void revokePermission(UserDevice device, Permission permission) {
+        UserDeviceEditPayload payload = UserDeviceEditPayload.newRevokePermissionPayload(device, permission);
+        sendEditMessage(payload);
+    }
+
+    public void editUserDevice(UserDevice oldDevice, UserDevice newDevice) {
+        UserDeviceEditPayload payload = UserDeviceEditPayload.newEditUserPayload(oldDevice, newDevice);
+        sendEditMessage(payload);
+    }
+
+    public void removeUserDevice(UserDevice userDevice) {
+        UserDeviceEditPayload payload = UserDeviceEditPayload.newRemoveUserPayload(userDevice);
+        sendEditMessage(payload);
+    }
 }
