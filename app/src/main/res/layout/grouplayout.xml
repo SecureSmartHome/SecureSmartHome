@@ -9,13 +9,21 @@
         android:id="@+id/listgroup_group_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/typography_subheadline"/>
+        android:layout_marginBottom="6dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:textSize="@dimen/typography_subheadline"
+        android:textStyle="bold"/>
 
     <TextView
 
         android:id="@+id/listgroup_group_members"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="6dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:textSize="@dimen/typography_body"
         />
 </LinearLayout>

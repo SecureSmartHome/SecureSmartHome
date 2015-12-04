@@ -8,9 +8,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.Collections;
@@ -19,9 +21,14 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.AppConstants;
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.app.activity.dialog.AddGroupDialog;
+import de.unipassau.isl.evs.ssh.app.activity.dialog.EditGroupDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserDeviceHandler;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
+
+import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.ADD_GROUP_DIALOG;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.EDIT_GROUP_DIALOG;
 
 /**
  * This fragment shows a list of all groups of user devices registered in the system.
@@ -31,8 +38,13 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
  * @see ListUserDeviceFragment
  * @see EditUserDeviceFragment
  */
-public class ListGroupFragment extends BoundFragment {
+public class ListGroupFragment extends BoundFragment implements EditGroupDialog.EditGroupDialogListener, AddGroupDialog.AddGroupDialogListener {
+
+
     private GroupListAdapter adapter;
+
+    private AddGroupDialog.AddGroupDialogListener addGroupDialogListener;
+    private EditGroupDialog.EditGroupDialogListener editGroupDialogListener;
 
     @Override
     public void onStart() {
@@ -61,12 +73,15 @@ public class ListGroupFragment extends BoundFragment {
                                     }
         );
         list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            // when a user clicks long on an item, the app opens a dialog
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Group item = adapter.getItem(position);
-                // TODO edit group dialog
-
+                //TODO edit group dialog
+                EditGroupDialog editGroupDialog = new EditGroupDialog();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(EDIT_GROUP_DIALOG, item);
+                editGroupDialog.setArguments(bundle);
+                editGroupDialog.show(getFragmentManager(), EDIT_GROUP_DIALOG);
                 return item == null;
             }
         });
@@ -75,12 +90,53 @@ public class ListGroupFragment extends BoundFragment {
             @Override
             public void onClick(View v) {
                 //TODO add new group dialog
+                AddGroupDialog addGroupDialog = new AddGroupDialog();
+                addGroupDialog.show(getFragmentManager(), ADD_GROUP_DIALOG);
             }
         });
         adapter = new GroupListAdapter(inflater);
         list.setAdapter(adapter);
 
         return root;
+    }
+
+    @Override
+    public void onDialogPositiveClick(AddGroupDialog dialog) {
+        EditText editText = (EditText) dialog.getView().findViewById(R.id.add_group_dialog_group_name);
+        String groupName = editText.getText().toString();
+        Spinner spinner = (Spinner) dialog.getView().findViewById(R.id.add_group_dialog_spinner);
+        String templateName = spinner.getSelectedItem().toString();
+
+        Group newGroup = new Group(groupName, templateName);
+
+        // addGroup(newGroup)
+    }
+
+    @Override
+    public void onDialogNegativeClick(AddGroupDialog dialog) {
+        dialog.dismiss();
+    }
+
+    @Override
+    public void onDialogPositiveClick(EditGroupDialog dialog) {
+        EditText editText = (EditText) dialog.getView().findViewById(R.id.edit_group_dialog_group_name);
+        String newGroupName = editText.getText().toString();
+        Spinner spinner = (Spinner) dialog.getView().findViewById(R.id.edit_group_dialog_spinner);
+        String newTemplateName = editText.getText().toString();
+        String oldGroupName = editText.getHint().toString();
+        String oldTemplateName = editText.getText().toString();
+
+        Group newGroup = new Group(newGroupName, newTemplateName);
+        Group oldGroup = new Group(oldGroupName, oldTemplateName);
+
+        if (!(newGroupName.equals(oldGroupName) && newTemplateName.equals(oldTemplateName))) {
+            // editGroup(newGroup, oldGroup)
+        }
+    }
+
+    @Override
+    public void onDialogNegativeClick(EditGroupDialog dialog) {
+        dialog.dismiss();
     }
 
     private class GroupListAdapter extends BaseAdapter {
@@ -100,8 +156,7 @@ public class ListGroupFragment extends BoundFragment {
         }
 
         private void updateGroupList() {
-            final List<Group> groups =
-                    getComponent(AppUserDeviceHandler.KEY).getAllGroups();
+            groups = getComponent(AppUserDeviceHandler.KEY).getAllGroups();
             if (groups != null) {
                 Collections.sort(groups, new Comparator<Group>() {
                     @Override
