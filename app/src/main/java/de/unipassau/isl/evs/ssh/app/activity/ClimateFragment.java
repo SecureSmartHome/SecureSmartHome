@@ -4,14 +4,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
-
-import java.util.logging.Handler;
 
 import de.unipassau.isl.evs.ssh.app.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 
 /**
  * This activity allows to display information contained in climate messages which are received from

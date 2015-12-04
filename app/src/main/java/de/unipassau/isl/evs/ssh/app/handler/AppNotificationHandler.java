@@ -15,7 +15,7 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 
 /**
  * Notification Handler for the App that receives Messages from the MasterNotificationHandler
@@ -36,12 +36,11 @@ public class AppNotificationHandler extends AbstractComponent implements Message
      */
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (message.getPayload() instanceof WeatherPayload) {
-            WeatherPayload payload = (WeatherPayload) message.getPayload();
+        if (message.getPayload() instanceof ClimatePayload) {
+            ClimatePayload payload = (ClimatePayload) message.getPayload();
             Context context = getContainer().get(ContainerService.KEY_CONTEXT);
             switch (payload.getNotificationType()) {
                 case CoreConstants.NotificationTypes.BRIGHTNESS_WARNING:
-                    //TODO how to get context?
                     issueBrightnessWarning(2, context);
                 case CoreConstants.NotificationTypes.HUMIDITY_WARNING:
                     issueWeatherNotification(1, context);

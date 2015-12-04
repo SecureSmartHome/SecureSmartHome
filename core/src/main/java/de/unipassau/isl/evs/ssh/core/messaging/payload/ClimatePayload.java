@@ -1,20 +1,18 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
-
 /**
  * Payload class for WeatherSensor data.
  *
  * @author bucher
  */
-public class WeatherPayload implements MessagePayload {
+public class ClimatePayload implements MessagePayload {
 
     private double temp1, temp2, pressure, altitude, humidity, uv;
     private int visible, ir;
-    private String notificationType, modulName;
+    private String notificationType, moduleName;
 
-    public WeatherPayload(double temp1, double temp2, double pressure, double altitude, double humidity,
-                          double uv, int visible, int ir, String notificationType, String modulName ) {
+    public ClimatePayload(double temp1, double temp2, double pressure, double altitude, double humidity,
+                          double uv, int visible, int ir, String notificationType, String moduleName) {
         this.temp1 = temp1;
         this.temp2 = temp2;
         this.pressure = pressure;
@@ -24,16 +22,17 @@ public class WeatherPayload implements MessagePayload {
         this.visible = visible;
         this.ir = ir;
         this.notificationType = notificationType; //see CoreConstants.NotificationTypd
-        this.modulName = modulName;
+        this.moduleName = moduleName;
     }
 
     /**
      * Creates a new payload based on a given one, ignoring the notification type of the old payload and allowing
      * to set a new one.
-     *  @param payload which is to be copied
+     *
+     * @param payload          which is to be copied
      * @param notificationType that is to be set
      */
-    public WeatherPayload(WeatherPayload payload, String notificationType) {
+    public ClimatePayload(ClimatePayload payload, String notificationType) {
         this.temp1 = payload.temp1;
         this.temp2 = payload.temp2;
         this.pressure = payload.pressure;
@@ -43,16 +42,16 @@ public class WeatherPayload implements MessagePayload {
         this.visible = payload.visible;
         this.ir = payload.ir;
         this.notificationType = notificationType;
-        this.modulName = modulName;
+        this.moduleName = moduleName;
     }
 
     /**
      * TODO write text
      *
-     * @return WeatherPayload containing the WeatherSensor data.
+     * @return ClimatePayload containing the ClimatePayload data.
      */
-    public WeatherPayload getWeatherData() {
-        return WeatherPayload.this;
+    public ClimatePayload ClimatePayload() {
+        return ClimatePayload.this;
     }
 
     public double getTemp1() {
@@ -87,7 +86,9 @@ public class WeatherPayload implements MessagePayload {
         return ir;
     }
 
-    public String getModulName() { return modulName; }
+    public String getModuleName() {
+        return moduleName;
+    }
 
     /**
      * Depending on the notification type a client decides if a warning shall be shown or not.

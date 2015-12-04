@@ -6,7 +6,7 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 
@@ -74,7 +74,7 @@ public class WeatherSensor extends AbstractComponent {
          * Sends Weather Information to Master
          */
         private void sendWeatherInfo() {
-            WeatherPayload payload = new WeatherPayload(getTemperature1(), getTemperature2(), getPressure(),
+            ClimatePayload payload = new ClimatePayload(getTemperature1(), getTemperature2(), getPressure(),
                     getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), " " , " ");
 
             //Todo set values
