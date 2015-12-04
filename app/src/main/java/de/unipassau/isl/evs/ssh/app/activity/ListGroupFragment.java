@@ -2,14 +2,13 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -59,7 +58,7 @@ public class ListGroupFragment extends BoundFragment implements EditGroupDialog.
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.listgroupfragment, container, false);
+        LinearLayout root = (LinearLayout) inflater.inflate(R.layout.listgroupfragment, container, false);
         ListView list = (ListView) root.findViewById(R.id.listGroupContainer);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                         // when a user clicks short on an item, he opens the ListUserDeviceFragment
@@ -85,7 +84,7 @@ public class ListGroupFragment extends BoundFragment implements EditGroupDialog.
                 return item == null;
             }
         });
-        Button fab = ((Button) root.findViewById(R.id.addgroup_fab));
+        FloatingActionButton fab = ((FloatingActionButton) root.findViewById(R.id.addgroup_fab));
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
