@@ -16,7 +16,9 @@ import de.unipassau.isl.evs.ssh.master.database.DatabaseConnector;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+import de.unipassau.isl.evs.ssh.master.handler.MasterClimateHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterNotificationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
 /**
@@ -39,6 +41,10 @@ public class MasterContainer extends ContainerService {
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
         incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
+        incomingDispatcher.registerHandler(new MasterClimateHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_GET,
+                CoreConstants.RoutingKeys.MASTER_WEATHER_INFO);
+        incomingDispatcher.registerHandler(new MasterNotificationHandler(),
+                CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND);
 
         if (!dir.mkdirs()) {
             dir = getFilesDir();

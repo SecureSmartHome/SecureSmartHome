@@ -129,7 +129,7 @@ public class NamingManager extends AbstractComponent {
     public X509Certificate getOwnCertificate() {
         return ownCert;
     }
-
+    
     /**
      * Gets the public key of the given DeviceID.
      *
