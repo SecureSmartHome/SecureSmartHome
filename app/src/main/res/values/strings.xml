@@ -34,4 +34,10 @@
     <string name="doorStatusOpen">Status: open</string>
     <string name="blockDoor">Block door</string>
     <string name="unblockDoor">Unblock door</string>
+    <string name="add_new_group_dialog_title">Add new group</string>
+    <string name="apply">Apply</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    <string name="group_name">Group Name</string>
+    <string name="edit_group_dialog_title">Edit Group</string>
 </resources>

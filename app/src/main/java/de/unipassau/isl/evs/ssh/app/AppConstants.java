@@ -7,7 +7,18 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
  */
 public class AppConstants extends CoreConstants {
 
-    public static class Fragment_Arguments {
+    /**
+     * @author Phil Werli
+     */
+    public class Fragment_Arguments {
         public static final String ARGUMENT_FRAGMENT = "ARGUMENT_FRAGMENT";
+    }
+
+    /**
+     * @author Phil Werli
+     */
+    public class Dialog_Arguments {
+        public static final String ADD_GROUP_DIALOG = "ADD_GROUP_DIALOG";
+        public static final String EDIT_GROUP_DIALOG = "EDIT_GROUP_DIALOG";
     }
 }
