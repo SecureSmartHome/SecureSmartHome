@@ -132,7 +132,7 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
         Message message = new Message(payload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_USERINFO_GET);
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_GET, message);
+        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_USERINFO_SET, message);
     }
 
     public void addGroup(Group group) {
