@@ -9,16 +9,16 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 /**
- * The UserDevicePayload is used to transfer user, group and permission information.
+ * The UserDeviceInformationPayload is used to transfer user, group and permission information.
  */
-public class UserDevicePayload implements MessagePayload {
+public class UserDeviceInformationPayload implements MessagePayload {
 
     private ImmutableListMultimap<UserDevice, Permission> usersToPermissions; //If a device has no permissions, it is still in the map with an empty permission list
     private ImmutableListMultimap<Group, UserDevice> groupToUserDevice; //If a group contains no devices, it is still in the map with an empty devicelist
     private List<Permission> allPermissions;
 
-    public UserDevicePayload(ImmutableListMultimap<UserDevice, Permission> usersToPermissions,
-                             ImmutableListMultimap<Group, UserDevice> groupToUserDevice, List<Permission> allPermissions) {
+    public UserDeviceInformationPayload(ImmutableListMultimap<UserDevice, Permission> usersToPermissions,
+                                        ImmutableListMultimap<Group, UserDevice> groupToUserDevice, List<Permission> allPermissions) {
         this.usersToPermissions = usersToPermissions;
         this.groupToUserDevice = groupToUserDevice;
         this.allPermissions = allPermissions;

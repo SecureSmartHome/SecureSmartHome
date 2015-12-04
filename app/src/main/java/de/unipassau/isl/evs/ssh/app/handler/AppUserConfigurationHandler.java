@@ -17,7 +17,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDevicePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 
 /**
  * The AppUserConfigurationHandler
@@ -45,6 +45,12 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
         listeners.remove(listener);
     }
 
+    private void fireUserInfoUpdated(){
+        for (UserInfoListener listener : listeners) {
+            listener.userInfoUpdated();
+        }
+    }
+
     @Override
     public void init(Container container) {
         super.init(container);
@@ -61,11 +67,12 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
     public void handle(Message.AddressedMessage message) {
         String routingKey = message.getRoutingKey();
         if (routingKey.equals(CoreConstants.RoutingKeys.APP_USERINFO_GET)) {
-            if (message.getPayload() instanceof UserDevicePayload) {
-                UserDevicePayload payload = (UserDevicePayload) message.getPayload();
+            if (message.getPayload() instanceof UserDeviceInformationPayload) {
+                UserDeviceInformationPayload payload = (UserDeviceInformationPayload) message.getPayload();
                 this.usersToPermissions = payload.getUsersToPermissions();
                 this.groupToUserDevice = payload.getGroupToUserDevice();
                 this.allPermissions = payload.getAllPermissions();
+                fireUserInfoUpdated();
             }
         } else {
             throw new UnsupportedOperationException("Bad routing key.");
@@ -102,5 +109,10 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
         return usersToPermissions.get(user);
     }
 
-    
+    //addGroup(Group group)
+    //removeGroup(Group group)
+    //editGroup(Group newGroup, Group oldGroup)
+    //setPermission(UserDevice device, Permission permission)
+    //editUserDevice(UserDevice newDevice, UserDevice oldDevice)
+    //removeUserDevice(UserDevice userDevice)
 }
