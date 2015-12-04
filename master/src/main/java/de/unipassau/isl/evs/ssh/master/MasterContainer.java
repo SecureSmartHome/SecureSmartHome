@@ -40,7 +40,7 @@ public class MasterContainer extends ContainerService {
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
         incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
 
-        if (!dir.mkdirs()) {
+        if (!dir.isDirectory() && !dir.mkdirs()) {
             dir = getFilesDir();
         }
         Log.i("ContainerService", "Storing IDs in " + dir);
