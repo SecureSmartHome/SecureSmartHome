@@ -16,6 +16,7 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 
 /**
@@ -62,24 +63,17 @@ public class WelcomeScreenFragment extends BoundFragment {
                 //TODO do something with info
                 //SharedPreferences sharedPreferences =
 
+                System.out.println("Token:" + android.util.Base64.encodeToString(info.getToken(), android.util.Base64.NO_WRAP));
                 SharedPreferences sharedPreferences = getContainer().require(ContainerService.KEY_CONTEXT).getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putInt(CoreConstants.NettyConstants.PREF_PORT, info.getPort());
-                StringBuilder hostNameBuilder = new StringBuilder();
-                for (byte b : info.getAddress().getAddress()) {
-                    hostNameBuilder.append(b + 128).append('.');
-                }
-                hostNameBuilder.deleteCharAt(hostNameBuilder.length() - 1);
-                System.out.println("HostNAME:" + hostNameBuilder.toString());
-                System.out.println("ID:" + info.getID());
-                System.out.println("Port:" + info.getPort());
-                System.out.println("Token:" + new String(info.getToken()));
-                editor.putString(CoreConstants.NettyConstants.PREF_HOST, hostNameBuilder.toString());
+                editor.putString(CoreConstants.NettyConstants.PREF_HOST, info.getAddress().getHostAddress());
                 editor.putInt(CoreConstants.NettyConstants.PREF_PORT, info.getPort());
-                editor.putString(CoreConstants.SharedPrefs.PREF_TOKEN, new String(info.getToken()));
+                editor.putString(CoreConstants.SharedPrefs.PREF_TOKEN, android.util.Base64.encodeToString(info.getToken(), android.util.Base64.NO_WRAP));
                 editor.putString(CoreConstants.SharedPrefs.PREF_MASTER_ID, info.getID().getIDString());
                 editor.commit();
                 editor.apply();
+                getContainer().require(Client.KEY).onDiscoverySuccessful(info.getAddress(), info.getPort());
             }
         }
     }

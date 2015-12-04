@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.core.network;
 
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
+import android.util.Base64;
 import android.util.Log;
 
 import java.net.InetAddress;
@@ -14,6 +15,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -143,9 +145,10 @@ public class Client extends AbstractComponent {
             @Override
             public void run() {
                 // Connect to TCP if the address of the Server/Master is known and not too many connection attempts have failed
+                final NamingManager namingManager = getContainer().require(NamingManager.KEY);
                 if (host != null && shouldReconnectTCP()) {
                     connectClient(host, port);
-                } else {
+                } else if(namingManager.isMasterKnown()) { //Todo: check if desired
                     if (host == null) {
                         Log.w(TAG, "No master known, starting UDP discovery");
                     } else {
@@ -219,8 +222,9 @@ public class Client extends AbstractComponent {
      */
     @NonNull
     protected ChannelHandler getHandshakeHandler() {
+        System.out.println(getSharedPrefs().getString("Token:Pref:" + CoreConstants.SharedPrefs.PREF_TOKEN, ""));
         return new ClientHandshakeHandler(this, getContainer(),
-                getSharedPrefs().getString(CoreConstants.SharedPrefs.PREF_TOKEN, "").getBytes());
+                android.util.Base64.decode(getSharedPrefs().getString(CoreConstants.SharedPrefs.PREF_TOKEN, ""), android.util.Base64.NO_WRAP));
     }
 
     /**
@@ -260,10 +264,10 @@ public class Client extends AbstractComponent {
      * Called by {@link UDPDiscoveryClient} once it found a possible address of the master.
      * Saves the new address
      */
-    void onDiscoverySuccessful(InetAddress address, int port) {
+    public void onDiscoverySuccessful(InetAddress address, int port) {
         Log.i(TAG, "UDP discovery successful, found " + address + ":" + port);
         getSharedPrefs().edit()
-                .putString(PREF_HOST, address.getHostName())
+                .putString(PREF_HOST, address.getHostAddress())
                 .putInt(PREF_PORT, port)
                 .commit();
         lastDisconnect = 0;

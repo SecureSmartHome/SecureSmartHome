@@ -27,7 +27,8 @@ public class QRDeviceInformation implements Serializable {
     private static final QRCodeWriter writer = new QRCodeWriter();
     private static final int ADDRESS_LENGTH = 4;
     public static final int TOKEN_LENGTH = 35;
-    private static final int DATA_LENGTH = 4 + 2 + TOKEN_LENGTH + DeviceID.ID_LENGTH;
+    private static final int BASE64_ENCODED_LENGTH = android.util.Base64.encode(new byte[TOKEN_LENGTH], android.util.Base64.NO_WRAP).length;
+    private static final int DATA_LENGTH = 4 + 2 + BASE64_ENCODED_LENGTH + DeviceID.ID_LENGTH;
 
     private final Inet4Address address;
     private final int port;
@@ -78,8 +79,9 @@ public class QRDeviceInformation implements Serializable {
         final byte[] idData = new byte[DeviceID.ID_LENGTH];
         byteBuf.readBytes(idData);
         final DeviceID id = new DeviceID(idData);
-        final byte[] token = new byte[TOKEN_LENGTH];
-        byteBuf.readBytes(token);
+        final byte[] encodedToken = new byte[BASE64_ENCODED_LENGTH];
+        byteBuf.readBytes(encodedToken);
+        final byte[] token = android.util.Base64.decode(encodedToken, android.util.Base64.NO_WRAP);
 
         return new QRDeviceInformation(address, port, id, token);
     }
@@ -89,7 +91,7 @@ public class QRDeviceInformation implements Serializable {
         byteBuf.writeBytes(address.getAddress());
         byteBuf.writeShort(port);
         byteBuf.writeBytes(id.getIDBytes());
-        byteBuf.writeBytes(token);
+        byteBuf.writeBytes(android.util.Base64.encode(token, android.util.Base64.NO_WRAP));
         return Base64.encode(byteBuf).toString(Charsets.US_ASCII);
     }
 

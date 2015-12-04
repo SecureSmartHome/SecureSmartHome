@@ -1,9 +1,9 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import android.util.Base64;
+
 import java.security.GeneralSecurityException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
+import java.util.HashMap;
 import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
@@ -13,7 +13,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterUserDevicePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
@@ -25,12 +24,13 @@ import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
  */
 public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
     //TODO: update database to initially include these. Also move to?
-    public static final String NOBODY = "Nobody";
-    public static final String NOGROUP = "No Group";
-    private Map<byte[], DeviceID> allowRegistrationFor;
+    public static final String NO_BODY = "Nobody";
+    public static final String NO_GROUP = "No Group";
+    private Map<String, DeviceID> allowRegistrationFor = new HashMap<>();
 
     @Override
     public void handle(Message.AddressedMessage message) {
+        System.out.println("occ: handling message");
         if (message.getPayload() instanceof RegisterUserDevicePayload) {
             //works for every functionality, because sender has to either be master or have ADD_USER permission
             if (hasPermission(message.getFromID(), new Permission(DatabaseContract.Permission.Values.ADD_USER))) {
@@ -56,10 +56,15 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
     }
 
     private void handleFinalizeRequest(Message.AddressedMessage message) {
+        System.out.println("occ: finalize method called");
         RegisterUserDevicePayload registerUserDevicePayload = ((RegisterUserDevicePayload) message.getPayload());
-        if (allowRegistrationFor.containsKey(registerUserDevicePayload.getToken())
-                && allowRegistrationFor.get(registerUserDevicePayload.getToken())
-                .equals(registerUserDevicePayload.getUserDeviceID())) {
+        String base64Token = Base64.encodeToString(registerUserDevicePayload.getToken(), Base64.NO_WRAP);
+        if (allowRegistrationFor.containsKey(base64Token)
+                && (allowRegistrationFor.get(base64Token) == DeviceID.NO_DEVICE
+                    || allowRegistrationFor.get(base64Token)
+                    .equals(registerUserDevicePayload.getUserDeviceID()))) {
+            System.out.println("occ: token and id accepted");
+            System.out.println("occ: specific id check? = " + String.valueOf(allowRegistrationFor.get(base64Token) == DeviceID.NO_DEVICE));
             try {
                 requireComponent(KeyStoreController.KEY).saveCertificate(
                         registerUserDevicePayload.getCertificate(),
@@ -70,17 +75,22 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
             }
             try {
                 requireComponent(UserManagementController.KEY).addUserDevice(new UserDevice(
-                        NOBODY,NOGROUP, registerUserDevicePayload.getUserDeviceID()));
+                        NO_BODY, NO_GROUP, registerUserDevicePayload.getUserDeviceID()));
             } catch (DatabaseControllerException e) {
                 //Todo: yeah, what do?
             }
-            allowRegistrationFor.remove(registerUserDevicePayload.getToken());
+            allowRegistrationFor.remove(base64Token);
             System.out.println("Yeahalsdjflkasdjflkjaksdfjlaksjdflkjasdlkfjöalsdkjf");
+            System.out.println("DeviceID: " + registerUserDevicePayload.getUserDeviceID().getIDString());
+            //Todo: Permissions!!!
         } //Todo: else error, ignore?
     }
 
     private void handleInitRequest(Message.AddressedMessage message) {
+        System.out.println("occ: " + ((RegisterUserDevicePayload) message.getPayload()).getUserDeviceID().getIDString());
+        System.out.println("occ: " + new String(((RegisterUserDevicePayload) message.getPayload()).getToken()));
         RegisterUserDevicePayload registerUserDevicePayload = ((RegisterUserDevicePayload) message.getPayload());
-        allowRegistrationFor.put(registerUserDevicePayload.getToken(), registerUserDevicePayload.getUserDeviceID());
+        allowRegistrationFor.put(Base64.encodeToString(registerUserDevicePayload.getToken(), Base64.NO_WRAP),
+                registerUserDevicePayload.getUserDeviceID());
     }
 }
