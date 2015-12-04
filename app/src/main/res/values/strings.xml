@@ -34,4 +34,9 @@
     <string name="doorStatusOpen">Status: open</string>
     <string name="blockDoor">Block door</string>
     <string name="unblockDoor">Unblock door</string>
+    <string name="switchSimulationOn">Switch Simulation On</string>
+    <string name="switchSimulationOff">Switch Simulation Off</string>
+    <string name="holidaySimulationStatus">Status: </string>
+    <string name="holidaySimulationOn">On</string>
+    <string name="holidaySimulationOff">Off</string>
 </resources>
