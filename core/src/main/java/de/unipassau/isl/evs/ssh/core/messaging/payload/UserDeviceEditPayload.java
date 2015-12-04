@@ -3,6 +3,9 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
@@ -80,22 +83,22 @@ public class UserDeviceEditPayload implements MessagePayload {
         return userDevice;
     }
 
-    public Map<UserDevice, Permission> getUserToRevokePermission() {
+    public ImmutableListMultimap<UserDevice, Permission> getUserToRevokePermission() {
         if (action != Action.REVOKE_PERMISSION) {
             throw new IllegalStateException("Invalid action");
         }
-        Map<UserDevice, Permission> map = new HashMap<>(1);
+        ListMultimap<UserDevice, Permission> map = LinkedListMultimap.create(1);
         map.put(userDevice, permission);
-        return map;
+        return ImmutableListMultimap.copyOf(map);
     }
 
-    public Map<UserDevice, Permission> getUserToGrantPermission() {
+    public ImmutableListMultimap<UserDevice, Permission> getUserToGrantPermission() {
         if (action != Action.GRANT_PERMISSION) {
             throw new IllegalStateException("Invalid action");
         }
-        Map<UserDevice, Permission> map = new HashMap<>(1);
+        ListMultimap<UserDevice, Permission> map = LinkedListMultimap.create(1);
         map.put(userDevice, permission);
-        return map;
+        return ImmutableListMultimap.copyOf(map);
     }
 
     public Map<UserDevice, UserDevice> getUserToEdit() {
