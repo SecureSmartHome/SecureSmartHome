@@ -94,22 +94,37 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
     }
 
     public List<Group> getAllGroups() {
+        if (groupToUserDevice == null) {
+            return null;
+        }
         return Lists.newArrayList(groupToUserDevice.keySet());
     }
 
     public List<UserDevice> getAllUserDevices() {
+        if (usersToPermissions == null) {
+            return null;
+        }
         return Lists.newArrayList(usersToPermissions.keySet());
     }
 
     public List<UserDevice> getAllGroupMembers(Group group) {
+        if (groupToUserDevice == null) {
+            return null;
+        }
         return groupToUserDevice.get(group);
     }
 
     public List<Permission> getAllPermissions() {
+        if (allPermissions == null) {
+            return null;
+        }
         return ImmutableList.copyOf(allPermissions);
     }
 
     public List<Permission> getPermissionForUser(UserDevice user) {
+        if (usersToPermissions == null) {
+            return null;
+        }
         return usersToPermissions.get(user);
     }
 
@@ -117,7 +132,7 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
         Message message = new Message(payload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_USERINFO_GET);
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_GET, message);
+        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_USERINFO_SET, message);
     }
 
     public void addGroup(Group group) {
