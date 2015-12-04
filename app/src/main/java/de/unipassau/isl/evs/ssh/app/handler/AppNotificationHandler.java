@@ -12,10 +12,12 @@ import de.unipassau.isl.evs.ssh.app.activity.MainActivity;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 
 /**
@@ -52,6 +54,10 @@ public class AppNotificationHandler extends AbstractComponent implements Message
         }else if (message.getPayload() instanceof WeatherPayload){
             WeatherPayload payload = (WeatherPayload) message.getPayload();
             issueWeatherWarning(3, payload.getWarnText(), getContainer().get(ContainerService.KEY_CONTEXT));
+        //System Health Warning
+        }else if (message.getPayload() instanceof SystemHealthPayload){
+            SystemHealthPayload payload = (SystemHealthPayload) message.getPayload();
+            issueSystemHealthWarning(4, payload, getContainer().get(ContainerService.KEY_CONTEXT));
         }
     }
 
@@ -87,6 +93,14 @@ public class AppNotificationHandler extends AbstractComponent implements Message
     private void issueWeatherWarning(int notificationID, String warnText, Context context){
         String title = "Weather Warning!";
         displayNotification(title, warnText, notificationID, context);
+    }
+
+    private void issueSystemHealthWarning(int notificationID, SystemHealthPayload payload, Context context){
+        String title = "Component failed!";
+        Module module = payload.getModule();
+        String text = (module.getName() + " at " + module.getAtSlave() + " "
+                + module.getModuleType() + " failed" );
+        displayNotification(title, text, notificationID, context );
     }
 
     /**
