@@ -109,6 +109,9 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
     }
 
     public List<Slave> getSlaves() {
+        if (getComponents() == null) {
+            return null;
+        }
         return ImmutableList.copyOf(slaves);
     }
 
