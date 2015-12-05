@@ -75,6 +75,22 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         }
 
         gpioView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_gpio, layout, false);
+        Button button = (Button) gpioView.findViewById(R.id.add_module_gpio_button);
+        final EditText gpioPortInput = (EditText) gpioView.findViewById(R.id.add_module_gpio_port_input);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String gpioPort = gpioPortInput.getText().toString();
+                if (gpioPort.equals("")) {
+                    ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_fill_all_fields));
+                    return;
+                }
+
+                //TODO add module via handler
+            }
+        });
+
         layout.addView(gpioView);
     }
 
@@ -90,6 +106,22 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         }
 
         usbView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_usb, layout, false);
+        Button button = (Button) usbView.findViewById(R.id.add_module_usb_button);
+        final EditText usbPortInput = (EditText) usbView.findViewById(R.id.add_module_usb_port_input);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String usbPort = usbPortInput.getText().toString();
+                if (usbPort.equals("")) {
+                    ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_fill_all_fields));
+                    return;
+                }
+
+                //TODO add module via handler
+            }
+        });
+
         layout.addView(usbView);
     }
 
