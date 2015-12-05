@@ -13,10 +13,6 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
@@ -119,12 +115,6 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             slaveSpinner.setEnabled(false);
             slaveSpinner.setAdapter(slaveAdapter);
         } else {
-            List<String> slaveNames = Lists.newArrayList(Iterables.transform(slaves, new Function<Slave, String>() {
-                @Override
-                public String apply(Slave input) {
-                    return input.getName();
-                }
-            }));
             ArrayAdapter<Slave> slaveAdapter = new ArrayAdapter<>(
                     getActivity().getApplicationContext(),
                     android.R.layout.simple_spinner_dropdown_item,

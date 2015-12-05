@@ -40,7 +40,7 @@ public class AppNewModuleHandler extends AbstractComponent implements MessageHan
     @Override
     public void handle(Message.AddressedMessage message) {
         String routingKey = message.getRoutingKey();
-        if (routingKey.equals(CoreConstants.RoutingKeys.APP_MODULES_GET)) {
+        if (routingKey.equals(CoreConstants.RoutingKeys.APP_MODULE_ADD)) {
             fireModulesUpdated();
         }
 
@@ -70,10 +70,11 @@ public class AppNewModuleHandler extends AbstractComponent implements MessageHan
 
     public void addNewModule(Module module) {
         AddNewModulePayload payload = new AddNewModulePayload(module);
+        OutgoingRouter router = getComponent(OutgoingRouter.KEY);
 
         Message message = new Message(payload);
 
-        OutgoingRouter router = getComponent(OutgoingRouter.KEY);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_MODULE_ADD);
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_MODULE_ADD, message);
 
     }

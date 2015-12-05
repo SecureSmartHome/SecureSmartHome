@@ -33,9 +33,8 @@ public class MasterModuleHandler extends AbstractMasterHandler {
         List<Module> components = slaveController.getModules();
         List<Slave> slaves = slaveController.getSlaves();
         Message message = new Message(new ModulesPayload(components, slaves));
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_MODULES_GET);
         message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
-        router.sendMessage(id, CoreConstants.RoutingKeys.APP_MODULES_GET, message);
+        router.sendMessage(id, CoreConstants.RoutingKeys.SLAVE_MODULES_UPDATE, message);
     }
 
     @Override
@@ -45,10 +44,13 @@ public class MasterModuleHandler extends AbstractMasterHandler {
             if (message.getPayload() instanceof AddNewModulePayload) {
                 AddNewModulePayload payload = (AddNewModulePayload) message.getPayload();
                 if (handleAddModule(payload.getModule(), message)) {
-                    updateDevices(message.getFromID());
                     for (Slave slave : getComponent(SlaveController.KEY).getSlaves()) {
                         updateDevices(slave.getSlaveID());
                     }
+
+                    Message reply = new Message(new AddNewModulePayload(null));
+                    OutgoingRouter router = getComponent(OutgoingRouter.KEY);
+                    router.sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
                 }
             }
         }
