@@ -11,7 +11,6 @@ dependencies {
     //compile 'com.madgag.spongycastle:pkix:1.53.0.0' //repackaged and moved to libs
     compile 'de.ncoder:typedmap:1.0.2'
     compile 'org.slf4j:slf4j-android:1.7.13'
-    compile 'org.slf4j:slf4j-android:1.7.13'
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.google.zxing:android-core:3.2.1'
 }

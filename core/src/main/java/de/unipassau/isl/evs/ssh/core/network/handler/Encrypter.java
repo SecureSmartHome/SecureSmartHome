@@ -1,5 +1,8 @@
 package de.unipassau.isl.evs.ssh.core.network.handler;
 
+import android.util.Log;
+
+import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 
@@ -15,6 +18,8 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.Security.MESSAGE_CRYPT
  * The Encrypter class is a channel handler that Is part of a ChannelPipeline and provides encryption for system messages.
  */
 public class Encrypter extends MessageToByteEncoder<ByteBuf> {
+    private static final String TAG = Encrypter.class.getSimpleName();
+
     private final Cipher encryptCipher;
 
     public Encrypter(PublicKey remotePublicKey) throws GeneralSecurityException {
@@ -23,14 +28,23 @@ public class Encrypter extends MessageToByteEncoder<ByteBuf> {
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) throws Exception {
-        final int decryptedLength = msg.readableBytes();
+    protected void encode(ChannelHandlerContext ctx, ByteBuf in, ByteBuf out) throws Exception {
+        final int decryptedLength = in.readableBytes();
         final int encryptedLength = encryptCipher.getOutputSize(decryptedLength);
+        Log.v(TAG, "Encrypting " + decryptedLength + "b data to " + encryptedLength + "b of encrypted data");
         out.writeInt(encryptedLength);
 
         out.ensureWritable(encryptedLength);
-        encryptCipher.doFinal(msg.nioBuffer(), out.nioBuffer());
+        final ByteBuffer inNio = in.nioBuffer(in.readerIndex(), decryptedLength);
+        final ByteBuffer outNio = out.nioBuffer(out.writerIndex(), encryptedLength);
+        encryptCipher.doFinal(inNio, outNio);
+        if (inNio.hasRemaining()) {
+            Log.wtf(TAG, "Crypto library did not read all bytes for encryption (" + inNio.remaining() + " remaining)");
+        }
+        if (outNio.hasRemaining()) {
+            Log.wtf(TAG, "Crypto library did not write all bytes for encryption (" + outNio.remaining() + " remaining)");
+        }
         out.writerIndex(out.writerIndex() + encryptedLength);
-        msg.readerIndex(msg.readerIndex() + decryptedLength);
+        in.readerIndex(in.readerIndex() + decryptedLength);
     }
 }

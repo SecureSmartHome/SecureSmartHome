@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.network.handler;
 
-import java.nio.ByteBuffer;
+import android.util.Log;
+
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.util.List;
@@ -17,6 +18,8 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.Security.MESSAGE_CRYPT
  * The Decrypter class is a channel handler that is part of a ChannelPipeline and provides decryption for system messages.
  */
 public class Decrypter extends ReplayingDecoder {
+    private static final String TAG = Decrypter.class.getSimpleName();
+
     private final Cipher decryptCipher;
 
     public Decrypter(PrivateKey localPrivateKey) throws GeneralSecurityException {
@@ -25,16 +28,18 @@ public class Decrypter extends ReplayingDecoder {
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> decoded) throws Exception {
         final int encryptedLength = in.readInt();
         final int decryptedLength = decryptCipher.getOutputSize(encryptedLength);
 
-        final ByteBuffer inBuffer = in.nioBuffer(in.readerIndex(), encryptedLength);
-        final ByteBuf outBuffer = ctx.alloc().buffer(decryptedLength);
-        decryptCipher.doFinal(inBuffer, outBuffer.nioBuffer());
-        outBuffer.writerIndex(outBuffer.writerIndex() + decryptedLength);
+        final ByteBuf out = ctx.alloc().buffer(decryptedLength);
+        Log.v(TAG, "Decrypting " + encryptedLength + "b data to " + decryptedLength + "b of decrypted data");
+        decryptCipher.doFinal(
+                in.nioBuffer(in.readerIndex(), encryptedLength),
+                out.nioBuffer(out.writerIndex(), decryptedLength));
+        out.writerIndex(out.writerIndex() + decryptedLength);
         in.readerIndex(in.readerIndex() + encryptedLength);
 
-        out.add(outBuffer);
+        decoded.add(out);
     }
 }
