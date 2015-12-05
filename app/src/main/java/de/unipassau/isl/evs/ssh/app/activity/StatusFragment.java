@@ -10,16 +10,12 @@ import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
-import java.util.LinkedList;
 import java.util.List;
 
-import de.unipassau.isl.evs.ssh.app.AppModuleHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
-import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * This activity allows to visualize status information of the system. If this functionality is used a message,

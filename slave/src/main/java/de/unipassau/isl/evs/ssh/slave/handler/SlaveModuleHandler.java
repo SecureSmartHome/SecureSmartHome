@@ -158,7 +158,8 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         String routingKey = message.getRoutingKey();
         if (routingKey.equals(CoreConstants.RoutingKeys.SLAVE_MODULES_UPDATE)) {
             if (message.getPayload() instanceof ModulesPayload) {
-                List<Module> modules = (List<Module>) message.getPayload();
+                ModulesPayload payload = (ModulesPayload) message.getPayload();
+                List<Module> modules = payload.getModules();
                 updateModule(modules);
             } else {
                 Log.e(TAG, "Error! Unknown message Payload");
