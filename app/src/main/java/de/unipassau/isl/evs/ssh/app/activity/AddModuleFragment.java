@@ -21,8 +21,12 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * This activity allows to add new sensors to the system. If this functionality is used a message,
@@ -32,34 +36,56 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private static final String TAG = AddModuleFragment.class.getSimpleName();
 
-    private LinearLayout wlanView = null;
-    private LinearLayout usbView = null;
-    private LinearLayout gpioView = null;
+    private LinearLayout wlanView;
+    private LinearLayout usbView;
+    private LinearLayout gpioView;
 
-    private Spinner slaveSpinner = null;
-    private EditText nameInput = null;
+    private Spinner slaveSpinner;
+    private Spinner sensorTypeSpinner;
+    private EditText nameInput;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_addmodule, container, false);
-        nameInput = (EditText) view.findViewById(R.id.add_module_name_input);
+        LinearLayout layout = (LinearLayout) view.findViewById(R.id.add_module_layout);
 
         Spinner connectionTypeSpinner = (Spinner) view.findViewById(R.id.connection_type_spinner);
-        slaveSpinner = (Spinner) view.findViewById(R.id.slaves_spinner);
+        sensorTypeSpinner = (Spinner) view.findViewById(R.id.add_module_sensor_type_spinner);
+
+        slaveSpinner = (Spinner) view.findViewById(R.id.add_module_slave_spinner);
+        nameInput = (EditText) view.findViewById(R.id.add_module_name_input);
+        wlanView = createViewWLAN(layout);
+        usbView = createViewUSB(layout);
+        gpioView = createViewGPIO(layout);
 
         ArrayAdapter<CharSequence> connectionTypeAdapter = ArrayAdapter.createFromResource(
                 getActivity().getApplicationContext(),
                 R.array.sensor_connection_types,
                 android.R.layout.simple_spinner_dropdown_item);
+
+        ArrayAdapter<CharSequence> sensorTypeAdapter = new ArrayAdapter<CharSequence>(
+                getActivity().getApplicationContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                new String[]{
+                        CoreConstants.ModuleType.LIGHT,
+                        CoreConstants.ModuleType.WEATHER_BOARD,
+                        CoreConstants.ModuleType.DOOR_BUZZER,
+                        CoreConstants.ModuleType.DOOR_SENSOR,
+                        CoreConstants.ModuleType.WINDOW_SENSOR,
+                        CoreConstants.ModuleType.WEBCAM,
+                        CoreConstants.ModuleType.DOORBELL,
+                });
+
+        sensorTypeSpinner.setAdapter(sensorTypeAdapter);
         connectionTypeSpinner.setAdapter(connectionTypeAdapter);
         connectionTypeSpinner.setOnItemSelectedListener(this);
         return view;
     }
 
     // returns true if global input fields are filled in correctly
-    private boolean checkInputFields(){
+    private boolean checkInputFields() {
         return !nameInput.equals("") && slaveSpinner.isEnabled();
     }
 
@@ -72,14 +98,14 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             return;
         }
         List<Slave> slaves = handler.getSlaves();
-        ArrayAdapter<String> slaveAdapter;
         if (slaves == null) {
-            slaveAdapter = new ArrayAdapter<>(
+            ArrayAdapter<String> slaveAdapter = new ArrayAdapter<>(
                     getActivity().getApplicationContext(),
                     android.R.layout.simple_spinner_dropdown_item,
                     new String[]{"No Slaves Connected"});
 
             slaveSpinner.setEnabled(false);
+            slaveSpinner.setAdapter(slaveAdapter);
         } else {
             List<String> slaveNames = Lists.newArrayList(Iterables.transform(slaves, new Function<Slave, String>() {
                 @Override
@@ -87,15 +113,14 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
                     return input.getName();
                 }
             }));
-            slaveAdapter = new ArrayAdapter<>(
+            ArrayAdapter<Slave> slaveAdapter = new ArrayAdapter<>(
                     getActivity().getApplicationContext(),
                     android.R.layout.simple_spinner_dropdown_item,
-                    slaveNames);
+                    slaves);
 
             slaveSpinner.setEnabled(true);
+            slaveSpinner.setAdapter(slaveAdapter);
         }
-
-        slaveSpinner.setAdapter(slaveAdapter);
 
 
     }
@@ -106,11 +131,17 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         String[] types = getResources().getStringArray(R.array.sensor_connection_types);
         LinearLayout layout = (LinearLayout) getView().findViewById(R.id.add_module_layout);
         if (types[0].equals(type)) {
-            createViewGPIO(layout);
+            layout.removeView(wlanView);
+            layout.removeView(usbView);
+            layout.addView(gpioView);
         } else if (types[1].equals(type)) {
-            createViewUSB(layout);
+            layout.removeView(wlanView);
+            layout.removeView(gpioView);
+            layout.addView(usbView);
         } else if (types[2].equals(type)) {
-            createViewWLAN(layout);
+            layout.removeView(usbView);
+            layout.removeView(gpioView);
+            layout.addView(wlanView);
         }
     }
 
@@ -119,18 +150,8 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     }
 
-    private void createViewGPIO(LinearLayout layout) {
-        if (wlanView != null) {
-            layout.removeView(wlanView);
-            wlanView = null;
-        }
-
-        if (usbView != null) {
-            layout.removeView(usbView);
-            usbView = null;
-        }
-
-        gpioView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_gpio, layout, false);
+    private LinearLayout createViewGPIO(ViewGroup container) {
+        LinearLayout gpioView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_gpio, container, false);
         Button button = (Button) gpioView.findViewById(R.id.add_module_gpio_button);
         final EditText gpioPortInput = (EditText) gpioView.findViewById(R.id.add_module_gpio_port_input);
 
@@ -147,21 +168,11 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             }
         });
 
-        layout.addView(gpioView);
+        return gpioView;
     }
 
-    private void createViewUSB(LinearLayout layout) {
-        if (wlanView != null) {
-            layout.removeView(wlanView);
-            wlanView = null;
-        }
-
-        if (gpioView != null) {
-            layout.removeView(gpioView);
-            gpioView = null;
-        }
-
-        usbView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_usb, layout, false);
+    private LinearLayout createViewUSB(ViewGroup container) {
+        LinearLayout usbView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_usb, container, false);
         Button button = (Button) usbView.findViewById(R.id.add_module_usb_button);
         final EditText usbPortInput = (EditText) usbView.findViewById(R.id.add_module_usb_port_input);
 
@@ -178,21 +189,11 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             }
         });
 
-        layout.addView(usbView);
+        return usbView;
     }
 
-    private void createViewWLAN(LinearLayout layout) {
-        if (gpioView != null) {
-            layout.removeView(gpioView);
-            gpioView = null;
-        }
-
-        if (usbView != null) {
-            layout.removeView(usbView);
-            usbView = null;
-        }
-
-        wlanView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_wlan, layout, false);
+    private LinearLayout createViewWLAN(ViewGroup container) {
+        LinearLayout wlanView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_wlan, container, false);
         Button button = (Button) wlanView.findViewById(R.id.add_module_wlan_button);
         final EditText usernameInput = (EditText) wlanView.findViewById(R.id.add_module_wlan_username_input);
         final EditText passwordInput = (EditText) wlanView.findViewById(R.id.add_module_wlan_password_input);
@@ -215,6 +216,15 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             }
         });
 
-        layout.addView(wlanView);
+        return wlanView;
+    }
+
+    private void addNewWlanModule(String username, String password, String port, String ipAdress) {
+        String name = nameInput.getText().toString();
+        WLANAccessPoint accessPoint = new WLANAccessPoint(Integer.valueOf(port), username, password, ipAdress);
+        DeviceID atSlave = ((Slave) slaveSpinner.getSelectedItem()).getSlaveID();
+
+        Module module = new Module(name, atSlave, (String) sensorTypeSpinner.getSelectedItem(), accessPoint);
+
     }
 }

@@ -36,4 +36,9 @@ public class Slave implements Serializable {
     public void setSlaveID(DeviceID slaveID) {
         this.slaveID = slaveID;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

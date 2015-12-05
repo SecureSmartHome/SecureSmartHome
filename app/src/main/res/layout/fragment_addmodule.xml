@@ -28,17 +28,29 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Connected to Slave:" />
+            android:text="Sensor Type:"
+            android:id="@+id/textView2" />
 
         <Spinner
-            android:id="@+id/slaves_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/add_module_sensor_type_spinner" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connected to Slave:"
+            android:id="@+id/textView4" />
+
+        <Spinner
+            android:id="@+id/add_module_slave_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Connection Type:" />
+            android:text="Connector Type:" />
 
         <Spinner
             android:id="@+id/connection_type_spinner"

@@ -20,6 +20,7 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * AppModuleHandler offers a list of all Modules that are active in the System.
