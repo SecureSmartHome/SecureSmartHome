@@ -15,6 +15,7 @@ import java.security.cert.X509Certificate;
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
@@ -47,6 +48,7 @@ public class AppContainer extends ContainerService {
         register(AppDoorHandler.KEY, new AppDoorHandler());
         register(AppLightHandler.KEY, new AppLightHandler());
         register(AppNotificationHandler.KEY, new AppNotificationHandler());
+        register(AppUserConfigurationHandler.KEY, new AppUserConfigurationHandler());
     }
 
     private void readMasterData() {

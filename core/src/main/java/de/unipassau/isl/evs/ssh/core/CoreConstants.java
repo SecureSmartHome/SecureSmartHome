@@ -110,6 +110,8 @@ public class CoreConstants {
         public static final String MASTER_DOOR_LOCK_SET = "/master/door/lock_set";
         public static final String MASTER_DOOR_LOCK_GET = "/master/door/lock_get";
         public static final String MASTER_DOOR_STATUS_GET = "/master/door/status_get";
+        public static final String MASTER_USERINFO_GET = "/master/userdevice/get";
+        public static final String MASTER_USERINFO_SET = "/master/userdevice/set";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
@@ -129,6 +131,7 @@ public class CoreConstants {
         public static final String APP_DOOR_BLOCK = "/app/door/block";
         public static final String APP_DOOR_GET = "/app/door/get";
         public static final String APP_DOOR_RING = "/app/door/ring";
+        public static final String APP_USERINFO_GET = "/app/userdevice/get";
     }
 
     /**
