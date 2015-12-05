@@ -18,6 +18,7 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.handler.MasterClimateHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterModuleHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterNotificationHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
@@ -47,6 +48,7 @@ public class MasterContainer extends ContainerService {
         incomingDispatcher.registerHandler(new MasterNotificationHandler(),
                 CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND);
         incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(), CoreConstants.RoutingKeys.MASTER_USERINFO_GET);
+        incomingDispatcher.registerHandler(new MasterModuleHandler(), CoreConstants.RoutingKeys.MASTER_MODULE_ADD);
 
         if (!dir.mkdirs()) {
             dir = getFilesDir();

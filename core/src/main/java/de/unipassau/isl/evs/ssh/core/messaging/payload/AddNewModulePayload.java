@@ -7,11 +7,11 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  *
  * @author bucher
  */
-public class AddNewSensorPayload implements MessagePayload {
+public class AddNewModulePayload implements MessagePayload {
 
     private Module module;
 
-    public AddNewSensorPayload(Module module) {
+    public AddNewModulePayload(Module module) {
         this.module = module;
     }
 

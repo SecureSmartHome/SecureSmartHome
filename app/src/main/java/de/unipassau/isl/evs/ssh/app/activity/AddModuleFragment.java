@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -35,10 +36,14 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 /**
  * This activity allows to add new sensors to the system. If this functionality is used a message,
  * containing all needed information, is generated and passed to the OutgoingRouter.
+ *
+ * @author Wolfgang Popp
  */
 public class AddModuleFragment extends BoundFragment implements AdapterView.OnItemSelectedListener {
 
     private static final String TAG = AddModuleFragment.class.getSimpleName();
+
+    private AppNewModuleHandler.NewModuleListener listener;
 
     private LinearLayout wlanView;
     private LinearLayout usbView;
@@ -97,11 +102,14 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
         AppModuleHandler handler = getComponent(AppModuleHandler.KEY);
-        if (handler == null) {
+        AppNewModuleHandler newModuleHandler = getComponent(AppNewModuleHandler.KEY);
+        if (handler == null || newModuleHandler == null) {
             Log.i(TAG, "Container not connected");
             return;
         }
+
         List<Slave> slaves = handler.getSlaves();
+
         if (slaves == null) {
             ArrayAdapter<String> slaveAdapter = new ArrayAdapter<>(
                     getActivity().getApplicationContext(),
@@ -126,7 +134,20 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             slaveSpinner.setAdapter(slaveAdapter);
         }
 
+        listener = new AppNewModuleHandler.NewModuleListener() {
+            @Override
+            public void moduleRegistered() {
+                Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Module added.", Toast.LENGTH_LONG);
+                toast.show();
+            }
+        };
+        newModuleHandler.addNewModuleListener(listener);
+    }
 
+    @Override
+    public void onContainerDisconnected() {
+        getComponent(AppNewModuleHandler.KEY).removeNewModuleListener(listener);
+        super.onContainerDisconnected();
     }
 
     @Override
@@ -224,7 +245,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         return wlanView;
     }
 
-    private void addNewModule(ModuleAccessPoint accessPoint){
+    private void addNewModule(ModuleAccessPoint accessPoint) {
         AppNewModuleHandler handler = getComponent(AppNewModuleHandler.KEY);
 
         if (handler == null) {

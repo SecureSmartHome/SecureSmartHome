@@ -5,13 +5,12 @@ import android.util.Log;
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.AddNewModulePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
@@ -41,20 +40,34 @@ public class MasterModuleHandler extends AbstractMasterHandler {
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        // TODO handle add new sensor
+        String routingKey = message.getRoutingKey();
+        if (routingKey.equals(CoreConstants.RoutingKeys.MASTER_MODULE_ADD)) {
+            if (message.getPayload() instanceof AddNewModulePayload) {
+                AddNewModulePayload payload = (AddNewModulePayload) message.getPayload();
+                if (handleAddModule(payload.getModule(), message)) {
+                    updateDevices(message.getFromID());
+                    for (Slave slave : getComponent(SlaveController.KEY).getSlaves()) {
+                        updateDevices(slave.getSlaveID());
+                    }
+                }
+            }
+        }
         // TODO handle remove sensor
         // TODO handle get modules
     }
 
-    private void handleAddModule(Module module, Message.AddressedMessage message) {
+    private boolean handleAddModule(Module module, Message.AddressedMessage message) {
         SlaveController controller = getComponent(SlaveController.KEY);
+        boolean success = false;
         //TODO create permission for the new module
         try {
             controller.addModule(module);
+            success = true;
         } catch (DatabaseControllerException e) {
             Log.e(TAG, "Error while adding new module: " + e.getCause().getMessage());
             sendErrorMessage(message);
         }
+        return success;
     }
 
     private void handleRemoveModule(String moduleName, Message.AddressedMessage message) {
