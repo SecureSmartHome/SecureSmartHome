@@ -21,9 +21,13 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppNewModuleHandler;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
@@ -161,10 +165,10 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
                 String gpioPort = gpioPortInput.getText().toString();
                 if (!checkInputFields() || gpioPort.equals("")) {
                     ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_fill_all_fields));
-                    return;
+                } else {
+                    GPIOAccessPoint accessPoint = new GPIOAccessPoint(Integer.valueOf(gpioPort));
+                    addNewModule(accessPoint);
                 }
-
-                //TODO add module via handler
             }
         });
 
@@ -182,10 +186,10 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
                 String usbPort = usbPortInput.getText().toString();
                 if (!checkInputFields() || usbPort.equals("")) {
                     ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_fill_all_fields));
-                    return;
+                } else {
+                    USBAccessPoint accessPoint = new USBAccessPoint(Integer.valueOf(usbPort));
+                    addNewModule(accessPoint);
                 }
-
-                //TODO add module via handler
             }
         });
 
@@ -210,21 +214,30 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
                 if (!checkInputFields() || port.equals("") || ipAdress.equals("") || password.equals("") || username.equals("")) {
                     ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_fill_all_fields));
-                    return;
+                } else {
+                    WLANAccessPoint accessPoint = new WLANAccessPoint(Integer.valueOf(port), username, password, ipAdress);
+                    addNewModule(accessPoint);
                 }
-                // TODO add module via handler
             }
         });
 
         return wlanView;
     }
 
-    private void addNewWlanModule(String username, String password, String port, String ipAdress) {
-        String name = nameInput.getText().toString();
-        WLANAccessPoint accessPoint = new WLANAccessPoint(Integer.valueOf(port), username, password, ipAdress);
-        DeviceID atSlave = ((Slave) slaveSpinner.getSelectedItem()).getSlaveID();
+    private void addNewModule(ModuleAccessPoint accessPoint){
+        AppNewModuleHandler handler = getComponent(AppNewModuleHandler.KEY);
 
-        Module module = new Module(name, atSlave, (String) sensorTypeSpinner.getSelectedItem(), accessPoint);
+        if (handler == null) {
+            Log.e(TAG, "Container not connected");
+            return;
+        }
+
+        String name = nameInput.getText().toString();
+        DeviceID atSlave = ((Slave) slaveSpinner.getSelectedItem()).getSlaveID();
+        String sensorType = (String) sensorTypeSpinner.getSelectedItem();
+        Module module = new Module(name, atSlave, sensorType, accessPoint);
+
+        handler.addNewModule(module);
 
     }
 }

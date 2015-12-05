@@ -112,6 +112,7 @@ public class CoreConstants {
         public static final String MASTER_DOOR_STATUS_GET = "/master/door/status_get";
         public static final String MASTER_USERINFO_GET = "/master/userdevice/get";
         public static final String MASTER_USERINFO_SET = "/master/userdevice/set";
+        public static final String MASTER_MODULE_ADD = "master/module/add";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
