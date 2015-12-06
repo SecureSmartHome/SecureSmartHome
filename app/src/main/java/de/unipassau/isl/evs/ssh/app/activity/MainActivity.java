@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
@@ -104,8 +105,7 @@ public class MainActivity extends BoundActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            super.onBackPressed();
-            getSupportFragmentManager().popBackStackImmediate();
+            getSupportFragmentManager().popBackStack();
         } else {
             super.onBackPressed();
         }
@@ -139,7 +139,7 @@ public class MainActivity extends BoundActivity
     }
 
     // returns the currently displayed Fragment
-    private Fragment getCurrentFragment(){
+    private Fragment getCurrentFragment() {
         return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
     }
 
@@ -180,7 +180,6 @@ public class MainActivity extends BoundActivity
             }
             fragmentTransaction.commit();
         }
-
     }
 
     // maps button resource ids to Fragment classes.
