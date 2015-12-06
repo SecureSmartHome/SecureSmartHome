@@ -14,26 +14,50 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.AddNewModulePayload;
 
-public class AppNewModuleHandler extends AbstractComponent implements MessageHandler{
+/**
+ * The AppNewModuleHandler handles the messaging needed to register a new ElectronicModule.
+ *
+ * @author Wolfgang Popp
+ */
+public class AppNewModuleHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppNewModuleHandler> KEY = new Key<>(AppNewModuleHandler.class);
 
     private List<NewModuleListener> listeners = new LinkedList<>();
 
-    public interface NewModuleListener{
-        void moduleRegistered();
+    /**
+     * The listener interface to be notified, when the registration of a new ElectronicModule
+     * finished.
+     */
+    public interface NewModuleListener {
+        /**
+         * Invoked when the registration of a new ElectronicModule finished.
+         *
+         * @param wasSuccessful indicates whether the registration was successful or not
+         */
+        void registrationFinished(boolean wasSuccessful);
     }
 
+    /**
+     * Adds a new NewModuleListener to this handler.
+     *
+     * @param listener the listener to add
+     */
     public void addNewModuleListener(AppNewModuleHandler.NewModuleListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Removes the given NewModuleListener from this handler.
+     *
+     * @param listener the listener to remove
+     */
     public void removeNewModuleListener(AppNewModuleHandler.NewModuleListener listener) {
         listeners.remove(listener);
     }
 
-    private void fireModulesUpdated(){
+    private void fireRegistrationFinished(boolean wasSuccessful) {
         for (NewModuleListener listener : listeners) {
-            listener.moduleRegistered();
+            listener.registrationFinished(wasSuccessful);
         }
     }
 
@@ -41,9 +65,8 @@ public class AppNewModuleHandler extends AbstractComponent implements MessageHan
     public void handle(Message.AddressedMessage message) {
         String routingKey = message.getRoutingKey();
         if (routingKey.equals(CoreConstants.RoutingKeys.APP_MODULE_ADD)) {
-            fireModulesUpdated();
+            fireRegistrationFinished(true);
         }
-
     }
 
     @Override
@@ -68,6 +91,12 @@ public class AppNewModuleHandler extends AbstractComponent implements MessageHan
 
     }
 
+    /**
+     * Registers the given module. Invoker of this method can be notified with a NewModuleListener
+     * when the registration is finished.
+     *
+     * @param module the module to register
+     */
     public void addNewModule(Module module) {
         AddNewModulePayload payload = new AddNewModulePayload(module);
         OutgoingRouter router = getComponent(OutgoingRouter.KEY);
@@ -76,6 +105,5 @@ public class AppNewModuleHandler extends AbstractComponent implements MessageHan
 
         message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_MODULE_ADD);
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_MODULE_ADD, message);
-
     }
 }

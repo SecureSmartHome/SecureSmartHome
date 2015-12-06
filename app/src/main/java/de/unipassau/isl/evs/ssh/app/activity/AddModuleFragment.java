@@ -30,7 +30,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
- * This activity allows to add new sensors to the system. If this functionality is used a message,
+ * This fragment allows to add new sensors to the system. If this functionality is used a message,
  * containing all needed information, is generated and passed to the OutgoingRouter.
  *
  * @author Wolfgang Popp
@@ -126,8 +126,16 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
         listener = new AppNewModuleHandler.NewModuleListener() {
             @Override
-            public void moduleRegistered() {
-                Toast toast = Toast.makeText(getActivity().getApplicationContext(), "Module added.", Toast.LENGTH_LONG);
+            public void registrationFinished(boolean wasSuccessful) {
+                String text;
+
+                if (wasSuccessful) {
+                    text = getActivity().getResources().getString(R.string.added_module_success);
+                } else {
+                    text = getActivity().getResources().getString(R.string.added_module_fail);
+                }
+
+                Toast toast = Toast.makeText(getActivity().getApplicationContext(), text, Toast.LENGTH_LONG);
                 toast.show();
             }
         };

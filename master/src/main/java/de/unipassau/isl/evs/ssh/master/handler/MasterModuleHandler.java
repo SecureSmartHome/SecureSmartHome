@@ -75,6 +75,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
     private void handleRemoveModule(String moduleName, Message.AddressedMessage message) {
         SlaveController controller = getComponent(SlaveController.KEY);
         controller.removeModule(moduleName);
+        // TODO send message
     }
 
     @Override

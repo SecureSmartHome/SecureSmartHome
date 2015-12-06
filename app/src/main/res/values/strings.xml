@@ -40,6 +40,8 @@
     <string name="error">Error</string>
     <string name="ok">OK</string>
     <string name="error_fill_all_fields">Cannot add module. Missing information.</string>
+    <string name="added_module_success">Added module successfully</string>
+    <string name="added_module_fail">Adding new module failed</string>
     <string-array name="sensor_connection_types">
         <!-- Do not change the order of items! Changing the order would break AddModuleFragment -->
         <item>GPIO</item>

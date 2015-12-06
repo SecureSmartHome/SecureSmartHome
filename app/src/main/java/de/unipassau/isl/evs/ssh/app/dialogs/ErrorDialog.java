@@ -10,12 +10,20 @@ import android.os.Bundle;
 import de.unipassau.isl.evs.ssh.app.R;
 
 /**
+ * The ErrorDialog Fragment is a popup dialog window that displays an error message.
+ *
  * @author Wolfgang Popp
  */
 public class ErrorDialog extends DialogFragment {
     private static final String ARG_MESSAGE = "de.unipassau.isl.evs.ssh.app.dialog.MESSAGE";
     private String message;
 
+    /**
+     * Creates and shows a new error dialog with the given message.
+     *
+     * @param activity the parent activity of the error dialog
+     * @param message the error message
+     */
     public static void show(Activity activity, String message) {
         DialogFragment dialog = new ErrorDialog();
         Bundle args = new Bundle(1);

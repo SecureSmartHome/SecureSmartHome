@@ -9,6 +9,9 @@ import com.google.common.collect.ListMultimap;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
+/**
+ * @author Wolfgang Popp
+ */
 public class UserDeviceEditPayload implements MessagePayload {
 
     private Permission permission;
