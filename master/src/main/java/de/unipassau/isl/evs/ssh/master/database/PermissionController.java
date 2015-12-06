@@ -302,7 +302,6 @@ public class PermissionController extends AbstractComponent {
     public void addPermission(Permission permission) throws AlreadyInUseException {
         try {
             if (permission.getModuleName() == null) {
-                System.out.println("asdfasdf..");
                 databaseConnector.executeSql("insert into "
                                 + DatabaseContract.Permission.TABLE_NAME
                                 + " (" + DatabaseContract.Permission.COLUMN_NAME + ")"

@@ -97,7 +97,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         String moduleName = reedSensor.getName();
         Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
         GPIOAccessPoint accessPoint = (GPIOAccessPoint) reedSensor.getModuleAccessPoint();
-        getContainer().register(key, new ReedSensor(accessPoint.getPort()));
+        getContainer().register(key, new ReedSensor(accessPoint.getPort(), moduleName));
     }
 
     private void registerWeatherSensor(Module weatherSensor) {
@@ -158,7 +158,8 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         String routingKey = message.getRoutingKey();
         if (routingKey.equals(CoreConstants.RoutingKeys.SLAVE_MODULES_UPDATE)) {
             if (message.getPayload() instanceof ModulesPayload) {
-                List<Module> modules = (List<Module>) message.getPayload();
+                ModulesPayload payload = (ModulesPayload) message.getPayload();
+                List<Module> modules = payload.getModules();
                 updateModule(modules);
             } else {
                 Log.e(TAG, "Error! Unknown message Payload");

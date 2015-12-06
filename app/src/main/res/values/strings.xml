@@ -29,9 +29,24 @@
     <string name="deviceSatusConnectedSlaves">Connected Slaves</string>
     <string name="NoSlavesConnected">No Slaves connected</string>
     <string name="NoModulesConnected">No modules connected</string>
+    <string name="addUser">Add User</string>
+    <string name="group">Group</string>
+    <string name="name">Name</string>
     <string name="refreshImage">Refresh Image</string>
     <string name="openDoor">Open door</string>
     <string name="doorStatusOpen">Status: open</string>
     <string name="blockDoor">Block door</string>
     <string name="unblockDoor">Unblock door</string>
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
+    <string name="error_fill_all_fields">Cannot add module. Missing information.</string>
+    <string name="added_module_success">Added module successfully</string>
+    <string name="added_module_fail">Adding new module failed</string>
+    <string-array name="sensor_connection_types">
+        <!-- Do not change the order of items! Changing the order would break AddModuleFragment -->
+        <item>GPIO</item>
+        <item>USB</item>
+        <item>WLAN</item>
+    </string-array>
+
 </resources>
