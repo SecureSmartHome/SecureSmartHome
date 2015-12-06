@@ -36,7 +36,6 @@
     <string name="addUser">Add User</string>
     <string name="group">Group</string>
     <string name="name">Name</string>
-    <string name="NoModulesConnected">No Modules connected</string>
 
     <!--Strings used for QR-Codes-->
     <string name="qr_code_description">This is a QR-Code.</string>
