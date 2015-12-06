@@ -30,22 +30,15 @@ public class AddNewUserDeviceFragment extends BoundFragment {
     private List<String> groups;
     private Spinner spinner;
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    private final AppUserConfigurationHandler.UserInfoListener userConfigListener = new AppUserConfigurationHandler.UserInfoListener() {
+        @Override
+        public void userInfoUpdated() {
+            updateGroupSpinner();
+        }
+    };
 
-        // TODO get groups
-        View view = inflater.inflate(R.layout.fragment_addnewuserdevice, container, false);
-        spinner = (Spinner) view.findViewById(R.id.groupSpinner);
-        spinner.setAdapter(new ArrayAdapter<>(getActivity().getApplicationContext(),
-                android.R.layout.simple_list_item_1, new String[]{"Querying groups"}));
-        spinner.setEnabled(false);
-        return view;
-    }
-
-    @Override
-    public void onContainerConnected(Container container) {
-        super.onContainerConnected(container);
-        List<Group> allGroups = container.require(AppUserConfigurationHandler.KEY).getAllGroups();
+    private void updateGroupSpinner() {
+        List<Group> allGroups = getComponent(AppUserConfigurationHandler.KEY).getAllGroups();
         if (allGroups == null) {
             Log.i(TAG, "No groups available, yet.");
             return;
@@ -63,8 +56,33 @@ public class AddNewUserDeviceFragment extends BoundFragment {
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        // TODO get groups
+        View view = inflater.inflate(R.layout.fragment_addnewuserdevice, container, false);
+        spinner = (Spinner) view.findViewById(R.id.groupSpinner);
+        spinner.setAdapter(new ArrayAdapter<>(getActivity().getApplicationContext(),
+                android.R.layout.simple_list_item_1, new String[]{"Querying groups"}));
+        spinner.setEnabled(false);
+        return view;
+    }
+
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        AppUserConfigurationHandler handler = container.require(AppUserConfigurationHandler.KEY);
+        handler.addUserInfoListener(userConfigListener);
+        handler.update();
+        updateGroupSpinner();
+    }
+
+    @Override
     public void onContainerDisconnected() {
         groups = null;
+        AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        if (handler != null) {
+            handler.removeUserInfoListener(userConfigListener);
+        }
         super.onContainerDisconnected();
     }
 }

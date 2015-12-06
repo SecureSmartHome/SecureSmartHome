@@ -19,6 +19,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
@@ -68,7 +69,7 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
     private List<Module> components;
     private List<Slave> slaves;
 
-    public void updateList(List<Module> components, List<Slave> slaves) {
+    private void updateList(List<Module> components, List<Slave> slaves) {
         this.components = components;
         this.slaves = slaves;
     }
@@ -134,8 +135,19 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
         }
     }
 
+    public void update(){
+        ModulesPayload payload = new ModulesPayload();
+        OutgoingRouter router = getComponent(OutgoingRouter.KEY);
+
+        Message message = new Message(payload);
+
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_MODULES_GET);
+        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_MODULE_GET, message);
+    }
+
     @Override
     public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
+
     }
 
     @Override

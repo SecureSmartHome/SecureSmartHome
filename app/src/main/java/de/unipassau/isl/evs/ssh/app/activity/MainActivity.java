@@ -96,23 +96,12 @@ public class MainActivity extends BoundActivity
      * @return If the device is already registered or not.
      */
     private boolean deviceNotRegistered() {
-        SharedPreferences sharedPreferences = getSharedPrefs();
-        String master_id;
-        if (sharedPreferences == null) {
-            master_id = null;
-        } else {
+        SharedPreferences sharedPreferences = getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        String master_id = null;
+        if (sharedPreferences != null) {
             master_id = sharedPreferences.getString(PREF_MASTER_ID, null);
         }
         return master_id == null;
-    }
-
-    private SharedPreferences getSharedPrefs() {
-        SharedPreferences sharedPreferences = getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
-        if (sharedPreferences == null) {
-            return getComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
-        } else {
-            return null;
-        }
     }
 
     @Override
@@ -218,6 +207,8 @@ public class MainActivity extends BoundActivity
             clazz = ModifyPermissionFragment.class;
         } else if (id == R.id.nav_addNewUserDevice) {
             clazz = AddNewUserDeviceFragment.class;
+        } else if (id == R.id.nav_addModule) {
+            clazz = AddModuleFragment.class;
         } else if (id == R.id.light_fab) {
             clazz = AddModuleFragment.class;
         } else {

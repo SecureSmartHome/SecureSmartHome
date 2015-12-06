@@ -74,6 +74,7 @@ public class WelcomeScreenFragment extends BoundFragment {
                 editor.commit();
                 editor.apply();
                 getContainer().require(Client.KEY).onDiscoverySuccessful(info.getAddress(), info.getPort());
+                ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
             }
         }
     }
