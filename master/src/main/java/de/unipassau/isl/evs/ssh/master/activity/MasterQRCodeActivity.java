@@ -76,6 +76,7 @@ public class MasterQRCodeActivity extends BoundActivity {
 
         ImageView imageview = ((ImageView) findViewById(R.id.qrcode_activity_qr_code));
         bitmap = createQRCodeBitmap();
+        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 8, bitmap.getHeight() * 8, false);
 
         if (bitmap != null) {
             imageview.setImageBitmap(bitmap);

@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.master.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,12 +22,14 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterUserDevicePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
+import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -145,14 +148,26 @@ public class MainActivity extends BoundActivity {
             QRDeviceInformation deviceInformation = null;
             try {
                 deviceInformation = new QRDeviceInformation(
-                        (Inet4Address) Inet4Address.getByAddress(new byte[] {127, 0, 0, 1}),
-                        12,
+                        (Inet4Address) Inet4Address.getByName("192.168.0.103"),
+                        CoreConstants.NettyConstants.DEFAULT_PORT,
                         getContainer().require(NamingManager.KEY).getMasterID(),
                         QRDeviceInformation.getRandomToken()
                 );
             } catch (UnknownHostException e) {
                 //Todo: handle error
             }
+            StringBuilder hostNameBuilder = new StringBuilder();
+            for (byte b : deviceInformation.getAddress().getAddress()) {
+                hostNameBuilder.append(b + 128).append('.');
+            }
+            hostNameBuilder.deleteCharAt(hostNameBuilder.length() - 1);
+            System.out.println("HostNAME:" + hostNameBuilder.toString());
+            System.out.println("ID:" + deviceInformation.getID());
+            System.out.println("Port:" + deviceInformation.getPort());
+            System.out.println("Token:" + android.util.Base64.encodeToString(deviceInformation.getToken(), android.util.Base64.NO_WRAP));
+            //NoDevice will allow any device to use this token
+            Message message = new Message(new RegisterUserDevicePayload(deviceInformation.getToken(), DeviceID.NO_DEVICE));
+            getContainer().require(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.MASTER_REGISTER_INIT, message);
             intent.putExtra(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
             startActivity(intent);
         }
