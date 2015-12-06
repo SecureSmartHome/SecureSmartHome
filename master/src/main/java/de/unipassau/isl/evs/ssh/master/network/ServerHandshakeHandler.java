@@ -7,6 +7,9 @@ import java.security.cert.X509Certificate;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
+import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterUserDevicePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.ClientIncomingDispatcher;
@@ -78,7 +81,15 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof HandshakePacket.ClientHello) {
+        if (msg instanceof HandshakePacket.ClientRegistration) {
+            //Send client register info to handler
+            HandshakePacket.ClientRegistration clientRegistration = ((HandshakePacket.ClientRegistration) msg);
+            Message message = new Message(new RegisterUserDevicePayload(
+                    clientRegistration.token, clientRegistration.clientCertificate
+            ));
+            getContainer().require(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE, message);
+
+        } else if (msg instanceof HandshakePacket.ClientHello) {
             final HandshakePacket.ClientHello hello = (HandshakePacket.ClientHello) msg;
             ctx.attr(CoreConstants.NettyConstants.ATTR_CLIENT_CERT).set(hello.clientCertificate);
             final DeviceID deviceID = DeviceID.fromCertificate(hello.clientCertificate);
@@ -112,6 +123,13 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         ctx.pipeline().remove(this);
         Log.v(TAG, "Pipeline after authenticate: " + ctx.pipeline());
     }
+
+
+    private void handshakeClientRegisters(ChannelHandlerContext ctx, Object msg) {
+        HandshakePacket.ClientRegistration clientReg = ((HandshakePacket.ClientRegistration) msg);
+        //DO Stuff
+    }
+
 
     protected Container getContainer() {
         return server._getContainer();

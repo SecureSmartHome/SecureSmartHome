@@ -16,6 +16,7 @@ import de.unipassau.isl.evs.ssh.master.database.DatabaseConnector;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.handler.MasterClimateHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterModuleHandler;
@@ -40,6 +41,7 @@ public class MasterContainer extends ContainerService {
         register(SlaveController.KEY, new SlaveController());
         register(PermissionController.KEY, new PermissionController());
         register(HolidayController.KEY, new HolidayController());
+        register(UserManagementController.KEY, new UserManagementController());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
         incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
@@ -65,7 +67,7 @@ public class MasterContainer extends ContainerService {
 
     private void writeMasterId() {
         try (final FileOutputStream os = new FileOutputStream(new File(dir, "master.id"))) {
-            os.write(require(NamingManager.KEY).getOwnID().getId().getBytes());
+            os.write(require(NamingManager.KEY).getOwnID().getIDString().getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }

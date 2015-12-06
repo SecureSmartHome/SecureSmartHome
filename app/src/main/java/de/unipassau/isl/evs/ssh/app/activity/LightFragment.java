@@ -1,9 +1,7 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -160,12 +158,12 @@ public class LightFragment extends BoundFragment {
             if (isLightOn) {
                 imageViewOff.setVisibility(View.GONE);
                 imageViewOn.setVisibility(View.VISIBLE);
-                button.setText(getResources().getString(R.string.string_turn_off));
+                button.setText(getResources().getString(R.string.turn_off));
                 button.setBackgroundColor(getResources().getColor(R.color.button_red));
             } else {
                 imageViewOn.setVisibility(View.GONE);
                 imageViewOff.setVisibility(View.VISIBLE);
-                button.setText(getResources().getString(R.string.string_turn_on));
+                button.setText(getResources().getString(R.string.turn_on));
                 button.setBackgroundColor(getResources().getColor(R.color.button_green));
             }
 

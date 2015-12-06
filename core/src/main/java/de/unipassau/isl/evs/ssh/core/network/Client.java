@@ -18,6 +18,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -29,10 +30,10 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
 import static android.content.Context.MODE_PRIVATE;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_MAX_DISCONNECTS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_MILLIS_BETWEEN_DISCONNECTS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PORT;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.PREF_HOST;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.PREF_PORT;
 
@@ -42,7 +43,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.PREF_PO
  * For details about switching to UDP discovery, see {@link #initClient()} and {@link #shouldReconnectTCP()}.
  * This component is used by the Slave and the end-user android App.
  *
- * @author Phil
+ * @author Phil Werli
  */
 public class Client extends AbstractComponent {
     public static final Key<Client> KEY = new Key<>(Client.class);
@@ -217,8 +218,9 @@ public class Client extends AbstractComponent {
      * @return the ClientHandshakeHandler to use
      */
     @NonNull
-    protected ClientHandshakeHandler getHandshakeHandler() {
-        return new ClientHandshakeHandler(this, getContainer());
+    protected ChannelHandler getHandshakeHandler() {
+        return new ClientHandshakeHandler(this, getContainer(),
+                getSharedPrefs().getString(CoreConstants.SharedPrefs.PREF_TOKEN, "").getBytes());
     }
 
     /**

@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.master;
+package de.unipassau.isl.evs.ssh.master.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,15 +9,24 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
+import java.util.List;
+
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+import de.unipassau.isl.evs.ssh.master.MasterContainer;
+import de.unipassau.isl.evs.ssh.master.R;
+import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -25,11 +34,12 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.group.ChannelGroup;
 
 /**
- * MainActivitiy for the Master App
+ * MainActivity for the Master App
  *
  * @author Team
  */
 public class MainActivity extends BoundActivity {
+    //Todo: intend name.
     private final MessageHandler handler = new MessageHandler() {
         @Override
         public void handle(final Message.AddressedMessage message) {
@@ -101,6 +111,17 @@ public class MainActivity extends BoundActivity {
         });
     }
 
+    /**
+     * Checks if there are no registered devices in the system.
+     *
+     * @return Whether no devices are registered in the master.
+     * author Phil Werli
+     */
+    private boolean hasNoRegisteredDevice() {
+        List<UserDevice> list = getContainer().require(UserManagementController.KEY).getUserDevices();
+        return list.size() == 0;
+    }
+
 
     @Override
     public void onContainerConnected(Container container) {
@@ -109,13 +130,32 @@ public class MainActivity extends BoundActivity {
             ((TextView) findViewById(R.id.textViewDeviceID)).setText("???");
         } else {
             ((TextView) findViewById(R.id.textViewDeviceID)).setText(
-                    namingManager.getOwnID().getId()
+                    namingManager.getOwnID().getIDString()
             );
         }
 
         updateConnectionStatus();
 
         requireComponent(IncomingDispatcher.KEY).registerHandler(handler, "/demo");
+
+        // start MasterQRCodeActivity when no devices are registered yet
+        if (hasNoRegisteredDevice()) {
+            Intent intent = new Intent(this, MasterQRCodeActivity.class);
+            //TODO: create QRCodeInformation from data
+            QRDeviceInformation deviceInformation = null;
+            try {
+                deviceInformation = new QRDeviceInformation(
+                        (Inet4Address) Inet4Address.getByAddress(new byte[] {127, 0, 0, 1}),
+                        12,
+                        getContainer().require(NamingManager.KEY).getMasterID(),
+                        QRDeviceInformation.getRandomToken()
+                );
+            } catch (UnknownHostException e) {
+                //Todo: handle error
+            }
+            intent.putExtra(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
+            startActivity(intent);
+        }
     }
 
     private void updateConnectionStatus() {

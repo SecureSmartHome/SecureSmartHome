@@ -15,16 +15,17 @@ import io.netty.util.ResourceLeakDetector;
 public class CoreConstants {
 
     /**
+     * Name used for SharedPreferences file
+     */
+    public static final String FILE_SHARED_PREFS = "shared-preferences";
+
+    /**
      * The class contains constants for the Netty Framework
      *
      * @author Niko Fink & Phil Werli
      */
     public static class NettyConstants {
 
-        /**
-         * Name used for SharedPreferences file
-         */
-        public static final String FILE_SHARED_PREFS = "shared-preferences";
         /**
          * Default port used by netty
          */
@@ -79,6 +80,7 @@ public class CoreConstants {
      */
     public class SharedPrefs {
         public static final String PREF_MASTER_ID = "ssh.core.MASTER_ID";
+        public static final String PREF_TOKEN = "ssh.core.TOKEN"; //TODO check if this is the correct place
     }
 
     /**
@@ -113,6 +115,8 @@ public class CoreConstants {
         public static final String MASTER_USERINFO_GET = "/master/userdevice/get";
         public static final String MASTER_USERINFO_SET = "/master/userdevice/set";
         public static final String MASTER_MODULE_ADD = "/master/module/add";
+        public static final String MASTER_REGISTER_INIT = "/master/register/init";
+        public static final String MASTER_REGISTER_FINALIZE = "/master/register/finalize";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
@@ -160,5 +164,15 @@ public class CoreConstants {
         public static final String DOOR_UNLATCHED = "DoorOpened";
         public static final String DOOR_LOCKED = "DoorLocked";
         public static final String DOOR_UNLOCKED = "DoorUnlocked";
+    }
+
+    /**
+     * This class contains constants for the information sent to create and display a QR-Code.
+     *
+     * @author Phil Werli
+     */
+    public class QRCodeInformation {
+        public static final String EXTRA_QR_DEVICE_INFORMATION = "EXTRA_QR_DEVICE_INFORMATION";
+        public static final String EXTRA_QR_MESSAGE = "EXTRA_QR_MESSAGE";
     }
 }

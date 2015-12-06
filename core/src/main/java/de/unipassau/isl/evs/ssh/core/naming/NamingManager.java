@@ -29,9 +29,8 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
  * @author Wolfgang Popp
  */
 public class NamingManager extends AbstractComponent {
-    private static final String TAG = NamingManager.class.getSimpleName();
     public static final Key<NamingManager> KEY = new Key<>(NamingManager.class);
-
+    private static final String TAG = NamingManager.class.getSimpleName();
     private final boolean isMaster;
     private DeviceID ownID;
     private DeviceID masterID;
@@ -203,7 +202,7 @@ public class NamingManager extends AbstractComponent {
 
     private void loadMasterData() throws UnresolvableNamingException {
         final SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
 
         String masterIDStr = prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null);
         if (masterIDStr != null) {

@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.content.SharedPreferences;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -20,6 +21,10 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.SharedPrefs.PREF_MASTER_ID;
 
 /**
  * As this Activity also displays information like whether the light is on or not, this Activity also
@@ -64,6 +69,7 @@ public class MainActivity extends BoundActivity
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
+
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -75,11 +81,37 @@ public class MainActivity extends BoundActivity
                 e.printStackTrace();
             }
         } else {
-            MainFragment fragment = new MainFragment();
+            // starts the main fragment when already registered, the welcomescreen fragment so the user can register.
+            Fragment fragment = (deviceNotRegistered() ? new WelcomeScreenFragment() : new MainFragment());
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
+        }
+    }
+
+    /**
+     * Checks whether the device is registered in the system by checking the master_id in the SharedPreferences.
+     *
+     * @return If the device is already registered or not.
+     */
+    private boolean deviceNotRegistered() {
+        SharedPreferences sharedPreferences = getSharedPrefs();
+        String master_id;
+        if (sharedPreferences == null) {
+            master_id = null;
+        } else {
+            master_id = sharedPreferences.getString(PREF_MASTER_ID, null);
+        }
+        return master_id == null;
+    }
+
+    private SharedPreferences getSharedPrefs() {
+        SharedPreferences sharedPreferences = getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        if (sharedPreferences == null) {
+            return getComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        } else {
+            return null;
         }
     }
 
@@ -165,7 +197,6 @@ public class MainActivity extends BoundActivity
             }
             fragmentTransaction.commit();
         }
-
     }
 
     // maps button resource ids to Fragment classes.
@@ -187,7 +218,7 @@ public class MainActivity extends BoundActivity
             clazz = ModifyPermissionFragment.class;
         } else if (id == R.id.nav_addNewUserDevice) {
             clazz = AddNewUserDeviceFragment.class;
-        } else if (id == R.id.nav_addModul) {
+        } else if (id == R.id.light_fab) {
             clazz = AddModuleFragment.class;
         } else {
             throw new IllegalArgumentException("Unknown id: " + id);

@@ -15,7 +15,7 @@ public class CameraPayload implements MessagePayload {
 
     /**
      * Constructor for a CameraPayload only requesting the cameraID.
-     *
+     * <p>
      * If this is used the picture in the payload will be null.
      * This can be used if a picture is requested.+
      *
