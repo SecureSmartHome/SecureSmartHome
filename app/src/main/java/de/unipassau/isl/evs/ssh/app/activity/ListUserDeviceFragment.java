@@ -6,9 +6,6 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-
-import de.unipassau.isl.evs.ssh.app.R;
 
 /**
  * todo
@@ -29,9 +26,10 @@ public class ListUserDeviceFragment extends BoundFragment {
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        LinearLayout root = (LinearLayout) inflater.inflate(R.layout.listuserdevicefragment, container, false);
+//        LinearLayout root = (LinearLayout) inflater.inflate(R.layout.listuserdevicefragment, container, false);
 
-        return root;
+//        return root;
+        return null;
     }
 
 }

@@ -46,7 +46,7 @@ public class EditUserDeviceFragment extends BoundFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.edituserdevicefragment, container, false);
+        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_edituserdevice, container, false);
         ListView userPermissionList = (ListView) root.findViewById(R.id.listUserPermissionContainer);
         userPermissionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                       // when a user clicks short on an item, he opens the ListUserDeviceFragment

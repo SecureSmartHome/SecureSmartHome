@@ -1,12 +1,17 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -21,19 +26,17 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.AppConstants;
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.app.dialogs.AddGroupDialog;
-import de.unipassau.isl.evs.ssh.app.dialogs.EditGroupDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
-import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.ADD_GROUP_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.EDIT_GROUP_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.TEMPLATE_DIALOG;
 
@@ -45,11 +48,8 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.TEMPLAT
  * @see ListUserDeviceFragment
  * @see EditUserDeviceFragment
  */
-public class ListGroupFragment extends BoundFragment implements EditGroupDialog.EditGroupDialogListener, AddGroupDialog.AddGroupDialogListener {
+public class ListGroupFragment extends BoundFragment {
     private GroupListAdapter adapter;
-
-    private AddGroupDialog.AddGroupDialogListener addGroupDialogListener;
-    private EditGroupDialog.EditGroupDialogListener editGroupDialogListener;
 
     @Override
     public void onStart() {
@@ -64,10 +64,9 @@ public class ListGroupFragment extends BoundFragment implements EditGroupDialog.
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.listgroupfragment, container, false);
+        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_listgroup, container, false);
         ListView list = (ListView) root.findViewById(R.id.listGroupContainer);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                        // when a user clicks short on an item, he opens the ListUserDeviceFragment
                                         @Override
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                             Group item = adapter.getItem(position);
@@ -81,16 +80,13 @@ public class ListGroupFragment extends BoundFragment implements EditGroupDialog.
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Group item = adapter.getItem(position);
-                //TODO edit group dialog
-                EditGroupDialog editGroupDialog = new EditGroupDialog();
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(EDIT_GROUP_DIALOG, item);
                 String[] templates = buildTemplatesFromGroups();
                 if (templates != null) {
                     bundle.putStringArray(TEMPLATE_DIALOG, buildTemplatesFromGroups());
                 }
-                editGroupDialog.setArguments(bundle);
-                editGroupDialog.show(getFragmentManager(), EDIT_GROUP_DIALOG);
+                createEditGroupDialog(bundle).show();
                 return item == null;
             }
         });
@@ -98,22 +94,87 @@ public class ListGroupFragment extends BoundFragment implements EditGroupDialog.
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO add new group dialog
-                AddGroupDialog addGroupDialog = new AddGroupDialog();
                 Bundle bundle = new Bundle();
                 String[] templates = buildTemplatesFromGroups();
                 if (templates != null) {
                     bundle.putStringArray(TEMPLATE_DIALOG, buildTemplatesFromGroups());
                 }
-                addGroupDialog.setArguments(bundle);
-                addGroupDialog.show(getFragmentManager(), ADD_GROUP_DIALOG);
-
+                createAddGroupDialog(bundle).show();
             }
         });
         adapter = new GroupListAdapter(inflater);
         list.setAdapter(adapter);
 
         return root;
+    }
+
+    /**
+     * Creates and returns a dialogs that gives the user the option to add a group.
+     */
+    private Dialog createAddGroupDialog(Bundle bundle) {
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        String[] templateNames = bundle.getStringArray(TEMPLATE_DIALOG);
+        View dialogView = inflater.inflate(R.layout.dialog_addgroup, null, false);
+        final EditText groupName = ((EditText) dialogView.findViewById(R.id.edit_group_dialog_group_name));
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        ArrayList<String> templateList = new ArrayList<>(Arrays.asList(templateNames));
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.template_list, templateList);
+
+        final Spinner templateName = ((Spinner) dialogView.findViewById(R.id.edit_group_dialog_spinner));
+        templateName.setAdapter(adapter);
+
+        final AlertDialog dialog = builder.create();
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        builder.setMessage(R.string.add_new_group_dialog_title)
+                .setView(dialogView)
+                .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        String name = groupName.getText().toString();
+                        String template = ((String) templateName.getSelectedItem());
+                        getComponent(AppUserConfigurationHandler.KEY).addGroup(new Group(name, template));
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null);
+        return dialog;
+    }
+
+    /**
+     * Creates and returns a dialogs that gives the user the option to edit a group.
+     */
+    private Dialog createEditGroupDialog(Bundle bundle) {
+        final Group group = (Group) getArguments().getSerializable(EDIT_GROUP_DIALOG);
+        String[] templateNames = bundle.getStringArray(TEMPLATE_DIALOG);
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_editgroup, null, false);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        final EditText groupName = (EditText) dialogView.findViewById(R.id.edit_group_dialog_group_name);
+        groupName.setHint(group.getName());
+        ArrayList<String> templateList = new ArrayList<>(Arrays.asList(templateNames));
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.template_list, templateList);
+        final Spinner templateName = ((Spinner) dialogView.findViewById(R.id.edit_group_dialog_spinner));
+
+        templateName.setAdapter(adapter);
+
+        final AlertDialog dialog = builder.create();
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        builder.setMessage(R.string.edit_group_dialog_title)
+                .setView(dialogView)
+                .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        String name = groupName.getText().toString();
+                        String template = ((String) templateName.getSelectedItem());
+                        getComponent(AppUserConfigurationHandler.KEY).editGroup(group, new Group(name, template));
+                    }
+                });
+        return dialog;
     }
 
     private String[] buildTemplatesFromGroups() {
@@ -128,35 +189,6 @@ public class ListGroupFragment extends BoundFragment implements EditGroupDialog.
             }
         }));
         return (String[]) ImmutableSet.copyOf(templateNames).toArray();
-    }
-
-    @Override
-    public void onDialogPositiveClick(AddGroupDialog dialog) {
-        EditText editText = (EditText) dialog.getView().findViewById(R.id.add_group_dialog_group_name);
-        String groupName = editText.getText().toString();
-        Spinner spinner = (Spinner) dialog.getView().findViewById(R.id.add_group_dialog_spinner);
-        String templateName = spinner.getSelectedItem().toString();
-
-        Group newGroup = new Group(groupName, templateName);
-
-        getComponent(AppUserConfigurationHandler.KEY).addGroup(newGroup);
-    }
-
-    @Override
-    public void onDialogPositiveClick(EditGroupDialog dialog) {
-        EditText editText = (EditText) dialog.getView().findViewById(R.id.edit_group_dialog_group_name);
-        String newGroupName = editText.getText().toString();
-        Spinner spinner = (Spinner) dialog.getView().findViewById(R.id.edit_group_dialog_spinner);
-        String newTemplateName = (String) spinner.getSelectedItem();
-        String oldGroupName = editText.getHint().toString();
-        String oldTemplateName = editText.getText().toString();
-
-        Group newGroup = new Group(newGroupName, newTemplateName);
-        Group oldGroup = new Group(oldGroupName, oldTemplateName);
-
-        if (!(newGroupName.equals(oldGroupName) && newTemplateName.equals(oldTemplateName))) {
-            getComponent(AppUserConfigurationHandler.KEY).editGroup(newGroup, oldGroup);
-        }
     }
 
     private class GroupListAdapter extends BaseAdapter {
@@ -177,6 +209,7 @@ public class ListGroupFragment extends BoundFragment implements EditGroupDialog.
 
         private void updateGroupList() {
             groups = getComponent(AppUserConfigurationHandler.KEY).getAllGroups();
+            // TODO delete bellow. only test
             groups = new ArrayList<>();
             Group group1 = new Group("Admin", "Template 1");
             Group group2 = new Group("Eltern", "Template 2");
