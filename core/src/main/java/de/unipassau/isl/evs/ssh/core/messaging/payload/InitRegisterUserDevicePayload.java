@@ -1,12 +1,14 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
+import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
+
 public class InitRegisterUserDevicePayload implements MessagePayload {
     byte[] token;
-    String groupName;
+    UserDevice userDevice;
 
-    public InitRegisterUserDevicePayload(byte[] token, String groupName) {
+    public InitRegisterUserDevicePayload(byte[] token, UserDevice userDevice) {
         this.token = token;
-        this.groupName = groupName;
+        this.userDevice = userDevice;
     }
 
     public byte[] getToken() {
@@ -17,11 +19,11 @@ public class InitRegisterUserDevicePayload implements MessagePayload {
         this.token = token;
     }
 
-    public String getGroupName() {
-        return groupName;
+    public UserDevice getUserDevice() {
+        return userDevice;
     }
 
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
+    public void setUserDevice(UserDevice userDevice) {
+        this.userDevice = userDevice;
     }
 }

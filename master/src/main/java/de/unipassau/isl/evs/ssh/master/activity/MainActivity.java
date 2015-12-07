@@ -166,7 +166,8 @@ public class MainActivity extends BoundActivity {
             System.out.println("Token:" + android.util.Base64.encodeToString(deviceInformation.getToken(), android.util.Base64.NO_WRAP));
             //NoDevice will allow any device to use this token
             Message message = new Message(new InitRegisterUserDevicePayload(deviceInformation.getToken(),
-                    MasterRegisterDeviceHandler.NO_GROUP));
+                    new UserDevice(MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.NO_GROUP,
+                            DeviceID.NO_DEVICE)));
             getContainer().require(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.MASTER_REGISTER_INIT, message);
             intent.putExtra(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
             startActivity(intent);

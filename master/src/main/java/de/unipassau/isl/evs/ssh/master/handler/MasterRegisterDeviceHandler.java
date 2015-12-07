@@ -31,7 +31,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
     //TODO: update database to initially include these. Also move to?
     public static final String FIRST_USER = "Admin";
     public static final String NO_GROUP = "No Group";
-    private Map<String, String> groupForToken = new HashMap<>();
+    private Map<String, UserDevice> groupForToken = new HashMap<>();
 
     @Override
     public void handle(Message.AddressedMessage message) {
@@ -70,6 +70,8 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
         FinalizeRegisterUserDevicePayload finalizeRegisterUserDevicePayload = ((FinalizeRegisterUserDevicePayload) message.getPayload());
         String base64Token = Base64.encodeToString(finalizeRegisterUserDevicePayload.getToken(), Base64.NO_WRAP);
         if (groupForToken.containsKey(base64Token)) {
+            UserDevice newDevice = groupForToken.get(finalizeRegisterUserDevicePayload.getToken());
+            newDevice.setUserDeviceID(finalizeRegisterUserDevicePayload.getUserDeviceID());
             try {
                 requireComponent(KeyStoreController.KEY).saveCertificate(
                         finalizeRegisterUserDevicePayload.getCertificate(),
@@ -80,15 +82,14 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
                         + " the KeyStore.", gse);
             }
             try {
-                requireComponent(UserManagementController.KEY).addUserDevice(new UserDevice(
-                        FIRST_USER, NO_GROUP, finalizeRegisterUserDevicePayload.getUserDeviceID()));
+                requireComponent(UserManagementController.KEY).addUserDevice(newDevice);
             } catch (DatabaseControllerException dce) {
                 throw new IllegalArgumentException("An error occurred while adding the new device to the database",
                         dce);
             }
             //Add permissions
             String templateName = requireComponent(UserManagementController.KEY)
-                    .getGroup(groupForToken.get(base64Token)).getTemplateName();
+                    .getGroup(newDevice.getInGroup()).getTemplateName();
             List<Permission> permissions = requireComponent(PermissionController.KEY)
                     .getPermissionsOfTemplate(templateName);
             for (Permission permission : permissions) {
@@ -112,13 +113,13 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
         InitRegisterUserDevicePayload initRegisterUserDevicePayload = ((InitRegisterUserDevicePayload) message.getPayload());
         if (isMaster(message.getFromID())) {
             String base64Token = Base64.encodeToString(initRegisterUserDevicePayload.getToken(), Base64.NO_WRAP);
-            groupForToken.put(base64Token, initRegisterUserDevicePayload.getGroupName());
+            groupForToken.put(base64Token, initRegisterUserDevicePayload.getUserDevice());
         } else {
             byte[] newToken = QRDeviceInformation.getRandomToken();
             String base64Token = Base64.encodeToString(newToken, Base64.NO_WRAP);
-            groupForToken.put(base64Token, initRegisterUserDevicePayload.getGroupName());
+            groupForToken.put(base64Token, initRegisterUserDevicePayload.getUserDevice());
             Message reply = new Message(new InitRegisterUserDevicePayload(newToken,
-                    initRegisterUserDevicePayload.getGroupName()));
+                    initRegisterUserDevicePayload.getUserDevice()));
             sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
         }
     }
