@@ -2,11 +2,24 @@ package de.unipassau.isl.evs.ssh.core.network;
 
 import android.util.Log;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
+import java.util.Objects;
+
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import de.unipassau.isl.evs.ssh.core.network.handler.Decrypter;
+import de.unipassau.isl.evs.ssh.core.network.handler.Encrypter;
 import de.unipassau.isl.evs.ssh.core.network.handler.PipelinePlug;
+import de.unipassau.isl.evs.ssh.core.network.handler.SignatureChecker;
+import de.unipassau.isl.evs.ssh.core.network.handler.SignatureGenerator;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket;
+import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.serialization.ClassResolvers;
@@ -16,6 +29,8 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_CERT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_ALL_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_READER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_WRITER_IDLE_TIME;
@@ -25,10 +40,12 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
 
     private final Client client;
     private final Container container;
+    private final byte[] token;
 
-    public ClientHandshakeHandler(Client client, Container container) {
+    public ClientHandshakeHandler(Client client, Container container, byte[] token) {
         this.client = client;
         this.container = container;
+        this.token = token;
     }
 
     /**
@@ -60,25 +77,79 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         Log.v(TAG, "channelActive " + ctx);
 
         final NamingManager namingManager = container.require(NamingManager.KEY);
-        ctx.writeAndFlush(new HandshakePacket.ClientHello(namingManager.getOwnCertificate(), namingManager.getMasterCertificate()));
+        if (!namingManager.isMasterKnown()) {
+            ctx.writeAndFlush(new HandshakePacket.ClientRegistration(namingManager.getOwnCertificate(), token));
+        } else {
+            ctx.writeAndFlush(new HandshakePacket.ClientHello(namingManager.getOwnCertificate(), namingManager.getMasterID(), null));
+        }
 
         super.channelActive(ctx);
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof HandshakePacket.ServerHello) {
-            handshakeComplete(ctx);
+        if (msg instanceof HandshakePacket) {
+            Log.v(TAG, "Received " + msg);
+            if (msg instanceof HandshakePacket.ServerRegistrationResponse) {
+                registrationExecuted(msg);
+            } else if (msg instanceof HandshakePacket.ServerHello) {
+                final HandshakePacket.ServerHello hello = (HandshakePacket.ServerHello) msg;
+
+                // Check that server is known at all
+                final NamingManager namingManager = container.require(NamingManager.KEY);
+                if (!namingManager.isMasterKnown()) {
+                    ctx.close();
+                    throw new IllegalStateException("Master ID not known");
+                }
+
+                // Check that this connection is to the right server
+                final DeviceID deviceID = DeviceID.fromCertificate(hello.serverCertificate);
+                if (!Objects.equals(
+                        namingManager.getMasterCertificate().getPublicKey(),
+                        hello.serverCertificate.getPublicKey()
+                )) {
+                    ctx.close();
+                    throw new IOException("Server reported ID " + deviceID + " not Master ID " + namingManager.getMasterID());
+                }
+                ctx.attr(ATTR_PEER_CERT).set(hello.serverCertificate);
+                ctx.attr(ATTR_PEER_ID).set(deviceID);
+
+                handshakeComplete(ctx, ((HandshakePacket.ServerHello) msg).serverCertificate);
+            }
         } else {
             super.channelRead(ctx, msg);
+        }
+    }
+
+    private void registrationExecuted(Object msg) throws GeneralSecurityException {
+        HandshakePacket.ServerRegistrationResponse message = (HandshakePacket.ServerRegistrationResponse) msg;
+        if (message.success) {
+            X509Certificate cert = message.serverCertificate;
+            KeyStoreController keyStoreController = container.require(KeyStoreController.KEY);
+            if (keyStoreController.listEntries().contains(cert)) {
+                DeviceID alias = DeviceID.fromCertificate(cert);
+                keyStoreController.saveCertificate(cert, alias.getIDString());
+            }
         }
     }
 
     /**
      * Called once the Handshake is complete
      */
-    private void handshakeComplete(ChannelHandlerContext ctx) {
+    protected void handshakeComplete(ChannelHandlerContext ctx, X509Certificate serverCertificate) {
         Log.v(TAG, "handshakeComplete " + ctx);
+
+        //Security
+        final PublicKey remotePublicKey = serverCertificate.getPublicKey();
+        final PrivateKey localPrivateKey = container.require(KeyStoreController.KEY).getOwnPrivateKey();
+        try {
+            ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), Encrypter.class.getSimpleName(), new Encrypter(remotePublicKey));
+            ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), Decrypter.class.getSimpleName(), new Decrypter(localPrivateKey));
+            ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), SignatureChecker.class.getSimpleName(), new SignatureChecker(remotePublicKey));
+            ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), SignatureGenerator.class.getSimpleName(), new SignatureGenerator(localPrivateKey));
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException("Could not set up Security Handlers", e);//TODO handle
+        }
 
         //Timeout Handler
         ctx.pipeline().addBefore(ctx.name(), IdleStateHandler.class.getSimpleName(),

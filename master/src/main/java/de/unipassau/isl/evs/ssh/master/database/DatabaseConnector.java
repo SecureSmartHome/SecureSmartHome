@@ -15,6 +15,7 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
+import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 
 /**
  * The DatabaseConnector allows to establish connections to the used database and execute operations on it.
@@ -203,6 +204,17 @@ public class DatabaseConnector extends AbstractComponent {
             }
         }
 
+        private void insertDefaults(SQLiteDatabase db) {
+            ContentValues values = new ContentValues(1);
+            values.put(DatabaseContract.PermissionTemplate.COLUMN_NAME, "DefaultTemplate");
+            db.insert(DatabaseContract.PermissionTemplate.TABLE_NAME, null, values);
+
+            values = new ContentValues(2);
+            values.put(DatabaseContract.Group.COLUMN_NAME, MasterRegisterDeviceHandler.NO_GROUP);
+            values.put(DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID, 1);
+            db.insert(DatabaseContract.Group.TABLE_NAME, null, values);
+        }
+
         private void execSQLScript(String script, SQLiteDatabase db) {
             String[] statements = script.split("\\;");
             for (String statement : statements) {
@@ -216,6 +228,7 @@ public class DatabaseConnector extends AbstractComponent {
             Log.v(TAG, "creating Database");
             execSQLScript(SQL_CREATE_DB, db);
             insertPermissions(db);
+            insertDefaults(db);
 
         }
 

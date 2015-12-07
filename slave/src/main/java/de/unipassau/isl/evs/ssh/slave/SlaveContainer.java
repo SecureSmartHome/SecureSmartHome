@@ -37,7 +37,7 @@ public class SlaveContainer extends ContainerService {
         register(KeyStoreController.KEY, new KeyStoreController());
 
         // read the master id and cert from local storage as long as adding new devices is not implemented
-        if (!dir.mkdirs()) {
+        if (!dir.isDirectory() && !dir.mkdirs()) {
             dir = getFilesDir();
         }
         Log.i("ContainerService", "Storing IDs in " + dir);
@@ -77,7 +77,7 @@ public class SlaveContainer extends ContainerService {
                 final Certificate certificate = certFact.generateCertificate(new FileInputStream(masterCert));
 
                 final DeviceID id = DeviceID.fromCertificate((X509Certificate) certificate);
-                getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
+                getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
                         .putString(SlaveConstants.SharedPrefs.PREF_MASTER_ID, id.getIDString())
                         .commit();
 

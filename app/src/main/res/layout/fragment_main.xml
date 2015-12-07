@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--@author Phil-->
+<!--@author Phil Werli-->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -24,9 +24,9 @@
             android:adjustViewBounds="true"
             android:background="?android:selectableItemBackground"
             android:padding="20dp"
-            android:visibility="gone"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_door_open"/>
+            android:src="@drawable/ic_door_open"
+            android:visibility="gone"/>
 
         <ImageButton
             android:id="@+id/doorButtonClosed"
@@ -40,9 +40,9 @@
             android:adjustViewBounds="true"
             android:background="?android:selectableItemBackground"
             android:padding="20dp"
-            android:visibility="visible"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_door_closed"/>
+            android:src="@drawable/ic_door_closed"
+            android:visibility="visible"/>
 
         <ImageButton
             android:id="@+id/lightButtonOn"
@@ -55,10 +55,10 @@
             android:layout_weight="1"
             android:adjustViewBounds="true"
             android:background="?android:selectableItemBackground"
-            android:visibility="gone"
             android:padding="20dp"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_light_bulb_on"/>
+            android:src="@drawable/ic_light_bulb_on"
+            android:visibility="gone"/>
 
         <ImageButton
             android:id="@+id/lightButtonOff"
@@ -72,9 +72,9 @@
             android:adjustViewBounds="true"
             android:background="?android:selectableItemBackground"
             android:padding="20dp"
-            android:visibility="visible"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_light_bulb_off"/>
+            android:src="@drawable/ic_light_bulb_off"
+            android:visibility="visible"/>
     </LinearLayout>
 
     <LinearLayout

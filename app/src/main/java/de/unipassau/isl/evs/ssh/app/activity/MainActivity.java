@@ -1,19 +1,30 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.content.SharedPreferences;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.SharedPrefs.PREF_MASTER_ID;
 
 /**
  * As this Activity also displays information like whether the light is on or not, this Activity also
@@ -30,6 +41,10 @@ public class MainActivity extends BoundActivity
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
 
+    private NotificationCompat.Builder notificationBuilder;
+    private NotificationManager notificationManager;
+    private static final int uniqueID = 037735;
+
     public MainActivity() {
         super(AppContainer.class);
     }
@@ -38,11 +53,17 @@ public class MainActivity extends BoundActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //Set the fragment initially
 
+        //Set the fragment initially
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //Initialise Notifications
+        notificationBuilder = new NotificationCompat.Builder(this);
+        notificationBuilder.setAutoCancel(true);
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        //Initialise NavigationDrawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -52,6 +73,7 @@ public class MainActivity extends BoundActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //Initialise fragmentTransaction
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
             try {
                 showFragmentByClass(Class.forName(savedInstanceState.getString(SAVED_LAST_ACTIVE_FRAGMENT)));
@@ -59,13 +81,27 @@ public class MainActivity extends BoundActivity
                 e.printStackTrace();
             }
         } else {
-            MainFragment fragment = new MainFragment();
+            // starts the main fragment when already registered, the welcomescreen fragment so the user can register.
+            Fragment fragment = (deviceNotRegistered() ? new WelcomeScreenFragment() : new MainFragment());
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
         }
+    }
 
+    /**
+     * Checks whether the device is registered in the system by checking the master_id in the SharedPreferences.
+     *
+     * @return If the device is already registered or not.
+     */
+    private boolean deviceNotRegistered() {
+        SharedPreferences sharedPreferences = getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        String master_id = null;
+        if (sharedPreferences != null) {
+            master_id = sharedPreferences.getString(PREF_MASTER_ID, null);
+        }
+        return master_id == null;
     }
 
     @Override
@@ -150,7 +186,6 @@ public class MainActivity extends BoundActivity
             }
             fragmentTransaction.commit();
         }
-
     }
 
     // maps button resource ids to Fragment classes.
@@ -172,7 +207,9 @@ public class MainActivity extends BoundActivity
             clazz = ModifyPermissionFragment.class;
         } else if (id == R.id.nav_addNewUserDevice) {
             clazz = AddNewUserDeviceFragment.class;
-        } else if (id == R.id.nav_addModul) {
+        } else if (id == R.id.nav_addModule) {
+            clazz = AddModuleFragment.class;
+        } else if (id == R.id.light_fab) {
             clazz = AddModuleFragment.class;
         } else {
             throw new IllegalArgumentException("Unknown id: " + id);
@@ -197,6 +234,7 @@ public class MainActivity extends BoundActivity
         if (fragment instanceof BoundFragment) {
             ((BoundFragment) fragment).onContainerConnected(container);
         }
+        container.require(AppNotificationHandler.KEY).addNotificationObjects(notificationBuilder, notificationManager);
     }
 
     @Override
@@ -205,5 +243,27 @@ public class MainActivity extends BoundActivity
         if (fragment instanceof BoundFragment) {
             ((BoundFragment) fragment).onContainerDisconnected();
         }
+    }
+
+    //TODO remove, just for testing!
+    public void notificationButtonClicked(View view) {
+        //Build notification
+        notificationBuilder.setSmallIcon(R.drawable.ic_home_light);
+        notificationBuilder.setContentTitle("Climate Warning!");
+        notificationBuilder.setWhen(System.currentTimeMillis());
+        notificationBuilder.setColor(2718207);
+        notificationBuilder.setContentText("Please open a Window, Humidity too high.");
+
+        //TODO does not work for fragments
+        //If Notification is clicked send to this Page
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction("OpenClimateFragment");
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        notificationBuilder.setContentIntent(pendingIntent);
+
+        //TODO own method: sendNotification(uniqueID){}
+        //Send notification out to Device
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        nm.notify(uniqueID, notificationBuilder.build());
     }
 }

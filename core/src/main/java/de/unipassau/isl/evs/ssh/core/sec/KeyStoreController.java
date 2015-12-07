@@ -47,6 +47,7 @@ import de.unipassau.isl.evs.ssh.core.container.StartupException;
  * @author Chris
  */
 public class KeyStoreController extends AbstractComponent {
+    public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);
     private static final String LOCAL_PRIVATE_KEY_ALIAS = "localPrivateKey";
     private static final String KEY_STORE_FILENAME = "encryptText-keystore.bks";
     private static final String KEY_STORE_TYPE = "BKS";
@@ -54,9 +55,6 @@ public class KeyStoreController extends AbstractComponent {
     private static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA224withECDSA";
     private static final String PUBLIC_KEY_PREFIX = "public_key:";
     private static final int ASYMMETRIC_KEY_SIZE = 256;
-
-
-    public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);
 
     static {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
@@ -99,18 +97,19 @@ public class KeyStoreController extends AbstractComponent {
      * Returns the PrivateKey of the device using the OdroidKeyStoreController
      *
      * @return PrivateKey of this device
-     * @throws UnrecoverableEntryException
-     * @throws NoSuchAlgorithmException
-     * @throws KeyStoreException
      */
     @NonNull
-    public PrivateKey getOwnPrivateKey() throws
-            UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException {
-        final KeyStore.Entry key = loadKey(LOCAL_PRIVATE_KEY_ALIAS);
-        if (key instanceof KeyStore.PrivateKeyEntry) {
-            return ((KeyStore.PrivateKeyEntry) key).getPrivateKey();
-        } else {
-            throw new StartupException("own private key not available");
+    public PrivateKey getOwnPrivateKey() {
+        try {
+            final KeyStore.Entry key = loadKey(LOCAL_PRIVATE_KEY_ALIAS);
+            if (key instanceof KeyStore.PrivateKeyEntry) {
+                return ((KeyStore.PrivateKeyEntry) key).getPrivateKey();
+            } else {
+                throw new StartupException("own private key not available, expected KeyStore.PrivateKeyEntry " +
+                        "but got " + key + " for " + LOCAL_PRIVATE_KEY_ALIAS);
+            }
+        } catch (KeyStoreException | UnrecoverableEntryException | NoSuchAlgorithmException e) {
+            throw new StartupException("own private key not available", e);
         }
     }
 
@@ -118,18 +117,19 @@ public class KeyStoreController extends AbstractComponent {
      * Returns the Certificate of the device using the OdroidKeyStoreController
      *
      * @return PrivateKey of this device
-     * @throws UnrecoverableEntryException
-     * @throws NoSuchAlgorithmException
-     * @throws KeyStoreException
      */
     @NonNull
-    public X509Certificate getOwnCertificate() throws
-            UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException {
-        final KeyStore.Entry key = loadKey(LOCAL_PRIVATE_KEY_ALIAS);
-        if (key instanceof KeyStore.PrivateKeyEntry) {
-            return (X509Certificate) ((KeyStore.PrivateKeyEntry) key).getCertificate();
-        } else {
-            throw new StartupException("own private key not available");
+    public X509Certificate getOwnCertificate() {
+        try {
+            final KeyStore.Entry key = loadKey(LOCAL_PRIVATE_KEY_ALIAS);
+            if (key instanceof KeyStore.PrivateKeyEntry) {
+                return (X509Certificate) ((KeyStore.PrivateKeyEntry) key).getCertificate();
+            } else {
+                throw new StartupException("own private key not available, expected KeyStore.PrivateKeyEntry " +
+                        "but got " + key + " for " + LOCAL_PRIVATE_KEY_ALIAS);
+            }
+        } catch (KeyStoreException | UnrecoverableEntryException | NoSuchAlgorithmException e) {
+            throw new StartupException("own private key not available", e);
         }
     }
 

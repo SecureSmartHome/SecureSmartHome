@@ -9,9 +9,9 @@ import java.util.List;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 
 /**
  * Offers high level methods to interact with the tables associated with permissions in the database.
@@ -19,7 +19,6 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
  */
 public class PermissionController extends AbstractComponent {
     public static final Key<PermissionController> KEY = new Key<>(PermissionController.class);
-    private DatabaseConnector databaseConnector;
     private static final String MODULE_ID_FROM_NAME_SQL_QUERY =
                         "select " + DatabaseContract.ElectronicModule.COLUMN_ID
                         + " from " + DatabaseContract.ElectronicModule.TABLE_NAME
@@ -49,6 +48,7 @@ public class PermissionController extends AbstractComponent {
                         + " from " + DatabaseContract.UserDevice.TABLE_NAME
                         + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
                         + " = ?";
+    private DatabaseConnector databaseConnector;
 
     @Override
     public void init(Container container) {
@@ -302,7 +302,6 @@ public class PermissionController extends AbstractComponent {
     public void addPermission(Permission permission) throws AlreadyInUseException {
         try {
             if (permission.getModuleName() == null) {
-                System.out.println("asdfasdf..");
                 databaseConnector.executeSql("insert into "
                                 + DatabaseContract.Permission.TABLE_NAME
                                 + " (" + DatabaseContract.Permission.COLUMN_NAME + ")"
@@ -406,6 +405,7 @@ public class PermissionController extends AbstractComponent {
 
     /**
      * //Todo unit test, doc
+     *
      * @param permission
      * @return
      */
@@ -428,7 +428,7 @@ public class PermissionController extends AbstractComponent {
                     + " = g." + DatabaseContract.Group.COLUMN_ID
                     + " where p." + DatabaseContract.Permission.COLUMN_NAME
                     + " = ? and p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
-                    + " is NULL", new String[]{ permission.getName(), permission.getModuleName() });
+                    + " is NULL", new String[]{permission.getName(), permission.getModuleName()});
         } else {
             userDevicesCursor = databaseConnector.executeSql("select"
                     + "u." + DatabaseContract.UserDevice.COLUMN_NAME
@@ -449,7 +449,7 @@ public class PermissionController extends AbstractComponent {
                     + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
                     + " where p." + DatabaseContract.Permission.COLUMN_NAME
                     + " = ? and m." + DatabaseContract.ElectronicModule.COLUMN_NAME
-                    + " = ?", new String[]{ permission.getName(), permission.getModuleName() });
+                    + " = ?", new String[]{permission.getName(), permission.getModuleName()});
         }
         List<UserDevice> userDevices = new LinkedList<>();
         while (userDevicesCursor.moveToNext()) {

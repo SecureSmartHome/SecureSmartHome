@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.app;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.File;
@@ -14,6 +15,10 @@ import java.security.cert.X509Certificate;
 
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppNewModuleHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
@@ -45,6 +50,9 @@ public class AppContainer extends ContainerService {
         register(AppModuleHandler.KEY, new AppModuleHandler());
         register(AppDoorHandler.KEY, new AppDoorHandler());
         register(AppLightHandler.KEY, new AppLightHandler());
+        register(AppNotificationHandler.KEY, new AppNotificationHandler());
+        register(AppUserConfigurationHandler.KEY, new AppUserConfigurationHandler());
+        register(AppNewModuleHandler.KEY, new AppNewModuleHandler());
     }
 
     private void readMasterData() {
@@ -55,7 +63,7 @@ public class AppContainer extends ContainerService {
                 final Certificate certificate = certFact.generateCertificate(new FileInputStream(masterCert));
 
                 final DeviceID id = DeviceID.fromCertificate((X509Certificate) certificate);
-                getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
+                getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, MODE_PRIVATE).edit()
                         .putString(AppConstants.SharedPrefs.PREF_MASTER_ID, id.getIDString())
                         .commit();
 

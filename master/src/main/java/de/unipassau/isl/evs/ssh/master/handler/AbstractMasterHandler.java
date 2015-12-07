@@ -76,6 +76,7 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler imple
 
     /**
      * Returns whether the device with the given DeviceID is a Slave.
+     *
      * @param deviceID DeviceID for the device to check for whether it a Slave or not.
      * @return Whether or not the device with given DeviceID is a Slave.
      */
@@ -83,8 +84,12 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler imple
         return requireComponent(SlaveController.KEY).getSlave(deviceID) != null;
     }
 
+    public boolean isMaster(DeviceID userDeviceID) {
+        return userDeviceID.equals(requireComponent(NamingManager.KEY).getMasterID());
+    }
+
     protected boolean hasPermission(DeviceID userDeviceID, Permission permission) {
-        return userDeviceID.equals(requireComponent(NamingManager.KEY).getOwnID())
+        return isMaster(userDeviceID)
                 || requireComponent(PermissionController.KEY).hasPermission(userDeviceID, permission);
     }
 

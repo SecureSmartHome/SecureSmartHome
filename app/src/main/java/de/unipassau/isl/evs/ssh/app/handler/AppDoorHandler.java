@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.app.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.activity.DoorFragment;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;

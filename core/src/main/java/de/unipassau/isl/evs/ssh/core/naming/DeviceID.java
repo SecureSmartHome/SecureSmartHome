@@ -16,9 +16,18 @@ import java.security.cert.X509Certificate;
 public final class DeviceID implements Serializable {
     private static final String ID_MD_ALG = "SHA-256";
     public static final int ID_LENGTH = 32;
+    public static final DeviceID NO_DEVICE = new DeviceID();
 
     private final String id;
     private final byte[] bytes;
+
+    /**
+     * Private Constructor for NO_DEVICE only
+     */
+    private DeviceID() {
+        id = "None";
+        bytes = null;
+    }
 
     /**
      * Creates a new DeviceID from the given string.

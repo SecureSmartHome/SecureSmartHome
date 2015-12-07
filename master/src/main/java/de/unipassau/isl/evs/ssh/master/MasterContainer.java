@@ -16,7 +16,13 @@ import de.unipassau.isl.evs.ssh.master.database.DatabaseConnector;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
+import de.unipassau.isl.evs.ssh.master.handler.MasterClimateHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterModuleHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterNotificationHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
 /**
@@ -36,11 +42,19 @@ public class MasterContainer extends ContainerService {
         register(SlaveController.KEY, new SlaveController());
         register(PermissionController.KEY, new PermissionController());
         register(HolidayController.KEY, new HolidayController());
+        register(UserManagementController.KEY, new UserManagementController());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
         incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
+        incomingDispatcher.registerHandler(new MasterClimateHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_GET,
+                CoreConstants.RoutingKeys.MASTER_WEATHER_INFO);
+        incomingDispatcher.registerHandler(new MasterNotificationHandler(),
+                CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND);
+        incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(), CoreConstants.RoutingKeys.MASTER_USERINFO_GET);
+        incomingDispatcher.registerHandler(new MasterModuleHandler(), CoreConstants.RoutingKeys.MASTER_MODULE_ADD);
+        incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(), CoreConstants.RoutingKeys.MASTER_REGISTER_INIT, CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE);
 
-        if (!dir.mkdirs()) {
+        if (!dir.isDirectory() && !dir.mkdirs()) {
             dir = getFilesDir();
         }
         Log.i("ContainerService", "Storing IDs in " + dir);
@@ -55,7 +69,7 @@ public class MasterContainer extends ContainerService {
 
     private void writeMasterId() {
         try (final FileOutputStream os = new FileOutputStream(new File(dir, "master.id"))) {
-            os.write(require(NamingManager.KEY).getOwnID().getId().getBytes());
+            os.write(require(NamingManager.KEY).getOwnID().getIDString().getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }

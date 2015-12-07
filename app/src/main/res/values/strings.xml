@@ -23,17 +23,46 @@
     <string name="nav_addModule_string">Add Module</string>
     <string name="deviceStatusConnectedSlaves">Connected Slaves</string>
     <string name="deviceStatusConnectedModules">Connected Modules</string>
-    <string name="string_turn_off">Turn Off</string>
-    <string name="string_turn_on">Turn On</string>
+
+    <!--Strings used in the LightFragment-->
+    <string name="turn_off">Turn Off</string>
+    <string name="turn_on">Turn On</string>
+
+
     <string name="status_of_light">Status of the Light</string>
     <string name="deviceSatusConnectedSlaves">Connected Slaves</string>
     <string name="NoSlavesConnected">No Slaves connected</string>
     <string name="NoModulesConnected">No modules connected</string>
+    <string name="addUser">Add User</string>
+    <string name="group">Group</string>
+    <string name="name">Name</string>
+
+    <!--Strings used for QR-Codes-->
+    <string name="qr_code_description">This is a QR-Code.</string>
+    <string name="please_scan_device">Scan the QR-Code with your device.</string>
+
+    <!--Strings used for the Welcome Screen-->
+    <string name="welcome_to_ssh">Welcome to the Secure Smart Home App.</string>
+    <string name="click_to_register">Click below to register in a system.</string>
+
+    <string name="register">Register</string>
     <string name="refreshImage">Refresh Image</string>
     <string name="openDoor">Open door</string>
     <string name="doorStatusOpen">Status: open</string>
     <string name="blockDoor">Block door</string>
     <string name="unblockDoor">Unblock door</string>
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
+    <string name="error_fill_all_fields">Cannot add module. Missing information.</string>
+    <string name="added_module_success">Added module successfully</string>
+    <string name="added_module_fail">Adding new module failed</string>
+    <string-array name="sensor_connection_types">
+        <!-- Do not change the order of items! Changing the order would break AddModuleFragment -->
+        <item>GPIO</item>
+        <item>USB</item>
+        <item>WLAN</item>
+    </string-array>
+
     <string name="switchSimulationOn">Switch Simulation On</string>
     <string name="switchSimulationOff">Switch Simulation Off</string>
     <string name="holidaySimulationStatus">Status: </string>

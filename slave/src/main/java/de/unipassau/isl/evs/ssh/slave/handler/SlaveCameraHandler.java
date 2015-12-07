@@ -5,15 +5,16 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.util.Log;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  * Handles messages requesting pictures from the camera (via API calls) and generates messages,
@@ -77,14 +78,14 @@ public class SlaveCameraHandler implements MessageHandler {
      * Makes a preview and takes a frame from there to make fill a picture callback
      *
      * @param pictureCallback to be filled
-     * @param camera to be used
+     * @param camera          to be used
      */
     private void setPreviewCallback(final Camera.PictureCallback pictureCallback, Camera camera) {
         Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
             public void onPreviewFrame(byte[] data, Camera camera) {
                 Rect rect = new Rect(0, 0, 300, 300);
-                        //mPreviewSize.width,
-                        //mPreviewSize.height);
+                //mPreviewSize.width,
+                //mPreviewSize.height);
                 YuvImage image = new YuvImage(data, ImageFormat.NV16, 300, 300, //TODO what picture size do we use?
                         //mPreviewSize.width,
                         //mPreviewSize.height, ,
