@@ -100,7 +100,6 @@ public class Server extends AbstractComponent {
             container.register(IncomingDispatcher.KEY, incomingDispatcher);
             container.register(OutgoingRouter.KEY, outgoingRouter);
             container.register(UDPDiscoveryServer.KEY, udpDiscovery);
-            //TODO require device registry
         } catch (InterruptedException e) {
             throw new StartupException("Could not start netty server", e);
         }
@@ -167,7 +166,7 @@ public class Server extends AbstractComponent {
      */
     public Channel findChannel(DeviceID id) {
         for (Channel channel : connections) {
-            if (channel.isActive() && Objects.equals(channel.attr(CoreConstants.NettyConstants.ATTR_CLIENT_ID).get(), id)) {
+            if (channel.isActive() && Objects.equals(channel.attr(CoreConstants.NettyConstants.ATTR_PEER_ID).get(), id)) {
                 return channel;
             }
         }

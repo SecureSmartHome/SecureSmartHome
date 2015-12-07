@@ -88,18 +88,21 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof HandshakePacket.ClientHello) {
-            final HandshakePacket.ClientHello hello = (HandshakePacket.ClientHello) msg;
-            ctx.attr(CoreConstants.NettyConstants.ATTR_CLIENT_CERT).set(hello.clientCertificate);
-            final DeviceID deviceID = DeviceID.fromCertificate(hello.clientCertificate);
-            ctx.attr(CoreConstants.NettyConstants.ATTR_CLIENT_ID).set(deviceID);
-            Log.i(TAG, "Client " + deviceID + " connected");
+        if (msg instanceof HandshakePacket) {
+            Log.v(TAG, "Received " + msg);
+            if (msg instanceof HandshakePacket.ClientHello) {
+                final HandshakePacket.ClientHello hello = (HandshakePacket.ClientHello) msg;
+                ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_CERT).set(hello.clientCertificate);
+                final DeviceID deviceID = DeviceID.fromCertificate(hello.clientCertificate);
+                ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_ID).set(deviceID);
+                Log.i(TAG, "Client " + deviceID + " connected");
 
-            final X509Certificate masterCert = container.require(NamingManager.KEY).getMasterCertificate();
-            ctx.writeAndFlush(new HandshakePacket.ServerHello(masterCert));
+                final X509Certificate masterCert = container.require(NamingManager.KEY).getMasterCertificate();
+                ctx.writeAndFlush(new HandshakePacket.ServerHello(masterCert, response));
 
-            //TODO check authentication and protocol version and close connection on fail
-            clientAuthenticated(ctx, hello.clientCertificate);
+                //TODO check authentication and protocol version and close connection on fail
+                clientAuthenticated(ctx, hello.clientCertificate);
+            }
         } else {
             super.channelRead(ctx, msg);
         }
@@ -115,10 +118,10 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         final PublicKey remotePublicKey = clientCertificate.getPublicKey();
         final PrivateKey localPrivateKey = container.require(KeyStoreController.KEY).getOwnPrivateKey();
         try {
-            ctx.pipeline().addBefore(ctx.name(), Encrypter.class.getSimpleName(), new Encrypter(remotePublicKey));
-            ctx.pipeline().addBefore(ctx.name(), Decrypter.class.getSimpleName(), new Decrypter(localPrivateKey));
-            ctx.pipeline().addBefore(ctx.name(), SignatureChecker.class.getSimpleName(), new SignatureChecker(remotePublicKey));
-            ctx.pipeline().addBefore(ctx.name(), SignatureGenerator.class.getSimpleName(), new SignatureGenerator(localPrivateKey));
+            ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), Encrypter.class.getSimpleName(), new Encrypter(remotePublicKey));
+            ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), Decrypter.class.getSimpleName(), new Decrypter(localPrivateKey));
+            ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), SignatureChecker.class.getSimpleName(), new SignatureChecker(remotePublicKey));
+            ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), SignatureGenerator.class.getSimpleName(), new SignatureGenerator(localPrivateKey));
         } catch (GeneralSecurityException e) {
             throw new RuntimeException("Could not set up Security Handlers", e);//TODO handle
         }

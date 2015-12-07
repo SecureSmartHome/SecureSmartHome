@@ -74,8 +74,8 @@ public class CoreConstants {
         public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE";
         public static final String[] DISCOVERY_PAYLOADS = {DISCOVERY_PAYLOAD_REQUEST, DISCOVERY_PAYLOAD_RESPONSE};
 
-        public static final AttributeKey<X509Certificate> ATTR_CLIENT_CERT = AttributeKey.valueOf(X509Certificate.class.getName());
-        public static final AttributeKey<DeviceID> ATTR_CLIENT_ID = AttributeKey.valueOf(DeviceID.class.getName());
+        public static final AttributeKey<X509Certificate> ATTR_PEER_CERT = AttributeKey.valueOf(X509Certificate.class.getName());
+        public static final AttributeKey<DeviceID> ATTR_PEER_ID = AttributeKey.valueOf(DeviceID.class.getName());
     }
 
     public static class Security {
