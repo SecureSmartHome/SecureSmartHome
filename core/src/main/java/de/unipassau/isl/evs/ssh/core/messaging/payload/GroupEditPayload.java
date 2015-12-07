@@ -5,6 +5,9 @@ import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 
+/**
+ * @author Wolfgang Popp
+ */
 public class GroupEditPayload implements MessagePayload {
 
     private Group group;

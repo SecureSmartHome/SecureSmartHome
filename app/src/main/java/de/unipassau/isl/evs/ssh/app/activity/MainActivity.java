@@ -1,19 +1,25 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Spinner;
 
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.app.activity.dialog.AddGroupDialog;
 import de.unipassau.isl.evs.ssh.app.activity.dialog.EditGroupDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
@@ -36,6 +42,10 @@ public class MainActivity extends BoundActivity
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
 
+    private NotificationCompat.Builder notificationBuilder;
+    private NotificationManager notificationManager;
+    private static final int uniqueID = 037735;
+
     public MainActivity() {
         super(AppContainer.class);
     }
@@ -44,20 +54,26 @@ public class MainActivity extends BoundActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //Set the fragment initially
 
+        //Set the fragment initially
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //Initialise Notifications
+        notificationBuilder = new NotificationCompat.Builder(this);
+        notificationBuilder.setAutoCancel(true);
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        //Initialise NavigationDrawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //Initialise fragmentTransaction
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
             try {
                 showFragmentByClass(Class.forName(savedInstanceState.getString(SAVED_LAST_ACTIVE_FRAGMENT)));
@@ -71,7 +87,6 @@ public class MainActivity extends BoundActivity
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
         }
-
     }
 
     @Override
@@ -134,7 +149,7 @@ public class MainActivity extends BoundActivity
      * screen or managing the back button behavior.
      *
      * @param clazz  the class of the fragment to show
-     * @param bundle the information given with the new fragment
+     * @param bundle the bundle that is given with the new fragment
      */
     public void showFragmentByClass(Class clazz, Bundle bundle) {
         Class oldFragment = getCurrentFragment().getClass();
@@ -203,6 +218,7 @@ public class MainActivity extends BoundActivity
         if (fragment instanceof BoundFragment) {
             ((BoundFragment) fragment).onContainerConnected(container);
         }
+        container.require(AppNotificationHandler.KEY).addNotificationObjects(notificationBuilder, notificationManager);
     }
 
     @Override
@@ -211,6 +227,28 @@ public class MainActivity extends BoundActivity
         if (fragment instanceof BoundFragment) {
             ((BoundFragment) fragment).onContainerDisconnected();
         }
+    }
+
+    //TODO remove, just for testing!
+    public void notificationButtonClicked(View view) {
+        //Build notification
+        notificationBuilder.setSmallIcon(R.drawable.ic_home_light);
+        notificationBuilder.setContentTitle("Climate Warning!");
+        notificationBuilder.setWhen(System.currentTimeMillis());
+        notificationBuilder.setColor(2718207);
+        notificationBuilder.setContentText("Please open a Window, Humidity too high.");
+
+        //TODO does not work for fragments
+        //If Notification is clicked send to this Page
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction("OpenClimateFragment");
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        notificationBuilder.setContentIntent(pendingIntent);
+
+        //TODO own method: sendNotification(uniqueID){}
+        //Send notification out to Device
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        nm.notify(uniqueID, notificationBuilder.build());
     }
 
     @Override

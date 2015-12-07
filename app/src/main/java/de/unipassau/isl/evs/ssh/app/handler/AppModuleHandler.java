@@ -1,8 +1,9 @@
-package de.unipassau.isl.evs.ssh.app;
+package de.unipassau.isl.evs.ssh.app.handler;
 
 import android.util.Log;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -14,10 +15,12 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * AppModuleHandler offers a list of all Modules that are active in the System.
@@ -63,11 +66,12 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
     };
 
     private List<Module> components;
+    private List<Slave> slaves;
 
-    public void updateList(List<Module> components) {
+    public void updateList(List<Module> components, List<Slave> slaves) {
         this.components = components;
+        this.slaves = slaves;
     }
-
 
     public List<Module> getComponents() {
         return components;
@@ -105,13 +109,28 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
         return Lists.newArrayList(filtered);
     }
 
+    public List<Slave> getSlaves() {
+        if (getComponents() == null) {
+            return null;
+        }
+        return ImmutableList.copyOf(slaves);
+    }
+
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (message.getPayload() instanceof ModulesPayload) {
-            List<Module> modules = (List<Module>) message.getPayload();
-            updateList(modules);
+        String routingKey = message.getRoutingKey();
+        if (routingKey.equals(CoreConstants.RoutingKeys.APP_MODULES_GET)) {
+            if (message.getPayload() instanceof ModulesPayload) {
+                ModulesPayload payload = (ModulesPayload) message.getPayload();
+                List<Module> modules = payload.getModules();
+                List<Slave> slaves = payload.getSlaves();
+                updateList(modules, slaves);
+            } else {
+                Log.e(this.getClass().getSimpleName(), "Error! Unknown message Payload");
+            }
+
         } else {
-            Log.e(this.getClass().getSimpleName(), "Error! Unknown message Payload");
+            throw new UnsupportedOperationException("Unknown routing key");
         }
     }
 

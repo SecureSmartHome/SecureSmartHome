@@ -44,4 +44,16 @@
     <string name="group_name">Group Name</string>
     <string name="edit_group_dialog_title">Edit Group</string>
     <string name="set_permission_template">Set a permission template</string>
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
+    <string name="error_fill_all_fields">Cannot add module. Missing information.</string>
+    <string name="added_module_success">Added module successfully</string>
+    <string name="added_module_fail">Adding new module failed</string>
+    <string-array name="sensor_connection_types">
+        <!-- Do not change the order of items! Changing the order would break AddModuleFragment -->
+        <item>GPIO</item>
+        <item>USB</item>
+        <item>WLAN</item>
+    </string-array>
+
 </resources>
