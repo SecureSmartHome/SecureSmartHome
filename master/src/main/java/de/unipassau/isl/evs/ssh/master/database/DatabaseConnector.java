@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import de.ncoder.typedmap.Key;
@@ -24,7 +25,7 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
  */
 public class DatabaseConnector extends AbstractComponent {
     public static final Key<DatabaseConnector> KEY = new Key<>(DatabaseConnector.class);
-    public static final String TAG = DatabaseConnector.class.getSimpleName();
+    private static final String TAG = DatabaseConnector.class.getSimpleName();
 
     private SQLiteDatabase database;
 
@@ -69,7 +70,7 @@ public class DatabaseConnector extends AbstractComponent {
 
     public class DBOpenHelper extends SQLiteOpenHelper {
         // If you change the database schema, you must increment the database version.
-        public static final int DATABASE_VERSION = 2;
+        public static final int DATABASE_VERSION = 3;
         public static final String DATABASE_NAME = "SecureSmartHome.db";
         private static final String SQL_CREATE_DB = "CREATE TABLE " + DatabaseContract.UserDevice.TABLE_NAME + " ("
                 + DatabaseContract.UserDevice.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
@@ -213,6 +214,20 @@ public class DatabaseConnector extends AbstractComponent {
             values.put(DatabaseContract.Group.COLUMN_NAME, MasterRegisterDeviceHandler.NO_GROUP);
             values.put(DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID, 1);
             db.insert(DatabaseContract.Group.TABLE_NAME, null, values);
+
+            String[] defaultTemplates = { "Parents_Template", "Children_Template", "Guests_Template", "Admin_Template" };
+            String[] groupNames = { "Parents", "Children", "Guests"} ;
+
+            for (String defaultTemplate : defaultTemplates) {
+                values = new ContentValues(1);
+                values.put(DatabaseContract.PermissionTemplate.COLUMN_NAME, defaultTemplate);
+            }
+
+            for (int i = 0; i < groupNames.length; i++) {
+                values = new ContentValues(2);
+                values.put(DatabaseContract.Group.COLUMN_NAME, groupNames[i]);
+                values.put(DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID, i+1);
+            }
         }
 
         private void execSQLScript(String script, SQLiteDatabase db) {
