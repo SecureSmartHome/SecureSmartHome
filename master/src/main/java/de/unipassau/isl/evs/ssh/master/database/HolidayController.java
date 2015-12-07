@@ -9,6 +9,7 @@ import java.util.List;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 
 /**
  * Offers high level methods to interact with the holiday table in the database.
@@ -62,5 +63,9 @@ public class HolidayController extends AbstractComponent {
             actions.add(holidayEntriesCursor.getString(0));
         }
         return actions;
+    }
+
+    public List<HolidayAction> getHolidayActions(Date from, Date to) {
+        return new LinkedList();
     }
 }

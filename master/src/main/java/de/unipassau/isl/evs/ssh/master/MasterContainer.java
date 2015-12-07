@@ -24,6 +24,7 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterNotificationHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
+import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
 
 /**
  * This Container class manages dependencies needed in the Master part of the architecture.
@@ -45,14 +46,18 @@ public class MasterContainer extends ContainerService {
         register(UserManagementController.KEY, new UserManagementController());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
-        incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
+        incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET,
+                CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
         incomingDispatcher.registerHandler(new MasterClimateHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_GET,
                 CoreConstants.RoutingKeys.MASTER_WEATHER_INFO);
         incomingDispatcher.registerHandler(new MasterNotificationHandler(),
                 CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND);
         incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(), CoreConstants.RoutingKeys.MASTER_USERINFO_GET);
         incomingDispatcher.registerHandler(new MasterModuleHandler(), CoreConstants.RoutingKeys.MASTER_MODULE_ADD);
-        incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(), CoreConstants.RoutingKeys.MASTER_REGISTER_INIT, CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE);
+        incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(),
+                CoreConstants.RoutingKeys.MASTER_REGISTER_INIT, CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE);
+        incomingDispatcher.registerHandler(new MasterHolidaySimulationPlannerHandler(),
+                CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET, CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET);
 
         if (!dir.isDirectory() && !dir.mkdirs()) {
             dir = getFilesDir();
