@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+
 import java.net.SocketAddress;
 import java.util.Objects;
 
@@ -35,6 +38,7 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PORT;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.master.MasterConstants.PREF_SERVER_PORT;
@@ -166,7 +170,7 @@ public class Server extends AbstractComponent {
      */
     public Channel findChannel(DeviceID id) {
         for (Channel channel : connections) {
-            if (channel.isActive() && Objects.equals(channel.attr(CoreConstants.NettyConstants.ATTR_PEER_ID).get(), id)) {
+            if (channel.isActive() && Objects.equals(channel.attr(ATTR_PEER_ID).get(), id)) {
                 return channel;
             }
         }
@@ -215,6 +219,15 @@ public class Server extends AbstractComponent {
      */
     public ChannelGroup getActiveChannels() {
         return connections;
+    }
+
+    public Iterable<DeviceID> getActiveDevices() {
+        return Iterables.transform(getActiveChannels(), new Function<Channel, DeviceID>() {
+            @Override
+            public DeviceID apply(Channel input) {
+                return input.attr(ATTR_PEER_ID).get();
+            }
+        });
     }
 
     /**
