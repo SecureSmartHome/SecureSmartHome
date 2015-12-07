@@ -89,6 +89,7 @@ public class CoreConstants {
      */
     public class SharedPrefs {
         public static final String PREF_MASTER_ID = "ssh.core.MASTER_ID";
+        public static final String PREF_TOKEN = "ssh.core.TOKEN"; //TODO check if this is the correct place
     }
 
     /**
