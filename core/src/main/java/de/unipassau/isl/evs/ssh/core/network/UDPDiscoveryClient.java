@@ -214,12 +214,13 @@ public class UDPDiscoveryClient extends AbstractComponent {
                     if (checkSignature(buffer, dataStart, dataEnd)) {
                         // got a new address for the master!
                         ReferenceCountUtil.release(request);
-                        Log.i(TAG, "UDP response received " + address + ":" + port);
+                        Log.i(TAG, "UDP response received " + address.getHostAddress() + ":" + port);
                         stopDiscovery();
                         requireComponent(Client.KEY).onDiscoverySuccessful(address, port);
                         return;
                     } else {
-                        Log.i(TAG, "UDP response received " + address + ":" + port + ", but signature is invalid");
+                        Log.i(TAG, "UDP response received " + address.getHostAddress() + ":" + port
+                                + ", but signature is invalid");
                     }
                 } else if (DISCOVERY_PAYLOAD_REQUEST.equals(messageType)) {
                     // discard own requests that are echoed by the router
