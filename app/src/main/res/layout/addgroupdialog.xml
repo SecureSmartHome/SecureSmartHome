@@ -11,10 +11,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_vertical_margin"
+        android:focusableInTouchMode="true"
         android:hint="@string/group_name"
-        android:inputType="textAutoComplete"
+        android:inputType="textAutoCorrect"
         android:textIsSelectable="true"
         android:textSize="@dimen/typography_headline1"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:text="@string/set_permission_template"
+        android:textColor="@color/colorPrimaryText"
+        android:textSize="@dimen/typography_body"
         />
 
     <android.support.v7.widget.AppCompatSpinner

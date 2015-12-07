@@ -14,11 +14,13 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.EDIT_GROUP_DIALOG;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.TEMPLATE_DIALOG;
 
 /**
  * Dialog class to create a dialog that lets the user edit a group.
@@ -42,6 +44,7 @@ public class EditGroupDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Group group = (Group) getArguments().getSerializable(EDIT_GROUP_DIALOG);
+        String[] templateNames = getArguments().getStringArray(TEMPLATE_DIALOG);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.editgroupdialog, null, false);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -56,13 +59,13 @@ public class EditGroupDialog extends DialogFragment {
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        listener.onDialogNegativeClick(EditGroupDialog.this);
+                        EditGroupDialog.this.getDialog().cancel();
                     }
                 });
         EditText groupName = (EditText) dialogView.findViewById(R.id.edit_group_dialog_group_name);
         groupName.setHint(group.getName());
-//        ArrayList<String> templateList = getTemplates();
-        ArrayList<String> templateList = null;
+        groupName.clearFocus();
+        ArrayList<String> templateList = new ArrayList<>(Arrays.asList(templateNames));
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.template_list, templateList);
         Spinner templateName = ((Spinner) dialogView.findViewById(R.id.edit_group_dialog_spinner));
         templateName.setAdapter(adapter);
@@ -71,8 +74,6 @@ public class EditGroupDialog extends DialogFragment {
 
     public interface EditGroupDialogListener {
         void onDialogPositiveClick(EditGroupDialog dialog);
-
-        void onDialogNegativeClick(EditGroupDialog dialog);
     }
 
 
