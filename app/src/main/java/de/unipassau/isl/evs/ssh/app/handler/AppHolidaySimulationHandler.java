@@ -3,8 +3,6 @@ package de.unipassau.isl.evs.ssh.app.handler;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -18,7 +16,6 @@ import java.util.List;
 
 /**
  * AppHolidaySimulationHandler class handles messages for the holiday simulation
- *
  *
  * @author Chris
  */
