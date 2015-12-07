@@ -10,6 +10,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
@@ -37,8 +38,13 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         }
     }
 
+    public void sendUpdateToUserDevice(DeviceID id) {
+        final Message messageToSend = new Message(generatePayload());
+        sendMessage(id, CoreConstants.RoutingKeys.APP_USERINFO_GET, messageToSend);
+    }
+
     private void sendUserInfoUpdate(Message.AddressedMessage message) {
-        final Message messageToSend = new Message(message.getPayload());
+        final Message messageToSend = new Message(generatePayload());
         messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
         sendMessage(message.getFromID(), CoreConstants.RoutingKeys.APP_USERINFO_GET, messageToSend);
     }
