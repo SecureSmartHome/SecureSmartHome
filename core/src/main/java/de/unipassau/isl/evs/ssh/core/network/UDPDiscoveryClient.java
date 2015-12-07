@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
@@ -203,10 +204,10 @@ public class UDPDiscoveryClient extends AbstractComponent {
                 final int dataStart = buffer.readerIndex();
                 final String messageType = readString(buffer);
                 if (DISCOVERY_PAYLOAD_RESPONSE.equals(messageType)) {
-                    String address = readString(buffer);
+                    InetAddress address = InetAddress.getByName(readString(buffer));
                     // the address originally sent from the master is discarded, as using the address from which the
                     // message came works even if I'm in a different subnet
-                    address = request.sender().getHostString();
+                    address = request.sender().getAddress();
 
                     final int port = buffer.readInt();
                     final int dataEnd = buffer.readerIndex();
