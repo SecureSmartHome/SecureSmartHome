@@ -27,8 +27,8 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.AppConstants;
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.app.activity.dialog.AddGroupDialog;
-import de.unipassau.isl.evs.ssh.app.activity.dialog.EditGroupDialog;
+import de.unipassau.isl.evs.ssh.app.dialogs.AddGroupDialog;
+import de.unipassau.isl.evs.ssh.app.dialogs.EditGroupDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;

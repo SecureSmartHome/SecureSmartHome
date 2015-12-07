@@ -19,9 +19,9 @@ import android.widget.Spinner;
 
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.app.dialogs.AddGroupDialog;
+import de.unipassau.isl.evs.ssh.app.dialogs.EditGroupDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
-import de.unipassau.isl.evs.ssh.app.activity.dialog.AddGroupDialog;
-import de.unipassau.isl.evs.ssh.app.activity.dialog.EditGroupDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -38,13 +38,11 @@ public class MainActivity extends BoundActivity
         implements NavigationView.OnNavigationItemSelectedListener, EditGroupDialog.EditGroupDialogListener, AddGroupDialog.AddGroupDialogListener {
 
     private static final String SAVED_LAST_ACTIVE_FRAGMENT = "de.unipassau.isl.evs.ssh.app.activity.SAVED_LAST_ACTIVE_FRAGMENT";
-
+    private static final int uniqueID = 037735;
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
-
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
-    private static final int uniqueID = 037735;
 
     public MainActivity() {
         super(AppContainer.class);
