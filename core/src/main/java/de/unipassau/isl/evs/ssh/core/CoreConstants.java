@@ -89,7 +89,6 @@ public class CoreConstants {
      */
     public class SharedPrefs {
         public static final String PREF_MASTER_ID = "ssh.core.MASTER_ID";
-        public static final String PREF_TOKEN = "ssh.core.TOKEN"; //TODO check if this is the correct place
     }
 
     /**
@@ -121,6 +120,8 @@ public class CoreConstants {
         public static final String MASTER_DOOR_LOCK_SET = "/master/door/lock_set";
         public static final String MASTER_DOOR_LOCK_GET = "/master/door/lock_get";
         public static final String MASTER_DOOR_STATUS_GET = "/master/door/status_get";
+        public static final String MASTER_HOLIDAY_SET = "/master/holiday/set";
+        public static final String MASTER_HOLIDAY_GET = "/master/holiday/get";
         public static final String MASTER_USERINFO_GET = "/master/userdevice/get";
         public static final String MASTER_USERINFO_SET = "/master/userdevice/set";
         public static final String MASTER_MODULE_ADD = "/master/module/add";
@@ -146,6 +147,7 @@ public class CoreConstants {
         public static final String APP_DOOR_BLOCK = "/app/door/block";
         public static final String APP_DOOR_GET = "/app/door/get";
         public static final String APP_DOOR_RING = "/app/door/ring";
+        public static final String APP_HOLIDAY_SIMULATION = "app/holiday/get";
         public static final String APP_USERINFO_GET = "/app/userdevice/get";
         public static final String APP_MODULE_ADD = "/app/module/add";
     }

@@ -63,4 +63,9 @@
         <item>WLAN</item>
     </string-array>
 
+    <string name="switchSimulationOn">Switch Simulation On</string>
+    <string name="switchSimulationOff">Switch Simulation Off</string>
+    <string name="holidaySimulationStatus">Status: </string>
+    <string name="holidaySimulationOn">On</string>
+    <string name="holidaySimulationOff">Off</string>
 </resources>
