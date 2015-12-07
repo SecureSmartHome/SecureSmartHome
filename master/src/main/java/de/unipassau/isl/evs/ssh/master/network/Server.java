@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+
 import java.net.SocketAddress;
 import java.util.Objects;
 
@@ -36,6 +39,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PORT;
 import static de.unipassau.isl.evs.ssh.master.MasterConstants.PREF_SERVER_PORT;
 
@@ -55,7 +59,7 @@ public class Server extends AbstractComponent {
     /**
      * Distributes incoming messages to the responsible handlers.
      */
-    private final ServerIncomingDispatcher incomingDispatcher = new ServerIncomingDispatcher(this);
+    private final ServerIncomingDispatcher incomingDispatcher = new ServerIncomingDispatcher();
     /**
      * Receives messages from system components and decides how to route them to the targets.
      */
@@ -100,7 +104,6 @@ public class Server extends AbstractComponent {
             container.register(IncomingDispatcher.KEY, incomingDispatcher);
             container.register(OutgoingRouter.KEY, outgoingRouter);
             container.register(UDPDiscoveryServer.KEY, udpDiscovery);
-            //TODO require device registry
         } catch (InterruptedException e) {
             throw new StartupException("Could not start netty server", e);
         }
@@ -137,11 +140,12 @@ public class Server extends AbstractComponent {
 
     /**
      * HandshakeHandle can be changed or mocked for testing
+     *
      * @return the ServerHandshakeHandler to use
      */
     @NonNull
     protected ServerHandshakeHandler getHandshakeHandler() {
-        return new ServerHandshakeHandler(this);
+        return new ServerHandshakeHandler(this, getContainer());
     }
 
     /**
@@ -167,7 +171,7 @@ public class Server extends AbstractComponent {
      */
     public Channel findChannel(DeviceID id) {
         for (Channel channel : connections) {
-            if (channel.isActive() && Objects.equals(channel.attr(CoreConstants.NettyConstants.ATTR_CLIENT_ID).get(), id)) {
+            if (channel.isActive() && Objects.equals(channel.attr(ATTR_PEER_ID).get(), id)) {
                 return channel;
             }
         }
@@ -196,13 +200,6 @@ public class Server extends AbstractComponent {
     }
 
     /**
-     * Provide the container to {@link ServerHandshakeHandler}
-     */
-    Container _getContainer() {
-        return super.getContainer();
-    }
-
-    /**
      * @return the port of the Server set in the SharedPreferences or {@link CoreConstants.NettyConstants#DEFAULT_PORT}
      */
     private int getPort() {
@@ -223,6 +220,15 @@ public class Server extends AbstractComponent {
      */
     public ChannelGroup getActiveChannels() {
         return connections;
+    }
+
+    public Iterable<DeviceID> getActiveDevices() {
+        return Iterables.transform(getActiveChannels(), new Function<Channel, DeviceID>() {
+            @Override
+            public DeviceID apply(Channel input) {
+                return input.attr(ATTR_PEER_ID).get();
+            }
+        });
     }
 
     /**

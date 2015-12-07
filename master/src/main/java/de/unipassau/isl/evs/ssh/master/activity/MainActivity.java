@@ -21,7 +21,6 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.FinalizeRegisterUserDevicePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.InitRegisterUserDevicePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -187,7 +186,7 @@ public class MainActivity extends BoundActivity {
             if (!channels.isEmpty()) {
                 status += ":\n";
                 for (Channel channel : channels) {
-                    final DeviceID deviceID = channel.attr(CoreConstants.NettyConstants.ATTR_CLIENT_ID).get();
+                    final DeviceID deviceID = channel.attr(CoreConstants.NettyConstants.ATTR_PEER_ID).get();
                     status += channel.id().asShortText() + " " + channel.remoteAddress() + " " +
                             (deviceID != null ? deviceID.toShortString() : "???") + "\n";
                 }

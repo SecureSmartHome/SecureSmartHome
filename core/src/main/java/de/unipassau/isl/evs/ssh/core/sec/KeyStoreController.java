@@ -97,18 +97,19 @@ public class KeyStoreController extends AbstractComponent {
      * Returns the PrivateKey of the device using the OdroidKeyStoreController
      *
      * @return PrivateKey of this device
-     * @throws UnrecoverableEntryException
-     * @throws NoSuchAlgorithmException
-     * @throws KeyStoreException
      */
     @NonNull
-    public PrivateKey getOwnPrivateKey() throws
-            UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException {
-        final KeyStore.Entry key = loadKey(LOCAL_PRIVATE_KEY_ALIAS);
-        if (key instanceof KeyStore.PrivateKeyEntry) {
-            return ((KeyStore.PrivateKeyEntry) key).getPrivateKey();
-        } else {
-            throw new StartupException("own private key not available");
+    public PrivateKey getOwnPrivateKey() {
+        try {
+            final KeyStore.Entry key = loadKey(LOCAL_PRIVATE_KEY_ALIAS);
+            if (key instanceof KeyStore.PrivateKeyEntry) {
+                return ((KeyStore.PrivateKeyEntry) key).getPrivateKey();
+            } else {
+                throw new StartupException("own private key not available, expected KeyStore.PrivateKeyEntry " +
+                        "but got " + key + " for " + LOCAL_PRIVATE_KEY_ALIAS);
+            }
+        } catch (KeyStoreException | UnrecoverableEntryException | NoSuchAlgorithmException e) {
+            throw new StartupException("own private key not available", e);
         }
     }
 
@@ -116,18 +117,19 @@ public class KeyStoreController extends AbstractComponent {
      * Returns the Certificate of the device using the OdroidKeyStoreController
      *
      * @return PrivateKey of this device
-     * @throws UnrecoverableEntryException
-     * @throws NoSuchAlgorithmException
-     * @throws KeyStoreException
      */
     @NonNull
-    public X509Certificate getOwnCertificate() throws
-            UnrecoverableEntryException, NoSuchAlgorithmException, KeyStoreException {
-        final KeyStore.Entry key = loadKey(LOCAL_PRIVATE_KEY_ALIAS);
-        if (key instanceof KeyStore.PrivateKeyEntry) {
-            return (X509Certificate) ((KeyStore.PrivateKeyEntry) key).getCertificate();
-        } else {
-            throw new StartupException("own private key not available");
+    public X509Certificate getOwnCertificate() {
+        try {
+            final KeyStore.Entry key = loadKey(LOCAL_PRIVATE_KEY_ALIAS);
+            if (key instanceof KeyStore.PrivateKeyEntry) {
+                return (X509Certificate) ((KeyStore.PrivateKeyEntry) key).getCertificate();
+            } else {
+                throw new StartupException("own private key not available, expected KeyStore.PrivateKeyEntry " +
+                        "but got " + key + " for " + LOCAL_PRIVATE_KEY_ALIAS);
+            }
+        } catch (KeyStoreException | UnrecoverableEntryException | NoSuchAlgorithmException e) {
+            throw new StartupException("own private key not available", e);
         }
     }
 
@@ -203,10 +205,9 @@ public class KeyStoreController extends AbstractComponent {
         keyStore.setCertificateEntry(alias, certificate);
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(keyStoreFile)) {
-            char[] keystorePassword = getKeystorePassword();
-            keyStore.store(fileOutputStream, keystorePassword);
-            Arrays.fill(keystorePassword, (char) 0);
-            fileOutputStream.flush();
+            char[] keyPairPassword = getKeyPairPassword();
+            keyStore.store(fileOutputStream, keyPairPassword);
+            Arrays.fill(keyPairPassword, (char) 0);
         } catch (IOException ex) {
             throw new KeyStoreException(ex);
         }
@@ -258,10 +259,7 @@ public class KeyStoreController extends AbstractComponent {
         Arrays.fill(keyPairPassword, (char) 0);
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(keyStoreFile)) {
-            final char[] keystorePassword = getKeystorePassword();
-            keyStore.store(fileOutputStream, keystorePassword);
-            Arrays.fill(keystorePassword, (char) 0);
-            fileOutputStream.flush();
+            keyStore.store(fileOutputStream, getKeystorePassword());
         } catch (IOException ex) {
             throw new KeyStoreException(ex);
         }
