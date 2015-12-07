@@ -148,6 +148,9 @@ public class CoreConstants {
         public static final String APP_DOOR_RING = "/app/door/ring";
         public static final String APP_USERINFO_GET = "/app/userdevice/get";
         public static final String APP_MODULE_ADD = "/app/module/add";
+
+        // Slave/App (used for broadcast messages)
+        public static final String MODULES_UPDATE = "/*/modules/update";
     }
 
     /**

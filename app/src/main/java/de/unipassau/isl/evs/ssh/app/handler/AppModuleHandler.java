@@ -120,7 +120,9 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
     @Override
     public void handle(Message.AddressedMessage message) {
         String routingKey = message.getRoutingKey();
-        if (routingKey.equals(CoreConstants.RoutingKeys.APP_MODULES_GET)) {
+        if (routingKey.equals(CoreConstants.RoutingKeys.APP_MODULES_GET)
+                || routingKey.equals(CoreConstants.RoutingKeys.MODULES_UPDATE)) {
+
             if (message.getPayload() instanceof ModulesPayload) {
                 ModulesPayload payload = (ModulesPayload) message.getPayload();
                 List<Module> modules = payload.getModules();
@@ -129,7 +131,6 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
             } else {
                 Log.e(this.getClass().getSimpleName(), "Error! Unknown message Payload");
             }
-
         } else {
             throw new UnsupportedOperationException("Unknown routing key");
         }

@@ -156,7 +156,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
     @Override
     public void handle(Message.AddressedMessage message) {
         String routingKey = message.getRoutingKey();
-        if (routingKey.equals(CoreConstants.RoutingKeys.SLAVE_MODULES_UPDATE)) {
+        if (routingKey.equals(CoreConstants.RoutingKeys.MODULES_UPDATE)) {
             if (message.getPayload() instanceof ModulesPayload) {
                 ModulesPayload payload = (ModulesPayload) message.getPayload();
                 List<Module> modules = payload.getModules();
@@ -172,12 +172,12 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
     @Override
     public void init(Container container) {
         super.init(container);
-        requireComponent(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.SLAVE_MODULES_UPDATE);
+        requireComponent(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.MODULES_UPDATE);
     }
 
     @Override
     public void destroy() {
-        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.SLAVE_MODULES_UPDATE);
+        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.MODULES_UPDATE);
         super.destroy();
     }
 
