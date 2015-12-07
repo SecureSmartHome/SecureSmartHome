@@ -3,12 +3,13 @@ package de.unipassau.isl.evs.ssh.master.handler;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimaps;
+
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.PushPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
@@ -34,8 +35,8 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             sendUserInfoUpdate(message);
         } else if (message.getPayload() instanceof UserDeviceEditPayload) {
             executeUserDeviceEdit(message);
-        } else if (message.getPayload() instanceof PushPayload) {
-            sendUpdateToUserDevice(((PushPayload) message.getPayload()).getDeviceID());
+        } else if (message.getPayload() instanceof DeviceConnectedPayload) {
+            sendUpdateToUserDevice(((DeviceConnectedPayload) message.getPayload()).deviceID);
         } else {
             sendErrorMessage(message); //wrong payload received
         }

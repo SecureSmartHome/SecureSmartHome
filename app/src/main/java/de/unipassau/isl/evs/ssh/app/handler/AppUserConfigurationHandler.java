@@ -91,7 +91,7 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
         Message message = new Message(payload);
 
         message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_USERINFO_GET);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_MODULE_GET, message);
+        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_USERINFO_GET, message);
     }
 
     @Override

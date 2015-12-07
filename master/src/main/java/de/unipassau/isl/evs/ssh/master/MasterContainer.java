@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -21,9 +20,19 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterClimateHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterModuleHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterNotificationHandler;
-import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DEVICE_CONNECTED;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_SET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_MODULE_ADD;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_REGISTER_INIT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USERINFO_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_WEATHER_INFO;
 
 /**
  * This Container class manages dependencies needed in the Master part of the architecture.
@@ -45,14 +54,14 @@ public class MasterContainer extends ContainerService {
         register(UserManagementController.KEY, new UserManagementController());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
-        incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET, CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
-        incomingDispatcher.registerHandler(new MasterClimateHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_GET,
-                CoreConstants.RoutingKeys.MASTER_WEATHER_INFO);
+        incomingDispatcher.registerHandler(new MasterLightHandler(), MASTER_LIGHT_SET, MASTER_LIGHT_GET);
+        incomingDispatcher.registerHandler(new MasterClimateHandler(), MASTER_LIGHT_GET,
+                MASTER_WEATHER_INFO);
         incomingDispatcher.registerHandler(new MasterNotificationHandler(),
-                CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND);
-        incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(), CoreConstants.RoutingKeys.MASTER_USERINFO_GET);
-        incomingDispatcher.registerHandler(new MasterModuleHandler(), CoreConstants.RoutingKeys.MASTER_MODULE_ADD);
-        incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(), CoreConstants.RoutingKeys.MASTER_REGISTER_INIT, CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE);
+                MASTER_NOTIFICATION_SEND);
+        incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(), MASTER_USERINFO_GET, MASTER_DEVICE_CONNECTED);
+        incomingDispatcher.registerHandler(new MasterModuleHandler(), MASTER_MODULE_ADD);
+        incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(), MASTER_REGISTER_INIT, MASTER_REGISTER_FINALIZE);
 
         if (!dir.isDirectory() && !dir.mkdirs()) {
             dir = getFilesDir();
