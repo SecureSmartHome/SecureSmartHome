@@ -84,8 +84,12 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler imple
         return requireComponent(SlaveController.KEY).getSlave(deviceID) != null;
     }
 
+    public boolean isMaster(DeviceID userDeviceID) {
+        return userDeviceID.equals(requireComponent(NamingManager.KEY).getMasterID());
+    }
+
     protected boolean hasPermission(DeviceID userDeviceID, Permission permission) {
-        return userDeviceID.equals(requireComponent(NamingManager.KEY).getOwnID())
+        return isMaster(userDeviceID)
                 || requireComponent(PermissionController.KEY).hasPermission(userDeviceID, permission);
     }
 

@@ -6,21 +6,16 @@ import java.security.cert.X509Certificate;
 
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
-public class RegisterUserDevicePayload implements MessagePayload {
+public class FinalizeRegisterUserDevicePayload implements MessagePayload {
     byte[] token;
     DeviceID userDeviceID;
     //certificate will be null when used for initRegistration!
     X509Certificate certificate;
 
-    public RegisterUserDevicePayload(byte[] token, X509Certificate certificate) throws NoSuchProviderException, NoSuchAlgorithmException {
+    public FinalizeRegisterUserDevicePayload(byte[] token, X509Certificate certificate) throws NoSuchProviderException, NoSuchAlgorithmException {
         this.token = token;
         userDeviceID = DeviceID.fromCertificate(certificate);
         this.certificate = certificate;
-    }
-
-    public RegisterUserDevicePayload(byte[] token, DeviceID userDeviceID) {
-        this.token = token;
-        this.userDeviceID = userDeviceID;
     }
 
     public byte[] getToken() {
@@ -33,10 +28,6 @@ public class RegisterUserDevicePayload implements MessagePayload {
 
     public DeviceID getUserDeviceID() {
         return userDeviceID;
-    }
-
-    public void setUserDeviceID(DeviceID userDeviceID) {
-        this.userDeviceID = userDeviceID;
     }
 
     public X509Certificate getCertificate() {

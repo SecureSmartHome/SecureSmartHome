@@ -9,7 +9,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterUserDevicePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.FinalizeRegisterUserDevicePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.ClientIncomingDispatcher;
@@ -84,7 +84,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         if (msg instanceof HandshakePacket.ClientRegistration) {
             //Send client register info to handler
             HandshakePacket.ClientRegistration clientRegistration = ((HandshakePacket.ClientRegistration) msg);
-            Message message = new Message(new RegisterUserDevicePayload(
+            Message message = new Message(new FinalizeRegisterUserDevicePayload(
                     clientRegistration.token, clientRegistration.clientCertificate
             ));
             getContainer().require(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE, message);
