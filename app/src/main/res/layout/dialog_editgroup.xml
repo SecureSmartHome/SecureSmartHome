@@ -11,6 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_vertical_margin"
+        android:enabled="true"
         android:hint="@string/group_name"
         android:inputType="textAutoCorrect"
         android:textIsSelectable="true"
