@@ -71,7 +71,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
         FinalizeRegisterUserDevicePayload finalizeRegisterUserDevicePayload = ((FinalizeRegisterUserDevicePayload) message.getPayload());
         String base64Token = Base64.encodeToString(finalizeRegisterUserDevicePayload.getToken(), Base64.NO_WRAP);
         if (groupForToken.containsKey(base64Token)) {
-            UserDevice newDevice = groupForToken.get(finalizeRegisterUserDevicePayload.getToken());
+            UserDevice newDevice = groupForToken.get(base64Token);
             newDevice.setUserDeviceID(finalizeRegisterUserDevicePayload.getUserDeviceID());
             try {
                 requireComponent(KeyStoreController.KEY).saveCertificate(
@@ -93,7 +93,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
                 List<Permission> permissions = requireComponent(PermissionController.KEY).getPermissions();
                 for (Permission permission : permissions) {
                     try {
-                        requireComponent(PermissionController.KEY).addUserPermission(message.getFromID(), permission);
+                        requireComponent(PermissionController.KEY).addUserPermission(newDevice.getUserDeviceID(), permission);
                     } catch (UnknownReferenceException ure) {
                         throw new IllegalArgumentException("There was a problem adding the all permissions to the"
                                 + "newly added user. Maybe a permission was deleted while adding permissions to the"

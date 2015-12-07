@@ -221,12 +221,14 @@ public class DatabaseConnector extends AbstractComponent {
             for (String defaultTemplate : defaultTemplates) {
                 values = new ContentValues(1);
                 values.put(DatabaseContract.PermissionTemplate.COLUMN_NAME, defaultTemplate);
+                db.insert(DatabaseContract.PermissionTemplate.TABLE_NAME, null, values);
             }
 
             for (int i = 0; i < groupNames.length; i++) {
                 values = new ContentValues(2);
                 values.put(DatabaseContract.Group.COLUMN_NAME, groupNames[i]);
                 values.put(DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID, i+1);
+                db.insert(DatabaseContract.Group.TABLE_NAME, null, values);
             }
         }
 
