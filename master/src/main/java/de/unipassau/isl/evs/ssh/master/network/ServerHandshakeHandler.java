@@ -98,7 +98,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
                 Log.i(TAG, "Client " + deviceID + " connected");
 
                 final X509Certificate masterCert = container.require(NamingManager.KEY).getMasterCertificate();
-                ctx.writeAndFlush(new HandshakePacket.ServerHello(masterCert, response));
+                ctx.writeAndFlush(new HandshakePacket.ServerHello(masterCert, null));
 
                 //TODO check authentication and protocol version and close connection on fail
                 clientAuthenticated(ctx, hello.clientCertificate);

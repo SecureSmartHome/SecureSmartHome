@@ -75,7 +75,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         Log.v(TAG, "channelActive " + ctx);
 
         final NamingManager namingManager = container.require(NamingManager.KEY);
-        ctx.writeAndFlush(new HandshakePacket.ClientHello(namingManager.getOwnCertificate(), namingManager.getMasterCertificate()));
+        ctx.writeAndFlush(new HandshakePacket.ClientHello(namingManager.getOwnCertificate(), namingManager.getMasterID(), null));
 
         super.channelActive(ctx);
     }
