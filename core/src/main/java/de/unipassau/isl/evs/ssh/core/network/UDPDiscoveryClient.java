@@ -170,7 +170,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
         if (!namingManager.isMasterKnown()) {
             final IllegalStateException e = new IllegalStateException("NamingManager.isMasterKnown() == false");
             e.fillInStackTrace();
-            Log.w(TAG, "Can't search for Master via UDP discovery when no Master Certificate is available," +
+            Log.w(TAG, "Can't search for Master via UDP discovery when no Master Certificate is available, " +
                     "will retry later", e);
             return channel.channel().newFailedFuture(e);
         }

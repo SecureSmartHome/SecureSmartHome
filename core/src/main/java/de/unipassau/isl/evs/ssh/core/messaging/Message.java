@@ -171,7 +171,7 @@ public class Message implements Serializable {
         @Override
         protected CharSequence headerString() {
             return super.headerString() + "#" + sequenceNr + " to " + toID
-                    + (routingKey != null && routingKey.startsWith("/") ? "/" : "") + routingKey + " from " + fromID;
+                    + (routingKey == null || !routingKey.startsWith("/") ? "/" : "") + routingKey + " from " + fromID;
         }
     }
 }
