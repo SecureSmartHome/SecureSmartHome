@@ -62,16 +62,25 @@ public class CoreConstants {
          * The maximum number of seconds the broadcast waits to be sent again.
          */
         public static final long CLIENT_MILLIS_BETWEEN_BROADCASTS = TimeUnit.SECONDS.toMillis(2);
+
+        public static final ResourceLeakDetector.Level RESOURCE_LEAK_DETECTION = ResourceLeakDetector.Level.PARANOID;
+
         /**
          * Default discovery port used by netty
          */
         public static final int DISCOVERY_PORT = 13132;
+        public static final String DISCOVERY_HOST = "255.255.255.255";
         public static final String DISCOVERY_PAYLOAD_REQUEST = "de.unipassau.isl.evs.ssh.udp_discovery.REQUEST";
         public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE";
-        public static final ResourceLeakDetector.Level RESOURCE_LEAK_DETECTION = ResourceLeakDetector.Level.PARANOID;
-        public static final String DISCOVERY_HOST = "255.255.255.255";
-        public static final AttributeKey<X509Certificate> ATTR_CLIENT_CERT = AttributeKey.valueOf(X509Certificate.class.getName());
-        public static final AttributeKey<DeviceID> ATTR_CLIENT_ID = AttributeKey.valueOf(DeviceID.class.getName());
+        public static final String[] DISCOVERY_PAYLOADS = {DISCOVERY_PAYLOAD_REQUEST, DISCOVERY_PAYLOAD_RESPONSE};
+
+        public static final AttributeKey<X509Certificate> ATTR_PEER_CERT = AttributeKey.valueOf(X509Certificate.class.getName());
+        public static final AttributeKey<DeviceID> ATTR_PEER_ID = AttributeKey.valueOf(DeviceID.class.getName());
+    }
+
+    public static class Security {
+        public static final String MESSAGE_CRYPT_ALG = "ECIES";
+        public static final String MESSAGE_SIGN_ALG = "SHA224withECDSA";
     }
 
     /**

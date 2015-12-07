@@ -5,13 +5,12 @@ android {
 }
 
 dependencies {
-    compile 'com.google.guava:guava:18.0'
-    //compile 'com.fasterxml.jackson.core:jackson-databind:2.6.3'
-    compile 'io.netty:netty-handler:5.0.0.Alpha2'
-    compile 'com.madgag.spongycastle:pkix:1.52.0.0'
-    compile 'net.glxn.qrgen:android:2.0'
     compile 'de.ncoder:typedmap:1.0.2'
+    compile 'com.google.guava:guava:18.0'
+    compile 'io.netty:netty-handler:5.0.0.Alpha2'
     compile 'org.slf4j:slf4j-android:1.7.13'
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.google.zxing:android-core:3.2.1'
+    //compile 'com.madgag.spongycastle:pkix:1.53.0.0' //repackaged and moved to libs
+    compile fileTree(dir: 'libs', include: '*.jar')
 }

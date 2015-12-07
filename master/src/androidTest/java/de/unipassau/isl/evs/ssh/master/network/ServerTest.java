@@ -185,7 +185,7 @@ public class ServerTest extends InstrumentationTestCase {
         @NonNull
         @Override
         protected ServerHandshakeHandler getHandshakeHandler() {
-            return new ServerHandshakeHandler(this) {
+            return new ServerHandshakeHandler(this, getContainer()) {
                 @Override
                 public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
                     super.channelRegistered(ctx);
