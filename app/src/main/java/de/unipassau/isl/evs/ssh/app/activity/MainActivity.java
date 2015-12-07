@@ -9,11 +9,17 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.Spinner;
 
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.app.activity.dialog.AddGroupDialog;
+import de.unipassau.isl.evs.ssh.app.activity.dialog.EditGroupDialog;
+import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 
 /**
  * As this Activity also displays information like whether the light is on or not, this Activity also
@@ -23,7 +29,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
  * @author Wolfgang Popp
  */
 public class MainActivity extends BoundActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, EditGroupDialog.EditGroupDialogListener, AddGroupDialog.AddGroupDialogListener {
 
     private static final String SAVED_LAST_ACTIVE_FRAGMENT = "de.unipassau.isl.evs.ssh.app.activity.SAVED_LAST_ACTIVE_FRAGMENT";
 
@@ -206,4 +212,34 @@ public class MainActivity extends BoundActivity
             ((BoundFragment) fragment).onContainerDisconnected();
         }
     }
+
+    @Override
+    public void onDialogPositiveClick(AddGroupDialog dialog) {
+        EditText editText = (EditText) dialog.getView().findViewById(R.id.add_group_dialog_group_name);
+        String groupName = editText.getText().toString();
+        Spinner spinner = (Spinner) dialog.getView().findViewById(R.id.add_group_dialog_spinner);
+        String templateName = spinner.getSelectedItem().toString();
+
+        Group newGroup = new Group(groupName, templateName);
+
+        getComponent(AppUserConfigurationHandler.KEY).addGroup(newGroup);
+    }
+
+    @Override
+    public void onDialogPositiveClick(EditGroupDialog dialog) {
+        EditText editText = (EditText) dialog.getView().findViewById(R.id.edit_group_dialog_group_name);
+        String newGroupName = editText.getText().toString();
+        Spinner spinner = (Spinner) dialog.getView().findViewById(R.id.edit_group_dialog_spinner);
+        String newTemplateName = (String) spinner.getSelectedItem();
+        String oldGroupName = editText.getHint().toString();
+        String oldTemplateName = editText.getText().toString();
+
+        Group newGroup = new Group(newGroupName, newTemplateName);
+        Group oldGroup = new Group(oldGroupName, oldTemplateName);
+
+        if (!(newGroupName.equals(oldGroupName) && newTemplateName.equals(oldTemplateName))) {
+            getComponent(AppUserConfigurationHandler.KEY).editGroup(newGroup, oldGroup);
+        }
+    }
+
 }

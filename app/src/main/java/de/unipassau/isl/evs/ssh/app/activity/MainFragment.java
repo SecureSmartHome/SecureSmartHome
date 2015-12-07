@@ -102,7 +102,7 @@ public class MainFragment extends BoundFragment implements MessageHandler {
         usersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                parent.showFragmentByClass(ModifyPermissionFragment.class);
+                parent.showFragmentByClass(ListGroupFragment.class);
             }
         });
         return mLinearLayout;

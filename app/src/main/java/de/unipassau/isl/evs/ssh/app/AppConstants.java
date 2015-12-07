@@ -20,5 +20,6 @@ public class AppConstants extends CoreConstants {
     public class Dialog_Arguments {
         public static final String ADD_GROUP_DIALOG = "ADD_GROUP_DIALOG";
         public static final String EDIT_GROUP_DIALOG = "EDIT_GROUP_DIALOG";
+        public static final String TEMPLATE_DIALOG = "TEMPLATE_DIALOG";
     }
 }

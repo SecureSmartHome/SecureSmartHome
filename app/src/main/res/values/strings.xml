@@ -43,4 +43,5 @@
     <string name="cancel">Cancel</string>
     <string name="group_name">Group Name</string>
     <string name="edit_group_dialog_title">Edit Group</string>
+    <string name="set_permission_template">Set a permission template</string>
 </resources>

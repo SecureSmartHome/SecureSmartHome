@@ -3,6 +3,7 @@ package de.unipassau.isl.evs.ssh.app.activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,6 +66,13 @@ public class LightFragment extends BoundFragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_light, container, false);
         listView = (ListView) root.findViewById(R.id.lightButtonContainer);
+        FloatingActionButton fab = ((FloatingActionButton) root.findViewById(R.id.light_fab));
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity) getActivity()).showFragmentByClass(AddModuleFragment.class);
+            }
+        });
         return root;
     }
 
