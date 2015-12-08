@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,7 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.app.AppConstants;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
@@ -49,16 +51,18 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.TEMPLAT
  * @see EditUserDeviceFragment
  */
 public class ListGroupFragment extends BoundFragment {
+    private static final String TAG = ListGroupFragment.class.getSimpleName();
+
     private GroupListAdapter adapter;
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onContainerDisconnected() {
+        super.onContainerDisconnected();
     }
 
     @Nullable
@@ -71,7 +75,7 @@ public class ListGroupFragment extends BoundFragment {
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                             Group item = adapter.getItem(position);
                                             Bundle bundle = new Bundle();
-                                            bundle.putSerializable(AppConstants.Fragment_Arguments.ARGUMENT_FRAGMENT, item);
+                                            bundle.putSerializable(AppConstants.Fragment_Arguments.GROUP_ARGUMENT_FRAGMENT, item);
                                             ((MainActivity) getActivity()).showFragmentByClass(ListUserDeviceFragment.class, bundle);
                                         }
                                     }
@@ -146,7 +150,7 @@ public class ListGroupFragment extends BoundFragment {
      * Creates and returns a dialogs that gives the user the option to edit a group.
      */
     private Dialog createEditGroupDialog(Bundle bundle) {
-        final Group group = (Group) getArguments().getSerializable(EDIT_GROUP_DIALOG);
+        final Group group = (Group) bundle.getSerializable(EDIT_GROUP_DIALOG);
         String[] templateNames = bundle.getStringArray(TEMPLATE_DIALOG);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_editgroup, null, false);
@@ -208,7 +212,14 @@ public class ListGroupFragment extends BoundFragment {
         }
 
         private void updateGroupList() {
-            groups = getComponent(AppUserConfigurationHandler.KEY).getAllGroups();
+            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+
+            if (handler == null) {
+                Log.i(TAG, "Container not yet connected!");
+                return;
+            }
+
+            groups = handler.getAllGroups();
             // TODO delete bellow. only test
             groups = new ArrayList<>();
             Group group1 = new Group("Admin", "Template 1");
@@ -288,12 +299,11 @@ public class ListGroupFragment extends BoundFragment {
                 groupLayout = (LinearLayout) convertView;
             }
 
-            TextView textView = (TextView) groupLayout.findViewById(R.id.listgroup_group_name);
-            textView.setText(group.getName());
+            TextView textViewGroupName = (TextView) groupLayout.findViewById(R.id.listgroup_group_name);
+            textViewGroupName.setText(group.getName());
 
             TextView textViewGroupMembers = (TextView) groupLayout.findViewById(R.id.listgroup_group_members);
-            String groupMembers = createGroupMemberText(group);
-            textViewGroupMembers.setText(groupMembers);
+            textViewGroupMembers.setText(createGroupMemberText(group));
 
             return groupLayout;
         }
