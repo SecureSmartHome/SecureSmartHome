@@ -48,7 +48,8 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     @Override
     public void init(Container container) {
         Scheduler scheduler = container.require(Scheduler.KEY);
-        PendingIntent intent = scheduler.getPendingScheduleIntent(MasterWeatherCheckHandler.KEY, null, 0);
+        PendingIntent intent = scheduler.getPendingScheduleIntent(MasterWeatherCheckHandler.KEY, null,
+                PendingIntent.FLAG_CANCEL_CURRENT);
         scheduler.setRepeating(AlarmManager.RTC, System.currentTimeMillis(),
                 MILLIS_IN_FIVE_MIN, intent);
     }
@@ -56,7 +57,8 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     @Override
     public void destroy() {
         Scheduler scheduler = getContainer().require(Scheduler.KEY);
-        PendingIntent intent = scheduler.getPendingScheduleIntent(MasterWeatherCheckHandler.KEY, null, 0);
+        PendingIntent intent = scheduler.getPendingScheduleIntent(MasterWeatherCheckHandler.KEY, null,
+                PendingIntent.FLAG_CANCEL_CURRENT);
         scheduler.cancel(intent);
     }
 
