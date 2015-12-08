@@ -7,11 +7,34 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/listuserDeviceContainer"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </ListView>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/listuserdevice_groupname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_horizontal"
+            android:textSize="@dimen/typography_display1"
+            />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_margin="8dp"
+            android:background="@color/md_black_1000"
+            />
+
+        <ListView
+            android:id="@+id/listuserDeviceContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </ListView>
+
+    </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/listuserdevice_fab"
@@ -26,5 +49,5 @@
         android:src="@drawable/ic_add"
         app:borderWidth="0dp"
         app:pressedTranslationZ="12dp"/>
-
 </FrameLayout>
+

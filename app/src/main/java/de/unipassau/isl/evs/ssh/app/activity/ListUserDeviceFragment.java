@@ -63,6 +63,9 @@ public class ListUserDeviceFragment extends BoundFragment {
         FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_listuserdevicefromgroup, container, false);
         group = ((Group) getArguments().getSerializable(GROUP_ARGUMENT_FRAGMENT));
 
+        TextView groupName = (TextView) root.findViewById(R.id.listuserdevice_groupname);
+        groupName.setText(group.getName());
+
         ListView userDeviceList = (ListView) root.findViewById(R.id.listuserDeviceContainer);
         userDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                   // when a user clicks short on an item, he opens the ListUserDeviceFragment
@@ -189,17 +192,4 @@ public class ListUserDeviceFragment extends BoundFragment {
             return userDeviceLayout;
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
