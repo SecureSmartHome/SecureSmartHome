@@ -86,7 +86,7 @@ public class WeatherSensor extends AbstractComponent {
             message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
             OutgoingRouter router = container.require(OutgoingRouter.KEY);
-            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_WEATHER_INFO, message);
+            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_PUSH_WEATHER_INFO, message);
         }
     }
 
