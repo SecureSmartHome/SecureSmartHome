@@ -105,31 +105,25 @@ public class EditUserDeviceFragment extends BoundFragment {
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         builder.setMessage(R.string.permission_dialog_title + " " + permission.getName())
                 .setView(dialogView)
-                .setPositiveButton(R.string.apply, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.grant, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        //TODO apply permission
+                        getComponent(AppUserConfigurationHandler.KEY).grantPermission(device, permission);
                     }
                 })
                 .setNegativeButton(R.string.revoke, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        //TODO remove permission
+                        getComponent(AppUserConfigurationHandler.KEY).revokePermission(device, permission);
                     }
                 });
         return dialog;
     }
 
-    private String createPermissionTypeText(Permission permission) {
-        String output = permission.getModuleName();
-        //TODO what is the ModuleName?
-        return null;
-    }
-
     private class PermissionListAdapter extends BaseAdapter {
+
         private final LayoutInflater inflater;
         private List<Permission> permissions;
-
         public PermissionListAdapter(LayoutInflater inflater) {
             this.inflater = inflater;
             updatePermissionList();
@@ -211,12 +205,27 @@ public class EditUserDeviceFragment extends BoundFragment {
             }
             TextView textViewPermissionName = (TextView) permissionLayout.findViewById(R.id.listpermission_permission_name);
             textViewPermissionName.setText(permission.getName());
+
             TextView textViewPermissionType = ((TextView) permissionLayout.findViewById(R.id.listpermission_permission_type));
             textViewPermissionType.setText(createPermissionTypeText(permission));
 
             return permissionLayout;
         }
+
+        /**
+         * Creates a small description where a permission is
+         * @param permission The permission the text is created for.
+         * @return the text to display.
+         */
+        private String createPermissionTypeText(Permission permission) {
+            String output;
+            String moduleName = permission.getModuleName();
+            if (moduleName != null) {
+                output = "This permission is connected to " + moduleName;
+            } else {
+                output = "This permission is not connected to any module.";
+            }
+            return output;
+        }
     }
-
-
 }
