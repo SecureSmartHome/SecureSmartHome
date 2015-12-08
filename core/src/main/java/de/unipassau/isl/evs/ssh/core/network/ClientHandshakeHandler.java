@@ -126,7 +126,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         if (message.success) {
             X509Certificate cert = message.serverCertificate;
             KeyStoreController keyStoreController = container.require(KeyStoreController.KEY);
-            if (keyStoreController.listEntries().contains(cert)) {
+            if (keyStoreController.listEntries().contains(DeviceID.fromCertificate(cert).getIDString())) {
                 DeviceID alias = DeviceID.fromCertificate(cert);
                 keyStoreController.saveCertificate(cert, alias.getIDString());
             }
