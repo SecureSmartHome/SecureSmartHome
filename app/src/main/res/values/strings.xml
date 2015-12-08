@@ -82,4 +82,6 @@
     <string name="holidaySimulationOff">Off</string>
     <string name="edit">Edit</string>
     <string name="remove">Remove</string>
+    <string name="grant">Grant</string>
+    <string name="deleteuserdevice_dialog_title">Want to remove</string>
 </resources>

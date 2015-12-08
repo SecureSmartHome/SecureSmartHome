@@ -91,7 +91,7 @@ public class ListGroupFragment extends BoundFragment {
                     bundle.putStringArray(TEMPLATE_DIALOG, buildTemplatesFromGroups());
                 }
                 createEditGroupDialog(bundle).show();
-                return item == null;
+                return true;
             }
         });
         FloatingActionButton fab = ((FloatingActionButton) root.findViewById(R.id.addgroup_fab));
