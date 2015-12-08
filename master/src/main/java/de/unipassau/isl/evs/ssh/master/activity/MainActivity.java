@@ -25,7 +25,7 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.InitRegisterUserDevicePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
@@ -144,10 +144,15 @@ public class MainActivity extends BoundActivity {
 
         requireComponent(IncomingDispatcher.KEY).registerHandler(handler, "/demo");
 
-        // start MasterQRCodeActivity when no devices are registered yet
+        showRegisterQROnFirstBoot();
+    }
+
+    /**
+     * start MasterQRCodeActivity when no devices are registered yet
+     */
+    private void showRegisterQROnFirstBoot() {
         if (hasNoRegisteredDevice()) {
             Intent intent = new Intent(this, MasterQRCodeActivity.class);
-            //TODO: create QRCodeInformation from data
             QRDeviceInformation deviceInformation = null;
             Context ctx = requireComponent(ContainerService.KEY_CONTEXT);
             WifiManager wifiManager = ((WifiManager) ctx.getSystemService(Context.WIFI_SERVICE));
@@ -156,7 +161,7 @@ public class MainActivity extends BoundActivity {
                 deviceInformation = new QRDeviceInformation(
                         (Inet4Address) Inet4Address.getByName(ipAddress),
                         CoreConstants.NettyConstants.DEFAULT_PORT,
-                        getContainer().require(NamingManager.KEY).getMasterID(),
+                        requireComponent(NamingManager.KEY).getMasterID(),
                         QRDeviceInformation.getRandomToken()
                 );
             } catch (UnknownHostException e) {
@@ -165,12 +170,13 @@ public class MainActivity extends BoundActivity {
             System.out.println("HostNAME:" + deviceInformation.getAddress().getHostAddress());
             System.out.println("ID:" + deviceInformation.getID());
             System.out.println("Port:" + deviceInformation.getPort());
-            System.out.println("Token:" + android.util.Base64.encodeToString(deviceInformation.getToken(), android.util.Base64.NO_WRAP));
+            System.out.println("Token:" + android.util.Base64.encodeToString(deviceInformation.getToken(),
+                    android.util.Base64.NO_WRAP));
             //NoDevice will allow any device to use this token
-            Message message = new Message(new InitRegisterUserDevicePayload(deviceInformation.getToken(),
-                    new UserDevice(MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.NO_GROUP,
-                            DeviceID.NO_DEVICE)));
-            getContainer().require(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.MASTER_REGISTER_INIT, message);
+            requireComponent(MasterRegisterDeviceHandler.KEY).generateNewRegisterToken(new UserDevice(
+                    MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.NO_GROUP,
+                    DeviceID.NO_DEVICE
+            ));
             intent.putExtra(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
             startActivity(intent);
         }

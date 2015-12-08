@@ -12,7 +12,6 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.FinalizeRegisterUserDevicePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -25,6 +24,7 @@ import de.unipassau.isl.evs.ssh.core.network.handler.SignatureGenerator;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
+import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
@@ -97,10 +97,10 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
             if (msg instanceof HandshakePacket.ClientRegistration) {
                 //Send client register info to handler
                 HandshakePacket.ClientRegistration clientRegistration = ((HandshakePacket.ClientRegistration) msg);
-                Message message = new Message(new FinalizeRegisterUserDevicePayload(
-                        clientRegistration.token, clientRegistration.clientCertificate
-                ));
-                container.require(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE, message);
+                container.require(MasterRegisterDeviceHandler.KEY).registerDevice(
+                        clientRegistration.clientCertificate,
+                        clientRegistration.token
+                );
 
             } else if (msg instanceof HandshakePacket.ClientHello) {
                 final HandshakePacket.ClientHello hello = (HandshakePacket.ClientHello) msg;
