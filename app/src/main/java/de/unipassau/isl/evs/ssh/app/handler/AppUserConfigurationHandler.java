@@ -22,6 +22,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 
 /**
  * The AppUserConfigurationHandler
@@ -81,6 +82,16 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
         } else {
             throw new UnsupportedOperationException("Bad routing key.");
         }
+    }
+
+    public void update() {
+        UserDeviceInformationPayload payload = new UserDeviceInformationPayload();
+        OutgoingRouter router = getComponent(OutgoingRouter.KEY);
+
+        Message message = new Message(payload);
+
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_USERINFO_GET);
+        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_MODULE_GET, message);
     }
 
     @Override

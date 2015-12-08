@@ -13,7 +13,7 @@ import io.netty.util.ReferenceCountUtil;
 /**
  * TimeoutHandler class is part of the netty pipeline. Handles timeouts by sending {@link PingMessage}.
  *
- * @author Phil
+ * @author Phil Werli
  */
 public class TimeoutHandler extends ChannelHandlerAdapter {
     private static final String TAG = TimeoutHandler.class.getSimpleName();

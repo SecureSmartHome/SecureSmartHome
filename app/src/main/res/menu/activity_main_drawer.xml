@@ -39,7 +39,7 @@
                 android:icon="@drawable/ic_addnewuser_light"
                 android:title="@string/nav_addNewUserDevice_sting"/>
             <item
-                android:id="@+id/nav_addModul"
+                android:id="@+id/nav_addModule"
                 android:icon="@drawable/ic_addmodul_light"
                 android:title="@string/nav_addModule_string"/>
             <!--TODO Delete item -->

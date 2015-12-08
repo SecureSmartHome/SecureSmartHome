@@ -8,24 +8,15 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
- * Distributes incoming messages form the one single connection a client has to the responsible handlers.
+ * Distributes incoming messages from the one single connection a client has to the responsible handlers.
  *
  * @author Niko Fink
  */
 @ChannelHandler.Sharable
 public class ClientIncomingDispatcher extends IncomingDispatcher {
     private static final String TAG = ClientIncomingDispatcher.class.getSimpleName();
-
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object in) throws Exception {
-        if (in instanceof Message.AddressedMessage) {
-            if (dispatch((Message.AddressedMessage) in)) return;
-        }
-        super.channelRead(ctx, in);
-    }
 
     /**
      * Dispatches an AddressedMessage to its target handler using the EventExecutor of the Client.

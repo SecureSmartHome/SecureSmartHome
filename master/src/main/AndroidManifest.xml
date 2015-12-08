@@ -14,13 +14,23 @@
         android:allowBackup="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:name="android.support.multidex.MultiDexApplication">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".activity.MasterQRCodeActivity"
+            android:label="@string/add_initial_device">
+            <intent-filter>
+                <action android:name="android.intent.action.QRCODE" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

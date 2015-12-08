@@ -41,7 +41,7 @@ public abstract class OutgoingRouter extends AbstractComponent {
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (!future.isSuccess()) {
                     Log.w(OutgoingRouter.this.getClass().getSimpleName(),
-                            "Could not send Message " + amsg, future.cause());
+                            "Could not send Message " + amsg + "Because of " + Log.getStackTraceString(future.cause()));
                 }
             }
         });

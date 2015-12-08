@@ -143,7 +143,7 @@ public class ServerTest extends InstrumentationTestCase {
                 new ContainerService.ContextComponent(getInstrumentation().getTargetContext()));
 
         SharedPreferences sharedPref = container.get(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(CoreConstants.NettyConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         assertTrue(
                 sharedPref.edit()
                         .clear()
@@ -185,7 +185,7 @@ public class ServerTest extends InstrumentationTestCase {
         @NonNull
         @Override
         protected ServerHandshakeHandler getHandshakeHandler() {
-            return new ServerHandshakeHandler(this) {
+            return new ServerHandshakeHandler(this, getContainer()) {
                 @Override
                 public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
                     super.channelRegistered(ctx);
@@ -214,7 +214,8 @@ public class ServerTest extends InstrumentationTestCase {
         @NonNull
         @Override
         protected ClientHandshakeHandler getHandshakeHandler() {
-            return new ClientHandshakeHandler(this, getContainer()) {
+            //FIXME, use correct token
+            return new ClientHandshakeHandler(this, getContainer(), "".getBytes()) {
                 @Override
                 public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
                     super.channelRegistered(ctx);

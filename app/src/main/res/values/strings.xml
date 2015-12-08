@@ -23,8 +23,12 @@
     <string name="nav_addModule_string">Add Module</string>
     <string name="deviceStatusConnectedSlaves">Connected Slaves</string>
     <string name="deviceStatusConnectedModules">Connected Modules</string>
-    <string name="string_turn_off">Turn Off</string>
-    <string name="string_turn_on">Turn On</string>
+
+    <!--Strings used in the LightFragment-->
+    <string name="turn_off">Turn Off</string>
+    <string name="turn_on">Turn On</string>
+
+
     <string name="status_of_light">Status of the Light</string>
     <string name="deviceSatusConnectedSlaves">Connected Slaves</string>
     <string name="NoSlavesConnected">No Slaves connected</string>
@@ -32,6 +36,16 @@
     <string name="addUser">Add User</string>
     <string name="group">Group</string>
     <string name="name">Name</string>
+
+    <!--Strings used for QR-Codes-->
+    <string name="qr_code_description">This is a QR-Code.</string>
+    <string name="please_scan_device">Scan the QR-Code with your device.</string>
+
+    <!--Strings used for the Welcome Screen-->
+    <string name="welcome_to_ssh">Welcome to the Secure Smart Home App.</string>
+    <string name="click_to_register">Click below to register in a system.</string>
+
+    <string name="register">Register</string>
     <string name="refreshImage">Refresh Image</string>
     <string name="openDoor">Open door</string>
     <string name="doorStatusOpen">Status: open</string>
@@ -61,4 +75,9 @@
         <item>WLAN</item>
     </string-array>
 
+    <string name="switchSimulationOn">Switch Simulation On</string>
+    <string name="switchSimulationOff">Switch Simulation Off</string>
+    <string name="holidaySimulationStatus">Status: </string>
+    <string name="holidaySimulationOn">On</string>
+    <string name="holidaySimulationOff">Off</string>
 </resources>
