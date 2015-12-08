@@ -181,6 +181,9 @@ public class ListGroupFragment extends BoundFragment {
         return dialog;
     }
 
+    /**
+     * @return A String Array of Template names generated from all groups.
+     */
     private String[] buildTemplatesFromGroups() {
         List<Group> groups = getComponent(AppUserConfigurationHandler.KEY).getAllGroups();
         if (groups == null) {
@@ -196,7 +199,6 @@ public class ListGroupFragment extends BoundFragment {
     }
 
     private class GroupListAdapter extends BaseAdapter {
-
         private final LayoutInflater inflater;
         private List<Group> groups;
 
@@ -220,7 +222,7 @@ public class ListGroupFragment extends BoundFragment {
             }
 
             groups = handler.getAllGroups();
-            // TODO delete bellow. only test
+            // TODO delete bellow. only for testing
             groups = new ArrayList<>();
             Group group1 = new Group("Admin", "Template 1");
             Group group2 = new Group("Eltern", "Template 2");

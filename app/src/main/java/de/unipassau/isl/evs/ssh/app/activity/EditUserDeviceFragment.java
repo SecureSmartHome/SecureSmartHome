@@ -61,8 +61,9 @@ public class EditUserDeviceFragment extends BoundFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_edituserdevice, container, false);
-        TextView deviceName = ((TextView) root.findViewById(R.id.userdevice_user_name));
         device = ((UserDevice) getArguments().getSerializable(USER_DEVICE_ARGUMENT_FRAGMENT));
+
+        TextView deviceName = ((TextView) root.findViewById(R.id.userdevice_user_name));
         deviceName.setText(device.getName());
 
         TextView deviceGroup = ((TextView) root.findViewById(R.id.userdevice_user_group));
