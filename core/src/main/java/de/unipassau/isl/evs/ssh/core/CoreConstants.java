@@ -4,6 +4,7 @@ import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import io.netty.util.AttributeKey;
 import io.netty.util.ResourceLeakDetector;
 
@@ -88,7 +89,11 @@ public class CoreConstants {
      * This class contains the key constants of SharedPreferences
      */
     public class SharedPrefs {
-        public static final String PREF_MASTER_ID = "ssh.core.MASTER_ID";
+        /**
+         * @deprecated should not be written outside of NamingManager
+         */
+        @Deprecated
+        public static final String PREF_MASTER_ID = NamingManager.PREF_MASTER_ID;
         public static final String PREF_TOKEN = "ssh.core.TOKEN"; //TODO check if this is the correct place
     }
 
