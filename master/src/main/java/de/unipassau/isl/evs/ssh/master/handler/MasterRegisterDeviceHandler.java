@@ -28,7 +28,8 @@ import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
  * messages for each target that needs to know of this event and passes them to the OutgoingRouter.
  */
 public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
-    //TODO: update database to initially include these. Also move to?
+    //TODO: move to?
+    //Todo: close qr code after first register.
     public static final String FIRST_USER = "Admin";
     public static final String NO_GROUP = "No Group";
     private Map<String, UserDevice> groupForToken = new HashMap<>();
@@ -70,7 +71,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
         FinalizeRegisterUserDevicePayload finalizeRegisterUserDevicePayload = ((FinalizeRegisterUserDevicePayload) message.getPayload());
         String base64Token = Base64.encodeToString(finalizeRegisterUserDevicePayload.getToken(), Base64.NO_WRAP);
         if (groupForToken.containsKey(base64Token)) {
-            UserDevice newDevice = groupForToken.get(finalizeRegisterUserDevicePayload.getToken());
+            UserDevice newDevice = groupForToken.get(base64Token);
             newDevice.setUserDeviceID(finalizeRegisterUserDevicePayload.getUserDeviceID());
             try {
                 requireComponent(KeyStoreController.KEY).saveCertificate(
@@ -88,20 +89,32 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler {
                         dce);
             }
             //Add permissions
-            String templateName = requireComponent(UserManagementController.KEY)
-                    .getGroup(newDevice.getInGroup()).getTemplateName();
-            List<Permission> permissions = requireComponent(PermissionController.KEY)
-                    .getPermissionsOfTemplate(templateName);
-            for (Permission permission : permissions) {
-                try {
-                    requireComponent(PermissionController.KEY).addUserPermission(message.getFromID(), permission);
-                } catch (UnknownReferenceException ure) {
-                    throw new IllegalArgumentException("There was a problem adding the all permissions to the newly"
-                            + "added user. Maybe a permission was deleted while adding permissions to the new user.",
-                            ure);
+            if (requireComponent(UserManagementController.KEY).getUserDevices().size() == 1) {
+                List<Permission> permissions = requireComponent(PermissionController.KEY).getPermissions();
+                for (Permission permission : permissions) {
+                    try {
+                        requireComponent(PermissionController.KEY).addUserPermission(newDevice.getUserDeviceID(), permission);
+                    } catch (UnknownReferenceException ure) {
+                        throw new IllegalArgumentException("There was a problem adding the all permissions to the"
+                                + "newly added user. Maybe a permission was deleted while adding permissions to the"
+                                + "new user.", ure);
+                    }
+                }
+            } else {
+                String templateName = requireComponent(UserManagementController.KEY)
+                        .getGroup(newDevice.getInGroup()).getTemplateName();
+                List<Permission> permissions = requireComponent(PermissionController.KEY)
+                        .getPermissionsOfTemplate(templateName);
+                for (Permission permission : permissions) {
+                    try {
+                        requireComponent(PermissionController.KEY).addUserPermission(message.getFromID(), permission);
+                    } catch (UnknownReferenceException ure) {
+                        throw new IllegalArgumentException("There was a problem adding the all permissions to the newly"
+                                + "added user. Maybe a permission was deleted while adding permissions to the new user.",
+                                ure);
+                    }
                 }
             }
-
             groupForToken.remove(base64Token);
         } else {
             Log.v(getClass().getSimpleName(), "Some tried using an unknown token to register. Token: " + base64Token

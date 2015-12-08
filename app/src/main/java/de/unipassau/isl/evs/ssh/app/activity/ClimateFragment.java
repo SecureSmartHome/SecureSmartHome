@@ -26,9 +26,17 @@ public class ClimateFragment extends BoundFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_status, container, false);
+        View view = inflater.inflate(R.layout.fragment_climate, container, false);
 
         AppModuleHandler moduleHandler = getComponent(AppModuleHandler.KEY);
         return view;
+    }
+
+    public void addItem() {
+
+    }
+
+    public void updateView() {
+
     }
 }

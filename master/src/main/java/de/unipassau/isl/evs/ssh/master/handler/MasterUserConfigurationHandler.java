@@ -3,13 +3,16 @@ package de.unipassau.isl.evs.ssh.master.handler;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimaps;
+
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
@@ -33,13 +36,20 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             sendUserInfoUpdate(message);
         } else if (message.getPayload() instanceof UserDeviceEditPayload) {
             executeUserDeviceEdit(message);
+        } else if (message.getPayload() instanceof DeviceConnectedPayload) {
+            sendUpdateToUserDevice(((DeviceConnectedPayload) message.getPayload()).deviceID);
         } else {
             sendErrorMessage(message); //wrong payload received
         }
     }
 
+    private void sendUpdateToUserDevice(DeviceID id) {
+        final Message messageToSend = new Message(generatePayload());
+        sendMessage(id, CoreConstants.RoutingKeys.APP_USERINFO_GET, messageToSend);
+    }
+
     private void sendUserInfoUpdate(Message.AddressedMessage message) {
-        final Message messageToSend = new Message(message.getPayload());
+        final Message messageToSend = new Message(generatePayload());
         messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
         sendMessage(message.getFromID(), CoreConstants.RoutingKeys.APP_USERINFO_GET, messageToSend);
     }

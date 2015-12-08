@@ -13,6 +13,7 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.FinalizeRegisterUserDevicePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.ClientIncomingDispatcher;
@@ -73,7 +74,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         ctx.pipeline().addBefore(ctx.name(), LoggingHandler.class.getSimpleName(), new LoggingHandler(LogLevel.TRACE));
 
         // Add exception handler
-        ctx.pipeline().addAfter(ctx.name(), PipelinePlug.class.getSimpleName(), new PipelinePlug());
+        ctx.pipeline().addLast(PipelinePlug.class.getSimpleName(), new PipelinePlug());
 
         // Register connection
         server.getActiveChannels().add(ctx.channel());
@@ -112,7 +113,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
                 ctx.writeAndFlush(new HandshakePacket.ServerHello(masterCert, null));
 
                 //TODO check authentication and protocol version and close connection on fail
-                clientAuthenticated(ctx, hello.clientCertificate);
+                clientAuthenticated(ctx, hello.clientCertificate, deviceID);
             }
         } else {
             super.channelRead(ctx, msg);
@@ -122,7 +123,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     /**
      * Called once the Handshake is complete
      */
-    private void clientAuthenticated(ChannelHandlerContext ctx, X509Certificate clientCertificate) {
+    private void clientAuthenticated(ChannelHandlerContext ctx, X509Certificate clientCertificate, DeviceID deviceID) {
         Log.v(TAG, "clientAuthenticated " + ctx);
 
         //Security
@@ -147,6 +148,9 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
 
         ctx.pipeline().remove(this);
         Log.v(TAG, "Pipeline after authenticate: " + ctx.pipeline());
+
+        Message message = new Message(new DeviceConnectedPayload(deviceID, ctx.channel()));
+        container.require(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.MASTER_DEVICE_CONNECTED, message);
     }
 
 

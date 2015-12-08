@@ -1,7 +1,10 @@
 package de.unipassau.isl.evs.ssh.master.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +19,7 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
@@ -145,9 +149,12 @@ public class MainActivity extends BoundActivity {
             Intent intent = new Intent(this, MasterQRCodeActivity.class);
             //TODO: create QRCodeInformation from data
             QRDeviceInformation deviceInformation = null;
+            Context ctx = requireComponent(ContainerService.KEY_CONTEXT);
+            WifiManager wifiManager = ((WifiManager) ctx.getSystemService(Context.WIFI_SERVICE));
+            String ipAddress = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
             try {
                 deviceInformation = new QRDeviceInformation(
-                        (Inet4Address) Inet4Address.getByName("192.168.0.103"),
+                        (Inet4Address) Inet4Address.getByName(ipAddress),
                         CoreConstants.NettyConstants.DEFAULT_PORT,
                         getContainer().require(NamingManager.KEY).getMasterID(),
                         QRDeviceInformation.getRandomToken()
@@ -155,12 +162,7 @@ public class MainActivity extends BoundActivity {
             } catch (UnknownHostException e) {
                 //Todo: handle error
             }
-            StringBuilder hostNameBuilder = new StringBuilder();
-            for (byte b : deviceInformation.getAddress().getAddress()) {
-                hostNameBuilder.append(b + 128).append('.');
-            }
-            hostNameBuilder.deleteCharAt(hostNameBuilder.length() - 1);
-            System.out.println("HostNAME:" + hostNameBuilder.toString());
+            System.out.println("HostNAME:" + deviceInformation.getAddress().getHostAddress());
             System.out.println("ID:" + deviceInformation.getID());
             System.out.println("Port:" + deviceInformation.getPort());
             System.out.println("Token:" + android.util.Base64.encodeToString(deviceInformation.getToken(), android.util.Base64.NO_WRAP));

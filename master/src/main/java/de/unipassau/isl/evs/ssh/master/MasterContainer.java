@@ -21,13 +21,23 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterClimateHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterModuleHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterNotificationHandler;
-import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
 import de.unipassau.isl.evs.ssh.master.task.MasterWeatherCheckHandler;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.*;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DEVICE_CONNECTED;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_SET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_MODULE_ADD;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_REGISTER_INIT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USERINFO_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_WEATHER_INFO;
 
 /**
  * This Container class manages dependencies needed in the Master part of the architecture.
@@ -49,6 +59,7 @@ public class MasterContainer extends ContainerService {
         register(UserManagementController.KEY, new UserManagementController());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
+
         incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET,
                 CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
         incomingDispatcher.registerHandler(new MasterClimateHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_GET,

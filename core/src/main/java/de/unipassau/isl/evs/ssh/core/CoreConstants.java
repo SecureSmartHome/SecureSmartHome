@@ -129,6 +129,7 @@ public class CoreConstants {
         public static final String MASTER_MODULE_GET = "/master/module/get";
         public static final String MASTER_REGISTER_INIT = "/master/register/init";
         public static final String MASTER_REGISTER_FINALIZE = "/master/register/finalize";
+        public static final String MASTER_DEVICE_CONNECTED = "/master/device/connected";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
@@ -151,6 +152,10 @@ public class CoreConstants {
         public static final String APP_HOLIDAY_SIMULATION = "app/holiday/get";
         public static final String APP_USERINFO_GET = "/app/userdevice/get";
         public static final String APP_MODULE_ADD = "/app/module/add";
+        public static final String APP_USER_REGISTER = "/app/user/register";
+
+        // Slave/App (used for broadcast messages)
+        public static final String MODULES_UPDATE = "/*/modules/update";
     }
 
     /**
