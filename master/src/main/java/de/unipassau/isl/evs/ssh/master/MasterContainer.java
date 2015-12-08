@@ -23,8 +23,10 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterNotificationHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
+import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DEVICE_CONNECTED;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_GET;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_SET;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_MODULE_ADD;
@@ -60,6 +62,8 @@ public class MasterContainer extends ContainerService {
         incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(),
                 MASTER_USERINFO_GET, MASTER_DEVICE_CONNECTED);
         incomingDispatcher.registerHandler(new MasterModuleHandler(), MASTER_MODULE_ADD);
+        incomingDispatcher.registerHandler(new MasterHolidaySimulationPlannerHandler(),
+                MASTER_HOLIDAY_GET, MASTER_HOLIDAY_GET);
 
         if (!dir.isDirectory() && !dir.mkdirs()) {
             dir = getFilesDir();

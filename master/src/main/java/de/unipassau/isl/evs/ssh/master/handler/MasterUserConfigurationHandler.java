@@ -13,6 +13,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
@@ -58,17 +59,39 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 
         switch (payload.getAction()) {
             case REMOVE_USERDEVICE:
-                removeUserDevice(payload);
+                if (hasPermission(message.getFromID(),new Permission(
+                        DatabaseContract.Permission.Values.DELETE_USER, ""))) {
+                    removeUserDevice(payload);
+                } else {
+                    sendErrorMessage(message);
+                }
                 break;
             case EDIT_USERDEVICE:
-                editUserDevice(message, payload);
+                //TODO maybe refactor and unite both permissions?
+                if (hasPermission(message.getFromID(),new Permission(
+                        DatabaseContract.Permission.Values.CHANGE_USER_NAME, ""))
+                        && hasPermission(message.getFromID(),new Permission(
+                        DatabaseContract.Permission.Values.CHANGE_USER_GROUP, ""))) {
+                    editUserDevice(message, payload);
+                } else {
+                    sendErrorMessage(message);
+                }
                 break;
             case GRANT_PERMISSION:
-                grantPermission(message, payload);
-
+                if (hasPermission(message.getFromID(),new Permission(
+                        DatabaseContract.Permission.Values.GRANT_USER_RIGHT, ""))) {
+                    grantPermission(message, payload);
+                } else {
+                    sendErrorMessage(message);
+                }
                 break;
             case REVOKE_PERMISSION:
-                revokePermission(payload);
+                if (hasPermission(message.getFromID(),new Permission(
+                        DatabaseContract.Permission.Values.WITHDRAW_USER_RIGHT, ""))) {
+                    revokePermission(payload);
+                } else {
+                    sendErrorMessage(message);
+                }
                 break;
         }
         sendUserInfoUpdate(message);
