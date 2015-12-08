@@ -11,6 +11,7 @@ public class AppConstants extends CoreConstants {
      * @author Phil Werli
      */
     public class Fragment_Arguments {
+        public static final String ARGUMENT_FRAGMENT = "ARGUMENT_FRAGMENT";
         public static final String GROUP_ARGUMENT_FRAGMENT = "GROUP_ARGUMENT_FRAGMENT";
         public static final String USER_DEVICE_ARGUMENT_FRAGMENT = "USER_DEVICE_ARGUMENT_FRAGMENT";
     }
