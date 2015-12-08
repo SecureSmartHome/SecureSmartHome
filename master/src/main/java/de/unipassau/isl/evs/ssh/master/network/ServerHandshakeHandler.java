@@ -97,11 +97,14 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
             if (msg instanceof HandshakePacket.ClientRegistration) {
                 //Send client register info to handler
                 HandshakePacket.ClientRegistration clientRegistration = ((HandshakePacket.ClientRegistration) msg);
-                container.require(MasterRegisterDeviceHandler.KEY).registerDevice(
+                boolean success = container.require(MasterRegisterDeviceHandler.KEY).registerDevice(
                         clientRegistration.clientCertificate,
                         clientRegistration.token
                 );
 
+                //Todo sanity check message
+                ctx.writeAndFlush(new HandshakePacket.ServerRegistrationResponse(success, "",
+                        container.require(NamingManager.KEY).getMasterCertificate()));
             } else if (msg instanceof HandshakePacket.ClientHello) {
                 final HandshakePacket.ClientHello hello = (HandshakePacket.ClientHello) msg;
                 ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_CERT).set(hello.clientCertificate);
@@ -150,6 +153,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         Log.v(TAG, "Pipeline after authenticate: " + ctx.pipeline());
 
         Message message = new Message(new DeviceConnectedPayload(deviceID, ctx.channel()));
+
         container.require(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.MASTER_DEVICE_CONNECTED, message);
     }
 

@@ -181,23 +181,28 @@ public class NamingManager extends AbstractComponent {
     public void init(Container container) {
         super.init(container);
         try {
-            final KeyStoreController keyStoreController = container.require(KeyStoreController.KEY);
-            ownCert = keyStoreController.getOwnCertificate();
-            ownID = DeviceID.fromCertificate(ownCert);
-
-            if (isMaster) {
-                masterCert = ownCert;
-                masterID = ownID;
-            } else {
-                try {
-                    loadMasterData();
-                } catch (UnresolvableNamingException e) {
-                    Log.w(TAG, "Master ID is set to " + masterID + " but certificate is unknown", e);
-                }
-            }
+            update();
         } catch (GeneralSecurityException e) {
             throw new StartupException(e);
         }
+    }
+
+    public void update() throws GeneralSecurityException {
+        final KeyStoreController keyStoreController = getContainer().require(KeyStoreController.KEY);
+        ownCert = keyStoreController.getOwnCertificate();
+        ownID = DeviceID.fromCertificate(ownCert);
+
+        if (isMaster) {
+            masterCert = ownCert;
+            masterID = ownID;
+        } else {
+            try {
+                loadMasterData();
+            } catch (UnresolvableNamingException e) {
+                Log.w(TAG, "Master ID is set to " + masterID + " but certificate is unknown", e);
+            }
+        }
+
     }
 
     private void loadMasterData() throws UnresolvableNamingException {

@@ -1,7 +1,14 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import android.util.Log;
+
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
@@ -30,6 +37,8 @@ import java.util.Map;
  */
 public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 
+    private static final String TAG = MasterUserConfigurationHandler.class.getSimpleName();
+
     @Override
     public void handle(Message.AddressedMessage message) {
         if (message.getPayload() instanceof UserDeviceInformationPayload) {
@@ -44,6 +53,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     }
 
     private void sendUpdateToUserDevice(DeviceID id) {
+        Log.v(TAG, "sendUpdateToUser: " + id.getIDString());
         final Message messageToSend = new Message(generatePayload());
         sendMessage(id, CoreConstants.RoutingKeys.APP_USERINFO_GET, messageToSend);
     }
@@ -59,7 +69,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 
         switch (payload.getAction()) {
             case REMOVE_USERDEVICE:
-                if (hasPermission(message.getFromID(),new Permission(
+                if (hasPermission(message.getFromID(), new Permission(
                         DatabaseContract.Permission.Values.DELETE_USER, ""))) {
                     removeUserDevice(payload);
                 } else {
@@ -68,9 +78,9 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 break;
             case EDIT_USERDEVICE:
                 //TODO maybe refactor and unite both permissions?
-                if (hasPermission(message.getFromID(),new Permission(
+                if (hasPermission(message.getFromID(), new Permission(
                         DatabaseContract.Permission.Values.CHANGE_USER_NAME, ""))
-                        && hasPermission(message.getFromID(),new Permission(
+                        && hasPermission(message.getFromID(), new Permission(
                         DatabaseContract.Permission.Values.CHANGE_USER_GROUP, ""))) {
                     editUserDevice(message, payload);
                 } else {
@@ -78,7 +88,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 }
                 break;
             case GRANT_PERMISSION:
-                if (hasPermission(message.getFromID(),new Permission(
+                if (hasPermission(message.getFromID(), new Permission(
                         DatabaseContract.Permission.Values.GRANT_USER_RIGHT, ""))) {
                     grantPermission(message, payload);
                 } else {
@@ -86,7 +96,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 }
                 break;
             case REVOKE_PERMISSION:
-                if (hasPermission(message.getFromID(),new Permission(
+                if (hasPermission(message.getFromID(), new Permission(
                         DatabaseContract.Permission.Values.WITHDRAW_USER_RIGHT, ""))) {
                     revokePermission(payload);
                 } else {
@@ -122,7 +132,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         //This is possible, because the map never has more then 2 values. It is used as a form of a tuple
 
         UserDevice toGrant = ((UserDevice[]) userToGrantPermission.keySet().toArray())[0];
-        for (Permission permission: userToGrantPermission.get(toGrant)) {
+        for (Permission permission : userToGrantPermission.get(toGrant)) {
             try {
                 getContainer().require(PermissionController.KEY).addUserPermission(
                         toGrant.getUserDeviceID(), permission);
@@ -137,46 +147,41 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         //This is possible, because the map never has more then 2 values. It is used as a form of a tuple
 
         UserDevice toRevoke = ((UserDevice[]) userToRevokePermission.keySet().toArray())[0];
-        for (Permission permission: userToRevokePermission.get(toRevoke)) {
+        for (Permission permission : userToRevokePermission.get(toRevoke)) {
             getContainer().require(PermissionController.KEY).removeUserPermission(
                     toRevoke.getUserDeviceID(), permission);
         }
     }
 
     private UserDeviceInformationPayload generatePayload() {
+        final PermissionController permissionController = requireComponent(PermissionController.KEY);
         final List<Group> groups = getContainer().require(UserManagementController.KEY).getGroups();
         final List<UserDevice> userDevices = getContainer().require(UserManagementController.KEY).getUserDevices();
         List<Permission> permissions = getContainer().require(PermissionController.KEY).getPermissions();
 
-        ImmutableListMultimap<Group, UserDevice> groupDeviceMapping = Multimaps.index(userDevices,
-                new Function<UserDevice, Group>() {
-                    @Override
-                    public Group apply(UserDevice input) {
-                        for (Group group : groups) {
-                            if (group.getName().equals(input.getInGroup())) {
-                                return group;
-                            }
-                        }
-                        return null;
-                    }
-                });
+        ListMultimap<Group, UserDevice> groupDeviceMapping = ArrayListMultimap.create();
+        for (final Group group : groups) {
+            Predicate<UserDevice> predicate = new Predicate<UserDevice>() {
+                @Override
+                public boolean apply(UserDevice userDevice) {
+                    return userDevice.getInGroup().equals(group.getName());
+                }
+            };
+            groupDeviceMapping.putAll(group, Iterables.filter(userDevices, predicate));
+        }
 
-        ImmutableListMultimap<UserDevice, Permission> devicePermissionMapping = Multimaps.index(permissions,
-                new Function<Permission, UserDevice>() {
-                    @Override
-                    public UserDevice apply(Permission input) {
-                        for (UserDevice userDevice : userDevices) {
-                            if (getContainer().require(PermissionController.KEY)
-                                    .hasPermission(userDevice.getUserDeviceID(), input)) {
-                                return userDevice;
-                            }
-                        }
-                        return null;
-                    }
-                });
+        ListMultimap<UserDevice, Permission> userHasPermissions = ArrayListMultimap.create();
+        for (UserDevice userDevice : userDevices) {
+            userHasPermissions.putAll(userDevice, permissionController.getPermissionsOfUserDevice(userDevice.getUserDeviceID()));
+        }
 
 
-        UserDeviceInformationPayload payload = new UserDeviceInformationPayload(devicePermissionMapping,groupDeviceMapping, permissions);
+        UserDeviceInformationPayload payload = new UserDeviceInformationPayload(
+                ImmutableListMultimap.copyOf(userHasPermissions),
+                ImmutableListMultimap.copyOf(groupDeviceMapping),
+                permissions
+        );
+
         return payload;
     }
 }
