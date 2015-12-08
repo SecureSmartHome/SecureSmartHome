@@ -38,10 +38,8 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.Fragment_Arguments.GROUP
  * @see EditUserDeviceFragment
  */
 public class ListUserDeviceFragment extends BoundFragment {
-
     private static final String TAG = ListUserDeviceFragment.class.getSimpleName();
-
-    private UserDeviceListAdapter userDeviceListAdapter;
+    private UserDeviceListAdapter adapter;
     /**
      * The group the fragment is created for.
      */
@@ -71,7 +69,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                                                   // when a user clicks short on an item, he opens the ListUserDeviceFragment
                                                   @Override
                                                   public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                                      UserDevice item = userDeviceListAdapter.getItem(position);
+                                                      UserDevice item = adapter.getItem(position);
                                                       Bundle bundle = new Bundle();
                                                       bundle.putSerializable(EDIT_PERMISSION_DIALOG, item);
                                                       ((MainActivity) getActivity()).showFragmentByClass(EditUserDeviceFragment.class, bundle);
@@ -87,8 +85,8 @@ public class ListUserDeviceFragment extends BoundFragment {
             }
         });
 
-        userDeviceListAdapter = new UserDeviceListAdapter(inflater);
-        userDeviceList.setAdapter(userDeviceListAdapter);
+        adapter = new UserDeviceListAdapter(inflater);
+        userDeviceList.setAdapter(adapter);
 
         return root;
     }
@@ -116,7 +114,6 @@ public class ListUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-
             userDevices = handler.getAllGroupMembers(group);
 
             if (userDevices != null) {

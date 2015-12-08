@@ -80,4 +80,6 @@
     <string name="holidaySimulationStatus">Status: </string>
     <string name="holidaySimulationOn">On</string>
     <string name="holidaySimulationOff">Off</string>
+    <string name="edit">Edit</string>
+    <string name="remove">Remove</string>
 </resources>
