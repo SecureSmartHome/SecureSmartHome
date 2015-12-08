@@ -45,7 +45,7 @@ import io.netty.channel.group.ChannelGroup;
  */
 public class MainActivity extends BoundActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
-    //Todo: intend name.
+
     private final MessageHandler handler = new MessageHandler() {
         @Override
         public void handle(final Message.AddressedMessage message) {

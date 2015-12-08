@@ -3,6 +3,7 @@ package de.unipassau.isl.evs.ssh.app.activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,21 +29,22 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 
 /**
- * This fragment allows to display information contained in light messages which are received from the IncomingDispatcher.
- * Furthermore it generates a light messages as instructed by the UI and passes it to the OutgoingRouter.
+ * This fragment allows to display the status of all registered lights.
+ * The fragment gets the information from the {@link AppLightHandler}.
  *
+ * @see AppLightHandler
  * @author Phil Werli
  */
 public class LightFragment extends BoundFragment {
     private static final String TAG = LightFragment.class.getSimpleName();
     private LightListAdapter adapter;
-    private ListView listView;
     private final AppLightHandler.LightHandlerListener listener = new AppLightHandler.LightHandlerListener() {
         @Override
         public void statusChanged(Module module) {
             adapter.notifyDataSetChanged();
         }
     };
+    private ListView listView;
 
     @Override
     public void onContainerConnected(Container container) {
@@ -64,6 +66,13 @@ public class LightFragment extends BoundFragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_light, container, false);
         listView = (ListView) root.findViewById(R.id.lightButtonContainer);
+        FloatingActionButton fab = ((FloatingActionButton) root.findViewById(R.id.light_fab));
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity) getActivity()).showFragmentByClass(AddModuleFragment.class);
+            }
+        });
         return root;
     }
 
@@ -130,6 +139,9 @@ public class LightFragment extends BoundFragment {
             return true;
         }
 
+        /**
+         * Creates a view for every registered light.
+         */
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             //create LinearLayout as defined in lightbutton.xml file
@@ -147,7 +159,7 @@ public class LightFragment extends BoundFragment {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    getContainer().require(AppLightHandler.KEY).toggleLight(m);
+                    getComponent(AppLightHandler.KEY).toggleLight(m);
                 }
             });
             // set up TextView
@@ -156,7 +168,7 @@ public class LightFragment extends BoundFragment {
             // set up ImageView and button
             ImageView imageViewOn = (ImageView) lightButtonLayout.findViewById(R.id.lightButtonImageViewOn);
             ImageView imageViewOff = (ImageView) lightButtonLayout.findViewById(R.id.lightButtonImageViewOff);
-            boolean isLightOn = getContainer().require(AppLightHandler.KEY).isLightOnCached(m);
+            boolean isLightOn = getComponent(AppLightHandler.KEY).isLightOnCached(m);
             if (isLightOn) {
                 imageViewOff.setVisibility(View.GONE);
                 imageViewOn.setVisibility(View.VISIBLE);
