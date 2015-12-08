@@ -9,75 +9,86 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="de.unipassau.isl.evs.ssh.app.MainActivity">
 
+    <View
+        android:id="@+id/climatesensor_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_margin="8dp"
+        android:visibility="gone"
+        android:background="@color/md_black_1000"
+        />
+
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="41dp"
-        android:text="Climate Sensor:"
         android:id="@+id/climateSensor"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="Climate Sensor:"
+        android:textSize="@dimen/typography_headline1"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/colorSecondaryText" />
 
+
     <TextView
+        android:id="@+id/temp1"
         android:layout_width="wrap_content"
         android:layout_height="21dp"
         android:text="Temperature 1:"
-        android:id="@+id/temp1"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/colorSecondaryText" />
 
     <TextView
+        android:id="@+id/temp2"
         android:layout_width="wrap_content"
         android:layout_height="21dp"
         android:text="Temperature 2:"
-        android:id="@+id/temp2"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/colorSecondaryText" />
 
     <TextView
+        android:id="@+id/pressure"
         android:layout_width="wrap_content"
         android:layout_height="21dp"
         android:text="Pressure:"
-        android:id="@+id/pressure"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/colorSecondaryText" />
 
     <TextView
+        android:id="@+id/altitude"
         android:layout_width="wrap_content"
         android:layout_height="21dp"
         android:text="Altitude:"
-        android:id="@+id/altitude"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/colorSecondaryText" />
 
     <TextView
+        android:id="@+id/humidity"
         android:layout_width="wrap_content"
         android:layout_height="21dp"
         android:text="Humidity:"
-        android:id="@+id/humidity"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/colorSecondaryText" />
 
     <TextView
+        android:id="@+id/uv"
         android:layout_width="wrap_content"
         android:layout_height="21dp"
         android:text="UV:"
-        android:id="@+id/uv"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/colorSecondaryText" />
 
     <TextView
+        android:id="@+id/visible"
         android:layout_width="wrap_content"
         android:layout_height="21dp"
         android:text="Visible Light:"
-        android:id="@+id/visible"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/colorSecondaryText" />
 
     <TextView
+        android:id="@+id/ir"
         android:layout_width="wrap_content"
         android:layout_height="21dp"
         android:text="Infrared:"
-        android:id="@+id/ir"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/colorSecondaryText" />
 

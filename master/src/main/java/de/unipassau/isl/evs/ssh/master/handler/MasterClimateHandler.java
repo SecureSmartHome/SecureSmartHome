@@ -28,7 +28,7 @@ public class MasterClimateHandler extends AbstractMasterHandler {
         } else if (CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO.equals(message.getRoutingKey())) {
             //TODO make map of latestWeatherData to send data for each Weatherboard
             if (latestWeatherData == null) {
-                latestWeatherData = new ClimatePayload(0,0,0,0,0,0,0,0,"", "");
+                latestWeatherData = new ClimatePayload(0,0,0,0,0,0,0,0,"", null);
             }
             sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY),
                     new Message(latestWeatherData));

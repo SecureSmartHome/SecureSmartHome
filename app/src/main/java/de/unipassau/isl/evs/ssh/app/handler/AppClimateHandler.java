@@ -36,7 +36,7 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
 
     public AppClimateHandler() {
         Module m = new Module("TestWeatherBoard", new DeviceID("H5f4ahpVmoVL6GKAYqZY7m73k9i9nDCnsiJLbw+0n3E="),
-                 CoreConstants.ModuleType.WEATHER_BOARD, new GPIOAccessPoint()); //FIXME resolve DeviceID
+                CoreConstants.ModuleType.WEATHER_BOARD, new GPIOAccessPoint()); //FIXME resolve DeviceID
         climateStatusMapping.put(m, new ClimateStatus(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0));
     }
 
@@ -58,17 +58,68 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
         }
     }
 
-    //TODO ClimateStatus
-    public boolean isLightOn(ClimatePayload payload) {
-        final ClimateStatus status = climateStatusMapping.get(payload);
+    public double getTemp1(Module module) {
+        final ClimateStatus status = climateStatusMapping.get(module);
         if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
-            requestClimateStatus(payload);
+            requestClimateStatus(module);
         }
-        return isClimateOnCached(false);
+        return status.getTemp1();
     }
 
-    private boolean isClimateOnCached(boolean b) {
-        return false;
+    public double getTemp2(Module module) {
+        final ClimateStatus status = climateStatusMapping.get(module);
+        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+            requestClimateStatus(module);
+        }
+        return status.getTemp2();
+    }
+
+    public double getPressure(Module module) {
+        final ClimateStatus status = climateStatusMapping.get(module);
+        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+            requestClimateStatus(module);
+        }
+        return status.getPressure();
+    }
+
+    public double getAltitude(Module module) {
+        final ClimateStatus status = climateStatusMapping.get(module);
+        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+            requestClimateStatus(module);
+        }
+        return status.getAltitude();
+    }
+
+    public double getHumidity(Module module) {
+        final ClimateStatus status = climateStatusMapping.get(module);
+        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+            requestClimateStatus(module);
+        }
+        return status.getHumidity();
+    }
+
+    public double getUv(Module module) {
+        final ClimateStatus status = climateStatusMapping.get(module);
+        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+            requestClimateStatus(module);
+        }
+        return status.getUv();
+    }
+
+    public int getVisible(Module module) {
+        final ClimateStatus status = climateStatusMapping.get(module);
+        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+            requestClimateStatus(module);
+        }
+        return status.getVisible();
+    }
+
+    public int getIr(Module module) {
+        final ClimateStatus status = climateStatusMapping.get(module);
+        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+            requestClimateStatus(module);
+        }
+        return status.getIr();
     }
 
     public Map<Module, ClimateStatus> getAllClimateModuleStates() {
@@ -77,8 +128,11 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
 
     ////Network/////////////////////////////////////////////////////////////////////////////////////
 
-    private void requestClimateStatus(ClimatePayload payload) {
-        ClimatePayload climatePayload = new ClimatePayload(payload, "");
+    private void requestClimateStatus(Module m) {
+        ClimateStatus status = climateStatusMapping.get(m);
+        ClimatePayload climatePayload = new ClimatePayload(status.getTemp1(), status.getTemp2(),
+                status.getPressure(), status.getAltitude(), status.getHumidity(), status.getUv(),
+                status.getVisible(), status.getIr(), "" , m);
 
         Message message = new Message(climatePayload);
 
@@ -86,8 +140,8 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_GET, message);
     }
 
-    private void setClimate(ClimatePayload payload,  String s) {
-        ClimatePayload climatePayload= new ClimatePayload(payload, s);
+    private void setClimate(ClimatePayload payload, String s) {
+        ClimatePayload climatePayload = new ClimatePayload(payload, s);
 
         Message message;
         message = new Message(climatePayload);
@@ -112,8 +166,8 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
     @Override
     public void handle(Message.AddressedMessage message) {
         if (message.getPayload() instanceof ClimatePayload) {
-            ClimatePayload climatePayload= (ClimatePayload) message.getPayload();
-            setCachedStatus( climatePayload.getModule(), climatePayload.getTemp1(), climatePayload.getTemp2(), climatePayload.getPressure()
+            ClimatePayload climatePayload = (ClimatePayload) message.getPayload();
+            setCachedStatus(climatePayload.getModule(), climatePayload.getTemp1(), climatePayload.getTemp2(), climatePayload.getPressure()
                     , climatePayload.getAltitude(), climatePayload.getHumidity(), climatePayload.getUv(), climatePayload.getIr(),
                     climatePayload.getVisible());
         } else {
@@ -155,7 +209,6 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
 
     public interface ClimateHandlerListener {
         void statusChanged(Module module);
-
     }
 
     public class ClimateStatus {
