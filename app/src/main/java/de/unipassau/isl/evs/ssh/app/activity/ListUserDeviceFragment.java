@@ -3,6 +3,7 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -58,11 +60,10 @@ public class ListUserDeviceFragment extends BoundFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_listgroup, container, false);
+        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_listuserdevicefromgroup, container, false);
         group = ((Group) getArguments().getSerializable(GROUP_ARGUMENT_FRAGMENT));
 
-
-        ListView userDeviceList = (ListView) root.findViewById(R.id.listUserPermissionContainer);
+        ListView userDeviceList = (ListView) root.findViewById(R.id.listuserDeviceContainer);
         userDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                   // when a user clicks short on an item, he opens the ListUserDeviceFragment
                                                   @Override
@@ -74,6 +75,15 @@ public class ListUserDeviceFragment extends BoundFragment {
                                                   }
                                               }
         );
+
+        FloatingActionButton fab = (FloatingActionButton) root.findViewById(R.id.listuserdevice_fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity) getActivity()).showFragmentByClass(AddNewUserDeviceFragment.class);
+            }
+        });
+
         userDeviceListAdapter = new UserDeviceListAdapter(inflater);
         userDeviceList.setAdapter(userDeviceListAdapter);
 
@@ -156,7 +166,7 @@ public class ListUserDeviceFragment extends BoundFragment {
         }
 
         /**
-         * Creates a view for every registered group.
+         * Creates a view for every device in the specific group.
          */
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -169,6 +179,12 @@ public class ListUserDeviceFragment extends BoundFragment {
             } else {
                 userDeviceLayout = (LinearLayout) convertView;
             }
+
+            TextView userDeviceName = ((TextView) userDeviceLayout.findViewById(R.id.userdevicelistitem_device_name));
+            userDeviceName.setText(device.getName());
+
+            TextView userDeviceDeviceID = ((TextView) userDeviceLayout.findViewById(R.id.userdevicelistitem_device_information));
+            userDeviceDeviceID.setText(device.getUserDeviceID().toString());
 
             return userDeviceLayout;
         }
