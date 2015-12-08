@@ -42,10 +42,6 @@
                 android:id="@+id/nav_addModule"
                 android:icon="@drawable/ic_addmodul_light"
                 android:title="@string/nav_addModule_string"/>
-            <!--TODO Delete item -->
-            <item
-                android:id="@+id/test_notification"
-                android:title="Test Notification"/>
         </menu>
     </item>
 </menu>
