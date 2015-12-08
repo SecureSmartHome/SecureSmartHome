@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
@@ -52,7 +53,6 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.TEMPLAT
  */
 public class ListGroupFragment extends BoundFragment {
     private static final String TAG = ListGroupFragment.class.getSimpleName();
-
     private GroupListAdapter adapter;
 
     @Override
@@ -140,6 +140,9 @@ public class ListGroupFragment extends BoundFragment {
                         String name = groupName.getText().toString();
                         String template = ((String) templateName.getSelectedItem());
                         getComponent(AppUserConfigurationHandler.KEY).addGroup(new Group(name, template));
+                        String toastText = "Group " + name + " created.";
+                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+                        toast.show();
                     }
                 })
                 .setNegativeButton(R.string.cancel, null);
@@ -167,17 +170,31 @@ public class ListGroupFragment extends BoundFragment {
         final AlertDialog dialog = builder.create();
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         builder.setMessage(R.string.edit_group_dialog_title)
                 .setView(dialogView)
-                .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
+                .setNeutralButton(R.string.edit, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         String name = groupName.getText().toString();
                         String template = ((String) templateName.getSelectedItem());
                         getComponent(AppUserConfigurationHandler.KEY).editGroup(group, new Group(name, template));
+                        String toastText = "Group " + name + " edited.";
+                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        getComponent(AppUserConfigurationHandler.KEY).removeGroup(group);
+                        String toastText = "Group " + group.getName() + " removed.";
+                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+                        toast.show();
                     }
                 });
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
         return dialog;
     }
 
@@ -220,22 +237,7 @@ public class ListGroupFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-
             groups = handler.getAllGroups();
-            // TODO delete bellow. only for testing
-            groups = new ArrayList<>();
-            Group group1 = new Group("Admin", "Template 1");
-            Group group2 = new Group("Eltern", "Template 2");
-            Group group3 = new Group("Kinder", "Template 3");
-            groups.add(group1);
-            groups.add(group2);
-            groups.add(group3);
-            Group group4 = new Group("Gäste", "Template 3");
-            Group group5 = new Group("Gästeeltern", "Template 3");
-            Group group6 = new Group("Gästekinder", "Template 3");
-            groups.add(group4);
-            groups.add(group5);
-            groups.add(group6);
 
             if (groups != null) {
                 Collections.sort(groups, new Comparator<Group>() {
