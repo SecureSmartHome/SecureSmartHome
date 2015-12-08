@@ -19,6 +19,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPo
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.drivers.lib.ButtonSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.DoorBuzzer;
@@ -46,7 +48,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
      *                   the SaveContainer. All modules that are in the container but not in the
      *                   list are unregistered.
      */
-    public void updateModule(List<Module> components) {
+    public void updateModule(List<Module> components) throws WrongAccessPointException {
         if (this.components == null) {
             Set<Module> newComponents = Sets.newHashSet(components);
             registerModules(newComponents);
@@ -62,7 +64,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         this.components = components;
     }
 
-    private void registerModules(Set<Module> componentsToAdd) {
+    private void registerModules(Set<Module> componentsToAdd) throws WrongAccessPointException {
         for (Module module : componentsToAdd) {
             Class<? extends Component> clazz = getDriverClass(module);
             if (clazz.getName().equals(ButtonSensor.class.getName())) {
@@ -79,23 +81,32 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         }
     }
 
-    private void registerButtonSensor(Module buttonSensor) {
+    private void registerButtonSensor(Module buttonSensor) throws WrongAccessPointException {
         String moduleName = buttonSensor.getName();
         Key<ButtonSensor> key = new Key<>(ButtonSensor.class, moduleName);
+        if (!(buttonSensor.getModuleAccessPoint() instanceof GPIOAccessPoint)) {
+            throw new WrongAccessPointException();
+        }
         GPIOAccessPoint accessPoint = (GPIOAccessPoint) buttonSensor.getModuleAccessPoint();
         getContainer().register(key, new ButtonSensor(accessPoint.getPort(), moduleName));
     }
 
-    private void registerDoorBuzzer(Module doorBuzzer) {
+    private void registerDoorBuzzer(Module doorBuzzer) throws WrongAccessPointException {
         String moduleName = doorBuzzer.getName();
         Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, moduleName);
+        if (!(doorBuzzer.getModuleAccessPoint() instanceof GPIOAccessPoint)) {
+            throw new WrongAccessPointException();
+        }
         GPIOAccessPoint accessPoint = (GPIOAccessPoint) doorBuzzer.getModuleAccessPoint();
         getContainer().register(key, new DoorBuzzer(accessPoint.getPort()));
     }
 
-    private void registerReedSensor(Module reedSensor) {
+    private void registerReedSensor(Module reedSensor) throws WrongAccessPointException {
         String moduleName = reedSensor.getName();
         Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
+        if (!(reedSensor.getModuleAccessPoint() instanceof GPIOAccessPoint)) {
+            throw new WrongAccessPointException();
+        }
         GPIOAccessPoint accessPoint = (GPIOAccessPoint) reedSensor.getModuleAccessPoint();
         getContainer().register(key, new ReedSensor(accessPoint.getPort(), moduleName));
     }
@@ -106,9 +117,13 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         getContainer().register(key, new WeatherSensor());
     }
 
-    private void registerEdimaxPlugSwitch(Module plugSwitch) {
+    private void registerEdimaxPlugSwitch(Module plugSwitch) throws WrongAccessPointException {
         String moduleName = plugSwitch.getName();
         Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, moduleName);
+
+        if (!(plugSwitch.getModuleAccessPoint() instanceof WLANAccessPoint)) {
+            throw new WrongAccessPointException();
+        }
         WLANAccessPoint accessPoint = (WLANAccessPoint) plugSwitch.getModuleAccessPoint();
         getContainer().register(key, new EdimaxPlugSwitch(accessPoint.getiPAddress(),
                 accessPoint.getPort(), accessPoint.getUsername(), accessPoint.getPassword()));
@@ -160,7 +175,13 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
             if (message.getPayload() instanceof ModulesPayload) {
                 ModulesPayload payload = (ModulesPayload) message.getPayload();
                 List<Module> modules = payload.getModules();
-                updateModule(modules);
+                try {
+                    updateModule(modules);
+                } catch (WrongAccessPointException e) {
+                    getContainer().require(OutgoingRouter.KEY).sendMessage(message.getFromID(),
+                            message.getHeader(Message.HEADER_REPLY_TO_KEY),
+                            new Message(new MessageErrorPayload(message.getPayload())));
+                }
             } else {
                 Log.e(TAG, "Error! Unknown message Payload");
             }
@@ -187,5 +208,9 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
 
     @Override
     public void handlerRemoved(String routingKey) {
+    }
+
+    private class WrongAccessPointException extends Exception {
+
     }
 }
