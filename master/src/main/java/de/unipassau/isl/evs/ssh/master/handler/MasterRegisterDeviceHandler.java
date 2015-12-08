@@ -46,12 +46,15 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
 
     @Override
     public void init(Container container) {
-        requireComponent(IncomingDispatcher.KEY).registerHandler(this, MASTER_REGISTER_INIT);
+        container.require(IncomingDispatcher.KEY).registerHandler(this, MASTER_REGISTER_INIT);
     }
 
     @Override
     public void destroy() {
-        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, MASTER_REGISTER_INIT);
+        Container container = getContainer();
+        if (container != null) {
+            container.require(IncomingDispatcher.KEY).unregisterHandler(this, MASTER_REGISTER_INIT);
+        }
     }
 
     @Override
