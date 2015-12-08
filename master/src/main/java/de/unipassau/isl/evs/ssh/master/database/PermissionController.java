@@ -357,7 +357,6 @@ public class PermissionController extends AbstractComponent {
                 + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID, new String[] {});
         List<Permission> permissions = new LinkedList<>();
         while (permissionsCursor.moveToNext()) {
-            System.out.println(permissionsCursor.getString(0));
             permissions.add(new Permission(permissionsCursor.getString(0), permissionsCursor.getString(1)));
         }
         //Permissions without modules
@@ -365,7 +364,6 @@ public class PermissionController extends AbstractComponent {
                 + " from " + DatabaseContract.Permission.TABLE_NAME
                 + " where " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL", new String[] {});
         while (permissionsCursor.moveToNext()) {
-            System.out.println(permissionsCursor.getString(0));
             permissions.add(new Permission(permissionsCursor.getString(0), null));
         }
         return permissions;
