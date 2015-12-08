@@ -42,7 +42,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     //TODO: move to?
     public static final String FIRST_USER = "Admin";
     public static final String NO_GROUP = "No Group";
-    private Map<String, UserDevice> groupForToken = new HashMap<>();
+    private Map<String, UserDevice> userDeviceForToken = new HashMap<>();
 
     @Override
     public void init(Container container) {
@@ -81,7 +81,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
 
     public byte[] generateNewRegisterToken(UserDevice device) {
         byte[] token = QRDeviceInformation.getRandomToken();
-        groupForToken.put(Base64.encodeToString(token, Base64.NO_WRAP), device);
+        userDeviceForToken.put(Base64.encodeToString(token, Base64.NO_WRAP), device);
         return token;
     }
 
@@ -97,8 +97,8 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
             throw new IllegalArgumentException("Something went wrong while trying to create a DeviceID from the given"
                     + " certificate.", e);
         }
-        if (groupForToken.containsKey(base64Token)) {
-            UserDevice newDevice = groupForToken.get(base64Token);
+        if (userDeviceForToken.containsKey(base64Token)) {
+            UserDevice newDevice = userDeviceForToken.get(base64Token);
             newDevice.setUserDeviceID(deviceID);
             //Save certificate to KeyStore
             try {
@@ -108,7 +108,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                         + " the KeyStore.", gse);
             }
             addUserDeviceToDatabase(deviceID, newDevice);
-            groupForToken.remove(base64Token);
+            userDeviceForToken.remove(base64Token);
             return true;
         } else {
             Log.v(getClass().getSimpleName(), "Some tried using an unknown token to register. Token: " + base64Token
@@ -158,7 +158,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                 ((GenerateNewRegisterTokenPayload) message.getPayload());
         byte[] newToken = generateNewRegisterToken(generateNewRegisterTokenPayload.getUserDevice());
         String base64Token = Base64.encodeToString(newToken, Base64.NO_WRAP);
-        groupForToken.put(base64Token, generateNewRegisterTokenPayload.getUserDevice());
+        userDeviceForToken.put(base64Token, generateNewRegisterTokenPayload.getUserDevice());
         Message reply = new Message(new GenerateNewRegisterTokenPayload(newToken,
                 generateNewRegisterTokenPayload.getUserDevice()));
         sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);

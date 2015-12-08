@@ -25,7 +25,6 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
@@ -45,6 +44,7 @@ import io.netty.channel.group.ChannelGroup;
  * @author Team
  */
 public class MainActivity extends BoundActivity {
+    private static final String TAG = MainActivity.class.getSimpleName();
     //Todo: intend name.
     private final MessageHandler handler = new MessageHandler() {
         @Override
@@ -157,26 +157,26 @@ public class MainActivity extends BoundActivity {
             Context ctx = requireComponent(ContainerService.KEY_CONTEXT);
             WifiManager wifiManager = ((WifiManager) ctx.getSystemService(Context.WIFI_SERVICE));
             String ipAddress = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
+            UserDevice userDevice = new UserDevice(
+                    MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.NO_GROUP,
+                    DeviceID.NO_DEVICE
+            );
             try {
                 deviceInformation = new QRDeviceInformation(
                         (Inet4Address) Inet4Address.getByName(ipAddress),
                         CoreConstants.NettyConstants.DEFAULT_PORT,
                         requireComponent(NamingManager.KEY).getMasterID(),
-                        QRDeviceInformation.getRandomToken()
+                        requireComponent(MasterRegisterDeviceHandler.KEY).generateNewRegisterToken(userDevice)
                 );
             } catch (UnknownHostException e) {
                 //Todo: handle error
             }
-            System.out.println("HostNAME:" + deviceInformation.getAddress().getHostAddress());
-            System.out.println("ID:" + deviceInformation.getID());
-            System.out.println("Port:" + deviceInformation.getPort());
-            System.out.println("Token:" + android.util.Base64.encodeToString(deviceInformation.getToken(),
+            Log.v(TAG, "HostNAME: " + deviceInformation.getAddress().getHostAddress());
+            Log.v(TAG, "ID: " + deviceInformation.getID());
+            Log.v(TAG, "Port: " + deviceInformation.getPort());
+            Log.v(TAG, "Token: " + android.util.Base64.encodeToString(deviceInformation.getToken(),
                     android.util.Base64.NO_WRAP));
             //NoDevice will allow any device to use this token
-            requireComponent(MasterRegisterDeviceHandler.KEY).generateNewRegisterToken(new UserDevice(
-                    MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.NO_GROUP,
-                    DeviceID.NO_DEVICE
-            ));
             intent.putExtra(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
             startActivity(intent);
         }
