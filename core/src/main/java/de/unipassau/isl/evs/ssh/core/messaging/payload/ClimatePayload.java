@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+
 /**
  * Payload class for WeatherSensor data.
  *
@@ -10,9 +12,11 @@ public class ClimatePayload implements MessagePayload {
     private double temp1, temp2, pressure, altitude, humidity, uv;
     private int visible, ir;
     private String notificationType, moduleName;
+    private Module module;
 
-    public ClimatePayload(double temp1, double temp2, double pressure, double altitude, double humidity,
+    public ClimatePayload(Module module, double temp1, double temp2, double pressure, double altitude, double humidity,
                           double uv, int visible, int ir, String notificationType, String moduleName) {
+        this.module = module;
         this.temp1 = temp1;
         this.temp2 = temp2;
         this.pressure = pressure;
@@ -33,6 +37,7 @@ public class ClimatePayload implements MessagePayload {
      * @param notificationType that is to be set
      */
     public ClimatePayload(ClimatePayload payload, String notificationType) {
+        this.module = payload.module;
         this.temp1 = payload.temp1;
         this.temp2 = payload.temp2;
         this.pressure = payload.pressure;
@@ -53,6 +58,8 @@ public class ClimatePayload implements MessagePayload {
     public ClimatePayload ClimatePayload() {
         return ClimatePayload.this;
     }
+
+    public Module getModule() { return module; }
 
     public double getTemp1() {
         return temp1;
