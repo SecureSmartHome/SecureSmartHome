@@ -89,7 +89,7 @@ public class AddNewUserDeviceFragment extends BoundFragment {
             public void onClick(View v) {
                 if (checkInputFields() && isContainerConnected()) {
                     String name = inputUserName.getText().toString();
-                    String group = ((Group) spinner.getSelectedItem()).getName();
+                    String group = ((String) spinner.getSelectedItem());
                     UserDevice user = new UserDevice(name, group, null);
                     getComponent(AppRegisterNewDeviceHandler.KEY).requestToken(user);
                 } else {

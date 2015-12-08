@@ -3,13 +3,13 @@ package de.unipassau.isl.evs.ssh.master.handler;
 import android.util.Log;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
+
+import java.util.List;
+import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
@@ -25,9 +25,6 @@ import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Handles messages indicating that a device wants to register itself at the system and also generates
@@ -159,16 +156,18 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         final List<UserDevice> userDevices = getContainer().require(UserManagementController.KEY).getUserDevices();
         List<Permission> permissions = getContainer().require(PermissionController.KEY).getPermissions();
 
-        ListMultimap<Group, UserDevice> groupDeviceMapping = ArrayListMultimap.create();
-        for (final Group group : groups) {
-            Predicate<UserDevice> predicate = new Predicate<UserDevice>() {
-                @Override
-                public boolean apply(UserDevice userDevice) {
-                    return userDevice.getInGroup().equals(group.getName());
-                }
-            };
-            groupDeviceMapping.putAll(group, Iterables.filter(userDevices, predicate));
-        }
+        ImmutableListMultimap<Group, UserDevice> groupDeviceMapping = Multimaps.index(userDevices,
+                new Function<UserDevice, Group>() {
+                    @Override
+                    public Group apply(UserDevice input) {
+                        for (Group group : groups) {
+                            if (group.getName().equals(input.getInGroup())) {
+                                return group;
+                            }
+                        }
+                        return null;
+                    }
+                });
 
         ListMultimap<UserDevice, Permission> userHasPermissions = ArrayListMultimap.create();
         for (UserDevice userDevice : userDevices) {
@@ -179,7 +178,8 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         UserDeviceInformationPayload payload = new UserDeviceInformationPayload(
                 ImmutableListMultimap.copyOf(userHasPermissions),
                 ImmutableListMultimap.copyOf(groupDeviceMapping),
-                permissions
+                permissions,
+                groups
         );
 
         return payload;
