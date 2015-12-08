@@ -39,6 +39,7 @@
 
     <Button
         android:layout_width="wrap_content"
+        android:id="@+id/add_user_button"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="@string/addUser" />

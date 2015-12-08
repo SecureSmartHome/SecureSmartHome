@@ -91,7 +91,11 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         if (msg instanceof HandshakePacket) {
             Log.v(TAG, "Received " + msg);
             if (msg instanceof HandshakePacket.ServerRegistrationResponse) {
-                registrationExecuted(msg);
+                if (registrationExecuted(msg)) {
+                    final NamingManager namingManager = container.require(NamingManager.KEY);
+                    ctx.writeAndFlush(new HandshakePacket.ClientHello(namingManager.getOwnCertificate(),
+                            namingManager.getMasterID(), null));
+                }
             } else if (msg instanceof HandshakePacket.ServerHello) {
                 final HandshakePacket.ServerHello hello = (HandshakePacket.ServerHello) msg;
 
@@ -121,16 +125,20 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         }
     }
 
-    private void registrationExecuted(Object msg) throws GeneralSecurityException {
+    private boolean registrationExecuted(Object msg) throws GeneralSecurityException {
         HandshakePacket.ServerRegistrationResponse message = (HandshakePacket.ServerRegistrationResponse) msg;
         if (message.success) {
             X509Certificate cert = message.serverCertificate;
             KeyStoreController keyStoreController = container.require(KeyStoreController.KEY);
-            if (keyStoreController.listEntries().contains(DeviceID.fromCertificate(cert).getIDString())) {
+            if (!keyStoreController.listEntries().contains(DeviceID.fromCertificate(cert).getIDString())) {
                 DeviceID alias = DeviceID.fromCertificate(cert);
                 keyStoreController.saveCertificate(cert, alias.getIDString());
             }
+            container.require(NamingManager.KEY).update();
+        } else {
+            Log.i(TAG, "Registration unsuccessful.");
         }
+        return message.success;
     }
 
     /**

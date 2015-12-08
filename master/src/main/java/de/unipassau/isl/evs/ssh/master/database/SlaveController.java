@@ -60,9 +60,6 @@ public class SlaveController extends AbstractComponent {
             allModuleAccessPoints[moduleAccessPoint.getDatabaseIndices()[i]] =
                     moduleAccessPoint.getAccessInformation()[i];
         }
-        for (String allModuleAccessPoint : allModuleAccessPoints) {
-            System.out.println(allModuleAccessPoint);
-        }
         return allModuleAccessPoints;
     }
 

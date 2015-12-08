@@ -56,6 +56,7 @@
     <string name="error_fill_all_fields">Cannot add module. Missing information.</string>
     <string name="added_module_success">Added module successfully</string>
     <string name="added_module_fail">Adding new module failed</string>
+    <string name="error_cannot_add_user">Cannot add new user. Missing information.</string>
     <string-array name="sensor_connection_types">
         <!-- Do not change the order of items! Changing the order would break AddModuleFragment -->
         <item>GPIO</item>
