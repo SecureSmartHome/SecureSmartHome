@@ -150,36 +150,36 @@ public class ClimateFragment extends BoundFragment {
             // TODO check if units are correct
             TextView temp1View = (TextView) climateSensorLayout.findViewById(R.id.temp1);
             double temp1 = getComponent(AppClimateHandler.KEY).getTemp1(m);
-            temp1View.setText("Temperature 1: " + Double.toString(temp1) + " °C");
+            temp1View.setText(Double.toString(temp1) + " °C");
 
             TextView temp2View = (TextView) climateSensorLayout.findViewById(R.id.temp2);
             double temp2 = getComponent(AppClimateHandler.KEY).getTemp2(m);
-            temp2View.setText("Temperature 2: " + Double.toString(temp2) + " °C");
+            temp2View.setText(Double.toString(temp2) + " °C");
 
             TextView pressureView = (TextView) climateSensorLayout.findViewById(R.id.pressure);
             double pressure = getComponent(AppClimateHandler.KEY).getPressure(m);
-            pressureView.setText("Pressure: " + Double.toString(pressure) + " Pa");
+            pressureView.setText(Double.toString(pressure) + " Pa");
 
             TextView altitudeView = (TextView) climateSensorLayout.findViewById(R.id.altitude);
             double altitude = getComponent(AppClimateHandler.KEY).getAltitude(m);
-            altitudeView.setText("Altitude " + Double.toString(altitude) + " m");
+            altitudeView.setText(Double.toString(altitude) + " m");
 
             TextView humidityView = (TextView) climateSensorLayout.findViewById(R.id.humidity);
             double humidity = getComponent(AppClimateHandler.KEY).getHumidity(m);
-            humidityView.setText("Humidity: " + Double.toString(humidity) + " %");
+            humidityView.setText(Double.toString(humidity) + " %");
 
             TextView uvView = (TextView) climateSensorLayout.findViewById(R.id.uv);
             double uv = getComponent(AppClimateHandler.KEY).getUv(m);
-            uvView.setText("UV: " + Double.toString(uv) + " W/m²");
+            uvView.setText(Double.toString(uv) + " W/m²");
 
             TextView visibleView = (TextView) climateSensorLayout.findViewById(R.id.visible);
             int visible = getComponent(AppClimateHandler.KEY).getVisible(m);
             //cd = Candela SI-unit for light intensity
-            visibleView.setText("Visible: " + Integer.toString(visible) + " cd");
+            visibleView.setText(Integer.toString(visible) + " cd");
 
             TextView irView = (TextView) climateSensorLayout.findViewById(R.id.ir);
             int ir = getComponent(AppClimateHandler.KEY).getIr(m);
-            irView.setText("Infrared: " + Integer.toString(ir) + " cd");
+            irView.setText(Integer.toString(ir) + " cd");
 
 
             counter++;
