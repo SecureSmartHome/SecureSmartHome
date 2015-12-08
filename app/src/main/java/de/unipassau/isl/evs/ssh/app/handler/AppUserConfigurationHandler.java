@@ -151,6 +151,10 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
         sendEditMessage(payload);
     }
 
+    public void initiateAddUser(UserDevice user) {
+        //TODO
+    }
+
     public void removeGroup(Group group) {
         GroupEditPayload payload = GroupEditPayload.newRemoveGroupPayload(group);
         sendEditMessage(payload);
