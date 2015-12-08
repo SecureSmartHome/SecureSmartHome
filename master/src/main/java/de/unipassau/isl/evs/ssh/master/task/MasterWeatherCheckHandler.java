@@ -50,7 +50,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
         Scheduler scheduler = container.require(Scheduler.KEY);
         PendingIntent intent = scheduler.getPendingScheduleIntent(MasterWeatherCheckHandler.KEY, null, 0);
         scheduler.setRepeating(AlarmManager.RTC, System.currentTimeMillis(),
-                System.currentTimeMillis() + MILLIS_IN_FIVE_MIN, intent);
+                MILLIS_IN_FIVE_MIN, intent);
     }
 
     @Override
