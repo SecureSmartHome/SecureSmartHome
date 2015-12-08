@@ -3,14 +3,11 @@ package de.unipassau.isl.evs.ssh.master.task;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.util.Log;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
@@ -18,6 +15,7 @@ import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
 import net.aksingh.owmjapis.CurrentWeather;
 import net.aksingh.owmjapis.OpenWeatherMap;
+import org.json.JSONException;
 
 import java.io.IOException;
 
@@ -30,6 +28,7 @@ import java.io.IOException;
 public class MasterWeatherCheckHandler extends AbstractMasterHandler implements ScheduledComponent{
 
     private static final Key<MasterWeatherCheckHandler> KEY = new Key<>(MasterWeatherCheckHandler.class);
+    private static final String TAG = MasterWeatherCheckHandler.class.getSimpleName();
     public static final int MILLIS_IN_FIVE_MIN = 300000;
     private boolean windowClosed;
 
@@ -70,8 +69,8 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
             if (!windowClosed && cw.getRainInstance().hasRain()) {
                 sendWarningNotification();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.wtf(TAG, e);
         }
     }
 }
