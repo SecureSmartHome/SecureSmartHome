@@ -25,6 +25,9 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
+import de.unipassau.isl.evs.ssh.master.task.MasterWeatherCheckHandler;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.*;
 
 /**
  * This Container class manages dependencies needed in the Master part of the architecture.
@@ -58,6 +61,8 @@ public class MasterContainer extends ContainerService {
                 CoreConstants.RoutingKeys.MASTER_REGISTER_INIT, CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE);
         incomingDispatcher.registerHandler(new MasterHolidaySimulationPlannerHandler(),
                 CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET, CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET);
+        incomingDispatcher.registerHandler(new MasterWeatherCheckHandler(),
+                CoreConstants.RoutingKeys.MASTER_DOOR_STATUS_GET);
 
         if (!dir.isDirectory() && !dir.mkdirs()) {
             dir = getFilesDir();
