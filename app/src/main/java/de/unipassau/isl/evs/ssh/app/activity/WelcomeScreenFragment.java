@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,6 @@ public class WelcomeScreenFragment extends BoundFragment {
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        System.out.println("occ: hit ocv");
         LinearLayout root = (LinearLayout) inflater.inflate(R.layout.fragment_welcomescreen, container, false);
 
         Button button = (Button) root.findViewById(R.id.welcomescreen_button);
@@ -46,36 +44,22 @@ public class WelcomeScreenFragment extends BoundFragment {
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        System.out.println("occ: hit occ");
         Bundle bundle = getArguments();
         QRDeviceInformation info = null;
         if (bundle != null) {
             info = (QRDeviceInformation) bundle.get(AppConstants.Fragment_Arguments.ARGUMENT_FRAGMENT);
         }
         if (info != null) {
-            System.out.println("occ: something went down");
-            System.out.println("occ: " + String.valueOf(info == null));
-            //System.out.println("occ: " + qrScanResult.getID().getIDString());
-
-            if (info != null) {
-                System.out.println("occ: something more went down");
-                //TODO: wait on container
-                //TODO do something with info
-                //SharedPreferences sharedPreferences =
-
-                System.out.println("Token:" + android.util.Base64.encodeToString(info.getToken(), android.util.Base64.NO_WRAP));
-                SharedPreferences sharedPreferences = getContainer().require(ContainerService.KEY_CONTEXT).getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putInt(CoreConstants.NettyConstants.PREF_PORT, info.getPort());
-                editor.putString(CoreConstants.NettyConstants.PREF_HOST, info.getAddress().getHostAddress());
-                editor.putInt(CoreConstants.NettyConstants.PREF_PORT, info.getPort());
-                editor.putString(CoreConstants.SharedPrefs.PREF_TOKEN, android.util.Base64.encodeToString(info.getToken(), android.util.Base64.NO_WRAP));
-                editor.putString(CoreConstants.SharedPrefs.PREF_MASTER_ID, info.getID().getIDString());
-                editor.commit();
-                editor.apply();
-                getContainer().require(Client.KEY).onDiscoverySuccessful(info.getAddress(), info.getPort());
-                ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
-            }
+            SharedPreferences sharedPreferences = getContainer().require(ContainerService.KEY_CONTEXT).getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(CoreConstants.NettyConstants.PREF_PORT, info.getPort());
+            editor.putString(CoreConstants.NettyConstants.PREF_HOST, info.getAddress().getHostAddress());
+            editor.putInt(CoreConstants.NettyConstants.PREF_PORT, info.getPort());
+            editor.putString(CoreConstants.SharedPrefs.PREF_TOKEN, android.util.Base64.encodeToString(info.getToken(), android.util.Base64.NO_WRAP));
+            editor.putString(CoreConstants.SharedPrefs.PREF_MASTER_ID, info.getID().getIDString());
+            editor.commit();
+            getContainer().require(Client.KEY).onDiscoverySuccessful(info.getAddress(), info.getPort());
+            ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         }
     }
 }
