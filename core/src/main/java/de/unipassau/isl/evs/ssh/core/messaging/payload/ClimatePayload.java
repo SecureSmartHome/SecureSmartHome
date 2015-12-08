@@ -14,9 +14,8 @@ public class ClimatePayload implements MessagePayload {
     private String notificationType, moduleName;
     private Module module;
 
-    public ClimatePayload(Module module, double temp1, double temp2, double pressure, double altitude, double humidity,
+    public ClimatePayload(double temp1, double temp2, double pressure, double altitude, double humidity,
                           double uv, int visible, int ir, String notificationType, String moduleName) {
-        this.module = module;
         this.temp1 = temp1;
         this.temp2 = temp2;
         this.pressure = pressure;
