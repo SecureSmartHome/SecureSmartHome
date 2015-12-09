@@ -123,14 +123,14 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         // import data from Hello packet
         assert msg.isMaster;
         final NamingManager namingManager = container.require(NamingManager.KEY);
+        if (!namingManager.isMasterKnown()) {
+            // first connection to master, register certificate for already known DeviceID
+            namingManager.setMasterCertificate(msg.certificate);
+        }
         final DeviceID masterID = namingManager.getMasterID();
         final DeviceID certID = DeviceID.fromCertificate(msg.certificate);
         if (!masterID.equals(certID)) {
             throw new HandshakeException("Server DeviceID " + certID + " did not match my MasterID " + masterID);
-        }
-        if (!namingManager.isMasterKnown()) {
-            // first connection to master, register certificate for already known DeviceID
-            namingManager.setMasterCertificate(msg.certificate);
         }
         if (!namingManager.isMasterKnown()) {
             throw new HandshakeException("Received Hello from a Master, but could not register that Master as mine");

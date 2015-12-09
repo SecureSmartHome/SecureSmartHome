@@ -22,6 +22,7 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterModuleHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterNotificationHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterRoutingTableHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
@@ -33,8 +34,11 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIG
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_SET;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_MODULE_ADD;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_PUSH_WEATHER_INFO;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_SLAVE_REGISTER;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USERINFO_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_WEATHER_INFO;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USER_REGISTER;
 
 /**
  * This Container class manages dependencies needed in the Master part of the architecture.
@@ -57,29 +61,14 @@ public class MasterContainer extends ContainerService {
         register(MasterRegisterDeviceHandler.KEY, new MasterRegisterDeviceHandler());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
-<<<<<<< Temporary merge branch 1
-        incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET,
-                CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
-        incomingDispatcher.registerHandler(new MasterClimateHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_GET,
-                CoreConstants.RoutingKeys.MASTER_WEATHER_INFO);
-        incomingDispatcher.registerHandler(new MasterNotificationHandler(),
-                CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND);
-        incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(), CoreConstants.RoutingKeys.MASTER_USERINFO_GET);
-        incomingDispatcher.registerHandler(new MasterModuleHandler(), CoreConstants.RoutingKeys.MASTER_MODULE_ADD);
-        incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(),
-                CoreConstants.RoutingKeys.MASTER_REGISTER_INIT, CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE);
-        incomingDispatcher.registerHandler(new MasterHolidaySimulationPlannerHandler(),
-                CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET, CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET);
-=======
         incomingDispatcher.registerHandler(new MasterLightHandler(), MASTER_LIGHT_SET, MASTER_LIGHT_GET);
-        incomingDispatcher.registerHandler(new MasterClimateHandler(), MASTER_LIGHT_GET,
-                MASTER_WEATHER_INFO);
-        incomingDispatcher.registerHandler(new MasterNotificationHandler(),
-                MASTER_NOTIFICATION_SEND);
+        incomingDispatcher.registerHandler(new MasterClimateHandler(), MASTER_LIGHT_GET, MASTER_REQUEST_WEATHER_INFO, MASTER_PUSH_WEATHER_INFO );
+        incomingDispatcher.registerHandler(new MasterNotificationHandler(), MASTER_NOTIFICATION_SEND);
         incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(), MASTER_USERINFO_GET, MASTER_DEVICE_CONNECTED);
         incomingDispatcher.registerHandler(new MasterModuleHandler(), MASTER_MODULE_ADD);
-        incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(), MASTER_REGISTER_INIT, MASTER_REGISTER_FINALIZE);
->>>>>>> Temporary merge branch 2
+        incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(), MASTER_USER_REGISTER);
+        incomingDispatcher.registerHandler(new MasterHolidaySimulationPlannerHandler(), MASTER_HOLIDAY_GET);
+        incomingDispatcher.registerHandler(new MasterRoutingTableHandler(), MASTER_SLAVE_REGISTER);
 
         if (!dir.isDirectory() && !dir.mkdirs()) {
             dir = getFilesDir();

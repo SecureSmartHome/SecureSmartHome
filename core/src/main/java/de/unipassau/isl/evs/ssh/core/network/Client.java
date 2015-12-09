@@ -145,9 +145,11 @@ public class Client extends AbstractComponent {
             public void run() {
                 // Connect to TCP if the address of the Server/Master is known and not too many connection attempts have failed
                 final NamingManager namingManager = getContainer().require(NamingManager.KEY);
-                if (!namingManager.isMasterIDKnown()) {
-                    Log.w(TAG, "MasterID is null, waiting for onDiscoverySuccessful(host, port)");
-                } else if (host != null && shouldReconnectTCP()) {
+                //Todo: uncomment with different behaviour for slave and app.
+                //if (!namingManager.isMasterIDKnown()) {
+                //    Log.w(TAG, "MasterID is null, waiting for onDiscoverySuccessful(host, port)");
+                //} else
+                if (host != null && shouldReconnectTCP()) {
                     connectClient(host, port);
                 } else {
                     if (host == null) {
