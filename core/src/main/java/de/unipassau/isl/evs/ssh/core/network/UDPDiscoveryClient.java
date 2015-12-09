@@ -8,7 +8,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
-import java.security.cert.X509Certificate;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -168,22 +167,24 @@ public class UDPDiscoveryClient extends AbstractComponent {
         Log.v(TAG, "sendDiscoveryRequest");
 
         final NamingManager namingManager = requireComponent(NamingManager.KEY);
-        if (!namingManager.isMasterKnown()) {
-            final IllegalStateException e = new IllegalStateException("NamingManager.isMasterKnown() == false");
+        if (!namingManager.isMasterIDKnown()) {
+            final IllegalStateException e = new IllegalStateException("NamingManager.isMasterIDKnown() == false");
             e.fillInStackTrace();
-            Log.w(TAG, "Can't search for Master via UDP discovery when no Master Certificate is available, " +
+            Log.w(TAG, "Can't search for Master via UDP discovery when no Master ID is available, " +
                     "will retry later", e);
             return channel.channel().newFailedFuture(e);
         }
-        final X509Certificate masterCert = namingManager.getMasterCertificate();
         final byte[] header = DISCOVERY_PAYLOAD_REQUEST.getBytes();
-        final byte[] pubKeyEncoded = masterCert.getPublicKey().getEncoded();
+        final byte[] ownIDBytes = namingManager.getOwnID().getIDBytes();
+        final byte[] masterIDBytes = namingManager.getMasterID().getIDBytes();
         final ByteBuf buffer = channel.channel().alloc().buffer(
-                header.length + pubKeyEncoded.length + (Integer.SIZE / Byte.SIZE) * 2);
+                header.length + ownIDBytes.length + masterIDBytes.length + 12);
         buffer.writeInt(header.length);
         buffer.writeBytes(header);
-        buffer.writeInt(pubKeyEncoded.length);
-        buffer.writeBytes(pubKeyEncoded);
+        buffer.writeInt(ownIDBytes.length);
+        buffer.writeBytes(ownIDBytes);
+        buffer.writeInt(masterIDBytes.length);
+        buffer.writeBytes(masterIDBytes);
 
         final InetSocketAddress recipient = new InetSocketAddress(DISCOVERY_HOST, DISCOVERY_PORT);
         final DatagramPacket request = new DatagramPacket(buffer, recipient);
@@ -204,10 +205,10 @@ public class UDPDiscoveryClient extends AbstractComponent {
                 final int dataStart = buffer.readerIndex();
                 final String messageType = readString(buffer);
                 if (DISCOVERY_PAYLOAD_RESPONSE.equals(messageType)) {
-                    InetAddress address = InetAddress.getByName(readString(buffer));
+                    String addressString = readString(buffer);
                     // the address originally sent from the master is discarded, as using the address from which the
                     // message came works even if I'm in a different subnet
-                    address = request.sender().getAddress();
+                    InetAddress address = request.sender().getAddress();
 
                     final int port = buffer.readInt();
                     final int dataEnd = buffer.readerIndex();
@@ -234,11 +235,16 @@ public class UDPDiscoveryClient extends AbstractComponent {
 
         private boolean checkSignature(ByteBuf buffer, int dataStart, int dataEnd) throws UnresolvableNamingException {
             try {
-                Signature signature = Signature.getInstance("ECDSA");
-                signature.initVerify(requireComponent(NamingManager.KEY).getMasterCertificate());
-                signature.update(buffer.nioBuffer(0, dataEnd - dataStart));
-                final byte[] sign = readSign(buffer);
-                return signature.verify(sign);
+                final NamingManager namingManager = requireComponent(NamingManager.KEY);
+                if (namingManager.isMasterKnown()) {
+                    Signature signature = Signature.getInstance("ECDSA");
+                    signature.initVerify(namingManager.getMasterCertificate());
+                    signature.update(buffer.nioBuffer(0, dataEnd - dataStart));
+                    final byte[] sign = readSign(buffer);
+                    return signature.verify(sign);
+                } else {
+                    return true; //trust for now until I received the master cert matching my Master's ID
+                }
             } catch (GeneralSecurityException e) {
                 Log.w(TAG, "Could not validate signature", e);
                 return false;
