@@ -18,6 +18,4 @@
         android:contentDescription="@string/qr_code_description"
         android:padding="@dimen/activity_vertical_margin"
         android:visibility="gone" />
-
-
 </LinearLayout>
