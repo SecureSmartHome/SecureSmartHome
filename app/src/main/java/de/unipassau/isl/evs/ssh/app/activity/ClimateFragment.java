@@ -83,6 +83,9 @@ public class ClimateFragment extends BoundFragment {
             super.notifyDataSetChanged();
         }
 
+        /**
+         * Creates a Map with Modules and links their ClimateStatus to them
+         */
         private void updateModuleList() {
             AppClimateHandler handler = getComponent(AppClimateHandler.KEY);
             if (handler == null) {
@@ -106,16 +109,33 @@ public class ClimateFragment extends BoundFragment {
             });
         }
 
+        /**
+         * With getCount the length of the climateSensorModules List is returned.
+         *
+         * @return Amount of climateSensorModules
+         */
         @Override
         public int getCount() {
             return climateSensorModules.size();
         }
 
+        /**
+         * Gets the Module on position position of the climateSensorModules List.
+         *
+         * @param position of Module in List
+         * @return climateSensorModule on position position
+         */
         @Override
         public Module getItem(int position) {
             return climateSensorModules.get(position);
         }
 
+        /**
+         * Gets the NameID of the Module on position position.
+         *
+         * @param position of Module in List
+         * @return NameID of Module
+         */
         @Override
         public long getItemId(int position) {
             final Module item = getItem(position);
@@ -126,6 +146,14 @@ public class ClimateFragment extends BoundFragment {
             }
         }
 
+        /**
+         * Fills the ClimateFragment with the current SensorData.
+         *
+         * @param position    of Module in List
+         * @param convertView child element of ListView
+         * @param parent      ListView being populated
+         * @return
+         */
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             LinearLayout climateSensorLayout;
@@ -138,11 +166,18 @@ public class ClimateFragment extends BoundFragment {
 
             final Module m = getItem(position);
 
+            /*
+            If there is more than one ClimateSensor, then a line between two blocks of SensorData
+            should be drawn, to visually separate them.
+            */
             if (counter > 2) {
                 View divider = climateSensorLayout.findViewById(R.id.climatesensor_divider);
                 divider.setVisibility(View.VISIBLE);
             }
 
+            /*
+            Draw the WeatherSensorData to the Module which is part of the Fragment.
+             */
             TextView climateSensorView = (TextView) climateSensorLayout.findViewById(R.id.climateSensor);
             String name = m.getName();
             climateSensorView.setText(name);
@@ -180,7 +215,6 @@ public class ClimateFragment extends BoundFragment {
             TextView irView = (TextView) climateSensorLayout.findViewById(R.id.ir);
             int ir = getComponent(AppClimateHandler.KEY).getIr(m);
             irView.setText(Integer.toString(ir) + " cd");
-
 
             counter++;
             return climateSensorLayout;

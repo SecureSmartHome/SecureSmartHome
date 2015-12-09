@@ -20,19 +20,19 @@
 
     </ListView>
 
-    <!--TODO edit @drawable to refresh button-->
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/climate_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
-        android:layout_margin="@dimen/activity_vertical_margin"
-        android:clickable="true"
-        android:elevation="6dp"
-        android:longClickable="false"
-        android:scaleType="center"
-        android:src="@drawable/ic_add"
-        app:borderWidth="0dp"
-        app:pressedTranslationZ="12dp"/>
-
+    <!--TODO edit @drawable to refresh button, add function to refresh Button-->
+    <!--  <android.support.design.widget.FloatingActionButton
+          android:id="@+id/climate_fab"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="bottom|right"
+          android:layout_margin="@dimen/activity_vertical_margin"
+          android:clickable="true"
+          android:elevation="6dp"
+          android:longClickable="false"
+          android:scaleType="center"
+          android:src="@drawable/ic_add"
+          app:borderWidth="0dp"
+          app:pressedTranslationZ="12dp"/>
+  -->
 </FrameLayout>

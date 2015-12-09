@@ -23,7 +23,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
- * AppLightHandler class handles message from and to the
+ * AppClimateHandler class handles message from and to the
  * {@link de.unipassau.isl.evs.ssh.app.activity.ClimateFragment ClimateFragment}
  *
  * @author bucher
@@ -35,15 +35,35 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
     private final Map<Module, ClimateStatus> climateStatusMapping = new HashMap<>();
 
     public AppClimateHandler() {
+        //create a TestWeatherBoard
         Module m = new Module("TestWeatherBoard", new DeviceID("H5f4ahpVmoVL6GKAYqZY7m73k9i9nDCnsiJLbw+0n3E="),
                 CoreConstants.ModuleType.WEATHER_BOARD, new GPIOAccessPoint()); //FIXME resolve DeviceID
         climateStatusMapping.put(m, new ClimateStatus(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0));
     }
 
+    /**
+     * Request current weatherSensor data.
+     *
+     * @param payload MessagePayload
+     * @param message MessageContent
+     */
     public void toggleClimate(ClimatePayload payload, String message) {
         setClimate(payload, message);
     }
 
+    /**
+     * Links the sensorData to a Module. If the data is already linked to the Module, it refreshes the Data.
+     *
+     * @param module   to which the data is linked to
+     * @param temp1    Temperature1
+     * @param temp2    Temperature2
+     * @param pressure AirPressure
+     * @param altitude Altitude
+     * @param humidity Humidity
+     * @param uv       UV radiation
+     * @param ir       IR radiation
+     * @param visible  light intensity
+     */
     private void setCachedStatus(Module module, double temp1, double temp2, double pressure, double altitude, double humidity,
                                  double uv, int ir, int visible) {
         ClimateStatus status = climateStatusMapping.get(module);
@@ -58,6 +78,7 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
         }
     }
 
+    //Getter for SensorData
     public double getTemp1(Module module) {
         final ClimateStatus status = climateStatusMapping.get(module);
         if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
@@ -122,23 +143,34 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
         return status.getIr();
     }
 
+    /**
+     * Map containing all WeatherSensor Modules with their Data.
+     *
+     * @return Map of Modules with SensorData
+     */
     public Map<Module, ClimateStatus> getAllClimateModuleStates() {
         return Collections.unmodifiableMap(climateStatusMapping);
     }
 
     ////Network/////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Sends Message to MasterClimateHandler to request SensorData of Module m.
+     *
+     * @param m Module to request data for
+     */
     private void requestClimateStatus(Module m) {
         ClimateStatus status = climateStatusMapping.get(m);
         ClimatePayload climatePayload = new ClimatePayload(status.getTemp1(), status.getTemp2(),
                 status.getPressure(), status.getAltitude(), status.getHumidity(), status.getUv(),
-                status.getVisible(), status.getIr(), "" , m);
+                status.getVisible(), status.getIr(), "", m);
 
         Message message = new Message(climatePayload);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_GET, message);
+        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO, message);
     }
+
 
     private void setClimate(ClimatePayload payload, String s) {
         ClimatePayload climatePayload = new ClimatePayload(payload, s);
@@ -163,6 +195,11 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
 
     //Lifecycle & Callbacks/////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Handles received Message from MasterClimateHandler. Refreshes SensorData.
+     *
+     * @param message Message to handle.
+     */
     @Override
     public void handle(Message.AddressedMessage message) {
         if (message.getPayload() instanceof ClimatePayload) {
@@ -227,6 +264,18 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
             setStatus(temp1, temp2, pressure, altitude, humidity, uv, ir, visible);
         }
 
+        /**
+         * Sets the current data from the WeatherBoard.
+         *
+         * @param temp1    Temperature1
+         * @param temp2    Temperature2
+         * @param pressure AirPressure
+         * @param altitude Altitude
+         * @param humidity Humidity
+         * @param uv       UV radiation
+         * @param ir       IR radiation
+         * @param visible  light intensity
+         */
         public void setStatus(double temp1, double temp2, double pressure, double altitude, double humidity,
                               double uv, int ir, int visible) {
             this.temp1 = temp1;
