@@ -21,6 +21,7 @@ import de.unipassau.isl.evs.ssh.core.network.handler.PipelinePlug;
 import de.unipassau.isl.evs.ssh.core.network.handler.SignatureChecker;
 import de.unipassau.isl.evs.ssh.core.network.handler.SignatureGenerator;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
+import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakeException;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import io.netty.channel.ChannelFutureListener;
@@ -40,6 +41,10 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_WRITER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.SharedPrefs.PREF_TOKEN;
 
+/**
+ * @author Niko Fink: Handshake Sequence
+ * @author Christoph Fraedrich: Registration
+ */
 public class ClientHandshakeHandler extends ChannelHandlerAdapter {
     private static final String TAG = ClientHandshakeHandler.class.getSimpleName();
 
@@ -91,6 +96,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         assert !namingManager.isMaster();
         ctx.writeAndFlush(new HandshakePacket.Hello(namingManager.getOwnCertificate(), false));
         setState(null, State.EXPECT_HELLO);
+        Log.v(TAG, "Sent Client Hello, expecting Server Hello");
     }
 
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -112,6 +118,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
 
     private void handleHello(ChannelHandlerContext ctx, HandshakePacket.Hello msg) throws GeneralSecurityException {
         setState(State.EXPECT_HELLO, State.EXPECT_CHAP);
+        Log.v(TAG, "Got Server Hello, sending 1. CHAP and awaiting 2. CHAP as response");
 
         // import data from Hello packet
         assert msg.isMaster;
@@ -144,19 +151,20 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
 
         // and send the initial CHAP packet to the master
         new SecureRandom().nextBytes(chapChallenge);
-        ctx.write(new HandshakePacket.CHAP(chapChallenge, null)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+        ctx.writeAndFlush(new HandshakePacket.CHAP(chapChallenge, null)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 
     private void handleChapResponse(ChannelHandlerContext ctx, HandshakePacket.CHAP msg) throws HandshakeException {
         setState(State.EXPECT_CHAP, State.EXPECT_STATE);
+        Log.v(TAG, "Got 2. CHAP, sending 3. CHAP and awaiting Status as response");
 
         if (msg.challenge == null || msg.response == null) {
             throw new HandshakeException("Illegal CHAP Response");
         }
-        if (!Arrays.equals(chapChallenge, msg.challenge)) {
+        if (!Arrays.equals(chapChallenge, msg.response)) {
             throw new HandshakeException("CHAP Packet with invalid response");
         }
-        ctx.write(new HandshakePacket.CHAP(null, msg.challenge)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+        ctx.writeAndFlush(new HandshakePacket.CHAP(null, msg.challenge)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 
     private void handleServerAuthenticationResponse(ChannelHandlerContext ctx, HandshakePacket.ServerAuthenticationResponse msg) throws HandshakeException {
@@ -164,6 +172,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
 
         if (msg.isAuthenticated) {
             setState(State.STATE_RECEIVED, State.FINISHED);
+            Log.v(TAG, "Got State: authenticated, handshake successful");
             handshakeSuccessful(ctx);
         } else {
             final String tokenString = client.getSharedPrefs().getString(PREF_TOKEN, null);
@@ -171,11 +180,13 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
             if (canRegister) {
                 triedRegister = true;
                 setState(State.STATE_RECEIVED, State.EXPECT_STATE);
+                Log.v(TAG, "Got State: unauthenticated, trying Registration");
                 final byte[] token = Base64.decode(tokenString, Base64.NO_WRAP);
 
-                ctx.write(new HandshakePacket.RegistrationRequest(token)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+                ctx.writeAndFlush(new HandshakePacket.RegistrationRequest(token)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
             } else {
                 setState(State.STATE_RECEIVED, State.FAILED);
+                Log.v(TAG, "Got State: unauthenticated and Registration is not possible, handshake failed");
                 handshakeFailed(ctx, msg.message);
             }
         }
@@ -201,7 +212,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
             throw new IllegalStateException("Handshake not finished: " + state);
         }
 
-        Log.e(TAG, "My Master rejected me, did he loose his mind? His message was " + message);
+        Log.e(TAG, "My Master rejected me, did he loose his mind? His message was: " + message);
         ctx.close();
         //TODO show error dialog
     }
@@ -219,20 +230,4 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         EXPECT_HELLO, EXPECT_CHAP, EXPECT_STATE, STATE_RECEIVED, FINISHED, FAILED
     }
 
-    private class HandshakeException extends GeneralSecurityException {
-        public HandshakeException() {
-        }
-
-        public HandshakeException(String detailMessage) {
-            super(detailMessage);
-        }
-
-        public HandshakeException(String detailMessage, Throwable throwable) {
-            super(detailMessage, throwable);
-        }
-
-        public HandshakeException(Throwable throwable) {
-            super(throwable);
-        }
-    }
 }
