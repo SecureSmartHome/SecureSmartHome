@@ -11,6 +11,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.R;
@@ -35,13 +36,12 @@ public class StatusFragment extends BoundFragment {
 
         AppModuleHandler moduleHandler = getComponent(AppModuleHandler.KEY);
 
-        List<Module> modules = null;
+        Set<Module> modules = null;
         List<Slave> slaves = null;
 
         if (moduleHandler != null) {
             modules = moduleHandler.getComponents();
-            // TODO get Slaves
-            slaves = null;
+            slaves = moduleHandler.getSlaves();
         }
 
         if (slaves == null) {
@@ -79,7 +79,7 @@ public class StatusFragment extends BoundFragment {
 
         } else {
             ArrayAdapter<Module> moduleAdapter = new ArrayAdapter<Module>(getActivity().getApplicationContext(),
-                    R.layout.device_status_module_item, modules) {
+                    R.layout.device_status_module_item, modules.toArray(new Module[modules.size()])) {
 
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {

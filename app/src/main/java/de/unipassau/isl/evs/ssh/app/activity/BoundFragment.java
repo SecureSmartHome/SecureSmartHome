@@ -94,4 +94,8 @@ public class BoundFragment extends Fragment {
             return null;
         }
     }
+
+    public boolean isContainerConnected() {
+        return getContainer() != null;
+    }
 }

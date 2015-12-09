@@ -18,6 +18,7 @@ import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppNewModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppRegisterNewDeviceHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
@@ -53,6 +54,7 @@ public class AppContainer extends ContainerService {
         register(AppNotificationHandler.KEY, new AppNotificationHandler());
         register(AppUserConfigurationHandler.KEY, new AppUserConfigurationHandler());
         register(AppNewModuleHandler.KEY, new AppNewModuleHandler());
+        register(AppRegisterNewDeviceHandler.KEY, new AppRegisterNewDeviceHandler());
     }
 
     private void readMasterData() {

@@ -2,12 +2,14 @@ package de.unipassau.isl.evs.ssh.master.handler;
 
 import android.util.Log;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
-import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -16,7 +18,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
-import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
+import de.unipassau.isl.evs.ssh.master.network.Server;
 
 /**
  * The MasterModuleHandler sends updated lists of active Modules to ODROIDs and Clients
@@ -28,32 +30,32 @@ public class MasterModuleHandler extends AbstractMasterHandler {
 
     private static final String TAG = MasterModuleHandler.class.getSimpleName();
 
-    private void updateSlaves() {
-        OutgoingRouter router = getComponent(OutgoingRouter.KEY);
-        Message message = createUpdateMessage();
-
-        for (Slave slave : getComponent(SlaveController.KEY).getSlaves()) {
-            router.sendMessage(slave.getSlaveID(), CoreConstants.RoutingKeys.SLAVE_MODULES_UPDATE, message);
-        }
-    }
-
-    private void updateUserDevices() {
-        OutgoingRouter router = getComponent(OutgoingRouter.KEY);
-        Message message = createUpdateMessage();
-        for (UserDevice user : getComponent(UserManagementController.KEY).getUserDevices()) {
-            router.sendMessage(user.getUserDeviceID(), CoreConstants.RoutingKeys.APP_MODULES_GET, message);
-        }
-    }
-
     private Message createUpdateMessage() {
         SlaveController slaveController = getComponent(SlaveController.KEY);
-        List<Module> components = slaveController.getModules();
         List<Slave> slaves = slaveController.getSlaves();
+        ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
 
-        Message message = new Message(new ModulesPayload(components, slaves));
+        for (Slave slave : slaves) {
+            modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
+        }
+
+        Message message = new Message(new ModulesPayload(modulesAtSlave));
         message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
         return message;
+    }
+
+    private void updateAllClients(){
+       Iterable<DeviceID> connectedClients = requireComponent(Server.KEY).getActiveDevices();
+        for (DeviceID connectedClient : connectedClients) {
+           updateClient(connectedClient);
+        }
+    }
+
+    public void updateClient(DeviceID id) {
+        OutgoingRouter router = getComponent(OutgoingRouter.KEY);
+        Message message = createUpdateMessage();
+        router.sendMessage(id, CoreConstants.RoutingKeys.MODULES_UPDATE, message);
     }
 
     @Override
@@ -63,8 +65,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
             if (message.getPayload() instanceof AddNewModulePayload) {
                 AddNewModulePayload payload = (AddNewModulePayload) message.getPayload();
                 if (handleAddModule(payload.getModule(), message)) {
-                    updateSlaves();
-                    updateUserDevices();
+                    updateAllClients();
 
                     Message reply = new Message(new AddNewModulePayload(null));
                     OutgoingRouter router = getComponent(OutgoingRouter.KEY);
