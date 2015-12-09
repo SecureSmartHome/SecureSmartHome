@@ -127,13 +127,4 @@ public class MasterModuleHandler extends AbstractMasterHandler {
         controller.removeModule(moduleName);
         // TODO send message
     }
-
-    @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-    }
 }
