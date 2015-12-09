@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.drivers.lib;
 
+import android.util.Log;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
@@ -20,25 +21,23 @@ import java.util.concurrent.TimeUnit;
  * @version 0.1
  */
 
-public class ButtonSensor extends AbstractComponent{
+public class ButtonSensor extends AbstractComponent {
     public static final Key<ButtonSensor> KEY = new Key<>(ButtonSensor.class);
-
+    private final String moduleName;
     int address;
     int dummyCount;
-
-    private final String moduleName;
     private Container container;
     private ScheduledFuture future;
 
     /**
      * Constructor of the class representing a push button
      *
-     * @param address where the button is connected to the odroid
+     * @param IoAdress where the button is connected to the odroid
      */
-    public ButtonSensor(int IoAdress, String moduleName) {
+    public ButtonSensor(int IoAdress, String moduleName) throws EvsIoException {
         this.moduleName = moduleName;
         address = IoAdress;
-        dummyCount = 0;
+        EvsIo.registerPin(IoAdress, "in");
     }
 
     /**
@@ -47,14 +46,18 @@ public class ButtonSensor extends AbstractComponent{
      * @return true if the push button is currently pressed
      */
     public boolean isPressed() throws EvsIoException {
-        boolean ret = false;
-        if (dummyCount < 1000) {
+        boolean ret = true;
+        String result = "";
+        result = EvsIo.readValue(address);
+        Log.w("EVS-IO", "EVS-REED:" + result + ":");
+
+
+        if (result.startsWith("1")) {
             ret = false;
-            dummyCount++;
         } else {
             ret = true;
-            dummyCount = 0;
         }
+
         return ret;
     }
 

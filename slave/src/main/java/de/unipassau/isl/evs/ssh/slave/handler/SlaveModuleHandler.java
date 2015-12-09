@@ -28,6 +28,8 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.drivers.lib.ButtonSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.DoorBuzzer;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
+import de.unipassau.isl.evs.ssh.drivers.lib.EvsIo;
+import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.WeatherSensor;
 
@@ -51,7 +53,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
      *                   the SaveContainer. All modules that are in the container but not in the
      *                   list are unregistered.
      */
-    public void updateModule(List<Module> components) throws WrongAccessPointException {
+    public void updateModule(List<Module> components) throws WrongAccessPointException, EvsIoException {
         if (this.components == null) {
             Set<Module> newComponents = Sets.newHashSet(components);
             registerModules(newComponents);
@@ -67,7 +69,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         this.components = components;
     }
 
-    private void registerModules(Set<Module> componentsToAdd) throws WrongAccessPointException {
+    private void registerModules(Set<Module> componentsToAdd) throws WrongAccessPointException, EvsIoException {
         for (Module module : componentsToAdd) {
             Class<? extends Component> clazz = getDriverClass(module);
             if (clazz.getName().equals(ButtonSensor.class.getName())) {
@@ -84,7 +86,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         }
     }
 
-    private void registerButtonSensor(Module buttonSensor) throws WrongAccessPointException {
+    private void registerButtonSensor(Module buttonSensor) throws WrongAccessPointException, EvsIoException {
         String moduleName = buttonSensor.getName();
         Key<ButtonSensor> key = new Key<>(ButtonSensor.class, moduleName);
         if (!(buttonSensor.getModuleAccessPoint() instanceof GPIOAccessPoint)) {
@@ -94,7 +96,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         getContainer().register(key, new ButtonSensor(accessPoint.getPort(), moduleName));
     }
 
-    private void registerDoorBuzzer(Module doorBuzzer) throws WrongAccessPointException {
+    private void registerDoorBuzzer(Module doorBuzzer) throws WrongAccessPointException, EvsIoException {
         String moduleName = doorBuzzer.getName();
         Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, moduleName);
         if (!(doorBuzzer.getModuleAccessPoint() instanceof GPIOAccessPoint)) {
@@ -104,7 +106,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         getContainer().register(key, new DoorBuzzer(accessPoint.getPort()));
     }
 
-    private void registerReedSensor(Module reedSensor) throws WrongAccessPointException {
+    private void registerReedSensor(Module reedSensor) throws WrongAccessPointException, EvsIoException {
         String moduleName = reedSensor.getName();
         Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
         if (!(reedSensor.getModuleAccessPoint() instanceof GPIOAccessPoint)) {
@@ -181,7 +183,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
                 List<Module> modules = payload.getModulesAtSlave(myself);
                 try {
                     updateModule(modules);
-                } catch (WrongAccessPointException e) {
+                } catch (WrongAccessPointException | EvsIoException e) {
                     getContainer().require(OutgoingRouter.KEY).sendMessage(message.getFromID(),
                             message.getHeader(Message.HEADER_REPLY_TO_KEY),
                             new Message(new MessageErrorPayload(message.getPayload())));
@@ -215,6 +217,9 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
     }
 
     private class WrongAccessPointException extends Exception {
-
+        public WrongAccessPointException() { super(); }
+        public WrongAccessPointException(String message) { super(message); }
+        public WrongAccessPointException(String message, Throwable cause) { super(message, cause); }
+        public WrongAccessPointException(Throwable cause) { super(cause); }
     }
 }

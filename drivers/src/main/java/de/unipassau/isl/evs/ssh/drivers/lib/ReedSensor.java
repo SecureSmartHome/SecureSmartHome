@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.drivers.lib;
 
+import android.util.Log;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
@@ -18,17 +19,14 @@ import java.util.concurrent.TimeUnit;
  * Class to get the values form a window/door sensor
  *
  * @author Wolfram Gottschlich
- * @author Chris
- * @version 1.0
+ * @version 0.1
  */
 
 public class ReedSensor extends AbstractComponent {
     public static final Key<ReedSensor> KEY = new Key<>(ReedSensor.class);
-
+    private final String moduleName;
     int address;
     int dummyCount;
-
-    private final String moduleName;
     private Container container;
     private ScheduledFuture future;
 
@@ -36,12 +34,10 @@ public class ReedSensor extends AbstractComponent {
      * Constructor of the class representing door and window sensors
      *
      * @param IoAdress where the sensor is connected to the odroid
-     * @param moduleName
      */
-    public ReedSensor(int IoAdress, String moduleName) {
+    public ReedSensor(int IoAdress, String moduleName) throws EvsIoException {
         this.moduleName = moduleName;
-        address = IoAdress;
-        dummyCount = 0;
+        EvsIo.registerPin(IoAdress, "in");
     }
 
     /**
@@ -51,13 +47,17 @@ public class ReedSensor extends AbstractComponent {
      */
     public boolean isOpen() throws EvsIoException {
         boolean ret = true;
-        if (dummyCount < 5) {
-            ret = false;
-            dummyCount++;
-        } else {
+        String result = "";
+        result = EvsIo.readValue(address);
+        Log.w("EVS-IO", "EVS-REED:" + result + ":");
+
+
+        if (result.startsWith("1")) {
             ret = true;
-            dummyCount = 0;
+        } else {
+            ret = false;
         }
+
         return ret;
     }
 
