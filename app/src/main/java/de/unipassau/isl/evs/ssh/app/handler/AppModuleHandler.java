@@ -68,10 +68,10 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
     };
 
     private Set<Module> components;
-    private Set<Slave> slaves;
+    private List<Slave> slaves;
     private ListMultimap<Slave, Module> modulesAtSlave;
 
-    private void updateList(Set<Module> components, Set<Slave> slaves, ListMultimap<Slave, Module> modulesAtSlave) {
+    private void updateList(Set<Module> components, List<Slave> slaves, ListMultimap<Slave, Module> modulesAtSlave) {
         this.components = components;
         this.slaves = slaves;
         this.modulesAtSlave = modulesAtSlave;
@@ -133,7 +133,7 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
             if (message.getPayload() instanceof ModulesPayload) {
                 ModulesPayload payload = (ModulesPayload) message.getPayload();
                 Set<Module> modules = payload.getModules();
-                Set<Slave> slaves = payload.getSlaves();
+                List<Slave> slaves = payload.getSlaves();
                 ListMultimap<Slave, Module> modulesAtSlave = payload.getModulesAtSlaves();
                 updateList(modules, slaves, modulesAtSlave);
             } else {
@@ -166,12 +166,14 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
     @Override
     public void init(Container container) {
         super.init(container);
-        requireComponent(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.APP_MODULES_GET);
+        requireComponent(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.APP_MODULES_GET,
+                CoreConstants.RoutingKeys.MODULES_UPDATE);
     }
 
     @Override
     public void destroy() {
-        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.APP_MODULES_GET);
+        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.APP_MODULES_GET,
+                CoreConstants.RoutingKeys.MODULES_UPDATE);
         super.destroy();
     }
 }

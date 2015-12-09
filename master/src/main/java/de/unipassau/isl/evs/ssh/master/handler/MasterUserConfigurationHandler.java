@@ -13,16 +13,21 @@ import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
+import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 
@@ -39,7 +44,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         if (message.getPayload() instanceof UserDeviceInformationPayload) {
-            sendUserInfoUpdate(message);
+            sendUpdateToUserDevice(message.getFromID());
         } else if (message.getPayload() instanceof UserDeviceEditPayload) {
             executeUserDeviceEdit(message);
         } else if (message.getPayload() instanceof DeviceConnectedPayload) {
@@ -51,16 +56,11 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 
     private void sendUpdateToUserDevice(DeviceID id) {
         Log.v(TAG, "sendUpdateToUser: " + id.getIDString());
-        final Message messageToSend = new Message(generatePayload());
-        sendMessage(id, CoreConstants.RoutingKeys.APP_USERINFO_GET, messageToSend);
+        final Message userDeviceInformationMessage = new Message(generateUserDeviceInformationPayload());
+        sendMessage(id, CoreConstants.RoutingKeys.APP_USERINFO_GET, userDeviceInformationMessage);
+        final Message moduleInformationMessage = new Message(generateModuleInformationPayload());
+        sendMessage(id, CoreConstants.RoutingKeys.MODULES_UPDATE, moduleInformationMessage);
     }
-
-    private void sendUserInfoUpdate(Message.AddressedMessage message) {
-        final Message messageToSend = new Message(generatePayload());
-        messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
-        sendMessage(message.getFromID(), CoreConstants.RoutingKeys.APP_USERINFO_GET, messageToSend);
-    }
-
     private void executeUserDeviceEdit(Message.AddressedMessage message) {
         UserDeviceEditPayload payload = (UserDeviceEditPayload) message.getPayload();
 
@@ -101,7 +101,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 }
                 break;
         }
-        sendUserInfoUpdate(message);
+        sendUpdateToUserDevice(message.getFromID());
     }
 
     private void removeUserDevice(UserDeviceEditPayload payload) {
@@ -150,7 +150,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         }
     }
 
-    private UserDeviceInformationPayload generatePayload() {
+    private UserDeviceInformationPayload generateUserDeviceInformationPayload() {
         final PermissionController permissionController = requireComponent(PermissionController.KEY);
         final List<Group> groups = getContainer().require(UserManagementController.KEY).getGroups();
         final List<UserDevice> userDevices = getContainer().require(UserManagementController.KEY).getUserDevices();
@@ -183,4 +183,17 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 
         return payload;
     }
+
+    private MessagePayload generateModuleInformationPayload() {
+        SlaveController slaveController = getComponent(SlaveController.KEY);
+        List<Slave> slaves = slaveController.getSlaves();
+        ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
+
+        for (Slave slave : slaves) {
+            modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
+        }
+
+        return new ModulesPayload(modulesAtSlave, slaves);
+    }
+
 }

@@ -42,10 +42,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
             modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
         }
 
-        Message message = new Message(new ModulesPayload(modulesAtSlave));
-        message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
-
-        return message;
+        return new Message(new ModulesPayload(modulesAtSlave, slaves));
     }
 
     private void updateAllClients(){
