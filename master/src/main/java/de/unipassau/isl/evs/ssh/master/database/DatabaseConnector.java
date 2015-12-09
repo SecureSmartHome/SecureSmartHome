@@ -155,60 +155,62 @@ public class DatabaseConnector extends AbstractComponent {
                 + "DROP TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + ";";
 
+        private String[] binaryPermissions = new String[]{
+                DatabaseContract.Permission.Values.ADD_ORDROID,
+                DatabaseContract.Permission.Values.RENAME_ORDROID,
+                DatabaseContract.Permission.Values.DELETE_ORDROID,
+                DatabaseContract.Permission.Values.ADD_SENSOR,
+                DatabaseContract.Permission.Values.RENAME_SENSOR,
+                DatabaseContract.Permission.Values.DELETE_SENSOR,
+                DatabaseContract.Permission.Values.START_HOLIDAY_SIMULATION,
+                DatabaseContract.Permission.Values.STOP_HOLIDAY_SIMULATION,
+                DatabaseContract.Permission.Values.ADD_USER,
+                DatabaseContract.Permission.Values.DELETE_USER,
+                DatabaseContract.Permission.Values.CHANGE_USER_NAME,
+                DatabaseContract.Permission.Values.CHANGE_USER_GROUP,
+                DatabaseContract.Permission.Values.GRANT_USER_RIGHT,
+                DatabaseContract.Permission.Values.WITHDRAW_USER_RIGHT,
+                DatabaseContract.Permission.Values.ADD_GROUP,
+                DatabaseContract.Permission.Values.DELETE_GROUP,
+                DatabaseContract.Permission.Values.CHANGE_GROUP_NAME,
+                DatabaseContract.Permission.Values.SHOW_GROUP_MEMBER,
+                DatabaseContract.Permission.Values.CHANGE_GROUP_TEMPLATE,
+                DatabaseContract.Permission.Values.CREATE_TEMPLATE,
+                DatabaseContract.Permission.Values.DELETE_TEMPLATE,
+                DatabaseContract.Permission.Values.EDIT_TEMPLATE,
+                DatabaseContract.Permission.Values.SHOW_TEMPLATE_PERMISSION,
+                CoreConstants.NotificationTypes.ODROID_ADDED,
+                CoreConstants.NotificationTypes.HUMIDITY_WARNING,
+                CoreConstants.NotificationTypes.BRIGHTNESS_WARNING,
+                CoreConstants.NotificationTypes.HOLIDAY_MODE_SWITCHED_ON,
+                CoreConstants.NotificationTypes.HOLIDAY_MODE_SWITCHED_OFF,
+                CoreConstants.NotificationTypes.SYSTEM_HEALTH_WARNING,
+                CoreConstants.NotificationTypes.BELL_RANG,
+                CoreConstants.NotificationTypes.WEATHER_WARNING,
+                CoreConstants.NotificationTypes.DOOR_UNLATCHED,
+                CoreConstants.NotificationTypes.DOOR_LOCKED,
+                CoreConstants.NotificationTypes.DOOR_UNLOCKED
+        };
+
+        private String[] defaultTemplates = {"Default_Template", "Parents_Template",
+                "Children_Template", "Guests_Template"};
+        private String[] groupNames = {MasterRegisterDeviceHandler.NO_GROUP, "Parents", "Children", "Guests"};
+
+
         public DBOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
         private void insertPermissions(SQLiteDatabase db) {
-            String[] binaryPermissions = new String[]{
-                    DatabaseContract.Permission.Values.ADD_ORDROID,
-                    DatabaseContract.Permission.Values.RENAME_ORDROID,
-                    DatabaseContract.Permission.Values.DELETE_ORDROID,
-                    DatabaseContract.Permission.Values.ADD_SENSOR,
-                    DatabaseContract.Permission.Values.RENAME_SENSOR,
-                    DatabaseContract.Permission.Values.DELETE_SENSOR,
-                    DatabaseContract.Permission.Values.START_HOLIDAY_SIMULATION,
-                    DatabaseContract.Permission.Values.STOP_HOLIDAY_SIMULATION,
-                    DatabaseContract.Permission.Values.ADD_USER,
-                    DatabaseContract.Permission.Values.DELETE_USER,
-                    DatabaseContract.Permission.Values.CHANGE_USER_NAME,
-                    DatabaseContract.Permission.Values.CHANGE_USER_GROUP,
-                    DatabaseContract.Permission.Values.GRANT_USER_RIGHT,
-                    DatabaseContract.Permission.Values.WITHDRAW_USER_RIGHT,
-                    DatabaseContract.Permission.Values.ADD_GROUP,
-                    DatabaseContract.Permission.Values.DELETE_GROUP,
-                    DatabaseContract.Permission.Values.CHANGE_GROUP_NAME,
-                    DatabaseContract.Permission.Values.SHOW_GROUP_MEMBER,
-                    DatabaseContract.Permission.Values.CHANGE_GROUP_TEMPLATE,
-                    DatabaseContract.Permission.Values.CREATE_TEMPLATE,
-                    DatabaseContract.Permission.Values.DELETE_TEMPLATE,
-                    DatabaseContract.Permission.Values.EDIT_TEMPLATE,
-                    DatabaseContract.Permission.Values.SHOW_TEMPLATE_PERMISSION,
-                    CoreConstants.NotificationTypes.ODROID_ADDED,
-                    CoreConstants.NotificationTypes.HUMIDITY_WARNING,
-                    CoreConstants.NotificationTypes.BRIGHTNESS_WARNING,
-                    CoreConstants.NotificationTypes.HOLIDAY_MODE_SWITCHED_ON,
-                    CoreConstants.NotificationTypes.HOLIDAY_MODE_SWITCHED_OFF,
-                    CoreConstants.NotificationTypes.SYSTEM_HEALTH_WARNING,
-                    CoreConstants.NotificationTypes.BELL_RANG,
-                    CoreConstants.NotificationTypes.WEATHER_WARNING,
-                    CoreConstants.NotificationTypes.DOOR_UNLATCHED,
-                    CoreConstants.NotificationTypes.DOOR_LOCKED,
-                    CoreConstants.NotificationTypes.DOOR_UNLOCKED
-            };
-
             for (String permission : binaryPermissions) {
                 ContentValues values = new ContentValues(1);
                 values.put(DatabaseContract.Permission.COLUMN_NAME, permission);
                 db.insert(DatabaseContract.Permission.TABLE_NAME, null, values);
             }
+
         }
 
-        private void insertDefaults(SQLiteDatabase db) {
-            String[] defaultTemplates = {"Default_Template", "Parents_Template",
-                    "Children_Template", "Guests_Template", "Admin_Template"};
-            String[] groupNames = {MasterRegisterDeviceHandler.NO_GROUP, "Parents", "Children", "Guests"};
-
+        private void insertGroups(SQLiteDatabase db) {
             for (String defaultTemplate : defaultTemplates) {
                 ContentValues values = new ContentValues(1);
                 values.put(DatabaseContract.PermissionTemplate.COLUMN_NAME, defaultTemplate);
@@ -223,6 +225,38 @@ public class DatabaseConnector extends AbstractComponent {
             }
         }
 
+        private void fillTemplates(SQLiteDatabase db) {
+            final int parentsTemplateID = 2;
+            for (int i = 0; i < binaryPermissions.length; i++) {
+                ContentValues values = new ContentValues(2);
+                values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID, i + 1);
+                values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID, parentsTemplateID);
+                db.insert(DatabaseContract.ComposedOfPermission.TABLE_NAME, null, values);
+            }
+
+            int[] childrenPermissionsIDs = new int[]{25, 26, 27, 28, 29, 30, 31, 32, 33, 34};
+
+            final int childrenTemplateID = 3;
+            final int guestsTemplateID = 4;
+            for (int permission : childrenPermissionsIDs) {
+                ContentValues values = new ContentValues(2);
+                values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID, permission);
+                values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID, childrenTemplateID);
+                db.insert(DatabaseContract.ComposedOfPermission.TABLE_NAME, null, values);
+
+                values = new ContentValues(2);
+                values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID, permission);
+                values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID, guestsTemplateID);
+                db.insert(DatabaseContract.ComposedOfPermission.TABLE_NAME, null, values);
+            }
+        }
+
+        private void insertDefaults(SQLiteDatabase db) {
+            insertPermissions(db);
+            insertGroups(db);
+            fillTemplates(db);
+        }
+
         private void execSQLScript(String script, SQLiteDatabase db) {
             String[] statements = script.split("\\;");
             for (String statement : statements) {
@@ -235,9 +269,7 @@ public class DatabaseConnector extends AbstractComponent {
         public void onCreate(SQLiteDatabase db) {
             Log.v(TAG, "creating Database");
             execSQLScript(SQL_CREATE_DB, db);
-            insertPermissions(db);
             insertDefaults(db);
-
         }
 
         @Override

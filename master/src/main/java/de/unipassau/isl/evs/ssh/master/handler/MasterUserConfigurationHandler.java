@@ -174,7 +174,6 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             userHasPermissions.putAll(userDevice, permissionController.getPermissionsOfUserDevice(userDevice.getUserDeviceID()));
         }
 
-
         UserDeviceInformationPayload payload = new UserDeviceInformationPayload(
                 ImmutableListMultimap.copyOf(userHasPermissions),
                 ImmutableListMultimap.copyOf(groupDeviceMapping),
