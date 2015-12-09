@@ -12,7 +12,6 @@ import com.google.zxing.WriterException;
 import java.io.Serializable;
 
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
@@ -28,7 +27,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTR
  */
 public class MasterQRCodeActivity extends BoundActivity {
     /**
-     * Used to scale the qr-code.
+     * Used to scale the QR-Code.
      */
     private static final int SCALE_QRCODE = 35;
     /**
@@ -59,21 +58,6 @@ public class MasterQRCodeActivity extends BoundActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public Container getContainer() {
-        return super.getContainer();
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qrcode);
@@ -82,7 +66,7 @@ public class MasterQRCodeActivity extends BoundActivity {
         bitmap = createQRCodeBitmap();
 
         //Workaround to scale QR-Code
-        //Makes bitmap bigger than the screen. The imageview adjusts the size itself.
+        //Makes bitmap bigger than the screen. The ImageView adjusts the size itself.
         bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * SCALE_QRCODE, bitmap.getHeight() * SCALE_QRCODE, false);
 
         if (bitmap != null) {
@@ -94,10 +78,5 @@ public class MasterQRCodeActivity extends BoundActivity {
         if (text != null) {
             textview.setText(text);
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
     }
 }

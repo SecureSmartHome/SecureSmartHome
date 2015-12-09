@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.google.zxing.WriterException;
 
@@ -13,14 +12,21 @@ import java.io.Serializable;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
-import de.unipassau.isl.evs.ssh.core.container.Container; import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 import de.unipassau.isl.evs.ssh.slave.R;
 import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
 
 /**
+ * SlaveQRCodeActivity to display a QR-Code in the slaves UI. This is used to register new slaves to the system.
+ *
  * @author Wolfgang Popp.
  */
 public class SlaveQRCodeActivity extends BoundActivity {
+    /**
+     * Used to scale the QR-Code.
+     */
+    private static final int SCALE_QRCODE = 35;
+
     /**
      * The QR-Code which will be displayed.
      */
@@ -49,37 +55,20 @@ public class SlaveQRCodeActivity extends BoundActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public Container getContainer() {
-        return super.getContainer();
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qrcode);
 
         ImageView imageview = ((ImageView) findViewById(R.id.qrcode_activity_qr_code));
         bitmap = createQRCodeBitmap();
-        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 8, bitmap.getHeight() * 8, false);
+
+        //Workaround to scale QR-Code
+        //Makes bitmap bigger than the screen. The ImageView adjusts the size itself.
+        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * SCALE_QRCODE, bitmap.getHeight() * SCALE_QRCODE, false);
 
         if (bitmap != null) {
             imageview.setImageBitmap(bitmap);
             imageview.setVisibility(View.VISIBLE);
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
     }
 }
