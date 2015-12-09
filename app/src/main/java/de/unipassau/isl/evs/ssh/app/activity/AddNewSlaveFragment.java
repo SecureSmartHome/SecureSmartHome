@@ -16,7 +16,9 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 
 /**
- * @author Wolfgang Popp.
+ * TODO add javadoc
+ *
+ * @author Wolfgang Popp
  */
 public class AddNewSlaveFragment extends ScanQRFragment {
     private static final String TAG = AddNewSlaveFragment.class.getSimpleName();
@@ -80,11 +82,5 @@ public class AddNewSlaveFragment extends ScanQRFragment {
             info = null;
             ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         }
-    }
-
-
-    @Override
-    public void onContainerDisconnected() {
-        super.onContainerDisconnected();
     }
 }

@@ -1,6 +1,5 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
-import android.app.Activity;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;

@@ -24,6 +24,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 
 /**
+ * TODO add javadoc
  * The AppUserConfigurationHandler
  *
  * @author Wolfgang Popp
@@ -37,10 +38,6 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
     private List<Group> allGroups;
 
     private List<UserInfoListener> listeners = new LinkedList<>();
-
-    public interface UserInfoListener {
-        void userInfoUpdated();
-    }
 
     public void addUserInfoListener(AppUserConfigurationHandler.UserInfoListener listener) {
         listeners.add(listener);
@@ -152,10 +149,6 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
         sendEditMessage(payload);
     }
 
-    public void initiateAddUser(UserDevice user) {
-        //TODO
-    }
-
     public void removeGroup(Group group) {
         GroupEditPayload payload = GroupEditPayload.newRemoveGroupPayload(group);
         sendEditMessage(payload);
@@ -184,5 +177,9 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
     public void removeUserDevice(UserDevice userDevice) {
         UserDeviceEditPayload payload = UserDeviceEditPayload.newRemoveUserPayload(userDevice);
         sendEditMessage(payload);
+    }
+
+    public interface UserInfoListener {
+        void userInfoUpdated();
     }
 }

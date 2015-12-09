@@ -25,7 +25,6 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
@@ -49,16 +48,6 @@ public class ListUserDeviceFragment extends BoundFragment {
      * The group the fragment is created for.
      */
     private Group group;
-
-    @Override
-    public void onContainerConnected(Container container) {
-        super.onContainerConnected(container);
-    }
-
-    @Override
-    public void onContainerDisconnected() {
-        super.onContainerDisconnected();
-    }
 
     @Nullable
     @Override

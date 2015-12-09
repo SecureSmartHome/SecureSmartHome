@@ -35,15 +35,14 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 public class ClimateFragment extends BoundFragment {
     private static final String TAG = ClimateFragment.class.getSimpleName();
     private ClimateListAdapter adapter;
-    private ListView listView;
-    private int counter = 0;
-
     private final AppClimateHandler.ClimateHandlerListener listener = new AppClimateHandler.ClimateHandlerListener() {
         @Override
         public void statusChanged(Module module) {
             adapter.notifyDataSetChanged();
         }
     };
+    private ListView listView;
+    private int counter = 0;
 
     @Override
     public void onContainerConnected(Container container) {
@@ -168,7 +167,7 @@ public class ClimateFragment extends BoundFragment {
 
             /*
             If there is more than one ClimateSensor, then a line between two blocks of SensorData
-            should be drawn, to visually separate them.
+            should be drawn, to separate them visually.
             */
             if (counter > 2) {
                 View divider = climateSensorLayout.findViewById(R.id.climatesensor_divider);

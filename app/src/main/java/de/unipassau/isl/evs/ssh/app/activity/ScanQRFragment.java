@@ -11,11 +11,13 @@ import java.io.IOException;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 
 /**
+ * TODO add javadoc
+ *
  * @author Wolfgang Popp.
  */
 public class ScanQRFragment extends BoundFragment {
-    protected static final int REQUEST_CODE_SCAN_QR = 1;
     public static final String SCAN_RESULT = "SCAN_RESULT";
+    protected static final int REQUEST_CODE_SCAN_QR = 1;
 
     protected void requestScanQRCode() {
         try {
