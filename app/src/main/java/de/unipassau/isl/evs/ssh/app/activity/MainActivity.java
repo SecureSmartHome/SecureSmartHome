@@ -1,9 +1,9 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
-import android.content.SharedPreferences;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -21,7 +21,6 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
-import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.SharedPrefs.PREF_MASTER_ID;
@@ -72,6 +71,15 @@ public class MainActivity extends BoundActivity
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //check intent if a specific fragment should be inflated when App is opened
+        if (getIntent().getAction().equals("ClimateFragment")) {
+            showFragmentByClass(ClimateFragment.class);
+        } else if (getIntent().getAction().equals("StatusFragment")) {
+            showFragmentByClass(StatusFragment.class);
+        } else if (getIntent().getAction().equals("LightFragment")) {
+            showFragmentByClass(LightFragment.class);
+        }
 
         //Initialise fragmentTransaction
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
