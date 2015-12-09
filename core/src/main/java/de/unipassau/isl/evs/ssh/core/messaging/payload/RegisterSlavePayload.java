@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
+import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
@@ -8,6 +9,11 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 public class RegisterSlavePayload {
     private String name;
     private DeviceID slaveID;
+
+    public RegisterSlavePayload(Slave slave) {
+        this.name = slave.getName();
+        this.slaveID = slave.getSlaveID();
+    }
 
     public RegisterSlavePayload(String name, DeviceID slaveID) {
         this.name = name;

@@ -194,6 +194,8 @@ public class MainActivity extends BoundActivity
             clazz = AddModuleFragment.class;
         } else if (id == R.id.light_fab) {
             clazz = AddModuleFragment.class;
+        } else if (id == R.id.nav_add_odroid) {
+            clazz = AddNewSlaveFragment.class;
         } else {
             throw new IllegalArgumentException("Unknown id: " + id);
         }
