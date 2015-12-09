@@ -24,7 +24,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PE
 public abstract class IncomingDispatcher extends ChannelHandlerAdapter implements Component {
     public static final Key<IncomingDispatcher> KEY = new Key<>(IncomingDispatcher.class);
 
-    public SetMultimap<String, MessageHandler> mappings = HashMultimap.create();
+    protected final SetMultimap<String, MessageHandler> mappings = HashMultimap.create();
     private Container container;
 
     @Override

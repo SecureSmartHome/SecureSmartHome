@@ -2,6 +2,9 @@ package de.unipassau.isl.evs.ssh.master.handler;
 
 import android.util.Log;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
@@ -15,6 +18,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+import de.unipassau.isl.evs.ssh.master.network.Server;
 
 /**
  * The MasterModuleHandler sends updated lists of active Modules to ODROIDs and Clients
@@ -28,17 +32,21 @@ public class MasterModuleHandler extends AbstractMasterHandler {
 
     private Message createUpdateMessage() {
         SlaveController slaveController = getComponent(SlaveController.KEY);
-        List<Module> components = slaveController.getModules();
         List<Slave> slaves = slaveController.getSlaves();
+        ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
 
-        Message message = new Message(new ModulesPayload(components, slaves));
+        for (Slave slave : slaves) {
+            modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
+        }
+
+        Message message = new Message(new ModulesPayload(modulesAtSlave));
         message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
         return message;
     }
 
     private void updateAllClients(){
-       Iterable<DeviceID> connectedClients = null;// TODO
+       Iterable<DeviceID> connectedClients = requireComponent(Server.KEY).getActiveDevices();
         for (DeviceID connectedClient : connectedClients) {
            updateClient(connectedClient);
         }

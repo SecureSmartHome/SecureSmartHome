@@ -1,13 +1,17 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
@@ -25,6 +29,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
+import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.DELETE_USERDEVICE_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.EDIT_PERMISSION_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Fragment_Arguments.GROUP_ARGUMENT_FRAGMENT;
 
@@ -76,6 +81,17 @@ public class ListUserDeviceFragment extends BoundFragment {
                                                   }
                                               }
         );
+        userDeviceList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                UserDevice item = adapter.getItem(position);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(DELETE_USERDEVICE_DIALOG, item);
+                createDeleteUserDeviceDialog(bundle);
+                return true;
+
+            }
+        });
 
         FloatingActionButton fab = (FloatingActionButton) root.findViewById(R.id.listuserdevice_fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -89,6 +105,31 @@ public class ListUserDeviceFragment extends BoundFragment {
         userDeviceList.setAdapter(adapter);
 
         return root;
+    }
+
+    /**
+     * Creates and returns a dialogs that gives the user the option to delete a user device.
+     */
+    private Dialog createDeleteUserDeviceDialog(Bundle bundle) {
+        final UserDevice userDevice = (UserDevice) bundle.getSerializable(EDIT_PERMISSION_DIALOG);
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_editgroup, null, false);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        final AlertDialog dialog = builder.create();
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        builder.setMessage(R.string.deleteuserdevice_dialog_title + " " + userDevice.getName() + "?")
+                .setView(dialogView)
+                .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        getComponent(AppUserConfigurationHandler.KEY).removeUserDevice(userDevice);
+                    }
+                })
+                .setNegativeButton(R.string.revoke, null);
+        return dialog;
     }
 
 

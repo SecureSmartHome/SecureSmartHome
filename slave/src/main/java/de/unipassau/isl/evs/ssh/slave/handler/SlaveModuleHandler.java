@@ -16,12 +16,15 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.drivers.lib.ButtonSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.DoorBuzzer;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
@@ -174,7 +177,8 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         if (routingKey.equals(CoreConstants.RoutingKeys.MODULES_UPDATE)) {
             if (message.getPayload() instanceof ModulesPayload) {
                 ModulesPayload payload = (ModulesPayload) message.getPayload();
-                List<Module> modules = payload.getModules();
+                DeviceID myself = requireComponent(NamingManager.KEY).getOwnID();
+                List<Module> modules = payload.getModulesAtSlave(myself);
                 try {
                     updateModule(modules);
                 } catch (WrongAccessPointException e) {

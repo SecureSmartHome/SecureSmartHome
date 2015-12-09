@@ -1,7 +1,10 @@
 package de.unipassau.isl.evs.ssh.master.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,12 +19,12 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.InitRegisterUserDevicePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
@@ -141,35 +144,39 @@ public class MainActivity extends BoundActivity {
 
         requireComponent(IncomingDispatcher.KEY).registerHandler(handler, "/demo");
 
-        // start MasterQRCodeActivity when no devices are registered yet
+        showRegisterQROnFirstBoot();
+    }
+
+    /**
+     * start MasterQRCodeActivity when no devices are registered yet
+     */
+    private void showRegisterQROnFirstBoot() {
         if (hasNoRegisteredDevice()) {
             Intent intent = new Intent(this, MasterQRCodeActivity.class);
             QRDeviceInformation deviceInformation = null;
+            Context ctx = requireComponent(ContainerService.KEY_CONTEXT);
+            WifiManager wifiManager = ((WifiManager) ctx.getSystemService(Context.WIFI_SERVICE));
+            String ipAddress = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
+            UserDevice userDevice = new UserDevice(
+                    MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.NO_GROUP,
+                    DeviceID.NO_DEVICE
+            );
             try {
                 deviceInformation = new QRDeviceInformation(
-                        (Inet4Address) Inet4Address.getByName("192.168.0.103"),
+                        (Inet4Address) Inet4Address.getByName(ipAddress),
                         CoreConstants.NettyConstants.DEFAULT_PORT,
-                        getContainer().require(NamingManager.KEY).getMasterID(),
-                        QRDeviceInformation.getRandomToken()
+                        requireComponent(NamingManager.KEY).getMasterID(),
+                        requireComponent(MasterRegisterDeviceHandler.KEY).generateNewRegisterToken(userDevice)
                 );
             } catch (UnknownHostException e) {
                 //Todo: handle error
             }
-            StringBuilder hostNameBuilder = new StringBuilder();
-            for (byte b : deviceInformation.getAddress().getAddress()) {
-                hostNameBuilder.append(b + 128).append('.');
-            }
-            hostNameBuilder.deleteCharAt(hostNameBuilder.length() - 1);
-            Log.i(TAG, "\"HostNAME:\" + hostNameBuilder.toString()");
-            Log.i(TAG, "ID:" + deviceInformation.getID());
-            Log.i(TAG, "Port:" + deviceInformation.getPort());
-            Log.i(TAG, "Token:" + android.util.Base64.encodeToString(deviceInformation.getToken(), android.util.Base64.NO_WRAP));
-
+            Log.v(TAG, "HostNAME: " + deviceInformation.getAddress().getHostAddress());
+            Log.v(TAG, "ID: " + deviceInformation.getID());
+            Log.v(TAG, "Port: " + deviceInformation.getPort());
+            Log.v(TAG, "Token: " + android.util.Base64.encodeToString(deviceInformation.getToken(),
+                    android.util.Base64.NO_WRAP));
             //NoDevice will allow any device to use this token
-            Message message = new Message(new InitRegisterUserDevicePayload(deviceInformation.getToken(),
-                    new UserDevice(MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.NO_GROUP,
-                            DeviceID.NO_DEVICE)));
-            getContainer().require(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.MASTER_REGISTER_INIT, message);
             intent.putExtra(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
             startActivity(intent);
         }
