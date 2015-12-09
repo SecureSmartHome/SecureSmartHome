@@ -29,7 +29,7 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_REGISTER_INIT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USER_REGISTER;
 
 /**
  * Handles messages indicating that a device wants to register itself at the system and also generates
@@ -47,14 +47,14 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
 
     @Override
     public void init(Container container) {
-        container.require(IncomingDispatcher.KEY).registerHandler(this, MASTER_REGISTER_INIT);
+        container.require(IncomingDispatcher.KEY).registerHandler(this, MASTER_USER_REGISTER);
     }
 
     @Override
     public void destroy() {
         Container container = getContainer();
         if (container != null) {
-            container.require(IncomingDispatcher.KEY).unregisterHandler(this, MASTER_REGISTER_INIT);
+            container.require(IncomingDispatcher.KEY).unregisterHandler(this, MASTER_USER_REGISTER);
         }
     }
 
@@ -65,7 +65,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                 //which functionality
                 switch (message.getRoutingKey()) {
                     //Add new register token
-                    case MASTER_REGISTER_INIT:
+                    case MASTER_USER_REGISTER:
                         handleInitRequest(message);
                         break;
                     default:

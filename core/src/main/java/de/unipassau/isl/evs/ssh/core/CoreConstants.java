@@ -127,7 +127,8 @@ public class CoreConstants {
         public static final String MASTER_HOLIDAY_GET = "/master/holiday/get";
         public static final String MASTER_MODULE_ADD = "/master/module/add";
         public static final String MASTER_MODULE_GET = "/master/module/get";
-        public static final String MASTER_REGISTER_INIT = "/master/register/init";
+        public static final String MASTER_USER_REGISTER = "/master/user/register";
+        public static final String MASTER_SLAVE_REGISTER = "/master/slave/register";
         public static final String MASTER_DEVICE_CONNECTED = "/master/device/connected";
 
         //Slave
