@@ -1,20 +1,17 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.Collections;
@@ -27,7 +24,6 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
-import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.EDIT_PERMISSION_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Fragment_Arguments.USER_DEVICE_ARGUMENT_FRAGMENT;
 
 /**
@@ -41,7 +37,6 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.Fragment_Arguments.USER_
 public class EditUserDeviceFragment extends BoundFragment {
     private static final String TAG = EditUserDeviceFragment.class.getSimpleName();
 
-    private PermissionListAdapter permissionListAdapter;
     /**
      * The device the fragment is created for.
      */
@@ -67,63 +62,22 @@ public class EditUserDeviceFragment extends BoundFragment {
         deviceName.setText(device.getName());
 
         TextView deviceGroup = ((TextView) root.findViewById(R.id.userdevice_user_group));
-        deviceGroup.setText(R.string.is_in_group + device.getInGroup() + R.string.dot);
+        deviceGroup.setText(getResources().getString(R.string.is_in_group) + device.getInGroup() + getResources().getString(R.string.dot));
 
         TextView deviceID = ((TextView) root.findViewById(R.id.userdevice_user_deviceid));
-        deviceID.setText(R.string.device_id + device.getUserDeviceID().getIDString());
+        deviceID.setText(getResources().getString(R.string.device_id) + device.getUserDeviceID().getIDString());
 
         ListView userPermissionList = (ListView) root.findViewById(R.id.listUserPermissionContainer);
-        userPermissionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                                      // when a user clicks short on an item, he opens the ListUserDeviceFragment
-                                                      @Override
-                                                      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                                          Permission item = permissionListAdapter.getItem(position);
-                                                          Bundle bundle = new Bundle();
-                                                          bundle.putSerializable(EDIT_PERMISSION_DIALOG, item);
-                                                          createEditPermissionDialog(bundle).show();
-                                                      }
-                                                  }
-        );
-        permissionListAdapter = new PermissionListAdapter(inflater);
+        PermissionListAdapter permissionListAdapter = new PermissionListAdapter(inflater);
         userPermissionList.setAdapter(permissionListAdapter);
 
         return root;
     }
 
-    /**
-     * Creates and returns a dialogs that gives the user the option to edit a group.
-     */
-    private Dialog createEditPermissionDialog(Bundle bundle) {
-        final Permission permission = (Permission) bundle.getSerializable(EDIT_PERMISSION_DIALOG);
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_editgroup, null, false);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-        final AlertDialog dialog = builder.create();
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        builder.setMessage(R.string.permission_dialog_title + " " + permission.getName())
-                .setView(dialogView)
-                .setPositiveButton(R.string.grant, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        getComponent(AppUserConfigurationHandler.KEY).grantPermission(device, permission);
-                    }
-                })
-                .setNegativeButton(R.string.revoke, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        getComponent(AppUserConfigurationHandler.KEY).revokePermission(device, permission);
-                    }
-                });
-        return dialog;
-    }
-
     private class PermissionListAdapter extends BaseAdapter {
-
         private final LayoutInflater inflater;
-        private List<Permission> permissions;
+        private List<Permission> allPermissions;
+        private List<Permission> userPermissions;
         public PermissionListAdapter(LayoutInflater inflater) {
             this.inflater = inflater;
             updatePermissionList();
@@ -141,9 +95,11 @@ public class EditUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-            permissions = handler.getPermissionForUser(device);
-            if (permissions != null) {
-                Collections.sort(permissions, new Comparator<Permission>() {
+            allPermissions = handler.getAllPermissions();
+            userPermissions = handler.getPermissionForUser(device);
+
+            if (allPermissions != null) {
+                Collections.sort(allPermissions, new Comparator<Permission>() {
                     @Override
                     public int compare(Permission lhs, Permission rhs) {
                         if (lhs.getName() == null) {
@@ -160,8 +116,8 @@ public class EditUserDeviceFragment extends BoundFragment {
 
         @Override
         public int getCount() {
-            if (permissions != null) {
-                return permissions.size();
+            if (allPermissions != null) {
+                return allPermissions.size();
             } else {
                 return 0;
             }
@@ -169,8 +125,8 @@ public class EditUserDeviceFragment extends BoundFragment {
 
         @Override
         public Permission getItem(int position) {
-            if (permissions != null) {
-                return permissions.get(position);
+            if (allPermissions != null) {
+                return allPermissions.get(position);
             } else {
                 return null;
             }
@@ -192,7 +148,8 @@ public class EditUserDeviceFragment extends BoundFragment {
         }
 
         /**
-         * Creates a view for every registered permission.
+         * Creates a view for every permission registered in the system. If the user device is granted a permission
+         * the switch button is {@code On}.
          */
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -203,8 +160,23 @@ public class EditUserDeviceFragment extends BoundFragment {
             } else {
                 permissionLayout = (LinearLayout) convertView;
             }
-            TextView textViewPermissionName = (TextView) permissionLayout.findViewById(R.id.listpermission_permission_name);
-            textViewPermissionName.setText(permission.getName());
+
+            final Switch permissionSwitch = (Switch) permissionLayout.findViewById(R.id.listpermission_permission_switch);
+            permissionSwitch.setText(permission.getName());
+            permissionSwitch.setChecked(userDeviceHasPermission(permission));
+            permissionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        getComponent(AppUserConfigurationHandler.KEY).grantPermission(device, permission);
+                        Log.i(TAG, permission.getName() + " granted for user device " + device.getName());
+                    } else {
+                        getComponent(AppUserConfigurationHandler.KEY).revokePermission(device, permission);
+                        Log.i(TAG, permission.getName() + " revoked for user device " + device.getName());
+                    }
+                    permissionSwitch.toggle();
+                }
+            });
 
             TextView textViewPermissionType = ((TextView) permissionLayout.findViewById(R.id.listpermission_permission_type));
             textViewPermissionType.setText(createPermissionTypeText(permission));
@@ -226,6 +198,13 @@ public class EditUserDeviceFragment extends BoundFragment {
                 output = "This permission is not connected to any module.";
             }
             return output;
+        }
+
+        /**
+         * @return If a user device is granted a certain permission.
+         */
+        private boolean userDeviceHasPermission(Permission permission) {
+            return userPermissions.contains(permission);
         }
     }
 }
