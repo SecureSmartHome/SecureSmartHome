@@ -3,7 +3,7 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
 /**
  * @author leon
  */
-public class RenameModulePayload {
+public class RenameModulePayload implements MessagePayload {
     String oldName;
     String newName;
 
