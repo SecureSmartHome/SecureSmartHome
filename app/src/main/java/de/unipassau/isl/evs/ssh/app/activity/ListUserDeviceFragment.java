@@ -19,6 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.common.collect.Lists;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -144,9 +146,11 @@ public class ListUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-            userDevices = handler.getAllGroupMembers(group);
 
-            if (userDevices != null) {
+            List<UserDevice> allUserDevices = handler.getAllGroupMembers(group);
+
+            if (allUserDevices != null) {
+                userDevices = Lists.newArrayList(allUserDevices);
                 Collections.sort(userDevices, new Comparator<UserDevice>() {
                     @Override
                     public int compare(UserDevice lhs, UserDevice rhs) {

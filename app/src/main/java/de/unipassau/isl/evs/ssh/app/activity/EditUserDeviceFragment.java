@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -177,10 +178,12 @@ public class EditUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-            allPermissions = handler.getAllPermissions();
             userPermissions = handler.getPermissionForUser(device);
 
-            if (allPermissions != null) {
+            List<Permission> tempPermissionList = handler.getAllPermissions();
+
+            if (tempPermissionList != null) {
+                allPermissions = Lists.newArrayList(tempPermissionList);
                 Collections.sort(allPermissions, new Comparator<Permission>() {
                     @Override
                     public int compare(Permission lhs, Permission rhs) {
