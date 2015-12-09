@@ -167,24 +167,22 @@ public class UDPDiscoveryClient extends AbstractComponent {
         Log.v(TAG, "sendDiscoveryRequest");
 
         final NamingManager namingManager = requireComponent(NamingManager.KEY);
-        if (!namingManager.isMasterIDKnown()) {
-            final IllegalStateException e = new IllegalStateException("NamingManager.isMasterIDKnown() == false");
-            e.fillInStackTrace();
-            Log.w(TAG, "Can't search for Master via UDP discovery when no Master ID is available, " +
-                    "will retry later", e);
-            return channel.channel().newFailedFuture(e);
-        }
         final byte[] header = DISCOVERY_PAYLOAD_REQUEST.getBytes();
         final byte[] ownIDBytes = namingManager.getOwnID().getIDBytes();
-        final byte[] masterIDBytes = namingManager.getMasterID().getIDBytes();
-        final ByteBuf buffer = channel.channel().alloc().buffer(
-                header.length + ownIDBytes.length + masterIDBytes.length + 12);
+        final ByteBuf buffer = channel.channel().alloc().buffer();
         buffer.writeInt(header.length);
         buffer.writeBytes(header);
         buffer.writeInt(ownIDBytes.length);
         buffer.writeBytes(ownIDBytes);
-        buffer.writeInt(masterIDBytes.length);
-        buffer.writeBytes(masterIDBytes);
+
+        if (namingManager.isMasterIDKnown()) {
+            buffer.writeBoolean(true);
+            final byte[] masterIDBytes = namingManager.getMasterID().getIDBytes();
+            buffer.writeInt(masterIDBytes.length);
+            buffer.writeBytes(masterIDBytes);
+        } else {
+            buffer.writeBoolean(false);
+        }
 
         final InetSocketAddress recipient = new InetSocketAddress(DISCOVERY_HOST, DISCOVERY_PORT);
         final DatagramPacket request = new DatagramPacket(buffer, recipient);

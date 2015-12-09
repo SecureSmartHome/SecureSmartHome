@@ -67,13 +67,14 @@ public class CoreConstants {
 
         public static final ResourceLeakDetector.Level RESOURCE_LEAK_DETECTION = ResourceLeakDetector.Level.PARANOID;
 
+        public static final int DISCOVERY_PROTOCOL_VERSION = 2;
         /**
          * Default discovery port used by netty
          */
         public static final int DISCOVERY_PORT = 13132;
         public static final String DISCOVERY_HOST = "255.255.255.255";
-        public static final String DISCOVERY_PAYLOAD_REQUEST = "de.unipassau.isl.evs.ssh.udp_discovery.REQUEST";
-        public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE";
+        public static final String DISCOVERY_PAYLOAD_REQUEST = "de.unipassau.isl.evs.ssh.udp_discovery.REQUEST" + DISCOVERY_PROTOCOL_VERSION;
+        public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE" + DISCOVERY_PROTOCOL_VERSION;
         public static final String[] DISCOVERY_PAYLOADS = {DISCOVERY_PAYLOAD_REQUEST, DISCOVERY_PAYLOAD_RESPONSE};
 
         public static final AttributeKey<X509Certificate> ATTR_PEER_CERT = AttributeKey.valueOf(X509Certificate.class.getName());

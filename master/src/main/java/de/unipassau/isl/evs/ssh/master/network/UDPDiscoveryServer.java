@@ -115,7 +115,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
             buffer.writeInt(sign.length);
             buffer.writeBytes(sign);
         } catch (GeneralSecurityException e) {
-            e.printStackTrace();
+            Log.w(TAG, "Could not send UDP discovery response", e);
         }
 
         final DatagramPacket response = new DatagramPacket(buffer, request.sender());
@@ -134,27 +134,36 @@ public class UDPDiscoveryServer extends AbstractComponent {
                 final ByteBuf buffer = request.content();
                 final String messageType = readString(buffer);
                 if (DISCOVERY_PAYLOAD_REQUEST.equals(messageType)) {
-                    final DeviceID clientID = readDeviceID(buffer);
-                    final DeviceID masterID = readDeviceID(buffer);
-                    if (clientID == null || masterID == null) {
-                        Log.d(TAG, "Discarding UDP inquiry without master ID (" + masterID + ") and client ID (" + clientID + ")");
-                        ReferenceCountUtil.release(request);
-                        return;
-                    }
                     final DeviceID ownID = requireComponent(NamingManager.KEY).getOwnID();
-                    if (!ownID.equals(masterID)) {
-                        Log.d(TAG, "Discarding UDP inquiry from " + clientID + "(" + request.sender() + ") " +
-                                "not looking for me (" + ownID + ") but " + masterID);
+                    final DeviceID clientID = readDeviceID(buffer);
+                    if (clientID == null) {
+                        Log.d(TAG, "Discarding UDP inquiry without client ID");
                         ReferenceCountUtil.release(request);
                         return;
                     }
-                    if (!isDeviceRegistered(clientID)) {
-                        Log.d(TAG, "Discarding UDP inquiry from " + clientID + "(" + request.sender() + ") " +
-                                "that is looking for me but is not registered");
-                        ReferenceCountUtil.release(request);
-                        return;
+
+                    final boolean isMasterKnown = buffer.readBoolean();
+                    if (isMasterKnown) {
+                        // if the master is known to the device, the IDs must match
+                        final DeviceID masterID = readDeviceID(buffer);
+                        if (!ownID.equals(masterID)) {
+                            Log.d(TAG, "Discarding UDP inquiry from " + clientID + "(" + request.sender() + ") " +
+                                    "that is not looking for me (" + ownID + ") but " + masterID);
+                            ReferenceCountUtil.release(request);
+                            return;
+                        }
+                    } else {
+                        // if the device doesn't know his master, the master must know the device
+                        if (!isDeviceRegistered(clientID)) {
+                            Log.d(TAG, "Discarding UDP inquiry from " + clientID + "(" + request.sender() + ") " +
+                                    "that is looking for any master and is not registered");
+                            ReferenceCountUtil.release(request);
+                            return;
+                        }
                     }
-                    Log.d(TAG, "UDP inquiry received from " + clientID + "(" + request.sender() + ")  looking for me");
+
+                    Log.d(TAG, "UDP inquiry received from " + clientID + "(" + request.sender() + ") that is looking for "
+                            + (isMasterKnown ? "me" : "any master and is registered here"));
                     sendDiscoveryResponse(request);
                     ReferenceCountUtil.release(request);
                     return;
