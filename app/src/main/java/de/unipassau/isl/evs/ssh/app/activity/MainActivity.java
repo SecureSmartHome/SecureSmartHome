@@ -117,11 +117,12 @@ public class MainActivity extends BoundActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            super.onBackPressed();
-            getSupportFragmentManager().popBackStackImmediate();
+        //} else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+        //    super.onBackPressed();
+        //    getSupportFragmentManager().popBackStackImmediate();
         } else {
             super.onBackPressed();
+            showFragmentByClass(MainFragment.class);
         }
     }
 
@@ -175,9 +176,11 @@ public class MainActivity extends BoundActivity
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
-            if (!oldFragment.isInstance(fragment)) {
-                fragmentTransaction.addToBackStack(null);
-            }
+
+            // Disabled backstack since it does not work reliably
+            //if (!oldFragment.isInstance(fragment)) {
+            //    fragmentTransaction.addToBackStack(null);
+            //}
             fragmentTransaction.commit();
         }
     }
