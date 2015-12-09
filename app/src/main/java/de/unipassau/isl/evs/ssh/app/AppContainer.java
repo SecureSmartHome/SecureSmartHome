@@ -12,6 +12,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+import de.unipassau.isl.evs.ssh.app.handler.AppAddSlaveHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppHolidaySimulationHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
@@ -56,6 +57,7 @@ public class AppContainer extends ContainerService {
         register(AppNewModuleHandler.KEY, new AppNewModuleHandler());
         register(AppRegisterNewDeviceHandler.KEY, new AppRegisterNewDeviceHandler());
         register(AppHolidaySimulationHandler.KEY, new AppHolidaySimulationHandler());
+        register(AppAddSlaveHandler.KEY, new AppAddSlaveHandler());
     }
 
     private void readMasterData() {

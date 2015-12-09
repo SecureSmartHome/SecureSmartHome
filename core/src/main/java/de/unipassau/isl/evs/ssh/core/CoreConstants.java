@@ -153,6 +153,7 @@ public class CoreConstants {
         public static final String APP_USERINFO_GET = "/app/userdevice/get";
         public static final String APP_MODULE_ADD = "/app/module/add";
         public static final String APP_USER_REGISTER = "/app/user/register";
+        public static final String APP_SLAVE_REGISTER = "/app/slave/register";
 
         // Slave/App (used for broadcast messages)
         public static final String MODULES_UPDATE = "/*/modules/update";
