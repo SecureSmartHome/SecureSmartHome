@@ -11,12 +11,14 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.activity.MainActivity;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 
@@ -28,6 +30,12 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
  */
 public class AppNotificationHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppNotificationHandler> KEY = new Key<>(AppNotificationHandler.class);
+
+    private static final int HUMIDITY_WARNING_ID = 1;
+    private static final int BRIGHTNESS_WARNING_ID = 2;
+    private static final int WEATHER_WARNING_ID = 3;
+    private static final int SYSTEM_HEALTH_WARNING_ID = 4;
+    private static final int DOOR_BELL_NOTIFICATION_ID = 5;
 
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
@@ -45,19 +53,23 @@ public class AppNotificationHandler extends AbstractComponent implements Message
             Context context = getContainer().get(ContainerService.KEY_CONTEXT);
             switch (payload.getNotificationType()) {
                 case CoreConstants.NotificationTypes.BRIGHTNESS_WARNING:
-                    issueBrightnessWarning(2, context);
+                    issueBrightnessWarning(BRIGHTNESS_WARNING_ID, context);
                 case CoreConstants.NotificationTypes.HUMIDITY_WARNING:
-                    issueClimateNotification(1, context);
+                    issueClimateNotification(HUMIDITY_WARNING_ID, context);
                     break;
             }
-        //Weather Warnings
-        }else if (message.getPayload() instanceof WeatherPayload){
+        } else if (message.getPayload() instanceof WeatherPayload) {
+            //Weather Warnings
             WeatherPayload payload = (WeatherPayload) message.getPayload();
-            issueWeatherWarning(3, payload.getWarnText(), getContainer().get(ContainerService.KEY_CONTEXT));
-        //System Health Warning
-        }else if (message.getPayload() instanceof SystemHealthPayload){
+            issueWeatherWarning(WEATHER_WARNING_ID, payload.getWarnText(), getContainer().get(ContainerService.KEY_CONTEXT));
+        } else if (message.getPayload() instanceof SystemHealthPayload) {
+            //System Health Warning
             SystemHealthPayload payload = (SystemHealthPayload) message.getPayload();
-            issueSystemHealthWarning(4, payload, getContainer().get(ContainerService.KEY_CONTEXT));
+            issueSystemHealthWarning(SYSTEM_HEALTH_WARNING_ID, payload, getContainer().get(ContainerService.KEY_CONTEXT));
+        } else if (message.getPayload() instanceof DoorBellPayload) {
+            // Door Bell Notification
+            DoorBellPayload payload = ((DoorBellPayload) message.getPayload());
+            issueDoorBellNotification(DOOR_BELL_NOTIFICATION_ID, payload, getContainer().get(ContainerService.KEY_CONTEXT));
         }
     }
 
@@ -69,6 +81,18 @@ public class AppNotificationHandler extends AbstractComponent implements Message
     @Override
     public void handlerRemoved(String routingKey) {
 
+    }
+
+    @Override
+    public void init(Container container) {
+        super.init(container);
+        container.require(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE);
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        getComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE);
     }
 
     /**
@@ -90,17 +114,23 @@ public class AppNotificationHandler extends AbstractComponent implements Message
         displayNotification(title, text, notificationID, context);
     }
 
-    private void issueWeatherWarning(int notificationID, String warnText, Context context){
+    private void issueWeatherWarning(int notificationID, String warnText, Context context) {
         String title = "Weather Warning!";
         displayNotification(title, warnText, notificationID, context);
     }
 
-    private void issueSystemHealthWarning(int notificationID, SystemHealthPayload payload, Context context){
+    private void issueSystemHealthWarning(int notificationID, SystemHealthPayload payload, Context context) {
         String title = "Component failed!";
         Module module = payload.getModule();
         String text = (module.getName() + " at " + module.getAtSlave() + " "
-                + module.getModuleType() + " failed" );
-        displayNotification(title, text, notificationID, context );
+                + module.getModuleType() + " failed.");
+        displayNotification(title, text, notificationID, context);
+    }
+
+    private void issueDoorBellNotification(int notificationID, DoorBellPayload payload, Context context) {
+        String title = "The Door Bell rang";
+        String text = ("Door Bell rang at " + payload.getModuleName() + "!");
+        displayNotification(title, text, notificationID, context);
     }
 
     /**
