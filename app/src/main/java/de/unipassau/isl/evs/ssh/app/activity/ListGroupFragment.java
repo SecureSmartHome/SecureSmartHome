@@ -226,9 +226,11 @@ public class ListGroupFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-            groups = handler.getAllGroups();
 
-            if (groups != null) {
+            List<Group> allGroups = handler.getAllGroups();
+
+            if (allGroups != null) {
+                groups = Lists.newArrayList(allGroups);
                 Collections.sort(groups, new Comparator<Group>() {
                     @Override
                     public int compare(Group lhs, Group rhs) {
