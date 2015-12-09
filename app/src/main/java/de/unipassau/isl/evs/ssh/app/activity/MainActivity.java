@@ -169,7 +169,7 @@ public class MainActivity extends BoundActivity
         }
         if (fragment != null) {
             isMainFragmentActive = clazz.equals(MainFragment.class);
-           
+
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);

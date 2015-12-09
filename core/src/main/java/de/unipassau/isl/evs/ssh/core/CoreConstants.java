@@ -202,5 +202,6 @@ public class CoreConstants {
     public class QRCodeInformation {
         public static final String EXTRA_QR_DEVICE_INFORMATION = "EXTRA_QR_DEVICE_INFORMATION";
         public static final String EXTRA_QR_MESSAGE = "EXTRA_QR_MESSAGE";
+        public static final int QR_CODE_IMAGE_SCALE = 35;
     }
 }

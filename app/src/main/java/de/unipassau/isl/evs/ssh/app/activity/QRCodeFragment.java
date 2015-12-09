@@ -16,10 +16,12 @@ import com.google.zxing.WriterException;
 import java.io.Serializable;
 
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_MESSAGE;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.QR_CODE_IMAGE_SCALE;
 
 /**
  * QRCodeFragment to display a QR-Code in the app UI. This is used to register new user-devices safely.
@@ -57,7 +59,7 @@ public class QRCodeFragment extends BoundFragment {
         LinearLayout root = (LinearLayout) inflater.inflate(R.layout.fragment_qrcode, container, false);
         ImageView imageview = ((ImageView) root.findViewById(R.id.qrcode_fragment_qr_code));
         bitmap = createQRCodeBitmap();
-        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 8, bitmap.getHeight() * 8, false);
+        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * QR_CODE_IMAGE_SCALE, bitmap.getHeight() * QR_CODE_IMAGE_SCALE, false);
 
         if (bitmap != null) {
             imageview.setImageBitmap(bitmap);
