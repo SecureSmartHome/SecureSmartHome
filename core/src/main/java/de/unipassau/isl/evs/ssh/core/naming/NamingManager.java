@@ -4,14 +4,12 @@ package de.unipassau.isl.evs.ssh.core.naming;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import java.security.GeneralSecurityException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import de.ncoder.typedmap.Key;
@@ -19,7 +17,6 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
-import de.unipassau.isl.evs.ssh.core.container.StartupException;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 
 /**
@@ -30,7 +27,9 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
  */
 public class NamingManager extends AbstractComponent {
     public static final Key<NamingManager> KEY = new Key<>(NamingManager.class);
+    public static final String PREF_MASTER_ID = "ssh.core.MASTER_ID";
     private static final String TAG = NamingManager.class.getSimpleName();
+
     private final boolean isMaster;
     private DeviceID ownID;
     private DeviceID masterID;
@@ -94,6 +93,20 @@ public class NamingManager extends AbstractComponent {
     }
 
     /**
+     * @return {@code true}, if the ID of the Master is known, i.e. it is stored in the SharedPreferences
+     */
+    public boolean isMasterIDKnown() {
+        if (isMaster || masterID != null) {
+            return true;
+        }
+        try {
+            loadMasterData();
+        } catch (UnresolvableNamingException ignore) {
+        }
+        return (masterID != null);
+    }
+
+    /**
      * @return {@code true}, if the ID and Certificate of the Master are known, i.e. they are stored in the
      * SharedPreferences and the KeyStore respectively
      */
@@ -128,7 +141,7 @@ public class NamingManager extends AbstractComponent {
     public X509Certificate getOwnCertificate() {
         return ownCert;
     }
-    
+
     /**
      * Gets the public key of the given DeviceID.
      *
@@ -147,11 +160,7 @@ public class NamingManager extends AbstractComponent {
     @Deprecated
     @NonNull
     public DeviceID getDeviceID(X509Certificate cert) throws UnresolvableNamingException {
-        try {
-            return DeviceID.fromCertificate(cert);
-        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
-            throw new UnresolvableNamingException(e);
-        }
+        return DeviceID.fromCertificate(cert);
     }
 
     /**
@@ -166,8 +175,10 @@ public class NamingManager extends AbstractComponent {
         try {
             if (id == null) {
                 throw new UnresolvableNamingException("id == null");
+            } else if (id.equals(getOwnID())) {
+                return getOwnCertificate();
             }
-            final X509Certificate certificate = getContainer().require(KeyStoreController.KEY).getCertificate(id.getIDString());
+            final X509Certificate certificate = requireComponent(KeyStoreController.KEY).getCertificate(id.getIDString());
             if (certificate == null) {
                 throw new UnresolvableNamingException("Certificate for Device " + id + " not found");
             }
@@ -180,28 +191,24 @@ public class NamingManager extends AbstractComponent {
     @Override
     public void init(Container container) {
         super.init(container);
-        try {
-            final KeyStoreController keyStoreController = container.require(KeyStoreController.KEY);
-            ownCert = keyStoreController.getOwnCertificate();
-            ownID = DeviceID.fromCertificate(ownCert);
 
-            if (isMaster) {
-                masterCert = ownCert;
-                masterID = ownID;
-            } else {
-                try {
-                    loadMasterData();
-                } catch (UnresolvableNamingException e) {
-                    Log.w(TAG, "Master ID is set to " + masterID + " but certificate is unknown", e);
-                }
+        final KeyStoreController keyStoreController = getContainer().require(KeyStoreController.KEY);
+        ownCert = keyStoreController.getOwnCertificate();
+        ownID = DeviceID.fromCertificate(ownCert);
+
+        if (isMaster) {
+            masterCert = ownCert;
+            masterID = ownID;
+        } else {
+            try {
+                loadMasterData();
+            } catch (UnresolvableNamingException ignore) {
             }
-        } catch (GeneralSecurityException e) {
-            throw new StartupException(e);
         }
     }
 
     private void loadMasterData() throws UnresolvableNamingException {
-        final SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
+        final SharedPreferences prefs = requireComponent(ContainerService.KEY_CONTEXT)
                 .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
 
         String masterIDStr = prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null);
@@ -209,6 +216,36 @@ public class NamingManager extends AbstractComponent {
             masterID = new DeviceID(masterIDStr);
             masterCert = getCertificate(masterID);
         }
+    }
+
+    public void setMasterID(DeviceID masterID) {
+        if (masterID == null) throw new NullPointerException("masterID");
+        if (this.masterID != null) throw new IllegalStateException("masterID already known");
+
+        requireComponent(ContainerService.KEY_CONTEXT)
+                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE)
+                .edit()
+                .putString(CoreConstants.SharedPrefs.PREF_MASTER_ID, masterID.getIDString())
+                .commit();
+
+        this.masterID = masterID;
+    }
+
+    public void setMasterCertificate(X509Certificate masterCert) throws CertificateException, NoSuchAlgorithmException, KeyStoreException {
+        if (masterCert == null) throw new NullPointerException("masterCert");
+        if (this.masterCert != null) throw new IllegalStateException("masterCert already known");
+        final DeviceID certID = DeviceID.fromCertificate(masterCert);
+        if (masterID != null && !masterID.equals(certID)) {
+            throw new CertificateException("MasterID generated from Certificate " + certID + " does not match " +
+                    "already known MasterID " + masterID);
+        }
+
+        requireComponent(KeyStoreController.KEY).saveCertificate(masterCert, masterID.getIDString());
+
+        if (masterID == null) {
+            setMasterID(certID);
+        }
+        this.masterCert = masterCert;
     }
 
     @Override

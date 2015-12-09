@@ -28,6 +28,10 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTR
  */
 public class MasterQRCodeActivity extends BoundActivity {
     /**
+     * Used to scale the qr-code.
+     */
+    private static final int SCALE_QRCODE = 35;
+    /**
      * The QR-Code which will be displayed.
      */
     private Bitmap bitmap;
@@ -76,7 +80,8 @@ public class MasterQRCodeActivity extends BoundActivity {
 
         ImageView imageview = ((ImageView) findViewById(R.id.qrcode_activity_qr_code));
         bitmap = createQRCodeBitmap();
-        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * 8, bitmap.getHeight() * 8, false);
+        //makes bitmap bigger than the screen. the imageview adjust the size itself
+        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * SCALE_QRCODE, bitmap.getHeight() * SCALE_QRCODE, false);
 
         if (bitmap != null) {
             imageview.setImageBitmap(bitmap);
@@ -87,7 +92,6 @@ public class MasterQRCodeActivity extends BoundActivity {
         if (text != null) {
             textview.setText(text);
         }
-
     }
 
     @Override

@@ -146,8 +146,7 @@ public class PermissionController extends AbstractComponent {
                             + " = ?", new String[] { permission.getName(), permission.getModuleName(),
                                                      userDeviceID.getId() });
         }
-        return true;
-        //return permissionCursor.moveToNext(); //FIXME setup permissions
+        return permissionCursor.moveToNext();
     }
 
     /**
@@ -357,7 +356,6 @@ public class PermissionController extends AbstractComponent {
                 + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID, new String[] {});
         List<Permission> permissions = new LinkedList<>();
         while (permissionsCursor.moveToNext()) {
-            System.out.println(permissionsCursor.getString(0));
             permissions.add(new Permission(permissionsCursor.getString(0), permissionsCursor.getString(1)));
         }
         //Permissions without modules
@@ -365,7 +363,6 @@ public class PermissionController extends AbstractComponent {
                 + " from " + DatabaseContract.Permission.TABLE_NAME
                 + " where " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL", new String[] {});
         while (permissionsCursor.moveToNext()) {
-            System.out.println(permissionsCursor.getString(0));
             permissions.add(new Permission(permissionsCursor.getString(0), null));
         }
         return permissions;
@@ -457,5 +454,44 @@ public class PermissionController extends AbstractComponent {
                     userDevicesCursor.getString(2), new DeviceID(userDevicesCursor.getString(1))));
         }
         return userDevices;
+    }
+
+    public List<Permission> getPermissionsOfUserDevice(DeviceID userDeviceID) {
+        List<Permission> permissions = new LinkedList<>();
+        Cursor permissionCursor;
+            permissionCursor = databaseConnector
+                    .executeSql("select p." + DatabaseContract.Permission.COLUMN_NAME
+                            + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
+                            + " from " + DatabaseContract.HasPermission.TABLE_NAME
+                            + " hp join " + DatabaseContract.Permission.TABLE_NAME + " p on "
+                            + "hp." + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
+                            + " = p." + DatabaseContract.Permission.COLUMN_ID
+                            + " join " + DatabaseContract.UserDevice.TABLE_NAME
+                            + " ud on hp." + DatabaseContract.HasPermission.COLUMN_USER_ID
+                            + " = ud." + DatabaseContract.UserDevice.COLUMN_ID
+                            + " join " + DatabaseContract.ElectronicModule.TABLE_NAME + " m on "
+                            + "p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " = "
+                            + " m." + DatabaseContract.ElectronicModule.COLUMN_ID
+                            + " where ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                            + " = ?", new String[] {userDeviceID.getIDString() });
+        while (permissionCursor.moveToNext()) {
+            permissions.add(new Permission(permissionCursor.getString(0), permissionCursor.getString(1)));
+        }
+            permissionCursor = databaseConnector
+                    .executeSql("select p." + DatabaseContract.Permission.COLUMN_NAME
+                            + " from " + DatabaseContract.HasPermission.TABLE_NAME
+                            + " hp join " + DatabaseContract.Permission.TABLE_NAME + " p on "
+                            + "hp." + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
+                            + " = p." + DatabaseContract.Permission.COLUMN_ID
+                            + " join " + DatabaseContract.UserDevice.TABLE_NAME
+                            + " ud on hp." + DatabaseContract.HasPermission.COLUMN_USER_ID
+                            + " = ud." + DatabaseContract.UserDevice.COLUMN_ID
+                            + " where p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
+                            +" is NULL and ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                            + " = ?", new String[] {userDeviceID.getIDString() });
+        while (permissionCursor.moveToNext()) {
+            permissions.add(new Permission(permissionCursor.getString(0)));
+        }
+        return permissions;
     }
 }

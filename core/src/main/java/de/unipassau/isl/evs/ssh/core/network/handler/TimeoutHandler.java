@@ -8,6 +8,8 @@ import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
 
 /**
@@ -17,6 +19,8 @@ import io.netty.util.ReferenceCountUtil;
  */
 public class TimeoutHandler extends ChannelHandlerAdapter {
     private static final String TAG = TimeoutHandler.class.getSimpleName();
+
+    public static final AttributeKey<Boolean> SEND_PINGS = AttributeKey.valueOf(TimeoutHandler.class, "SEND_PINGS");
 
     /**
      * Handles received timeout event.
@@ -30,7 +34,11 @@ public class TimeoutHandler extends ChannelHandlerAdapter {
                 Log.d(TAG, "Connection timed out");
                 ctx.close();
             } else if (e.state() == IdleState.WRITER_IDLE) {
-                ctx.writeAndFlush(new PingMessage());
+                final Attribute<Boolean> attr = ctx.channel().attr(SEND_PINGS);
+                attr.setIfAbsent(false);
+                if (attr.get()) {
+                    ctx.writeAndFlush(new PingMessage());
+                }
             }
         }
     }

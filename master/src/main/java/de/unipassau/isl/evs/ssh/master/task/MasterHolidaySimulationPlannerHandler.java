@@ -1,6 +1,11 @@
 package de.unipassau.isl.evs.ssh.master.task;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Intent;
+import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
@@ -12,6 +17,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
+import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
+import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
@@ -29,36 +36,11 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Chris
  */
-public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler implements Task {
+public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler implements ScheduledComponent {
 
+    private static final Key<MasterHolidaySimulationPlannerHandler> KEY = new Key<>(MasterHolidaySimulationPlannerHandler.class);
     public static final int MILLIS_PER_HOUR = 3600000;
     private boolean runHolidaySimulation = false;
-
-    public MasterHolidaySimulationPlannerHandler() {
-        getContainer().require(ExecutionServiceComponent.KEY).scheduleAtFixedRate(this, 0, MILLIS_PER_HOUR,
-                TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public void run() {
-        if (runHolidaySimulation) {
-            List<HolidayAction> logEntriesRange = getContainer().require(HolidayController.KEY).getHolidayActions(new Date(),
-                    new Date(System.currentTimeMillis() + MILLIS_PER_HOUR));
-
-            for (HolidayAction a: logEntriesRange) {
-                int minNow = new Date(System.currentTimeMillis()).getMinutes();
-                int minPast = new Date(a.getTimeStamp()).getMinutes();
-
-                if (minPast > minNow) {
-                    minPast += 60;
-                }
-
-                long delay = minPast - minNow;
-                getContainer().require(ExecutionServiceComponent.KEY).schedule(new HolidayLightAction(a.getModuleName(),
-                        a.getActionName()), delay, TimeUnit.MINUTES);
-            }
-        }
-    }
 
     @Override
     public void handle(Message.AddressedMessage message) {
@@ -97,6 +79,39 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
         HolidaySimulationPayload payload = new HolidaySimulationPayload(runHolidaySimulation);
         Message reply = new Message(payload);
         sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
+    }
+
+    @Override
+    public void onReceive(Intent intent) {
+        if (runHolidaySimulation) {
+            List<HolidayAction> logEntriesRange = getContainer().require(HolidayController.KEY).getHolidayActions(new Date(),
+                    new Date(System.currentTimeMillis() + MILLIS_PER_HOUR));
+
+            for (HolidayAction a: logEntriesRange) {
+                int minNow = new Date(System.currentTimeMillis()).getMinutes();
+                int minPast = new Date(a.getTimeStamp()).getMinutes();
+
+                if (minPast > minNow) {
+                    minPast += 60;
+                }
+
+                long delay = minPast - minNow;
+                getContainer().require(ExecutionServiceComponent.KEY).schedule(new HolidayLightAction(a.getModuleName(),
+                        a.getActionName()), delay, TimeUnit.MINUTES);
+            }
+        }
+    }
+
+    @Override
+    public void init(Container container) {
+        Scheduler scheduler = getContainer().require(Scheduler.KEY);
+        PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
+        scheduler.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), MILLIS_PER_HOUR, intent);
+    }
+
+    @Override
+    public void destroy() {
+
     }
 
     private class HolidayLightAction implements Runnable {

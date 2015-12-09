@@ -36,13 +36,11 @@ public class MainActivity extends BoundActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String SAVED_LAST_ACTIVE_FRAGMENT = "de.unipassau.isl.evs.ssh.app.activity.SAVED_LAST_ACTIVE_FRAGMENT";
-
+    private static final int uniqueID = 037735;
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
-
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
-    private static final int uniqueID = 037735;
 
     public MainActivity() {
         super(AppContainer.class);
@@ -133,20 +131,6 @@ public class MainActivity extends BoundActivity
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(SAVED_LAST_ACTIVE_FRAGMENT, getCurrentFragment().getClass().getName());
@@ -219,6 +203,8 @@ public class MainActivity extends BoundActivity
             clazz = AddModuleFragment.class;
         } else if (id == R.id.light_fab) {
             clazz = AddModuleFragment.class;
+        } else if (id == R.id.nav_add_odroid) {
+            clazz = AddNewSlaveFragment.class;
         } else {
             throw new IllegalArgumentException("Unknown id: " + id);
         }

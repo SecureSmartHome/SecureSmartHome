@@ -26,22 +26,6 @@
             android:padding="20dp"
             android:scaleType="centerInside"
             android:src="@drawable/ic_door_open"
-            android:visibility="gone"/>
-
-        <ImageButton
-            android:id="@+id/doorButtonClosed"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:background="?android:selectableItemBackground"
-            android:padding="20dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_door_closed"
             android:visibility="visible"/>
 
         <ImageButton
@@ -58,22 +42,6 @@
             android:padding="20dp"
             android:scaleType="centerInside"
             android:src="@drawable/ic_light_bulb_on"
-            android:visibility="gone"/>
-
-        <ImageButton
-            android:id="@+id/lightButtonOff"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="35dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:background="?android:selectableItemBackground"
-            android:padding="20dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_light_bulb_off"
             android:visibility="visible"/>
     </LinearLayout>
 

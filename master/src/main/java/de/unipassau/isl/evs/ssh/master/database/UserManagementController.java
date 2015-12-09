@@ -169,7 +169,6 @@ public class UserManagementController extends AbstractComponent {
                     new String[]{userDevice.getName(), userDevice.getUserDeviceID().getId(),
                             userDevice.getInGroup()});
         } catch (SQLiteConstraintException sqlce) {
-            System.out.println(sqlce.getMessage());
             throw new DatabaseControllerException(
                     "Either the given Group does not exist in the database"
                     + " or a UserDevice already has the given name or fingerprint.", sqlce);

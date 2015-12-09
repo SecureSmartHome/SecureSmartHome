@@ -29,7 +29,7 @@ public class DatabaseContract {
             public static final String DELETE_ORDROID = "DeleteOdroid";
             //Sensor
             public static final String ADD_SENSOR= "AddSensor";
-            public static final String RENAME_SENSOR = "RenameSensor";
+            public static final String RENAME_MODULE = "RenameSensor";
             public static final String DELETE_SENSOR = "DeleteSensor";
             //Window
             public static final String REQUEST_WINDOW_STATUS = "RequestWindowStatus";
