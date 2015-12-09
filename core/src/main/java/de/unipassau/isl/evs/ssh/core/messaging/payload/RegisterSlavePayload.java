@@ -5,7 +5,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 /**
  * @author leon
  */
-public class RegisterSlavePayload {
+public class RegisterSlavePayload implements MessagePayload {
     private String name;
     private DeviceID slaveID;
 

@@ -7,7 +7,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  *
  * @author bucher
  */
-public class SystemHealthPayload {
+public class SystemHealthPayload implements MessagePayload {
 
     private boolean hasError;
     private Module module;

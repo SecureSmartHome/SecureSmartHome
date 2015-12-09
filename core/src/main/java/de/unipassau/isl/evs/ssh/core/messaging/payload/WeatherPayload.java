@@ -5,7 +5,7 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
  *
  * @author bucher
  */
-public class WeatherPayload {
+public class WeatherPayload implements MessagePayload {
 
     boolean warning; //should user be warned?
     String warnText; //what type of warning is it?
