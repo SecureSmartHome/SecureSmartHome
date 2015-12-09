@@ -4,6 +4,7 @@ import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
@@ -31,7 +32,7 @@ public class WeatherSensor extends AbstractComponent {
 
     private double temp1, temp2, pressure, altitude, humidity, uv;
     private int visible, ir;
-    private String modulName;
+    private Module module;
     private Container container;
     private ScheduledFuture future;
 
@@ -75,7 +76,7 @@ public class WeatherSensor extends AbstractComponent {
          */
         private void sendWeatherInfo() {
             ClimatePayload payload = new ClimatePayload(getTemperature1(), getTemperature2(), getPressure(),
-                    getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), " " , " ");
+                    getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), "" , getModule());
 
             //Todo set values
 
@@ -86,7 +87,7 @@ public class WeatherSensor extends AbstractComponent {
             message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
             OutgoingRouter router = container.require(OutgoingRouter.KEY);
-            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_WEATHER_INFO, message);
+            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_PUSH_WEATHER_INFO, message);
         }
     }
 
@@ -171,5 +172,7 @@ public class WeatherSensor extends AbstractComponent {
     /*
     * returns last value from readData() for module Name of the sensor
      */
-    public String getModulName(){ return modulName; }
+    public Module getModule(){
+        return module;
+    }
 }

@@ -14,15 +14,24 @@ import de.unipassau.isl.evs.ssh.master.MasterConstants;
 public class MasterClimateHandler extends AbstractMasterHandler {
 
     private boolean mainLampOn = false;
+    private ClimatePayload latestWeatherData;
 
     @Override
     public void handle(Message.AddressedMessage message) {
         saveMessage(message);
-        if (message.getPayload() instanceof ClimatePayload) {
+        if (CoreConstants.RoutingKeys.MASTER_PUSH_WEATHER_INFO.equals(message.getRoutingKey())) {
+            latestWeatherData = (ClimatePayload) message.getPayload();
             evaluateWeatherData(((ClimatePayload) message.getPayload()));
-        } else if (message.getPayload() instanceof LightPayload) {
+        } else if (CoreConstants.RoutingKeys.MASTER_LIGHT_GET.equals(message.getRoutingKey())) {
             LightPayload payload = (LightPayload) message.getPayload();
             mainLampOn = payload.getOn(); //TODO check if this is the first lamp
+        } else if (CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO.equals(message.getRoutingKey())) {
+            //TODO make map of latestWeatherData to send data for each Weatherboard
+            if (latestWeatherData == null) {
+                latestWeatherData = new ClimatePayload(0,0,0,0,0,0,0,0,"", null);
+            }
+            sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY),
+                    new Message(latestWeatherData));
         }
     }
 

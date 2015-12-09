@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.cert.CertificateEncodingException;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -24,6 +25,7 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
+import de.unipassau.isl.evs.ssh.master.task.MasterWeatherCheckHandler;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DEVICE_CONNECTED;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET;
@@ -55,15 +57,29 @@ public class MasterContainer extends ContainerService {
         register(MasterRegisterDeviceHandler.KEY, new MasterRegisterDeviceHandler());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
+<<<<<<< Temporary merge branch 1
+        incomingDispatcher.registerHandler(new MasterLightHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_SET,
+                CoreConstants.RoutingKeys.MASTER_LIGHT_GET);
+        incomingDispatcher.registerHandler(new MasterClimateHandler(), CoreConstants.RoutingKeys.MASTER_LIGHT_GET,
+                CoreConstants.RoutingKeys.MASTER_WEATHER_INFO);
+        incomingDispatcher.registerHandler(new MasterNotificationHandler(),
+                CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND);
+        incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(), CoreConstants.RoutingKeys.MASTER_USERINFO_GET);
+        incomingDispatcher.registerHandler(new MasterModuleHandler(), CoreConstants.RoutingKeys.MASTER_MODULE_ADD);
+        incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(),
+                CoreConstants.RoutingKeys.MASTER_REGISTER_INIT, CoreConstants.RoutingKeys.MASTER_REGISTER_FINALIZE);
+        incomingDispatcher.registerHandler(new MasterHolidaySimulationPlannerHandler(),
+                CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET, CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET);
+=======
         incomingDispatcher.registerHandler(new MasterLightHandler(), MASTER_LIGHT_SET, MASTER_LIGHT_GET);
         incomingDispatcher.registerHandler(new MasterClimateHandler(), MASTER_LIGHT_GET,
                 MASTER_WEATHER_INFO);
-        incomingDispatcher.registerHandler(new MasterNotificationHandler(),MASTER_NOTIFICATION_SEND);
-        incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(),
-                MASTER_USERINFO_GET, MASTER_DEVICE_CONNECTED);
+        incomingDispatcher.registerHandler(new MasterNotificationHandler(),
+                MASTER_NOTIFICATION_SEND);
+        incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(), MASTER_USERINFO_GET, MASTER_DEVICE_CONNECTED);
         incomingDispatcher.registerHandler(new MasterModuleHandler(), MASTER_MODULE_ADD);
-        incomingDispatcher.registerHandler(new MasterHolidaySimulationPlannerHandler(),
-                MASTER_HOLIDAY_GET, MASTER_HOLIDAY_GET);
+        incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(), MASTER_REGISTER_INIT, MASTER_REGISTER_FINALIZE);
+>>>>>>> Temporary merge branch 2
 
         if (!dir.isDirectory() && !dir.mkdirs()) {
             dir = getFilesDir();

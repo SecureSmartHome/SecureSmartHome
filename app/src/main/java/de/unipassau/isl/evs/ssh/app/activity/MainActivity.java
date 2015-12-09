@@ -70,6 +70,17 @@ public class MainActivity extends BoundActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //check intent if a specific fragment should be inflated when App is opened
+        if (getIntent().getAction().equals("ClimateFragment")) {
+            showFragmentByClass(ClimateFragment.class);
+        } else if (getIntent().getAction().equals("StatusFragment")) {
+            showFragmentByClass(StatusFragment.class);
+        } else if (getIntent().getAction().equals("LightFragment")) {
+            showFragmentByClass(LightFragment.class);
+        } else if (getIntent().getAction().equals("DoorFragment")) {
+            showFragmentByClass(DoorFragment.class);
+        }
+
         //Initialise fragmentTransaction
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
             try {

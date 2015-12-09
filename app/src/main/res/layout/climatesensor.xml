@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author bucher-->
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:columnCount="2"
+    android:measureWithLargestChild="false"
+    android:orientation="vertical"
+    android:paddingBottom="10dp"
+    android:paddingTop="10dp"
+    android:rowCount="3">
+
+    <View
+        android:id="@+id/climatesensor_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_margin="8dp"
+        android:visibility="gone"
+        android:background="@color/md_black_1000"
+        />
+
+
+    <TextView
+        android:id="@+id/climateSensor"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="Climate Sensor:"
+        android:textSize="@dimen/typography_headline2"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/colorSecondaryText" />
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:text="Temperature 1:    "
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/temp1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:text="New Text"
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:text="Temperature 2: "
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/temp2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:text="New Text"
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:text="Pressure: "
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/pressure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:text="New Text"
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:text="Altitude: "
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/altitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:text="New Text"
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:text="Humidity: "
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/humidity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:text="New Text"
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:text="UV: "
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/uv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:text="New Text"
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:text="Visible: "
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/visible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:text="New Text"
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:text="IR: "
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/ir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:text="New Text"
+            android:textSize="@dimen/typography_subheadline"
+            android:textColor="@color/colorSecondaryText" />
+    </TableRow>
+
+</TableLayout>

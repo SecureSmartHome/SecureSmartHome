@@ -120,7 +120,8 @@ public class CoreConstants {
         public static final String MASTER_LIGHT_SET = "/master/light/set";
         public static final String MASTER_DOOR_BELL_RING = "/master/doorbell/ring";
         public static final String MASTER_CAMERA_GET = "/master/camera/get";
-        public static final String MASTER_WEATHER_INFO = "/master/weather/info";
+        public static final String MASTER_REQUEST_WEATHER_INFO = "/master/weatherinfo/request";
+        public static final String MASTER_PUSH_WEATHER_INFO = "/master/weatherinfo/push";
         public static final String MASTER_NOTIFICATION_SEND = "/master/notification/send";
         public static final String MASTER_DOOR_BELL_CAMERA_GET = "/master/doorbell/camera/get";
         public static final String MASTER_DOOR_UNLATCH = "/master/door/unlatch";
@@ -164,6 +165,7 @@ public class CoreConstants {
 
         // Slave/App (used for broadcast messages)
         public static final String MODULES_UPDATE = "/*/modules/update";
+        public static final String APP_REQUEST_WEATHER_INFO = "/app/weatherinfo/request";
     }
 
     /**
