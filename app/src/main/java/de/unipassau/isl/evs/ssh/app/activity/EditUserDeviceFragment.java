@@ -1,19 +1,32 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.common.collect.ImmutableSet;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -21,9 +34,12 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
+import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.ALL_GROUPS_DIALOG;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.EDIT_USERDEVICE_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Fragment_Arguments.USER_DEVICE_ARGUMENT_FRAGMENT;
 
 /**
@@ -67,12 +83,89 @@ public class EditUserDeviceFragment extends BoundFragment {
         TextView deviceID = ((TextView) root.findViewById(R.id.userdevice_user_deviceid));
         deviceID.setText(getResources().getString(R.string.device_id) + device.getUserDeviceID().getIDString());
 
+        Button editButton = (Button) root.findViewById(R.id.userdevice_edit_button);
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle bundle = new Bundle();
+                String[] groups = listGroups();
+                if (groups != null) {
+                    bundle.putStringArray(ALL_GROUPS_DIALOG, groups);
+                }
+                createEditUserDeviceDialog(bundle);
+            }
+        });
+
         ListView userPermissionList = (ListView) root.findViewById(R.id.listUserPermissionContainer);
         PermissionListAdapter permissionListAdapter = new PermissionListAdapter(inflater);
         userPermissionList.setAdapter(permissionListAdapter);
 
         return root;
     }
+
+    /**
+     * @return A String Array of group names.
+     */
+    private String[] listGroups() {
+        List<Group> groups = getComponent(AppUserConfigurationHandler.KEY).getAllGroups();
+        if (groups == null) {
+            return null;
+        }
+        return (String[]) ImmutableSet.copyOf(groups).toArray();
+    }
+
+
+    /**
+     * Creates and returns a dialogs that gives the user the option to edit a group.
+     */
+    private Dialog createEditUserDeviceDialog(Bundle bundle) {
+        final UserDevice userDevice = (UserDevice) bundle.getSerializable(EDIT_USERDEVICE_DIALOG);
+
+        String[] groupNames = bundle.getStringArray(ALL_GROUPS_DIALOG);
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_edituserdevice, null, false);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        final EditText userDeviceName = (EditText) dialogView.findViewById(R.id.edit_userdevice_dialog_userdevice_name);
+        userDeviceName.setHint(userDevice.getName());
+        List<String> groupList = new ArrayList<>(Arrays.asList(groupNames));
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.group_list, groupList);
+        final Spinner groupName = ((Spinner) dialogView.findViewById(R.id.edit_userdevice_dialog_spinner));
+
+        groupName.setAdapter(adapter);
+
+        final AlertDialog dialog = builder.create();
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        builder.setMessage(R.string.edit_group_dialog_title)
+                .setView(dialogView)
+                .setNegativeButton(R.string.cancel, null)
+                .setNeutralButton(R.string.edit, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        String name = userDeviceName.getText().toString();
+                        String group = ((String) groupName.getSelectedItem());
+                        getComponent(AppUserConfigurationHandler.KEY).editUserDevice(userDevice,
+                                new UserDevice(name, group, userDevice.getUserDeviceID()));
+                        String toastText = "Device " + name + " edited.";
+                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                })
+                .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        getComponent(AppUserConfigurationHandler.KEY).removeUserDevice(userDevice);
+                        String toastText = "Device " + userDevice.getName() + " removed.";
+                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                });
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+        return dialog;
+    }
+
 
     private class PermissionListAdapter extends BaseAdapter {
         private final LayoutInflater inflater;

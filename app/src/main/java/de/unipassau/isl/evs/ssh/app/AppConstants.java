@@ -23,6 +23,8 @@ public class AppConstants extends CoreConstants {
         public static final String EDIT_GROUP_DIALOG = "EDIT_GROUP_DIALOG";
         public static final String EDIT_PERMISSION_DIALOG = "EDIT_PERMISSION_DIALOG";
         public static final String TEMPLATE_DIALOG = "TEMPLATE_DIALOG";
+        public static final String ALL_GROUPS_DIALOG = "ALL_GROUPS_DIALOG";
+        public static final String EDIT_USERDEVICE_DIALOG = "EDIT_USERDEVICE_DIALOG";
         public static final String DELETE_USERDEVICE_DIALOG = "DELETE_USERDEVICE_DIALOG";
     }
 }
