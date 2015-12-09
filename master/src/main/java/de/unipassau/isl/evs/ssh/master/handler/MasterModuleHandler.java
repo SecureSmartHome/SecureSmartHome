@@ -9,13 +9,16 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.AddNewModulePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.RenameModulePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
@@ -60,7 +63,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        String routingKey = message.getRoutingKey();
+        final String routingKey = message.getRoutingKey();
         if (routingKey.equals(CoreConstants.RoutingKeys.MASTER_MODULE_ADD)) {
             if (message.getPayload() instanceof AddNewModulePayload) {
                 AddNewModulePayload payload = (AddNewModulePayload) message.getPayload();
@@ -77,8 +80,35 @@ public class MasterModuleHandler extends AbstractMasterHandler {
                 OutgoingRouter router = getComponent(OutgoingRouter.KEY);
                 router.sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), createUpdateMessage());
             }
+        /* @author leon */
+        } else if (routingKey.equals(CoreConstants.RoutingKeys.MASTER_MODULE_RENAME)) {
+            if (hasPermission(message.getFromID(), new Permission(DatabaseContract.Permission.Values.RENAME_MODULE))) {
+                if (message.getPayload() instanceof RenameModulePayload) {
+                    if (handleRenameModule(message)) {
+                        updateAllClients();
+                    } else {
+                        sendErrorMessage(message);
+                    }
+                } else {
+                    sendErrorMessage(message);
+                }
+            }
         }
         // TODO handle remove sensor
+    }
+
+    /* @author leon */
+    private boolean handleRenameModule(Message.AddressedMessage message) {
+        RenameModulePayload renameModulePayload = ((RenameModulePayload) message.getPayload());
+        try {
+            requireComponent(SlaveController.KEY).changeModuleName(renameModulePayload.getOldName(),
+                    renameModulePayload.getNewName());
+            return true;
+        } catch (DatabaseControllerException e) {
+            Log.e(TAG, "Error while adding new module: " + e.getCause().getMessage());
+            sendErrorMessage(message);
+            return false;
+        }
     }
 
     private boolean handleAddModule(Module module, Message.AddressedMessage message) {
