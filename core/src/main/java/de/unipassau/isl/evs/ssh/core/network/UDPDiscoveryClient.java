@@ -164,9 +164,13 @@ public class UDPDiscoveryClient extends AbstractComponent {
      * @return the ChannelFuture returned by {@link io.netty.channel.Channel#write(Object)}
      */
     private ChannelFuture sendDiscoveryRequest() {
-        Log.v(TAG, "sendDiscoveryRequest");
-
         final NamingManager namingManager = requireComponent(NamingManager.KEY);
+        if (namingManager.isMasterIDKnown()) {
+            Log.v(TAG, "sendDiscoveryRequest looking for Master " + namingManager.getMasterID());
+        } else {
+            Log.v(TAG, "sendDiscoveryRequest looking for any Master");
+        }
+
         final byte[] header = DISCOVERY_PAYLOAD_REQUEST.getBytes();
         final byte[] ownIDBytes = namingManager.getOwnID().getIDBytes();
         final ByteBuf buffer = channel.channel().alloc().buffer();
