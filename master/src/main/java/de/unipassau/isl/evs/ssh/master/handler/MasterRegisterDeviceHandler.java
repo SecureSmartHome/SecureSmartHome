@@ -32,6 +32,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_REG
 /**
  * Handles messages indicating that a device wants to register itself at the system and also generates
  * messages for each target that needs to know of this event and passes them to the OutgoingRouter.
+ * @author leon
  */
 public class MasterRegisterDeviceHandler extends AbstractMasterHandler implements Component {
     public static final Key<MasterRegisterDeviceHandler> KEY = new Key<>(MasterRegisterDeviceHandler.class);

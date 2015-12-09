@@ -22,7 +22,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
-import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 
 /**
  * The AppUserConfigurationHandler
@@ -35,6 +34,7 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
     private ImmutableListMultimap<UserDevice, Permission> usersToPermissions;
     private ImmutableListMultimap<Group, UserDevice> groupToUserDevice;
     private List<Permission> allPermissions;
+    private List<Group> allGroups;
 
     private List<UserInfoListener> listeners = new LinkedList<>();
 
@@ -77,6 +77,7 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
                 this.usersToPermissions = payload.getUsersToPermissions();
                 this.groupToUserDevice = payload.getGroupToUserDevice();
                 this.allPermissions = payload.getAllPermissions();
+                this.allGroups = payload.getAllGroups();
                 fireUserInfoUpdated();
             }
         } else {
@@ -105,10 +106,10 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
     }
 
     public List<Group> getAllGroups() {
-        if (groupToUserDevice == null) {
+        if (allGroups == null) {
             return null;
         }
-        return Lists.newArrayList(groupToUserDevice.keySet());
+        return ImmutableList.copyOf(allGroups);
     }
 
     public List<UserDevice> getAllUserDevices() {
