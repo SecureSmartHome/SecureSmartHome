@@ -160,7 +160,7 @@ public class DatabaseConnector extends AbstractComponent {
                 DatabaseContract.Permission.Values.RENAME_ORDROID,
                 DatabaseContract.Permission.Values.DELETE_ORDROID,
                 DatabaseContract.Permission.Values.ADD_SENSOR,
-                DatabaseContract.Permission.Values.RENAME_SENSOR,
+                DatabaseContract.Permission.Values.RENAME_MODULE,
                 DatabaseContract.Permission.Values.DELETE_SENSOR,
                 DatabaseContract.Permission.Values.START_HOLIDAY_SIMULATION,
                 DatabaseContract.Permission.Values.STOP_HOLIDAY_SIMULATION,
