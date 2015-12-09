@@ -5,7 +5,9 @@ import android.util.Log;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -24,7 +26,10 @@ import de.unipassau.isl.evs.ssh.core.network.handler.SignatureGenerator;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
+import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
@@ -34,7 +39,9 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.AttributeKey;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_ALL_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_READER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_WRITER_IDLE_TIME;
@@ -42,6 +49,9 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_
 @ChannelHandler.Sharable
 public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     private static final String TAG = ServerHandshakeHandler.class.getSimpleName();
+
+    private static final AttributeKey<byte[]> CHAP_CALLENGE = AttributeKey.valueOf(ServerHandshakeHandler.class, "CHAP_CHALLENGE");
+    private static final AttributeKey<State> STATE = AttributeKey.valueOf(ServerHandshakeHandler.class, "STATE");
 
     private final Server server;
     private final Container container;
@@ -73,11 +83,13 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
                 ClassResolvers.weakCachingConcurrentResolver(getClass().getClassLoader())));
         ctx.pipeline().addBefore(ctx.name(), LoggingHandler.class.getSimpleName(), new LoggingHandler(LogLevel.TRACE));
 
+        // Timeout Handler
+        ctx.pipeline().addBefore(ctx.name(), IdleStateHandler.class.getSimpleName(),
+                new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
+        ctx.pipeline().addBefore(ctx.name(), TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
+
         // Add exception handler
         ctx.pipeline().addLast(PipelinePlug.class.getSimpleName(), new PipelinePlug());
-
-        // Register connection
-        server.getActiveChannels().add(ctx.channel());
 
         super.channelRegistered(ctx);
         Log.v(TAG, "Pipeline after register: " + ctx.pipeline());
@@ -86,81 +98,187 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         Log.v(TAG, "channelActive " + ctx);
-
         super.channelActive(ctx);
+        assert container.require(NamingManager.KEY).isMaster();
+        setState(ctx, null, State.EXPECT_HELLO);
+        setChapChallenge(ctx, new byte[HandshakePacket.CHAP.CHALLENGE_LENGTH]);
     }
 
-    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof HandshakePacket) {
-            Log.v(TAG, "Received " + msg);
-            if (msg instanceof HandshakePacket.ClientRegistration) {
-                //Send client register info to handler
-                HandshakePacket.ClientRegistration clientRegistration = ((HandshakePacket.ClientRegistration) msg);
-                boolean success = container.require(MasterRegisterDeviceHandler.KEY).registerDevice(
-                        clientRegistration.clientCertificate,
-                        clientRegistration.token
-                );
-
-                //Todo sanity check message
-                ctx.writeAndFlush(new HandshakePacket.ServerRegistrationResponse(success, "",
-                        container.require(NamingManager.KEY).getMasterCertificate()));
-            } else if (msg instanceof HandshakePacket.ClientHello) {
-                final HandshakePacket.ClientHello hello = (HandshakePacket.ClientHello) msg;
-                ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_CERT).set(hello.clientCertificate);
-                final DeviceID deviceID = DeviceID.fromCertificate(hello.clientCertificate);
-                ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_ID).set(deviceID);
-                Log.i(TAG, "Client " + deviceID + " connected");
-
-                final X509Certificate masterCert = container.require(NamingManager.KEY).getMasterCertificate();
-                ctx.writeAndFlush(new HandshakePacket.ServerHello(masterCert, null));
-
-                //TODO check authentication and protocol version and close connection on fail
-                clientAuthenticated(ctx, hello.clientCertificate, deviceID);
+        try {
+            if (msg instanceof HandshakePacket.Hello) {
+                handleHello(ctx, ((HandshakePacket.Hello) msg));
+            } else if (msg instanceof HandshakePacket.CHAP) {
+                if (getState(ctx) == State.EXPECT_INITIAL_CHAP) {
+                    handleInitialChapRequest(ctx, ((HandshakePacket.CHAP) msg));
+                } else {
+                    handleFinalChapResponse(ctx, ((HandshakePacket.CHAP) msg));
+                }
+            } else if (msg instanceof HandshakePacket.RegistrationRequest) {
+                handleRegistrationRequest(ctx, ((HandshakePacket.RegistrationRequest) msg));
+            } else {
+                throw new HandshakeException("Illegal Handshake packet received");
             }
-        } else {
-            super.channelRead(ctx, msg);
+        } catch (Exception e) {
+            ctx.close();
+            throw e;
         }
     }
 
-    /**
-     * Called once the Handshake is complete
-     */
-    private void clientAuthenticated(ChannelHandlerContext ctx, X509Certificate clientCertificate, DeviceID deviceID) {
-        Log.v(TAG, "clientAuthenticated " + ctx);
+    private void handleHello(ChannelHandlerContext ctx, HandshakePacket.Hello msg) throws GeneralSecurityException {
+        setState(ctx, State.EXPECT_HELLO, State.EXPECT_INITIAL_CHAP);
 
-        //Security
-        final PublicKey remotePublicKey = clientCertificate.getPublicKey();
+        assert !msg.isMaster;
+        final X509Certificate deviceCertificate = msg.certificate;
+        ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_CERT).set(deviceCertificate);
+        final DeviceID deviceID = DeviceID.fromCertificate(deviceCertificate);
+        ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_ID).set(deviceID);
+        Log.v(TAG, "Client " + deviceID + " connected, checking authentication");
+
+        final X509Certificate masterCert = container.require(NamingManager.KEY).getMasterCertificate();
+        final boolean isMaster = container.require(NamingManager.KEY).isMaster();
+        ctx.writeAndFlush(new HandshakePacket.Hello(masterCert, isMaster)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+
+        // add Security handlers
+        final PublicKey remotePublicKey = deviceCertificate.getPublicKey();
         final PrivateKey localPrivateKey = container.require(KeyStoreController.KEY).getOwnPrivateKey();
-        try {
-            ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), Encrypter.class.getSimpleName(), new Encrypter(remotePublicKey));
-            ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), Decrypter.class.getSimpleName(), new Decrypter(localPrivateKey));
-            ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), SignatureChecker.class.getSimpleName(), new SignatureChecker(remotePublicKey));
-            ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), SignatureGenerator.class.getSimpleName(), new SignatureGenerator(localPrivateKey));
-        } catch (GeneralSecurityException e) {
-            throw new RuntimeException("Could not set up Security Handlers", e);//TODO handle
+        ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), Encrypter.class.getSimpleName(), new Encrypter(remotePublicKey));
+        ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), Decrypter.class.getSimpleName(), new Decrypter(localPrivateKey));
+        ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), SignatureChecker.class.getSimpleName(), new SignatureChecker(remotePublicKey));
+        ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), SignatureGenerator.class.getSimpleName(), new SignatureGenerator(localPrivateKey));
+    }
+
+    private void handleInitialChapRequest(ChannelHandlerContext ctx, HandshakePacket.CHAP msg) throws HandshakeException {
+        setState(ctx, State.EXPECT_INITIAL_CHAP, State.EXPECT_FINAL_CHAP);
+
+        if (msg.challenge == null || msg.response != null) {
+            throw new HandshakeException("Illegal CHAP Response");
+        }
+        final byte[] chapChallenge = getChapChallenge(ctx);
+        new SecureRandom().nextBytes(chapChallenge);
+        ctx.write(new HandshakePacket.CHAP(chapChallenge, msg.challenge)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+    }
+
+    private void handleFinalChapResponse(ChannelHandlerContext ctx, HandshakePacket.CHAP msg) throws HandshakeException {
+        setState(ctx, State.EXPECT_FINAL_CHAP, State.CHECK_AUTH);
+
+        if (msg.challenge == null || msg.response == null) {
+            throw new HandshakeException("Illegal CHAP Response");
+        }
+        if (!Arrays.equals(getChapChallenge(ctx), msg.challenge)) {
+            throw new HandshakeException("CHAP Packet with invalid response");
         }
 
-        //Timeout Handler
-        ctx.pipeline().addBefore(ctx.name(), IdleStateHandler.class.getSimpleName(),
-                new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
-        ctx.pipeline().addBefore(ctx.name(), TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
+        checkAuthentication(ctx);
+    }
 
-        //Dispatcher
-        ctx.pipeline().addBefore(ctx.name(), ServerIncomingDispatcher.class.getSimpleName(), server.getIncomingDispatcher());
+    private void checkAuthentication(ChannelHandlerContext ctx) throws HandshakeException {
+        setState(ctx, State.CHECK_AUTH, State.CHECK_AUTH);
 
+        final DeviceID deviceID = ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_ID).get();
+        if (isDeviceRegistered(deviceID)) {
+            setState(ctx, State.CHECK_AUTH, State.FINISHED);
+
+            handshakeSuccessful(ctx);
+
+            ctx.write(new HandshakePacket.ServerAuthenticationResponse(
+                    true, null
+            )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+        } else {
+            setState(ctx, State.CHECK_AUTH, State.EXPECT_REGISTER);
+            Log.i(TAG, "Device " + deviceID + " is not registered, requesting registration");
+
+            ctx.write(new HandshakePacket.ServerAuthenticationResponse(
+                    false, "Unknown Device, please register."
+            )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+        }
+    }
+
+    private boolean isDeviceRegistered(DeviceID clientID) {
+        return container.require(SlaveController.KEY).getSlave(clientID) != null
+                || container.require(UserManagementController.KEY).getUserDevice(clientID) != null;
+    }
+
+    private void handleRegistrationRequest(ChannelHandlerContext ctx, HandshakePacket.RegistrationRequest msg) throws HandshakeException {
+        setState(ctx, State.EXPECT_REGISTER, State.CHECK_AUTH);
+
+        // send client register info to handler
+        boolean success = container.require(MasterRegisterDeviceHandler.KEY).registerDevice( //TODO add cert to KeyStore?
+                ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_CERT).get(),
+                msg.token
+        );
+
+        if (success) {
+            checkAuthentication(ctx);
+        } else {
+            setState(ctx, State.CHECK_AUTH, State.EXPECT_REGISTER);
+
+            ctx.write(new HandshakePacket.ServerAuthenticationResponse(
+                    false, "Registration rejected, closing connection"
+            )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+        }
+    }
+
+    protected void handshakeSuccessful(ChannelHandlerContext ctx) {
+        final State state = getState(ctx);
+        if (state != State.FINISHED) {
+            throw new IllegalStateException("Handshake not finished: " + state);
+        }
+        final DeviceID deviceID = ctx.channel().attr(ATTR_PEER_ID).get();
+
+        // allow pings
+        ctx.channel().attr(TimeoutHandler.SEND_PINGS).set(true);
+
+        // add Dispatcher
+        ctx.pipeline().addBefore(ctx.name(), ClientIncomingDispatcher.class.getSimpleName(), server.getIncomingDispatcher());
         ctx.pipeline().remove(this);
-        Log.v(TAG, "Pipeline after authenticate: " + ctx.pipeline());
+
+        // Register connection
+        server.getActiveChannels().add(ctx.channel());
+        Log.i(TAG, "Handshake with " + deviceID + " successful, current Pipeline: " + ctx.pipeline());
 
         Message message = new Message(new DeviceConnectedPayload(deviceID, ctx.channel()));
-
         container.require(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.MASTER_DEVICE_CONNECTED, message);
     }
 
-
-    private void handshakeClientRegisters(ChannelHandlerContext ctx, Object msg) {
-        HandshakePacket.ClientRegistration clientReg = ((HandshakePacket.ClientRegistration) msg);
-        //DO Stuff
+    private void setState(ChannelHandlerContext ctx, State expectedState, State newState) throws HandshakeException {
+        if (!ctx.channel().attr(STATE).compareAndSet(expectedState, newState)) {
+            throw new HandshakeException("Expected state " + expectedState + " but was " + getState(ctx) + ", " +
+                    "new state would have been " + newState);
+        }
+        Log.v(TAG, "State transition " + expectedState + " -> " + newState);
     }
 
+    private State getState(ChannelHandlerContext ctx) {
+        return ctx.channel().attr(STATE).get();
+    }
+
+    private void setChapChallenge(ChannelHandlerContext ctx, byte[] value) {
+        ctx.channel().attr(CHAP_CALLENGE).set(value);
+    }
+
+    private byte[] getChapChallenge(ChannelHandlerContext ctx) {
+        return ctx.channel().attr(CHAP_CALLENGE).get();
+    }
+
+    private enum State {
+        EXPECT_HELLO, EXPECT_INITIAL_CHAP, EXPECT_FINAL_CHAP, EXPECT_REGISTER, CHECK_AUTH, FINISHED
+    }
+
+    private class HandshakeException extends GeneralSecurityException {
+        public HandshakeException() {
+        }
+
+        public HandshakeException(String detailMessage) {
+            super(detailMessage);
+        }
+
+        public HandshakeException(String detailMessage, Throwable throwable) {
+            super(detailMessage, throwable);
+        }
+
+        public HandshakeException(Throwable throwable) {
+            super(throwable);
+        }
+    }
 }
