@@ -87,4 +87,6 @@
     <string name="deleteuserdevice_dialog_title">Want to remove</string>
     <string name="denied">Denied</string>
     <string name="granted">Granted</string>
+    <string name="nav_add_odroid_string">Add Odroid</string>
+    <string name="new_slave_name_missing">Enter a name for the new slave</string>
 </resources>
