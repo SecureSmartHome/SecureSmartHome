@@ -1,10 +1,13 @@
 package de.unipassau.isl.evs.ssh.core.messaging;
 
+import android.util.Log;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
 import java.security.SignatureException;
 import java.util.Objects;
+import java.util.Set;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
@@ -13,6 +16,7 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.EventLoop;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 
@@ -52,7 +56,25 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
      * @param msg AddressedMessage to dispatch.
      * @return {@code true} if the Message was forwarded to at least one MessageHandler.
      */
-    public abstract boolean dispatch(Message.AddressedMessage msg);
+    public boolean dispatch(final Message.AddressedMessage msg) {
+        Set<MessageHandler> handlers = mappings.get(msg.getRoutingKey());
+        final EventLoop executor = getExecutor();
+        Log.v(getClass().getSimpleName(), "Using EventLoop " + executor);
+        for (final MessageHandler handler : handlers) {
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    handler.handle(msg);
+                }
+            });
+        }
+        return !handlers.isEmpty();
+    }
+
+    /**
+     * @return the EventLoop used for dispatching all incoming messages
+     */
+    protected abstract EventLoop getExecutor();
 
     @Override
     public void init(Container container) {

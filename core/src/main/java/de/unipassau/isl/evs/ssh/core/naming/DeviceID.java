@@ -7,6 +7,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 
 /**
  * Unique id for all devices (user devices, master, slaves).
@@ -42,7 +43,7 @@ public final class DeviceID implements Serializable {
 
     public DeviceID(byte[] bytes) {
         this.id = Base64.encodeToString(bytes, Base64.NO_WRAP).trim();
-        this.bytes = bytes;
+        this.bytes = Arrays.copyOf(bytes, bytes.length);
         validateLength();
     }
 
@@ -52,8 +53,13 @@ public final class DeviceID implements Serializable {
         }
     }
 
-    public static DeviceID fromCertificate(X509Certificate cert) throws NoSuchProviderException, NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance(ID_MD_ALG, "SC");
+    public static DeviceID fromCertificate(X509Certificate cert) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance(ID_MD_ALG, "SC");
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+            throw new RuntimeException(ID_MD_ALG + " is not available from SpongyCastle", e);
+        }
         if (md.getDigestLength() != ID_LENGTH) {
             throw new AssertionError("Message digest " + ID_MD_ALG + " returns invalid length " + md.getDigestLength() + "!=" + ID_LENGTH);
         }
@@ -82,7 +88,7 @@ public final class DeviceID implements Serializable {
     }
 
     public byte[] getIDBytes() {
-        return bytes;
+        return Arrays.copyOf(bytes, bytes.length);
     }
 
     @Override
@@ -95,7 +101,7 @@ public final class DeviceID implements Serializable {
         }
 
         DeviceID deviceID = (DeviceID) o;
-        return id.equals(deviceID.id);
+        return Arrays.equals(bytes, deviceID.bytes);
     }
 
     @Override

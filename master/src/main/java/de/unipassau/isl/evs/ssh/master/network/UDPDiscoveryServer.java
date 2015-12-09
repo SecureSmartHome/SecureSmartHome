@@ -7,17 +7,18 @@ import android.util.Log;
 import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
+import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
@@ -114,7 +115,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
             buffer.writeInt(sign.length);
             buffer.writeBytes(sign);
         } catch (GeneralSecurityException e) {
-            e.printStackTrace();
+            Log.w(TAG, "Could not send UDP discovery response", e);
         }
 
         final DatagramPacket response = new DatagramPacket(buffer, request.sender());
@@ -133,18 +134,48 @@ public class UDPDiscoveryServer extends AbstractComponent {
                 final ByteBuf buffer = request.content();
                 final String messageType = readString(buffer);
                 if (DISCOVERY_PAYLOAD_REQUEST.equals(messageType)) {
-                    if (checkPubKey(buffer)) {
-                        Log.d(TAG, "UDP inquiry received from " + request.sender() + " looking for me");
-                        sendDiscoveryResponse(request);
+                    final DeviceID ownID = requireComponent(NamingManager.KEY).getOwnID();
+                    final DeviceID clientID = readDeviceID(buffer);
+                    if (clientID == null) {
+                        Log.d(TAG, "Discarding UDP inquiry without client ID");
                         ReferenceCountUtil.release(request);
                         return;
-                    } else {
-                        Log.d(TAG, "UDP inquiry received from " + request.sender() + ", but looking for another master");
                     }
+
+                    final boolean isMasterKnown = buffer.readBoolean();
+                    if (isMasterKnown) {
+                        // if the master is known to the device, the IDs must match
+                        final DeviceID masterID = readDeviceID(buffer);
+                        if (!ownID.equals(masterID)) {
+                            Log.d(TAG, "Discarding UDP inquiry from " + clientID + "(" + request.sender() + ") " +
+                                    "that is not looking for me (" + ownID + ") but " + masterID);
+                            ReferenceCountUtil.release(request);
+                            return;
+                        }
+                    } else {
+                        // if the device doesn't know his master, the master must know the device
+                        if (!isDeviceRegistered(clientID)) {
+                            Log.d(TAG, "Discarding UDP inquiry from " + clientID + "(" + request.sender() + ") " +
+                                    "that is looking for any master and is not registered");
+                            ReferenceCountUtil.release(request);
+                            return;
+                        }
+                    }
+
+                    Log.d(TAG, "UDP inquiry received from " + clientID + "(" + request.sender() + ") that is looking for "
+                            + (isMasterKnown ? "me" : "any master and is registered here"));
+                    sendDiscoveryResponse(request);
+                    ReferenceCountUtil.release(request);
+                    return;
                 }
             }
             // forward all other packets to the pipeline
             super.channelRead(ctx, msg);
+        }
+
+        private boolean isDeviceRegistered(DeviceID clientID) {
+            return requireComponent(SlaveController.KEY).getSlave(clientID) != null
+                    || requireComponent(UserManagementController.KEY).getUserDevice(clientID) != null;
         }
 
         /**
@@ -161,18 +192,16 @@ public class UDPDiscoveryServer extends AbstractComponent {
         }
 
         /**
-         * Read and verify public key.
+         * Read a DeviceID.
          */
-        private boolean checkPubKey(ByteBuf buffer) {
-            final X509Certificate masterCert = requireComponent(NamingManager.KEY).getMasterCertificate();
-            final int pubKeyLength = buffer.readInt();
-            final byte[] expectedPubKey = masterCert.getPublicKey().getEncoded();
-            if (pubKeyLength != expectedPubKey.length) {
-                return false;
+        private DeviceID readDeviceID(ByteBuf buffer) {
+            final int length = buffer.readInt();
+            if (length != DeviceID.ID_LENGTH) {
+                return null;
             }
-            byte[] actualPubKey = new byte[expectedPubKey.length];
-            buffer.readBytes(actualPubKey);
-            return Arrays.equals(expectedPubKey, expectedPubKey);
+            byte[] value = new byte[DeviceID.ID_LENGTH];
+            buffer.readBytes(value);
+            return new DeviceID(value);
         }
     }
 }

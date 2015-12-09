@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.core.network;
 
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
-import android.util.Base64;
 import android.util.Log;
 
 import java.net.InetAddress;
@@ -146,9 +145,11 @@ public class Client extends AbstractComponent {
             public void run() {
                 // Connect to TCP if the address of the Server/Master is known and not too many connection attempts have failed
                 final NamingManager namingManager = getContainer().require(NamingManager.KEY);
-                if (host != null && shouldReconnectTCP()) {
+                if (!namingManager.isMasterIDKnown()) {
+                    Log.w(TAG, "MasterID is null, waiting for onDiscoverySuccessful(host, port)");
+                } else if (host != null && shouldReconnectTCP()) {
                     connectClient(host, port);
-                } else if(namingManager.isMasterKnown()) { //Todo: check if desired
+                } else {
                     if (host == null) {
                         Log.w(TAG, "No master known, starting UDP discovery");
                     } else {
@@ -222,9 +223,7 @@ public class Client extends AbstractComponent {
      */
     @NonNull
     protected ChannelHandler getHandshakeHandler() {
-        System.out.println(getSharedPrefs().getString("Token:Pref:" + CoreConstants.SharedPrefs.PREF_TOKEN, ""));
-        return new ClientHandshakeHandler(this, getContainer(),
-                android.util.Base64.decode(getSharedPrefs().getString(CoreConstants.SharedPrefs.PREF_TOKEN, ""), android.util.Base64.NO_WRAP));
+        return new ClientHandshakeHandler(this, getContainer());
     }
 
     /**
@@ -252,7 +251,8 @@ public class Client extends AbstractComponent {
                 Log.w(TAG, disconnectsInARow + ". disconnect within the last " + diff + "ms, retrying");
             } else {
                 // otherwise just retry
-                Log.i(TAG, "Regular disconnect, retrying");
+                lastDisconnect = time;
+                Log.i(TAG, "First disconnect recently   , retrying");
             }
             initClient();
         } else {
@@ -265,7 +265,7 @@ public class Client extends AbstractComponent {
      * Saves the new address
      */
     public void onDiscoverySuccessful(InetAddress address, int port) {
-        Log.i(TAG, "UDP discovery successful, found " + address + ":" + port);
+        Log.i(TAG, "discovery successful, found " + address + ":" + port);
         getSharedPrefs().edit()
                 .putString(PREF_HOST, address.getHostAddress())
                 .putInt(PREF_PORT, port)
@@ -314,7 +314,7 @@ public class Client extends AbstractComponent {
         return incomingDispatcher;
     }
 
-    private SharedPreferences getSharedPrefs() {
+    SharedPreferences getSharedPrefs() {
         return getComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
     }
 

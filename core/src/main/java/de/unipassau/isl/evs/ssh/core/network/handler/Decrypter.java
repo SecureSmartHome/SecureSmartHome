@@ -29,17 +29,22 @@ public class Decrypter extends ReplayingDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> decoded) throws Exception {
-        final int encryptedLength = in.readInt();
-        final int decryptedLength = decryptCipher.getOutputSize(encryptedLength);
+        try {
+            final int encryptedLength = in.readInt();
+            final int decryptedLength = decryptCipher.getOutputSize(encryptedLength);
 
-        final ByteBuf out = ctx.alloc().buffer(decryptedLength);
-        Log.v(TAG, "Decrypting " + encryptedLength + "b data to " + decryptedLength + "b of decrypted data");
-        decryptCipher.doFinal(
-                in.nioBuffer(in.readerIndex(), encryptedLength),
-                out.nioBuffer(out.writerIndex(), decryptedLength));
-        out.writerIndex(out.writerIndex() + decryptedLength);
-        in.readerIndex(in.readerIndex() + encryptedLength);
+            final ByteBuf out = ctx.alloc().buffer(decryptedLength);
+            Log.v(TAG, "Decrypting " + encryptedLength + "b data to " + decryptedLength + "b of decrypted data");
+            decryptCipher.doFinal(
+                    in.nioBuffer(in.readerIndex(), encryptedLength),
+                    out.nioBuffer(out.writerIndex(), decryptedLength));
+            out.writerIndex(out.writerIndex() + decryptedLength);
+            in.readerIndex(in.readerIndex() + encryptedLength);
 
-        decoded.add(out);
+            decoded.add(out);
+        } catch (GeneralSecurityException e) {
+            ctx.close();
+            throw e;
+        }
     }
 }
