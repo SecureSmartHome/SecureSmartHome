@@ -76,12 +76,6 @@ public class SlaveQRCodeActivity extends BoundActivity {
             imageview.setImageBitmap(bitmap);
             imageview.setVisibility(View.VISIBLE);
         }
-        TextView textview = ((TextView) findViewById(R.id.qrcode_activity_text));
-        String text = getIntent().getExtras().getString(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION);
-        if (text != null) {
-            textview.setText(text);
-        }
-
     }
 
     @Override
