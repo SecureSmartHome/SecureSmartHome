@@ -5,11 +5,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.Button;
 import android.widget.TextView;
+
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppHolidaySimulationHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 
@@ -69,7 +68,7 @@ public class HolidayFragment extends BoundFragment {
     }
 
     /**
-     * Updates the buttons in this fragment's to represent the current door status.
+     * Updates the buttons in this fragment's to represent the current holiday status.
      */
     private void updateView() {
         AppHolidaySimulationHandler handler = getHolidaySimulationHandler();
