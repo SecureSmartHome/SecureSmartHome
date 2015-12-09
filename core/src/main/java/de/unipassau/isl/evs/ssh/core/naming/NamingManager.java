@@ -240,11 +240,12 @@ public class NamingManager extends AbstractComponent {
                     "already known MasterID " + masterID);
         }
 
-        requireComponent(KeyStoreController.KEY).saveCertificate(masterCert, masterID.getIDString());
-
         if (masterID == null) {
             setMasterID(certID);
         }
+
+        requireComponent(KeyStoreController.KEY).saveCertificate(masterCert, masterID.getIDString());
+
         this.masterCert = masterCert;
     }
 
