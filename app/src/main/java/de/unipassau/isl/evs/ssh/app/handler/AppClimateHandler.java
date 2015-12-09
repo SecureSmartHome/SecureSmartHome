@@ -64,8 +64,8 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
      * @param ir       IR radiation
      * @param visible  light intensity
      */
-    private void setCachedStatus(Module module, double temp1, double temp2, double pressure, double altitude, double humidity,
-                                 double uv, int ir, int visible) {
+    private void setCachedStatus(Module module, double temp1, double temp2, double pressure, double altitude,
+                                 double humidity, double uv, int ir, int visible) {
         ClimateStatus status = climateStatusMapping.get(module);
         if (status == null) {
             status = new ClimateStatus(temp1, temp2, pressure, altitude, humidity, uv, ir, visible);
@@ -204,9 +204,9 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
     public void handle(Message.AddressedMessage message) {
         if (message.getPayload() instanceof ClimatePayload) {
             ClimatePayload climatePayload = (ClimatePayload) message.getPayload();
-            setCachedStatus(climatePayload.getModule(), climatePayload.getTemp1(), climatePayload.getTemp2(), climatePayload.getPressure()
-                    , climatePayload.getAltitude(), climatePayload.getHumidity(), climatePayload.getUv(), climatePayload.getIr(),
-                    climatePayload.getVisible());
+            setCachedStatus(climatePayload.getModule(), climatePayload.getTemp1(), climatePayload.getTemp2(),
+                    climatePayload.getPressure(), climatePayload.getAltitude(), climatePayload.getHumidity(),
+                    climatePayload.getUv(), climatePayload.getIr(), climatePayload.getVisible());
         } else {
             Log.e(this.getClass().getSimpleName(), "Error! Unknown message Payload");
         }

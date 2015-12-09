@@ -152,7 +152,7 @@ public class ClimateFragment extends BoundFragment {
          * @param position    of Module in List
          * @param convertView child element of ListView
          * @param parent      ListView being populated
-         * @return
+         * @return New View to draw
          */
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
