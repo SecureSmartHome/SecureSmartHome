@@ -17,11 +17,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  * @author bucher
  */
 public class MainFragment extends BoundFragment implements MessageHandler {
-
-    public MainFragment() {
-        // Required empty public constructor
-    }
-
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout mLinearLayout = (LinearLayout) inflater.inflate(R.layout.fragment_main,
                 container, false);
@@ -102,72 +97,11 @@ public class MainFragment extends BoundFragment implements MessageHandler {
         usersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                parent.showFragmentByClass(ModifyPermissionFragment.class);
+                parent.showFragmentByClass(ListGroupFragment.class);
             }
         });
         return mLinearLayout;
     }
-
-    /**
-     * Checks if one of the registered doors is open.
-     *
-     * @return If one of the registered doors is open.
-     */
-/*
-    private boolean doorIsOpen() {
-        List<Module> list = getDoorModules();
-        for (Module m : list) {
-            if (m.getStatus()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    */
-/**
-     * todo
-     *
-     * @return All modules from the type door.
- *//*
-
-    private List<Module> getDoorModules() {
-        // get list
-        // filter door modules
-        return null;
-    }
-
-    */
-/**
-     * Checks if one of the registered lights is turned on.
-     *
-     * @return If one of all registered lights is turned on.
- *//*
-
-    private boolean lightTurnedOn() {
-        List<Module> list = getLightModules(); //TODO get light modules from database
-        for (Module m : list) {
-            if (m.getStatus()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    */
-
-    /**
-     * todo
-     *
-     * @return All modules from the type light.
-     *//*
-
-    private List<Module> getLightModules() {
-        // get list
-        // filter light modules
-        return null;
-    }
-*/
 
     @Override
     public void handle(Message.AddressedMessage message) {

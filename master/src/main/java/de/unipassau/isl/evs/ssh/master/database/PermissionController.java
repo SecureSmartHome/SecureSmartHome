@@ -146,8 +146,7 @@ public class PermissionController extends AbstractComponent {
                             + " = ?", new String[] { permission.getName(), permission.getModuleName(),
                                                      userDeviceID.getId() });
         }
-        return true;
-        //return permissionCursor.moveToNext(); //FIXME setup permissions
+        return permissionCursor.moveToNext();
     }
 
     /**

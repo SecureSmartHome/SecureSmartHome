@@ -53,8 +53,8 @@ public class DatabaseContract {
             public static final String DELETE_USER = "DeleteUser";
             public static final String CHANGE_USER_NAME = "ChangeUserName";
             public static final String CHANGE_USER_GROUP = "ChangeUserGroup";
-            public static final String GRANT_USER_RIGHT = "GrantUserRight";
-            public static final String WITHDRAW_USER_RIGHT = "WithdrawUserRight";
+            public static final String GRANT_USER_RIGHT = "GrantUserRight";  //TODO rename to GRANT_USER_PERMISSION
+            public static final String WITHDRAW_USER_RIGHT = "WithdrawUserRight"; //TODO rename to REVOKE_USER_PERMISSION
             //Groups
             public static final String ADD_GROUP = "AddGroup";
             public static final String DELETE_GROUP = "DeleteGroup";

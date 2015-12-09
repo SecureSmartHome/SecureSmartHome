@@ -41,7 +41,8 @@ import io.netty.channel.group.ChannelGroup;
  * @author Team
  */
 public class MainActivity extends BoundActivity {
-    //Todo: intend name.
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     private final MessageHandler handler = new MessageHandler() {
         @Override
         public void handle(final Message.AddressedMessage message) {
@@ -143,7 +144,6 @@ public class MainActivity extends BoundActivity {
         // start MasterQRCodeActivity when no devices are registered yet
         if (hasNoRegisteredDevice()) {
             Intent intent = new Intent(this, MasterQRCodeActivity.class);
-            //TODO: create QRCodeInformation from data
             QRDeviceInformation deviceInformation = null;
             try {
                 deviceInformation = new QRDeviceInformation(
@@ -160,10 +160,11 @@ public class MainActivity extends BoundActivity {
                 hostNameBuilder.append(b + 128).append('.');
             }
             hostNameBuilder.deleteCharAt(hostNameBuilder.length() - 1);
-            System.out.println("HostNAME:" + hostNameBuilder.toString());
-            System.out.println("ID:" + deviceInformation.getID());
-            System.out.println("Port:" + deviceInformation.getPort());
-            System.out.println("Token:" + android.util.Base64.encodeToString(deviceInformation.getToken(), android.util.Base64.NO_WRAP));
+            Log.i(TAG, "\"HostNAME:\" + hostNameBuilder.toString()");
+            Log.i(TAG, "ID:" + deviceInformation.getID());
+            Log.i(TAG, "Port:" + deviceInformation.getPort());
+            Log.i(TAG, "Token:" + android.util.Base64.encodeToString(deviceInformation.getToken(), android.util.Base64.NO_WRAP));
+
             //NoDevice will allow any device to use this token
             Message message = new Message(new InitRegisterUserDevicePayload(deviceInformation.getToken(),
                     new UserDevice(MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.NO_GROUP,

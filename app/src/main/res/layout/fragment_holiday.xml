@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,33 +9,41 @@
     android:orientation="vertical"
     tools:context="de.unipassau.isl.evs.ssh.app.MainActivity">
 
-    <TextView
-        android:text="Hello Holiday!"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/switchSimulationOn"
+            android:id="@+id/holidayFragmentButton"
+            android:layout_gravity="center_horizontal"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"/>
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Available Components:"
-        android:id="@+id/textView" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/holidaySimulationStatus"
+            android:id="@+id/textView2"
+            android:layout_above="@+id/holidayFragmentButton"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="68dp"/>
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="[]"
-        android:id="@+id/textViewComponents" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/holidaySimulationOn"
+            android:id="@+id/holidayFragmentStatusField"
+            android:layout_alignBottom="@+id/textView2"
+            android:layout_toEndOf="@+id/textView2"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Package Information:"
-        android:id="@+id/textView3" />
+    <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView"
+            android:layout_marginTop="51dp"
+            android:src="@drawable/ic_holiday_island"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="null"
-        android:id="@+id/textViewPackage" />
-
-</LinearLayout>
+</RelativeLayout>
