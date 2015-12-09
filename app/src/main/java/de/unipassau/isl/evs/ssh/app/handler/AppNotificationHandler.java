@@ -61,7 +61,7 @@ public class AppNotificationHandler extends AbstractComponent implements Message
             //Weather Warnings
         } else if (message.getPayload() instanceof WeatherPayload) {
             WeatherPayload payload = (WeatherPayload) message.getPayload();
-            issueWeatherWarning(3, payload.getWarnText(), getContainer().get(ContainerService.KEY_CONTEXT));
+            issueWeatherWarning(WEATHER_WARNING_ID, payload.getWarnText(), getContainer().get(ContainerService.KEY_CONTEXT));
             //System Health Warning
         } else if (message.getPayload() instanceof SystemHealthPayload) {
             SystemHealthPayload payload = (SystemHealthPayload) message.getPayload();
@@ -124,14 +124,13 @@ public class AppNotificationHandler extends AbstractComponent implements Message
         Module module = payload.getModule();
         String text = (module.getName() + " at " + module.getAtSlave() + " "
                 + module.getModuleType() + " failed.");
-        displayNotification(title, text, notificationID, context);
+        displayNotification(title, text, "StatusFragment", notificationID, context);
     }
 
     private void issueDoorBellNotification(int notificationID, DoorBellPayload payload, Context context) {
         String title = "The Door Bell rang";
         String text = ("Door Bell rang at " + payload.getModuleName() + "!");
-        displayNotification(title, text, notificationID, context);
-                + module.getModuleType() + " failed");
+        displayNotification(title, text, "DoorFragment", notificationID, context);
         displayNotification(title, text, "StatusFragment", notificationID, context);
     }
 
@@ -148,6 +147,8 @@ public class AppNotificationHandler extends AbstractComponent implements Message
      */
     private void displayNotification(String title, String text, String openThisFragment, int notificationID,
                                      Context context) {
+        final int REQUEST_CODE = 0;
+
         //Build notification
         notificationBuilder.setSmallIcon(R.drawable.ic_home_light);
         notificationBuilder.setColor(2718207);
@@ -155,11 +156,10 @@ public class AppNotificationHandler extends AbstractComponent implements Message
         notificationBuilder.setContentTitle(title);
         notificationBuilder.setContentText(text);
 
-        //TODO send to right Fragment not always to MainActivity
         //If Notification is clicked send to this Page
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction(openThisFragment);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notificationBuilder.setContentIntent(pendingIntent);
 
         //Send notification out to Device

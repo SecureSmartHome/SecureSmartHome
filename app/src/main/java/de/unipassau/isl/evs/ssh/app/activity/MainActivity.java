@@ -77,6 +77,8 @@ public class MainActivity extends BoundActivity
             showFragmentByClass(StatusFragment.class);
         } else if (getIntent().getAction().equals("LightFragment")) {
             showFragmentByClass(LightFragment.class);
+        } else if (getIntent().getAction().equals("DoorFragment")) {
+            showFragmentByClass(DoorFragment.class);
         }
 
         //Initialise fragmentTransaction
