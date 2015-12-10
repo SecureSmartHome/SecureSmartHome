@@ -2,6 +2,12 @@ package de.unipassau.isl.evs.ssh.master;
 
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.cert.CertificateEncodingException;
+
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -18,10 +24,12 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterModuleHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterNotificationHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRoutingTableHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterSystemHealthCheckHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.*;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DEVICE_CONNECTED;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_BELL_CAMERA_GET;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_BELL_RING;
@@ -63,6 +71,7 @@ public class MasterContainer extends ContainerService {
         incomingDispatcher.registerHandler(new MasterHolidaySimulationPlannerHandler(), MASTER_HOLIDAY_GET);
         incomingDispatcher.registerHandler(new MasterRoutingTableHandler(), MASTER_SLAVE_REGISTER);
         incomingDispatcher.registerHandler(new MasterDoorBellHandler(), MASTER_DOOR_BELL_RING, MASTER_DOOR_BELL_CAMERA_GET);
+        incomingDispatcher.registerHandler(new MasterSystemHealthCheckHandler(), MASTER_SYSTEM_HEALTH_CHECK);
 
         Log.i(getClass().getSimpleName(), "Master set up! ID is " + require(NamingManager.KEY).getOwnID());
     }

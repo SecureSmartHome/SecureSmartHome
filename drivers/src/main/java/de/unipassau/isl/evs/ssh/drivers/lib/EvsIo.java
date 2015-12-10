@@ -71,8 +71,8 @@ public class EvsIo {
             String result = readFully(response);
             Log.w("EVS-IO", "EVS-IO: Read GPIO value: " + result);
             ret = result;
-        }catch(Exception e){
-            Log.w("EVS-IO","EVS-IO error: " + e);
+        } catch (Exception e) {
+            Log.w("EVS-IO", "EVS-IO error: " + e);
             throw new EvsIoException("Could not register Pin: " + e);
         }
         return ret;

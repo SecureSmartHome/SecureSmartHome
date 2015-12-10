@@ -14,6 +14,7 @@ import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveDoorHandler;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveLightHandler;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveModuleHandler;
+import de.unipassau.isl.evs.ssh.slave.handler.SlaveSystemHealthHandler;
 
 /**
  * This Container class manages dependencies needed in the Slave part of the architecture.
@@ -27,6 +28,7 @@ public class SlaveContainer extends ContainerService {
         register(NamingManager.KEY, new NamingManager(false));
         register(Client.KEY, new Client());
         register(SlaveModuleHandler.KEY, new SlaveModuleHandler());
+        register(SlaveSystemHealthHandler.KEY, new SlaveSystemHealthHandler());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
         incomingDispatcher.registerHandler(new SlaveLightHandler(),

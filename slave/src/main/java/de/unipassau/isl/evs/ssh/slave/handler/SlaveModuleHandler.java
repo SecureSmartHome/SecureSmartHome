@@ -141,7 +141,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
         }
     }
 
-    private Class<? extends Component> getDriverClass(Module module) {
+    public Class<? extends Component> getDriverClass(Module module) {
         Class clazz = null;
         switch (module.getModuleType()) {
             case CoreConstants.ModuleType.WINDOW_SENSOR:
@@ -169,7 +169,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
      *
      * @return a list of registered components
      */
-    public List<Module> getComponents() {
+    public List<Module> getModules() {
         return new ArrayList<>(components);
     }
 

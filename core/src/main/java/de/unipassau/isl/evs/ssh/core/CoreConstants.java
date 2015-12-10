@@ -138,6 +138,7 @@ public class CoreConstants {
         public static final String MASTER_SLAVE_REGISTER = "/master/slave/register";
         public static final String MASTER_DEVICE_CONNECTED = "/master/device/connected";
         public static final String MASTER_MODULE_RENAME = "/master/module/modify";
+        public static final String MASTER_SYSTEM_HEALTH_CHECK = "master/systemhealth/check";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
