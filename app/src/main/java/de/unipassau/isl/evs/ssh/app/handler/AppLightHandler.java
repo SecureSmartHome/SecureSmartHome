@@ -32,12 +32,6 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     private final List<LightHandlerListener> listeners = new ArrayList<>();
     private final Map<Module, LightStatus> lightStatusMapping = new HashMap<>();
 
-    public AppLightHandler() {
-        Module m = new Module("TestPlugswitch", new DeviceID("H5f4ahpVmoVL6GKAYqZY7m73k9i9nDCnsiJLbw+0n3E="),
-                CoreConstants.ModuleType.LIGHT, new WLANAccessPoint()); //FIXME resolve DeviceID
-        lightStatusMapping.put(m, new LightStatus(false));
-    }
-
     /**
      * Changes the light status of a module.
      *
