@@ -28,8 +28,8 @@ public class SlaveContainer extends ContainerService {
         register(NamingManager.KEY, new NamingManager(false));
         register(Client.KEY, new Client());
         register(SlaveModuleHandler.KEY, new SlaveModuleHandler());
-        register(SlaveSystemHealthHandler.KEY, new SlaveSystemHealthHandler());
         register(ExecutionServiceComponent.KEY, new ExecutionServiceComponent());
+        register(SlaveSystemHealthHandler.KEY, new SlaveSystemHealthHandler());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
         incomingDispatcher.registerHandler(new SlaveLightHandler(),
