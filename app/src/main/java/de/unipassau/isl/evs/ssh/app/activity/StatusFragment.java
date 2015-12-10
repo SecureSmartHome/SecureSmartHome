@@ -20,8 +20,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 
 /**
- * This activity allows to visualize status information of the system. If this functionality is used a message,
- * requesting all needed information, is generated and passed to the OutgoingRouter.
+ * This activity allows to visualize connected Modules and slaves. If this functionality is used a
+ * message, requesting all needed information, is generated and passed to the OutgoingRouter.
  *
  * @author Wolfgang Popp
  */
@@ -110,6 +110,5 @@ public class StatusFragment extends BoundFragment {
             };
             moduleListView.setAdapter(moduleAdapter);
         }
-
     }
 }

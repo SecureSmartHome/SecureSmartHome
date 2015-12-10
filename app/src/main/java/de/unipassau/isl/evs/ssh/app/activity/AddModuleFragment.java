@@ -30,8 +30,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
- * This fragment allows to add new sensors to the system. If this functionality is used a message,
- * containing all needed information, is generated and passed to the OutgoingRouter.
+ * This fragment allows to add new sensors to the system. If this functionality is used, a message
+ * containing all needed information is generated and passed to the OutgoingRouter.
  *
  * @author Wolfgang Popp
  */

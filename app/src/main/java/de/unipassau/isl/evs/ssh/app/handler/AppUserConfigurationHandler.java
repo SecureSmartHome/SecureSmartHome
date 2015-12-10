@@ -24,8 +24,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 
 /**
- * TODO add javadoc
- * The AppUserConfigurationHandler
+ * The AppUserConfigurationHandler handles the messaging that is needed to provide user and group
+ * information on the app.
  *
  * @author Wolfgang Popp
  */
@@ -39,10 +39,20 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
 
     private List<UserInfoListener> listeners = new LinkedList<>();
 
+    /**
+     * Adds the given listener to this handler.
+     *
+     * @param listener the listener to add
+     */
     public void addUserInfoListener(AppUserConfigurationHandler.UserInfoListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Removes the given listener from this handler.
+     *
+     * @param listener the listener to remove
+     */
     public void removeUserInfoListener(AppUserConfigurationHandler.UserInfoListener listener) {
         listeners.remove(listener);
     }
@@ -82,7 +92,7 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
         }
     }
 
-    public void update() {
+    private void update() {
         UserDeviceInformationPayload payload = new UserDeviceInformationPayload();
         OutgoingRouter router = getComponent(OutgoingRouter.KEY);
 
@@ -102,36 +112,63 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
 
     }
 
+    /**
+     * Returns a list of all groups.
+     *
+     * @return a list of all groups or null if no groups are available
+     */
     public List<Group> getAllGroups() {
-        if (allGroups == null) {
+        if (allGroups == null || allGroups.size() < 1) {
             return null;
         }
         return ImmutableList.copyOf(allGroups);
     }
 
+    /**
+     * Returns a list of all UserDevices.
+     *
+     * @return a list of all UserDevices or null if no groups are available
+     */
     public List<UserDevice> getAllUserDevices() {
-        if (usersToPermissions == null) {
+        if (usersToPermissions == null || usersToPermissions.size() < 1) {
             return null;
         }
         return Lists.newArrayList(usersToPermissions.keySet());
     }
 
+    /**
+     * Returns a list of all members of the given group.
+     *
+     * @param group the group
+     * @return a list of all members or null
+     */
     public List<UserDevice> getAllGroupMembers(Group group) {
-        if (groupToUserDevice == null) {
+        if (groupToUserDevice == null || groupToUserDevice.size() < 1) {
             return null;
         }
         return groupToUserDevice.get(group);
     }
 
+    /**
+     * Returns a list of all permissions.
+     *
+     * @return a list of all permissions or null
+     */
     public List<Permission> getAllPermissions() {
-        if (allPermissions == null) {
+        if (allPermissions == null || allPermissions.size() < 1) {
             return null;
         }
         return ImmutableList.copyOf(allPermissions);
     }
 
+    /**
+     * Returns a list of all permissions of the given user.
+     *
+     * @param user the user whose permissions are queried
+     * @return a list of all permissions of the user or null
+     */
     public List<Permission> getPermissionForUser(UserDevice user) {
-        if (usersToPermissions == null) {
+        if (usersToPermissions == null || usersToPermissions.size() < 1) {
             return null;
         }
         return usersToPermissions.get(user);
@@ -144,42 +181,87 @@ public class AppUserConfigurationHandler extends AbstractComponent implements Me
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_USERINFO_SET, message);
     }
 
+    /**
+     * Sends a message to master to add the given group.
+     *
+     * @param group the group to add
+     */
     public void addGroup(Group group) {
         GroupEditPayload payload = GroupEditPayload.newAddGroupPayload(group);
         sendEditMessage(payload);
     }
 
+    /**
+     * Sends a message to master to remove the given group.
+     *
+     * @param group the group to remove
+     */
     public void removeGroup(Group group) {
         GroupEditPayload payload = GroupEditPayload.newRemoveGroupPayload(group);
         sendEditMessage(payload);
     }
 
+    /**
+     * Sends a message to master to update the given {@code oldGroup} to the given {@code newGroup}
+     *
+     * @param oldGroup the group to edit
+     * @param newGroup the new group information
+     */
     public void editGroup(Group oldGroup, Group newGroup) {
         GroupEditPayload payload = GroupEditPayload.newEditGroupPayload(oldGroup, newGroup);
         sendEditMessage(payload);
     }
 
+    /**
+     * Sends a message to master to grant the given permission to the given device.
+     *
+     * @param device     the UserDevice to grant the permission
+     * @param permission the permission to grant
+     */
     public void grantPermission(UserDevice device, Permission permission) {
         UserDeviceEditPayload payload = UserDeviceEditPayload.newGrantPermissionPayload(device, permission);
         sendEditMessage(payload);
     }
 
+    /**
+     * Sends a message to master to remove the given permission from the given UserDevice.
+     *
+     * @param device     the UserDevice to remove the permission from
+     * @param permission the permission to remove
+     */
     public void revokePermission(UserDevice device, Permission permission) {
         UserDeviceEditPayload payload = UserDeviceEditPayload.newRevokePermissionPayload(device, permission);
         sendEditMessage(payload);
     }
 
+    /**
+     * Sends a message to master to edit the given user device.
+     *
+     * @param oldDevice the UserDevice that gets edited
+     * @param newDevice the new configuration for {@code oldUserDevice}
+     */
     public void editUserDevice(UserDevice oldDevice, UserDevice newDevice) {
         UserDeviceEditPayload payload = UserDeviceEditPayload.newEditUserPayload(oldDevice, newDevice);
         sendEditMessage(payload);
     }
 
+    /**
+     * Sends a message to master to remove the given UserDevice.
+     *
+     * @param userDevice the UserDevice to remove
+     */
     public void removeUserDevice(UserDevice userDevice) {
         UserDeviceEditPayload payload = UserDeviceEditPayload.newRemoveUserPayload(userDevice);
         sendEditMessage(payload);
     }
 
+    /**
+     * The listener to receive callbacks, when the user configuration changed.
+     */
     public interface UserInfoListener {
+        /**
+         * Called when the user configuration changed.
+         */
         void userInfoUpdated();
     }
 }

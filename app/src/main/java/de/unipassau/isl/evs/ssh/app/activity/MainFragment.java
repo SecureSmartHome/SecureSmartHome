@@ -8,9 +8,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
-import de.unipassau.isl.evs.ssh.core.messaging.Message;
 
 /**
  * MainFragment gives the user an overview over the most important functions.
@@ -18,7 +15,9 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  *
  * @author bucher
  */
-public class MainFragment extends BoundFragment implements MessageHandler {
+public class MainFragment extends BoundFragment {
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout mLinearLayout = (LinearLayout) inflater.inflate(R.layout.fragment_main,
                 container, false);
@@ -72,20 +71,5 @@ public class MainFragment extends BoundFragment implements MessageHandler {
             }
         });
         return mLinearLayout;
-    }
-
-    @Override
-    public void handle(Message.AddressedMessage message) {
-
-    }
-
-    @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-
     }
 }

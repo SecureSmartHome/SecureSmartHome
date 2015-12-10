@@ -10,7 +10,7 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 
 /**
- * A Fragment which can be attached to a {@link BoundActivity} and has utitlity methods for accessing the
+ * A Fragment which can be attached to a {@link BoundActivity} and has utility methods for accessing the
  * Container(Service) the Activity is bound to.
  *
  * @author Niko Fink
