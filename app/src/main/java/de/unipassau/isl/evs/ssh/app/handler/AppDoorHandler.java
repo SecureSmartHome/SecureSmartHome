@@ -53,6 +53,11 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
     }
 
     private void fireImageUpdated(byte[] image) {
+        if (image == null) {
+            Log.v(TAG, "No camera picture came with the message.");
+        } else {
+            Log.v(TAG, "Received picture.");
+        }
         for (DoorFragment.DoorListener listener : listeners) {
             listener.onPictureChanged(image);
         }
@@ -77,14 +82,18 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
         super.init(container);
         getContainer().require(IncomingDispatcher.KEY).registerHandler(this,
                 CoreConstants.RoutingKeys.APP_CAMERA_GET,
-                CoreConstants.RoutingKeys.APP_DOOR_BLOCK);
+                CoreConstants.RoutingKeys.APP_DOOR_BLOCK,
+                CoreConstants.RoutingKeys.APP_DOOR_GET,
+                CoreConstants.RoutingKeys.APP_DOOR_RING);
     }
 
     @Override
     public void destroy() {
         getContainer().require(IncomingDispatcher.KEY).unregisterHandler(this,
                 CoreConstants.RoutingKeys.APP_CAMERA_GET,
-                CoreConstants.RoutingKeys.APP_DOOR_BLOCK);
+                CoreConstants.RoutingKeys.APP_DOOR_BLOCK,
+                CoreConstants.RoutingKeys.APP_DOOR_GET,
+                CoreConstants.RoutingKeys.APP_DOOR_RING);
         super.destroy();
     }
 
@@ -105,8 +114,9 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
         } else if (routingKey.equals(CoreConstants.RoutingKeys.APP_DOOR_RING)) {
             DoorBellPayload doorBellPayload = (DoorBellPayload) message.getPayload();
             fireImageUpdated(doorBellPayload.getCameraPayload().getPicture());
+            Message messageToSend = new Message(doorBellPayload);
             requireComponent(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE,
-                    message);
+                    messageToSend);
         } else {
             throw new IllegalArgumentException("Unkown Routing Key: " + routingKey);
         }

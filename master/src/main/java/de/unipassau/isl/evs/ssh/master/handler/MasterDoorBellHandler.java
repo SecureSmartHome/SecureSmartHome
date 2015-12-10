@@ -67,7 +67,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
 
     private void handleCameraResponse(Message.AddressedMessage message) {
         CameraPayload cameraPayload = (CameraPayload) message.getPayload();
-        Message.AddressedMessage correspondingMessage = getMessageOnBehalfOfSequenceNr(message.getSequenceNr());
+        Message.AddressedMessage correspondingMessage = getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
         DoorBellPayload doorBellPayload = (DoorBellPayload) correspondingMessage.getPayload();
         doorBellPayload.setCameraPayload(cameraPayload);
 

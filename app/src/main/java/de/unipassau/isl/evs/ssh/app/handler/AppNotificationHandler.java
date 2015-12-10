@@ -137,7 +137,6 @@ public class AppNotificationHandler extends AbstractComponent implements Message
         String title = "The Door Bell rang";
         String text = ("Door Bell rang at " + payload.getModuleName() + "!");
         displayNotification(title, text, "DoorFragment", notificationID, context);
-        displayNotification(title, text, "StatusFragment", notificationID, context);
     }
 
     /**
