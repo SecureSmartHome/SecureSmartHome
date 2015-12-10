@@ -1,5 +1,8 @@
 package de.unipassau.isl.evs.ssh.drivers.lib;
 
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
@@ -10,9 +13,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
-
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Class to get weather information from the Odroid Show and Weather board.
@@ -41,7 +41,7 @@ public class WeatherSensor extends AbstractComponent {
         initSerialInterface();
         this.container = container;
 
-        this.future =  container.require(ExecutionServiceComponent.KEY).scheduleAtFixedRate(
+        this.future = container.require(ExecutionServiceComponent.KEY).scheduleAtFixedRate(
                 new WeatherPollingRunnable(this), 0, 200, TimeUnit.MILLISECONDS);
     }
 
@@ -55,49 +55,13 @@ public class WeatherSensor extends AbstractComponent {
         readData();
     }
 
-    private class WeatherPollingRunnable implements Runnable {
-
-        WeatherSensor sensor;
-
-        public WeatherPollingRunnable(WeatherSensor sensor) {
-            this.sensor = sensor;
-        }
-
-        @Override
-        public void run() {
-            if (future != null) {
-                updateData();
-                sendWeatherInfo();
-            }
-        }
-
-        /**
-         * Sends Weather Information to Master
-         */
-        private void sendWeatherInfo() {
-            ClimatePayload payload = new ClimatePayload(getTemperature1(), getTemperature2(), getPressure(),
-                    getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), "" , getModule());
-
-            //Todo set values
-
-            NamingManager namingManager = container.require(NamingManager.KEY);
-
-            Message message;
-            message = new Message(payload);
-            message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
-
-            OutgoingRouter router = container.require(OutgoingRouter.KEY);
-            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_PUSH_WEATHER_INFO, message);
-        }
-    }
-
-    //Natives///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * Initializes serial connection to Odroid Show and Weather board.
      * Remember to call close() at the end to close the connection.
      */
     private native void initSerialInterface();
+
+    //Natives///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Reads the current sensor data. The weather board only supports to read
@@ -111,14 +75,14 @@ public class WeatherSensor extends AbstractComponent {
      */
     private native void close();
 
-    //Getters///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     /*
     * returns last value from readData() for temperature sensor 1
     */
     public double getTemperature1() {
         return temp1;
     }
+
+    //Getters///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /*
     * returns last value from readData() for temperature sensor 2
@@ -172,7 +136,43 @@ public class WeatherSensor extends AbstractComponent {
     /*
     * returns last value from readData() for module Name of the sensor
      */
-    public Module getModule(){
+    public Module getModule() {
         return module;
+    }
+
+    private class WeatherPollingRunnable implements Runnable {
+
+        WeatherSensor sensor;
+
+        public WeatherPollingRunnable(WeatherSensor sensor) {
+            this.sensor = sensor;
+        }
+
+        @Override
+        public void run() {
+            if (future != null) {
+                updateData();
+                sendWeatherInfo();
+            }
+        }
+
+        /**
+         * Sends Weather Information to Master
+         */
+        private void sendWeatherInfo() {
+            ClimatePayload payload = new ClimatePayload(getTemperature1(), getTemperature2(), getPressure(),
+                    getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), "", getModule());
+
+            //Todo set values
+
+            NamingManager namingManager = container.require(NamingManager.KEY);
+
+            Message message;
+            message = new Message(payload);
+            message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
+
+            OutgoingRouter router = container.require(OutgoingRouter.KEY);
+            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_PUSH_WEATHER_INFO, message);
+        }
     }
 }

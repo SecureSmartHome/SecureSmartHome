@@ -5,30 +5,30 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
+        android:name="android.support.multidex.MultiDexApplication"
         android:allowBackup="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:name="android.support.multidex.MultiDexApplication">
+        android:theme="@style/AppTheme">
         <activity
             android:name=".activity.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
             android:name=".activity.SlaveQRCodeActivity"
-            android:label="RegisterDevice" />
+            android:label="RegisterDevice"/>
 
-        <service android:name=".SlaveContainer" />
+        <service android:name=".SlaveContainer"/>
 
         <!-- Start Service on boot -->
         <receiver
@@ -36,7 +36,7 @@
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
     </application>

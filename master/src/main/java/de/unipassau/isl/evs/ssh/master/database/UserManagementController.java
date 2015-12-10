@@ -15,21 +15,22 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * Offers high level methods to interact with the tables associated with users and groups in the database.
+ *
  * @author leon
  */
 public class UserManagementController extends AbstractComponent {
     public static final Key<UserManagementController> KEY = new Key<>(UserManagementController.class);
-    private DatabaseConnector databaseConnector;
     private static final String TEMPLATE_ID_FROM_NAME_SQL_QUERY =
-                        "select " + DatabaseContract.PermissionTemplate.COLUMN_ID
-                        + " from " + DatabaseContract.PermissionTemplate.TABLE_NAME
-                        + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
-                        + " = ?";
+            "select " + DatabaseContract.PermissionTemplate.COLUMN_ID
+                    + " from " + DatabaseContract.PermissionTemplate.TABLE_NAME
+                    + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                    + " = ?";
     private static final String GROUP_ID_FROM_NAME_SQL_QUERY =
-                        "select " + DatabaseContract.Group.COLUMN_ID
-                                + " from " + DatabaseContract.Group.TABLE_NAME
-                                + " where " + DatabaseContract.Group.COLUMN_NAME
-                                + " = ?";
+            "select " + DatabaseContract.Group.COLUMN_ID
+                    + " from " + DatabaseContract.Group.TABLE_NAME
+                    + " where " + DatabaseContract.Group.COLUMN_NAME
+                    + " = ?";
+    private DatabaseConnector databaseConnector;
 
     @Override
     public void init(Container container) {
@@ -52,10 +53,10 @@ public class UserManagementController extends AbstractComponent {
         try {
             databaseConnector.executeSql("insert into "
                             + DatabaseContract.Group.TABLE_NAME
-                            + " ("+ DatabaseContract.Group.COLUMN_NAME + ","
+                            + " (" + DatabaseContract.Group.COLUMN_NAME + ","
                             + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + ") values (?,("
                             + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
-                    new String[] { group.getName(), group.getTemplateName() });
+                    new String[]{group.getName(), group.getTemplateName()});
         } catch (SQLiteConstraintException sqlce) {
             throw new DatabaseControllerException("Either the given Template does not exist in the database"
                     + "or the name is already in use by another Group.", sqlce);
@@ -72,7 +73,7 @@ public class UserManagementController extends AbstractComponent {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.Group.TABLE_NAME
                             + " where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
-                    new String[] { groupName });
+                    new String[]{groupName});
         } catch (SQLiteConstraintException sqlce) {
             throw new IsReferencedException("This group is used by at least one UserDevice", sqlce);
         }
@@ -107,7 +108,7 @@ public class UserManagementController extends AbstractComponent {
             databaseConnector.executeSql("update " + DatabaseContract.Group.TABLE_NAME
                             + " set " + DatabaseContract.Group.COLUMN_NAME
                             + " = ? where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
-                                new String[] { newName, oldName });
+                    new String[]{newName, oldName});
         } catch (SQLiteConstraintException sqlce) {
             throw new AlreadyInUseException("The given name is already used by another Group.", sqlce);
         }
@@ -126,7 +127,7 @@ public class UserManagementController extends AbstractComponent {
                 + " from " + DatabaseContract.UserDevice.TABLE_NAME + " u"
                 + " join " + DatabaseContract.Group.TABLE_NAME + " g"
                 + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID + " = g."
-                + DatabaseContract.Group.COLUMN_ID, new String[] {});
+                + DatabaseContract.Group.COLUMN_ID, new String[]{});
         List<UserDevice> userDevices = new LinkedList<>();
         while (userDevicesCursor.moveToNext()) {
             userDevices.add(new UserDevice(userDevicesCursor.getString(0),
@@ -171,7 +172,7 @@ public class UserManagementController extends AbstractComponent {
         } catch (SQLiteConstraintException sqlce) {
             throw new DatabaseControllerException(
                     "Either the given Group does not exist in the database"
-                    + " or a UserDevice already has the given name or fingerprint.", sqlce);
+                            + " or a UserDevice already has the given name or fingerprint.", sqlce);
         }
     }
 
@@ -184,7 +185,7 @@ public class UserManagementController extends AbstractComponent {
         databaseConnector.executeSql("delete from "
                         + DatabaseContract.UserDevice.TABLE_NAME
                         + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
-                            new String[] { userDeviceID.getId() });
+                new String[]{userDeviceID.getId()});
     }
 
     /**
@@ -199,7 +200,7 @@ public class UserManagementController extends AbstractComponent {
                             + " set " + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID
                             + " = (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY
                             + ") where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
-                                new String[] { templateName, groupName });
+                    new String[]{templateName, groupName});
         } catch (SQLiteConstraintException sqlce) {
             throw new UnknownReferenceException("The given Template does not exist in the database", sqlce);
         }
@@ -217,7 +218,7 @@ public class UserManagementController extends AbstractComponent {
                             + " set " + DatabaseContract.UserDevice.COLUMN_GROUP_ID
                             + " = (" + GROUP_ID_FROM_NAME_SQL_QUERY
                             + ") where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
-                                new String[] { groupName, userDeviceID.getId() });
+                    new String[]{groupName, userDeviceID.getId()});
         } catch (SQLiteConstraintException sqlce) {
             throw new UnknownReferenceException("The given Group does not exist in the database", sqlce);
         }
@@ -225,19 +226,20 @@ public class UserManagementController extends AbstractComponent {
 
     /**
      * Get a single Group by name.
+     *
      * @param groupName Name of the Group.
      * @return The requested Group.
      */
     public Group getGroup(String groupName) {
         Cursor groupCursor = databaseConnector.executeSql("select g."
-                + DatabaseContract.Group.COLUMN_NAME
-                + ", t." + DatabaseContract.PermissionTemplate.COLUMN_NAME
-                + " from " + DatabaseContract.Group.TABLE_NAME + " g"
-                + " join " + DatabaseContract.PermissionTemplate.TABLE_NAME + " t"
-                + " on g." + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + " = t."
-                + DatabaseContract.PermissionTemplate.COLUMN_ID
-                + " where g." + DatabaseContract.Group.COLUMN_NAME + " = ?",
-                    new String[] { groupName });
+                        + DatabaseContract.Group.COLUMN_NAME
+                        + ", t." + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                        + " from " + DatabaseContract.Group.TABLE_NAME + " g"
+                        + " join " + DatabaseContract.PermissionTemplate.TABLE_NAME + " t"
+                        + " on g." + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + " = t."
+                        + DatabaseContract.PermissionTemplate.COLUMN_ID
+                        + " where g." + DatabaseContract.Group.COLUMN_NAME + " = ?",
+                new String[]{groupName});
         if (groupCursor.moveToNext()) {
             return new Group(groupCursor.getString(0), groupCursor.getString(1));
         }
@@ -246,20 +248,21 @@ public class UserManagementController extends AbstractComponent {
 
     /**
      * Get a UserDevice by DeviceID.
+     *
      * @param deviceID DeviceID of the UserDevice.
      * @return The requested UserDevice.
      */
     public UserDevice getUserDevice(DeviceID deviceID) {
         Cursor userDeviceCursor = databaseConnector.executeSql("select u."
-                + DatabaseContract.UserDevice.COLUMN_NAME
-                + ", u." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
-                + ", g." + DatabaseContract.Group.COLUMN_NAME
-                + " from " + DatabaseContract.UserDevice.TABLE_NAME + " u"
-                + " join " + DatabaseContract.Group.TABLE_NAME + " g"
-                + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID + " = g."
-                + DatabaseContract.Group.COLUMN_ID
-                + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
-                    new String[] { deviceID.getId() });
+                        + DatabaseContract.UserDevice.COLUMN_NAME
+                        + ", u." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                        + ", g." + DatabaseContract.Group.COLUMN_NAME
+                        + " from " + DatabaseContract.UserDevice.TABLE_NAME + " u"
+                        + " join " + DatabaseContract.Group.TABLE_NAME + " g"
+                        + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID + " = g."
+                        + DatabaseContract.Group.COLUMN_ID
+                        + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
+                new String[]{deviceID.getId()});
         if (userDeviceCursor.moveToNext()) {
             return new UserDevice(userDeviceCursor.getString(0),
                     userDeviceCursor.getString(2), new DeviceID(userDeviceCursor.getString(1)));

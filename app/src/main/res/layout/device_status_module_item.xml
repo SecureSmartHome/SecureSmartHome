@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--Author: Wolfgang Popp-->
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:baselineAligned="false"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:baselineAligned="false"
              android:columnCount="2"
-    android:measureWithLargestChild="false"
+             android:measureWithLargestChild="false"
              android:orientation="vertical"
              android:paddingBottom="10dp"
-    android:paddingTop="10dp"
+             android:paddingTop="10dp"
              android:rowCount="3">
 
     <TableRow

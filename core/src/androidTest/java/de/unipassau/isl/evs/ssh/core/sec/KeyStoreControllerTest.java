@@ -62,7 +62,7 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
      *
      * @throws Exception
      */
-    public void  testLoadKey() throws Exception {
+    public void testLoadKey() throws Exception {
         SimpleContainer container = new SimpleContainer();
         container.register(ContainerService.KEY_CONTEXT,
                 new ContainerService.ContextComponent(getInstrumentation().getTargetContext()));

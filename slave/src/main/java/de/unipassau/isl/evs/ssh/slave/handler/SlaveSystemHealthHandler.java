@@ -1,5 +1,10 @@
 package de.unipassau.isl.evs.ssh.slave.handler;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
@@ -11,19 +16,11 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import de.unipassau.isl.evs.ssh.drivers.lib.ButtonSensor;
-import de.unipassau.isl.evs.ssh.drivers.lib.DoorBuzzer;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
 import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
-import de.unipassau.isl.evs.ssh.drivers.lib.WeatherSensor;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * SlaveHandler that checkes periodically if ElectronicModules are still alive.

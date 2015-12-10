@@ -3,6 +3,11 @@ package de.unipassau.isl.evs.ssh.master.task;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -21,10 +26,6 @@ import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
 
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 /**
  * This handler calculates what actions need to take place in order to execute the holiday simulation.
  * It then tells the scheduler which HolidayTasks need to be scheduled for which time and also
@@ -34,8 +35,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler implements ScheduledComponent {
 
-    private static final Key<MasterHolidaySimulationPlannerHandler> KEY = new Key<>(MasterHolidaySimulationPlannerHandler.class);
     public static final int MILLIS_PER_HOUR = 3600000;
+    private static final Key<MasterHolidaySimulationPlannerHandler> KEY = new Key<>(MasterHolidaySimulationPlannerHandler.class);
     private boolean runHolidaySimulation = false;
 
     @Override
@@ -48,13 +49,13 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
                 HolidaySimulationPayload payload = (HolidaySimulationPayload) message.getPayload();
 
                 //TODO Refactor if we eliminate one permission
-                if (payload.switchOn() && hasPermission(message.getFromID(),new Permission(
-                                CoreConstants.Permission.BinaryPermission.START_HOLIDAY_SIMULATION.toString(), ""))) {
+                if (payload.switchOn() && hasPermission(message.getFromID(), new Permission(
+                        CoreConstants.Permission.BinaryPermission.START_HOLIDAY_SIMULATION.toString(), ""))) {
 
                     runHolidaySimulation = payload.switchOn();
                     replyStatus(message);
 
-                } else if (!payload.switchOn() && hasPermission(message.getFromID(),new Permission(
+                } else if (!payload.switchOn() && hasPermission(message.getFromID(), new Permission(
                         CoreConstants.Permission.BinaryPermission.STOP_HOLIDAY_SIMULATION.toString(), ""))) {
 
                     runHolidaySimulation = payload.switchOn();
@@ -83,7 +84,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
             List<HolidayAction> logEntriesRange = getContainer().require(HolidayController.KEY).getHolidayActions(new Date(),
                     new Date(System.currentTimeMillis() + MILLIS_PER_HOUR));
 
-            for (HolidayAction a: logEntriesRange) {
+            for (HolidayAction a : logEntriesRange) {
                 int minNow = new Date(System.currentTimeMillis()).getMinutes();
                 int minPast = new Date(a.getTimeStamp()).getMinutes();
 
@@ -122,7 +123,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
         @Override
         public void run() {
-            boolean on=false;
+            boolean on = false;
             Module module = getContainer().require(SlaveController.KEY).getModule(moduleName);
             if (actionName.equals(CoreConstants.LogActions.LIGHT_ON_ACTION)) {
                 on = true;

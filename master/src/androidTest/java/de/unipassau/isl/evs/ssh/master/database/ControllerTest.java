@@ -13,16 +13,17 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
-import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * Test class for all controller functionality (database interface)
+ *
  * @author leon
  */
 public class ControllerTest extends InstrumentationTestCase {
@@ -68,7 +69,7 @@ public class ControllerTest extends InstrumentationTestCase {
         List<String> permissions = new LinkedList<>();
         for (Permission permission : permissionController.getPermissions()) {
             permissions.add(permission.getName()); // as they are unique in this testcase and i don't want to implement
-                                                   // hashcode just for this test, just the name works fine.
+            // hashcode just for this test, just the name works fine.
         }
         assertTrue(permissions.containsAll(Arrays.asList("test", "test2", "test3", "test4")));
 
@@ -350,7 +351,7 @@ public class ControllerTest extends InstrumentationTestCase {
         }
         try {
             permissionController.addUserPermission(new DeviceID("44"), new Permission("perm3", "m1"));
-                    Assert.fail("Permission controller should have thrown UnknownReferenceException");
+            Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
@@ -449,13 +450,13 @@ public class ControllerTest extends InstrumentationTestCase {
         try {
             slaveController.addSlave(new Slave("s1", new DeviceID("55")));
             Assert.fail("Permission controller should have thrown AlreadyInUseException");
-        } catch (AlreadyInUseException e ) {
+        } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
         try {
             slaveController.addSlave(new Slave("s55", new DeviceID("2")));
             Assert.fail("Permission controller should have thrown AlreadyInUseException");
-        } catch (AlreadyInUseException e ) {
+        } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
 

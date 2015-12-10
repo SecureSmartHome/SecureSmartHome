@@ -41,9 +41,9 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
  *      pendingIntent);
  * </pre>
  *
+ * @author Niko Fink
  * @see AlarmManager
  * @see ContainerService
- * @author Niko Fink
  */
 public class Scheduler extends AbstractComponent {
     public static final Key<Scheduler> KEY = new Key<>(Scheduler.class);

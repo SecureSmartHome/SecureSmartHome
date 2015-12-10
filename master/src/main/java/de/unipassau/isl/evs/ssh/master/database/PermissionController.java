@@ -15,39 +15,40 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * Offers high level methods to interact with the tables associated with permissions in the database.
+ *
  * @author leon
  */
 public class PermissionController extends AbstractComponent {
     public static final Key<PermissionController> KEY = new Key<>(PermissionController.class);
     private static final String MODULE_ID_FROM_NAME_SQL_QUERY =
-                        "select " + DatabaseContract.ElectronicModule.COLUMN_ID
-                        + " from " + DatabaseContract.ElectronicModule.TABLE_NAME
-                        + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME
-                        + " = ?";
+            "select " + DatabaseContract.ElectronicModule.COLUMN_ID
+                    + " from " + DatabaseContract.ElectronicModule.TABLE_NAME
+                    + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME
+                    + " = ?";
     private static final String PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY =
-                        "select p." + DatabaseContract.Permission.COLUMN_ID
-                        + " from " + DatabaseContract.Permission.TABLE_NAME + " p"
-                        + " join " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
-                        + " on p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
-                        + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
-                        + " where p." + DatabaseContract.Permission.COLUMN_NAME
-                        + " = ? and m." + DatabaseContract.ElectronicModule.COLUMN_NAME
-                        + " = ?";
+            "select p." + DatabaseContract.Permission.COLUMN_ID
+                    + " from " + DatabaseContract.Permission.TABLE_NAME + " p"
+                    + " join " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
+                    + " on p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
+                    + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
+                    + " where p." + DatabaseContract.Permission.COLUMN_NAME
+                    + " = ? and m." + DatabaseContract.ElectronicModule.COLUMN_NAME
+                    + " = ?";
     private static final String PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY =
-                        "select " + DatabaseContract.Permission.COLUMN_ID
-                        + " from " + DatabaseContract.Permission.TABLE_NAME
-                        + " where " + DatabaseContract.Permission.COLUMN_NAME
-                        + " = ? and " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL";
+            "select " + DatabaseContract.Permission.COLUMN_ID
+                    + " from " + DatabaseContract.Permission.TABLE_NAME
+                    + " where " + DatabaseContract.Permission.COLUMN_NAME
+                    + " = ? and " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL";
     private static final String TEMPLATE_ID_FROM_NAME_SQL_QUERY =
-                        "select " + DatabaseContract.PermissionTemplate.COLUMN_ID
-                        + " from " + DatabaseContract.PermissionTemplate.TABLE_NAME
-                        + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
-                        + " = ?";
+            "select " + DatabaseContract.PermissionTemplate.COLUMN_ID
+                    + " from " + DatabaseContract.PermissionTemplate.TABLE_NAME
+                    + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                    + " = ?";
     private static final String USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY =
-                        "select " + DatabaseContract.UserDevice.COLUMN_ID
-                        + " from " + DatabaseContract.UserDevice.TABLE_NAME
-                        + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
-                        + " = ?";
+            "select " + DatabaseContract.UserDevice.COLUMN_ID
+                    + " from " + DatabaseContract.UserDevice.TABLE_NAME
+                    + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                    + " = ?";
     private DatabaseConnector databaseConnector;
 
     @Override
@@ -83,23 +84,23 @@ public class PermissionController extends AbstractComponent {
                         + " on p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
                         + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
                         + " where pt." + DatabaseContract.PermissionTemplate.COLUMN_NAME
-                        + " = ?", new String[] { templateName });
+                        + " = ?", new String[]{templateName});
         List<Permission> permissions = new LinkedList<>();
         while (permissionsCursor.moveToNext()) {
             permissions.add(new Permission(permissionsCursor.getString(0), permissionsCursor.getString(1)));
         }
         permissionsCursor = databaseConnector
                 .executeSql("select p." + DatabaseContract.Permission.COLUMN_NAME
-                        + " from " + DatabaseContract.ComposedOfPermission.TABLE_NAME + " comp "
-                        + "join " + DatabaseContract.PermissionTemplate.TABLE_NAME + " pt on comp."
-                        + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
-                        + " = pt." + DatabaseContract.PermissionTemplate.COLUMN_ID
-                        + " join " + DatabaseContract.Permission.TABLE_NAME
-                        + " p on comp." + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
-                        + " = p." + DatabaseContract.Permission.COLUMN_ID
-                        + " where pt." + DatabaseContract.PermissionTemplate.COLUMN_NAME
-                        + " = ? and " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL",
-                            new String[] { templateName });
+                                + " from " + DatabaseContract.ComposedOfPermission.TABLE_NAME + " comp "
+                                + "join " + DatabaseContract.PermissionTemplate.TABLE_NAME + " pt on comp."
+                                + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
+                                + " = pt." + DatabaseContract.PermissionTemplate.COLUMN_ID
+                                + " join " + DatabaseContract.Permission.TABLE_NAME
+                                + " p on comp." + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
+                                + " = p." + DatabaseContract.Permission.COLUMN_ID
+                                + " where pt." + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                                + " = ? and " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL",
+                        new String[]{templateName});
         while (permissionsCursor.moveToNext()) {
             permissions.add(new Permission(permissionsCursor.getString(0), null));
         }
@@ -110,7 +111,7 @@ public class PermissionController extends AbstractComponent {
      * Returns whether a given user has a given Permission.
      *
      * @param userDeviceID DeviceID associated with the user.
-     * @param permission Permission to check.
+     * @param permission   Permission to check.
      * @return true if has permissions otherwise false.
      */
     public boolean hasPermission(DeviceID userDeviceID, Permission permission) {
@@ -127,7 +128,7 @@ public class PermissionController extends AbstractComponent {
                             + " where p." + DatabaseContract.Permission.COLUMN_NAME
                             + " = ? and p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
                             + " is NULL and ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
-                            + " = ?", new String[] { permission.getName(), userDeviceID.getId() });
+                            + " = ?", new String[]{permission.getName(), userDeviceID.getId()});
         } else {
             permissionCursor = databaseConnector
                     .executeSql("select * from " + DatabaseContract.HasPermission.TABLE_NAME
@@ -143,8 +144,8 @@ public class PermissionController extends AbstractComponent {
                             + " where p." + DatabaseContract.Permission.COLUMN_NAME
                             + " = ? and m." + DatabaseContract.ElectronicModule.COLUMN_NAME
                             + " = ? and ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
-                            + " = ?", new String[] { permission.getName(), permission.getModuleName(),
-                                                     userDeviceID.getId() });
+                            + " = ?", new String[]{permission.getName(), permission.getModuleName(),
+                            userDeviceID.getId()});
         }
         return permissionCursor.moveToNext();
     }
@@ -157,9 +158,9 @@ public class PermissionController extends AbstractComponent {
     public void removeTemplate(String templateName) throws IsReferencedException {
         try {
             databaseConnector.executeSql("delete from "
-                            + DatabaseContract.PermissionTemplate.TABLE_NAME
-                            + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
-                            + " = ?", new String[] { templateName });
+                    + DatabaseContract.PermissionTemplate.TABLE_NAME
+                    + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
+                    + " = ?", new String[]{templateName});
         } catch (SQLiteConstraintException sqlce) {
             throw new IsReferencedException("This template is used by at least one Group", sqlce);
         }
@@ -167,8 +168,9 @@ public class PermissionController extends AbstractComponent {
 
     /**
      * Add a Permission to a Template.
+     *
      * @param templateName Name of the Template.
-     * @param permission Permission to add to the Template.
+     * @param permission   Permission to add to the Template.
      */
     public void addPermissionToTemplate(String templateName, Permission permission) throws UnknownReferenceException {
         try {
@@ -179,7 +181,7 @@ public class PermissionController extends AbstractComponent {
                                 + ", " + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
                                 + ") values ((" + PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY
                                 + "), (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
-                        new String[] { permission.getName(), templateName });
+                        new String[]{permission.getName(), templateName});
             } else {
                 databaseConnector.executeSql("insert into "
                                 + DatabaseContract.ComposedOfPermission.TABLE_NAME
@@ -197,8 +199,9 @@ public class PermissionController extends AbstractComponent {
 
     /**
      * Remove a Permission from a Template.
+     *
      * @param templateName Name of the Template.
-     * @param permission Permission to remove.
+     * @param permission   Permission to remove.
      */
     public void removePermissionFromTemplate(String templateName, Permission permission) {
         if (permission.getModuleName() == null) {
@@ -222,8 +225,9 @@ public class PermissionController extends AbstractComponent {
 
     /**
      * Add a Permission for a UserDevice.
+     *
      * @param userDeviceID DeviceID of the UserDevice.
-     * @param permission Permission to give to UserDevice.
+     * @param permission   Permission to give to UserDevice.
      */
     public void addUserPermission(DeviceID userDeviceID, Permission permission) throws UnknownReferenceException {
         try {
@@ -234,7 +238,7 @@ public class PermissionController extends AbstractComponent {
                         + ", " + DatabaseContract.HasPermission.COLUMN_USER_ID
                         + ") values ((" + PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY
                         + "), (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
-                        + "))", new String[] { permission.getName(), userDeviceID.getId() });
+                        + "))", new String[]{permission.getName(), userDeviceID.getId()});
             } else {
                 databaseConnector.executeSql("insert into "
                         + DatabaseContract.HasPermission.TABLE_NAME
@@ -242,8 +246,8 @@ public class PermissionController extends AbstractComponent {
                         + ", " + DatabaseContract.HasPermission.COLUMN_USER_ID
                         + ") values ((" + PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY
                         + "), (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
-                        + "))", new String[] { permission.getName(), permission.getModuleName(),
-                                               userDeviceID.getId() });
+                        + "))", new String[]{permission.getName(), permission.getModuleName(),
+                        userDeviceID.getId()});
             }
         } catch (SQLiteConstraintException sqlce) {
             throw new UnknownReferenceException(
@@ -253,8 +257,9 @@ public class PermissionController extends AbstractComponent {
 
     /**
      * Remove a Permission for a UserDevice.
+     *
      * @param userDeviceID DeviceID of the UserDevice.
-     * @param permission Permission to take from UserDevice.
+     * @param permission   Permission to take from UserDevice.
      */
     public void removeUserPermission(DeviceID userDeviceID, Permission permission) {
         if (permission.getModuleName() == null) {
@@ -287,7 +292,7 @@ public class PermissionController extends AbstractComponent {
             databaseConnector.executeSql("insert into "
                     + DatabaseContract.PermissionTemplate.TABLE_NAME
                     + " (" + DatabaseContract.PermissionTemplate.COLUMN_NAME + ")"
-                    + "values (?)", new String[] { templateName });
+                    + "values (?)", new String[]{templateName});
         } catch (SQLiteConstraintException sqlce) {
             throw new AlreadyInUseException("The name is already used by another Template.", sqlce);
         }
@@ -302,20 +307,20 @@ public class PermissionController extends AbstractComponent {
         try {
             if (permission.getModuleName() == null) {
                 databaseConnector.executeSql("insert into "
-                                + DatabaseContract.Permission.TABLE_NAME
-                                + " (" + DatabaseContract.Permission.COLUMN_NAME + ")"
-                                + " values (?)", new String[] { permission.getName() });
+                        + DatabaseContract.Permission.TABLE_NAME
+                        + " (" + DatabaseContract.Permission.COLUMN_NAME + ")"
+                        + " values (?)", new String[]{permission.getName()});
             } else {
                 databaseConnector.executeSql("insert into "
                                 + DatabaseContract.Permission.TABLE_NAME
                                 + " (" + DatabaseContract.Permission.COLUMN_NAME
                                 + ", " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + ")"
                                 + "values (?, (" + MODULE_ID_FROM_NAME_SQL_QUERY + "))",
-                        new String[]{permission.getName(), permission.getModuleName() });
+                        new String[]{permission.getName(), permission.getModuleName()});
             }
         } catch (SQLiteConstraintException sqlce) {
             throw new AlreadyInUseException("The name-module combination is already used by another Permission.",
-                                                sqlce);
+                    sqlce);
         }
     }
 
@@ -330,19 +335,20 @@ public class PermissionController extends AbstractComponent {
                             + DatabaseContract.Permission.TABLE_NAME
                             + " where " + DatabaseContract.Permission.COLUMN_NAME
                             + " = ? and " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL",
-                                new String[] { permission.getName() });
+                    new String[]{permission.getName()});
         } else {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.Permission.TABLE_NAME
                             + " where " + DatabaseContract.Permission.COLUMN_NAME
                             + " = ? and " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
                             + " = (" + MODULE_ID_FROM_NAME_SQL_QUERY + ")",
-                                new String[] { permission.getName(), permission.getModuleName() });
+                    new String[]{permission.getName(), permission.getModuleName()});
         }
     }
 
     /**
      * Get the names of all Permissions.
+     *
      * @return All names as a list.
      */
     public List<Permission> getPermissions() {
@@ -353,7 +359,7 @@ public class PermissionController extends AbstractComponent {
                 + " from " + DatabaseContract.Permission.TABLE_NAME
                 + " p join " + DatabaseContract.ElectronicModule.TABLE_NAME
                 + " m on p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
-                + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID, new String[] {});
+                + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID, new String[]{});
         List<Permission> permissions = new LinkedList<>();
         while (permissionsCursor.moveToNext()) {
             permissions.add(new Permission(permissionsCursor.getString(0), permissionsCursor.getString(1)));
@@ -361,7 +367,7 @@ public class PermissionController extends AbstractComponent {
         //Permissions without modules
         permissionsCursor = databaseConnector.executeSql("select " + DatabaseContract.Permission.COLUMN_NAME
                 + " from " + DatabaseContract.Permission.TABLE_NAME
-                + " where " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL", new String[] {});
+                + " where " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL", new String[]{});
         while (permissionsCursor.moveToNext()) {
             permissions.add(new Permission(permissionsCursor.getString(0), null));
         }
@@ -370,12 +376,13 @@ public class PermissionController extends AbstractComponent {
 
     /**
      * Get the name of all Templates.
+     *
      * @return All names as a list.
      */
     public List<String> getTemplates() {
         Cursor templatesCursor = databaseConnector.executeSql("select "
                 + DatabaseContract.PermissionTemplate.COLUMN_NAME
-                + " from " + DatabaseContract.PermissionTemplate.TABLE_NAME, new String[] {});
+                + " from " + DatabaseContract.PermissionTemplate.TABLE_NAME, new String[]{});
         List<String> templates = new LinkedList<>();
         while (templatesCursor.moveToNext()) {
             templates.add(templatesCursor.getString(0));
@@ -385,6 +392,7 @@ public class PermissionController extends AbstractComponent {
 
     /**
      * Change the name of a Template.
+     *
      * @param oldName Old name of the Template.
      * @param newName New name of the Template.
      * @throws AlreadyInUseException
@@ -394,7 +402,7 @@ public class PermissionController extends AbstractComponent {
             databaseConnector.executeSql("update " + DatabaseContract.PermissionTemplate.TABLE_NAME
                             + " set " + DatabaseContract.PermissionTemplate.COLUMN_NAME
                             + " = ? where " + DatabaseContract.PermissionTemplate.COLUMN_NAME + " = ?",
-                    new String[] { newName, oldName });
+                    new String[]{newName, oldName});
         } catch (SQLiteConstraintException sqlce) {
             throw new AlreadyInUseException("The given name is already used by another Template.", sqlce);
         }
@@ -425,7 +433,7 @@ public class PermissionController extends AbstractComponent {
                     + " = g." + DatabaseContract.Group.COLUMN_ID
                     + " where p." + DatabaseContract.Permission.COLUMN_NAME
                     + " = ? and p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
-                    + " is NULL", new String[] {permission.getName()});
+                    + " is NULL", new String[]{permission.getName()});
         } else {
             userDevicesCursor = databaseConnector.executeSql("select"
                     + " u." + DatabaseContract.UserDevice.COLUMN_NAME
@@ -446,7 +454,7 @@ public class PermissionController extends AbstractComponent {
                     + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
                     + " where p." + DatabaseContract.Permission.COLUMN_NAME
                     + " = ? and m." + DatabaseContract.ElectronicModule.COLUMN_NAME
-                    + " = ?", new String[] {permission.getName(), permission.getModuleName()});
+                    + " = ?", new String[]{permission.getName(), permission.getModuleName()});
         }
         List<UserDevice> userDevices = new LinkedList<>();
         while (userDevicesCursor.moveToNext()) {
@@ -459,36 +467,36 @@ public class PermissionController extends AbstractComponent {
     public List<Permission> getPermissionsOfUserDevice(DeviceID userDeviceID) {
         List<Permission> permissions = new LinkedList<>();
         Cursor permissionCursor;
-            permissionCursor = databaseConnector
-                    .executeSql("select p." + DatabaseContract.Permission.COLUMN_NAME
-                            + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
-                            + " from " + DatabaseContract.HasPermission.TABLE_NAME
-                            + " hp join " + DatabaseContract.Permission.TABLE_NAME + " p on "
-                            + "hp." + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
-                            + " = p." + DatabaseContract.Permission.COLUMN_ID
-                            + " join " + DatabaseContract.UserDevice.TABLE_NAME
-                            + " ud on hp." + DatabaseContract.HasPermission.COLUMN_USER_ID
-                            + " = ud." + DatabaseContract.UserDevice.COLUMN_ID
-                            + " join " + DatabaseContract.ElectronicModule.TABLE_NAME + " m on "
-                            + "p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " = "
-                            + " m." + DatabaseContract.ElectronicModule.COLUMN_ID
-                            + " where ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
-                            + " = ?", new String[] {userDeviceID.getIDString() });
+        permissionCursor = databaseConnector
+                .executeSql("select p." + DatabaseContract.Permission.COLUMN_NAME
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
+                        + " from " + DatabaseContract.HasPermission.TABLE_NAME
+                        + " hp join " + DatabaseContract.Permission.TABLE_NAME + " p on "
+                        + "hp." + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
+                        + " = p." + DatabaseContract.Permission.COLUMN_ID
+                        + " join " + DatabaseContract.UserDevice.TABLE_NAME
+                        + " ud on hp." + DatabaseContract.HasPermission.COLUMN_USER_ID
+                        + " = ud." + DatabaseContract.UserDevice.COLUMN_ID
+                        + " join " + DatabaseContract.ElectronicModule.TABLE_NAME + " m on "
+                        + "p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " = "
+                        + " m." + DatabaseContract.ElectronicModule.COLUMN_ID
+                        + " where ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                        + " = ?", new String[]{userDeviceID.getIDString()});
         while (permissionCursor.moveToNext()) {
             permissions.add(new Permission(permissionCursor.getString(0), permissionCursor.getString(1)));
         }
-            permissionCursor = databaseConnector
-                    .executeSql("select p." + DatabaseContract.Permission.COLUMN_NAME
-                            + " from " + DatabaseContract.HasPermission.TABLE_NAME
-                            + " hp join " + DatabaseContract.Permission.TABLE_NAME + " p on "
-                            + "hp." + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
-                            + " = p." + DatabaseContract.Permission.COLUMN_ID
-                            + " join " + DatabaseContract.UserDevice.TABLE_NAME
-                            + " ud on hp." + DatabaseContract.HasPermission.COLUMN_USER_ID
-                            + " = ud." + DatabaseContract.UserDevice.COLUMN_ID
-                            + " where p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
-                            +" is NULL and ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
-                            + " = ?", new String[] {userDeviceID.getIDString() });
+        permissionCursor = databaseConnector
+                .executeSql("select p." + DatabaseContract.Permission.COLUMN_NAME
+                        + " from " + DatabaseContract.HasPermission.TABLE_NAME
+                        + " hp join " + DatabaseContract.Permission.TABLE_NAME + " p on "
+                        + "hp." + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
+                        + " = p." + DatabaseContract.Permission.COLUMN_ID
+                        + " join " + DatabaseContract.UserDevice.TABLE_NAME
+                        + " ud on hp." + DatabaseContract.HasPermission.COLUMN_USER_ID
+                        + " = ud." + DatabaseContract.UserDevice.COLUMN_ID
+                        + " where p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
+                        + " is NULL and ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                        + " = ?", new String[]{userDeviceID.getIDString()});
         while (permissionCursor.moveToNext()) {
             permissions.add(new Permission(permissionCursor.getString(0)));
         }

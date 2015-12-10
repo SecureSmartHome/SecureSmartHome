@@ -92,7 +92,7 @@ public class HolidayFragment extends BoundFragment {
     private void switchButtonAction() {
         AppHolidaySimulationHandler handler = getHolidaySimulationHandler();
 
-        if (handler == null){
+        if (handler == null) {
             Log.i(TAG, "Container not bound.");
             return;
         }

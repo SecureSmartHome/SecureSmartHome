@@ -32,8 +32,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  * This fragment allows to display the status of all registered lights.
  * The fragment gets the information from the {@link AppLightHandler}.
  *
- * @see AppLightHandler
  * @author Phil Werli
+ * @see AppLightHandler
  */
 public class LightFragment extends BoundFragment {
     private static final String TAG = LightFragment.class.getSimpleName();

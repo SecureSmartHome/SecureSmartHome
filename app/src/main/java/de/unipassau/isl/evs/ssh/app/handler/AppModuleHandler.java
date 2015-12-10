@@ -148,7 +148,7 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
         }
     }
 
-    public void update(){
+    public void update() {
         ModulesPayload payload = new ModulesPayload();
         OutgoingRouter router = getComponent(OutgoingRouter.KEY);
 

@@ -5,7 +5,6 @@ import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;

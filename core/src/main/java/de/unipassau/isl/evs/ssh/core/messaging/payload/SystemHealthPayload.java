@@ -12,7 +12,7 @@ public class SystemHealthPayload implements MessagePayload {
     private boolean hasError;
     private Module module;
 
-    public SystemHealthPayload (boolean hasError, Module defectModule) {
+    public SystemHealthPayload(boolean hasError, Module defectModule) {
         this.hasError = hasError;
         this.module = defectModule;
     }

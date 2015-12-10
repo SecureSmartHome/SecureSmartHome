@@ -21,7 +21,7 @@ public class LightPayload implements MessagePayload {
     /**
      * Returns a boolean indicating whether the light should switched on or is on.
      * If not it means the opposite, that is, the light should be switched off, not just "not switched on".
-     *
+     * <p/>
      * Whether the light status is only checked or switched depends on the used routing key.
      *
      * @return true if the light should be switched on, false if the light should be switched off.

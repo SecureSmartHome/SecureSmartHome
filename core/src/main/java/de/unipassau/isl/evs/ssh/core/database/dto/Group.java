@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 /**
  * A DTO representing a group. User devices are part of a group. Every group has a permission template.
+ *
  * @author leon
  */
 public class Group implements Serializable {

@@ -16,7 +16,6 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
-import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -28,7 +27,6 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.drivers.lib.ButtonSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.DoorBuzzer;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
-import de.unipassau.isl.evs.ssh.drivers.lib.EvsIo;
 import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.WeatherSensor;
@@ -217,9 +215,20 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
     }
 
     private class WrongAccessPointException extends Exception {
-        public WrongAccessPointException() { super(); }
-        public WrongAccessPointException(String message) { super(message); }
-        public WrongAccessPointException(String message, Throwable cause) { super(message, cause); }
-        public WrongAccessPointException(Throwable cause) { super(cause); }
+        public WrongAccessPointException() {
+            super();
+        }
+
+        public WrongAccessPointException(String message) {
+            super(message);
+        }
+
+        public WrongAccessPointException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public WrongAccessPointException(Throwable cause) {
+            super(cause);
+        }
     }
 }

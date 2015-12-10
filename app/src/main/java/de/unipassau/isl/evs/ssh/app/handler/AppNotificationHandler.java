@@ -49,11 +49,11 @@ public class AppNotificationHandler extends AbstractComponent implements Message
     @Override
     public void handle(Message.AddressedMessage message) {
         //Todo: either notificationpayload or switch case for other payloads
-        if(message.getPayload() instanceof NotificationPayload) {
+        if (message.getPayload() instanceof NotificationPayload) {
             NotificationPayload notificationPayload = ((NotificationPayload) message.getPayload());
             //Todo: make openthisfragment constants in coreconstants
             displayNotification("Notification", notificationPayload.getMessage(), "ClimateFragment", 55, getContainer().require(ContainerService.KEY_CONTEXT));
-        //Climate Warnings
+            //Climate Warnings
         } else if (message.getPayload() instanceof ClimatePayload) {
             ClimatePayload payload = (ClimatePayload) message.getPayload();
             Context context = getContainer().get(ContainerService.KEY_CONTEXT);

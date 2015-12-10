@@ -8,6 +8,7 @@ public class DoorStatusPayload implements MessagePayload {
         this.closed = closed;
         this.moduleName = moduleName;
     }
+
     public DoorStatusPayload(String moduleName) {
         this.closed = false;
         this.moduleName = moduleName;

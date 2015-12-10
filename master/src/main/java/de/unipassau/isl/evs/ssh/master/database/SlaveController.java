@@ -18,16 +18,17 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * Offers high level methods to interact with the tables associated with slaves and modules in the database.
+ *
  * @author leon
  */
 public class SlaveController extends AbstractComponent {
     public static final Key<SlaveController> KEY = new Key<>(SlaveController.class);
-    private DatabaseConnector databaseConnector;
     private static final String SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY =
             "select " + DatabaseContract.Slave.COLUMN_ID
                     + " from " + DatabaseContract.Slave.TABLE_NAME
                     + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT
                     + " = ?";
+    private DatabaseConnector databaseConnector;
 
     @Override
     public void init(Container container) {
@@ -86,8 +87,8 @@ public class SlaveController extends AbstractComponent {
                             + "(?, ?, ?, ?, ?, ?, ?, ?, (" + SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY + "), ?)",
                     ObjectArrays.concat(
                             createCombinedModulesAccessInformationFromSingle(module.getModuleAccessPoint()),
-                            new String[] { module.getModuleType(), module.getModuleAccessPoint().getType(),
-                                    module.getAtSlave().getId(), module.getName() }, String.class));
+                            new String[]{module.getModuleType(), module.getModuleAccessPoint().getType(),
+                                    module.getAtSlave().getId(), module.getName()}, String.class));
         } catch (SQLiteConstraintException sqlce) {
             throw new DatabaseControllerException("The given Slave does not exist in the database"
                     + " or the name is already used by another Module", sqlce);
@@ -103,7 +104,7 @@ public class SlaveController extends AbstractComponent {
         databaseConnector.executeSql("delete from "
                         + DatabaseContract.ElectronicModule.TABLE_NAME
                         + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME + " = ?",
-                            new String[] { moduleName });
+                new String[]{moduleName});
     }
 
     /**
@@ -125,7 +126,7 @@ public class SlaveController extends AbstractComponent {
                 + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
                 + " join " + DatabaseContract.Slave.TABLE_NAME + " s"
                 + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
-                + " = s." + DatabaseContract.Slave.COLUMN_ID, new String[] {});
+                + " = s." + DatabaseContract.Slave.COLUMN_ID, new String[]{});
         List<Module> modules = new LinkedList<>();
         while (modulesCursor.moveToNext()) {
             String[] combinedModuleAccessPointInformation =
@@ -139,7 +140,7 @@ public class SlaveController extends AbstractComponent {
             modules.add(new Module(modulesCursor.getString(
                     ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 3), new DeviceID(
                     modulesCursor.getString(
-                    ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2)),
+                            ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION + 2)),
                     modulesCursor.getString(ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION),
                     moduleAccessPoint));
         }
@@ -148,28 +149,29 @@ public class SlaveController extends AbstractComponent {
 
     /**
      * Get all information of a single Module by name.
+     *
      * @param moduleName The name of the Module.
      * @return The requested Module.
      */
     public Module getModule(String moduleName) {
         //Notice: again changed order for convenience reasons when creating the ModuleAccessPoint.
         Cursor moduleCursor = databaseConnector.executeSql("select" +
-                " m." + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_USB_PORT
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE
-                + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
-                + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
-                + " join " + DatabaseContract.Slave.TABLE_NAME + " s"
-                + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
-                + " = s." + DatabaseContract.Slave.COLUMN_ID
-                + " where m." + DatabaseContract.ElectronicModule.COLUMN_NAME + " = ?",
-                    new String[] { moduleName });
+                        " m." + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_USB_PORT
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE
+                        + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
+                        + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
+                        + " join " + DatabaseContract.Slave.TABLE_NAME + " s"
+                        + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
+                        + " = s." + DatabaseContract.Slave.COLUMN_ID
+                        + " where m." + DatabaseContract.ElectronicModule.COLUMN_NAME + " = ?",
+                new String[]{moduleName});
         if (moduleCursor.moveToNext()) {
             String[] combinedModuleAccessPointInformation =
                     new String[ModuleAccessPoint.COMBINED_AMOUNT_OF_ACCESS_INFORMATION];
@@ -190,28 +192,29 @@ public class SlaveController extends AbstractComponent {
 
     /**
      * Get all Modules of a given Slave.
+     *
      * @param slaveDeviceID DeviceID of the Slave.
      * @return All Modules of the Slave as a list.
      */
     public List<Module> getModulesOfSlave(DeviceID slaveDeviceID) {
         //Notice: again changed order for convenience reasons when creating the ModuleAccessPoint.
         Cursor modulesCursor = databaseConnector.executeSql("select" +
-                " m." + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_USB_PORT
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE
-                + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
-                + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
-                + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
-                + " join " + DatabaseContract.Slave.TABLE_NAME + " s"
-                + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
-                + " = s." + DatabaseContract.Slave.COLUMN_ID
-                + " where s." + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
-                    new String[] { slaveDeviceID.getId() });
+                        " m." + DatabaseContract.ElectronicModule.COLUMN_GPIO_PIN
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_USB_PORT
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PORT
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_USERNAME
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_PASSWORD
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE
+                        + ", s." + DatabaseContract.Slave.COLUMN_FINGERPRINT
+                        + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
+                        + " from " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
+                        + " join " + DatabaseContract.Slave.TABLE_NAME + " s"
+                        + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
+                        + " = s." + DatabaseContract.Slave.COLUMN_ID
+                        + " where s." + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
+                new String[]{slaveDeviceID.getId()});
         List<Module> modules = new LinkedList<>();
         while (modulesCursor.moveToNext()) {
             String[] combinedModuleAccessPointInformation =
@@ -242,7 +245,7 @@ public class SlaveController extends AbstractComponent {
             databaseConnector.executeSql("update " + DatabaseContract.ElectronicModule.TABLE_NAME
                             + " set " + DatabaseContract.ElectronicModule.COLUMN_NAME
                             + " = ? where " + DatabaseContract.ElectronicModule.COLUMN_NAME + " = ?",
-                    new String[] { newName, oldName });
+                    new String[]{newName, oldName});
         } catch (SQLiteConstraintException sqlce) {
             throw new AlreadyInUseException("The given name is already used by another Module.", sqlce);
         }
@@ -253,9 +256,9 @@ public class SlaveController extends AbstractComponent {
      */
     public List<Slave> getSlaves() {
         Cursor slavesCursor = databaseConnector.executeSql("select "
-                        + DatabaseContract.Slave.COLUMN_NAME
-                        + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT
-                        + " from " + DatabaseContract.Slave.TABLE_NAME, new String[] {});
+                + DatabaseContract.Slave.COLUMN_NAME
+                + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT
+                + " from " + DatabaseContract.Slave.TABLE_NAME, new String[]{});
         List<Slave> slaves = new LinkedList<>();
         while (slavesCursor.moveToNext()) {
             slaves.add(new Slave(slavesCursor.getString(0),
@@ -275,7 +278,7 @@ public class SlaveController extends AbstractComponent {
             databaseConnector.executeSql("update " + DatabaseContract.Slave.TABLE_NAME
                             + " set " + DatabaseContract.Slave.COLUMN_NAME
                             + " = ? where " + DatabaseContract.Slave.COLUMN_NAME + " = ?",
-                    new String[] { newName, oldName });
+                    new String[]{newName, oldName});
         } catch (SQLiteConstraintException sqlce) {
             throw new AlreadyInUseException("The given name is already used by another Slave.", sqlce);
         }
@@ -308,7 +311,7 @@ public class SlaveController extends AbstractComponent {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.Slave.TABLE_NAME
                             + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
-                    new String[] { slaveID.getId() });
+                    new String[]{slaveID.getId()});
         } catch (SQLiteConstraintException sqlce) {
             throw new IsReferencedException("This slave is used by at least one Module", sqlce);
         }
@@ -316,10 +319,10 @@ public class SlaveController extends AbstractComponent {
 
     public Integer getModuleID(String moduleName) {
         Cursor moduleCursor = databaseConnector.executeSql("select "
-                        + DatabaseContract.ElectronicModule.COLUMN_ID
-                        + " from " + DatabaseContract.ElectronicModule.TABLE_NAME
-                        + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME
-                        + " = ?", new String[] { moduleName });
+                + DatabaseContract.ElectronicModule.COLUMN_ID
+                + " from " + DatabaseContract.ElectronicModule.TABLE_NAME
+                + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME
+                + " = ?", new String[]{moduleName});
         if (moduleCursor.moveToNext()) {
             return moduleCursor.getInt(0);
         }
@@ -332,7 +335,7 @@ public class SlaveController extends AbstractComponent {
                 + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT
                 + " from " + DatabaseContract.Slave.TABLE_NAME
                 + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT
-                + " = ?", new String[] {slaveID.getIDString()});
+                + " = ?", new String[]{slaveID.getIDString()});
         if (slavesCursor.moveToNext()) {
             return new Slave(slavesCursor.getString(0), new DeviceID(slavesCursor.getString(1)));
         }
@@ -357,7 +360,7 @@ public class SlaveController extends AbstractComponent {
                         + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
                         + " = s." + DatabaseContract.Slave.COLUMN_ID
                         + " where m." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE + " = ?",
-                new String[] { type });
+                new String[]{type});
         List<Module> modules = new LinkedList<>();
         while (modulesCursor.moveToNext()) {
             String[] combinedModuleAccessPointInformation =
