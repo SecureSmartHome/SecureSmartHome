@@ -136,6 +136,10 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
                 List<Slave> slaves = payload.getSlaves();
                 ListMultimap<Slave, Module> modulesAtSlave = payload.getModulesAtSlaves();
                 updateList(modules, slaves, modulesAtSlave);
+                //Todo: don't do this. do the thing that really needs to be done. this is just here because it's working for now!
+                for (Module module : getLights()) {
+                    requireComponent(AppLightHandler.KEY).setLight(module, false);
+                }
             } else {
                 Log.e(this.getClass().getSimpleName(), "Error! Unknown message Payload");
             }
