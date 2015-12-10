@@ -30,7 +30,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  * the IncomingDispatcher.
  * Furthermore it generates a climate messages as instructed by the UI and passes it to the OutgoingRouter.
  *
- * @author bucher
+ * @author Andreas Bucher
  */
 public class ClimateFragment extends BoundFragment {
     private static final String TAG = ClimateFragment.class.getSimpleName();

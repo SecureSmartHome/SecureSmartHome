@@ -15,7 +15,7 @@ import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
 /**
  * Handles light messages and makes API calls accordingly.
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class SlaveLightHandler extends AbstractSlaveHandler {
     /**

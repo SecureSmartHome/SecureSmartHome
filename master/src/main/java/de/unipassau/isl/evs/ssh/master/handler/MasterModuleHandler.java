@@ -25,7 +25,7 @@ import de.unipassau.isl.evs.ssh.master.network.Server;
 /**
  * The MasterModuleHandler sends updated lists of active Modules to ODROIDs and Clients
  *
- * @author bucher
+ * @author Andreas Bucher
  * @author Wolfgang Popp
  */
 public class MasterModuleHandler extends AbstractMasterHandler {
@@ -76,7 +76,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
                 OutgoingRouter router = getComponent(OutgoingRouter.KEY);
                 router.sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), createUpdateMessage());
             }
-        /* @author leon */
+        /* @author Leon Sell */
         } else if (routingKey.equals(CoreConstants.RoutingKeys.MASTER_MODULE_RENAME)) {
             if (hasPermission(message.getFromID(), new Permission(CoreConstants.Permission.BinaryPermission.RENAME_MODULE.toString()))) {
                 if (message.getPayload() instanceof RenameModulePayload) {
@@ -93,7 +93,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
         // TODO handle remove sensor
     }
 
-    /* @author leon */
+    /* @author Leon Sell */
     private boolean handleRenameModule(Message.AddressedMessage message) {
         RenameModulePayload renameModulePayload = ((RenameModulePayload) message.getPayload());
         try {

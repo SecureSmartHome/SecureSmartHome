@@ -24,7 +24,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
  * AppClimateHandler class handles message from and to the
  * {@link de.unipassau.isl.evs.ssh.app.activity.ClimateFragment ClimateFragment}
  *
- * @author bucher
+ * @author Andreas Bucher
  */
 public class AppClimateHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppClimateHandler> KEY = new Key<>(AppClimateHandler.class);

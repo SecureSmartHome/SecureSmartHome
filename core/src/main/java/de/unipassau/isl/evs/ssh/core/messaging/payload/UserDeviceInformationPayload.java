@@ -11,7 +11,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 /**
  * The UserDeviceInformationPayload is used to transfer user, group and permission information.
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class UserDeviceInformationPayload implements MessagePayload {
 

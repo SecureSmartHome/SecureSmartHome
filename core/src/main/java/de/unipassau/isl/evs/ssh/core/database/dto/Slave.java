@@ -7,7 +7,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 /**
  * A DTO representing slave devices. A slave device is a which can provide Modules to the master device.
  *
- * @author leon
+ * @author Leon Sell
  */
 public class Slave implements Serializable {
 

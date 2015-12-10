@@ -5,7 +5,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 /**
  * Payload class for message to add new Sensor to the System.
  *
- * @author bucher
+ * @author Andreas Bucher
  */
 public class AddNewModulePayload implements MessagePayload {
 

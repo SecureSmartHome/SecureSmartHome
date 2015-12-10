@@ -9,7 +9,7 @@ import de.unipassau.isl.evs.ssh.master.MasterConstants;
 /**
  * Handles climate messages and generates messages for each target and passes them to the OutgoingRouter.
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class MasterClimateHandler extends AbstractMasterHandler {
 

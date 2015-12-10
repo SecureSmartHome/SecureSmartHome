@@ -16,7 +16,7 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
  * (by also sending a message to the MasterCameraHandler) and generates messages for each target
  * and passes them to the OutgoingRouter.
  *
- * @author leon
+ * @author Leon Sell
  */
 public class MasterDoorBellHandler extends AbstractMasterHandler {
 

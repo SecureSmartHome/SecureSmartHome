@@ -24,7 +24,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 /**
  * Test class for all controller functionality (database interface)
  *
- * @author leon
+ * @author Leon Sell
  */
 public class ControllerTest extends InstrumentationTestCase {
 

@@ -27,7 +27,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 /**
  * AppModuleHandler offers a list of all Modules that are active in the System.
  *
- * @author bucher
+ * @author Andreas Bucher
  */
 public class AppModuleHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppModuleHandler> KEY = new Key<>(AppModuleHandler.class);

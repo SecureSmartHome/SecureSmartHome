@@ -27,7 +27,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
  * Notification Handler for the App that receives Messages from the MasterNotificationHandler
  * and issues UI Notifications.
  *
- * @author bucher, Chris
+ * @author Andreas Bucher, Chris
  */
 public class AppNotificationHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppNotificationHandler> KEY = new Key<>(AppNotificationHandler.class);

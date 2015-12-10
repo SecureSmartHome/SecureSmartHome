@@ -35,7 +35,7 @@ import de.unipassau.isl.evs.ssh.drivers.lib.WeatherSensor;
  * SlaveModuleHandler offers a list of all Modules that are active in the System and (un)registers
  * modules in the SlaveContainer when they become (un)available.
  *
- * @author bucher
+ * @author Andreas Bucher
  * @author Wolfgang Popp
  */
 public class SlaveModuleHandler extends AbstractComponent implements MessageHandler {

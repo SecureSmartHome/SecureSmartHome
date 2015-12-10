@@ -12,7 +12,7 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 /**
  * Handles notification messages and generates messages for each target and passes them to the OutgoingRouter.
  *
- * @author bucher
+ * @author Andreas Bucher
  */
 public class MasterNotificationHandler extends AbstractMasterHandler {
 

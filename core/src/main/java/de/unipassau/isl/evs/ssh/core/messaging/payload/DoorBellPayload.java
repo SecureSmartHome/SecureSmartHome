@@ -3,7 +3,7 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
 /**
  * Payload class for messages regarding door bell events
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class DoorBellPayload implements MessagePayload {
 

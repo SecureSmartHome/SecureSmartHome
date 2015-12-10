@@ -13,7 +13,7 @@ import de.unipassau.isl.evs.ssh.app.R;
  * MainFragment gives the user an overview over the most important functions.
  * Other functions can be accessed through the Navigation Drawer.
  *
- * @author bucher
+ * @author Andreas Bucher
  */
 public class MainFragment extends BoundFragment {
 

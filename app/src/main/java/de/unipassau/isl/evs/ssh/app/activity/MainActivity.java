@@ -26,7 +26,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.SharedPrefs.PREF_MASTE
  * As this Activity also displays information like whether the light is on or not, this Activity also
  * needs to messages concerning that information.
  *
- * @author bucher
+ * @author Andreas Bucher
  * @author Wolfgang Popp
  */
 public class MainActivity extends BoundActivity

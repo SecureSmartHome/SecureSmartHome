@@ -49,7 +49,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_
 
 /**
  * @author Niko Fink: Handshake Sequence
- * @author Chris Registration
+ * @author Christoph Fraedrich Registration
  */
 @ChannelHandler.Sharable
 public class ServerHandshakeHandler extends ChannelHandlerAdapter {

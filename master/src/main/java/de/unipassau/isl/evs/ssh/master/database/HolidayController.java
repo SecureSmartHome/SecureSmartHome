@@ -14,7 +14,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 /**
  * Offers high level methods to interact with the holiday table in the database.
  *
- * @author leon
+ * @author Leon Sell
  */
 public class HolidayController extends AbstractComponent {
     public static final Key<HolidayController> KEY = new Key<>(HolidayController.class);

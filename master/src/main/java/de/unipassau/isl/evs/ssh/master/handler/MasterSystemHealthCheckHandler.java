@@ -15,7 +15,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_SYS
  * Handler that periodically checks if hardware system components are still active and working properly.
  * In case of malfunctioning hardware notifications are issued.
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class MasterSystemHealthCheckHandler extends AbstractMasterHandler {
     private static final String TAG = MasterRoutingTableHandler.class.getSimpleName();

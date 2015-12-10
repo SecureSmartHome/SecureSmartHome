@@ -17,7 +17,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 /**
  * AppHolidaySimulationHandler class handles messages for the holiday simulation
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class AppHolidaySimulationHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppHolidaySimulationHandler> KEY = new Key<>(AppHolidaySimulationHandler.class);

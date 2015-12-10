@@ -11,7 +11,7 @@ public class MasterConstants extends CoreConstants {
     public static final String PREF_SERVER_PORT = "PREF_SERVER_PORT";
 
     /**
-     * @author Chris
+     * @author Christoph Fraedrich
      */
     public class ClimateThreshold {
         public static final int ALTITUDE = 100;

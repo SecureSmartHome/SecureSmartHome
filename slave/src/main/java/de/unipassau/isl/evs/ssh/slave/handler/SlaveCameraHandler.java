@@ -20,7 +20,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
  * Handles messages requesting pictures from the camera (via API calls) and generates messages,
  * containing the pictures, and sends these to the master.
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class SlaveCameraHandler implements MessageHandler {
 

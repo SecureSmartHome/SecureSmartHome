@@ -5,7 +5,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 /**
  * Payload class for SystemHealthChecker
  *
- * @author bucher
+ * @author Andreas Bucher
  */
 public class SystemHealthPayload implements MessagePayload {
 

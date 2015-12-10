@@ -3,7 +3,7 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
 /**
  * Payload class for weather warnings
  *
- * @author bucher
+ * @author Andreas Bucher
  */
 public class WeatherPayload implements MessagePayload {
 

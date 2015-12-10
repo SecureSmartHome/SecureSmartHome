@@ -44,7 +44,7 @@ import de.unipassau.isl.evs.ssh.core.container.StartupException;
  * It also initiates the private Key which will be associated with this device if it doesn't exist yet.
  * (Notice: the Keys handled by the KeyStoreController are not the Keys from the TypedMap package.)
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class KeyStoreController extends AbstractComponent {
     public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);

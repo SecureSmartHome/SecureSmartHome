@@ -3,7 +3,7 @@ package de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint;
 /**
  * ModuleAccessPoint class for a GPIO access point.
  *
- * @author leon
+ * @author Leon Sell
  */
 public class GPIOAccessPoint extends ModuleAccessPoint {
     public static final String TYPE = "GPIO";

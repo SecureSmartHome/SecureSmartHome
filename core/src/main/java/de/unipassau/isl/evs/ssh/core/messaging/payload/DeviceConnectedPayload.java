@@ -4,7 +4,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import io.netty.channel.Channel;
 
 /**
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class DeviceConnectedPayload implements MessagePayload {
 
