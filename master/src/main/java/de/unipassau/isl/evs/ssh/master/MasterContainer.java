@@ -66,7 +66,6 @@ public class MasterContainer extends ContainerService {
         incomingDispatcher.registerHandler(new MasterNotificationHandler(), MASTER_NOTIFICATION_SEND);
         incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(), MASTER_USERINFO_GET, MASTER_DEVICE_CONNECTED);
         incomingDispatcher.registerHandler(new MasterModuleHandler(), MASTER_MODULE_ADD);
-        incomingDispatcher.registerHandler(new MasterRegisterDeviceHandler(), MASTER_USER_REGISTER);
         incomingDispatcher.registerHandler(new MasterHolidaySimulationPlannerHandler(), MASTER_HOLIDAY_GET);
         incomingDispatcher.registerHandler(new MasterRoutingTableHandler(), MASTER_SLAVE_REGISTER);
 
