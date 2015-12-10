@@ -11,14 +11,12 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.AddNewModulePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RenameModulePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
@@ -79,7 +77,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
             }
         /* @author leon */
         } else if (routingKey.equals(CoreConstants.RoutingKeys.MASTER_MODULE_RENAME)) {
-            if (hasPermission(message.getFromID(), new Permission(DatabaseContract.Permission.Values.RENAME_MODULE))) {
+            if (hasPermission(message.getFromID(), new Permission(CoreConstants.Permission.BinaryPermission.RENAME_MODULE.toString()))) {
                 if (message.getPayload() instanceof RenameModulePayload) {
                     if (handleRenameModule(message)) {
                         updateAllClients();

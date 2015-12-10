@@ -6,7 +6,6 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
-import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 
 /**
@@ -78,7 +77,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
         if (hasPermission(
                 message.getFromID(),
                 new Permission(
-                        DatabaseContract.Permission.Values.REQUEST_LIGHT_STATUS,
+                        CoreConstants.Permission.BinaryPermission.REQUEST_LIGHT_STATUS.toString(),
                         atModule.getName()
                 )
         )) {
