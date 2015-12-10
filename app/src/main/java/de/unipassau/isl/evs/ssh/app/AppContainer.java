@@ -1,6 +1,5 @@
 package de.unipassau.isl.evs.ssh.app;
 
-import android.content.Context;
 import android.util.Log;
 
 import java.io.File;
@@ -13,8 +12,12 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+import de.unipassau.isl.evs.ssh.app.handler.AppAddSlaveHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppClimateHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppHolidaySimulationHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppNewModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
@@ -51,10 +54,13 @@ public class AppContainer extends ContainerService {
         register(AppModuleHandler.KEY, new AppModuleHandler());
         register(AppDoorHandler.KEY, new AppDoorHandler());
         register(AppLightHandler.KEY, new AppLightHandler());
+        register(AppClimateHandler.KEY, new AppClimateHandler());
         register(AppNotificationHandler.KEY, new AppNotificationHandler());
         register(AppUserConfigurationHandler.KEY, new AppUserConfigurationHandler());
         register(AppNewModuleHandler.KEY, new AppNewModuleHandler());
         register(AppRegisterNewDeviceHandler.KEY, new AppRegisterNewDeviceHandler());
+        register(AppHolidaySimulationHandler.KEY, new AppHolidaySimulationHandler());
+        register(AppAddSlaveHandler.KEY, new AppAddSlaveHandler());
     }
 
     private void readMasterData() {

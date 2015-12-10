@@ -36,7 +36,6 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.app.AppConstants;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
@@ -54,16 +53,6 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.TEMPLAT
 public class ListGroupFragment extends BoundFragment {
     private static final String TAG = ListGroupFragment.class.getSimpleName();
     private GroupListAdapter adapter;
-
-    @Override
-    public void onContainerConnected(Container container) {
-        super.onContainerConnected(container);
-    }
-
-    @Override
-    public void onContainerDisconnected() {
-        super.onContainerDisconnected();
-    }
 
     @Nullable
     @Override
@@ -237,9 +226,11 @@ public class ListGroupFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-            groups = handler.getAllGroups();
 
-            if (groups != null) {
+            List<Group> allGroups = handler.getAllGroups();
+
+            if (allGroups != null) {
+                groups = Lists.newArrayList(allGroups);
                 Collections.sort(groups, new Comparator<Group>() {
                     @Override
                     public int compare(Group lhs, Group rhs) {

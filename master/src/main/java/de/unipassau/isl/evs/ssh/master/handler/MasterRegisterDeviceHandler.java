@@ -4,8 +4,6 @@ import android.util.Base64;
 import android.util.Log;
 
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +27,7 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_REGISTER_INIT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USER_REGISTER;
 
 /**
  * Handles messages indicating that a device wants to register itself at the system and also generates
@@ -47,14 +45,14 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
 
     @Override
     public void init(Container container) {
-        container.require(IncomingDispatcher.KEY).registerHandler(this, MASTER_REGISTER_INIT);
+        container.require(IncomingDispatcher.KEY).registerHandler(this, MASTER_USER_REGISTER);
     }
 
     @Override
     public void destroy() {
         Container container = getContainer();
         if (container != null) {
-            container.require(IncomingDispatcher.KEY).unregisterHandler(this, MASTER_REGISTER_INIT);
+            container.require(IncomingDispatcher.KEY).unregisterHandler(this, MASTER_USER_REGISTER);
         }
     }
 
@@ -65,7 +63,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                 //which functionality
                 switch (message.getRoutingKey()) {
                     //Add new register token
-                    case MASTER_REGISTER_INIT:
+                    case MASTER_USER_REGISTER:
                         handleInitRequest(message);
                         break;
                     default:
@@ -92,12 +90,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     public boolean registerDevice(X509Certificate certificate, byte[] token) {
         String base64Token = Base64.encodeToString(token, Base64.NO_WRAP);
         DeviceID deviceID;
-        try {
-            deviceID = DeviceID.fromCertificate(certificate);
-        } catch (NoSuchProviderException | NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException("Something went wrong while trying to create a DeviceID from the given"
-                    + " certificate.", e);
-        }
+        deviceID = DeviceID.fromCertificate(certificate);
         if (userDeviceForToken.containsKey(base64Token)) {
             UserDevice newDevice = userDeviceForToken.get(base64Token);
             newDevice.setUserDeviceID(deviceID);
@@ -106,13 +99,13 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                 requireComponent(KeyStoreController.KEY).saveCertificate(certificate, deviceID.getIDString());
             } catch (GeneralSecurityException gse) {
                 throw new IllegalArgumentException("An error occurred while adding the certificate of the new device to"
-                        + " the KeyStore.", gse);
+                        + " the KeyStore.", gse); //FIXME
             }
             addUserDeviceToDatabase(deviceID, newDevice);
             userDeviceForToken.remove(base64Token);
             return true;
         } else {
-            Log.v(getClass().getSimpleName(), "Some tried using an unknown token to register. Token: " + base64Token
+            Log.w(getClass().getSimpleName(), "Some tried using an unknown token to register. Token: " + base64Token
                     + ". Certificate: " + certificate);
             return false;
         }
@@ -122,8 +115,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
         try {
             requireComponent(UserManagementController.KEY).addUserDevice(newDevice);
         } catch (DatabaseControllerException dce) {
-            throw new IllegalArgumentException("An error occurred while adding the new device to the database",
-                    dce);
+            throw new IllegalArgumentException("An error occurred while adding the new device to the database", dce);
         }
         //Add permissions
         if (requireComponent(UserManagementController.KEY).getUserDevices().size() == 1) {
@@ -132,9 +124,8 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                 try {
                     requireComponent(PermissionController.KEY).addUserPermission(deviceID, permission);
                 } catch (UnknownReferenceException ure) {
-                    throw new IllegalArgumentException("There was a problem adding the all permissions to the"
-                            + "newly added user. Maybe a permission was deleted while adding permissions to the"
-                            + "new user.", ure);
+                    throw new IllegalArgumentException("There was a problem adding all permissions to the newly added user. " +
+                            "Maybe a permission was deleted while adding permissions to the new user.", ure);
                 }
             }
         } else {
@@ -146,9 +137,8 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                 try {
                     requireComponent(PermissionController.KEY).addUserPermission(deviceID, permission);
                 } catch (UnknownReferenceException ure) {
-                    throw new IllegalArgumentException("There was a problem adding the all permissions to the newly"
-                            + "added user. Maybe a permission was deleted while adding permissions to the new user.",
-                            ure);
+                    throw new IllegalArgumentException("There was a problem adding all permissions to the newly added user. " +
+                            "Maybe a permission was deleted while adding permissions to the new user.", ure);
                 }
             }
         }

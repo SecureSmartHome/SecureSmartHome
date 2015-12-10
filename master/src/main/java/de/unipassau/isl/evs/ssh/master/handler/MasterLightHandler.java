@@ -45,13 +45,15 @@ public class MasterLightHandler extends AbstractMasterHandler {
 
     private void handleSetRequest(Message.AddressedMessage message) {
         final Module atModule = ((LightPayload) message.getPayload()).getModule();
-        if (hasPermission(
-                message.getFromID(),
-                new Permission(
-                        DatabaseContract.Permission.Values.SWITCH_LIGHT,
-                        atModule.getName()
-                )
-        )) {
+        //Todo: uncomment when permission are better integrated
+        //if (hasPermission(
+        //        message.getFromID(),
+        //        new Permission(
+        //                DatabaseContract.Permission.Values.SWITCH_LIGHT,
+        //                atModule.getName()
+        //        )
+        //)) {
+        if (true) {
             final Message messageToSend = new Message(message.getPayload());
             messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
             final Message.AddressedMessage sendMessage = sendMessage(

@@ -4,6 +4,7 @@ import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import io.netty.util.AttributeKey;
 import io.netty.util.ResourceLeakDetector;
 
@@ -66,13 +67,14 @@ public class CoreConstants {
 
         public static final ResourceLeakDetector.Level RESOURCE_LEAK_DETECTION = ResourceLeakDetector.Level.PARANOID;
 
+        public static final int DISCOVERY_PROTOCOL_VERSION = 2;
         /**
          * Default discovery port used by netty
          */
         public static final int DISCOVERY_PORT = 13132;
         public static final String DISCOVERY_HOST = "255.255.255.255";
-        public static final String DISCOVERY_PAYLOAD_REQUEST = "de.unipassau.isl.evs.ssh.udp_discovery.REQUEST";
-        public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE";
+        public static final String DISCOVERY_PAYLOAD_REQUEST = "de.unipassau.isl.evs.ssh.udp_discovery.REQUEST" + DISCOVERY_PROTOCOL_VERSION;
+        public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE" + DISCOVERY_PROTOCOL_VERSION;
         public static final String[] DISCOVERY_PAYLOADS = {DISCOVERY_PAYLOAD_REQUEST, DISCOVERY_PAYLOAD_RESPONSE};
 
         public static final AttributeKey<X509Certificate> ATTR_PEER_CERT = AttributeKey.valueOf(X509Certificate.class.getName());
@@ -88,7 +90,11 @@ public class CoreConstants {
      * This class contains the key constants of SharedPreferences
      */
     public class SharedPrefs {
-        public static final String PREF_MASTER_ID = "ssh.core.MASTER_ID";
+        /**
+         * @deprecated should not be written outside of NamingManager
+         */
+        @Deprecated
+        public static final String PREF_MASTER_ID = NamingManager.PREF_MASTER_ID;
         public static final String PREF_TOKEN = "ssh.core.TOKEN"; //TODO check if this is the correct place
     }
 
@@ -114,7 +120,8 @@ public class CoreConstants {
         public static final String MASTER_LIGHT_SET = "/master/light/set";
         public static final String MASTER_DOOR_BELL_RING = "/master/doorbell/ring";
         public static final String MASTER_CAMERA_GET = "/master/camera/get";
-        public static final String MASTER_WEATHER_INFO = "/master/weather/info";
+        public static final String MASTER_REQUEST_WEATHER_INFO = "/master/weatherinfo/request";
+        public static final String MASTER_PUSH_WEATHER_INFO = "/master/weatherinfo/push";
         public static final String MASTER_NOTIFICATION_SEND = "/master/notification/send";
         public static final String MASTER_DOOR_BELL_CAMERA_GET = "/master/doorbell/camera/get";
         public static final String MASTER_DOOR_UNLATCH = "/master/door/unlatch";
@@ -127,8 +134,10 @@ public class CoreConstants {
         public static final String MASTER_HOLIDAY_GET = "/master/holiday/get";
         public static final String MASTER_MODULE_ADD = "/master/module/add";
         public static final String MASTER_MODULE_GET = "/master/module/get";
-        public static final String MASTER_REGISTER_INIT = "/master/register/init";
+        public static final String MASTER_USER_REGISTER = "/master/user/register";
+        public static final String MASTER_SLAVE_REGISTER = "/master/slave/register";
         public static final String MASTER_DEVICE_CONNECTED = "/master/device/connected";
+        public static final String MASTER_MODULE_RENAME = "/master/module/modify";
 
         //Slave
         public static final String SLAVE_LIGHT_GET = "/slave/light/get";
@@ -152,9 +161,11 @@ public class CoreConstants {
         public static final String APP_USERINFO_GET = "/app/userdevice/get";
         public static final String APP_MODULE_ADD = "/app/module/add";
         public static final String APP_USER_REGISTER = "/app/user/register";
+        public static final String APP_SLAVE_REGISTER = "/app/slave/register";
 
         // Slave/App (used for broadcast messages)
         public static final String MODULES_UPDATE = "/*/modules/update";
+        public static final String APP_REQUEST_WEATHER_INFO = "/app/weatherinfo/request";
     }
 
     /**

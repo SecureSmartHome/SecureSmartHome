@@ -13,7 +13,9 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 
 /**
- * Main page if you start App
+ * MainFragment gives the user an overview over the most important functions.
+ * Other functions can be accessed through the Navigation Drawer.
+ *
  * @author bucher
  */
 public class MainFragment extends BoundFragment implements MessageHandler {
@@ -23,22 +25,7 @@ public class MainFragment extends BoundFragment implements MessageHandler {
         final MainActivity parent = (MainActivity) getActivity();
 
         ImageButton doorButtonOpen = (ImageButton) mLinearLayout.findViewById(R.id.doorButtonOpen);
-        ImageButton doorButtonClosed = (ImageButton) mLinearLayout.findViewById(R.id.doorButtonClosed);
-//fixme        if (doorIsOpen()) {
-        if (true) {
-            doorButtonOpen.setVisibility(View.VISIBLE);
-            doorButtonClosed.setVisibility(View.GONE);
-        } else {
-            doorButtonClosed.setVisibility(View.VISIBLE);
-            doorButtonOpen.setVisibility(View.GONE);
-        }
         doorButtonOpen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                parent.showFragmentByClass(DoorFragment.class);
-            }
-        });
-        doorButtonClosed.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 parent.showFragmentByClass(DoorFragment.class);
@@ -46,23 +33,7 @@ public class MainFragment extends BoundFragment implements MessageHandler {
         });
 
         ImageButton lightButtonOn = (ImageButton) mLinearLayout.findViewById(R.id.lightButtonOn);
-        ImageButton lightButtonOff = (ImageButton) mLinearLayout.findViewById(R.id.lightButtonOff);
-        //The status of the light imageButton depends in the status of the lights.
-//fixme        if (lightTurnedOn()) {
-        if (true) {
-            lightButtonOff.setVisibility(View.GONE);
-            lightButtonOn.setVisibility(View.VISIBLE);
-        } else {
-            lightButtonOn.setVisibility(View.GONE);
-            lightButtonOff.setVisibility(View.VISIBLE);
-        }
         lightButtonOn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                parent.showFragmentByClass(LightFragment.class);
-            }
-        });
-        lightButtonOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 parent.showFragmentByClass(LightFragment.class);

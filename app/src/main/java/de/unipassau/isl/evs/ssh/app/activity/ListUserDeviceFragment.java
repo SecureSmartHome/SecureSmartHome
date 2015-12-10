@@ -19,13 +19,14 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.common.collect.Lists;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
@@ -49,16 +50,6 @@ public class ListUserDeviceFragment extends BoundFragment {
      * The group the fragment is created for.
      */
     private Group group;
-
-    @Override
-    public void onContainerConnected(Container container) {
-        super.onContainerConnected(container);
-    }
-
-    @Override
-    public void onContainerDisconnected() {
-        super.onContainerDisconnected();
-    }
 
     @Nullable
     @Override
@@ -155,9 +146,11 @@ public class ListUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-            userDevices = handler.getAllGroupMembers(group);
 
-            if (userDevices != null) {
+            List<UserDevice> allUserDevices = handler.getAllGroupMembers(group);
+
+            if (allUserDevices != null) {
+                userDevices = Lists.newArrayList(allUserDevices);
                 Collections.sort(userDevices, new Comparator<UserDevice>() {
                     @Override
                     public int compare(UserDevice lhs, UserDevice rhs) {

@@ -20,11 +20,12 @@ import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 
 /**
  * WelcomeScreenFragment to display a welcome message to every user when he initially starts the app.
- * As the device isn't registered yet, it asks the user to scan a QR-Code by calling {@link ScanQRCodeFragment}.
+ * As the device isn't registered yet, it asks the user to scan a QR-Code.
  *
  * @author Phil Werli
  */
-public class WelcomeScreenFragment extends BoundFragment {
+public class WelcomeScreenFragment extends ScanQRFragment {
+    private QRDeviceInformation info;
 
     @Nullable
     @Override
@@ -35,7 +36,7 @@ public class WelcomeScreenFragment extends BoundFragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity) getActivity()).showFragmentByClass(ScanQRCodeFragment.class);
+                requestScanQRCode();
             }
         });
         return root;
@@ -44,13 +45,8 @@ public class WelcomeScreenFragment extends BoundFragment {
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        Bundle bundle = getArguments();
-        QRDeviceInformation info = null;
-        if (bundle != null) {
-            info = (QRDeviceInformation) bundle.get(AppConstants.Fragment_Arguments.ARGUMENT_FRAGMENT);
-        }
         if (info != null) {
-            SharedPreferences sharedPreferences = getContainer().require(ContainerService.KEY_CONTEXT).getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = container.require(ContainerService.KEY_CONTEXT).getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt(CoreConstants.NettyConstants.PREF_PORT, info.getPort());
             editor.putString(CoreConstants.NettyConstants.PREF_HOST, info.getAddress().getHostAddress());
@@ -61,5 +57,11 @@ public class WelcomeScreenFragment extends BoundFragment {
             getContainer().require(Client.KEY).onDiscoverySuccessful(info.getAddress(), info.getPort());
             ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         }
+    }
+
+    @Override
+    protected void onQRCodeScanned(QRDeviceInformation info) {
+        super.onQRCodeScanned(info);
+        this.info = info;
     }
 }

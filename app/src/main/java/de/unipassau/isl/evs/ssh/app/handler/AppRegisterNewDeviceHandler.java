@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
@@ -25,7 +24,7 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_USER_REGISTER;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_REGISTER_INIT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USER_REGISTER;
 
 /**
  * @author Wolfgang Popp.
@@ -115,7 +114,7 @@ public class AppRegisterNewDeviceHandler extends AbstractComponent implements Me
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USER_REGISTER);
         final OutgoingRouter outgoingRouter = getComponent(OutgoingRouter.KEY);
         if (outgoingRouter != null) {
-            outgoingRouter.sendMessageToMaster(MASTER_REGISTER_INIT, message);
+            outgoingRouter.sendMessageToMaster(MASTER_USER_REGISTER, message);
         } //Todo: what do when no container?
     }
 }

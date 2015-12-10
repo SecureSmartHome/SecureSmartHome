@@ -257,6 +257,5 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         Module module = new Module(name, atSlave, sensorType, accessPoint);
 
         handler.addNewModule(module);
-
     }
 }

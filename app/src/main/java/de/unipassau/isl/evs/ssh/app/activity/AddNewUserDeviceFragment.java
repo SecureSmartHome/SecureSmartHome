@@ -31,20 +31,11 @@ import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
  * This activity allows to enter information describing new user devices and provide a QR-Code
  * which a given user device has to scan. If this functionality is used a message,
  * containing all needed information, is generated and passed to the OutgoingRouter.
+ *
+ * @author Wolfgang Popp
  */
 public class AddNewUserDeviceFragment extends BoundFragment {
     private static final String TAG = AddNewUserDeviceFragment.class.getSimpleName();
-    private List<String> groups;
-    private Spinner spinner;
-    private EditText inputUserName;
-
-    private final AppUserConfigurationHandler.UserInfoListener userConfigListener = new AppUserConfigurationHandler.UserInfoListener() {
-        @Override
-        public void userInfoUpdated() {
-            updateGroupSpinner();
-        }
-    };
-
     private final AppRegisterNewDeviceHandler.RegisterNewDeviceListener registerNewDeviceListener = new AppRegisterNewDeviceHandler.RegisterNewDeviceListener() {
         @Override
         public void tokenResponse(QRDeviceInformation qrDeviceInformation) {
@@ -53,6 +44,15 @@ public class AddNewUserDeviceFragment extends BoundFragment {
             ((MainActivity) getActivity()).showFragmentByClass(QRCodeFragment.class, bundle);
         }
     };
+    private List<String> groups;
+    private Spinner spinner;
+    private final AppUserConfigurationHandler.UserInfoListener userConfigListener = new AppUserConfigurationHandler.UserInfoListener() {
+        @Override
+        public void userInfoUpdated() {
+            updateGroupSpinner();
+        }
+    };
+    private EditText inputUserName;
 
     private void updateGroupSpinner() {
         List<Group> allGroups = getComponent(AppUserConfigurationHandler.KEY).getAllGroups();

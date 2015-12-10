@@ -8,6 +8,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
@@ -100,7 +101,7 @@ public class ReedSensor extends AbstractComponent {
          * Sends info about doorbell being used
          */
         private void sendReedInfo() {
-            MessagePayload payload = new DoorBellPayload(moduleName); //TODO FIXME
+            MessagePayload payload = new DoorStatusPayload(moduleName); //TODO FIXME
 
             NamingManager namingManager = container.require(NamingManager.KEY);
 
@@ -109,7 +110,7 @@ public class ReedSensor extends AbstractComponent {
             message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
             OutgoingRouter router = container.require(OutgoingRouter.KEY);
-            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_DOOR_BELL_RING, message);
+            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_DOOR_STATUS_GET, message);
         }
     }
 

@@ -20,6 +20,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  */
 public class ModulesPayload implements MessagePayload {
 
+    private List<Slave> slaves;
     private ListMultimap<Slave, Module> modulesAtSlave;
 
     /**
@@ -29,16 +30,17 @@ public class ModulesPayload implements MessagePayload {
         this.modulesAtSlave = null;
     }
 
-    public ModulesPayload(ListMultimap<Slave, Module> modulesAtSlave) {
+    public ModulesPayload(ListMultimap<Slave, Module> modulesAtSlave, List<Slave> slaves) {
         this.modulesAtSlave = modulesAtSlave;
+        this.slaves = slaves;
     }
 
     public Set<Module> getModules() {
         return Sets.newHashSet(modulesAtSlave.values());
     }
 
-    public Set<Slave> getSlaves() {
-        return modulesAtSlave.keySet();
+    public List<Slave> getSlaves() {
+        return slaves;
     }
 
     public List<Module> getModulesAtSlave(Slave slave) {
@@ -54,7 +56,7 @@ public class ModulesPayload implements MessagePayload {
 
     @Nullable
     public Slave getSlave(final DeviceID slaveID) {
-        final Set<Slave> slaves = getSlaves();
+        final List<Slave> slaves = getSlaves();
         for (Slave slave : slaves) {
             if (slave.getSlaveID().equals(slaveID)) {
                 return slave;

@@ -41,6 +41,7 @@ public class MainActivity extends BoundActivity
     private Toolbar toolbar = null;
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
+    private boolean isMainFragmentActive;
 
     public MainActivity() {
         super(AppContainer.class);
@@ -70,6 +71,17 @@ public class MainActivity extends BoundActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //check intent if a specific fragment should be inflated when App is opened
+        if (getIntent().getAction().equals("ClimateFragment")) {
+            showFragmentByClass(ClimateFragment.class);
+        } else if (getIntent().getAction().equals("StatusFragment")) {
+            showFragmentByClass(StatusFragment.class);
+        } else if (getIntent().getAction().equals("LightFragment")) {
+            showFragmentByClass(LightFragment.class);
+        } else if (getIntent().getAction().equals("DoorFragment")) {
+            showFragmentByClass(DoorFragment.class);
+        }
+
         //Initialise fragmentTransaction
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
             try {
@@ -79,11 +91,8 @@ public class MainActivity extends BoundActivity
             }
         } else {
             // starts the main fragment when already registered, the welcomescreen fragment so the user can register.
-            Fragment fragment = (deviceNotRegistered() ? new WelcomeScreenFragment() : new MainFragment());
-            android.support.v4.app.FragmentTransaction fragmentTransaction =
-                    getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, fragment);
-            fragmentTransaction.commit();
+            Class<? extends Fragment> clazz = (deviceNotRegistered() ? WelcomeScreenFragment.class : MainFragment.class);
+            showFragmentByClass(clazz);
         }
     }
 
@@ -106,9 +115,8 @@ public class MainActivity extends BoundActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            super.onBackPressed();
-            getSupportFragmentManager().popBackStackImmediate();
+        } else if (!isMainFragmentActive) {
+            showFragmentByClass(MainFragment.class);
         } else {
             super.onBackPressed();
         }
@@ -150,7 +158,6 @@ public class MainActivity extends BoundActivity
      * @param bundle the bundle that is given with the new fragment
      */
     public void showFragmentByClass(Class clazz, Bundle bundle) {
-        Class oldFragment = getCurrentFragment().getClass();
         Fragment fragment = null;
         try {
             fragment = (Fragment) clazz.newInstance();
@@ -161,12 +168,11 @@ public class MainActivity extends BoundActivity
             e.printStackTrace();
         }
         if (fragment != null) {
+            isMainFragmentActive = clazz.equals(MainFragment.class);
+           
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
-            if (!oldFragment.isInstance(fragment)) {
-                fragmentTransaction.addToBackStack(null);
-            }
             fragmentTransaction.commit();
         }
     }
@@ -194,6 +200,8 @@ public class MainActivity extends BoundActivity
             clazz = AddModuleFragment.class;
         } else if (id == R.id.light_fab) {
             clazz = AddModuleFragment.class;
+        } else if (id == R.id.nav_add_odroid) {
+            clazz = AddNewSlaveFragment.class;
         } else {
             throw new IllegalArgumentException("Unknown id: " + id);
         }

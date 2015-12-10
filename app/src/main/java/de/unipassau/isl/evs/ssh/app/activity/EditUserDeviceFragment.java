@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +34,6 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
@@ -57,16 +57,6 @@ public class EditUserDeviceFragment extends BoundFragment {
      * The device the fragment is created for.
      */
     private UserDevice device;
-
-    @Override
-    public void onContainerConnected(Container container) {
-        super.onContainerConnected(container);
-    }
-
-    @Override
-    public void onContainerDisconnected() {
-        super.onContainerDisconnected();
-    }
 
     @Nullable
     @Override
@@ -188,10 +178,12 @@ public class EditUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-            allPermissions = handler.getAllPermissions();
             userPermissions = handler.getPermissionForUser(device);
 
-            if (allPermissions != null) {
+            List<Permission> tempPermissionList = handler.getAllPermissions();
+
+            if (tempPermissionList != null) {
+                allPermissions = Lists.newArrayList(tempPermissionList);
                 Collections.sort(allPermissions, new Comparator<Permission>() {
                     @Override
                     public int compare(Permission lhs, Permission rhs) {

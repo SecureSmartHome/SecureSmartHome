@@ -28,4 +28,6 @@ public class DoorStatusPayload implements MessagePayload {
     public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
     }
+
+    //TODO refactor so we have two payloads, one for doors and one windows?
 }

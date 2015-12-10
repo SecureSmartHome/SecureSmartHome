@@ -18,7 +18,7 @@ import de.unipassau.isl.evs.ssh.master.database.SlaveController;
  *
  * @author leon
  */
-public abstract class AbstractMasterHandler extends AbstractMessageHandler implements MessageHandler {
+public abstract class AbstractMasterHandler extends AbstractMessageHandler {
     private Map<Integer, Message.AddressedMessage> inbox = new HashMap<>();
     private Map<Integer, Integer> onBehalfOfMessage = new HashMap<>();
 

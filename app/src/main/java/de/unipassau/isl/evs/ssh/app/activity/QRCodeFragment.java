@@ -51,16 +51,6 @@ public class QRCodeFragment extends BoundFragment {
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -77,11 +67,5 @@ public class QRCodeFragment extends BoundFragment {
         String text = getArguments().getString(EXTRA_QR_MESSAGE, getResources().getString(R.string.please_scan_device));
         textView.setText(text);
         return root;
-    }
-
-    @Nullable
-    @Override
-    public View getView() {
-        return super.getView();
     }
 }

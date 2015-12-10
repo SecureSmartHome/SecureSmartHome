@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+
 /**
  * Payload class for WeatherSensor data.
  *
@@ -9,10 +11,11 @@ public class ClimatePayload implements MessagePayload {
 
     private double temp1, temp2, pressure, altitude, humidity, uv;
     private int visible, ir;
-    private String notificationType, moduleName;
+    private String notificationType;
+    private Module module;
 
     public ClimatePayload(double temp1, double temp2, double pressure, double altitude, double humidity,
-                          double uv, int visible, int ir, String notificationType, String moduleName) {
+                          double uv, int visible, int ir, String notificationType, Module module) {
         this.temp1 = temp1;
         this.temp2 = temp2;
         this.pressure = pressure;
@@ -21,8 +24,8 @@ public class ClimatePayload implements MessagePayload {
         this.uv = uv;
         this.visible = visible;
         this.ir = ir;
-        this.notificationType = notificationType; //see CoreConstants.NotificationTypd
-        this.moduleName = moduleName;
+        this.notificationType = notificationType; //see CoreConstants.NotificationTyp
+        this.module = module;
     }
 
     /**
@@ -33,6 +36,7 @@ public class ClimatePayload implements MessagePayload {
      * @param notificationType that is to be set
      */
     public ClimatePayload(ClimatePayload payload, String notificationType) {
+        this.module = payload.module;
         this.temp1 = payload.temp1;
         this.temp2 = payload.temp2;
         this.pressure = payload.pressure;
@@ -42,7 +46,6 @@ public class ClimatePayload implements MessagePayload {
         this.visible = payload.visible;
         this.ir = payload.ir;
         this.notificationType = notificationType;
-        this.moduleName = moduleName;
     }
 
     /**
@@ -53,6 +56,8 @@ public class ClimatePayload implements MessagePayload {
     public ClimatePayload ClimatePayload() {
         return ClimatePayload.this;
     }
+
+    public Module getModule() { return module; }
 
     public double getTemp1() {
         return temp1;
@@ -86,8 +91,8 @@ public class ClimatePayload implements MessagePayload {
         return ir;
     }
 
-    public String getModuleName() {
-        return moduleName;
+    public Module getModuleName() {
+        return module;
     }
 
     /**

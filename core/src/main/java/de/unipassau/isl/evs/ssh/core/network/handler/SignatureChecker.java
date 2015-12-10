@@ -46,10 +46,13 @@ public class SignatureChecker extends ChannelHandlerAdapter {
                 data.retain();
                 ctx.fireChannelRead(data);
             } else {
-                throw new SignatureException("Message has a broken signature");
+                ctx.close();
+                throw new SignatureException("Message has a broken signature, closing connection");
             }
         } else {
-            throw new SignatureException("Can't check signature of message of type " + (msg != null ? msg.getClass() : "null"));
+            ctx.close();
+            throw new SignatureException("Can't check signature of message of type " + (msg != null ? msg.getClass() : "null")
+                    + ", closing connection");
         }
     }
 }
