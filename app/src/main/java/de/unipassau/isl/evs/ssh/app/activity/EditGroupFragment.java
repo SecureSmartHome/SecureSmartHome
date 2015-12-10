@@ -20,7 +20,7 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.EDIT_GR
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.TEMPLATE_DIALOG;
 
 /**
- * This fragment gives the user the option to choose a name and a template to edit an existing group.
+ * This fragment gives the user the option to choose a name and a template used to edit an existing group.
  *
  * @author Phil Werli
  */

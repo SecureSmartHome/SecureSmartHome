@@ -36,7 +36,7 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
     /**
      * Adds a DoorListener to this handler.
      *
-     * @param listener
+     * @param listener the DoorListener that is added to handler.
      */
     public void addListener(DoorFragment.DoorListener listener) {
         listeners.add(listener);
@@ -45,7 +45,7 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
     /**
      * Removes the given DoorListener from this handler.
      *
-     * @param listener
+     * @param listener the DoorListener that is removed from handler.
      */
     public void removeListener(DoorFragment.DoorListener listener) {
         listeners.remove(listener);

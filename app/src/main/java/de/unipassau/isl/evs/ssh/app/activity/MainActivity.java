@@ -1,8 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -14,7 +12,6 @@ import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
@@ -225,27 +222,5 @@ public class MainActivity extends BoundActivity
         if (fragment instanceof BoundFragment) {
             ((BoundFragment) fragment).onContainerDisconnected();
         }
-    }
-
-    //TODO remove, just for testing!
-    public void notificationButtonClicked(View view) {
-        //Build notification
-        notificationBuilder.setSmallIcon(R.drawable.ic_home_light);
-        notificationBuilder.setContentTitle("Climate Warning!");
-        notificationBuilder.setWhen(System.currentTimeMillis());
-        notificationBuilder.setColor(2718207);
-        notificationBuilder.setContentText("Please open a Window, Humidity too high.");
-
-        //TODO does not work for fragments
-        //If Notification is clicked send to this Page
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setAction("OpenClimateFragment");
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        notificationBuilder.setContentIntent(pendingIntent);
-
-        //TODO own method: sendNotification(uniqueID){}
-        //Send notification out to Device
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        nm.notify(uniqueID, notificationBuilder.build());
     }
 }

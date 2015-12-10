@@ -14,13 +14,11 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
-import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * AppClimateHandler class handles message from and to the
@@ -30,16 +28,10 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  */
 public class AppClimateHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppClimateHandler> KEY = new Key<>(AppClimateHandler.class);
+
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(1000);
     private final List<ClimateHandlerListener> listeners = new ArrayList<>();
     private final Map<Module, ClimateStatus> climateStatusMapping = new HashMap<>();
-
-    public AppClimateHandler() {
-        //create a TestWeatherBoard
-        Module m = new Module("TestWeatherBoard", new DeviceID("H5f4ahpVmoVL6GKAYqZY7m73k9i9nDCnsiJLbw+0n3E="),
-                CoreConstants.ModuleType.WEATHER_BOARD, new GPIOAccessPoint()); //FIXME resolve DeviceID
-        climateStatusMapping.put(m, new ClimateStatus(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0));
-    }
 
     /**
      * Request current weatherSensor data.
@@ -78,7 +70,12 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
         }
     }
 
-    //Getter for SensorData
+    /**
+     * Return temperature that is measured in Temperature1 sensor.
+     *
+     * @param module The weatherboard which sensors are measured.
+     * @return The temperature measured in Temperature1 sensor.
+     */
     public double getTemp1(Module module) {
         final ClimateStatus status = climateStatusMapping.get(module);
         if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
@@ -87,6 +84,12 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
         return status.getTemp1();
     }
 
+    /**
+     * Return temperature that is measured in Temperature2 sensor.
+     *
+     * @param module The weatherboard which sensors is measured.
+     * @return The temperature measured in Temperature2 sensor.
+     */
     public double getTemp2(Module module) {
         final ClimateStatus status = climateStatusMapping.get(module);
         if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
@@ -95,6 +98,12 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
         return status.getTemp2();
     }
 
+    /**
+     * Return pressure that is measured in AirPressure sensor.
+     *
+     * @param module The weatherboard which sensor is measured.
+     * @return The temperature measured in AirPressure sensor.
+     */
     public double getPressure(Module module) {
         final ClimateStatus status = climateStatusMapping.get(module);
         if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
@@ -103,6 +112,12 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
         return status.getPressure();
     }
 
+    /**
+     * Return altitude that is measured in AirPressure sensor.
+     *
+     * @param module The weatherboard which sensor is measured.
+     * @return The temperature measured in Altitude sensor.
+     */
     public double getAltitude(Module module) {
         final ClimateStatus status = climateStatusMapping.get(module);
         if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
@@ -111,6 +126,12 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
         return status.getAltitude();
     }
 
+    /**
+     * Return humidity that is measured in Humidity sensor.
+     *
+     * @param module The weatherboard which sensor is measured.
+     * @return The temperature measured in Humidity sensor.
+     */
     public double getHumidity(Module module) {
         final ClimateStatus status = climateStatusMapping.get(module);
         if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
@@ -119,6 +140,12 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
         return status.getHumidity();
     }
 
+    /**
+     * Return uv radiation that is measured in UV Radiation sensor.
+     *
+     * @param module The weatherboard which sensor is measured.
+     * @return The temperature measured in UV Radiation sensor.
+     */
     public double getUv(Module module) {
         final ClimateStatus status = climateStatusMapping.get(module);
         if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
@@ -127,6 +154,12 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
         return status.getUv();
     }
 
+    /**
+     * Return ir radiation that is measured in IR Radiation sensor.
+     *
+     * @param module The weatherboard which sensor is measured.
+     * @return The temperature measured in IR Radiation sensor.
+     */
     public int getVisible(Module module) {
         final ClimateStatus status = climateStatusMapping.get(module);
         if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
@@ -135,6 +168,12 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
         return status.getVisible();
     }
 
+    /**
+     * Return light intensity that is measured in Light Intensity sensor.
+     *
+     * @param module The weatherboard which sensor is measured.
+     * @return The temperature measured in Light Intensity sensor.
+     */
     public int getIr(Module module) {
         final ClimateStatus status = climateStatusMapping.get(module);
         if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
