@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -27,6 +26,7 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
@@ -54,13 +54,15 @@ public class ListUserDeviceFragment extends BoundFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_listuserdevicefromgroup, container, false);
-        group = ((Group) getArguments().getSerializable(GROUP_ARGUMENT_FRAGMENT));
+        return inflater.inflate(R.layout.fragment_listuserdevicefromgroup, container, false);
+    }
 
-        TextView groupName = (TextView) root.findViewById(R.id.listuserdevice_groupname);
+    private void buildView() {
+        group = (Group) getArguments().getSerializable(GROUP_ARGUMENT_FRAGMENT);
+        TextView groupName = (TextView) getActivity().findViewById(R.id.listuserdevice_groupname);
         groupName.setText(group.getName());
 
-        ListView userDeviceList = (ListView) root.findViewById(R.id.listuserDeviceContainer);
+        ListView userDeviceList = (ListView) getActivity().findViewById(R.id.listuserDeviceContainer);
         userDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                   // when a user clicks short on an item, he opens the ListUserDeviceFragment
                                                   @Override
@@ -78,13 +80,13 @@ public class ListUserDeviceFragment extends BoundFragment {
                 UserDevice item = adapter.getItem(position);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(DELETE_USERDEVICE_DIALOG, item);
-                createDeleteUserDeviceDialog(bundle);
+                createRemoveUserDeviceDialog(bundle).show();
                 return true;
 
             }
         });
 
-        FloatingActionButton fab = (FloatingActionButton) root.findViewById(R.id.listuserdevice_fab);
+        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.listuserdevice_fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,44 +94,47 @@ public class ListUserDeviceFragment extends BoundFragment {
             }
         });
 
-        adapter = new UserDeviceListAdapter(inflater);
+        adapter = new UserDeviceListAdapter();
         userDeviceList.setAdapter(adapter);
+    }
 
-        return root;
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        buildView();
     }
 
     /**
      * Creates and returns a dialogs that gives the user the option to delete a user device.
      */
-    private Dialog createDeleteUserDeviceDialog(Bundle bundle) {
+    private Dialog createRemoveUserDeviceDialog(Bundle bundle) {
         final UserDevice userDevice = (UserDevice) bundle.getSerializable(DELETE_USERDEVICE_DIALOG);
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_editgroup, null, false);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
         final AlertDialog dialog = builder.create();
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        builder.setMessage(R.string.deleteuserdevice_dialog_title + " " + userDevice.getName() + "?")
-                .setView(dialogView)
+        builder.setMessage(getResources().getString(R.string.deleteuserdevice_dialog_title) + " " + userDevice.getName() + "?")
                 .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         getComponent(AppUserConfigurationHandler.KEY).removeUserDevice(userDevice);
                     }
                 })
-                .setNegativeButton(R.string.revoke, null);
+                .setNegativeButton(R.string.cancel, null)
+                .create()
+                .show();
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         return dialog;
     }
 
 
     private class UserDeviceListAdapter extends BaseAdapter {
-        private final LayoutInflater inflater;
         private List<UserDevice> userDevices;
 
-        public UserDeviceListAdapter(LayoutInflater inflater) {
-            this.inflater = inflater;
+        public UserDeviceListAdapter() {
             updateUserDeviceList();
         }
 
@@ -206,7 +211,7 @@ public class ListUserDeviceFragment extends BoundFragment {
         public View getView(int position, View convertView, ViewGroup parent) {
             // the UserDevice the list item is created for
             final UserDevice device = getItem(position);
-
+            LayoutInflater inflater = getActivity().getLayoutInflater();
             LinearLayout userDeviceLayout;
             if (convertView == null) {
                 userDeviceLayout = (LinearLayout) inflater.inflate(R.layout.userdevicelayout, parent, false);

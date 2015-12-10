@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -25,6 +24,7 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.app.AppConstants;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
@@ -46,8 +46,17 @@ public class ListGroupFragment extends BoundFragment {
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_listgroup, container, false);
-        ListView list = (ListView) root.findViewById(R.id.listGroupContainer);
+        return inflater.inflate(R.layout.fragment_listgroup, container, false);
+    }
+
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        buildView();
+    }
+
+    private void buildView() {
+        ListView list = (ListView) getActivity().findViewById(R.id.listGroupContainer);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -72,7 +81,7 @@ public class ListGroupFragment extends BoundFragment {
                 return true;
             }
         });
-        FloatingActionButton fab = ((FloatingActionButton) root.findViewById(R.id.addgroup_fab));
+        FloatingActionButton fab = ((FloatingActionButton) getActivity().findViewById(R.id.addgroup_fab));
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -84,10 +93,8 @@ public class ListGroupFragment extends BoundFragment {
                 ((MainActivity) getActivity()).showFragmentByClass(AddGroupFragment.class, bundle);
             }
         });
-        adapter = new GroupListAdapter(inflater);
+        adapter = new GroupListAdapter();
         list.setAdapter(adapter);
-
-        return root;
     }
 
     /**
@@ -115,11 +122,9 @@ public class ListGroupFragment extends BoundFragment {
     }
 
     private class GroupListAdapter extends BaseAdapter {
-        private final LayoutInflater inflater;
         private List<Group> groups;
 
-        public GroupListAdapter(LayoutInflater inflater) {
-            this.inflater = inflater;
+        public GroupListAdapter() {
             updateGroupList();
         }
 
@@ -198,6 +203,7 @@ public class ListGroupFragment extends BoundFragment {
             final Group group = getItem(position);
 
             LinearLayout groupLayout;
+            LayoutInflater inflater = getActivity().getLayoutInflater();
             if (convertView == null) {
                 groupLayout = (LinearLayout) inflater.inflate(R.layout.grouplayout, parent, false);
             } else {

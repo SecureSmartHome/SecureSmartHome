@@ -9,12 +9,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -32,6 +32,7 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
@@ -59,19 +60,22 @@ public class EditUserDeviceFragment extends BoundFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_edituserdevice, container, false);
+        return inflater.inflate(R.layout.fragment_edituserdevice, container, false);
+    }
+
+    private void buildView() {
         device = ((UserDevice) getArguments().getSerializable(USER_DEVICE_ARGUMENT_FRAGMENT));
 
-        TextView deviceName = ((TextView) root.findViewById(R.id.userdevice_user_name));
+        TextView deviceName = ((TextView) getActivity().findViewById(R.id.userdevice_user_name));
         deviceName.setText(device.getName());
 
-        TextView deviceGroup = ((TextView) root.findViewById(R.id.userdevice_user_group));
+        TextView deviceGroup = ((TextView) getActivity().findViewById(R.id.userdevice_user_group));
         deviceGroup.setText(getResources().getString(R.string.is_in_group) + device.getInGroup() + getResources().getString(R.string.dot));
 
-        TextView deviceID = ((TextView) root.findViewById(R.id.userdevice_user_deviceid));
+        TextView deviceID = ((TextView) getActivity().findViewById(R.id.userdevice_user_deviceid));
         deviceID.setText(getResources().getString(R.string.device_id) + device.getUserDeviceID().getIDString());
 
-        Button editButton = (Button) root.findViewById(R.id.userdevice_edit_button);
+        Button editButton = (Button) getActivity().findViewById(R.id.userdevice_edit_button);
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,11 +89,15 @@ public class EditUserDeviceFragment extends BoundFragment {
             }
         });
 
-        ListView userPermissionList = (ListView) root.findViewById(R.id.listUserPermissionContainer);
-        PermissionListAdapter permissionListAdapter = new PermissionListAdapter(inflater);
+        ListView userPermissionList = (ListView) getActivity().findViewById(R.id.listUserPermissionContainer);
+        PermissionListAdapter permissionListAdapter = new PermissionListAdapter();
         userPermissionList.setAdapter(permissionListAdapter);
+    }
 
-        return root;
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        buildView();
     }
 
     /**
@@ -122,18 +130,18 @@ public class EditUserDeviceFragment extends BoundFragment {
         View dialogView = inflater.inflate(R.layout.dialog_edituserdevice, null, false);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        final EditText userDeviceName = (EditText) dialogView.findViewById(R.id.edit_userdevice_dialog_userdevice_name);
+        final EditText userDeviceName = (EditText) dialogView.findViewById(R.id.editdevicedialog_username);
         List<String> groupList = new ArrayList<>(Arrays.asList(groupNames));
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_spinner_dropdown_item, groupList);
-        final Spinner groupName = ((Spinner) dialogView.findViewById(R.id.edit_userdevice_dialog_spinner));
+        final Spinner groupName = ((Spinner) dialogView.findViewById(R.id.editdevicedialog_spinner));
         groupName.setAdapter(adapter);
 
         final AlertDialog dialog = builder.create();
         builder.setMessage(R.string.edit_group_dialog_title)
                 .setView(dialogView)
                 .setNegativeButton(R.string.cancel, null)
-                .setNeutralButton(R.string.edit, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.edit, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         String name = userDeviceName.getText().toString();
@@ -145,7 +153,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                         toast.show();
                     }
                 })
-                .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
+                .setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         getComponent(AppUserConfigurationHandler.KEY).removeUserDevice(userDevice);
@@ -157,22 +165,18 @@ public class EditUserDeviceFragment extends BoundFragment {
                 .create()
                 .show();
         userDeviceName.requestFocus();
-
-//        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-//        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-//        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         return dialog;
     }
 
 
     private class PermissionListAdapter extends BaseAdapter {
-        private final LayoutInflater inflater;
         private List<Permission> allPermissions;
         private List<Permission> userPermissions;
 
-        public PermissionListAdapter(LayoutInflater inflater) {
-            this.inflater = inflater;
+        public PermissionListAdapter() {
             updatePermissionList();
         }
 
@@ -248,6 +252,7 @@ public class EditUserDeviceFragment extends BoundFragment {
          */
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater = getActivity().getLayoutInflater();
             final Permission permission = getItem(position);
             LinearLayout permissionLayout;
             if (convertView == null) {

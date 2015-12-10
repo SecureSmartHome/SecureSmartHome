@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.EDIT_GROUP_DIALOG;
@@ -28,18 +29,22 @@ public class EditGroupFragment extends BoundFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ;
+        return inflater.inflate(R.layout.fragment_editnewgroup, container, false);
+    }
+
+    private void buildView() {
         final Group group = (Group) getArguments().getSerializable(EDIT_GROUP_DIALOG);
         String[] templateNames = getArguments().getStringArray(TEMPLATE_DIALOG);
-        View view = inflater.inflate(R.layout.fragment_editnewgroup, container, false);
 
-        final EditText inputGroupName = (EditText) view.findViewById(R.id.editgroupfragment_group_name);
+        final EditText inputGroupName = (EditText) getActivity().findViewById(R.id.editgroupfragment_group_name);
 
-        final Spinner spinner = (Spinner) view.findViewById(R.id.editgroupfragment_spinner);
+        final Spinner spinner = (Spinner) getActivity().findViewById(R.id.editgroupfragment_spinner);
         spinner.setAdapter(new ArrayAdapter<>(getActivity().getApplicationContext(),
                 android.R.layout.simple_list_item_1,
                 (templateNames != null ? templateNames : new String[]{"Missing templates"})));
 
-        Button editButton = (Button) view.findViewById(R.id.editgroupfragment_button_edit);
+        Button editButton = (Button) getActivity().findViewById(R.id.editgroupfragment_button_edit);
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,7 +57,7 @@ public class EditGroupFragment extends BoundFragment {
                 toast.show();
             }
         });
-        Button removeButton = ((Button) view.findViewById(R.id.editgroupfragment_button_remove));
+        Button removeButton = ((Button) getActivity().findViewById(R.id.editgroupfragment_button_remove));
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -63,6 +68,11 @@ public class EditGroupFragment extends BoundFragment {
                 toast.show();
             }
         });
-        return view;
+    }
+
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        buildView();
     }
 }
