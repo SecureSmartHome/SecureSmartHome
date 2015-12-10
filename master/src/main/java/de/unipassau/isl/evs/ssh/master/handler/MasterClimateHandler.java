@@ -27,6 +27,7 @@ public class MasterClimateHandler extends AbstractMasterHandler {
             mainLampOn = payload.getOn(); //TODO check if this is the first lamp
         } else if (CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO.equals(message.getRoutingKey())) {
             //TODO make map of latestWeatherData to send data for each Weatherboard
+            //Todo: request weather state
             if (latestWeatherData == null) {
                 latestWeatherData = new ClimatePayload(0,0,0,0,0,0,0,0,"", null);
             }
