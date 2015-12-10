@@ -19,6 +19,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 
@@ -47,8 +48,13 @@ public class AppNotificationHandler extends AbstractComponent implements Message
      */
     @Override
     public void handle(Message.AddressedMessage message) {
+        //Todo: either notificationpayload or switch case for other payloads
+        if(message.getPayload() instanceof NotificationPayload) {
+            NotificationPayload notificationPayload = ((NotificationPayload) message.getPayload());
+            //Todo: make openthisfragment constants in coreconstants
+            displayNotification("Notification", notificationPayload.getMessage(), "ClimateFragment", 55, getContainer().require(ContainerService.KEY_CONTEXT));
         //Climate Warnings
-        if (message.getPayload() instanceof ClimatePayload) {
+        } else if (message.getPayload() instanceof ClimatePayload) {
             ClimatePayload payload = (ClimatePayload) message.getPayload();
             Context context = getContainer().get(ContainerService.KEY_CONTEXT);
 
