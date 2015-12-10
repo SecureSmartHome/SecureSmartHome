@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--@author bucher-->
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:baselineAligned="false"
-             android:columnCount="2"
-             android:measureWithLargestChild="false"
-             android:orientation="vertical"
-             android:paddingBottom="10dp"
-             android:paddingTop="10dp"
-             android:rowCount="3">
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:columnCount="2"
+    android:measureWithLargestChild="false"
+    android:orientation="vertical"
+    android:paddingBottom="10dp"
+    android:paddingTop="10dp"
+    android:rowCount="3">
 
     <View
         android:id="@+id/climatesensor_divider"
@@ -25,7 +26,7 @@
         android:id="@+id/climateSensor"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:text="Climate Sensor:"
+        android:text="@string/climate_sensor"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/colorSecondaryText"
         android:textSize="@dimen/typography_headline2"/>
@@ -38,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
-            android:text="Temperature 1:    "
+            android:text="@string/temperature_1"
             android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
@@ -61,7 +62,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
-            android:text="Temperature 2: "
+            android:text="@string/temperature2"
             android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
@@ -84,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
-            android:text="Pressure: "
+            android:text="@string/pressure"
             android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
@@ -107,7 +108,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
-            android:text="Altitude: "
+            android:text="@string/altitude"
             android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
@@ -130,7 +131,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
-            android:text="Humidity: "
+            android:text="@string/humidity"
             android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
@@ -153,7 +154,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
-            android:text="UV: "
+            android:text="@string/uv"
             android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
@@ -176,7 +177,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
-            android:text="Visible: "
+            android:text="@string/visible_1"
             android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
@@ -199,7 +200,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
-            android:text="IR: "
+            android:text="@string/ir"
             android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>

@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--author: Wolfgang Popp-->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Username:"/>
+        android:text="@string/add_wlan_username"/>
 
     <EditText
         android:id="@+id/add_module_wlan_username_input"
@@ -19,7 +20,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Password:"/>
+        android:text="@string/add_wlan_password"/>
 
     <EditText
         android:id="@+id/add_module_wlan_password_input"
@@ -32,7 +33,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="IP Adress:"/>
+        android:text="@string/ip_address"/>
 
     <EditText
         android:id="@+id/add_module_wlan_ip_input"
@@ -43,7 +44,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Port:"/>
+        android:text="@string/port"/>
 
     <EditText
         android:id="@+id/add_module_wlan_port_input"
@@ -57,7 +58,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Add WLAN module"/>
+        android:text="@string/add_wlan_module"/>
 
 
 </LinearLayout>
