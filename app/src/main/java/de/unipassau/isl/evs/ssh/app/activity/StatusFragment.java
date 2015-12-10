@@ -15,6 +15,7 @@ import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 
@@ -26,13 +27,18 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
  */
 public class StatusFragment extends BoundFragment {
 
-    // TODO onContainerConnected
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_status, container, false);
-        ListView slaveListView = (ListView) view.findViewById(R.id.deviceStatusListView);
-        ListView moduleListView = (ListView) view.findViewById(R.id.deviceStatusModelsListView);
+        return inflater.inflate(R.layout.fragment_status, container, false);
+    }
+
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+
+        ListView slaveListView = (ListView) getActivity().findViewById(R.id.deviceStatusListView);
+        ListView moduleListView = (ListView) getActivity().findViewById(R.id.deviceStatusModelsListView);
 
         AppModuleHandler moduleHandler = getComponent(AppModuleHandler.KEY);
 
@@ -44,8 +50,8 @@ public class StatusFragment extends BoundFragment {
             slaves = moduleHandler.getSlaves();
         }
 
-        if (slaves == null) {
-            TextView connectedSlaves = (TextView) view.findViewById(R.id.deviceStatusConnectedSlaves);
+        if (slaves == null || slaves.size() < 1) {
+            TextView connectedSlaves = (TextView) getActivity().findViewById(R.id.deviceStatusConnectedSlaves);
             connectedSlaves.setText(R.string.NoSlavesConnected);
         } else {
             ArrayAdapter<Slave> slaveAdapter = new ArrayAdapter<Slave>(getActivity().getApplicationContext(),
@@ -73,8 +79,8 @@ public class StatusFragment extends BoundFragment {
             slaveListView.setAdapter(slaveAdapter);
         }
 
-        if (modules == null) {
-            TextView connectedModules = (TextView) view.findViewById(R.id.deviceStatusConnectedModules);
+        if (modules == null || modules.size() < 1) {
+            TextView connectedModules = (TextView) getActivity().findViewById(R.id.deviceStatusConnectedModules);
             connectedModules.setText(R.string.NoModulesConnected);
 
         } else {
@@ -105,6 +111,5 @@ public class StatusFragment extends BoundFragment {
             moduleListView.setAdapter(moduleAdapter);
         }
 
-        return view;
     }
 }
