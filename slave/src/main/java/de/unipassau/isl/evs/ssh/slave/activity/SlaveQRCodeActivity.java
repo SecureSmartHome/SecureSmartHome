@@ -10,11 +10,13 @@ import com.google.zxing.WriterException;
 
 import java.io.Serializable;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 import de.unipassau.isl.evs.ssh.slave.R;
 import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.QR_CODE_IMAGE_SCALE;
 
 /**
  * SlaveQRCodeActivity to display a QR-Code in the slaves UI. This is used to register new slaves to the system.
@@ -22,11 +24,6 @@ import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
  * @author Wolfgang Popp.
  */
 public class SlaveQRCodeActivity extends BoundActivity {
-    /**
-     * Used to scale the QR-Code.
-     */
-    private static final int SCALE_QRCODE = 35;
-
     /**
      * The QR-Code which will be displayed.
      */
@@ -41,8 +38,8 @@ public class SlaveQRCodeActivity extends BoundActivity {
      *
      * @return the created QR-Code
      */
-    private Bitmap createQRCodeBitmap() {
-        Serializable extra = getIntent().getExtras().getSerializable(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION);
+    private Bitmap createQRCodeBitmap() throws IllegalArgumentException {
+        Serializable extra = getIntent().getExtras().getSerializable(EXTRA_QR_DEVICE_INFORMATION);
         if (extra instanceof QRDeviceInformation) {
             try {
                 return ((QRDeviceInformation) extra).toQRBitmap(Bitmap.Config.ARGB_8888, Color.BLACK, Color.WHITE);
@@ -50,7 +47,7 @@ public class SlaveQRCodeActivity extends BoundActivity {
                 throw new IllegalArgumentException("illegal QRCode data", e);
             }
         } else {
-            throw new IllegalArgumentException("missing " + CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION + " as extra ");
+            throw new IllegalArgumentException("missing " + EXTRA_QR_DEVICE_INFORMATION + " as extra ");
         }
     }
 
@@ -64,7 +61,8 @@ public class SlaveQRCodeActivity extends BoundActivity {
 
         //Workaround to scale QR-Code
         //Makes bitmap bigger than the screen. The ImageView adjusts the size itself.
-        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * SCALE_QRCODE, bitmap.getHeight() * SCALE_QRCODE, false);
+        bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() * QR_CODE_IMAGE_SCALE,
+                bitmap.getHeight() * QR_CODE_IMAGE_SCALE, false);
 
         if (bitmap != null) {
             imageview.setImageBitmap(bitmap);

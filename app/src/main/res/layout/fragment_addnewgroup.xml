@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--@author Wolfang Popp-->
+<!--@author Phil Werli-->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -20,7 +20,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"/>
 
     <EditText
-        android:id="@+id/addNewDeviceUserName"
+        android:id="@+id/addgroupfragment_group_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
@@ -30,21 +30,25 @@
         android:layout_weight="0.05"/>
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/group"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        android:text="@string/set_permission_template"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        />
 
     <Spinner
-        android:id="@+id/groupSpinner"
+        android:id="@+id/addgroupfragment_spinner"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        />
 
     <Button
-        android:id="@+id/add_user_button"
-        android:layout_width="wrap_content"
+        android:id="@+id/addgroupfragment_button"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="@string/addUser"/>
+        android:layout_margin="@dimen/abc_button_padding_horizontal_material"
+        android:text="@string/add_group"/>
 
 </LinearLayout>

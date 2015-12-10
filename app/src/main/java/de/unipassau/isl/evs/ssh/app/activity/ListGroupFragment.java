@@ -1,34 +1,23 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -79,7 +68,7 @@ public class ListGroupFragment extends BoundFragment {
                 if (templates != null) {
                     bundle.putStringArray(TEMPLATE_DIALOG, buildTemplatesFromGroups());
                 }
-                createEditGroupDialog(bundle).show();
+                ((MainActivity) getActivity()).showFragmentByClass(EditGroupFragment.class, bundle);
                 return true;
             }
         });
@@ -92,99 +81,13 @@ public class ListGroupFragment extends BoundFragment {
                 if (templates != null) {
                     bundle.putStringArray(TEMPLATE_DIALOG, buildTemplatesFromGroups());
                 }
-                createAddGroupDialog(bundle).show();
+                ((MainActivity) getActivity()).showFragmentByClass(AddGroupFragment.class, bundle);
             }
         });
         adapter = new GroupListAdapter(inflater);
         list.setAdapter(adapter);
 
         return root;
-    }
-
-    /**
-     * Creates and returns a dialogs that gives the user the option to add a group.
-     */
-    private Dialog createAddGroupDialog(Bundle bundle) {
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        String[] templateNames = bundle.getStringArray(TEMPLATE_DIALOG);
-        View dialogView = inflater.inflate(R.layout.dialog_addgroup, null, false);
-        final EditText groupName = ((EditText) dialogView.findViewById(R.id.edit_group_dialog_group_name));
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-        ArrayList<String> templateList = new ArrayList<>(Arrays.asList(templateNames));
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.template_list, templateList);
-
-        final Spinner templateName = ((Spinner) dialogView.findViewById(R.id.edit_group_dialog_spinner));
-        templateName.setAdapter(adapter);
-
-        final AlertDialog dialog = builder.create();
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        builder.setMessage(R.string.add_new_group_dialog_title)
-                .setView(dialogView)
-                .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        String name = groupName.getText().toString();
-                        String template = ((String) templateName.getSelectedItem());
-                        getComponent(AppUserConfigurationHandler.KEY).addGroup(new Group(name, template));
-                        String toastText = "Group " + name + " created.";
-                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, null);
-        return dialog;
-    }
-
-    /**
-     * Creates and returns a dialogs that gives the user the option to edit a group.
-     */
-    private Dialog createEditGroupDialog(Bundle bundle) {
-        final Group group = (Group) bundle.getSerializable(EDIT_GROUP_DIALOG);
-        String[] templateNames = bundle.getStringArray(TEMPLATE_DIALOG);
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_editgroup, null, false);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-        final EditText groupName = (EditText) dialogView.findViewById(R.id.edit_group_dialog_group_name);
-        groupName.setHint(group.getName());
-        ArrayList<String> templateList = new ArrayList<>(Arrays.asList(templateNames));
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.template_list, templateList);
-        final Spinner templateName = ((Spinner) dialogView.findViewById(R.id.edit_group_dialog_spinner));
-
-        templateName.setAdapter(adapter);
-
-        final AlertDialog dialog = builder.create();
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        builder.setMessage(R.string.edit_group_dialog_title)
-                .setView(dialogView)
-                .setNeutralButton(R.string.edit, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        String name = groupName.getText().toString();
-                        String template = ((String) templateName.getSelectedItem());
-                        getComponent(AppUserConfigurationHandler.KEY).editGroup(group, new Group(name, template));
-                        String toastText = "Group " + name + " edited.";
-                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        getComponent(AppUserConfigurationHandler.KEY).removeGroup(group);
-                        String toastText = "Group " + group.getName() + " removed.";
-                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                });
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
-        return dialog;
     }
 
     /**
@@ -201,7 +104,14 @@ public class ListGroupFragment extends BoundFragment {
                 return input.getTemplateName();
             }
         }));
-        return (String[]) ImmutableSet.copyOf(templateNames).toArray();
+        String[] templateArray = new String[templateNames.size()];
+        int counter = 0;
+        for (String s :
+                templateNames) {
+            templateArray[counter] = s;
+            counter++;
+        }
+        return templateArray;
     }
 
     private class GroupListAdapter extends BaseAdapter {

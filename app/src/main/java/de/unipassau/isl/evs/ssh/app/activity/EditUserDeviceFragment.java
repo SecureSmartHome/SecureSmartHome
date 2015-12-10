@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -23,7 +22,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -78,11 +76,12 @@ public class EditUserDeviceFragment extends BoundFragment {
             @Override
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
+                bundle.putSerializable(EDIT_USERDEVICE_DIALOG, device);
                 String[] groups = listGroups();
                 if (groups != null) {
                     bundle.putStringArray(ALL_GROUPS_DIALOG, groups);
                 }
-                createEditUserDeviceDialog(bundle);
+                createEditUserDeviceDialog(bundle).show();
             }
         });
 
@@ -101,7 +100,14 @@ public class EditUserDeviceFragment extends BoundFragment {
         if (groups == null) {
             return null;
         }
-        return (String[]) ImmutableSet.copyOf(groups).toArray();
+        String[] groupNames = new String[groups.size()];
+        int counter = 0;
+        for (Group g :
+                groups) {
+            groupNames[counter] = g.getName();
+            counter++;
+        }
+        return groupNames;
     }
 
 
@@ -117,16 +123,13 @@ public class EditUserDeviceFragment extends BoundFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         final EditText userDeviceName = (EditText) dialogView.findViewById(R.id.edit_userdevice_dialog_userdevice_name);
-        userDeviceName.setHint(userDevice.getName());
         List<String> groupList = new ArrayList<>(Arrays.asList(groupNames));
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.group_list, groupList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_spinner_dropdown_item, groupList);
         final Spinner groupName = ((Spinner) dialogView.findViewById(R.id.edit_userdevice_dialog_spinner));
-
         groupName.setAdapter(adapter);
 
         final AlertDialog dialog = builder.create();
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         builder.setMessage(R.string.edit_group_dialog_title)
                 .setView(dialogView)
                 .setNegativeButton(R.string.cancel, null)
@@ -150,8 +153,14 @@ public class EditUserDeviceFragment extends BoundFragment {
                         Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
                         toast.show();
                     }
-                });
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+                })
+                .create()
+                .show();
+        userDeviceName.requestFocus();
+
+//        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+//        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+//        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         return dialog;
     }
@@ -161,6 +170,7 @@ public class EditUserDeviceFragment extends BoundFragment {
         private final LayoutInflater inflater;
         private List<Permission> allPermissions;
         private List<Permission> userPermissions;
+
         public PermissionListAdapter(LayoutInflater inflater) {
             this.inflater = inflater;
             updatePermissionList();
@@ -271,6 +281,7 @@ public class EditUserDeviceFragment extends BoundFragment {
 
         /**
          * Creates a small description where a permission is
+         *
          * @param permission The permission the text is created for.
          * @return the text to display.
          */
