@@ -14,6 +14,7 @@ import android.widget.Toast;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.TEMPLATE_DIALOG;
@@ -28,6 +29,15 @@ public class AddGroupFragment extends BoundFragment {
 
     private Spinner spinner;
     private EditText inputGroupName;
+
+    private final AppUserConfigurationHandler.UserInfoListener userInfoListener = new AppUserConfigurationHandler.UserInfoListener() {
+        @Override
+        public void userInfoUpdated() {
+            String toastText = "Group created.";
+            Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+            toast.show();
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -50,9 +60,6 @@ public class AddGroupFragment extends BoundFragment {
                     String template = ((String) spinner.getSelectedItem());
                     getComponent(AppUserConfigurationHandler.KEY).addGroup(new Group(name, template));
                     Log.i(TAG, "Group " + name + " added.");
-                    String toastText = "Group " + name + " created.";
-                    Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                    toast.show();
                 } else {
                     ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_cannot_add_group));
                 }
@@ -61,6 +68,17 @@ public class AddGroupFragment extends BoundFragment {
         return view;
     }
 
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        container.require(AppUserConfigurationHandler.KEY).addUserInfoListener(userInfoListener);
+    }
+
+    @Override
+    public void onContainerDisconnected() {
+        getComponent(AppUserConfigurationHandler.KEY).removeUserInfoListener(userInfoListener);
+        super.onContainerDisconnected();
+    }
 
     // returns true if all input fields are filled in correctly
     private boolean checkInputFields() {
