@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--author: Wolfgang Popp-->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/add_module_gpio_port_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="GPIO Port:"/>
+        android:text="@string/gpio_port"/>
 
     <EditText
         android:id="@+id/add_module_gpio_port_input"
@@ -23,5 +24,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Add GPIO module"/>
+        android:text="@string/add_gpio_module"/>
 </LinearLayout>

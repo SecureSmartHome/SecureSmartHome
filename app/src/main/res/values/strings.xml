@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">EVS SSH app</string>
+    <string name="app_name">Secure Smart Home</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="secure_smart_home">Secure Smart Home</string>
 
@@ -93,4 +93,31 @@
     <string name="add_group">Add Group</string>
     <string name="edit_group">Edit Group</string>
     <string name="remove_group">Remove Group</string>
+    <string name="gpio_port">GPIO Port:</string>
+    <string name="add_gpio_module">Add GPIO module</string>
+    <string name="usb_port">USB Port:</string>
+    <string name="add_usb_module">Add USB module</string>
+    <string name="add_wlan_username">Username:</string>
+    <string name="add_wlan_password">Password:</string>
+    <string name="ip_address">IP Address:</string>
+    <string name="port">Port:</string>
+    <string name="add_wlan_module">Add WLAN module</string>
+    <string name="climate_sensor">Climate Sensor:</string>
+    <string name="temperature_1">Temperature 1:</string>
+    <string name="temperature2">Temperature 2:</string>
+    <string name="pressure">Pressure:</string>
+    <string name="altitude">Altitude:</string>
+    <string name="humidity">Humidity:</string>
+    <string name="uv">UV:</string>
+    <string name="visible_1">Visible:</string>
+    <string name="ir">IR:</string>
+    <string name="status_name">Name:</string>
+    <string name="status_id">ID:</string>
+    <string name="statusmodule_name">Name:</string>
+    <string name="statusmodule_type">Module Type:</string>
+    <string name="connector_type">Connector Type:</string>
+    <string name="name_of_new_slave">Name of the new slave</string>
+    <string name="add_new_slave">Add New Slave</string>
+    <string name="name_of_new_sensor">Name of the new Sensor:</string>
+    <string name="connected_to_type">Connected to Slave:</string>
 </resources>
