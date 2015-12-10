@@ -27,7 +27,6 @@ public class DoorBuzzer extends AbstractComponent {
      */
     public void lock() throws EvsIoException {
         EvsIo.setValue(address, false);
-
     }
 
     /**
