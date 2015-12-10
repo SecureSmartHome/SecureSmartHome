@@ -83,13 +83,7 @@ public class MainActivity extends BoundActivity
         }
 
         //Initialise fragmentTransaction
-        if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
-            try {
-                showFragmentByClass(Class.forName(savedInstanceState.getString(SAVED_LAST_ACTIVE_FRAGMENT)));
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        } else {
+        if (savedInstanceState == null || !savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
             // starts the main fragment when already registered, the welcomescreen fragment so the user can register.
             Class<? extends Fragment> clazz = (deviceNotRegistered() ? WelcomeScreenFragment.class : MainFragment.class);
             showFragmentByClass(clazz);
