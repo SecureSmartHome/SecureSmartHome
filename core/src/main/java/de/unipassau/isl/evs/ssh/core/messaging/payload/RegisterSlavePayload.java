@@ -4,7 +4,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
- * @author leon
+ * @author Leon Sell
  */
 public class RegisterSlavePayload implements MessagePayload {
     private String name;

@@ -7,7 +7,7 @@ import android.content.Intent;
 /**
  * Start Service if Master has finished boot up
  *
- * @author bucher
+ * @author Andreas Bucher
  */
 public class OnBootReceiver extends BroadcastReceiver {
     public OnBootReceiver() {

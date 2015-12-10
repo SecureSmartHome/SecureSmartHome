@@ -16,7 +16,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 
 /**
- * TODO add javadoc
+ * The AddNewSlaveFragment is used to add new Slaves to the SecureSmartHome.
  *
  * @author Wolfgang Popp
  */

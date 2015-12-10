@@ -19,7 +19,7 @@ import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
  *
  * @author Wolfram Gottschlich
  * @author Niko Fink
- * @author Chris
+ * @author Christoph Fraedrich
  * @version 2.1
  */
 public class WeatherSensor extends AbstractComponent {

@@ -11,14 +11,20 @@ import java.io.IOException;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 
 /**
- * TODO add javadoc
+ * The ScanQRFragment is a BoundFragment that can be extended to communicate with a QR-Code Scanner
+ * Activity. When extending this Fragment use {@code requestScanQRCode()} to start the QR-Code
+ * Scanner Activity and {@code onQRCodeScanned()} to receive the scan result.
  *
  * @author Wolfgang Popp.
  */
 public class ScanQRFragment extends BoundFragment {
     public static final String SCAN_RESULT = "SCAN_RESULT";
-    protected static final int REQUEST_CODE_SCAN_QR = 1;
+    private static final int REQUEST_CODE_SCAN_QR = 1;
 
+    /**
+     * Starts the QR-Code Scanner or an app store to install a QR-Code Scanner, if no scanner is
+     * installed.
+     */
     protected void requestScanQRCode() {
         try {
             // Try to open ZXing to scan the QR-Cde
@@ -53,6 +59,10 @@ public class ScanQRFragment extends BoundFragment {
         }
     }
 
+    /**
+     * Called when the Qr-Code was scanned successfully.
+     * @param info the information contained in the QR-Code
+     */
     protected void onQRCodeScanned(QRDeviceInformation info) {
 
     }

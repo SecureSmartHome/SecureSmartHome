@@ -8,7 +8,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  * A DTO representing user device. A user device is a device using the SSH as a client.
  * User devices are part of a group.
  *
- * @author leon
+ * @author Leon Sell
  */
 public class UserDevice implements Serializable {
 

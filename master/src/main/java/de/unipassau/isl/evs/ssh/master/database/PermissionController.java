@@ -16,7 +16,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 /**
  * Offers high level methods to interact with the tables associated with permissions in the database.
  *
- * @author leon
+ * @author Leon Sell
  */
 public class PermissionController extends AbstractComponent {
     public static final Key<PermissionController> KEY = new Key<>(PermissionController.class);

@@ -27,7 +27,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 /**
  * AppModuleHandler offers a list of all Modules that are active in the System.
  *
- * @author bucher
+ * @author Andreas Bucher
  */
 public class AppModuleHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppModuleHandler> KEY = new Key<>(AppModuleHandler.class);
@@ -39,28 +39,28 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
      * ArrayList<Module> modules = Lists.newArrayList(filtered);
      * </pre>
      */
-    public static final Predicate<Module> PREDICATE_LIGHT = new Predicate<Module>() {
+    private static final Predicate<Module> PREDICATE_LIGHT = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
             return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.LIGHT);
         }
     };
 
-    public static final Predicate<Module> PREDICATE_DOOR = new Predicate<Module>() {
+    private static final Predicate<Module> PREDICATE_DOOR = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
             return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.DOOR_SENSOR);
         }
     };
 
-    public static final Predicate<Module> PREDICATE_WEATHER = new Predicate<Module>() {
+    private static final Predicate<Module> PREDICATE_WEATHER = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
             return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.WEATHER_BOARD);
         }
     };
 
-    public static final Predicate<Module> PREDICATE_CAMERA = new Predicate<Module>() {
+    private static final Predicate<Module> PREDICATE_CAMERA = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
             return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.WEBCAM);
@@ -120,6 +120,11 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
         return ImmutableList.copyOf(slaves);
     }
 
+    /**
+     * Returns a list of connected modules at the given slave.
+     * @param slave the slave
+     * @return a list of connected modules at the given slave
+     */
     public List<Module> getModulesAtSlave(Slave slave) {
         return modulesAtSlave.get(slave);
     }
@@ -148,7 +153,7 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
         }
     }
 
-    public void update() {
+    private void update() {
         ModulesPayload payload = new ModulesPayload();
         OutgoingRouter router = getComponent(OutgoingRouter.KEY);
 

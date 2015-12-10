@@ -26,6 +26,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
  */
 public class AppLightHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppLightHandler> KEY = new Key<>(AppLightHandler.class);
+
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(20);
     private final List<LightHandlerListener> listeners = new ArrayList<>();
     private final Map<Module, LightStatus> lightStatusMapping = new HashMap<>();
@@ -64,6 +65,12 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
         return isLightOnCached(module);
     }
 
+    /**
+     * Return if a light-status is already cached.
+     *
+     * @param module the light module
+     * @return if a light-status is already cached.
+     */
     public boolean isLightOnCached(Module module) {
         final LightStatus status = lightStatusMapping.get(module);
         return status != null && status.isOn();
@@ -76,7 +83,6 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
         return Collections.unmodifiableMap(lightStatusMapping);
     }
 
-    //Network///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Sends a request for the status of a module.
@@ -107,8 +113,6 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_SET, message);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * Registers the {@link IncomingDispatcher} as an component.
      */
@@ -121,8 +125,6 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
     @Override
     public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
     }
-
-    //Lifecycle & Callbacks/////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void handle(Message.AddressedMessage message) {

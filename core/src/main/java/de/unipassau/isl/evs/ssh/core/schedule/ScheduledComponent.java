@@ -9,7 +9,7 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 /**
  * A {@link Component} that can receive alarms scheduled by the {@link Scheduler}.
  *
- * @author Chris
+ * @author Christoph Fraedrich
  * @see Scheduler
  */
 public interface ScheduledComponent extends Component {

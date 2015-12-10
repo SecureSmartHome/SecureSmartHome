@@ -53,7 +53,7 @@ public class WelcomeScreenFragment extends ScanQRFragment {
             editor.putString(CoreConstants.SharedPrefs.PREF_TOKEN, android.util.Base64.encodeToString(info.getToken(), android.util.Base64.NO_WRAP));
             editor.putString(CoreConstants.SharedPrefs.PREF_MASTER_ID, info.getID().getIDString());
             editor.commit();
-            getContainer().require(Client.KEY).onDiscoverySuccessful(info.getAddress(), info.getPort());
+            container.require(Client.KEY).onDiscoverySuccessful(info.getAddress(), info.getPort());
             ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         }
     }

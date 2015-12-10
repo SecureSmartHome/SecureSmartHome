@@ -3,7 +3,7 @@ package de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint;
 /**
  * ModuleAccessPoint class for a WLAN access point.
  *
- * @author leon
+ * @author Leon Sell
  */
 public class WLANAccessPoint extends ModuleAccessPoint {
     public static final String TYPE = "WLAN";

@@ -17,7 +17,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 /**
  * AppHolidaySimulationHandler class handles messages for the holiday simulation
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class AppHolidaySimulationHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppHolidaySimulationHandler> KEY = new Key<>(AppHolidaySimulationHandler.class);
@@ -48,6 +48,9 @@ public class AppHolidaySimulationHandler extends AbstractComponent implements Me
 
     }
 
+    /**
+     * @return if the Holiday Simulation is turned on.
+     */
     public boolean isOn() {
         if (System.currentTimeMillis() - timeStamp >= UPDATE_INTERVAL) {
             Message message = new Message();
@@ -58,6 +61,12 @@ public class AppHolidaySimulationHandler extends AbstractComponent implements Me
         return isOn;
     }
 
+    /**
+     * Changes the statue of the Holiday Simulation. When parameter on is {@code true} the simulation will start.
+     * Otherwise the Simulation will stop.
+     *
+     * @param on {@code true} to start the holiday simulation, {@code false} to stop the holiday simulation.
+     */
     public void switchHolidaySimulation(boolean on) {
         HolidaySimulationPayload payload = new HolidaySimulationPayload(on);
         Message message = new Message(payload);
@@ -71,7 +80,7 @@ public class AppHolidaySimulationHandler extends AbstractComponent implements Me
      * @param original Original Message.
      */
     protected Message.AddressedMessage sendErrorMessage(Message.AddressedMessage original) {
-        //FIXME logging, reasons??
+        //TODO logging
         Message reply = new Message(new MessageErrorPayload(original.getPayload()));
         reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
         return sendMessage(

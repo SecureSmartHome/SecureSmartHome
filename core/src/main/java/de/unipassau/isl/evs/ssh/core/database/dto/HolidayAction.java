@@ -3,7 +3,7 @@ package de.unipassau.isl.evs.ssh.core.database.dto;
 /**
  * TODO comment
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class HolidayAction {
 

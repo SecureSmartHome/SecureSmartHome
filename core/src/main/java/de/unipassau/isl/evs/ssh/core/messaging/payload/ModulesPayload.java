@@ -15,7 +15,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 /**
  * The ModulesPayload is a payload used for exchanging information on modules and slaves.
  *
- * @author bucher
+ * @author Andreas Bucher
  * @author Wolfgang Popp
  */
 public class ModulesPayload implements MessagePayload {

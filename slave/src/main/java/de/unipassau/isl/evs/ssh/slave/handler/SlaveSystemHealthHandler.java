@@ -23,10 +23,10 @@ import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 
 /**
- * SlaveHandler that checkes periodically if ElectronicModules are still alive.
+ * SlaveHandler that checks periodically if ElectronicModules are still alive.
  * If a module is not alive or reachable a Message with a SystemHealthPayload will be sent to the master.
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class SlaveSystemHealthHandler extends AbstractComponent implements MessageHandler {
     //TODO maybe refactor to task instead of handler. So far we do not answer messages

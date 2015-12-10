@@ -26,7 +26,7 @@ import de.unipassau.isl.evs.ssh.master.network.Server;
  * <p/>
  * An example when this handler needs to take action is when a new sensor is added or switched to a new GPIO Pin.
  *
- * @author leon
+ * @author Leon Sell
  */
 public class MasterRoutingTableHandler extends AbstractMasterHandler {
     private static final String TAG = MasterRoutingTableHandler.class.getSimpleName();

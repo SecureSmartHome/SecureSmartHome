@@ -6,7 +6,7 @@ import java.util.Arrays;
 /**
  * Defines how to access how Module at a given Slave.
  *
- * @author leon
+ * @author Leon Sell
  */
 public abstract class ModuleAccessPoint implements Serializable {
     //Amount all different possible entries for access information in the database.

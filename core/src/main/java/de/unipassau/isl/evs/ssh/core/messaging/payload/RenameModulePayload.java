@@ -1,7 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
 /**
- * @author leon
+ * @author Leon Sell
  */
 public class RenameModulePayload implements MessagePayload {
     String oldName;

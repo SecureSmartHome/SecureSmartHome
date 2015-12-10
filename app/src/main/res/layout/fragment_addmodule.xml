@@ -1,6 +1,9 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Wolfgang Popp-->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/add_module_layout"
@@ -18,7 +21,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Name of the new Sensor:"/>
+            android:text="@string/name_of_new_sensor"/>
 
         <EditText
             android:id="@+id/add_module_name_input"
@@ -41,7 +44,7 @@
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Connected to Slave:"/>
+            android:text="@string/connected_to_type"/>
 
         <Spinner
             android:id="@+id/add_module_slave_spinner"
@@ -51,7 +54,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Connector Type:"/>
+            android:text="@string/connector_type"/>
 
         <Spinner
             android:id="@+id/connection_type_spinner"

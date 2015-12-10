@@ -3,7 +3,7 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
 /**
  * Payload for messages which indicate initial message
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class MessageErrorPayload implements MessagePayload {
 

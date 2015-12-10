@@ -3,7 +3,7 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
 /**
  * Payload class for messages to switch the holiday simulation on or off
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class HolidaySimulationPayload implements MessagePayload {
 

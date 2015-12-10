@@ -5,7 +5,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 /**
  * Payload class for WeatherSensor data.
  *
- * @author bucher
+ * @author Andreas Bucher
  */
 public class ClimatePayload implements MessagePayload {
 

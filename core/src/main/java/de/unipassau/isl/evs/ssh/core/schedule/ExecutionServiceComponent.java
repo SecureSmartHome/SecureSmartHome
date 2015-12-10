@@ -20,7 +20,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
  * An ExecutorService that can schedule commands to run after a given
  * delay, or to execute periodically.
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class ExecutionServiceComponent extends AbstractComponent implements ScheduledExecutorService {
 

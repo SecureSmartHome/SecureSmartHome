@@ -15,6 +15,8 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
  * Handles messages received when the doorbell is used, requests a picture from the camera
  * (by also sending a message to the MasterCameraHandler) and generates messages for each target
  * and passes them to the OutgoingRouter.
+ *
+ * @author Leon Sell
  */
 public class MasterDoorBellHandler extends AbstractMasterHandler {
 

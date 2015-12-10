@@ -14,7 +14,7 @@ import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 /**
  * Handles door messages and makes API calls accordingly.
  *
- * @author bucher
+ * @author Andreas Bucher
  * @author Wolfgang Popp
  */
 public class SlaveDoorHandler extends AbstractSlaveHandler {

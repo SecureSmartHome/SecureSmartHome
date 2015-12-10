@@ -31,7 +31,7 @@ import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
  * It then tells the scheduler which HolidayTasks need to be scheduled for which time and also
  * issues a schedule entry for itself, so it is executed again after all planned tasks are finished.
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler implements ScheduledComponent {
 

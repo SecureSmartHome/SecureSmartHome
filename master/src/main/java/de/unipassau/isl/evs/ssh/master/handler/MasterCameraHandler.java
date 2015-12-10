@@ -11,6 +11,8 @@ import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 /**
  * Handles messages requesting pictures from the camera and generates messages, containing the pictures,
  * and sends these to the responsible MasterNotificationHandler.
+ *
+ * @author Leon Sell
  */
 public class MasterCameraHandler extends AbstractMasterHandler {
 

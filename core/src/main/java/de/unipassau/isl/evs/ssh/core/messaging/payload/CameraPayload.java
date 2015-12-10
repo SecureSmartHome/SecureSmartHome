@@ -5,7 +5,7 @@ import android.hardware.Camera;
 /**
  * Payload class for messages regarding camera interaction
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class CameraPayload implements MessagePayload {
 

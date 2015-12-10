@@ -3,7 +3,7 @@ package de.unipassau.isl.evs.ssh.master.database;
 /**
  * Exception combines any amount of exceptions of subclasses of the DatabaseControllerException.
  *
- * @author leon
+ * @author Leon Sell
  */
 public class DatabaseControllerException extends Exception {
     public DatabaseControllerException() {

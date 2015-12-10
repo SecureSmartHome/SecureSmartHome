@@ -27,21 +27,43 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_USER_R
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USER_REGISTER;
 
 /**
- * @author Wolfgang Popp.
+ * The AppRegisterNewDeviceHandler handles the messaging to register a new UserDevice.
+ *
+ * @author Wolfgang Popp
+ * @author Leon Sell
  */
 public class AppRegisterNewDeviceHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppRegisterNewDeviceHandler> KEY = new Key<>(AppRegisterNewDeviceHandler.class);
 
     private List<RegisterNewDeviceListener> listeners = new LinkedList<>();
 
+    /**
+     * The listener to receive registration events
+     */
     public interface RegisterNewDeviceListener {
+        /**
+         * Called when the token for the new UserDevice was received and the QR Code can be
+         * displayed now.
+         *
+         * @param qrDeviceInformation the QR-Code information to display on the admin's screen
+         */
         void tokenResponse(QRDeviceInformation qrDeviceInformation);
     }
 
+    /**
+     * Adds the given listener to this handler.
+     *
+     * @param listener the listener to add
+     */
     public void addRegisterDeviceListener(RegisterNewDeviceListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Removes the given listener from this handler.
+     *
+     * @param listener the listener to remove
+     */
     public void removeRegisterDeviceListener(RegisterNewDeviceListener listener) {
         listeners.remove(listener);
     }
@@ -109,6 +131,11 @@ public class AppRegisterNewDeviceHandler extends AbstractComponent implements Me
         super.destroy();
     }
 
+    /**
+     * Sends a request message for a token to the master.
+     *
+     * @param user
+     */
     public void requestToken(UserDevice user) {
         Message message = new Message(new GenerateNewRegisterTokenPayload(null, user));
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USER_REGISTER);

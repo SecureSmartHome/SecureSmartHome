@@ -16,7 +16,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
  * This activity allows to start and stop the holiday simulation. If this functionality is used a message,
  * containing all needed information, is generated and passed to the OutgoingRouter.
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class HolidayFragment extends BoundFragment {
 

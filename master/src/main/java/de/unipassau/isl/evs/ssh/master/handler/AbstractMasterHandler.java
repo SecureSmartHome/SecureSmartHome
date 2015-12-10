@@ -15,7 +15,7 @@ import de.unipassau.isl.evs.ssh.master.database.SlaveController;
  * This is a MasterHandler providing functionality all MasterHandlers need. This will avoid needing to implement the
  * same functionality over and over again.
  *
- * @author leon
+ * @author Leon Sell
  */
 public abstract class AbstractMasterHandler extends AbstractMessageHandler {
     private Map<Integer, Message.AddressedMessage> inbox = new HashMap<>();
@@ -83,6 +83,12 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
         return requireComponent(SlaveController.KEY).getSlave(deviceID) != null;
     }
 
+    /**
+     * Returns whether the device with the given DeviceID is a Master.
+     *
+     * @param userDeviceID DeviceID for the device to check for whether it a Master or not.
+     * @return Whether or not the device with given DeviceID is a Master.
+     */
     public boolean isMaster(DeviceID userDeviceID) {
         return userDeviceID.equals(requireComponent(NamingManager.KEY).getMasterID());
     }

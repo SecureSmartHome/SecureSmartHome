@@ -12,7 +12,7 @@ import de.unipassau.isl.evs.ssh.master.database.HolidayController;
  * Handles light messages, logs them for the holiday simulation and generates messages
  * for each target and passes them to the OutgoingRouter.
  *
- * @author leon
+ * @author Leon Sell
  */
 public class MasterLightHandler extends AbstractMasterHandler {
     @Override

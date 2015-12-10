@@ -14,7 +14,9 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterSlavePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
- * @author Wolfgang Popp.
+ * The AppAddSlaveHandler handles the messaging needed to add a new slave to the system.
+ *
+ * @author Wolfgang Popp
  */
 public class AppAddSlaveHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppAddSlaveHandler> KEY = new Key<>(AppAddSlaveHandler.class);
@@ -24,7 +26,6 @@ public class AppAddSlaveHandler extends AbstractComponent implements MessageHand
     public void handle(Message.AddressedMessage message) {
         //TODO Error Handling
         Log.e(TAG, "Received message: " + message);
-
     }
 
     @Override
@@ -49,6 +50,11 @@ public class AppAddSlaveHandler extends AbstractComponent implements MessageHand
         super.destroy();
     }
 
+    /**
+     * Sends a message to master to registers a new slave.
+     * @param slaveID the device ID of the new slave
+     * @param slaveName the name of the new slave
+     */
     public void registerNewSlave(DeviceID slaveID, String slaveName) {
         Log.v(TAG, "registerNewSlave() called");
         RegisterSlavePayload payload = new RegisterSlavePayload(slaveName, slaveID);

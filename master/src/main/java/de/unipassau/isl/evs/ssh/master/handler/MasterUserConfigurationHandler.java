@@ -34,7 +34,7 @@ import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
  * Handles messages indicating that a device wants to register itself at the system and also generates
  * messages for each target that needs to know of this event and passes them to the OutgoingRouter.
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 

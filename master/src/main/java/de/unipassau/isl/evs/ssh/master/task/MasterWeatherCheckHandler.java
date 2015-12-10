@@ -22,7 +22,7 @@ import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
  * Task/Handler that periodically checks the records of weather data provider and issues notifications
  * based on a configured set of rules.
  *
- * @author Chris
+ * @author Christoph Fraedrich
  */
 public class MasterWeatherCheckHandler extends AbstractMasterHandler implements ScheduledComponent {
 

@@ -5,7 +5,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 /**
  * Payload class for Light Messages
  *
- * @Author Chris
+ * @author Christoph Fraedrich
  */
 public class LightPayload implements MessagePayload {
 
