@@ -29,6 +29,7 @@ public class SlaveContainer extends ContainerService {
         register(Client.KEY, new Client());
         register(SlaveModuleHandler.KEY, new SlaveModuleHandler());
         register(SlaveSystemHealthHandler.KEY, new SlaveSystemHealthHandler());
+        register(ExecutionServiceComponent.KEY, new ExecutionServiceComponent());
 
         final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
         incomingDispatcher.registerHandler(new SlaveLightHandler(),
@@ -39,8 +40,8 @@ public class SlaveContainer extends ContainerService {
                 CoreConstants.RoutingKeys.SLAVE_DOOR_UNLATCH);
 
         //FIXME this is temporary for testing until we got everything needed
-        Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, "TestPlugswitch");
-        register(key, new EdimaxPlugSwitch("192.168.0.111", 10000, "admin", "1234"));
+        //Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, "TestPlugswitch");
+        //register(key, new EdimaxPlugSwitch("192.168.0.111", 10000, "admin", "1234"));
 
         final NamingManager namingManager = require(NamingManager.KEY);
         Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getOwnID()
