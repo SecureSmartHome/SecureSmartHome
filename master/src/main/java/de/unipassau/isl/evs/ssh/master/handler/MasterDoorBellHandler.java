@@ -97,7 +97,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
                 //        CoreConstants.RoutingKeys.MASTER_CAMERA_GET,
                 //        messageToSend
                 //);
-                sendMessageLocal(CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND, new Message(new NotificationPayload(CoreConstants.NotificationTypes.BELL_RANG, "Door bell rang.")));
+                sendMessageLocal(CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND, new Message(new NotificationPayload(CoreConstants.Permission.BinaryPermission.BELL_RANG.toString(), "Door bell rang.")));
         putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
     }
 }
