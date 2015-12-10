@@ -20,11 +20,11 @@ public class EvsIo {
 	 *
 	 * @return True if OK
      */
-    public static boolean registerPin(int IoAddress, String direction)throws EvsIoException{
+    public static boolean registerPin(int IoAddress, String direction) throws EvsIoException {
         boolean ret = true;
 
         // Register sensor
-        try{
+        try {
             Log.w("EVS-IO", "EVS-IO: Register GPIO " + IoAddress + " with direction: " + direction);
             Process su = Runtime.getRuntime().exec("su");
             DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
@@ -36,8 +36,8 @@ public class EvsIo {
             outputStream.writeBytes("exit\n");
             outputStream.flush();
             su.waitFor();
-        }catch(Exception e){
-            Log.w("EVS-IO","EVS-IO error: " + e);
+        } catch (Exception e) {
+            Log.w("EVS-IO", "EVS-IO error: " + e);
             throw new EvsIoException("Could not register Pin: " + e);
         }
         return ret;
@@ -50,11 +50,11 @@ public class EvsIo {
      *
      * @return The read value
     */
-    public static String readValue(int IoAdress)throws EvsIoException{
+    public static String readValue(int IoAdress) throws EvsIoException {
         String ret = "";
 
         // Register sensor
-        try{
+        try {
             InputStream response = null;
             Log.w("EVS-IO", "EVS-IO: Read GPIO " + IoAdress);
             Process su = Runtime.getRuntime().exec("su");
@@ -78,28 +78,25 @@ public class EvsIo {
         return ret;
     }
 
-
-
-
- /*
-  * Set actuator state
-  *
-  * @param IoAddress Pin number (see shifter shild)
-  * @param value value to set
-  *
-  * @return True if OK
- */
-    public static boolean setValue(int IoAdress, boolean value)throws EvsIoException{
+    /*
+     * Set actuator state
+     *
+     * @param IoAddress Pin number (see shifter shild)
+     * @param value value to set
+     *
+     * @return True if OK
+    */
+    public static boolean setValue(int IoAdress, boolean value) throws EvsIoException {
         boolean ret = false;
 
         // Register sensor
-        try{
+        try {
             Log.w("EVS-IO", "EVS-IO: Set GPIO " + IoAdress);
             Process su = Runtime.getRuntime().exec("su");
             DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
-            int valueInt  = 0;
+            int valueInt = 0;
 
-            if (value == true){
+            if (value == true) {
                 valueInt = 1;
             } else {
                 valueInt = 0;
@@ -112,13 +109,12 @@ public class EvsIo {
             outputStream.flush();
             su.waitFor();
             ret = true;
-        }catch(Exception e){
-            Log.w("EVS-IO","EVS-IO error: " + e);
+        } catch (Exception e) {
+            Log.w("EVS-IO", "EVS-IO error: " + e);
             throw new EvsIoException("Could not register Pin: " + e);
         }
         return ret;
     }
-
 
     public static String readFully(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
