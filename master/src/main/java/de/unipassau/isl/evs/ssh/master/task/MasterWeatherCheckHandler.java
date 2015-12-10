@@ -4,6 +4,10 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.util.Log;
+
+import net.aksingh.owmjapis.CurrentWeather;
+import net.aksingh.owmjapis.OpenWeatherMap;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -13,11 +17,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
-import net.aksingh.owmjapis.CurrentWeather;
-import net.aksingh.owmjapis.OpenWeatherMap;
-import org.json.JSONException;
-
-import java.io.IOException;
 
 /**
  * Task/Handler that periodically checks the records of weather data provider and issues notifications
@@ -25,11 +24,11 @@ import java.io.IOException;
  *
  * @author Chris
  */
-public class MasterWeatherCheckHandler extends AbstractMasterHandler implements ScheduledComponent{
+public class MasterWeatherCheckHandler extends AbstractMasterHandler implements ScheduledComponent {
 
+    public static final int MILLIS_IN_FIVE_MIN = 300000;
     private static final Key<MasterWeatherCheckHandler> KEY = new Key<>(MasterWeatherCheckHandler.class);
     private static final String TAG = MasterWeatherCheckHandler.class.getSimpleName();
-    public static final int MILLIS_IN_FIVE_MIN = 300000;
     private boolean windowClosed;
 
     private void sendWarningNotification() {

@@ -7,5 +7,5 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
  *
  * @author Team
  */
-public class DriverConstants extends CoreConstants{
+public class DriverConstants extends CoreConstants {
 }

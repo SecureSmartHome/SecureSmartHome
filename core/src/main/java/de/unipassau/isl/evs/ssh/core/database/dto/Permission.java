@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 /**
  * A DTO representing permissions. A permission has a name and may only be for a specific module.
+ *
  * @author leon
  */
 public class Permission implements Serializable {

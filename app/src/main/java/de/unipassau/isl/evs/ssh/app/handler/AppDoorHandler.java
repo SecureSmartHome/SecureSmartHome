@@ -127,7 +127,7 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
     /**
      * Refreshs the door status by sending a status request message.
      */
-    public void refresh(){
+    public void refresh() {
         List<Module> doors = getContainer().require(AppModuleHandler.KEY).getDoors();
         if (doors == null || doors.size() < 1) {
             Log.e(TAG, "Could not get door status. No door installed");

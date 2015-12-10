@@ -99,7 +99,7 @@ public class DoorFragment extends BoundFragment {
     private void openButtonAction() {
         AppDoorHandler handler = getDoorHandler();
 
-        if (handler == null){
+        if (handler == null) {
             Log.i(TAG, "Container not bound.");
             return;
         }
@@ -116,7 +116,7 @@ public class DoorFragment extends BoundFragment {
     private void blockButtonAction() {
         AppDoorHandler handler = getDoorHandler();
 
-        if (handler == null){
+        if (handler == null) {
             Log.i(TAG, "Container not bound.");
             return;
         }
@@ -177,6 +177,7 @@ public class DoorFragment extends BoundFragment {
      */
     public interface DoorListener {
         void onPictureChanged(byte[] image);
+
         void onDoorStatusChanged();
     }
 

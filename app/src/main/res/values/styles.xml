@@ -15,10 +15,10 @@
     </style>
 
     <!--Theme used for design.widget.AppBarLayout-->
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     <!--Theme used for v7.widget.Toolbar-->
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
     <!--Theme for a simple divider (a thing black line)-->
     <style name="Divider">

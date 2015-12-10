@@ -44,7 +44,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
         calendar.add(Calendar.YEAR, 100);
         certGen.setNotAfter(calendar.getTime());
         certGen.setSignatureAlgorithm(KEY_PAIR_SIGNING_ALGORITHM);
-        return  certGen.generate(keyPair.getPrivate());
+        return certGen.generate(keyPair.getPrivate());
 
     }
 
@@ -70,7 +70,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
         return masterId;
     }
 
-    private Container createDefaultEnvironment(boolean isMasterEnv){
+    private Container createDefaultEnvironment(boolean isMasterEnv) {
         // Setup environment
         SimpleContainer container = new SimpleContainer();
         Context context = getInstrumentation().getTargetContext();

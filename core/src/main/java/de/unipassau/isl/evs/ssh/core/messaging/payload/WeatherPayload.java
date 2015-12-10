@@ -10,7 +10,7 @@ public class WeatherPayload implements MessagePayload {
     boolean warning; //should user be warned?
     String warnText; //what type of warning is it?
 
-    public WeatherPayload (boolean warning, String warnText){
+    public WeatherPayload(boolean warning, String warnText) {
         this.warning = warning;
         this.warnText = warnText;
     }
@@ -20,7 +20,9 @@ public class WeatherPayload implements MessagePayload {
      *
      * @return boolean warning
      */
-    public boolean getWarning (){ return warning; }
+    public boolean getWarning() {
+        return warning;
+    }
 
     /**
      * The String contains the message from the Weather Service. So the message to the user also
@@ -28,6 +30,8 @@ public class WeatherPayload implements MessagePayload {
      *
      * @return String warnText
      */
-    public String getWarnText () { return warnText; }
+    public String getWarnText() {
+        return warnText;
+    }
 
 }

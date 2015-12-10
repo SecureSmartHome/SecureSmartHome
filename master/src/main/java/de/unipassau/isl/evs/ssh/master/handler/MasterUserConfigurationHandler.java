@@ -60,6 +60,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         final Message moduleInformationMessage = new Message(generateModuleInformationPayload());
         sendMessage(id, CoreConstants.RoutingKeys.MODULES_UPDATE, moduleInformationMessage);
     }
+
     private void executeUserDeviceEdit(Message.AddressedMessage message) {
         UserDeviceEditPayload payload = (UserDeviceEditPayload) message.getPayload();
 

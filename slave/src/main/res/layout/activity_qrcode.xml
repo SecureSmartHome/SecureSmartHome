@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
     <TextView
         android:id="@+id/qrcode_activity_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/activity_vertical_margin"
-        android:text="@string/please_scan_device" />
+        android:text="@string/please_scan_device"/>
 
     <ImageView
         android:id="@+id/qrcode_activity_qr_code"
@@ -17,5 +17,5 @@
         android:layout_height="wrap_content"
         android:contentDescription="@string/qr_code_description"
         android:padding="@dimen/activity_vertical_margin"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 </LinearLayout>

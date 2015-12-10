@@ -8,7 +8,7 @@ import de.ncoder.typedmap.Key;
  * Components are main parts of the system that have control over their initiation and shutdown process.
  * This means the steps needed to initialize or safely shutdown a Component is managed by itself,
  * whereas the time when either process takes place depends on the Object managing the component.
- *
+ * <p/>
  * AbstractComponent provides implementations for standard methods, that will be used multiple times.
  *
  * @author Niko Fink
@@ -81,6 +81,7 @@ public class AbstractComponent implements Component {
 
     /**
      * Method that returns a String for the given component
+     *
      * @return String for the given component
      */
     @Override

@@ -7,6 +7,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * A DTO representing modules which are connected to slave devices, e..g. a light.
+ *
  * @author leon
  */
 public class Module implements Serializable {

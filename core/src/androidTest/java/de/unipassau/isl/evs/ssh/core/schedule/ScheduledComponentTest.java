@@ -20,7 +20,6 @@ import java.util.concurrent.TimeoutException;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
 import static org.hamcrest.MatcherAssert.assertThat;

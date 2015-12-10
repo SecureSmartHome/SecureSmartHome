@@ -25,6 +25,7 @@ import de.unipassau.isl.evs.ssh.master.network.Server;
  * Handles messages indicating that information of a device needs to be updated and writes these changes to the routing table.
  * <p/>
  * An example when this handler needs to take action is when a new sensor is added or switched to a new GPIO Pin.
+ *
  * @author leon
  */
 public class MasterRoutingTableHandler extends AbstractMasterHandler {
@@ -79,7 +80,7 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler {
         return new Message(new ModulesPayload(modulesAtSlave, slaves));
     }
 
-    private void updateAllClients(){
+    private void updateAllClients() {
         Iterable<DeviceID> connectedClients = requireComponent(Server.KEY).getActiveDevices();
         for (DeviceID connectedClient : connectedClients) {
             updateClient(connectedClient);

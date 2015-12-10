@@ -57,7 +57,9 @@ public class ClimatePayload implements MessagePayload {
         return ClimatePayload.this;
     }
 
-    public Module getModule() { return module; }
+    public Module getModule() {
+        return module;
+    }
 
     public double getTemp1() {
         return temp1;

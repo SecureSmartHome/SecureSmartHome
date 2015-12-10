@@ -1,5 +1,8 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
@@ -11,21 +14,16 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * AppHolidaySimulationHandler class handles messages for the holiday simulation
  *
  * @author Chris
  */
-public class AppHolidaySimulationHandler extends AbstractComponent implements MessageHandler{
+public class AppHolidaySimulationHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppHolidaySimulationHandler> KEY = new Key<>(AppHolidaySimulationHandler.class);
-    private static final String TAG = AppHolidaySimulationHandler.class.getSimpleName();
-
-    private final List<HolidaySimulationListener> listeners = new ArrayList<>();
-
     public static final int UPDATE_INTERVAL = 5000;
+    private static final String TAG = AppHolidaySimulationHandler.class.getSimpleName();
+    private final List<HolidaySimulationListener> listeners = new ArrayList<>();
     private boolean isOn;
     private long timeStamp = System.currentTimeMillis();
 
@@ -87,10 +85,6 @@ public class AppHolidaySimulationHandler extends AbstractComponent implements Me
         return requireComponent(OutgoingRouter.KEY).sendMessage(toID, routingKey, msg);
     }
 
-    public interface HolidaySimulationListener {
-        void statusChanged();
-    }
-
     /**
      * Adds parameter handler to listeners.
      */
@@ -106,8 +100,12 @@ public class AppHolidaySimulationHandler extends AbstractComponent implements Me
     }
 
     private void fireStatusChanged() {
-        for (HolidaySimulationListener listener: listeners) {
+        for (HolidaySimulationListener listener : listeners) {
             listener.statusChanged();
         }
+    }
+
+    public interface HolidaySimulationListener {
+        void statusChanged();
     }
 }

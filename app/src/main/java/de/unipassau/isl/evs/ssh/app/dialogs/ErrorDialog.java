@@ -22,7 +22,7 @@ public class ErrorDialog extends DialogFragment {
      * Creates and shows a new error dialog with the given message.
      *
      * @param activity the parent activity of the error dialog
-     * @param message the error message
+     * @param message  the error message
      */
     public static void show(Activity activity, String message) {
         DialogFragment dialog = new ErrorDialog();
