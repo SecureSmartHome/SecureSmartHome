@@ -40,9 +40,9 @@ public class SlaveCameraHandler implements MessageHandler {
             Camera camera;
             camera = Camera.open(payload.getCameraID());
 
-            CameraPayload.PictureCallback pictureCallback = payload.getPictureCallback();
+            PictureCallback pictureCallback = new PictureCallback();
             setPreviewCallback(pictureCallback, camera);
-            payload.setPictureCallback(pictureCallback);
+            payload.setPicture(pictureCallback.pictureData);
         } else {
             sendErrorMessage(message);
         }
@@ -114,5 +114,14 @@ public class SlaveCameraHandler implements MessageHandler {
 
         camera.setOneShotPreviewCallback(previewCallback);
         camera.startPreview();
+    }
+
+    public class PictureCallback implements Camera.PictureCallback {
+        byte[] pictureData;
+
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+            this.pictureData = data;
+        }
     }
 }

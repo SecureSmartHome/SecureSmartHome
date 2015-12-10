@@ -1,15 +1,13 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
 import android.util.Log;
+
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
-import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.*;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationTypes.*;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.*;
 
 /**
@@ -27,7 +25,9 @@ public class MasterSystemHealthCheckHandler extends AbstractMasterHandler {
             if (message.getPayload() instanceof SystemHealthPayload) {
                 if (((SystemHealthPayload) message.getPayload()).getHasError()) {
                     String name = ((SystemHealthPayload) message.getPayload()).getModule().getName();
-                    MessagePayload payload = new NotificationPayload(SYSTEM_HEALTH_WARNING, "Error at module: " + name);
+                    MessagePayload payload = new NotificationPayload(
+                            CoreConstants.Permission.BinaryPermission.SYSTEM_HEALTH_WARNING.toString(),
+                            "Error at module: " + name);
                     sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(payload));
                 }
             }

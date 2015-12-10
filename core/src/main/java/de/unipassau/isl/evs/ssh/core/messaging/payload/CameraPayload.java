@@ -11,7 +11,7 @@ public class CameraPayload implements MessagePayload {
 
     String moduleName;
     int cameraID;
-    PictureCallback pictureCallback;
+    byte[] picture;
 
     /**
      * Constructor for a CameraPayload only requesting the cameraID.
@@ -24,7 +24,6 @@ public class CameraPayload implements MessagePayload {
     public CameraPayload(int cameraID, String moduleName) {
         this.cameraID = cameraID;
         this.moduleName = moduleName;
-        this.pictureCallback = new PictureCallback();
     }
 
     public String getModuleName() {
@@ -44,34 +43,11 @@ public class CameraPayload implements MessagePayload {
         return cameraID;
     }
 
-    /**
-     * Returns the taken picture
-     *
-     * @return picture taken
-     */
-    public PictureCallback getPictureCallback() {
-        return pictureCallback;
-    }
-
-    /**
-     * Allows setting the pictureCallback of this camera
-     *
-     * @param pictureCallback
-     */
-    public void setPictureCallback(PictureCallback pictureCallback) {
-        this.pictureCallback = pictureCallback;
-    }
-
     public byte[] getPicture() {
-        return this.pictureCallback.pictureData;
+        return picture;
     }
 
-    public class PictureCallback implements Camera.PictureCallback {
-        byte[] pictureData;
-
-        @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
-            this.pictureData = data;
-        }
+    public void setPicture(byte[] picture) {
+        this.picture = picture;
     }
 }

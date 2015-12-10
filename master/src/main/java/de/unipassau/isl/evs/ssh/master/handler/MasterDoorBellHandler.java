@@ -86,18 +86,15 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
 
     private void handleDoorBellRing(Message.AddressedMessage message) {
         //Camera has always to be the first camera of all added cameras. (database and id)
-        /*
         Module camera = requireComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.WEBCAM).get(0);
         Message messageToSend = new Message(new CameraPayload(0, camera.getName()));
         messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.MASTER_DOOR_BELL_CAMERA_GET);
-        */ //Todo: uncomment when camera is working
 
         Message.AddressedMessage sendMessage =
-                //sendMessageLocal(
-                //        CoreConstants.RoutingKeys.MASTER_CAMERA_GET,
-                //        messageToSend
-                //);
-                sendMessageLocal(CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND, new Message(new NotificationPayload(CoreConstants.Permission.BinaryPermission.BELL_RANG.toString(), "Door bell rang.")));
+                sendMessageLocal(
+                        CoreConstants.RoutingKeys.MASTER_CAMERA_GET,
+                        messageToSend
+                );
         putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
     }
 }
