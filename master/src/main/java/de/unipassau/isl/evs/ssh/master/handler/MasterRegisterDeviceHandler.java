@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
@@ -21,7 +22,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
-import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
@@ -59,7 +59,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     @Override
     public void handle(Message.AddressedMessage message) {
         if (message.getPayload() instanceof GenerateNewRegisterTokenPayload) {
-            if (hasPermission(message.getFromID(), new Permission(DatabaseContract.Permission.Values.ADD_USER))) {
+            if (hasPermission(message.getFromID(), new Permission(CoreConstants.Permission.BinaryPermission.ADD_USER.toString()))) {
                 //which functionality
                 switch (message.getRoutingKey()) {
                     //Add new register token

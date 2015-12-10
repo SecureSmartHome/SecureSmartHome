@@ -9,8 +9,6 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
@@ -19,12 +17,10 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
-import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -53,13 +49,13 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
                 //TODO Refactor if we eliminate one permission
                 if (payload.switchOn() && hasPermission(message.getFromID(),new Permission(
-                                DatabaseContract.Permission.Values.START_HOLIDAY_SIMULATION, ""))) {
+                                CoreConstants.Permission.BinaryPermission.START_HOLIDAY_SIMULATION.toString(), ""))) {
 
                     runHolidaySimulation = payload.switchOn();
                     replyStatus(message);
 
                 } else if (!payload.switchOn() && hasPermission(message.getFromID(),new Permission(
-                        DatabaseContract.Permission.Values.STOP_HOLIDAY_SIMULATION, ""))) {
+                        CoreConstants.Permission.BinaryPermission.STOP_HOLIDAY_SIMULATION.toString(), ""))) {
 
                     runHolidaySimulation = payload.switchOn();
                     replyStatus(message);
