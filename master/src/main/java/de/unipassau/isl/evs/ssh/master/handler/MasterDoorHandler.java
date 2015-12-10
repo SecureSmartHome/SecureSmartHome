@@ -16,6 +16,8 @@ import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 /**
  * Handles door messages and generates messages for each target and passes them to the OutgoingRouter.
+ *
+ * @author leon
  */
 public class MasterDoorHandler extends AbstractMasterHandler {
     //Todo: formulate messages

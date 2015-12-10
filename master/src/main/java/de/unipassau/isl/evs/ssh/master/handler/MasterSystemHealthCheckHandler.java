@@ -12,7 +12,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_NOT
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK;
 
 /**
- * Task/Handler that periodically checks if hardware system components are still active and working properly.
+ * Handler that periodically checks if hardware system components are still active and working properly.
  * In case of malfunctioning hardware notifications are issued.
  *
  * @author Chris
