@@ -3,6 +3,8 @@ package de.unipassau.isl.evs.ssh.master.database;
 import android.content.Context;
 import android.database.Cursor;
 import android.test.InstrumentationTestCase;
+
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
 
@@ -49,7 +51,7 @@ public class DatabaseConnectorTest extends InstrumentationTestCase {
         }
         c = db.executeSql("Select " + DatabaseContract.Permission.COLUMN_NAME + " from " + DatabaseContract.Permission.TABLE_NAME + " where _ID = 1", null);
         c.moveToFirst();
-        assertEquals(DatabaseContract.Permission.Values.ADD_ORDROID, c.getString(c.getColumnIndex(DatabaseContract.Permission.COLUMN_NAME)));
+        assertEquals(CoreConstants.Permission.BinaryPermission.ADD_ODROID.toString(), c.getString(c.getColumnIndex(DatabaseContract.Permission.COLUMN_NAME)));
 
     }
 }

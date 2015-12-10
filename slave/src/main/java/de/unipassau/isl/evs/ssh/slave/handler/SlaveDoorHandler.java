@@ -18,6 +18,7 @@ import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
  * @author Wolfgang Popp
  */
 public class SlaveDoorHandler extends AbstractSlaveHandler {
+    public static final Key<SlaveDoorHandler> KEY = new Key<>(SlaveDoorHandler.class);
     private static final String TAG = SlaveDoorHandler.class.getSimpleName();
 
     @Override

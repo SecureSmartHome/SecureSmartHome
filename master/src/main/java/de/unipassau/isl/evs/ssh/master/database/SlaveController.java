@@ -356,7 +356,7 @@ public class SlaveController extends AbstractComponent {
                         + " join " + DatabaseContract.Slave.TABLE_NAME + " s"
                         + " on m." + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID
                         + " = s." + DatabaseContract.Slave.COLUMN_ID
-                        + " where s." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE + " = ?",
+                        + " where m." + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE + " = ?",
                 new String[] { type });
         List<Module> modules = new LinkedList<>();
         while (modulesCursor.moveToNext()) {

@@ -19,6 +19,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 
@@ -47,16 +48,21 @@ public class AppNotificationHandler extends AbstractComponent implements Message
      */
     @Override
     public void handle(Message.AddressedMessage message) {
+        //Todo: either notificationpayload or switch case for other payloads
+        if(message.getPayload() instanceof NotificationPayload) {
+            NotificationPayload notificationPayload = ((NotificationPayload) message.getPayload());
+            //Todo: make openthisfragment constants in coreconstants
+            displayNotification("Notification", notificationPayload.getMessage(), "ClimateFragment", 55, getContainer().require(ContainerService.KEY_CONTEXT));
         //Climate Warnings
-        if (message.getPayload() instanceof ClimatePayload) {
+        } else if (message.getPayload() instanceof ClimatePayload) {
             ClimatePayload payload = (ClimatePayload) message.getPayload();
             Context context = getContainer().get(ContainerService.KEY_CONTEXT);
-            switch (payload.getNotificationType()) {
-                case CoreConstants.NotificationTypes.BRIGHTNESS_WARNING:
-                    issueBrightnessWarning(BRIGHTNESS_WARNING_ID, context);
-                case CoreConstants.NotificationTypes.HUMIDITY_WARNING:
-                    issueClimateNotification(HUMIDITY_WARNING_ID, context);
-                    break;
+
+            if (payload.getNotificationType().equals(CoreConstants.Permission.BinaryPermission.BRIGHTNESS_WARNING.toString())) {
+                issueBrightnessWarning(BRIGHTNESS_WARNING_ID, context);
+                issueClimateNotification(HUMIDITY_WARNING_ID, context);
+            } else if (payload.getNotificationType().equals(CoreConstants.Permission.BinaryPermission.HUMIDITY_WARNING.toString())) {
+                issueClimateNotification(HUMIDITY_WARNING_ID, context);
             }
             //Weather Warnings
         } else if (message.getPayload() instanceof WeatherPayload) {

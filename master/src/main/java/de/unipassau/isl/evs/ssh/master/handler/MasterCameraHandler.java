@@ -6,7 +6,6 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
-import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 /**
@@ -67,7 +66,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
         if (hasPermission(
                 message.getFromID(),
                 new Permission(
-                        DatabaseContract.Permission.Values.REQUEST_CAMERA_STATUS,
+                        CoreConstants.Permission.BinaryPermission.REQUEST_CAMERA_STATUS.toString(),
                         atModule.getName()
                 )
         )) {

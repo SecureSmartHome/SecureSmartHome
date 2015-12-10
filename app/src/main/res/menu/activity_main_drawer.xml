@@ -31,7 +31,7 @@
     <item android:title="@string/nav_edit">
         <menu>
             <item
-                android:id="@+id/nav_modifyPermissions"
+                android:id="@+id/nav_list_groups"
                 android:icon="@drawable/ic_modifypermissions_light"
                 android:title="@string/nav_modifyPermissions_string"/>
             <item

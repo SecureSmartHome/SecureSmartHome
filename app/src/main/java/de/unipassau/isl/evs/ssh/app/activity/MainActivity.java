@@ -183,8 +183,8 @@ public class MainActivity extends BoundActivity
             clazz = HolidayFragment.class;
         } else if (id == R.id.nav_status) {
             clazz = StatusFragment.class;
-        } else if (id == R.id.nav_modifyPermissions) {
-            clazz = ModifyPermissionFragment.class;
+        } else if (id == R.id.nav_list_groups) {
+            clazz = ListGroupFragment.class;
         } else if (id == R.id.nav_addNewUserDevice) {
             clazz = AddNewUserDeviceFragment.class;
         } else if (id == R.id.nav_addModule) {

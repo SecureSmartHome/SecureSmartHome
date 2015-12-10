@@ -11,7 +11,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
-import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
@@ -111,7 +110,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         if (hasPermission(
                 message.getFromID(),
                 new Permission(
-                        DatabaseContract.Permission.Values.REQUEST_DOOR_STATUS,
+                        CoreConstants.Permission.BinaryPermission.REQUEST_DOOR_STATUS.toString(),
                         atModule.getName()
                 )
         )) {
@@ -136,7 +135,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
         if (requireComponent(PermissionController.KEY)
                 .hasPermission(message.getFromID(), new Permission(
-                        DatabaseContract.Permission.Values.REQUEST_DOOR_STATUS, atModule.getName()))) {
+                        CoreConstants.Permission.BinaryPermission.REQUEST_DOOR_STATUS.toString(), atModule.getName()))) {
 
 
             Message messageToSend = new Message(new DoorLockPayload(getLocked(atModule.getName()), atModule.getName()));
@@ -157,7 +156,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
         if (requireComponent(PermissionController.KEY)
                 .hasPermission(message.getFromID(), new Permission(
-                        DatabaseContract.Permission.Values.LOCK_DOOR, atModule.getName()))) {
+                        CoreConstants.Permission.BinaryPermission.LOCK_DOOR.toString(), atModule.getName()))) {
 
             setLocked(atModule.getName(), !doorLockPayload.isUnlock());
 
@@ -167,7 +166,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                         CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND,
                         new Message(
                                 new NotificationPayload(
-                                        CoreConstants.NotificationTypes.DOOR_UNLOCKED,
+                                        CoreConstants.Permission.BinaryPermission.DOOR_UNLOCKED.toString(),
                                         DOOR_UNLOCKED_MESSAGE
                                 )
                         ));
@@ -176,7 +175,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                         CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND,
                         new Message(
                                 new NotificationPayload(
-                                        CoreConstants.NotificationTypes.DOOR_LOCKED,
+                                        CoreConstants.Permission.BinaryPermission.DOOR_LOCKED.toString(),
                                         DOOR_LOCKED_MESSAGE
                                 )
                         ));
@@ -191,7 +190,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         Message.AddressedMessage correspondingMessage =
                 getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
         Message messageToSend = new Message(new NotificationPayload(
-                CoreConstants.NotificationTypes.DOOR_UNLATCHED, DOOR_UNLATCHED_MESSAGE));
+                CoreConstants.Permission.BinaryPermission.DOOR_UNLATCHED.toString(), DOOR_UNLATCHED_MESSAGE));
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
         sendMessageLocal(CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND, messageToSend);
@@ -206,7 +205,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
         if (requireComponent(PermissionController.KEY)
                 .hasPermission(message.getFromID(), new Permission(
-                        DatabaseContract.Permission.Values.UNLATCH_DOOR, atModule.getName()))) {
+                        CoreConstants.Permission.BinaryPermission.UNLATCH_DOOR.toString(), atModule.getName()))) {
 
             if (!getLocked(atModule.getName())) {
                 Message.AddressedMessage sendMessage =

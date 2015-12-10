@@ -27,6 +27,7 @@ public class MasterClimateHandler extends AbstractMasterHandler {
             mainLampOn = payload.getOn(); //TODO check if this is the first lamp
         } else if (CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO.equals(message.getRoutingKey())) {
             //TODO make map of latestWeatherData to send data for each Weatherboard
+            //Todo: request weather state
             if (latestWeatherData == null) {
                 latestWeatherData = new ClimatePayload(0,0,0,0,0,0,0,0,"", null);
             }
@@ -38,11 +39,11 @@ public class MasterClimateHandler extends AbstractMasterHandler {
     private void evaluateWeatherData(ClimatePayload payload) {
         //The following values will not be checked as they are not of interest: Altitude, Pressure, Temp1, Temp2
         if (payload.getHumidity() > MasterConstants.ClimateThreshold.HUMIDITY) {
-            ClimatePayload newPayload = new ClimatePayload(payload, CoreConstants.NotificationTypes.HUMIDITY_WARNING);
+            ClimatePayload newPayload = new ClimatePayload(payload, CoreConstants.Permission.BinaryPermission.HUMIDITY_WARNING.toString());
             sendMessageLocal(CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND, new Message(newPayload));
         }
         if (payload.getVisible() > MasterConstants.ClimateThreshold.VISIBLE_LIGHT && mainLampOn) {
-            ClimatePayload newPayload = new ClimatePayload(payload, CoreConstants.NotificationTypes.BRIGHTNESS_WARNING);
+            ClimatePayload newPayload = new ClimatePayload(payload, CoreConstants.Permission.BinaryPermission.BRIGHTNESS_WARNING.toString());
             sendMessageLocal(CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND, new Message(newPayload));
         }
     }
