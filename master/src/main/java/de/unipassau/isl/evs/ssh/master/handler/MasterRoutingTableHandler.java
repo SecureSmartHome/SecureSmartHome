@@ -18,7 +18,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterSlavePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
-import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
@@ -35,7 +34,7 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler {
     public void handle(Message.AddressedMessage message) {
         saveMessage(message);
         if (message.getPayload() instanceof RegisterSlavePayload) {
-            if (hasPermission(message.getFromID(), new Permission(DatabaseContract.Permission.Values.ADD_ORDROID))) {
+            if (hasPermission(message.getFromID(), new Permission(CoreConstants.Permission.BinaryPermission.ADD_ODROID.toString()))) {
                 switch (message.getRoutingKey()) {
                     case CoreConstants.RoutingKeys.MASTER_SLAVE_REGISTER:
                         if (handleRegisterRequest(message)) {

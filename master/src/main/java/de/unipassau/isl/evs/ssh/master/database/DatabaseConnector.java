@@ -155,42 +155,7 @@ public class DatabaseConnector extends AbstractComponent {
                 + "DROP TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + ";";
 
-        private String[] binaryPermissions = new String[]{
-                DatabaseContract.Permission.Values.ADD_ORDROID,
-                DatabaseContract.Permission.Values.RENAME_ORDROID,
-                DatabaseContract.Permission.Values.DELETE_ORDROID,
-                DatabaseContract.Permission.Values.ADD_SENSOR,
-                DatabaseContract.Permission.Values.RENAME_MODULE,
-                DatabaseContract.Permission.Values.DELETE_SENSOR,
-                DatabaseContract.Permission.Values.START_HOLIDAY_SIMULATION,
-                DatabaseContract.Permission.Values.STOP_HOLIDAY_SIMULATION,
-                DatabaseContract.Permission.Values.ADD_USER,
-                DatabaseContract.Permission.Values.DELETE_USER,
-                DatabaseContract.Permission.Values.CHANGE_USER_NAME,
-                DatabaseContract.Permission.Values.CHANGE_USER_GROUP,
-                DatabaseContract.Permission.Values.GRANT_USER_RIGHT,
-                DatabaseContract.Permission.Values.WITHDRAW_USER_RIGHT,
-                DatabaseContract.Permission.Values.ADD_GROUP,
-                DatabaseContract.Permission.Values.DELETE_GROUP,
-                DatabaseContract.Permission.Values.CHANGE_GROUP_NAME,
-                DatabaseContract.Permission.Values.SHOW_GROUP_MEMBER,
-                DatabaseContract.Permission.Values.CHANGE_GROUP_TEMPLATE,
-                DatabaseContract.Permission.Values.CREATE_TEMPLATE,
-                DatabaseContract.Permission.Values.DELETE_TEMPLATE,
-                DatabaseContract.Permission.Values.EDIT_TEMPLATE,
-                DatabaseContract.Permission.Values.SHOW_TEMPLATE_PERMISSION,
-                CoreConstants.NotificationTypes.ODROID_ADDED,
-                CoreConstants.NotificationTypes.HUMIDITY_WARNING,
-                CoreConstants.NotificationTypes.BRIGHTNESS_WARNING,
-                CoreConstants.NotificationTypes.HOLIDAY_MODE_SWITCHED_ON,
-                CoreConstants.NotificationTypes.HOLIDAY_MODE_SWITCHED_OFF,
-                CoreConstants.NotificationTypes.SYSTEM_HEALTH_WARNING,
-                CoreConstants.NotificationTypes.BELL_RANG,
-                CoreConstants.NotificationTypes.WEATHER_WARNING,
-                CoreConstants.NotificationTypes.DOOR_UNLATCHED,
-                CoreConstants.NotificationTypes.DOOR_LOCKED,
-                CoreConstants.NotificationTypes.DOOR_UNLOCKED
-        };
+        private CoreConstants.Permission.BinaryPermission[] binaryPermissions = CoreConstants.Permission.BinaryPermission.values();
 
         private String[] defaultTemplates = {"Default_Template", "Parents_Template",
                 "Children_Template", "Guests_Template"};
@@ -202,9 +167,9 @@ public class DatabaseConnector extends AbstractComponent {
         }
 
         private void insertPermissions(SQLiteDatabase db) {
-            for (String permission : binaryPermissions) {
+            for (CoreConstants.Permission.BinaryPermission permission : binaryPermissions) {
                 ContentValues values = new ContentValues(1);
-                values.put(DatabaseContract.Permission.COLUMN_NAME, permission);
+                values.put(DatabaseContract.Permission.COLUMN_NAME, permission.toString());
                 db.insert(DatabaseContract.Permission.TABLE_NAME, null, values);
             }
 

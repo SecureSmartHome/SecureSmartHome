@@ -24,7 +24,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
@@ -67,7 +66,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         switch (payload.getAction()) {
             case REMOVE_USERDEVICE:
                 if (hasPermission(message.getFromID(), new Permission(
-                        DatabaseContract.Permission.Values.DELETE_USER, ""))) {
+                        CoreConstants.Permission.BinaryPermission.DELETE_USER.toString(), ""))) {
                     removeUserDevice(payload);
                 } else {
                     sendErrorMessage(message);
@@ -76,9 +75,9 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             case EDIT_USERDEVICE:
                 //TODO maybe refactor and unite both permissions?
                 if (hasPermission(message.getFromID(), new Permission(
-                        DatabaseContract.Permission.Values.CHANGE_USER_NAME, ""))
+                        CoreConstants.Permission.BinaryPermission.CHANGE_USER_NAME.toString(), ""))
                         && hasPermission(message.getFromID(), new Permission(
-                        DatabaseContract.Permission.Values.CHANGE_USER_GROUP, ""))) {
+                        CoreConstants.Permission.BinaryPermission.CHANGE_USER_GROUP.toString(), ""))) {
                     editUserDevice(message, payload);
                 } else {
                     sendErrorMessage(message);
@@ -86,7 +85,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 break;
             case GRANT_PERMISSION:
                 if (hasPermission(message.getFromID(), new Permission(
-                        DatabaseContract.Permission.Values.GRANT_USER_RIGHT, ""))) {
+                        CoreConstants.Permission.BinaryPermission.GRANT_USER_PERMISSION.toString(), ""))) {
                     grantPermission(message, payload);
                 } else {
                     sendErrorMessage(message);
@@ -94,7 +93,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 break;
             case REVOKE_PERMISSION:
                 if (hasPermission(message.getFromID(), new Permission(
-                        DatabaseContract.Permission.Values.WITHDRAW_USER_RIGHT, ""))) {
+                        CoreConstants.Permission.BinaryPermission.WITHDRAW_USER_PERMISSION.toString(), ""))) {
                     revokePermission(payload);
                 } else {
                     sendErrorMessage(message);

@@ -41,7 +41,6 @@ public class MainActivity extends BoundActivity
     private Toolbar toolbar = null;
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
-    private boolean isMainFragmentActive;
 
     public MainActivity() {
         super(AppContainer.class);
@@ -83,13 +82,7 @@ public class MainActivity extends BoundActivity
         }
 
         //Initialise fragmentTransaction
-        if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
-            try {
-                showFragmentByClass(Class.forName(savedInstanceState.getString(SAVED_LAST_ACTIVE_FRAGMENT)));
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        } else {
+        if (savedInstanceState == null || !savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
             // starts the main fragment when already registered, the welcomescreen fragment so the user can register.
             Class<? extends Fragment> clazz = (deviceNotRegistered() ? WelcomeScreenFragment.class : MainFragment.class);
             showFragmentByClass(clazz);
@@ -115,7 +108,7 @@ public class MainActivity extends BoundActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (!isMainFragmentActive) {
+        } else if (!getCurrentFragment().getClass().equals(MainFragment.class)) {
             showFragmentByClass(MainFragment.class);
         } else {
             super.onBackPressed();
@@ -168,8 +161,6 @@ public class MainActivity extends BoundActivity
             e.printStackTrace();
         }
         if (fragment != null) {
-            isMainFragmentActive = clazz.equals(MainFragment.class);
-           
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);

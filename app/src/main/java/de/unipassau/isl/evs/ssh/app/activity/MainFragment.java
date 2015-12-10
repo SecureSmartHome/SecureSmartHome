@@ -24,16 +24,16 @@ public class MainFragment extends BoundFragment implements MessageHandler {
                 container, false);
         final MainActivity parent = (MainActivity) getActivity();
 
-        ImageButton doorButtonOpen = (ImageButton) mLinearLayout.findViewById(R.id.doorButtonOpen);
-        doorButtonOpen.setOnClickListener(new View.OnClickListener() {
+        ImageButton doorButton = (ImageButton) mLinearLayout.findViewById(R.id.doorButtonOpen);
+        doorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 parent.showFragmentByClass(DoorFragment.class);
             }
         });
 
-        ImageButton lightButtonOn = (ImageButton) mLinearLayout.findViewById(R.id.lightButtonOn);
-        lightButtonOn.setOnClickListener(new View.OnClickListener() {
+        ImageButton lightButton = (ImageButton) mLinearLayout.findViewById(R.id.lightButtonOn);
+        lightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 parent.showFragmentByClass(LightFragment.class);

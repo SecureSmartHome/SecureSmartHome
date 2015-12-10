@@ -31,8 +31,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.DELETE_USERDEVICE_DIALOG;
-import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.EDIT_PERMISSION_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Fragment_Arguments.GROUP_ARGUMENT_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.Fragment_Arguments.USER_DEVICE_ARGUMENT_FRAGMENT;
 
 
 /**
@@ -67,7 +67,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                                                   public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                                       UserDevice item = adapter.getItem(position);
                                                       Bundle bundle = new Bundle();
-                                                      bundle.putSerializable(EDIT_PERMISSION_DIALOG, item);
+                                                      bundle.putSerializable(USER_DEVICE_ARGUMENT_FRAGMENT, item);
                                                       ((MainActivity) getActivity()).showFragmentByClass(EditUserDeviceFragment.class, bundle);
                                                   }
                                               }
@@ -102,7 +102,7 @@ public class ListUserDeviceFragment extends BoundFragment {
      * Creates and returns a dialogs that gives the user the option to delete a user device.
      */
     private Dialog createDeleteUserDeviceDialog(Bundle bundle) {
-        final UserDevice userDevice = (UserDevice) bundle.getSerializable(EDIT_PERMISSION_DIALOG);
+        final UserDevice userDevice = (UserDevice) bundle.getSerializable(DELETE_USERDEVICE_DIALOG);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_editgroup, null, false);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

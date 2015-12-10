@@ -41,7 +41,6 @@ public class AddNewSlaveFragment extends ScanQRFragment {
                 } else {
                     ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.new_slave_name_missing));
                 }
-
             }
         });
 
@@ -64,7 +63,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        //outState.putString(KEY_SLAVE_NAME, slaveNameInput.getText().toString());
+        outState.putString(KEY_SLAVE_NAME, slaveNameInput.getText().toString());
     }
 
     @Override

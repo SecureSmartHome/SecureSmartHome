@@ -75,7 +75,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
         for (UserDevice userDevice :
                 requireComponent(PermissionController.KEY).getAllUserDevicesWithPermission(
                         new Permission(
-                                CoreConstants.NotificationTypes.BELL_RANG,
+                                CoreConstants.Permission.BinaryPermission.BELL_RANG.toString(),
                                 null
                         )
                 )) {
