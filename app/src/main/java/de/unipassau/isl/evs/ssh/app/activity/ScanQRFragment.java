@@ -53,7 +53,7 @@ public class ScanQRFragment extends BoundFragment {
         }
     }
 
-    protected void onQRCodeScanned(QRDeviceInformation info){
+    protected void onQRCodeScanned(QRDeviceInformation info) {
 
     }
 }

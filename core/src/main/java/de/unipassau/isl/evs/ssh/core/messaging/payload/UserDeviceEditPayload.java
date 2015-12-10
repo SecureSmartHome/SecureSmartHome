@@ -1,11 +1,12 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
@@ -22,12 +23,6 @@ public class UserDeviceEditPayload implements MessagePayload {
 
     private UserDeviceEditPayload() {
 
-    }
-
-    public enum Action {
-        ADD_USERDEVICE, REMOVE_USERDEVICE,
-        EDIT_USERDEVICE,
-        GRANT_PERMISSION, REVOKE_PERMISSION
     }
 
     public static UserDeviceEditPayload newAddUserPayload(UserDevice userDevice) {
@@ -111,6 +106,12 @@ public class UserDeviceEditPayload implements MessagePayload {
         Map<UserDevice, UserDevice> map = new HashMap<>(1);
         map.put(oldUserDevice, newUserDevice);
         return map;
+    }
+
+    public enum Action {
+        ADD_USERDEVICE, REMOVE_USERDEVICE,
+        EDIT_USERDEVICE,
+        GRANT_PERMISSION, REVOKE_PERMISSION
     }
 
 

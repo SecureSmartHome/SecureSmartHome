@@ -7,5 +7,5 @@ import de.unipassau.isl.evs.ssh.drivers.DriverConstants;
  *
  * @author Team
  */
-public class SlaveConstants extends DriverConstants{
+public class SlaveConstants extends DriverConstants {
 }

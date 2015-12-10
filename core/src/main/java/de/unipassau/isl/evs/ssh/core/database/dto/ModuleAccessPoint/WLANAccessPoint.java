@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint;
 
 /**
  * ModuleAccessPoint class for a WLAN access point.
+ *
  * @author leon
  */
 public class WLANAccessPoint extends ModuleAccessPoint {
@@ -21,23 +22,9 @@ public class WLANAccessPoint extends ModuleAccessPoint {
         this.iPAddress = iPAddress;
     }
 
-    @Override
-    public String[] getAccessInformation() {
-        return new String[] { String.valueOf(port), username, password, iPAddress };
-    }
-
-    @Override
-    public int[] getDatabaseIndices() {
-        return new int[] { 2, 3, 4, 5 };
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
     /**
      * Create WLANAccessPoint from combined access point information.
+     *
      * @param combinedModuleAccessPointInformation The combined access point information.
      * @return The constructed WLANAccessPoint.
      */
@@ -46,6 +33,21 @@ public class WLANAccessPoint extends ModuleAccessPoint {
         return new WLANAccessPoint(Integer.valueOf(combinedModuleAccessPointInformation[2]),
                 combinedModuleAccessPointInformation[3], combinedModuleAccessPointInformation[4],
                 combinedModuleAccessPointInformation[5]);
+    }
+
+    @Override
+    public String[] getAccessInformation() {
+        return new String[]{String.valueOf(port), username, password, iPAddress};
+    }
+
+    @Override
+    public int[] getDatabaseIndices() {
+        return new int[]{2, 3, 4, 5};
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
     }
 
     public int getPort() {

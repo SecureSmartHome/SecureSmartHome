@@ -2,8 +2,8 @@ package de.unipassau.isl.evs.ssh.master.handler;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.master.MasterConstants;
 
 /**
@@ -29,7 +29,7 @@ public class MasterClimateHandler extends AbstractMasterHandler {
             //TODO make map of latestWeatherData to send data for each Weatherboard
             //Todo: request weather state
             if (latestWeatherData == null) {
-                latestWeatherData = new ClimatePayload(0,0,0,0,0,0,0,0,"", null);
+                latestWeatherData = new ClimatePayload(0, 0, 0, 0, 0, 0, 0, 0, "", null);
             }
             sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY),
                     new Message(latestWeatherData));

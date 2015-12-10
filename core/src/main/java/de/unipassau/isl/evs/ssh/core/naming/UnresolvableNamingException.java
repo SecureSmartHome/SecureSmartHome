@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.core.naming;
 
 /**
  * Thrown when a naming mapping cannot be resolved to a DeviceID or public key.
+ *
  * @author Wolfgang Popp
  */
 public class UnresolvableNamingException extends Exception {

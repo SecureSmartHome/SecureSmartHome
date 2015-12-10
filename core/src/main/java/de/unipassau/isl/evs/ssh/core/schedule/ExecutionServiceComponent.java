@@ -1,8 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.schedule;
 
 import android.support.annotation.NonNull;
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,6 +13,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.container.Container;
+
 /**
  * An ExecutorService that can schedule commands to run after a given
  * delay, or to execute periodically.
@@ -23,10 +24,9 @@ import java.util.concurrent.TimeoutException;
  */
 public class ExecutionServiceComponent extends AbstractComponent implements ScheduledExecutorService {
 
-    private ScheduledExecutorService service;
-
     public static final de.ncoder.typedmap.Key<ExecutionServiceComponent> KEY
             = new de.ncoder.typedmap.Key<>(ExecutionServiceComponent.class);
+    private ScheduledExecutorService service;
 
     @Override
     public void init(Container container) {

@@ -10,6 +10,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  * Then a message containing the reset command is generated an passed to the OutgoingRouter
  * and from there sent on to the target handler, which eventually,
  * will result in a reset of the whole system.
+ *
  * @author leon
  */
 public class MasterButtonHandler extends AbstractMasterHandler {

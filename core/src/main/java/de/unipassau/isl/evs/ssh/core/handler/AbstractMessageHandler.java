@@ -18,7 +18,8 @@ public abstract class AbstractMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void handlerRemoved(String routingKey) {}
+    public void handlerRemoved(String routingKey) {
+    }
 
     protected IncomingDispatcher getDispatcher() {
         return dispatcher;

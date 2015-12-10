@@ -13,6 +13,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 
 /**
  * Offers high level methods to interact with the holiday table in the database.
+ *
  * @author leon
  */
 public class HolidayController extends AbstractComponent {
@@ -38,9 +39,9 @@ public class HolidayController extends AbstractComponent {
      */
     public void addHolidayLogEntry(String action) {
         databaseConnector.executeSql("insert into " + DatabaseContract.HolidayLog.TABLE_NAME
-                + " (" + DatabaseContract.HolidayLog.COLUMN_ACTION
-                + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + ") values (? ,?)",
-                    new String[] { action, String.valueOf(System.currentTimeMillis()) });
+                        + " (" + DatabaseContract.HolidayLog.COLUMN_ACTION
+                        + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + ") values (? ,?)",
+                new String[]{action, String.valueOf(System.currentTimeMillis())});
     }
 
     /**
@@ -52,12 +53,12 @@ public class HolidayController extends AbstractComponent {
      */
     public List<String> getLogEntriesRange(Date from, Date to) {
         Cursor holidayEntriesCursor = databaseConnector.executeSql("select "
-                + DatabaseContract.HolidayLog.COLUMN_ACTION
-                + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
-                + " from " + DatabaseContract.HolidayLog.TABLE_NAME
-                + " where " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
-                + " >= ? and " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " <= ?",
-                    new String[] { String.valueOf(from.getTime()), String.valueOf(to.getTime()) });
+                        + DatabaseContract.HolidayLog.COLUMN_ACTION
+                        + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
+                        + " from " + DatabaseContract.HolidayLog.TABLE_NAME
+                        + " where " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
+                        + " >= ? and " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " <= ?",
+                new String[]{String.valueOf(from.getTime()), String.valueOf(to.getTime())});
         List<String> actions = new LinkedList<>();
         while (holidayEntriesCursor.moveToNext()) {
             actions.add(holidayEntriesCursor.getString(0));
