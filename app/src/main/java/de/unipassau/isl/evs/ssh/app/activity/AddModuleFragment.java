@@ -156,14 +156,17 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         if (types[0].equals(type)) {
             layout.removeView(wlanView);
             layout.removeView(usbView);
+            layout.removeView(gpioView);
             layout.addView(gpioView);
         } else if (types[1].equals(type)) {
             layout.removeView(wlanView);
             layout.removeView(gpioView);
+            layout.removeView(usbView);
             layout.addView(usbView);
         } else if (types[2].equals(type)) {
             layout.removeView(usbView);
             layout.removeView(gpioView);
+            layout.removeView(wlanView);
             layout.addView(wlanView);
         }
     }
