@@ -41,7 +41,6 @@ public class MainActivity extends BoundActivity
     private Toolbar toolbar = null;
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
-    private boolean isMainFragmentActive;
 
     public MainActivity() {
         super(AppContainer.class);
@@ -109,7 +108,7 @@ public class MainActivity extends BoundActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (!isMainFragmentActive) {
+        } else if (!getCurrentFragment().getClass().equals(MainFragment.class)) {
             showFragmentByClass(MainFragment.class);
         } else {
             super.onBackPressed();
@@ -162,8 +161,6 @@ public class MainActivity extends BoundActivity
             e.printStackTrace();
         }
         if (fragment != null) {
-            isMainFragmentActive = clazz.equals(MainFragment.class);
-
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
