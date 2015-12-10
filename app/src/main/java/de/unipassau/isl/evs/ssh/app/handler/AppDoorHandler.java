@@ -16,6 +16,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
@@ -52,6 +53,11 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
     }
 
     private void fireImageUpdated(byte[] image) {
+        if (image == null) {
+            Log.v(TAG, "No camera picture came with the message.");
+        } else {
+            Log.v(TAG, "Received picture.");
+        }
         for (DoorFragment.DoorListener listener : listeners) {
             listener.onPictureChanged(image);
         }
@@ -76,14 +82,18 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
         super.init(container);
         getContainer().require(IncomingDispatcher.KEY).registerHandler(this,
                 CoreConstants.RoutingKeys.APP_CAMERA_GET,
-                CoreConstants.RoutingKeys.APP_DOOR_BLOCK);
+                CoreConstants.RoutingKeys.APP_DOOR_BLOCK,
+                CoreConstants.RoutingKeys.APP_DOOR_GET,
+                CoreConstants.RoutingKeys.APP_DOOR_RING);
     }
 
     @Override
     public void destroy() {
         getContainer().require(IncomingDispatcher.KEY).unregisterHandler(this,
                 CoreConstants.RoutingKeys.APP_CAMERA_GET,
-                CoreConstants.RoutingKeys.APP_DOOR_BLOCK);
+                CoreConstants.RoutingKeys.APP_DOOR_BLOCK,
+                CoreConstants.RoutingKeys.APP_DOOR_GET,
+                CoreConstants.RoutingKeys.APP_DOOR_RING);
         super.destroy();
     }
 
@@ -101,6 +111,12 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
             DoorStatusPayload payload = (DoorStatusPayload) message.getPayload();
             isDoorOpen = !payload.isClosed();
             fireStatusUpdated();
+        } else if (routingKey.equals(CoreConstants.RoutingKeys.APP_DOOR_RING)) {
+            DoorBellPayload doorBellPayload = (DoorBellPayload) message.getPayload();
+            fireImageUpdated(doorBellPayload.getCameraPayload().getPicture());
+            Message messageToSend = new Message(doorBellPayload);
+            requireComponent(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE,
+                    messageToSend);
         } else {
             throw new IllegalArgumentException("Unkown Routing Key: " + routingKey);
         }

@@ -36,5 +36,6 @@ public class AppContainer extends ContainerService {
         register(AppRegisterNewDeviceHandler.KEY, new AppRegisterNewDeviceHandler());
         register(AppHolidaySimulationHandler.KEY, new AppHolidaySimulationHandler());
         register(AppAddSlaveHandler.KEY, new AppAddSlaveHandler());
+
     }
 }

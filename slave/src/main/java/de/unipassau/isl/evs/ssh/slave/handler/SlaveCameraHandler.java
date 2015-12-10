@@ -23,7 +23,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
  * @author Christoph Fraedrich
  */
 public class SlaveCameraHandler implements MessageHandler {
-
+    private static final String TAG = SlaveCameraHandler.class.getSimpleName();
 
     private IncomingDispatcher dispatcher;
 
@@ -38,11 +38,19 @@ public class SlaveCameraHandler implements MessageHandler {
             CameraPayload payload = (CameraPayload) message.getPayload();
 
             Camera camera;
-            camera = Camera.open(payload.getCameraID());
 
-            CameraPayload.PictureCallback pictureCallback = payload.getPictureCallback();
-            setPreviewCallback(pictureCallback, camera);
-            payload.setPictureCallback(pictureCallback);
+            try {
+                camera = Camera.open();
+                PictureCallback pictureCallback = new PictureCallback();
+                setPreviewCallback(pictureCallback, camera);
+                payload.setPicture(pictureCallback.pictureData);
+            } catch (RuntimeException e) {
+                Log.i(TAG, "Failed to connect to cam.");
+            }
+            Message reply = new Message(payload);
+            reply.putHeader(Message.HEADER_REFERENCES_ID, message.getSequenceNr());
+            dispatcher.getContainer().require(OutgoingRouter.KEY)
+                    .sendMessageToMaster(message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
         } else {
             sendErrorMessage(message);
         }
@@ -114,5 +122,14 @@ public class SlaveCameraHandler implements MessageHandler {
 
         camera.setOneShotPreviewCallback(previewCallback);
         camera.startPreview();
+    }
+
+    public class PictureCallback implements Camera.PictureCallback {
+        byte[] pictureData;
+
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+            this.pictureData = data;
+        }
     }
 }

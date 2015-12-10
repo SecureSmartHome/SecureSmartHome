@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.master.handler;
 
 import android.util.Log;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
@@ -10,6 +11,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.Permission.BinaryPermission.SYSTEM_HEALTH_WARNING;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.*;
 
 /**
  * Handler that periodically checks if hardware system components are still active and working properly.

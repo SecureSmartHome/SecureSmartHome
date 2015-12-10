@@ -11,6 +11,7 @@ import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
+import de.unipassau.isl.evs.ssh.master.handler.MasterCameraHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterClimateHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterDoorBellHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
@@ -65,6 +66,7 @@ public class MasterContainer extends ContainerService {
         incomingDispatcher.registerHandler(new MasterRoutingTableHandler(), MASTER_SLAVE_REGISTER);
         incomingDispatcher.registerHandler(new MasterDoorBellHandler(), MASTER_DOOR_BELL_RING, MASTER_DOOR_BELL_CAMERA_GET);
         incomingDispatcher.registerHandler(new MasterSystemHealthCheckHandler(), MASTER_SYSTEM_HEALTH_CHECK);
+        incomingDispatcher.registerHandler(new MasterCameraHandler(), MASTER_CAMERA_GET);
 
         Log.i(getClass().getSimpleName(), "Master set up! ID is " + require(NamingManager.KEY).getOwnID());
     }
