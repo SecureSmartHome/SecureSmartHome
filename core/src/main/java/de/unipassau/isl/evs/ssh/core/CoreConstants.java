@@ -201,7 +201,7 @@ public class CoreConstants {
                     case ModuleType.LIGHT:
                         return new String[]{SWITCH_LIGHT};
                     default:
-                        throw new IllegalArgumentException("Unkown module Type");
+                        return null;
                 }
             }
 
