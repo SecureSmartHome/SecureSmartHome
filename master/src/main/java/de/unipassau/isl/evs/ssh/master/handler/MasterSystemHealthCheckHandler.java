@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
 import android.util.Log;
+
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;

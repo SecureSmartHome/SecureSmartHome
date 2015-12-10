@@ -13,8 +13,8 @@ import android.widget.TextView;
 import java.util.List;
 import java.util.Set;
 
-import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;

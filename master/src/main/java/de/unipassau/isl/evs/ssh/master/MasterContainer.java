@@ -23,7 +23,6 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.*;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DEVICE_CONNECTED;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_BELL_CAMERA_GET;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_BELL_RING;
@@ -35,8 +34,8 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_NOT
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_PUSH_WEATHER_INFO;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_SLAVE_REGISTER;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USERINFO_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USER_REGISTER;
 
 /**
  * This Container class manages dependencies needed in the Master part of the architecture.

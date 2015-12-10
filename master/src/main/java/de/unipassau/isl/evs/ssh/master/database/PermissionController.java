@@ -433,7 +433,7 @@ public class PermissionController extends AbstractComponent {
                     + " = g." + DatabaseContract.Group.COLUMN_ID
                     + " where p." + DatabaseContract.Permission.COLUMN_NAME
                     + " = ? and p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
-                    + " is NULL", new String[] {permission.getName()});
+                    + " is NULL", new String[]{permission.getName()});
         } else {
             userDevicesCursor = databaseConnector.executeSql("select"
                     + " u." + DatabaseContract.UserDevice.COLUMN_NAME
@@ -454,7 +454,7 @@ public class PermissionController extends AbstractComponent {
                     + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
                     + " where p." + DatabaseContract.Permission.COLUMN_NAME
                     + " = ? and m." + DatabaseContract.ElectronicModule.COLUMN_NAME
-                    + " = ?", new String[] {permission.getName(), permission.getModuleName()});
+                    + " = ?", new String[]{permission.getName(), permission.getModuleName()});
         }
         List<UserDevice> userDevices = new LinkedList<>();
         while (userDevicesCursor.moveToNext()) {

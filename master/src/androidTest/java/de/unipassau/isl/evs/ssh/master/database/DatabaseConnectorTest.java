@@ -36,7 +36,7 @@ public class DatabaseConnectorTest extends InstrumentationTestCase {
 
         db.executeSql("insert into PermissionTemplate values (123, 'theTemplate')", null);
         db.executeSql("insert into DeviceGroup values (?,?,?)", new String[]{"2", "theGroup", "123"});
-        db.executeSql("insert into UserDevice values (?,?,?,?);", new String[]{ "1001", "bob", "fingerprint", "2" });
+        db.executeSql("insert into UserDevice values (?,?,?,?);", new String[]{"1001", "bob", "fingerprint", "2"});
         c = db.executeSql("select * from UserDevice where _ID = 1001;", null);
         c.moveToFirst();
         assertEquals(c.getString(c.getColumnIndex("name")), "bob");

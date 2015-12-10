@@ -80,7 +80,7 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler {
         return new Message(new ModulesPayload(modulesAtSlave, slaves));
     }
 
-    private void updateAllClients(){
+    private void updateAllClients() {
         Iterable<DeviceID> connectedClients = requireComponent(Server.KEY).getActiveDevices();
         for (DeviceID connectedClient : connectedClients) {
             updateClient(connectedClient);

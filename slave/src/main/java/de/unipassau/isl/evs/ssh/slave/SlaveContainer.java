@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.slave;
 
 import android.util.Log;
 
-import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
@@ -10,7 +9,6 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
-import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveDoorHandler;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveLightHandler;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveModuleHandler;
