@@ -29,7 +29,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 public class AppClimateHandler extends AbstractComponent implements MessageHandler {
     public static final Key<AppClimateHandler> KEY = new Key<>(AppClimateHandler.class);
 
-    private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(1000);
+    private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(1);
     private final List<ClimateHandlerListener> listeners = new ArrayList<>();
     private final Map<Module, ClimateStatus> climateStatusMapping = new HashMap<>();
 
