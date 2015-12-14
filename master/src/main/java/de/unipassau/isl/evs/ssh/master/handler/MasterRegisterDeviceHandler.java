@@ -79,6 +79,9 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
         }
     }
 
+    /**
+     * TODO javadoc
+     */
     public byte[] generateNewRegisterToken(UserDevice device) {
         byte[] token = QRDeviceInformation.getRandomToken();
         userDeviceForToken.put(Base64.encodeToString(token, Base64.NO_WRAP), device);
