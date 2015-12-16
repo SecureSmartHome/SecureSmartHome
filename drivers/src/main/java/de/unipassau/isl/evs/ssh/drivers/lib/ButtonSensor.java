@@ -23,6 +23,7 @@ import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
  */
 
 public class ButtonSensor extends AbstractComponent {
+    private static final String TAG = ButtonSensor.class.getSimpleName();
     public static final Key<ButtonSensor> KEY = new Key<>(ButtonSensor.class);
     private final String moduleName;
     int address;
@@ -50,7 +51,7 @@ public class ButtonSensor extends AbstractComponent {
         boolean ret = true;
         String result = "";
         result = EvsIo.readValue(address);
-        Log.w("EVS-IO", "EVS-REED:" + result + ":");
+        //Log.v(TAG, "EVS-Button:" + result + ":");
 
 
         if (result.startsWith("1")) {
@@ -80,7 +81,8 @@ public class ButtonSensor extends AbstractComponent {
 
     private class DoorPollingRunnable implements Runnable {
 
-        ButtonSensor sensor;
+        private ButtonSensor sensor;
+        private boolean isPressedFilter = false;
 
         public DoorPollingRunnable(ButtonSensor sensor) {
             this.sensor = sensor;
@@ -89,8 +91,12 @@ public class ButtonSensor extends AbstractComponent {
         @Override
         public void run() {
             try {
-                if (future != null && sensor.isPressed()) {
+                if (future != null && sensor.isPressed() && !isPressedFilter) {
+                    Log.i(TAG, "Button Pressed!");
                     sendDoorBellInfo();
+                    isPressedFilter = true;
+                } else if (!sensor.isPressed()) {
+                    isPressedFilter = false;
                 }
             } catch (EvsIoException e) {
                 e.printStackTrace();

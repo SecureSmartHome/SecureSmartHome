@@ -56,7 +56,7 @@ public class EvsIo {
         // Register sensor
         try {
             InputStream response = null;
-            Log.w("EVS-IO", "EVS-IO: Read GPIO " + IoAdress);
+            //Log.w("EVS-IO", "EVS-IO: Read GPIO " + IoAdress);
             Process su = Runtime.getRuntime().exec("su");
             DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
             response = su.getInputStream();
@@ -69,7 +69,7 @@ public class EvsIo {
             outputStream.flush();
             su.waitFor();
             String result = readFully(response);
-            Log.w("EVS-IO", "EVS-IO: Read GPIO value: " + result);
+            //Log.w("EVS-IO", "EVS-IO: Read GPIO value: " + result);
             ret = result;
         } catch (Exception e) {
             Log.w("EVS-IO", "EVS-IO error: " + e);
