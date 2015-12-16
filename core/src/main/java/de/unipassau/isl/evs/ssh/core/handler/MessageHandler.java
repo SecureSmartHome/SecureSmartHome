@@ -1,6 +1,8 @@
 package de.unipassau.isl.evs.ssh.core.handler;
 
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 
 /**
  * Handlers perform actions based on the received messages and there field of responsibility.
@@ -8,7 +10,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
  * a new message is generated and passed on to the OutgoingRouter.
  */
 public interface MessageHandler {
-
     /**
      * Will perform actions based on the message given, e.g. permission/sanity checks.
      *
@@ -16,9 +17,9 @@ public interface MessageHandler {
      */
     void handle(Message.AddressedMessage message);
 
-    void handlerAdded(de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher dispatcher, String routingKey);
+    void handlerAdded(IncomingDispatcher dispatcher, RoutingKey routingKey);
 
 
-    void handlerRemoved(String routingKey);
+    void handlerRemoved(RoutingKey routingKey);
 }
 

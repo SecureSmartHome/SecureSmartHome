@@ -25,6 +25,7 @@ import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
@@ -37,6 +38,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.group.ChannelGroup;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.GLOBAL_DEMO;
 
 /**
  * MainActivity for the Master App
@@ -58,12 +61,12 @@ public class MainActivity extends BoundActivity {
         }
 
         @Override
-        public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
+        public void handlerAdded(IncomingDispatcher dispatcher, RoutingKey routingKey) {
 
         }
 
         @Override
-        public void handlerRemoved(String routingKey) {
+        public void handlerRemoved(RoutingKey routingKey) {
 
         }
     };
@@ -94,7 +97,7 @@ public class MainActivity extends BoundActivity {
                     Toast.makeText(MainActivity.this, "Container not connected", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                final ChannelFuture future = outgoingRouter.sendMessageToMaster("/demo", message).getSendFuture();
+                final ChannelFuture future = outgoingRouter.sendMessageToMaster(GLOBAL_DEMO, message).getSendFuture();
                 log("OUT:" + message.toString());
                 future.addListener(new ChannelFutureListener() {
                     @Override
@@ -142,7 +145,7 @@ public class MainActivity extends BoundActivity {
 
         updateConnectionStatus();
 
-        requireComponent(IncomingDispatcher.KEY).registerHandler(handler, "/demo");
+        requireComponent(IncomingDispatcher.KEY).registerHandler(handler, GLOBAL_DEMO);
 
         showRegisterQROnFirstBoot();
     }
@@ -207,7 +210,7 @@ public class MainActivity extends BoundActivity {
     @Override
     public void onContainerDisconnected() {
         updateConnectionStatus();
-        requireComponent(IncomingDispatcher.KEY).unregisterHandler(handler, "/demo");
+        requireComponent(IncomingDispatcher.KEY).unregisterHandler(handler, GLOBAL_DEMO);
     }
 
     private void log(String text) {

@@ -10,16 +10,13 @@ import java.util.Set;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Component;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
@@ -31,6 +28,8 @@ import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.WeatherSensor;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.GLOBAL_MODULES_UPDATE;
+
 /**
  * SlaveModuleHandler offers a list of all Modules that are active in the System and (un)registers
  * modules in the SlaveContainer when they become (un)available.
@@ -38,10 +37,10 @@ import de.unipassau.isl.evs.ssh.drivers.lib.WeatherSensor;
  * @author Andreas Bucher
  * @author Wolfgang Popp
  */
-public class SlaveModuleHandler extends AbstractComponent implements MessageHandler {
+public class SlaveModuleHandler extends AbstractMessageHandler implements Component {
+    private static final String TAG = SlaveModuleHandler.class.getSimpleName();
     public static final Key<SlaveModuleHandler> KEY = new Key<>(SlaveModuleHandler.class);
 
-    private static final String TAG = SlaveModuleHandler.class.getSimpleName();
     private List<Module> components = null;
 
     /**
@@ -140,7 +139,7 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
     }
 
     public Class<? extends Component> getDriverClass(Module module) {
-        Class clazz = null;
+        Class<? extends Component> clazz = null;
         switch (module.getModuleType()) {
             case CoreConstants.ModuleType.WINDOW_SENSOR:
             case CoreConstants.ModuleType.DOOR_SENSOR:
@@ -173,45 +172,28 @@ public class SlaveModuleHandler extends AbstractComponent implements MessageHand
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        String routingKey = message.getRoutingKey();
-        if (routingKey.equals(CoreConstants.RoutingKeys.MODULES_UPDATE)) {
-            if (message.getPayload() instanceof ModulesPayload) {
-                ModulesPayload payload = (ModulesPayload) message.getPayload();
-                DeviceID myself = requireComponent(NamingManager.KEY).getOwnID();
-                List<Module> modules = payload.getModulesAtSlave(myself);
-                try {
-                    updateModule(modules);
-                } catch (WrongAccessPointException | EvsIoException e) {
-                    getContainer().require(OutgoingRouter.KEY).sendMessage(message.getFromID(),
-                            message.getHeader(Message.HEADER_REPLY_TO_KEY),
-                            new Message(new MessageErrorPayload(message.getPayload())));
-                }
-            } else {
-                Log.e(TAG, "Error! Unknown message Payload");
+        if (GLOBAL_MODULES_UPDATE.matches(message)) {
+            ModulesPayload payload = (ModulesPayload) message.getPayload();
+            DeviceID myself = requireComponent(NamingManager.KEY).getOwnID();
+            List<Module> modules = payload.getModulesAtSlave(myself);
+            try {
+                updateModule(modules);
+            } catch (WrongAccessPointException | EvsIoException e) {
+                Log.e(TAG, "Could not update Modules from payload " + payload, e);
+                sendMessage(
+                        message.getFromID(),
+                        message.getHeader(Message.HEADER_REPLY_TO_KEY),
+                        new Message(new MessageErrorPayload(message.getPayload()))
+                );
             }
         } else {
-            Log.e(TAG, "Error! Unsupported routing key");
+            invalidMessage(message);
         }
     }
 
     @Override
-    public void init(Container container) {
-        super.init(container);
-        requireComponent(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.MODULES_UPDATE);
-    }
-
-    @Override
-    public void destroy() {
-        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.MODULES_UPDATE);
-        super.destroy();
-    }
-
-    @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{GLOBAL_MODULES_UPDATE};
     }
 
     private class WrongAccessPointException extends Exception {

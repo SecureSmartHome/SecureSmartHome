@@ -7,26 +7,35 @@ import java.util.List;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.app.activity.DoorFragment;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_CAMERA_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_DOOR_BLOCK;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_DOOR_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_DOOR_RING;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_CAMERA_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_SET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_STATUS_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_UNLATCH;
+
 /**
  * The AppDoorHandler class sends and receives messages for door events.
  *
  * @author Wolfgang Popp
  */
-public class AppDoorHandler extends AbstractComponent implements MessageHandler {
+public class AppDoorHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppDoorHandler> KEY = new Key<>(AppDoorHandler.class);
     private static final String TAG = AppDoorHandler.class.getSimpleName();
 
@@ -70,55 +79,34 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
     }
 
     @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-    }
-
-    @Override
-    public void init(Container container) {
-        super.init(container);
-        getContainer().require(IncomingDispatcher.KEY).registerHandler(this,
-                CoreConstants.RoutingKeys.APP_CAMERA_GET,
-                CoreConstants.RoutingKeys.APP_DOOR_BLOCK,
-                CoreConstants.RoutingKeys.APP_DOOR_GET,
-                CoreConstants.RoutingKeys.APP_DOOR_RING);
-    }
-
-    @Override
-    public void destroy() {
-        getContainer().require(IncomingDispatcher.KEY).unregisterHandler(this,
-                CoreConstants.RoutingKeys.APP_CAMERA_GET,
-                CoreConstants.RoutingKeys.APP_DOOR_BLOCK,
-                CoreConstants.RoutingKeys.APP_DOOR_GET,
-                CoreConstants.RoutingKeys.APP_DOOR_RING);
-        super.destroy();
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{APP_CAMERA_GET,
+                APP_DOOR_BLOCK,
+                APP_DOOR_GET,
+                APP_DOOR_RING};
     }
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        String routingKey = message.getRoutingKey();
-        if (routingKey.equals(CoreConstants.RoutingKeys.APP_CAMERA_GET)) {
+        if (APP_CAMERA_GET.matches(message)) {
             CameraPayload payload = (CameraPayload) message.getPayload();
             fireImageUpdated(payload.getPicture());
-        } else if (routingKey.equals(CoreConstants.RoutingKeys.APP_DOOR_BLOCK)) {
+        } else if (APP_DOOR_BLOCK.matches(message)) {
             DoorLockPayload payload = (DoorLockPayload) message.getPayload();
             isDoorBlocked = !payload.isUnlock();
             fireStatusUpdated();
-        } else if (routingKey.equals(CoreConstants.RoutingKeys.APP_DOOR_GET)) {
+        } else if (APP_DOOR_GET.matches(message)) {
             DoorStatusPayload payload = (DoorStatusPayload) message.getPayload();
             isDoorOpen = !payload.isClosed();
             fireStatusUpdated();
-        } else if (routingKey.equals(CoreConstants.RoutingKeys.APP_DOOR_RING)) {
+        } else if (APP_DOOR_RING.matches(message)) {
             DoorBellPayload doorBellPayload = (DoorBellPayload) message.getPayload();
             fireImageUpdated(doorBellPayload.getCameraPayload().getPicture());
             Message messageToSend = new Message(doorBellPayload);
-            requireComponent(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE,
+            requireComponent(OutgoingRouter.KEY).sendMessageLocal(APP_NOTIFICATION_RECEIVE,
                     messageToSend);
         } else {
-            throw new IllegalArgumentException("Unkown Routing Key: " + routingKey);
+            invalidMessage(message);
         }
     }
 
@@ -157,10 +145,10 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
         DoorStatusPayload doorPayload = new DoorStatusPayload(door);
 
         Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_DOOR_GET);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_DOOR_STATUS_GET, message);
+        router.sendMessageToMaster(MASTER_DOOR_STATUS_GET, message);
 
     }
 
@@ -168,10 +156,10 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
         DoorUnlatchPayload doorPayload = new DoorUnlatchPayload(door);
 
         Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_DOOR_BLOCK);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_BLOCK);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_GET, message);
+        router.sendMessageToMaster(MASTER_DOOR_LOCK_GET, message);
     }
 
     /**
@@ -186,10 +174,10 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
         DoorUnlatchPayload doorPayload = new DoorUnlatchPayload(doors.get(0).getName());
 
         Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_DOOR_GET);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_DOOR_UNLATCH, message);
+        router.sendMessageToMaster(MASTER_DOOR_UNLATCH, message);
         isDoorOpen = true;
     }
 
@@ -202,10 +190,10 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
         DoorLockPayload doorPayload = new DoorLockPayload(isBlocked, doors.get(0).getName());
 
         Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_DOOR_BLOCK);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_BLOCK);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_SET, message);
+        router.sendMessageToMaster(MASTER_DOOR_LOCK_SET, message);
         isDoorBlocked = isBlocked;
     }
 
@@ -236,9 +224,9 @@ public class AppDoorHandler extends AbstractComponent implements MessageHandler 
         CameraPayload payload = new CameraPayload(0, cameras.get(0).getName());
 
         Message message = new Message(payload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_CAMERA_GET);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_CAMERA_GET);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_CAMERA_GET, message);
+        router.sendMessageToMaster(MASTER_CAMERA_GET, message);
     }
 }

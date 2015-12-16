@@ -1,27 +1,21 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 
 /**
  * Handles messages indicating that information about permissions of devices are requested or
  * that permissions need to be updated and also writes changes to the database using the DatabaseConnector.
+ * <p/>
+ * TODO remove? (Niko, 2015-12-16)
  */
-public class MasterPermissionHandler implements MessageHandler {
-
+public class MasterPermissionHandler extends AbstractMasterHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
-
     }
 
     @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-
+    protected RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[0];
     }
 }

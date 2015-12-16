@@ -98,6 +98,7 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
                 || requireComponent(PermissionController.KEY).hasPermission(userDeviceID, permission);
     }
 
+    @Deprecated
     protected void handleErrorMessage(Message.AddressedMessage message) {
         if (message.getHeader(Message.HEADER_REFERENCES_ID) != null) {
             final Message.AddressedMessage correspondingMessage = getMessageOnBehalfOfSequenceNr(

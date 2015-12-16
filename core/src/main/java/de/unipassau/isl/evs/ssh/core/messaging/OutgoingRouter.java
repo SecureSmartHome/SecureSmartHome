@@ -27,12 +27,11 @@ public abstract class OutgoingRouter extends AbstractComponent {
      * Adds the Address Information to the message by wrapping it in an immutable
      * {@link de.unipassau.isl.evs.ssh.core.messaging.Message.AddressedMessage} an sending to the corresponding
      * target.
-     *
-     * @param toID       ID of the receiving device.
+     *  @param toID       ID of the receiving device.
      * @param routingKey Alias of the receiving Handler.
      * @param msg        AddressedMessage to forward.
      */
-    public Message.AddressedMessage sendMessage(DeviceID toID, String routingKey, Message msg) {
+    public Message.AddressedMessage sendMessage(DeviceID toID, RoutingKey routingKey, Message msg) {
         final Message.AddressedMessage amsg = msg.setDestination(getOwnID(), toID, routingKey);
         final ChannelFuture future = doSendMessage(amsg);
         amsg.setSendFuture(future);
@@ -53,7 +52,7 @@ public abstract class OutgoingRouter extends AbstractComponent {
      *
      * @see IncomingDispatcher#dispatch(Message.AddressedMessage)
      */
-    public Message.AddressedMessage sendMessageLocal(String routingKey, Message message) {
+    public Message.AddressedMessage sendMessageLocal(RoutingKey routingKey, Message message) {
         return sendMessage(getOwnID(), routingKey, message);
     }
 
@@ -62,7 +61,7 @@ public abstract class OutgoingRouter extends AbstractComponent {
      *
      * @see NamingManager#getMasterID()
      */
-    public Message.AddressedMessage sendMessageToMaster(String routingKey, Message message) {
+    public Message.AddressedMessage sendMessageToMaster(RoutingKey routingKey, Message message) {
         return sendMessage(getMasterID(), routingKey, message);
     }
 

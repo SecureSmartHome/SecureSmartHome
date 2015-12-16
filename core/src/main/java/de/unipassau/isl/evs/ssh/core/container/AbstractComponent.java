@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.container;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import de.ncoder.typedmap.Key;
@@ -46,6 +48,7 @@ public class AbstractComponent implements Component {
     /**
      * @return the Container this Component is registered to or {@code null}
      */
+    @Nullable
     protected Container getContainer() {
         return container;
     }
@@ -55,6 +58,7 @@ public class AbstractComponent implements Component {
      *
      * @see Container#get(Key)
      */
+    @Nullable
     protected <T extends Component> T getComponent(Key<T> key) {
         Container container = getContainer();
         if (container != null) {
@@ -70,6 +74,7 @@ public class AbstractComponent implements Component {
      *
      * @see Container#require(Key)
      */
+    @NonNull
     protected <T extends Component> T requireComponent(Key<T> key) {
         Container container = getContainer();
         if (container != null) {

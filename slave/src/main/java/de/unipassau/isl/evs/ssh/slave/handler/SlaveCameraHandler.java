@@ -9,12 +9,12 @@ import android.util.Log;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_CAMERA_GET;
 
 /**
  * Handles messages requesting pictures from the camera (via API calls) and generates messages,
@@ -22,10 +22,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
  *
  * @author Christoph Fraedrich
  */
-public class SlaveCameraHandler implements MessageHandler {
+public class SlaveCameraHandler extends AbstractMessageHandler {
     private static final String TAG = SlaveCameraHandler.class.getSimpleName();
-
-    private IncomingDispatcher dispatcher;
 
     /**
      * Will perform actions based on the message given, e.g. permission/sanity checks.
@@ -34,7 +32,7 @@ public class SlaveCameraHandler implements MessageHandler {
      */
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (message.getPayload() instanceof CameraPayload) {
+        if (SLAVE_CAMERA_GET.matches(message)) {
             CameraPayload payload = (CameraPayload) message.getPayload();
 
             try {
@@ -47,47 +45,26 @@ public class SlaveCameraHandler implements MessageHandler {
                 ));
                 camera.startPreview();
             } catch (RuntimeException e) {
-                Log.i(TAG, "Failed to connect to cam.", e);
+                Log.e(TAG, "Failed to connect to cam.", e);
                 sendErrorMessage(message);
             }
         } else {
-            sendErrorMessage(message);
+            invalidMessage(message);
         }
     }
 
     @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-        this.dispatcher = dispatcher;
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-
-    }
-
-    /**
-     * Sends an error message to original sender
-     *
-     * @param original message
-     */
-    private void sendErrorMessage(Message.AddressedMessage original) {
-        Message reply;
-
-        String routingKey = original.getHeader(Message.HEADER_REPLY_TO_KEY);
-        reply = new Message(new MessageErrorPayload(original.getPayload()));
-        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
-        reply.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
-
-        dispatcher.getContainer().require(OutgoingRouter.KEY).sendMessage(original.getFromID(), routingKey, reply);
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{SLAVE_CAMERA_GET};
     }
 
     public class PictureCallback implements Camera.PreviewCallback, Camera.PictureCallback {
         private final int cameraID;
         private final String moduleName;
         private final int replyToSequenceNr;
-        private final String replyToKey;
+        private final RoutingKey replyToKey;
 
-        public PictureCallback(int cameraID, String moduleName, int replyToSequenceNr, String replyToKey) {
+        public PictureCallback(int cameraID, String moduleName, int replyToSequenceNr, RoutingKey replyToKey) {
             this.cameraID = cameraID;
             this.moduleName = moduleName;
             this.replyToSequenceNr = replyToSequenceNr;
@@ -116,7 +93,7 @@ public class SlaveCameraHandler implements MessageHandler {
                         */
                 onPictureTaken(jpegData, camera);
             } catch (IOException e) {
-                Log.wtf("facerecognition", e.getMessage());
+                Log.wtf(TAG, e.getMessage());
             }
         }
 
@@ -126,8 +103,7 @@ public class SlaveCameraHandler implements MessageHandler {
             payload.setPicture(data);
             Message reply = new Message(payload);
             reply.putHeader(Message.HEADER_REFERENCES_ID, replyToSequenceNr);
-            dispatcher.getContainer().require(OutgoingRouter.KEY)
-                    .sendMessageToMaster(replyToKey, reply);
+            sendMessageToMaster(replyToKey, reply);
         }
     }
 }

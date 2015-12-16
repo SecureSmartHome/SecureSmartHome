@@ -1,7 +1,5 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
-import android.util.Log;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -14,22 +12,24 @@ import java.util.Set;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_MODULES_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.GLOBAL_MODULES_UPDATE;
 
 /**
  * AppModuleHandler offers a list of all Modules that are active in the System.
  *
  * @author Andreas Bucher
  */
-public class AppModuleHandler extends AbstractComponent implements MessageHandler {
+public class AppModuleHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppModuleHandler> KEY = new Key<>(AppModuleHandler.class);
 
     /**
@@ -122,6 +122,7 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
 
     /**
      * Returns a list of connected modules at the given slave.
+     *
      * @param slave the slave
      * @return a list of connected modules at the given slave
      */
@@ -131,25 +132,18 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        String routingKey = message.getRoutingKey();
-        if (routingKey.equals(CoreConstants.RoutingKeys.APP_MODULES_GET)
-                || routingKey.equals(CoreConstants.RoutingKeys.MODULES_UPDATE)) {
-
-            if (message.getPayload() instanceof ModulesPayload) {
-                ModulesPayload payload = (ModulesPayload) message.getPayload();
-                Set<Module> modules = payload.getModules();
-                List<Slave> slaves = payload.getSlaves();
-                ListMultimap<Slave, Module> modulesAtSlave = payload.getModulesAtSlaves();
-                updateList(modules, slaves, modulesAtSlave);
-                //Todo: don't do this. do the thing that really needs to be done. this is just here because it's working for now!
-                for (Module module : getLights()) {
-                    requireComponent(AppLightHandler.KEY).setLight(module, false);
-                }
-            } else {
-                Log.e(this.getClass().getSimpleName(), "Error! Unknown message Payload");
+        if (APP_MODULES_GET.matches(message) || GLOBAL_MODULES_UPDATE.matches(message)) {
+            ModulesPayload payload = (ModulesPayload) message.getPayload();
+            Set<Module> modules = payload.getModules();
+            List<Slave> slaves = payload.getSlaves();
+            ListMultimap<Slave, Module> modulesAtSlave = payload.getModulesAtSlaves();
+            updateList(modules, slaves, modulesAtSlave);
+            //Todo: don't do this. do the thing that really needs to be done. this is just here because it's working for now!
+            for (Module module : getLights()) {
+                requireComponent(AppLightHandler.KEY).setLight(module, false);
             }
         } else {
-            throw new UnsupportedOperationException("Unknown routing key");
+            invalidMessage(message);
         }
     }
 
@@ -159,30 +153,12 @@ public class AppModuleHandler extends AbstractComponent implements MessageHandle
 
         Message message = new Message(payload);
 
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_MODULES_GET);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_MODULES_GET);
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_MODULE_GET, message);
     }
 
     @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-    }
-
-    @Override
-    public void init(Container container) {
-        super.init(container);
-        requireComponent(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.APP_MODULES_GET,
-                CoreConstants.RoutingKeys.MODULES_UPDATE);
-    }
-
-    @Override
-    public void destroy() {
-        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.APP_MODULES_GET,
-                CoreConstants.RoutingKeys.MODULES_UPDATE);
-        super.destroy();
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{APP_MODULES_GET, GLOBAL_MODULES_UPDATE};
     }
 }

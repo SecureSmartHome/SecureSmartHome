@@ -3,6 +3,12 @@ package de.unipassau.isl.evs.ssh.core;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import io.netty.util.AttributeKey;
@@ -215,59 +221,67 @@ public class CoreConstants {
     /**
      * This class contains constants for RoutingKeys
      */
-    public class RoutingKeys {
-        //Master
-        public static final String MASTER_LIGHT_GET = "/master/light/get";
-        public static final String MASTER_LIGHT_SET = "/master/light/set";
-        public static final String MASTER_DOOR_BELL_RING = "/master/doorbell/ring";
-        public static final String MASTER_CAMERA_GET = "/master/camera/get";
-        public static final String MASTER_REQUEST_WEATHER_INFO = "/master/weatherinfo/request";
-        public static final String MASTER_PUSH_WEATHER_INFO = "/master/weatherinfo/push";
-        public static final String MASTER_NOTIFICATION_SEND = "/master/notification/send";
-        public static final String MASTER_DOOR_BELL_CAMERA_GET = "/master/doorbell/camera/get";
-        public static final String MASTER_DOOR_UNLATCH = "/master/door/unlatch";
-        public static final String MASTER_DOOR_LOCK_SET = "/master/door/lock_set";
-        public static final String MASTER_DOOR_LOCK_GET = "/master/door/lock_get";
-        public static final String MASTER_DOOR_STATUS_GET = "/master/door/status_get";
-        public static final String MASTER_USERINFO_GET = "/master/userinfo/get";
-        public static final String MASTER_USERINFO_SET = "/master/userinfo/set";
-        public static final String MASTER_HOLIDAY_SET = "/master/holiday/set";
-        public static final String MASTER_HOLIDAY_GET = "/master/holiday/get";
-        public static final String MASTER_MODULE_ADD = "/master/module/add";
-        public static final String MASTER_MODULE_GET = "/master/module/get";
-        public static final String MASTER_USER_REGISTER = "/master/user/register";
-        public static final String MASTER_SLAVE_REGISTER = "/master/slave/register";
-        public static final String MASTER_DEVICE_CONNECTED = "/master/device/connected";
-        public static final String MASTER_MODULE_RENAME = "/master/module/modify";
-        public static final String MASTER_SYSTEM_HEALTH_CHECK = "master/systemhealth/check";
+    public static class RoutingKeys {
+        private RoutingKeys() {}
 
-        //Slave
-        public static final String SLAVE_LIGHT_GET = "/slave/light/get";
-        public static final String SLAVE_LIGHT_SET = "/slave/light/set";
-        public static final String SLAVE_CAMERA_GET = "/slave/camera/get";
-        public static final String SLAVE_DOOR_STATUS_GET = "/slave/door/status_get";
-        public static final String SLAVE_DOOR_UNLATCH = "/slave/door/unlatch";
-        public static final String SLAVE_MODULES_UPDATE = "/slave/modules/update";
+        private static final String PREFIX_MASTER = "/master";
+        private static final String PREFIX_SLAVE = "/slave";
+        private static final String PREFIX_APP = "/app";
+        private static final String PREFIX_GLOBAL = "/global";
 
-        //App
-        public static final String APP_MODULES_GET = "/app/module/get";
-        public static final String APP_LIGHT_UPDATE = "/app/light/update";
-        public static final String APP_CLIMATE_UPDATE = "/app/climate/update";
-        public static final String APP_NOTIFICATION_RECEIVE = "/app/notification/receive";
-        public static final String APP_NOTIFICATION_PICTURE_RECEIVE = "/app/notification/picture_receive";
-        public static final String APP_CAMERA_GET = "/app/camera/get";
-        public static final String APP_DOOR_BLOCK = "/app/door/block";
-        public static final String APP_DOOR_GET = "/app/door/get";
-        public static final String APP_DOOR_RING = "/app/door/ring";
-        public static final String APP_HOLIDAY_SIMULATION = "app/holiday/get";
-        public static final String APP_USERINFO_GET = "/app/userdevice/get";
-        public static final String APP_MODULE_ADD = "/app/module/add";
-        public static final String APP_USER_REGISTER = "/app/user/register";
-        public static final String APP_SLAVE_REGISTER = "/app/slave/register";
+        // Master
+        public static final RoutingKey<MessagePayload> MASTER_LIGHT_GET = new RoutingKey<>(PREFIX_MASTER + "/light/get", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_LIGHT_SET = new RoutingKey<>(PREFIX_MASTER + "/light/set", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_DOOR_BELL_RING = new RoutingKey<>(PREFIX_MASTER + "/doorbell/ring", MessagePayload.class);
+        public static final RoutingKey<CameraPayload> MASTER_CAMERA_GET = new RoutingKey<>(PREFIX_MASTER + "/camera/get", CameraPayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_REQUEST_WEATHER_INFO = new RoutingKey<>(PREFIX_MASTER + "/weatherinfo/request", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_PUSH_WEATHER_INFO = new RoutingKey<>(PREFIX_MASTER + "/weatherinfo/push", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_NOTIFICATION_SEND = new RoutingKey<>(PREFIX_MASTER + "/notification/send", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_DOOR_BELL_CAMERA_GET = new RoutingKey<>(PREFIX_MASTER + "/doorbell/camera/get", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_DOOR_UNLATCH = new RoutingKey<>(PREFIX_MASTER + "/door/unlatch", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_DOOR_LOCK_SET = new RoutingKey<>(PREFIX_MASTER + "/door/lock_set", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_DOOR_LOCK_GET = new RoutingKey<>(PREFIX_MASTER + "/door/lock_get", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_DOOR_STATUS_GET = new RoutingKey<>(PREFIX_MASTER + "/door/status_get", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_USERINFO_GET = new RoutingKey<>(PREFIX_MASTER + "/userinfo/get", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_USERINFO_SET = new RoutingKey<>(PREFIX_MASTER + "/userinfo/set", MessagePayload.class);
+        public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_SET = new RoutingKey<>(PREFIX_MASTER + "/holiday/set", HolidaySimulationPayload.class);
+        public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_GET = new RoutingKey<>(PREFIX_MASTER + "/holiday/get", HolidaySimulationPayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_MODULE_ADD = new RoutingKey<>(PREFIX_MASTER + "/module/add", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_MODULE_GET = new RoutingKey<>(PREFIX_MASTER + "/module/get", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_USER_REGISTER = new RoutingKey<>(PREFIX_MASTER + "/user/register", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_SLAVE_REGISTER = new RoutingKey<>(PREFIX_MASTER + "/slave/register", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_DEVICE_CONNECTED = new RoutingKey<>(PREFIX_MASTER + "/device/connected", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_MODULE_RENAME = new RoutingKey<>(PREFIX_MASTER + "/module/modify", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> MASTER_SYSTEM_HEALTH_CHECK = new RoutingKey<>(PREFIX_MASTER + "/systemhealth/check", MessagePayload.class);
 
-        // Slave/App (used for broadcast messages)
-        public static final String MODULES_UPDATE = "/*/modules/update";
-        public static final String APP_REQUEST_WEATHER_INFO = "/app/weatherinfo/request";
+        // Slave
+        public static final RoutingKey<MessagePayload> SLAVE_LIGHT_GET = new RoutingKey<>(PREFIX_SLAVE + "/light/get", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> SLAVE_LIGHT_SET = new RoutingKey<>(PREFIX_SLAVE + "/light/set", MessagePayload.class);
+        public static final RoutingKey<CameraPayload> SLAVE_CAMERA_GET = new RoutingKey<>(PREFIX_SLAVE + "/camera/get", CameraPayload.class);
+        public static final RoutingKey<MessagePayload> SLAVE_DOOR_STATUS_GET = new RoutingKey<>(PREFIX_SLAVE + "/door/status_get", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> SLAVE_DOOR_UNLATCH = new RoutingKey<>(PREFIX_SLAVE + "/door/unlatch", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> SLAVE_MODULES_UPDATE = new RoutingKey<>(PREFIX_SLAVE + "/modules/update", MessagePayload.class);
+
+        // App
+        public static final RoutingKey<MessagePayload> APP_MODULES_GET = new RoutingKey<>(PREFIX_APP + "/module/get", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> APP_LIGHT_UPDATE = new RoutingKey<>(PREFIX_APP + "/light/update", MessagePayload.class);
+        public static final RoutingKey<ClimatePayload> APP_CLIMATE_UPDATE = new RoutingKey<>(PREFIX_APP + "/climate/update", ClimatePayload.class);
+        public static final RoutingKey<MessagePayload> APP_NOTIFICATION_RECEIVE = new RoutingKey<>(PREFIX_APP + "/notification/receive", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> APP_NOTIFICATION_PICTURE_RECEIVE = new RoutingKey<>(PREFIX_APP + "/notification/picture_receive", MessagePayload.class);
+        public static final RoutingKey<CameraPayload> APP_CAMERA_GET = new RoutingKey<>(PREFIX_APP + "/camera/get", CameraPayload.class);
+        public static final RoutingKey<MessagePayload> APP_DOOR_BLOCK = new RoutingKey<>(PREFIX_APP + "/door/block", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> APP_DOOR_GET = new RoutingKey<>(PREFIX_APP + "/door/get", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> APP_DOOR_RING = new RoutingKey<>(PREFIX_APP + "/door/ring", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> APP_HOLIDAY_SIMULATION = new RoutingKey<>(PREFIX_APP + "/holiday/get", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> APP_USERINFO_GET = new RoutingKey<>(PREFIX_APP + "/userdevice/get", MessagePayload.class);
+        public static final RoutingKey<Void> APP_MODULE_ADD = new RoutingKey<>(PREFIX_APP + "/module/add", Void.class);
+        public static final RoutingKey<GenerateNewRegisterTokenPayload> APP_USER_REGISTER = new RoutingKey<>(PREFIX_APP + "/user/register", GenerateNewRegisterTokenPayload.class);
+        public static final RoutingKey<MessagePayload> APP_SLAVE_REGISTER = new RoutingKey<>(PREFIX_APP + "/slave/register", MessagePayload.class);
+
+        // Global
+        public static final RoutingKey<MessagePayload> GLOBAL_MODULES_UPDATE = new RoutingKey<>(PREFIX_GLOBAL + "/modules/update", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> GLOBAL_REQUEST_WEATHER_INFO = new RoutingKey<>(PREFIX_GLOBAL + "/weatherinfo/request", MessagePayload.class);
+        public static final RoutingKey<MessagePayload> GLOBAL_DEMO = new RoutingKey<>(PREFIX_GLOBAL + "/demo", MessagePayload.class);
     }
 
     /**

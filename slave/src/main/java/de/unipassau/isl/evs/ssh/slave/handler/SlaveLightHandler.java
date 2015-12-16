@@ -7,17 +7,24 @@ import java.io.IOException;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_LIGHT_SET;
 
 /**
  * Handles light messages and makes API calls accordingly.
  *
  * @author Christoph Fraedrich
  */
-public class SlaveLightHandler extends AbstractSlaveHandler {
+public class SlaveLightHandler extends AbstractMessageHandler {
+    private static final String TAG = SlaveLightHandler.class.getSimpleName();
+
     /**
      * Will perform actions based on the message given, e.g. permission/sanity checks.
      *
@@ -33,15 +40,14 @@ public class SlaveLightHandler extends AbstractSlaveHandler {
             );
             final EdimaxPlugSwitch plugSwitch = requireComponent(key);
 
-            switch (message.getRoutingKey()) {
-                case CoreConstants.RoutingKeys.SLAVE_LIGHT_SET:
-                    switchLight(message, plugSwitch);
-                case CoreConstants.RoutingKeys.SLAVE_LIGHT_GET:
-                    replyStatus(message, plugSwitch);
-                    break;
+            if (SLAVE_LIGHT_SET.matches(message)) {
+                switchLight(message, plugSwitch);
+                replyStatus(message, plugSwitch);
+            } else if (SLAVE_LIGHT_GET.matches(message)) {
+                replyStatus(message, plugSwitch);
             }
         } else {
-            //TODO check Routing key
+            //TODO check RoutingKey and call invalidMessage(message) otherwise
             final Message reply = new Message(new MessageErrorPayload(message.getPayload()));
             sendMessage(
                     message.getFromID(),
@@ -49,6 +55,11 @@ public class SlaveLightHandler extends AbstractSlaveHandler {
                     reply
             );
         }
+    }
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{SLAVE_LIGHT_SET, SLAVE_LIGHT_GET};
     }
 
     /**
@@ -63,12 +74,12 @@ public class SlaveLightHandler extends AbstractSlaveHandler {
             if (payload.getOn() != plugSwitch.isOn()) {
                 final boolean success = plugSwitch.setOn(payload.getOn());
                 if (!success) {
-                    Log.e(this.getClass().getSimpleName(), "Lamp did change status");
+                    Log.e(TAG, "Lamp did change status (should be " + payload.getOn() + ")");
                     sendErrorMessage(original);
                 }
             }
         } catch (IOException e) {
-            Log.e(this.getClass().getSimpleName(), "Cannot switch lamp due to error", e);
+            Log.e(TAG, "Cannot switch lamp due to error", e);
             sendErrorMessage(original);
         }
     }
@@ -90,7 +101,7 @@ public class SlaveLightHandler extends AbstractSlaveHandler {
                     reply
             );
         } catch (IOException e) {
-            Log.e(this.getClass().getSimpleName(), "Cannot retrieve lamp status due to error", e);
+            Log.e(TAG, "Cannot retrieve lamp status due to error", e);
             sendErrorMessage(original);
         }
     }

@@ -7,14 +7,12 @@ import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import de.unipassau.isl.evs.ssh.drivers.lib.ButtonSensor;
@@ -28,36 +26,26 @@ import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
  *
  * @author Christoph Fraedrich
  */
-public class SlaveSystemHealthHandler extends AbstractComponent implements MessageHandler {
+public class SlaveSystemHealthHandler extends AbstractMessageHandler implements Component {
     //TODO maybe refactor to task instead of handler. So far we do not answer messages
     public static final Key<SlaveSystemHealthHandler> KEY = new Key<>(SlaveSystemHealthHandler.class);
-    private static final String TAG = SlaveSystemHealthHandler.class.getSimpleName();
 
-    private Container container;
     private ScheduledFuture future;
 
     @Override
     public void handle(Message.AddressedMessage message) {
-
     }
 
     @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[0];
     }
 
     @Override
     public void init(Container container) {
         super.init(container);
-        this.container = container;
-
         future = container.require(ExecutionServiceComponent.KEY).scheduleAtFixedRate(
-                new SystemHealthRunnable(), 0, 60000, TimeUnit.MILLISECONDS
+                new SystemHealthRunnable(), 0, 1, TimeUnit.MINUTES
         );
     }
 
@@ -68,42 +56,37 @@ public class SlaveSystemHealthHandler extends AbstractComponent implements Messa
     }
 
     private class SystemHealthRunnable implements Runnable {
-
         @Override
         public void run() {
             SlaveModuleHandler handler = getContainer().require(SlaveModuleHandler.KEY);
             List<Module> modules = handler.getModules();
             for (Module module : modules) {
-                Class clazz = handler.getDriverClass(module);
-                Key key = new Key(clazz, module.getName());
-                checkStatus(clazz, getContainer().require(key), module);
+                Key<? extends Component> key = new Key<>(handler.getDriverClass(module), module.getName());
+                checkStatus(handler.getDriverClass(module), getContainer().require(key), module);
             }
         }
 
         private void checkStatus(Class clazz, Component driver, Module module) {
-            if (clazz.getName().equals(ButtonSensor.class.getName())) {
+            if (ButtonSensor.class.equals(clazz)) {
                 try {
                     ((ButtonSensor) driver).isPressed();
                 } catch (EvsIoException e) {
                     Message message = new Message(new SystemHealthPayload(true, module));
-                    getContainer().require(OutgoingRouter.KEY).sendMessageToMaster(
-                            CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
+                    sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
                 }
-            } else if (clazz.getName().equals(ReedSensor.class.getName())) {
+            } else if (ReedSensor.class.equals(clazz)) {
                 try {
                     ((ReedSensor) driver).isOpen();
                 } catch (EvsIoException e) {
                     Message message = new Message(new SystemHealthPayload(true, module));
-                    getContainer().require(OutgoingRouter.KEY).sendMessageToMaster(
-                            CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
+                    sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
                 }
-            } else if (clazz.getName().equals(EdimaxPlugSwitch.class.getName())) {
+            } else if (EdimaxPlugSwitch.class.equals(clazz)) {
                 try {
                     ((EdimaxPlugSwitch) driver).isOn();
                 } catch (IOException e) {
                     Message message = new Message(new SystemHealthPayload(true, module));
-                    getContainer().require(OutgoingRouter.KEY).sendMessageToMaster(
-                            CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
+                    sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
                 }
             }
         }

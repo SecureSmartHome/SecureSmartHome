@@ -4,9 +4,12 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_CAMERA_GET;
 
 /**
  * Handles messages requesting pictures from the camera and generates messages, containing the pictures,
@@ -19,20 +22,9 @@ public class MasterCameraHandler extends AbstractMasterHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         saveMessage(message);
-
-        if (message.getPayload() instanceof CameraPayload) {
-            //Response or request?
+        if (MASTER_CAMERA_GET.matches(message)) {
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
-                //Request
-                //which functionality
-                switch (message.getRoutingKey()) {
-                    //Get status
-                    case CoreConstants.RoutingKeys.MASTER_CAMERA_GET:
-                        handleGetRequest(message);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("Unsupported routing key: " + message.getRoutingKey());
-                }
+                handleGetRequest(message);
             } else {
                 //Response
                 handleResponse(message);
@@ -40,8 +32,13 @@ public class MasterCameraHandler extends AbstractMasterHandler {
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
-            sendErrorMessage(message);
+            invalidMessage(message);
         }
+    }
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_CAMERA_GET};
     }
 
     private void handleResponse(Message.AddressedMessage message) {

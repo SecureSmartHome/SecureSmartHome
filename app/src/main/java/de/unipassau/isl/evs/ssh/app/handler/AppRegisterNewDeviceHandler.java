@@ -11,14 +11,13 @@ import java.util.List;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
@@ -32,7 +31,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USE
  * @author Wolfgang Popp
  * @author Leon Sell
  */
-public class AppRegisterNewDeviceHandler extends AbstractComponent implements MessageHandler {
+public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppRegisterNewDeviceHandler> KEY = new Key<>(AppRegisterNewDeviceHandler.class);
 
     private List<RegisterNewDeviceListener> listeners = new LinkedList<>();
@@ -76,16 +75,16 @@ public class AppRegisterNewDeviceHandler extends AbstractComponent implements Me
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (message.getPayload() instanceof GenerateNewRegisterTokenPayload) {
-            switch (message.getRoutingKey()) {
-                case APP_USER_REGISTER:
-                    handleUserRegisterResponse(message);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unsupported routing key: " + message.getRoutingKey()
-                            + " for GenerateNewRegisterTokenPayload");
-            }
+        if (APP_USER_REGISTER.matches(message)) {
+            handleUserRegisterResponse(message);
+        } else {
+            invalidMessage(message);
         }
+    }
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{APP_USER_REGISTER};
     }
 
     private void handleUserRegisterResponse(Message.AddressedMessage message) {
@@ -107,28 +106,6 @@ public class AppRegisterNewDeviceHandler extends AbstractComponent implements Me
         QRDeviceInformation qrDevInfo = new QRDeviceInformation(address, port, namingManager.getMasterID(),
                 generateNewRegisterTokenPayload.getToken());
         fireTokenResponse(qrDevInfo);
-    }
-
-    @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-
-    }
-
-    @Override
-    public void init(Container container) {
-        super.init(container);
-        getComponent(IncomingDispatcher.KEY).registerHandler(this, APP_USER_REGISTER);
-    }
-
-    @Override
-    public void destroy() {
-        getComponent(IncomingDispatcher.KEY).unregisterHandler(this, APP_USER_REGISTER);
-        super.destroy();
     }
 
     /**

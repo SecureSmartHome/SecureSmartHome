@@ -3,13 +3,17 @@ package de.unipassau.isl.evs.ssh.slave.handler;
 import android.util.Log;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
 import de.unipassau.isl.evs.ssh.drivers.lib.DoorBuzzer;
 import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_DOOR_STATUS_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_DOOR_UNLATCH;
 
 /**
  * Handles door messages and makes API calls accordingly.
@@ -17,19 +21,24 @@ import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
  * @author Andreas Bucher
  * @author Wolfgang Popp
  */
-public class SlaveDoorHandler extends AbstractSlaveHandler {
-    public static final Key<SlaveDoorHandler> KEY = new Key<>(SlaveDoorHandler.class);
+public class SlaveDoorHandler extends AbstractMessageHandler {
     private static final String TAG = SlaveDoorHandler.class.getSimpleName();
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        String routingKey = message.getRoutingKey();
-        if (routingKey.equals(CoreConstants.RoutingKeys.SLAVE_DOOR_STATUS_GET)) {
+        if (SLAVE_DOOR_STATUS_GET.matches(message)) {
             handleDoorStatus(message);
-        } else if (routingKey.equals(CoreConstants.RoutingKeys.SLAVE_DOOR_UNLATCH)) {
+        } else if (SLAVE_DOOR_UNLATCH.matches(message)) {
             handleUnlatchDoor(message);
             handleDoorStatus(message);
+        } else {
+            invalidMessage(message);
         }
+    }
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{SLAVE_DOOR_STATUS_GET, SLAVE_DOOR_UNLATCH};
     }
 
     private void handleDoorStatus(Message.AddressedMessage original) {
@@ -37,19 +46,15 @@ public class SlaveDoorHandler extends AbstractSlaveHandler {
         String moduleName = incomingPayload.getModuleName();
         Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
         ReedSensor doorSensor = getContainer().require(key);
-        boolean isDoorOpen = false;
 
         try {
-            isDoorOpen = doorSensor.isOpen();
+            final Message reply = new Message(new DoorStatusPayload(doorSensor.isOpen(), moduleName));
+            reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
+            sendMessage(original.getFromID(), original.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
         } catch (EvsIoException e) {
             Log.e(TAG, "Cannot get door status", e);
             sendErrorMessage(original);
-            return;
         }
-
-        final Message reply = new Message(new DoorStatusPayload(isDoorOpen, moduleName));
-        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
-        sendMessage(original.getFromID(), original.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
     }
 
     private void handleUnlatchDoor(Message.AddressedMessage message) {

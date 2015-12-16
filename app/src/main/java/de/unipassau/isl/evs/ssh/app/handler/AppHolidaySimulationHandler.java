@@ -4,60 +4,50 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.container.Component;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
-import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_HOLIDAY_SET;
 
 /**
  * AppHolidaySimulationHandler class handles messages for the holiday simulation
  *
  * @author Christoph Fraedrich
  */
-public class AppHolidaySimulationHandler extends AbstractComponent implements MessageHandler {
+public class AppHolidaySimulationHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppHolidaySimulationHandler> KEY = new Key<>(AppHolidaySimulationHandler.class);
-    public static final int UPDATE_INTERVAL = 5000;
-    private static final String TAG = AppHolidaySimulationHandler.class.getSimpleName();
+    public static final int UPDATE_INTERVAL = 5000; //FIXME move to Constants (Niko, 2015-12-16)
+
     private final List<HolidaySimulationListener> listeners = new ArrayList<>();
     private boolean isOn;
-    private long timeStamp = System.currentTimeMillis();
-
+    private long lastUpdate = System.currentTimeMillis();
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (message.getPayload() instanceof HolidaySimulationPayload) {
+        if (MASTER_HOLIDAY_SET.matches(message)) {
             this.isOn = ((HolidaySimulationPayload) message.getPayload()).switchOn();
             fireStatusChanged();
         } else {
-            sendErrorMessage(message);
+            invalidMessage(message);
         }
     }
 
     @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_HOLIDAY_SET};
     }
 
     /**
      * @return if the Holiday Simulation is turned on.
      */
     public boolean isOn() {
-        if (System.currentTimeMillis() - timeStamp >= UPDATE_INTERVAL) {
-            Message message = new Message();
-            OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-            router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET, message);
+        if (System.currentTimeMillis() - lastUpdate >= UPDATE_INTERVAL) {
+            sendMessageToMaster(MASTER_HOLIDAY_GET, new Message());
         }
-
         return isOn;
     }
 
@@ -70,28 +60,7 @@ public class AppHolidaySimulationHandler extends AbstractComponent implements Me
     public void switchHolidaySimulation(boolean on) {
         HolidaySimulationPayload payload = new HolidaySimulationPayload(on);
         Message message = new Message(payload);
-        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_HOLIDAY_SET, message);
-    }
-
-    /**
-     * Respond with an error message to a given AddressedMessage.
-     *
-     * @param original Original Message.
-     */
-    protected Message.AddressedMessage sendErrorMessage(Message.AddressedMessage original) {
-        //TODO logging
-        Message reply = new Message(new MessageErrorPayload(original.getPayload()));
-        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
-        return sendMessage(
-                original.getFromID(),
-                original.getHeader(Message.HEADER_REPLY_TO_KEY),
-                reply
-        );
-    }
-
-    protected Message.AddressedMessage sendMessage(DeviceID toID, String routingKey, Message msg) {
-        return requireComponent(OutgoingRouter.KEY).sendMessage(toID, routingKey, msg);
+        sendMessageToMaster(MASTER_HOLIDAY_SET, message);
     }
 
     /**

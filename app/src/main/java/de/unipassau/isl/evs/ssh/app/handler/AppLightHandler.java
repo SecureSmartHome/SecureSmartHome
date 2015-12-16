@@ -9,14 +9,15 @@ import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_LIGHT_UPDATE;
 
 /**
  * AppLightHandler class handles message from and to the
@@ -24,7 +25,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
  *
  * @author Phil Werli
  */
-public class AppLightHandler extends AbstractComponent implements MessageHandler {
+public class AppLightHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppLightHandler> KEY = new Key<>(AppLightHandler.class);
 
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(20);
@@ -107,29 +108,25 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
 
         Message message;
         message = new Message(lightPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_LIGHT_UPDATE);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_LIGHT_UPDATE);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_SET, message);
     }
 
-    /**
-     * Registers the {@link IncomingDispatcher} as an component.
-     */
     @Override
-    public void init(Container container) {
-        super.init(container);
-        requireComponent(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.APP_LIGHT_UPDATE);
-    }
-
-    @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{APP_LIGHT_UPDATE};
     }
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        LightPayload lightPayload = (LightPayload) message.getPayload();
-        setCachedStatus(lightPayload.getModule(), lightPayload.getOn());
+        if (APP_LIGHT_UPDATE.matches(message)) {
+            LightPayload lightPayload = (LightPayload) message.getPayload();
+            setCachedStatus(lightPayload.getModule(), lightPayload.getOn());
+        } else {
+            invalidMessage(message);
+        }
     }
 
     /**
@@ -144,18 +141,6 @@ public class AppLightHandler extends AbstractComponent implements MessageHandler
      */
     public void removeListener(LightHandlerListener listener) {
         listeners.remove(listener);
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-    }
-
-    /**
-     * Unregisters the {@link IncomingDispatcher} as an component.
-     */
-    @Override
-    public void destroy() {
-        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.APP_LIGHT_UPDATE);
     }
 
     public interface LightHandlerListener {

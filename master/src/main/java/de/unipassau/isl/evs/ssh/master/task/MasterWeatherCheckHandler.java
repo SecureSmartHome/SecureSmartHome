@@ -8,10 +8,13 @@ import android.util.Log;
 import net.aksingh.owmjapis.CurrentWeather;
 import net.aksingh.owmjapis.OpenWeatherMap;
 
+import java.util.concurrent.TimeUnit;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
@@ -25,8 +28,7 @@ import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
  * @author Christoph Fraedrich
  */
 public class MasterWeatherCheckHandler extends AbstractMasterHandler implements ScheduledComponent {
-
-    public static final int MILLIS_IN_FIVE_MIN = 300000;
+    public static final long MILLIS_IN_FIVE_MIN = TimeUnit.MINUTES.toMillis(5);
     private static final Key<MasterWeatherCheckHandler> KEY = new Key<>(MasterWeatherCheckHandler.class);
     private static final String TAG = MasterWeatherCheckHandler.class.getSimpleName();
     private boolean windowClosed;
@@ -38,9 +40,15 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
 
     @Override
     public void handle(Message.AddressedMessage message) {
+        //FIXME //STOPSHIP use correct RoutingKey instead and add to getRoutingKeys() (Niko, 2015-12-17)
         if (message.getPayload() instanceof DoorStatusPayload) {
             windowClosed = ((DoorStatusPayload) message.getPayload()).isClosed();
         }
+    }
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{};
     }
 
     @Override
@@ -62,9 +70,9 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
 
     @Override
     public void onReceive(Intent intent) {
-        OpenWeatherMap owm = new OpenWeatherMap("f5301a474451c6e1394268314b72a358");
+        OpenWeatherMap owm = new OpenWeatherMap("f5301a474451c6e1394268314b72a358"); //TODO move to CoreConstants (Niko, 2015-12-17)
         try {
-            CurrentWeather cw = owm.currentWeatherByCityName("Passau");
+            CurrentWeather cw = owm.currentWeatherByCityName("Passau"); //TODO use current location  (Niko, 2015-12-17)
             if (!windowClosed && cw.getRainInstance().hasRain()) {
                 sendWarningNotification();
             }

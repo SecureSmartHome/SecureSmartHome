@@ -15,7 +15,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
@@ -26,6 +26,10 @@ import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_HOLIDAY_SET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_LIGHT_SET;
+
 /**
  * This handler calculates what actions need to take place in order to execute the holiday simulation.
  * It then tells the scheduler which HolidayTasks need to be scheduled for which time and also
@@ -34,42 +38,41 @@ import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
  * @author Christoph Fraedrich
  */
 public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler implements ScheduledComponent {
-
-    public static final int MILLIS_PER_HOUR = 3600000;
+    public static final long MILLIS_PER_HOUR = TimeUnit.HOURS.toMillis(1);
     private static final Key<MasterHolidaySimulationPlannerHandler> KEY = new Key<>(MasterHolidaySimulationPlannerHandler.class);
     private boolean runHolidaySimulation = false;
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (message.getRoutingKey().equals(CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET)) {
+        if (MASTER_HOLIDAY_GET.matches(message)) {
             replyStatus(message);
+        } else if (MASTER_HOLIDAY_SET.matches(message)) {
+            HolidaySimulationPayload payload = (HolidaySimulationPayload) message.getPayload();
 
-        } else if (message.getRoutingKey().equals(CoreConstants.RoutingKeys.MASTER_HOLIDAY_SET)) {
-            if (message.getPayload() instanceof HolidaySimulationPayload) {
-                HolidaySimulationPayload payload = (HolidaySimulationPayload) message.getPayload();
+            //TODO Refactor if we eliminate one permission
+            if (payload.switchOn() && hasPermission(message.getFromID(), new Permission(
+                    CoreConstants.Permission.BinaryPermission.START_HOLIDAY_SIMULATION.toString(), ""))) {
 
-                //TODO Refactor if we eliminate one permission
-                if (payload.switchOn() && hasPermission(message.getFromID(), new Permission(
-                        CoreConstants.Permission.BinaryPermission.START_HOLIDAY_SIMULATION.toString(), ""))) {
+                runHolidaySimulation = payload.switchOn();
+                replyStatus(message);
 
-                    runHolidaySimulation = payload.switchOn();
-                    replyStatus(message);
+            } else if (!payload.switchOn() && hasPermission(message.getFromID(), new Permission(
+                    CoreConstants.Permission.BinaryPermission.STOP_HOLIDAY_SIMULATION.toString(), ""))) {
 
-                } else if (!payload.switchOn() && hasPermission(message.getFromID(), new Permission(
-                        CoreConstants.Permission.BinaryPermission.STOP_HOLIDAY_SIMULATION.toString(), ""))) {
+                runHolidaySimulation = payload.switchOn();
+                replyStatus(message);
 
-                    runHolidaySimulation = payload.switchOn();
-                    replyStatus(message);
-
-                } else {
-                    sendErrorMessage(message);
-                }
             } else {
                 sendErrorMessage(message);
             }
         } else {
-            sendErrorMessage(message);
+            invalidMessage(message);
         }
+    }
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_HOLIDAY_GET, MASTER_HOLIDAY_SET};
     }
 
     private void replyStatus(Message.AddressedMessage message) {
@@ -108,7 +111,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
     @Override
     public void destroy() {
-
+        //FIXME cancel scheduled task (Niko, 2015-12-17)
     }
 
     private class HolidayLightAction implements Runnable {
@@ -132,8 +135,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
             }
             MessagePayload payload = new LightPayload(on, module);
             Message message = new Message(payload);
-            getContainer().require(OutgoingRouter.KEY).sendMessage(module.getAtSlave(),
-                    CoreConstants.RoutingKeys.SLAVE_LIGHT_SET, message);
+            sendMessage(module.getAtSlave(), SLAVE_LIGHT_SET, message);
         }
     }
 }

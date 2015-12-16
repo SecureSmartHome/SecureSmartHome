@@ -5,21 +5,22 @@ import java.util.List;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.AddNewModulePayload;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_MODULE_ADD;
 
 /**
  * The AppNewModuleHandler handles the messaging needed to register a new ElectronicModule.
  *
  * @author Wolfgang Popp
  */
-public class AppNewModuleHandler extends AbstractComponent implements MessageHandler {
+public class AppNewModuleHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppNewModuleHandler> KEY = new Key<>(AppNewModuleHandler.class);
 
     private List<NewModuleListener> listeners = new LinkedList<>();
@@ -63,32 +64,16 @@ public class AppNewModuleHandler extends AbstractComponent implements MessageHan
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        String routingKey = message.getRoutingKey();
-        if (routingKey.equals(CoreConstants.RoutingKeys.APP_MODULE_ADD)) {
+        if (APP_MODULE_ADD.matches(message)) {
             fireRegistrationFinished(true);
+        } else {
+            invalidMessage(message);
         }
     }
 
     @Override
-    public void init(Container container) {
-        super.init(container);
-        container.require(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.APP_MODULE_ADD);
-    }
-
-    @Override
-    public void destroy() {
-        getComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.APP_MODULE_ADD);
-        super.destroy();
-    }
-
-    @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-
-    }
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{APP_MODULE_ADD};
     }
 
     /**
@@ -103,7 +88,7 @@ public class AppNewModuleHandler extends AbstractComponent implements MessageHan
 
         Message message = new Message(payload);
 
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_MODULE_ADD);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_MODULE_ADD);
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_MODULE_ADD, message);
     }
 }

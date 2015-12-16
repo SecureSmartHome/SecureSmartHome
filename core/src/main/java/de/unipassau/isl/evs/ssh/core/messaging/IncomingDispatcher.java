@@ -28,7 +28,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PE
 public abstract class IncomingDispatcher extends ChannelHandlerAdapter implements Component {
     public static final Key<IncomingDispatcher> KEY = new Key<>(IncomingDispatcher.class);
 
-    protected final SetMultimap<String, MessageHandler> mappings = HashMultimap.create();
+    protected final SetMultimap<RoutingKey, MessageHandler> mappings = HashMultimap.create();
     private Container container;
 
     @Override
@@ -57,7 +57,7 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
      * @return {@code true} if the Message was forwarded to at least one MessageHandler.
      */
     public boolean dispatch(final Message.AddressedMessage msg) {
-        Set<MessageHandler> handlers = mappings.get(msg.getRoutingKey());
+        Set<MessageHandler> handlers = mappings.get(new RoutingKey<>(msg.getRoutingKey(), msg.getPayload().getClass()));
         final EventLoop executor = getExecutor();
         Log.v(getClass().getSimpleName(), "Using EventLoop " + executor);
         for (final MessageHandler handler : handlers) {
@@ -89,8 +89,8 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
     /**
      * Register the handler to receive all messages sent to one of the given routingKeys.
      */
-    public void registerHandler(MessageHandler handler, String... routingKeys) {
-        for (String routingKey : routingKeys) {
+    public void registerHandler(MessageHandler handler, RoutingKey... routingKeys) {
+        for (RoutingKey routingKey : routingKeys) {
             mappings.put(routingKey, handler);
             handler.handlerAdded(this, routingKey);
         }
@@ -99,8 +99,8 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
     /**
      * Unregister the handler so that it no longer receives any messages sent to one of the given routingKeys.
      */
-    public void unregisterHandler(MessageHandler handler, String... routingKeys) {
-        for (String routingKey : routingKeys) {
+    public void unregisterHandler(MessageHandler handler, RoutingKey... routingKeys) {
+        for (RoutingKey routingKey : routingKeys) {
             handler.handlerRemoved(routingKey);
             mappings.remove(routingKey, handler);
         }

@@ -1,7 +1,5 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,14 +9,15 @@ import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_CLIMATE_UPDATE;
 
 /**
  * AppClimateHandler class handles message from and to the
@@ -26,7 +25,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
  *
  * @author Andreas Bucher
  */
-public class AppClimateHandler extends AbstractComponent implements MessageHandler {
+public class AppClimateHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppClimateHandler> KEY = new Key<>(AppClimateHandler.class);
 
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(1);
@@ -216,20 +215,10 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
 
         Message message;
         message = new Message(climatePayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, CoreConstants.RoutingKeys.APP_CLIMATE_UPDATE);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_CLIMATE_UPDATE);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO, message);
-    }
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Registers the {@link IncomingDispatcher} as an component.
-     */
-    @Override
-    public void init(Container container) {
-        super.init(container);
-        requireComponent(IncomingDispatcher.KEY).registerHandler(this, CoreConstants.RoutingKeys.APP_CLIMATE_UPDATE);
     }
 
     //Lifecycle & Callbacks/////////////////////////////////////////////////////////////////////////
@@ -241,24 +230,19 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
      */
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (message.getPayload() instanceof ClimatePayload) {
+        if (APP_CLIMATE_UPDATE.matches(message)) {
             ClimatePayload climatePayload = (ClimatePayload) message.getPayload();
             setCachedStatus(climatePayload.getModule(), climatePayload.getTemp1(), climatePayload.getTemp2(),
                     climatePayload.getPressure(), climatePayload.getAltitude(), climatePayload.getHumidity(),
                     climatePayload.getUv(), climatePayload.getIr(), climatePayload.getVisible());
         } else {
-            Log.e(this.getClass().getSimpleName(), "Error! Unknown message Payload");
+            invalidMessage(message);
         }
     }
 
     @Override
-    public void handlerAdded(IncomingDispatcher dispatcher, String routingKey) {
-    }
-
-
-    @Override
-    public void handlerRemoved(String routingKey) {
-
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{APP_CLIMATE_UPDATE};
     }
 
     /**
@@ -273,14 +257,6 @@ public class AppClimateHandler extends AbstractComponent implements MessageHandl
      */
     public void removeListener(AppClimateHandler.ClimateHandlerListener listener) {
         listeners.remove(listener);
-    }
-
-    /**
-     * Unregisters the {@link IncomingDispatcher} as an component.
-     */
-    @Override
-    public void destroy() {
-        requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, CoreConstants.RoutingKeys.APP_CLIMATE_UPDATE);
     }
 
     public interface ClimateHandlerListener {
