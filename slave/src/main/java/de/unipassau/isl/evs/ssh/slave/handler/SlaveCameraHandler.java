@@ -37,20 +37,19 @@ public class SlaveCameraHandler implements MessageHandler {
         if (message.getPayload() instanceof CameraPayload) {
             CameraPayload payload = (CameraPayload) message.getPayload();
 
-            Camera camera;
-
             try {
-                camera = Camera.open();
-                PictureCallback pictureCallback = new PictureCallback();
-                setPreviewCallback(pictureCallback, camera);
-                payload.setPicture(pictureCallback.pictureData);
+                Camera camera = Camera.open();
+                camera.setOneShotPreviewCallback(new PictureCallback(
+                        payload.getCameraID(),
+                        payload.getModuleName(),
+                        message.getSequenceNr(),
+                        message.getHeader(Message.HEADER_REPLY_TO_KEY)
+                ));
+                camera.startPreview();
             } catch (RuntimeException e) {
-                Log.i(TAG, "Failed to connect to cam.");
+                Log.i(TAG, "Failed to connect to cam.", e);
+                sendErrorMessage(message);
             }
-            Message reply = new Message(payload);
-            reply.putHeader(Message.HEADER_REFERENCES_ID, message.getSequenceNr());
-            dispatcher.getContainer().require(OutgoingRouter.KEY)
-                    .sendMessageToMaster(message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
         } else {
             sendErrorMessage(message);
         }
@@ -82,54 +81,53 @@ public class SlaveCameraHandler implements MessageHandler {
         dispatcher.getContainer().require(OutgoingRouter.KEY).sendMessage(original.getFromID(), routingKey, reply);
     }
 
-    /**
-     * Makes a preview and takes a frame from there to make fill a picture callback
-     *
-     * @param pictureCallback to be filled
-     * @param camera          to be used
-     */
-    private void setPreviewCallback(final Camera.PictureCallback pictureCallback, Camera camera) {
-        Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
-            public void onPreviewFrame(byte[] data, Camera camera) {
-                Rect rect = new Rect(0, 0, 300, 300);
-                //mPreviewSize.width,
-                //mPreviewSize.height);
-                YuvImage image = new YuvImage(data, ImageFormat.NV16, 300, 300, //TODO what picture size do we use?
-                        //mPreviewSize.width,
-                        //mPreviewSize.height, ,
-                        null);
+    public class PictureCallback implements Camera.PreviewCallback, Camera.PictureCallback {
+        private final int cameraID;
+        private final String moduleName;
+        private final int replyToSequenceNr;
+        private final String replyToKey;
 
-                try {
-                    ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-                    image.compressToJpeg(rect, 100, outStream);
-                    outStream.flush();
-                    outStream.close();
-                    byte[] jpegData = outStream.toByteArray();
+        public PictureCallback(int cameraID, String moduleName, int replyToSequenceNr, String replyToKey) {
+            this.cameraID = cameraID;
+            this.moduleName = moduleName;
+            this.replyToSequenceNr = replyToSequenceNr;
+            this.replyToKey = replyToKey;
+        }
+
+        public void onPreviewFrame(byte[] data, Camera camera) {
+            Rect rect = new Rect(0, 0, 300, 300);
+            //mPreviewSize.width,
+            //mPreviewSize.height);
+            YuvImage image = new YuvImage(data, ImageFormat.NV16, 300, 300, //TODO what picture size do we use?
+                    //mPreviewSize.width,
+                    //mPreviewSize.height, ,
+                    null);
+
+            try {
+                ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+                image.compressToJpeg(rect, 100, outStream);
+                outStream.flush();
+                outStream.close();
+                byte[] jpegData = outStream.toByteArray();
 /*
                     if (previewRotate != 0)
                         jpegData = rotatePicture(jpegData, mPreviewSize.width,
                                 mPreviewSize.height, previewRotate);
                         */
-                    if (pictureCallback != null) {
-                        pictureCallback.onPictureTaken(jpegData, camera);
-                    }
-                } catch (IOException e) {
-                    Log.wtf("facerecognition", e.getMessage());
-                }
+                onPictureTaken(jpegData, camera);
+            } catch (IOException e) {
+                Log.wtf("facerecognition", e.getMessage());
             }
-
-        };
-
-        camera.setOneShotPreviewCallback(previewCallback);
-        camera.startPreview();
-    }
-
-    public class PictureCallback implements Camera.PictureCallback {
-        byte[] pictureData;
+        }
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-            this.pictureData = data;
+            CameraPayload payload = new CameraPayload(cameraID, moduleName);
+            payload.setPicture(data);
+            Message reply = new Message(payload);
+            reply.putHeader(Message.HEADER_REFERENCES_ID, replyToSequenceNr);
+            dispatcher.getContainer().require(OutgoingRouter.KEY)
+                    .sendMessageToMaster(replyToKey, reply);
         }
     }
 }
