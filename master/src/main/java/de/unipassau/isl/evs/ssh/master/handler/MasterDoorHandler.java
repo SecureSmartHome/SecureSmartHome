@@ -6,6 +6,7 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
@@ -13,6 +14,14 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_SET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_STATUS_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_UNLATCH;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_DOOR_STATUS_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_DOOR_UNLATCH;
 
 /**
  * Handles door messages and generates messages for each target and passes them to the OutgoingRouter.
@@ -30,55 +39,24 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     public void handle(Message.AddressedMessage message) {
         saveMessage(message);
 
-        if (message.getPayload() instanceof DoorUnlatchPayload) {
+        if (MASTER_DOOR_UNLATCH.matches(message)) {
             //Response or request?
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
                 //Request
-
-                //which functionality
-                switch (message.getRoutingKey()) {
-                    //Unlatch door
-                    case CoreConstants.RoutingKeys.MASTER_DOOR_UNLATCH:
-                        handleDoorUnlatch(message);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("Unsupported routing key: " + message.getRoutingKey());
-                }
+                handleDoorUnlatch(message);
             } else {
                 //Response
                 handleDoorUnlatchResponse(message);
             }
-        } else if (message.getPayload() instanceof DoorLockPayload) {
-            //Request
-
-            //which functionality
-            switch (message.getRoutingKey()) {
-                //(Un)Lock door
-                case CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_SET:
-                    handleDoorLockSet(message);
-                    break;
-                //Get door lock state
-                case CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_GET:
-                    handleDoorLockGet(message);
-                    break;
-                default:
-                    sendErrorMessage(message);
-                    break;
-            }
-        } else if (message.getPayload() instanceof DoorStatusPayload) {
+        } else if (MASTER_DOOR_LOCK_SET.matches(message)) {
+            handleDoorLockSet(message);
+        } else if (MASTER_DOOR_LOCK_GET.matches(message)) {
+            handleDoorLockGet(message);
+        } else if (MASTER_DOOR_STATUS_GET.matches(message)) {
             //Response or request?
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
                 //Request
-
-                //which functionality
-                switch (message.getRoutingKey()) {
-                    //Get status
-                    case CoreConstants.RoutingKeys.MASTER_DOOR_STATUS_GET:
-                        handleDoorStatusGet(message);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("Unsupported routing key: " + message.getRoutingKey());
-                }
+                handleDoorStatusGet(message);
             } else {
                 //Response
                 handleDoorStatusGetResponse(message);
@@ -86,8 +64,13 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
-            sendErrorMessage(message);
+            invalidMessage(message);
         }
+    }
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_DOOR_UNLATCH, MASTER_DOOR_LOCK_SET, MASTER_DOOR_LOCK_GET, MASTER_DOOR_STATUS_GET};
     }
 
     private void handleDoorStatusGetResponse(Message.AddressedMessage message) {
@@ -120,7 +103,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),
-                    CoreConstants.RoutingKeys.SLAVE_DOOR_STATUS_GET,
+                    SLAVE_DOOR_STATUS_GET,
                     messageToSend
             );
             putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
@@ -165,7 +148,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             //Send notification
             if (doorLockPayload.isUnlock()) {
                 sendMessageLocal(
-                        CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND,
+                        MASTER_NOTIFICATION_SEND,
                         new Message(
                                 new NotificationPayload(
                                         CoreConstants.Permission.BinaryPermission.DOOR_UNLOCKED.toString(),
@@ -174,7 +157,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                         ));
             } else {
                 sendMessageLocal(
-                        CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND,
+                        MASTER_NOTIFICATION_SEND,
                         new Message(
                                 new NotificationPayload(
                                         CoreConstants.Permission.BinaryPermission.DOOR_LOCKED.toString(),
@@ -195,7 +178,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                 CoreConstants.Permission.BinaryPermission.DOOR_UNLATCHED.toString(), DOOR_UNLATCHED_MESSAGE));
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
-        sendMessageLocal(CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND, messageToSend);
+        sendMessageLocal(MASTER_NOTIFICATION_SEND, messageToSend);
     }
 
     private void handleDoorUnlatch(Message.AddressedMessage message) {
@@ -213,7 +196,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                 Message.AddressedMessage sendMessage =
                         sendMessage(
                                 atModule.getAtSlave(),
-                                CoreConstants.RoutingKeys.SLAVE_DOOR_UNLATCH,
+                                SLAVE_DOOR_UNLATCH,
                                 messageToSend
                         );
                 putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());

@@ -1,13 +1,18 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import java.util.List;
+
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND;
 
 /**
  * Handles notification messages and generates messages for each target and passes them to the OutgoingRouter.
@@ -17,27 +22,24 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 public class MasterNotificationHandler extends AbstractMasterHandler {
 
     public void handle(Message.AddressedMessage message) {
-        if (message.getPayload() instanceof NotificationPayload) {
-
+        if (MASTER_NOTIFICATION_SEND.matches(message)) {
             //Check if message is from master.
             if (requireComponent(NamingManager.KEY).getMasterID().equals(message.getFromID())) {
-                //which functionality
-                switch (message.getRoutingKey()) {
-                    //Send notification
-                    case CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND:
-                        handleNotificationSend(message);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("Unsupported routing key: " + message.getRoutingKey());
-                }
+                //Send notification
+                handleNotificationSend(message);
             } else {
                 sendErrorMessage(message);
             }
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
-            sendErrorMessage(message);
+            invalidMessage(message);
         }
+    }
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_NOTIFICATION_SEND};
     }
 
     private void handleNotificationSend(Message.AddressedMessage message) {
@@ -48,15 +50,16 @@ public class MasterNotificationHandler extends AbstractMasterHandler {
         sendMessageToAllReceivers(
                 messageToSend,
                 notificationPayload.getType(),
-                CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE
+                APP_NOTIFICATION_RECEIVE
         );
     }
 
-    private void sendMessageToAllReceivers(Message messageToSend, String type, String routingKey) {
-        for (UserDevice userDevice :
-                requireComponent(PermissionController.KEY).getAllUserDevicesWithPermission(
+    private void sendMessageToAllReceivers(Message messageToSend, String type, RoutingKey routingKey) {
+        final List<UserDevice> allUserDevicesWithPermission = requireComponent(PermissionController.KEY)
+                .getAllUserDevicesWithPermission(
                         new Permission(type, null)
-                )) {
+                );
+        for (UserDevice userDevice : allUserDevicesWithPermission) {
             sendMessage(userDevice.getUserDeviceID(), routingKey, messageToSend);
         }
     }

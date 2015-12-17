@@ -4,9 +4,15 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_SET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_LIGHT_SET;
 
 /**
  * Handles light messages, logs them for the holiday simulation and generates messages
@@ -18,28 +24,29 @@ public class MasterLightHandler extends AbstractMasterHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         saveMessage(message);
-        if (message.getPayload() instanceof LightPayload) {
-            //Response or request?
+
+        if (MASTER_LIGHT_SET.matches(message)) {
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
-                //which functionality
-                switch (message.getRoutingKey()) {
-                    case CoreConstants.RoutingKeys.MASTER_LIGHT_SET:
-                        handleSetRequest(message);
-                        break;
-                    case CoreConstants.RoutingKeys.MASTER_LIGHT_GET:
-                        handleGetRequest(message);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("Unsupported routing key: " + message.getRoutingKey());
-                }
+                handleSetRequest(message);
+            } else {
+                handleResponse(message);
+            }
+        } else if (MASTER_LIGHT_GET.matches(message)) {
+            if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
+                handleGetRequest(message);
             } else {
                 handleResponse(message);
             }
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
-            sendErrorMessage(message);
+            invalidMessage(message);
         }
+    }
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_LIGHT_SET, MASTER_LIGHT_GET};
     }
 
     private void handleSetRequest(Message.AddressedMessage message) {
@@ -57,7 +64,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
             messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),
-                    CoreConstants.RoutingKeys.SLAVE_LIGHT_SET,
+                    SLAVE_LIGHT_SET,
                     messageToSend
             );
             putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
@@ -85,7 +92,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
             messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),
-                    CoreConstants.RoutingKeys.SLAVE_LIGHT_GET,
+                    SLAVE_LIGHT_GET,
                     messageToSend
             );
             putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());

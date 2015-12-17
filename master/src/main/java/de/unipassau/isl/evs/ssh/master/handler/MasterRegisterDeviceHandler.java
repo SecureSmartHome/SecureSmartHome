@@ -12,11 +12,10 @@ import java.util.Map;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Component;
-import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
@@ -45,38 +44,21 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     private Map<String, UserDevice> userDeviceForToken = new HashMap<>();
 
     @Override
-    public void init(Container container) {
-        container.require(IncomingDispatcher.KEY).registerHandler(this, MASTER_USER_REGISTER);
-    }
-
-    @Override
-    public void destroy() {
-        Container container = getContainer();
-        if (container != null) {
-            container.require(IncomingDispatcher.KEY).unregisterHandler(this, MASTER_USER_REGISTER);
-        }
-    }
-
-    @Override
     public void handle(Message.AddressedMessage message) {
-        if (message.getPayload() instanceof GenerateNewRegisterTokenPayload) {
+        if (MASTER_USER_REGISTER.matches(message)) {
             if (hasPermission(message.getFromID(), new Permission(CoreConstants.Permission.BinaryPermission.ADD_USER.toString()))) {
-                //which functionality
-                switch (message.getRoutingKey()) {
-                    //Add new register token
-                    case MASTER_USER_REGISTER:
-                        handleInitRequest(message);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("Unsupported routing key: " + message.getRoutingKey()
-                                + " for GenerateNewRegisterTokenPayload");
-                }
+                handleInitRequest(message);
             }
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
-            sendErrorMessage(message);
+            invalidMessage(message);
         }
+    }
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_USER_REGISTER};
     }
 
     /**

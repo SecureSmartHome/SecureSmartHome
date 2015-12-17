@@ -15,7 +15,7 @@ public class MasterPermissionHandler extends AbstractMasterHandler {
     }
 
     @Override
-    protected RoutingKey[] getRoutingKeys() {
+    public RoutingKey[] getRoutingKeys() {
         return new RoutingKey[0];
     }
 }
