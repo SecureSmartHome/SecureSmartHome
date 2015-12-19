@@ -108,7 +108,7 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
 
         Message message;
         message = new Message(lightPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_LIGHT_UPDATE);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_LIGHT_UPDATE.getKey());
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_SET, message);

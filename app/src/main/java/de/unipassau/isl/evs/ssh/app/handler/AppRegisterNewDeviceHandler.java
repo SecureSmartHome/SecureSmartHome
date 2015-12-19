@@ -115,7 +115,7 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
      */
     public void requestToken(UserDevice user) {
         Message message = new Message(new GenerateNewRegisterTokenPayload(null, user));
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USER_REGISTER);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USER_REGISTER.getKey());
         final OutgoingRouter outgoingRouter = getComponent(OutgoingRouter.KEY);
         if (outgoingRouter != null) {
             outgoingRouter.sendMessageToMaster(MASTER_USER_REGISTER, message);

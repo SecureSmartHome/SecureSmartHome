@@ -81,7 +81,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
         //Camera has always to be the first camera of all added cameras. (database and id)
         Module camera = requireComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.WEBCAM).get(0);
         Message messageToSend = new Message(new CameraPayload(0, camera.getName()));
-        messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_DOOR_BELL_CAMERA_GET);
+        messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_DOOR_BELL_CAMERA_GET.getKey());
 
         Message.AddressedMessage sendMessage =
                 sendMessageLocal(

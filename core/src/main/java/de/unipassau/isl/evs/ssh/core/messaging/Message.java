@@ -20,7 +20,7 @@ import io.netty.channel.ChannelFuture;
 public class Message implements Serializable {
     public static final Key<Long> HEADER_TIMESTAMP = new Key<>(Long.class, "timestamp");
     public static final Key<Integer> HEADER_REFERENCES_ID = new Key<>(Integer.class, "referencesID");
-    public static final Key<RoutingKey> HEADER_REPLY_TO_KEY = new Key<>(RoutingKey.class, "replyToKey");
+    public static final Key<String> HEADER_REPLY_TO_KEY = new Key<>(String.class, "replyToKey");
 
     private static final AtomicInteger sequenceCounter = new AtomicInteger();
     private final TypedMap<Object> headers;
@@ -40,6 +40,7 @@ public class Message implements Serializable {
         this.payload = payload;
     }
 
+    @Deprecated
     public MessagePayload getPayload() {
         return payload;
     }
@@ -106,7 +107,7 @@ public class Message implements Serializable {
      * @param toID       ID of the receiving device.
      * @param routingKey Alias of the receiving Handler.
      */
-    AddressedMessage setDestination(DeviceID fromID, DeviceID toID, RoutingKey routingKey) {
+    AddressedMessage setDestination(DeviceID fromID, DeviceID toID, String routingKey) {
         this.putHeader(HEADER_TIMESTAMP, System.currentTimeMillis());
         return new AddressedMessage(this, fromID, toID, routingKey);
     }
@@ -117,16 +118,16 @@ public class Message implements Serializable {
     public static class AddressedMessage extends Message {
         private final DeviceID fromID;
         private final DeviceID toID;
-        private final RoutingKey routingKey;
+        private final String routingKey;
         private final int sequenceNr;
 
         private transient ChannelFuture sendFuture;
 
-        private AddressedMessage(Message from, DeviceID fromID, DeviceID toID, RoutingKey routingKey) {
+        private AddressedMessage(Message from, DeviceID fromID, DeviceID toID, String routingKey) {
             this(new TypedMap<>(from.headers), from.payload, fromID, toID, routingKey);
         }
 
-        private AddressedMessage(TypedMap headers, MessagePayload payload, DeviceID fromID, DeviceID toID, RoutingKey routingKey) {
+        private AddressedMessage(TypedMap headers, MessagePayload payload, DeviceID fromID, DeviceID toID, String routingKey) {
             super(headers.unmodifiableView(), payload);
             this.fromID = fromID;
             this.toID = toID;
@@ -140,7 +141,7 @@ public class Message implements Serializable {
         }
 
         @Override
-        AddressedMessage setDestination(DeviceID fromID, DeviceID toID, RoutingKey routingKey) {
+        AddressedMessage setDestination(DeviceID fromID, DeviceID toID, String routingKey) {
             throw new UnsupportedOperationException("destination already set");
         }
 
@@ -153,7 +154,7 @@ public class Message implements Serializable {
         }
 
         public String getRoutingKey() {
-            return routingKey.getKey();
+            return routingKey;
         }
 
         public int getSequenceNr() {

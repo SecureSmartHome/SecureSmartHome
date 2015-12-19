@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
@@ -14,6 +13,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.AddNewModulePayload;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_MODULE_ADD;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_MODULE_ADD;
 
 /**
  * The AppNewModuleHandler handles the messaging needed to register a new ElectronicModule.
@@ -88,7 +88,7 @@ public class AppNewModuleHandler extends AbstractMessageHandler implements Compo
 
         Message message = new Message(payload);
 
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_MODULE_ADD);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_MODULE_ADD, message);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_MODULE_ADD.getKey());
+        router.sendMessageToMaster(MASTER_MODULE_ADD, message);
     }
 }

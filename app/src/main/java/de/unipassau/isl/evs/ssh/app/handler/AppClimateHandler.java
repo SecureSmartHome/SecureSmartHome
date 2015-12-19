@@ -215,7 +215,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
 
         Message message;
         message = new Message(climatePayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_CLIMATE_UPDATE);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_CLIMATE_UPDATE.getKey());
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO, message);

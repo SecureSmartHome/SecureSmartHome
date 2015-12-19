@@ -62,9 +62,9 @@ public class SlaveCameraHandler extends AbstractMessageHandler {
         private final int cameraID;
         private final String moduleName;
         private final int replyToSequenceNr;
-        private final RoutingKey replyToKey;
+        private final String replyToKey;
 
-        public PictureCallback(int cameraID, String moduleName, int replyToSequenceNr, RoutingKey replyToKey) {
+        public PictureCallback(int cameraID, String moduleName, int replyToSequenceNr, String replyToKey) {
             this.cameraID = cameraID;
             this.moduleName = moduleName;
             this.replyToSequenceNr = replyToSequenceNr;

@@ -145,7 +145,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         DoorStatusPayload doorPayload = new DoorStatusPayload(door);
 
         Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET.getKey());
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(MASTER_DOOR_STATUS_GET, message);
@@ -156,7 +156,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         DoorUnlatchPayload doorPayload = new DoorUnlatchPayload(door);
 
         Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_BLOCK);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_BLOCK.getKey());
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(MASTER_DOOR_LOCK_GET, message);
@@ -174,7 +174,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         DoorUnlatchPayload doorPayload = new DoorUnlatchPayload(doors.get(0).getName());
 
         Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET.getKey());
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(MASTER_DOOR_UNLATCH, message);
@@ -190,7 +190,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         DoorLockPayload doorPayload = new DoorLockPayload(isBlocked, doors.get(0).getName());
 
         Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_BLOCK);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_BLOCK.getKey());
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(MASTER_DOOR_LOCK_SET, message);
@@ -224,7 +224,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         CameraPayload payload = new CameraPayload(0, cameras.get(0).getName());
 
         Message message = new Message(payload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_CAMERA_GET);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_CAMERA_GET.getKey());
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(MASTER_CAMERA_GET, message);

@@ -89,7 +89,7 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
 
         Message message = new Message(payload);
 
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USERINFO_GET);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USERINFO_GET.getKey());
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_USERINFO_GET, message);
     }
 
@@ -157,7 +157,7 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
 
     private void sendEditMessage(MessagePayload payload) {
         Message message = new Message(payload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USERINFO_GET);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USERINFO_GET.getKey());
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_USERINFO_SET, message);
     }

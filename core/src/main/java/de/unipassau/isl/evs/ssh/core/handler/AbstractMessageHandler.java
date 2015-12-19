@@ -78,6 +78,18 @@ public abstract class AbstractMessageHandler implements MessageHandler {
         }
     }
 
+    protected Message.AddressedMessage sendMessage(DeviceID toID, String routingKey, Message msg) {
+        return requireComponent(OutgoingRouter.KEY).sendMessage(toID, routingKey, msg);
+    }
+
+    protected Message.AddressedMessage sendMessageLocal(String routingKey, Message msg) {
+        return requireComponent(OutgoingRouter.KEY).sendMessageLocal(routingKey, msg);
+    }
+
+    protected Message.AddressedMessage sendMessageToMaster(String routingKey, Message msg) {
+        return requireComponent(OutgoingRouter.KEY).sendMessageToMaster(routingKey, msg);
+    }
+
     protected Message.AddressedMessage sendMessage(DeviceID toID, RoutingKey routingKey, Message msg) {
         return requireComponent(OutgoingRouter.KEY).sendMessage(toID, routingKey, msg);
     }

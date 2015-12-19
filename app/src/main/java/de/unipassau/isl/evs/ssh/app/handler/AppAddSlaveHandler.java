@@ -43,7 +43,7 @@ public class AppAddSlaveHandler extends AbstractMessageHandler implements Compon
         Log.v(TAG, "registerNewSlave() called");
         RegisterSlavePayload payload = new RegisterSlavePayload(slaveName, slaveID);
         Message message = new Message(payload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_SLAVE_REGISTER);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_SLAVE_REGISTER.getKey());
         getComponent(OutgoingRouter.KEY).sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_SLAVE_REGISTER, message);
     }
 }

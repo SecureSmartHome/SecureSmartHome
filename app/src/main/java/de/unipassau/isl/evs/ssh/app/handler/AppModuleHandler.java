@@ -153,7 +153,7 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
 
         Message message = new Message(payload);
 
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_MODULES_GET);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_MODULES_GET.getKey());
         router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_MODULE_GET, message);
     }
 
