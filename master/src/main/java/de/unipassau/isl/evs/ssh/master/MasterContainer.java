@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.master;
 
 import android.util.Log;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -12,6 +11,7 @@ import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
+import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterCameraHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterClimateHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterDoorBellHandler;
@@ -25,21 +25,6 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.*;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DEVICE_CONNECTED;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_BELL_CAMERA_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_BELL_RING;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_SET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_MODULE_ADD;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_PUSH_WEATHER_INFO;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_SLAVE_REGISTER;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USERINFO_GET;
-
 /**
  * This Container class manages dependencies needed in the Master part of the architecture.
  *
@@ -52,24 +37,32 @@ public class MasterContainer extends ContainerService {
         register(KeyStoreController.KEY, new KeyStoreController());
         register(NamingManager.KEY, new NamingManager(true));
         register(Server.KEY, new Server());
+
         register(SlaveController.KEY, new SlaveController());
         register(PermissionController.KEY, new PermissionController());
         register(HolidayController.KEY, new HolidayController());
         register(UserManagementController.KEY, new UserManagementController());
+
         register(MasterRegisterDeviceHandler.KEY, new MasterRegisterDeviceHandler());
 
-        final IncomingDispatcher incomingDispatcher = require(IncomingDispatcher.KEY);
-        incomingDispatcher.registerHandler(new MasterLightHandler(), MASTER_LIGHT_SET, MASTER_LIGHT_GET);
-        incomingDispatcher.registerHandler(new MasterClimateHandler(), MASTER_LIGHT_GET, MASTER_REQUEST_WEATHER_INFO, MASTER_PUSH_WEATHER_INFO);
-        incomingDispatcher.registerHandler(new MasterNotificationHandler(), MASTER_NOTIFICATION_SEND);
-        incomingDispatcher.registerHandler(new MasterUserConfigurationHandler(), MASTER_USERINFO_GET, MASTER_DEVICE_CONNECTED);
-        incomingDispatcher.registerHandler(new MasterModuleHandler(), MASTER_MODULE_ADD);
-        incomingDispatcher.registerHandler(new MasterHolidaySimulationPlannerHandler(), MASTER_HOLIDAY_GET);
-        incomingDispatcher.registerHandler(new MasterRoutingTableHandler(), MASTER_SLAVE_REGISTER);
-        incomingDispatcher.registerHandler(new MasterDoorBellHandler(), MASTER_DOOR_BELL_RING, MASTER_DOOR_BELL_CAMERA_GET);
-        incomingDispatcher.registerHandler(new MasterSystemHealthCheckHandler(), MASTER_SYSTEM_HEALTH_CHECK);
-        incomingDispatcher.registerHandler(new MasterCameraHandler(), MASTER_CAMERA_GET);
+        registerHandler(new MasterDoorBellHandler());
+        registerHandler(new MasterModuleHandler());
+        registerHandler(new MasterUserConfigurationHandler());
+        registerHandler(new MasterNotificationHandler());
+        registerHandler(new MasterRoutingTableHandler());
+        registerHandler(new MasterLightHandler());
+        registerHandler(new MasterSystemHealthCheckHandler());
+        registerHandler(new MasterCameraHandler());
+        registerHandler(new MasterClimateHandler());
+        registerHandler(new MasterHolidaySimulationPlannerHandler());
+
+        //registerHandler(new MasterDoorHandler()); //FIXME was not registered before (Niko,  2015-12-17)
+        //registerHandler(new MasterPermissionHandler());
 
         Log.i(getClass().getSimpleName(), "Master set up! ID is " + require(NamingManager.KEY).getOwnID());
+    }
+
+    private void registerHandler(AbstractMasterHandler masterHandler) {
+        require(IncomingDispatcher.KEY).registerHandler(masterHandler, masterHandler.getRoutingKeys());
     }
 }

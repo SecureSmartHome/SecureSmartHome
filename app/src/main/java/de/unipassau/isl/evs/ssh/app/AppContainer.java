@@ -26,16 +26,16 @@ public class AppContainer extends ContainerService {
         register(KeyStoreController.KEY, new KeyStoreController());
         register(NamingManager.KEY, new NamingManager(false));
         register(Client.KEY, new Client());
-        register(AppModuleHandler.KEY, new AppModuleHandler());
-        register(AppDoorHandler.KEY, new AppDoorHandler());
-        register(AppLightHandler.KEY, new AppLightHandler());
-        register(AppClimateHandler.KEY, new AppClimateHandler());
-        register(AppNotificationHandler.KEY, new AppNotificationHandler());
-        register(AppUserConfigurationHandler.KEY, new AppUserConfigurationHandler());
-        register(AppNewModuleHandler.KEY, new AppNewModuleHandler());
-        register(AppRegisterNewDeviceHandler.KEY, new AppRegisterNewDeviceHandler());
-        register(AppHolidaySimulationHandler.KEY, new AppHolidaySimulationHandler());
-        register(AppAddSlaveHandler.KEY, new AppAddSlaveHandler());
 
+        register(AppAddSlaveHandler.KEY, new AppAddSlaveHandler());
+        register(AppClimateHandler.KEY, new AppClimateHandler());
+        register(AppDoorHandler.KEY, new AppDoorHandler());
+        register(AppHolidaySimulationHandler.KEY, new AppHolidaySimulationHandler());
+        register(AppLightHandler.KEY, new AppLightHandler());
+        register(AppModuleHandler.KEY, new AppModuleHandler());
+        register(AppNewModuleHandler.KEY, new AppNewModuleHandler());
+        register(AppNotificationHandler.KEY, new AppNotificationHandler());
+        register(AppRegisterNewDeviceHandler.KEY, new AppRegisterNewDeviceHandler());
+        register(AppUserConfigurationHandler.KEY, new AppUserConfigurationHandler());
     }
 }
