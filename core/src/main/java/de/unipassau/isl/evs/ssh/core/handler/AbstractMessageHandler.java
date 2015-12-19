@@ -120,7 +120,13 @@ public abstract class AbstractMessageHandler implements MessageHandler {
     }
 
     protected void invalidMessage(Message.AddressedMessage message) {
-        //TODO implement (Niko 2015-12-16)
+        for (RoutingKey routingKey : registeredKeys) {
+            if (routingKey.matches(message)) {
+                throw new IllegalStateException("Handler did not accept message for RoutingKey " + routingKey
+                        + " even though being registered for handling it. The message was " + message);
+            }
+        }
+        throw new IllegalArgumentException("Handler is not registered for Handling message " + message);
     }
 
     /**

@@ -173,7 +173,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
     @Override
     public void handle(Message.AddressedMessage message) {
         if (GLOBAL_MODULES_UPDATE.matches(message)) {
-            ModulesPayload payload = (ModulesPayload) message.getPayload();
+            ModulesPayload payload = GLOBAL_MODULES_UPDATE.getPayload(message);
             DeviceID myself = requireComponent(NamingManager.KEY).getOwnID();
             List<Module> modules = payload.getModulesAtSlave(myself);
             try {

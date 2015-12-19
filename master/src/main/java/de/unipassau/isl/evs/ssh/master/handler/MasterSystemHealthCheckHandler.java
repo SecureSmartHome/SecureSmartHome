@@ -20,10 +20,11 @@ public class MasterSystemHealthCheckHandler extends AbstractMasterHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_SYSTEM_HEALTH_CHECK.matches(message)) {
-            if (((SystemHealthPayload) message.getPayload()).getHasError()) {
-                String name = ((SystemHealthPayload) message.getPayload()).getModule().getName();
-                MessagePayload payload = new NotificationPayload(SYSTEM_HEALTH_WARNING.toString(), "Error at module: " + name);
-                sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(payload));
+            final SystemHealthPayload payload = MASTER_SYSTEM_HEALTH_CHECK.getPayload(message);
+            if (payload.getHasError()) {
+                String name = payload.getModule().getName();
+                MessagePayload respPayload = new NotificationPayload(SYSTEM_HEALTH_WARNING.toString(), "Error at module: " + name);
+                sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(respPayload));
             }
         } else {
             invalidMessage(message);

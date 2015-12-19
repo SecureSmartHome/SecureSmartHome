@@ -29,7 +29,7 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_HOLIDAY_SET.matches(message)) {
-            this.isOn = ((HolidaySimulationPayload) message.getPayload()).switchOn();
+            this.isOn = MASTER_HOLIDAY_SET.getPayload(message).switchOn();
             fireStatusChanged();
         } else {
             invalidMessage(message);

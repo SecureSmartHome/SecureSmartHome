@@ -72,7 +72,7 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
     @Override
     public void handle(Message.AddressedMessage message) {
         if (APP_USERINFO_GET.matches(message)) {
-            UserDeviceInformationPayload payload = (UserDeviceInformationPayload) message.getPayload();
+            UserDeviceInformationPayload payload = APP_USERINFO_GET.getPayload(message);
             this.usersToPermissions = payload.getUsersToPermissions();
             this.groupToUserDevice = payload.getGroupToUserDevice();
             this.allPermissions = payload.getAllPermissions();

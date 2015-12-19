@@ -50,7 +50,8 @@ public class MasterLightHandler extends AbstractMasterHandler {
     }
 
     private void handleSetRequest(Message.AddressedMessage message) {
-        final Module atModule = ((LightPayload) message.getPayload()).getModule();
+        final LightPayload payload = MASTER_LIGHT_SET.getPayload(message);
+        final Module atModule = payload.getModule();
         //Todo: uncomment when permission are better integrated
         //if (hasPermission(
         //        message.getFromID(),
@@ -60,7 +61,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
         //        )
         //)) {
         if (true) {
-            final Message messageToSend = new Message(message.getPayload());
+            final Message messageToSend = new Message(payload);
             messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),
@@ -68,7 +69,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
                     messageToSend
             );
             putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
-            if (((LightPayload) message.getPayload()).getOn()) {
+            if (payload.getOn()) {
                 requireComponent(HolidayController.KEY).addHolidayLogEntry(CoreConstants.LogActions.LIGHT_ON_ACTION);
             } else {
                 requireComponent(HolidayController.KEY).addHolidayLogEntry(CoreConstants.LogActions.LIGHT_OFF_ACTION);
@@ -80,7 +81,8 @@ public class MasterLightHandler extends AbstractMasterHandler {
     }
 
     private void handleGetRequest(Message.AddressedMessage message) {
-        final Module atModule = ((LightPayload) message.getPayload()).getModule();
+        final LightPayload payload = MASTER_LIGHT_GET.getPayload(message);
+        final Module atModule = payload.getModule();
         if (hasPermission(
                 message.getFromID(),
                 new Permission(
@@ -88,7 +90,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
                         atModule.getName()
                 )
         )) {
-            final Message messageToSend = new Message(message.getPayload());
+            final Message messageToSend = new Message(payload);
             messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),

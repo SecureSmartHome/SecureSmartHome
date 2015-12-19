@@ -42,7 +42,7 @@ public class SlaveDoorHandler extends AbstractMessageHandler {
     }
 
     private void handleDoorStatus(Message.AddressedMessage original) {
-        DoorStatusPayload incomingPayload = (DoorStatusPayload) original.getPayload();
+        DoorStatusPayload incomingPayload = (DoorStatusPayload) original.getPayload(); //FIXME ClassCastException for a SLAVE_DOOR_UNLATCH message DoorUnlatchPayload (Niko, 2015-12-19)
         String moduleName = incomingPayload.getModuleName();
         Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
         ReedSensor doorSensor = getContainer().require(key);
@@ -58,7 +58,7 @@ public class SlaveDoorHandler extends AbstractMessageHandler {
     }
 
     private void handleUnlatchDoor(Message.AddressedMessage message) {
-        DoorUnlatchPayload payload = (DoorUnlatchPayload) message.getPayload();
+        DoorUnlatchPayload payload = SLAVE_DOOR_UNLATCH.getPayload(message);
         Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, payload.getModuleName());
         DoorBuzzer doorBuzzer = getContainer().require(key);
         try {

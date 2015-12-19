@@ -47,7 +47,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
         if (MASTER_HOLIDAY_GET.matches(message)) {
             replyStatus(message);
         } else if (MASTER_HOLIDAY_SET.matches(message)) {
-            HolidaySimulationPayload payload = (HolidaySimulationPayload) message.getPayload();
+            HolidaySimulationPayload payload = MASTER_HOLIDAY_SET.getPayload(message);
 
             //TODO Refactor if we eliminate one permission
             if (payload.switchOn() && hasPermission(message.getFromID(), new Permission(

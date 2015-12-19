@@ -61,7 +61,7 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler {
     }
 
     private boolean handleRegisterRequest(Message.AddressedMessage message) {
-        RegisterSlavePayload registerSlavePayload = ((RegisterSlavePayload) message.getPayload());
+        RegisterSlavePayload registerSlavePayload = MASTER_SLAVE_REGISTER.getPayload(message);
         try {
             requireComponent(SlaveController.KEY).addSlave(new Slave(registerSlavePayload.getName(),
                     registerSlavePayload.getSlaveID()));

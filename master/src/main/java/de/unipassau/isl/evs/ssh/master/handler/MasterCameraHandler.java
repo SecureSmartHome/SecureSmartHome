@@ -42,7 +42,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
     }
 
     private void handleResponse(Message.AddressedMessage message) {
-        CameraPayload cameraPayload = (CameraPayload) message.getPayload();
+        CameraPayload cameraPayload = MASTER_CAMERA_GET.getPayload(message);
         Message.AddressedMessage correspondingMessage =
                 getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
         Message messageToSend = new Message(cameraPayload);
@@ -56,7 +56,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
     }
 
     private void handleGetRequest(Message.AddressedMessage message) {
-        CameraPayload cameraPayload = (CameraPayload) message.getPayload();
+        CameraPayload cameraPayload = MASTER_CAMERA_GET.getPayload(message);
         Module atModule = requireComponent(SlaveController.KEY).getModule(cameraPayload.getModuleName());
         Message messageToSend = new Message(cameraPayload);
         messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());

@@ -45,6 +45,10 @@ public class Message implements Serializable {
         return payload;
     }
 
+    public <T> T getPayloadOfClass(Class<T> payloadClass) {
+        return payloadClass.cast(payload);
+    }
+
     public void setPayload(MessagePayload payload) {
         this.payload = payload;
     }

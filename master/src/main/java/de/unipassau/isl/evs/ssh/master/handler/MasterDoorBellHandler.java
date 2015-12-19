@@ -31,24 +31,55 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
         saveMessage(message);
 
         if (MASTER_DOOR_BELL_RING.matches(message)) {
-            //Check if message comes from a slave.
-            if (isSlave(message.getFromID())) {
-                handleDoorBellRing(message);
-            } else {
-                //no permission
-                sendErrorMessage(message);
-            }
+            handleDoorBellRing(message);
         } else if (MASTER_DOOR_BELL_CAMERA_GET.matches(message)) {
-            //Check if message comes from master
-            if (requireComponent(NamingManager.KEY).getMasterID().equals(message.getFromID())) {
-                handleCameraResponse(message);
-            } else {
-                //no permission
-                sendErrorMessage(message);
-            }
+            handleCameraResponse(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
+            sendErrorMessage(message);
+        }
+    }
+
+    private void handleCameraResponse(Message.AddressedMessage message) {//Check if message comes from master
+        if (requireComponent(NamingManager.KEY).getMasterID().equals(message.getFromID())) {
+            CameraPayload cameraPayload = MASTER_DOOR_BELL_CAMERA_GET.getPayload(message);
+            Message.AddressedMessage correspondingMessage = getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
+            DoorBellPayload doorBellPayload = MASTER_DOOR_BELL_RING.getPayload(correspondingMessage);
+            doorBellPayload.setCameraPayload(cameraPayload);
+
+            Message messageToSend = new Message(doorBellPayload);
+
+            for (UserDevice userDevice :
+                    requireComponent(PermissionController.KEY).getAllUserDevicesWithPermission(
+                            new Permission(
+                                    CoreConstants.Permission.BinaryPermission.BELL_RANG.toString(),
+                                    null
+                            )
+                    )) {
+                sendMessage(userDevice.getUserDeviceID(), APP_DOOR_RING, messageToSend);
+            }
+        } else {
+            //no permission
+            sendErrorMessage(message);
+        }
+    }
+
+    private void handleDoorBellRing(Message.AddressedMessage message) {//Check if message comes from a slave.
+        if (isSlave(message.getFromID())) {
+            //Camera has always to be the first camera of all added cameras. (database and id)
+            Module camera = requireComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.WEBCAM).get(0);
+            Message messageToSend = new Message(new CameraPayload(0, camera.getName()));
+            messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_DOOR_BELL_CAMERA_GET.getKey());
+
+            Message.AddressedMessage sendMessage =
+                    sendMessageLocal(
+                            MASTER_CAMERA_GET,
+                            messageToSend
+                    );
+            putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
+        } else {
+            //no permission
             sendErrorMessage(message);
         }
     }
@@ -58,36 +89,4 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
         return new RoutingKey[]{MASTER_DOOR_BELL_RING, MASTER_DOOR_BELL_CAMERA_GET};
     }
 
-    private void handleCameraResponse(Message.AddressedMessage message) {
-        CameraPayload cameraPayload = (CameraPayload) message.getPayload();
-        Message.AddressedMessage correspondingMessage = getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
-        DoorBellPayload doorBellPayload = (DoorBellPayload) correspondingMessage.getPayload();
-        doorBellPayload.setCameraPayload(cameraPayload);
-
-        Message messageToSend = new Message(doorBellPayload);
-
-        for (UserDevice userDevice :
-                requireComponent(PermissionController.KEY).getAllUserDevicesWithPermission(
-                        new Permission(
-                                CoreConstants.Permission.BinaryPermission.BELL_RANG.toString(),
-                                null
-                        )
-                )) {
-            sendMessage(userDevice.getUserDeviceID(), APP_DOOR_RING, messageToSend);
-        }
-    }
-
-    private void handleDoorBellRing(Message.AddressedMessage message) {
-        //Camera has always to be the first camera of all added cameras. (database and id)
-        Module camera = requireComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.WEBCAM).get(0);
-        Message messageToSend = new Message(new CameraPayload(0, camera.getName()));
-        messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_DOOR_BELL_CAMERA_GET.getKey());
-
-        Message.AddressedMessage sendMessage =
-                sendMessageLocal(
-                        MASTER_CAMERA_GET,
-                        messageToSend
-                );
-        putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
-    }
 }

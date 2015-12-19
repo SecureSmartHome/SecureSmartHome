@@ -43,7 +43,7 @@ public class MasterNotificationHandler extends AbstractMasterHandler {
     }
 
     private void handleNotificationSend(Message.AddressedMessage message) {
-        NotificationPayload notificationPayload = (NotificationPayload) message.getPayload();
+        NotificationPayload notificationPayload = MASTER_NOTIFICATION_SEND.getPayload(message);
         Message messageToSend = new Message(notificationPayload);
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, message.getHeader(Message.HEADER_REFERENCES_ID));
 

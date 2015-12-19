@@ -1,6 +1,8 @@
 package de.unipassau.isl.evs.ssh.core.messaging;
 
 /**
+ * TODO also differentiate between request and response, i.e. for message.getHeader(Message.HEADER_REFERENCES_ID) == null (Niko, 2015-12-17)
+ *
  * @author Niko Fink
  */
 public class RoutingKey<T> {
@@ -24,6 +26,10 @@ public class RoutingKey<T> {
         return new RoutingKey<>(identifier, (Class<T>) Class.forName(clazz));
     }
 
+    public static RoutingKey forMessage(Message.AddressedMessage message) {
+        return new RoutingKey<>(message.getRoutingKey(), message.getPayload().getClass());
+    }
+
     public Class<T> getPayloadClass() {
         return clazz;
     }
@@ -33,7 +39,20 @@ public class RoutingKey<T> {
     }
 
     public boolean matches(Message.AddressedMessage message) {
-        return getKey().equals(message.getRoutingKey()) && getPayloadClass().isInstance(message.getPayload());
+        return getKey().equals(message.getRoutingKey()) && payloadMatches(message);
+    }
+
+    public boolean payloadMatches(Message message) {
+        return getPayloadClass().isInstance(message.getPayload()) ||
+                (getPayloadClass() == Void.class && message.getPayload() == null);
+    }
+
+    public T getPayload(Message message) {
+        if (!payloadMatches(message)
+                || (message instanceof Message.AddressedMessage && !matches((Message.AddressedMessage) message))) {
+            throw new IllegalArgumentException("Message doesn't match RoutingKey " + this);
+        }
+        return message.getPayloadOfClass(getPayloadClass());
     }
 
     @Override

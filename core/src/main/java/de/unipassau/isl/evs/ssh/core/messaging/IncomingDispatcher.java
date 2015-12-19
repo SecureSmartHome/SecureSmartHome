@@ -57,7 +57,7 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
      * @return {@code true} if the Message was forwarded to at least one MessageHandler.
      */
     public boolean dispatch(final Message.AddressedMessage msg) {
-        Set<MessageHandler> handlers = mappings.get(new RoutingKey<>(msg.getRoutingKey(), msg.getPayload().getClass()));
+        Set<MessageHandler> handlers = mappings.get(RoutingKey.forMessage(msg));
         final EventLoop executor = getExecutor();
         Log.v(getClass().getSimpleName(), "Using EventLoop " + executor);
         for (final MessageHandler handler : handlers) {

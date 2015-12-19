@@ -231,7 +231,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
     @Override
     public void handle(Message.AddressedMessage message) {
         if (APP_CLIMATE_UPDATE.matches(message)) {
-            ClimatePayload climatePayload = (ClimatePayload) message.getPayload();
+            ClimatePayload climatePayload = APP_CLIMATE_UPDATE.getPayload(message);
             setCachedStatus(climatePayload.getModule(), climatePayload.getTemp1(), climatePayload.getTemp2(),
                     climatePayload.getPressure(), climatePayload.getAltitude(), climatePayload.getHumidity(),
                     climatePayload.getUv(), climatePayload.getIr(), climatePayload.getVisible());

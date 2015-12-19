@@ -77,7 +77,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         //Response
         final Message.AddressedMessage correspondingMessage =
                 getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
-        final Message messageToSend = new Message(message.getPayload());
+        final Message messageToSend = new Message(MASTER_DOOR_STATUS_GET.getPayload(message));
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
         //works for get and set, so no switch required
@@ -89,7 +89,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorStatusGet(Message.AddressedMessage message) {
-        DoorStatusPayload doorStatusPayload = (DoorStatusPayload) message.getPayload();
+        DoorStatusPayload doorStatusPayload = MASTER_DOOR_STATUS_GET.getPayload(message);
         final Module atModule = requireComponent(SlaveController.KEY).getModule(doorStatusPayload.getModuleName());
         //Get status
         if (hasPermission(
@@ -99,7 +99,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                         atModule.getName()
                 )
         )) {
-            final Message messageToSend = new Message(message.getPayload());
+            final Message messageToSend = new Message(doorStatusPayload);
             messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),
@@ -114,7 +114,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorLockGet(Message.AddressedMessage message) {
-        DoorLockPayload doorLockPayload = (DoorLockPayload) message.getPayload();
+        DoorLockPayload doorLockPayload = MASTER_DOOR_LOCK_GET.getPayload(message);
         Module atModule = requireComponent(SlaveController.KEY)
                 .getModule(doorLockPayload.getModuleName());
 
@@ -135,7 +135,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorLockSet(Message.AddressedMessage message) {
-        DoorLockPayload doorLockPayload = (DoorLockPayload) message.getPayload();
+        DoorLockPayload doorLockPayload = MASTER_DOOR_LOCK_SET.getPayload(message);
         Module atModule = requireComponent(SlaveController.KEY)
                 .getModule(doorLockPayload.getModuleName());
 
@@ -182,7 +182,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorUnlatch(Message.AddressedMessage message) {
-        DoorUnlatchPayload doorUnlatchPayload = (DoorUnlatchPayload) message.getPayload();
+        DoorUnlatchPayload doorUnlatchPayload = MASTER_DOOR_UNLATCH.getPayload(message);
         Module atModule = requireComponent(SlaveController.KEY)
                 .getModule(doorUnlatchPayload.getModuleName());
         Message messageToSend = new Message(doorUnlatchPayload);

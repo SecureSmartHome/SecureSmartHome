@@ -122,7 +122,7 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
     @Override
     public void handle(Message.AddressedMessage message) {
         if (APP_LIGHT_UPDATE.matches(message)) {
-            LightPayload lightPayload = (LightPayload) message.getPayload();
+            LightPayload lightPayload = APP_LIGHT_UPDATE.getPayload(message);
             setCachedStatus(lightPayload.getModule(), lightPayload.getOn());
         } else {
             invalidMessage(message);

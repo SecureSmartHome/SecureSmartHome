@@ -25,10 +25,10 @@ public class MasterClimateHandler extends AbstractMasterHandler {
     public void handle(Message.AddressedMessage message) {
         saveMessage(message);
         if (MASTER_PUSH_WEATHER_INFO.matches(message)) {
-            latestWeatherData = (ClimatePayload) message.getPayload();
-            evaluateWeatherData(((ClimatePayload) message.getPayload()));
+            latestWeatherData = MASTER_PUSH_WEATHER_INFO.getPayload(message);
+            evaluateWeatherData(latestWeatherData);
         } else if (MASTER_LIGHT_GET.matches(message)) {
-            LightPayload payload = (LightPayload) message.getPayload();
+            LightPayload payload = MASTER_LIGHT_GET.getPayload(message);
             mainLampOn = payload.getOn(); //TODO check if this is the first lamp
         } else if (MASTER_REQUEST_WEATHER_INFO.matches(message)) {
             //TODO make map of latestWeatherData to send data for each Weatherboard

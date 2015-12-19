@@ -33,8 +33,7 @@ public class SlaveCameraHandler extends AbstractMessageHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         if (SLAVE_CAMERA_GET.matches(message)) {
-            CameraPayload payload = (CameraPayload) message.getPayload();
-
+            CameraPayload payload = SLAVE_CAMERA_GET.getPayload(message);
             try {
                 Camera camera = Camera.open();
                 camera.setOneShotPreviewCallback(new PictureCallback(

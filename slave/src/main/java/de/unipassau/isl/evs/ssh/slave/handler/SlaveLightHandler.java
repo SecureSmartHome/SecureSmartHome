@@ -32,8 +32,8 @@ public class SlaveLightHandler extends AbstractMessageHandler {
      */
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (message.getPayload() instanceof LightPayload) {
-            final LightPayload payload = (LightPayload) message.getPayload();
+        if (SLAVE_LIGHT_SET.matches(message) || SLAVE_LIGHT_GET.matches(message)) {
+            final LightPayload payload = message.getPayloadOfClass(LightPayload.class);
             final Key<EdimaxPlugSwitch> key = new Key<>(
                     EdimaxPlugSwitch.class,
                     payload.getModule().getName()
@@ -42,10 +42,8 @@ public class SlaveLightHandler extends AbstractMessageHandler {
 
             if (SLAVE_LIGHT_SET.matches(message)) {
                 switchLight(message, plugSwitch);
-                replyStatus(message, plugSwitch);
-            } else if (SLAVE_LIGHT_GET.matches(message)) {
-                replyStatus(message, plugSwitch);
             }
+            replyStatus(message, plugSwitch);
         } else {
             //TODO check RoutingKey and call invalidMessage(message) otherwise
             final Message reply = new Message(new MessageErrorPayload(message.getPayload()));
@@ -69,7 +67,7 @@ public class SlaveLightHandler extends AbstractMessageHandler {
      * @param plugSwitch representing the driver of the lamp which is to be switched
      */
     private void switchLight(Message.AddressedMessage original, EdimaxPlugSwitch plugSwitch) {
-        final LightPayload payload = (LightPayload) original.getPayload();
+        final LightPayload payload = SLAVE_LIGHT_SET.getPayload(original);
         try {
             if (payload.getOn() != plugSwitch.isOn()) {
                 final boolean success = plugSwitch.setOn(payload.getOn());
@@ -90,7 +88,7 @@ public class SlaveLightHandler extends AbstractMessageHandler {
      * @param original message that should get a reply
      */
     private void replyStatus(Message.AddressedMessage original, EdimaxPlugSwitch plugSwitch) {
-        final LightPayload payload = (LightPayload) original.getPayload();
+        final LightPayload payload = original.getPayloadOfClass(LightPayload.class);
         final Module module = payload.getModule();
         try {
             final Message reply = new Message(new LightPayload(plugSwitch.isOn(), module));

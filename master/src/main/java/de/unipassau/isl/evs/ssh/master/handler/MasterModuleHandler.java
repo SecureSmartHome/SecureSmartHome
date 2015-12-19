@@ -65,7 +65,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_MODULE_ADD.matches(message)) {
-            AddNewModulePayload payload = (AddNewModulePayload) message.getPayload();
+            AddNewModulePayload payload = MASTER_MODULE_ADD.getPayload(message);
             if (handleAddModule(payload.getModule(), message)) {
                 updateAllClients();
 
@@ -80,12 +80,8 @@ public class MasterModuleHandler extends AbstractMasterHandler {
         /* @author Leon Sell */
         } else if (MASTER_MODULE_RENAME.matches(message)) {
             if (hasPermission(message.getFromID(), new Permission(CoreConstants.Permission.BinaryPermission.RENAME_MODULE.toString()))) {
-                if (message.getPayload() instanceof RenameModulePayload) {
-                    if (handleRenameModule(message)) {
-                        updateAllClients();
-                    } else {
-                        sendErrorMessage(message);
-                    }
+                if (handleRenameModule(message)) {
+                    updateAllClients();
                 } else {
                     sendErrorMessage(message);
                 }
@@ -105,7 +101,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
 
     /* @author Leon Sell */
     private boolean handleRenameModule(Message.AddressedMessage message) {
-        RenameModulePayload renameModulePayload = ((RenameModulePayload) message.getPayload());
+        RenameModulePayload renameModulePayload = MASTER_MODULE_RENAME.getPayload(message);
         try {
             requireComponent(SlaveController.KEY).changeModuleName(renameModulePayload.getOldName(),
                     renameModulePayload.getNewName());

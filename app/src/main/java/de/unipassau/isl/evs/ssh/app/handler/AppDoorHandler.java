@@ -89,18 +89,18 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
     @Override
     public void handle(Message.AddressedMessage message) {
         if (APP_CAMERA_GET.matches(message)) {
-            CameraPayload payload = (CameraPayload) message.getPayload();
+            CameraPayload payload = APP_CAMERA_GET.getPayload(message);
             fireImageUpdated(payload.getPicture());
         } else if (APP_DOOR_BLOCK.matches(message)) {
-            DoorLockPayload payload = (DoorLockPayload) message.getPayload();
+            DoorLockPayload payload = APP_DOOR_BLOCK.getPayload(message);
             isDoorBlocked = !payload.isUnlock();
             fireStatusUpdated();
         } else if (APP_DOOR_GET.matches(message)) {
-            DoorStatusPayload payload = (DoorStatusPayload) message.getPayload();
+            DoorStatusPayload payload = APP_DOOR_GET.getPayload(message);
             isDoorOpen = !payload.isClosed();
             fireStatusUpdated();
         } else if (APP_DOOR_RING.matches(message)) {
-            DoorBellPayload doorBellPayload = (DoorBellPayload) message.getPayload();
+            DoorBellPayload doorBellPayload = APP_DOOR_RING.getPayload(message);
             fireImageUpdated(doorBellPayload.getCameraPayload().getPicture());
             Message messageToSend = new Message(doorBellPayload);
             requireComponent(OutgoingRouter.KEY).sendMessageLocal(APP_NOTIFICATION_RECEIVE,

@@ -76,7 +76,7 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
     @Override
     public void handle(Message.AddressedMessage message) {
         if (APP_USER_REGISTER.matches(message)) {
-            handleUserRegisterResponse(message);
+            handleUserRegisterResponse(APP_USER_REGISTER.getPayload(message));
         } else {
             invalidMessage(message);
         }
@@ -87,9 +87,7 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
         return new RoutingKey[]{APP_USER_REGISTER};
     }
 
-    private void handleUserRegisterResponse(Message.AddressedMessage message) {
-        GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload =
-                (GenerateNewRegisterTokenPayload) message.getPayload();
+    private void handleUserRegisterResponse(GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload) {
         final SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
                 .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         final NamingManager namingManager = getComponent(NamingManager.KEY);

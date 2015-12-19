@@ -131,8 +131,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     }
 
     private void handleInitRequest(Message.AddressedMessage message) {
-        GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload =
-                ((GenerateNewRegisterTokenPayload) message.getPayload());
+        GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload = MASTER_USER_REGISTER.getPayload(message);
         byte[] newToken = generateNewRegisterToken(generateNewRegisterTokenPayload.getUserDevice());
         String base64Token = Base64.encodeToString(newToken, Base64.NO_WRAP);
         userDeviceForToken.put(base64Token, generateNewRegisterTokenPayload.getUserDevice());
