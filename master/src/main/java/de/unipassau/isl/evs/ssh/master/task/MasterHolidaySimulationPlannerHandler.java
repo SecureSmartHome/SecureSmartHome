@@ -38,7 +38,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_LIGH
  * @author Christoph Fraedrich
  */
 public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler implements ScheduledComponent {
-    public static final long MILLIS_PER_HOUR = TimeUnit.HOURS.toMillis(1);
+    private static final long SCHEDULE_LOOKAHEAD_MILLIS = TimeUnit.HOURS.toMillis(1);
     private static final Key<MasterHolidaySimulationPlannerHandler> KEY = new Key<>(MasterHolidaySimulationPlannerHandler.class);
     private boolean runHolidaySimulation = false;
 
@@ -85,7 +85,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
     public void onReceive(Intent intent) {
         if (runHolidaySimulation) {
             List<HolidayAction> logEntriesRange = getContainer().require(HolidayController.KEY).getHolidayActions(new Date(),
-                    new Date(System.currentTimeMillis() + MILLIS_PER_HOUR));
+                    new Date(System.currentTimeMillis() + SCHEDULE_LOOKAHEAD_MILLIS));
 
             for (HolidayAction a : logEntriesRange) {
                 int minNow = new Date(System.currentTimeMillis()).getMinutes();
@@ -106,7 +106,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
     public void init(Container container) {
         Scheduler scheduler = getContainer().require(Scheduler.KEY);
         PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
-        scheduler.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), MILLIS_PER_HOUR, intent);
+        scheduler.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), SCHEDULE_LOOKAHEAD_MILLIS, intent);
     }
 
     @Override

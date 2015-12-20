@@ -1,6 +1,5 @@
 package de.unipassau.isl.evs.ssh.core.naming;
 
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
@@ -28,7 +27,6 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 public class NamingManager extends AbstractComponent {
     public static final Key<NamingManager> KEY = new Key<>(NamingManager.class);
     public static final String PREF_MASTER_ID = "ssh.core.MASTER_ID";
-    private static final String TAG = NamingManager.class.getSimpleName();
 
     private final boolean isMaster;
     private DeviceID ownID;
@@ -211,7 +209,7 @@ public class NamingManager extends AbstractComponent {
         final SharedPreferences prefs = requireComponent(ContainerService.KEY_CONTEXT)
                 .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
 
-        String masterIDStr = prefs.getString(CoreConstants.SharedPrefs.PREF_MASTER_ID, null);
+        String masterIDStr = prefs.getString(PREF_MASTER_ID, null);
         if (masterIDStr != null) {
             masterID = new DeviceID(masterIDStr);
             masterCert = getCertificate(masterID);
@@ -225,7 +223,7 @@ public class NamingManager extends AbstractComponent {
         requireComponent(ContainerService.KEY_CONTEXT)
                 .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE)
                 .edit()
-                .putString(CoreConstants.SharedPrefs.PREF_MASTER_ID, masterID.getIDString())
+                .putString(PREF_MASTER_ID, masterID.getIDString())
                 .commit();
 
         this.masterID = masterID;

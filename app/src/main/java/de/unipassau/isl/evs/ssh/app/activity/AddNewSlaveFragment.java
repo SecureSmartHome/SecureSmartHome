@@ -55,7 +55,6 @@ public class AddNewSlaveFragment extends ScanQRFragment {
 
     @Override
     protected void onQRCodeScanned(QRDeviceInformation info) {
-        super.onQRCodeScanned(info);
         this.info = info;
         registerSlave();
     }

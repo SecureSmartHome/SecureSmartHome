@@ -33,7 +33,6 @@ public class MainActivity extends BoundActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String SAVED_LAST_ACTIVE_FRAGMENT = "de.unipassau.isl.evs.ssh.app.activity.SAVED_LAST_ACTIVE_FRAGMENT";
-    private static final int uniqueID = 037735;
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
     private NotificationCompat.Builder notificationBuilder;

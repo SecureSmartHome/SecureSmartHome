@@ -29,10 +29,13 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_DOOR
  * @author Leon Sell
  */
 public class MasterDoorHandler extends AbstractMasterHandler {
-    //Todo: formulate messages
-    public static final String DOOR_UNLATCHED_MESSAGE = "Door unlatched";
-    public static final String DOOR_UNLOCKED_MESSAGE = "Door unlocked";
-    public static final String DOOR_LOCKED_MESSAGE = "Door locked";
+    //TODO formulate messages (and extract String resources (Niko, 2015-12-20))
+    private static final String DOOR_UNLATCHED_MESSAGE = "Door unlatched";
+    private static final String DOOR_UNLOCKED_MESSAGE = "Door unlocked";
+    private static final String DOOR_LOCKED_MESSAGE = "Door locked";
+    //FIXME lockedFor is used but never assigned, which would usually result in an NPE, except if the code was never tested nor run...
+    // maybe the following line and some tests would be suitable? (Niko, 2015-12-20)
+    //private final Map<Integer, Boolean> lockedFor = new HashMap<>();
     private Map<Integer, Boolean> lockedFor;
 
     @Override

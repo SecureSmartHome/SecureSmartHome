@@ -13,6 +13,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 
@@ -23,9 +24,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
  * @author Christoph Fraedrich
  */
 public class ExecutionServiceComponent extends AbstractComponent implements ScheduledExecutorService {
-
-    public static final de.ncoder.typedmap.Key<ExecutionServiceComponent> KEY
-            = new de.ncoder.typedmap.Key<>(ExecutionServiceComponent.class);
+    public static final Key<ExecutionServiceComponent> KEY = new Key<>(ExecutionServiceComponent.class);
     private ScheduledExecutorService service;
 
     @Override
@@ -43,25 +42,25 @@ public class ExecutionServiceComponent extends AbstractComponent implements Sche
 
     @NonNull
     @Override
-    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+    public ScheduledFuture<?> schedule(@NonNull Runnable command, long delay, @NonNull TimeUnit unit) {
         return service.schedule(command, delay, unit);
     }
 
     @NonNull
     @Override
-    public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+    public <V> ScheduledFuture<V> schedule(@NonNull Callable<V> callable, long delay, @NonNull TimeUnit unit) {
         return service.schedule(callable, delay, unit);
     }
 
     @NonNull
     @Override
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+    public ScheduledFuture<?> scheduleAtFixedRate(@NonNull Runnable command, long initialDelay, long period, @NonNull TimeUnit unit) {
         return service.scheduleAtFixedRate(command, initialDelay, period, unit);
     }
 
     @NonNull
     @Override
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+    public ScheduledFuture<?> scheduleWithFixedDelay(@NonNull Runnable command, long initialDelay, long delay, @NonNull TimeUnit unit) {
         return service.scheduleWithFixedDelay(command, initialDelay, delay, unit);
     }
 
@@ -87,53 +86,53 @@ public class ExecutionServiceComponent extends AbstractComponent implements Sche
     }
 
     @Override
-    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+    public boolean awaitTermination(long timeout, @NonNull TimeUnit unit) throws InterruptedException {
         return service.awaitTermination(timeout, unit);
     }
 
     @NonNull
     @Override
-    public <T> Future<T> submit(Callable<T> task) {
+    public <T> Future<T> submit(@NonNull Callable<T> task) {
         return service.submit(task);
     }
 
     @NonNull
     @Override
-    public <T> Future<T> submit(Runnable task, T result) {
+    public <T> Future<T> submit(@NonNull Runnable task, T result) {
         return service.submit(task, result);
     }
 
     @NonNull
     @Override
-    public Future<?> submit(Runnable task) {
+    public Future<?> submit(@NonNull Runnable task) {
         return service.submit(task);
     }
 
     @NonNull
     @Override
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(@NonNull Collection<? extends Callable<T>> tasks) throws InterruptedException {
         return service.invokeAll(tasks);
     }
 
     @NonNull
     @Override
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(@NonNull Collection<? extends Callable<T>> tasks, long timeout, @NonNull TimeUnit unit) throws InterruptedException {
         return service.invokeAll(tasks, timeout, unit);
     }
 
     @NonNull
     @Override
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+    public <T> T invokeAny(@NonNull Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
         return service.invokeAny(tasks);
     }
 
     @Override
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public <T> T invokeAny(@NonNull Collection<? extends Callable<T>> tasks, long timeout, @NonNull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         return service.invokeAny(tasks, timeout, unit);
     }
 
     @Override
-    public void execute(Runnable command) {
+    public void execute(@NonNull Runnable command) {
         service.execute(command);
     }
 }

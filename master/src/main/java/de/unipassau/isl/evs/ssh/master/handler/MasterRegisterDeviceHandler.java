@@ -38,7 +38,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     public static final Key<MasterRegisterDeviceHandler> KEY = new Key<>(MasterRegisterDeviceHandler.class);
 
     //Todo: close qr code after first register.
-    //TODO: move to?
+    //TODO:
     public static final String FIRST_USER = "Admin";
     public static final String NO_GROUP = "No Group";
     private Map<String, UserDevice> userDeviceForToken = new HashMap<>();

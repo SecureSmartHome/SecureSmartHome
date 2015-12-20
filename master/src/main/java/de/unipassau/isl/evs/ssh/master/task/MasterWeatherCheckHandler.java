@@ -28,7 +28,7 @@ import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
  * @author Christoph Fraedrich
  */
 public class MasterWeatherCheckHandler extends AbstractMasterHandler implements ScheduledComponent {
-    public static final long MILLIS_IN_FIVE_MIN = TimeUnit.MINUTES.toMillis(5);
+    private static final long CHECK_INTERVAL_MILLIS = TimeUnit.MINUTES.toMillis(5);
     private static final Key<MasterWeatherCheckHandler> KEY = new Key<>(MasterWeatherCheckHandler.class);
     private static final String TAG = MasterWeatherCheckHandler.class.getSimpleName();
     private boolean windowClosed;
@@ -57,7 +57,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
         PendingIntent intent = scheduler.getPendingScheduleIntent(MasterWeatherCheckHandler.KEY, null,
                 PendingIntent.FLAG_CANCEL_CURRENT);
         scheduler.setRepeating(AlarmManager.RTC, System.currentTimeMillis(),
-                MILLIS_IN_FIVE_MIN, intent);
+                CHECK_INTERVAL_MILLIS, intent);
     }
 
     @Override

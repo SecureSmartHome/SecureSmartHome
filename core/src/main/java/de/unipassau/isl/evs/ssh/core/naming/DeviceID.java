@@ -17,6 +17,10 @@ import java.util.Arrays;
 public final class DeviceID implements Serializable {
     private static final String ID_MD_ALG = "SHA-256";
     public static final int ID_LENGTH = 32;
+    /**
+     * //FIXME this will throw NullPointer and IllegalArgumentExceptions all the way,
+     * maybe initialize with new byte[ID_LENGTH} and all bytes set to 0? (Niko, 2015-12-20)
+     */
     public static final DeviceID NO_DEVICE = new DeviceID();
 
     private final String id;

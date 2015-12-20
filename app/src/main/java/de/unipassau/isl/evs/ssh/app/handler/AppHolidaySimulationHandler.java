@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.app.handler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
@@ -20,7 +21,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_HOL
  */
 public class AppHolidaySimulationHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppHolidaySimulationHandler> KEY = new Key<>(AppHolidaySimulationHandler.class);
-    public static final int UPDATE_INTERVAL = 5000; //FIXME move to Constants (Niko, 2015-12-16)
+    private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(5);
 
     private final List<HolidaySimulationListener> listeners = new ArrayList<>();
     private boolean isOn;
@@ -45,7 +46,7 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
      * @return if the Holiday Simulation is turned on.
      */
     public boolean isOn() {
-        if (System.currentTimeMillis() - lastUpdate >= UPDATE_INTERVAL) {
+        if (System.currentTimeMillis() - lastUpdate >= REFRESH_DELAY_MILLIS) {
             sendMessageToMaster(MASTER_HOLIDAY_GET, new Message());
         }
         return isOn;

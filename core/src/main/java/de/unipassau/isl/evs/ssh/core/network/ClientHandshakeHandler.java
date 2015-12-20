@@ -198,7 +198,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         }
 
         // allow pings
-        ctx.channel().attr(TimeoutHandler.SEND_PINGS).set(true);
+        TimeoutHandler.setPingEnabled(ctx.channel(), true);
 
         // add Dispatcher
         ctx.pipeline().addBefore(ctx.name(), ClientIncomingDispatcher.class.getSimpleName(), client.getIncomingDispatcher());

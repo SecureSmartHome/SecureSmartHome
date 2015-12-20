@@ -238,7 +238,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         final DeviceID deviceID = ctx.channel().attr(ATTR_PEER_ID).get();
 
         // allow pings
-        ctx.channel().attr(TimeoutHandler.SEND_PINGS).set(true);
+        TimeoutHandler.setPingEnabled(ctx.channel(), true);
 
         // add Dispatcher
         ctx.pipeline().addBefore(ctx.name(), ClientIncomingDispatcher.class.getSimpleName(), server.getIncomingDispatcher());

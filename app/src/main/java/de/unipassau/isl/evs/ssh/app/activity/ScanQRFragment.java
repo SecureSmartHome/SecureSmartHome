@@ -17,9 +17,14 @@ import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
  *
  * @author Wolfgang Popp.
  */
-public class ScanQRFragment extends BoundFragment {
-    public static final String SCAN_RESULT = "SCAN_RESULT";
+public abstract class ScanQRFragment extends BoundFragment {
     private static final int REQUEST_CODE_SCAN_QR = 1;
+    private static final Intent ZXING_SCAN_INTENT = new Intent("com.google.zxing.client.android.SCAN");
+    private static final String ZXING_SCAN_RESULT = "SCAN_RESULT";
+
+    static {
+        ZXING_SCAN_INTENT.putExtra("SCAN_MODE", "QR_CODE_MODE");
+    }
 
     /**
      * Starts the QR-Code Scanner or an app store to install a QR-Code Scanner, if no scanner is
@@ -28,10 +33,7 @@ public class ScanQRFragment extends BoundFragment {
     protected void requestScanQRCode() {
         try {
             // Try to open ZXing to scan the QR-Cde
-            Intent intent = new
-                    Intent("com.google.zxing.client.android.SCAN");
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, REQUEST_CODE_SCAN_QR);
+            startActivityForResult(ZXING_SCAN_INTENT, REQUEST_CODE_SCAN_QR);
         } catch (ActivityNotFoundException e) {
             // If it's not installed, open the Play Store and let the user install it
             Uri marketUri =
@@ -47,7 +49,7 @@ public class ScanQRFragment extends BoundFragment {
 
         if (requestCode == REQUEST_CODE_SCAN_QR) {
             if (resultCode == Activity.RESULT_OK) {
-                String contents = data.getStringExtra(SCAN_RESULT);
+                String contents = data.getStringExtra(ZXING_SCAN_RESULT);
                 try {
                     final QRDeviceInformation info = QRDeviceInformation.fromDataString(contents);
                     onQRCodeScanned(info);
@@ -61,9 +63,8 @@ public class ScanQRFragment extends BoundFragment {
 
     /**
      * Called when the Qr-Code was scanned successfully.
+     *
      * @param info the information contained in the QR-Code
      */
-    protected void onQRCodeScanned(QRDeviceInformation info) {
-
-    }
+    protected abstract void onQRCodeScanned(QRDeviceInformation info);
 }

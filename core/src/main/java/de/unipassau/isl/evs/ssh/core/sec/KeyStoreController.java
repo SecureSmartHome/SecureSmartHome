@@ -49,10 +49,10 @@ import de.unipassau.isl.evs.ssh.core.container.StartupException;
 public class KeyStoreController extends AbstractComponent {
     public static final Key<KeyStoreController> KEY = new Key<>(KeyStoreController.class);
     private static final String LOCAL_PRIVATE_KEY_ALIAS = "localPrivateKey";
-    private static final String KEY_STORE_FILENAME = "encryptText-keystore.bks";
-    private static final String KEY_STORE_TYPE = "BKS";
-    private static final String KEY_PAIR_ALGORITHM = "ECIES";
-    private static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA224withECDSA";
+    private static final String KEYSTORE_FILENAME = "encryptText-keystore.bks";
+    private static final String KEYSTORE_TYPE = "BKS";
+    private static final String ASYMMETRIC_KEY_ALGORITHM = "ECIES";
+    private static final String ASYMMETRIC_SIGNING_ALGORITHM = "SHA224withECDSA";
     private static final String PUBLIC_KEY_PREFIX = "public_key:";
     private static final int ASYMMETRIC_KEY_SIZE = 256;
 
@@ -73,13 +73,13 @@ public class KeyStoreController extends AbstractComponent {
     public void init(Container container) {
         super.init(container);
         try {
-            keyStore = KeyStore.getInstance(KEY_STORE_TYPE);
+            keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
 
             Context containerServiceContext = container.require(ContainerService.KEY_CONTEXT);
-            keyStoreFile = containerServiceContext.getFileStreamPath(KEY_STORE_FILENAME);
+            keyStoreFile = containerServiceContext.getFileStreamPath(KEYSTORE_FILENAME);
             if (keyStoreFile.exists()) {
                 char[] keyStorePassword = getKeystorePassword();
-                keyStore.load(containerServiceContext.openFileInput(KEY_STORE_FILENAME), keyStorePassword);
+                keyStore.load(containerServiceContext.openFileInput(KEYSTORE_FILENAME), keyStorePassword);
                 Arrays.fill(keyStorePassword, (char) 0);
             } else {
                 keyStore.load(null);
@@ -219,7 +219,7 @@ public class KeyStoreController extends AbstractComponent {
 
         String keyPairAlgorithm;
 
-        if (KEY_PAIR_ALGORITHM.startsWith("EC")) {
+        if (ASYMMETRIC_KEY_ALGORITHM.startsWith("EC")) {
             //Hardcoded Algorithms
             //see org.spongycastle.jcajce.provider.asymmetric.EC.Mappings.configure(ConfigurableProvider), line 52:
             //     "KeyPairGenerator.ECIES" -> "KeyPairGeneratorSpi$ECDH"
@@ -227,7 +227,7 @@ public class KeyStoreController extends AbstractComponent {
             Log.w(KeyStoreController.class.getSimpleName(), "Using 'EC' instead of '" + keyPairAlgorithm
                     + "' to circumvent wrong BouncyCastle mappings");
         } else {
-            keyPairAlgorithm = KEY_PAIR_ALGORITHM;
+            keyPairAlgorithm = ASYMMETRIC_KEY_ALGORITHM;
         }
 
         KeyPairGenerator generator;
@@ -247,7 +247,7 @@ public class KeyStoreController extends AbstractComponent {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.YEAR, 100);
         certGen.setNotAfter(calendar.getTime());
-        certGen.setSignatureAlgorithm(KEY_PAIR_SIGNING_ALGORITHM);
+        certGen.setSignatureAlgorithm(ASYMMETRIC_SIGNING_ALGORITHM);
         X509Certificate cert = certGen.generate(keyPair.getPrivate());
 
         char[] keyPairPassword = getKeyPairPassword();

@@ -9,9 +9,6 @@ public class GPIOAccessPoint extends ModuleAccessPoint {
     public static final String TYPE = "GPIO";
     private int port;
 
-    public GPIOAccessPoint() {
-    }
-
     public GPIOAccessPoint(int port) {
         this.port = port;
     }
