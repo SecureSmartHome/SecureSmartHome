@@ -1,6 +1,6 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
@@ -51,11 +51,11 @@ public class MasterClimateHandler extends AbstractMasterHandler {
     private void evaluateWeatherData(ClimatePayload payload) {
         //The following values will not be checked as they are not of interest: Altitude, Pressure, Temp1, Temp2
         if (payload.getHumidity() > MasterConstants.ClimateThreshold.HUMIDITY) {
-            ClimatePayload newPayload = new ClimatePayload(payload, CoreConstants.Permission.BinaryPermission.HUMIDITY_WARNING.toString());
+            ClimatePayload newPayload = new ClimatePayload(payload, Permission.HUMIDITY_WARNING.toString());
             sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(newPayload));
         }
         if (payload.getVisible() > MasterConstants.ClimateThreshold.VISIBLE_LIGHT && mainLampOn) {
-            ClimatePayload newPayload = new ClimatePayload(payload, CoreConstants.Permission.BinaryPermission.BRIGHTNESS_WARNING.toString());
+            ClimatePayload newPayload = new ClimatePayload(payload, Permission.BRIGHTNESS_WARNING.toString());
             sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(newPayload));
         }
     }

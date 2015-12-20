@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 /**
  * A DTO representing permissions. A permission has a name and may only be for a specific module.
+ * <p/>
+ * //TODO resolve name collision with {@link de.unipassau.isl.evs.ssh.core.Permission} (Niko, 2015-12-20)
  *
  * @author Leon Sell
  */

@@ -65,7 +65,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
         if (hasPermission(
                 message.getFromID(),
                 new Permission(
-                        CoreConstants.Permission.BinaryPermission.REQUEST_CAMERA_STATUS.toString(),
+                        de.unipassau.isl.evs.ssh.core.Permission.REQUEST_CAMERA_STATUS.toString(),
                         atModule.getName()
                 )
         )) {

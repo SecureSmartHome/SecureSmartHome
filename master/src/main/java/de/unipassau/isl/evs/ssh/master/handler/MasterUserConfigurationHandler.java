@@ -73,7 +73,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         switch (payload.getAction()) {
             case REMOVE_USERDEVICE:
                 if (hasPermission(message.getFromID(), new Permission(
-                        CoreConstants.Permission.BinaryPermission.DELETE_USER.toString(), ""))) {
+                        de.unipassau.isl.evs.ssh.core.Permission.DELETE_USER.toString(), ""))) {
                     removeUserDevice(payload);
                 } else {
                     sendErrorMessage(message);
@@ -82,9 +82,9 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             case EDIT_USERDEVICE:
                 //TODO maybe refactor and unite both permissions?
                 if (hasPermission(message.getFromID(), new Permission(
-                        CoreConstants.Permission.BinaryPermission.CHANGE_USER_NAME.toString(), ""))
+                        de.unipassau.isl.evs.ssh.core.Permission.CHANGE_USER_NAME.toString(), ""))
                         && hasPermission(message.getFromID(), new Permission(
-                        CoreConstants.Permission.BinaryPermission.CHANGE_USER_GROUP.toString(), ""))) {
+                        de.unipassau.isl.evs.ssh.core.Permission.CHANGE_USER_GROUP.toString(), ""))) {
                     editUserDevice(message, payload);
                 } else {
                     sendErrorMessage(message);
@@ -92,7 +92,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 break;
             case GRANT_PERMISSION:
                 if (hasPermission(message.getFromID(), new Permission(
-                        CoreConstants.Permission.BinaryPermission.GRANT_USER_PERMISSION.toString(), ""))) {
+                        de.unipassau.isl.evs.ssh.core.Permission.GRANT_USER_PERMISSION.toString(), ""))) {
                     grantPermission(message, payload);
                 } else {
                     sendErrorMessage(message);
@@ -100,7 +100,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 break;
             case REVOKE_PERMISSION:
                 if (hasPermission(message.getFromID(), new Permission(
-                        CoreConstants.Permission.BinaryPermission.WITHDRAW_USER_PERMISSION.toString(), ""))) {
+                        de.unipassau.isl.evs.ssh.core.Permission.WITHDRAW_USER_PERMISSION.toString(), ""))) {
                     revokePermission(payload);
                 } else {
                     sendErrorMessage(message);

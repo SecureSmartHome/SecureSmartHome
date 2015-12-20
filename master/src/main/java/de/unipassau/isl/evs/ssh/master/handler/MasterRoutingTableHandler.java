@@ -7,7 +7,6 @@ import com.google.common.collect.ListMultimap;
 
 import java.util.List;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
@@ -39,7 +38,7 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler {
     public void handle(Message.AddressedMessage message) {
         saveMessage(message);
         if (MASTER_SLAVE_REGISTER.matches(message)) {
-            if (hasPermission(message.getFromID(), new Permission(CoreConstants.Permission.BinaryPermission.ADD_ODROID.toString()))) {
+            if (hasPermission(message.getFromID(), new Permission(de.unipassau.isl.evs.ssh.core.Permission.ADD_ODROID.toString()))) {
                 if (handleRegisterRequest(message)) {
                     updateAllClients();
                 } else {

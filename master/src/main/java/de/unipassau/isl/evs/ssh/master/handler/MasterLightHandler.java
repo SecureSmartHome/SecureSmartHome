@@ -86,7 +86,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
         if (hasPermission(
                 message.getFromID(),
                 new Permission(
-                        CoreConstants.Permission.BinaryPermission.REQUEST_LIGHT_STATUS.toString(),
+                        de.unipassau.isl.evs.ssh.core.Permission.REQUEST_LIGHT_STATUS.toString(),
                         atModule.getName()
                 )
         )) {

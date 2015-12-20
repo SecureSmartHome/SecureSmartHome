@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
@@ -46,7 +45,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_USER_REGISTER.matches(message)) {
-            if (hasPermission(message.getFromID(), new Permission(CoreConstants.Permission.BinaryPermission.ADD_USER.toString()))) {
+            if (hasPermission(message.getFromID(), new Permission(de.unipassau.isl.evs.ssh.core.Permission.ADD_USER.toString()))) {
                 handleInitRequest(message);
             }
         } else if (message.getPayload() instanceof MessageErrorPayload) {

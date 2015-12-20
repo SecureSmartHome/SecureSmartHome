@@ -9,7 +9,7 @@ import android.support.v7.app.NotificationCompat;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.activity.MainActivity;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.Permission;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
@@ -59,10 +59,11 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         } else if (message.getPayload() instanceof ClimatePayload) {
             ClimatePayload payload = (ClimatePayload) message.getPayload();
 
-            if (payload.getNotificationType().equals(CoreConstants.Permission.BinaryPermission.BRIGHTNESS_WARNING.toString())) {
+            //TODO comparing the notification type name with the name of a permission?? that must be a tough mental typecast (Niko, 2015-12-20)
+            if (payload.getNotificationType().equals(Permission.BRIGHTNESS_WARNING.toString())) {
                 issueBrightnessWarning(BRIGHTNESS_WARNING_ID);
                 issueClimateNotification(HUMIDITY_WARNING_ID);
-            } else if (payload.getNotificationType().equals(CoreConstants.Permission.BinaryPermission.HUMIDITY_WARNING.toString())) {
+            } else if (payload.getNotificationType().equals(Permission.HUMIDITY_WARNING.toString())) {
                 issueClimateNotification(HUMIDITY_WARNING_ID);
             }
             //Weather Warnings

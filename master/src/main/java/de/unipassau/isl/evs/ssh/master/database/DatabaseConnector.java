@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.Permission;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
@@ -155,8 +155,6 @@ public class DatabaseConnector extends AbstractComponent {
                 + "DROP TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + ";";
 
-        private CoreConstants.Permission.BinaryPermission[] binaryPermissions = CoreConstants.Permission.BinaryPermission.values();
-
         private String[] defaultTemplates = {"Default_Template", "Parents_Template",
                 "Children_Template", "Guests_Template"};
         private String[] groupNames = {MasterRegisterDeviceHandler.NO_GROUP, "Parents", "Children", "Guests"};
@@ -167,12 +165,11 @@ public class DatabaseConnector extends AbstractComponent {
         }
 
         private void insertPermissions(SQLiteDatabase db) {
-            for (CoreConstants.Permission.BinaryPermission permission : binaryPermissions) {
+            for (Permission permission : Permission.binaryPermissions) {
                 ContentValues values = new ContentValues(1);
                 values.put(DatabaseContract.Permission.COLUMN_NAME, permission.toString());
                 db.insert(DatabaseContract.Permission.TABLE_NAME, null, values);
             }
-
         }
 
         private void insertGroups(SQLiteDatabase db) {
@@ -192,7 +189,7 @@ public class DatabaseConnector extends AbstractComponent {
 
         private void fillTemplates(SQLiteDatabase db) {
             final int parentsTemplateID = 2;
-            for (int i = 0; i < binaryPermissions.length; i++) {
+            for (int i = 0; i < Permission.binaryPermissions.length; i++) {
                 ContentValues values = new ContentValues(2);
                 values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID, i + 1);
                 values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID, parentsTemplateID);

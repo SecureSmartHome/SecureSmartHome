@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.master.handler;
 
 import java.util.Map;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -98,7 +97,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         if (hasPermission(
                 message.getFromID(),
                 new Permission(
-                        CoreConstants.Permission.BinaryPermission.REQUEST_DOOR_STATUS.toString(),
+                        de.unipassau.isl.evs.ssh.core.Permission.REQUEST_DOOR_STATUS.toString(),
                         atModule.getName()
                 )
         )) {
@@ -123,7 +122,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
         if (requireComponent(PermissionController.KEY)
                 .hasPermission(message.getFromID(), new Permission(
-                        CoreConstants.Permission.BinaryPermission.REQUEST_DOOR_STATUS.toString(), atModule.getName()))) {
+                        de.unipassau.isl.evs.ssh.core.Permission.REQUEST_DOOR_STATUS.toString(), atModule.getName()))) {
 
 
             Message messageToSend = new Message(new DoorLockPayload(getLocked(atModule.getName()), atModule.getName()));
@@ -144,7 +143,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
         if (requireComponent(PermissionController.KEY)
                 .hasPermission(message.getFromID(), new Permission(
-                        CoreConstants.Permission.BinaryPermission.LOCK_DOOR.toString(), atModule.getName()))) {
+                        de.unipassau.isl.evs.ssh.core.Permission.LOCK_DOOR.toString(), atModule.getName()))) {
 
             setLocked(atModule.getName(), !doorLockPayload.isUnlock());
 
@@ -154,7 +153,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                         MASTER_NOTIFICATION_SEND,
                         new Message(
                                 new NotificationPayload(
-                                        CoreConstants.Permission.BinaryPermission.DOOR_UNLOCKED.toString(),
+                                        de.unipassau.isl.evs.ssh.core.Permission.DOOR_UNLOCKED.toString(),
                                         DOOR_UNLOCKED_MESSAGE
                                 )
                         ));
@@ -163,7 +162,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                         MASTER_NOTIFICATION_SEND,
                         new Message(
                                 new NotificationPayload(
-                                        CoreConstants.Permission.BinaryPermission.DOOR_LOCKED.toString(),
+                                        de.unipassau.isl.evs.ssh.core.Permission.DOOR_LOCKED.toString(),
                                         DOOR_LOCKED_MESSAGE
                                 )
                         ));
@@ -178,7 +177,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         Message.AddressedMessage correspondingMessage =
                 getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
         Message messageToSend = new Message(new NotificationPayload(
-                CoreConstants.Permission.BinaryPermission.DOOR_UNLATCHED.toString(), DOOR_UNLATCHED_MESSAGE));
+                de.unipassau.isl.evs.ssh.core.Permission.DOOR_UNLATCHED.toString(), DOOR_UNLATCHED_MESSAGE));
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
         sendMessageLocal(MASTER_NOTIFICATION_SEND, messageToSend);
@@ -193,7 +192,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
         if (requireComponent(PermissionController.KEY)
                 .hasPermission(message.getFromID(), new Permission(
-                        CoreConstants.Permission.BinaryPermission.UNLATCH_DOOR.toString(), atModule.getName()))) {
+                        de.unipassau.isl.evs.ssh.core.Permission.UNLATCH_DOOR.toString(), atModule.getName()))) {
 
             if (!getLocked(atModule.getName())) {
                 Message.AddressedMessage sendMessage =

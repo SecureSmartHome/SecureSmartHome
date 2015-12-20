@@ -7,7 +7,6 @@ import com.google.common.collect.ListMultimap;
 
 import java.util.List;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
@@ -79,7 +78,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
             sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), createUpdateMessage());
         /* @author Leon Sell */
         } else if (MASTER_MODULE_RENAME.matches(message)) {
-            if (hasPermission(message.getFromID(), new Permission(CoreConstants.Permission.BinaryPermission.RENAME_MODULE.toString()))) {
+            if (hasPermission(message.getFromID(), new Permission(de.unipassau.isl.evs.ssh.core.Permission.RENAME_MODULE.toString()))) {
                 if (handleRenameModule(message)) {
                     updateAllClients();
                 } else {
@@ -117,14 +116,14 @@ public class MasterModuleHandler extends AbstractMasterHandler {
         SlaveController slaveController = requireComponent(SlaveController.KEY);
         PermissionController permissionController = requireComponent(PermissionController.KEY);
         boolean success = false;
-        String[] permissions = CoreConstants.Permission.TernaryPermission.getPermissions(module.getModuleType());
+        de.unipassau.isl.evs.ssh.core.Permission[] permissions = de.unipassau.isl.evs.ssh.core.Permission.getPermissions(module.getModuleType());
 
         try {
             slaveController.addModule(module);
 
             if (permissions != null) {
-                for (String permission : permissions) {
-                    permissionController.addPermission(new Permission(permission, module.getName()));
+                for (de.unipassau.isl.evs.ssh.core.Permission permission : permissions) {
+                    permissionController.addPermission(new Permission(permission.toString(), module.getName()));
                 }
             }
             success = true;
