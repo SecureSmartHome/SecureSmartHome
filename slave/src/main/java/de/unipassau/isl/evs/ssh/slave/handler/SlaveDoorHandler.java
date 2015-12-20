@@ -12,8 +12,8 @@ import de.unipassau.isl.evs.ssh.drivers.lib.DoorBuzzer;
 import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_DOOR_STATUS_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_DOOR_UNLATCH;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH;
 
 /**
  * Handles door messages and makes API calls accordingly.

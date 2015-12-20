@@ -34,12 +34,11 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ALL_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_CERT;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_ALL_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_READER_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_WRITER_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.SharedPrefs.PREF_TOKEN;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.READER_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.WRITER_IDLE_TIME;
 
 /**
  * @author Niko Fink: Handshake Sequence
@@ -78,7 +77,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
 
         // Timeout Handler
         ctx.pipeline().addBefore(ctx.name(), IdleStateHandler.class.getSimpleName(),
-                new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
+                new IdleStateHandler(READER_IDLE_TIME, WRITER_IDLE_TIME, ALL_IDLE_TIME));
         ctx.pipeline().addBefore(ctx.name(), TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
 
         // Add exception handler
@@ -175,7 +174,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
             Log.v(TAG, "Got State: authenticated, handshake successful");
             handshakeSuccessful(ctx);
         } else {
-            final String tokenString = client.getSharedPrefs().getString(PREF_TOKEN, null);
+            final String tokenString = client.getRegistrationToken();
             final boolean canRegister = !triedRegister && !Strings.isNullOrEmpty(tokenString);
             if (canRegister) {
                 triedRegister = true;

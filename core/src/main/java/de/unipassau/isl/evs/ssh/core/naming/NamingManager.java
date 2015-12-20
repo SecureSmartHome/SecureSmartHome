@@ -26,7 +26,7 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
  */
 public class NamingManager extends AbstractComponent {
     public static final Key<NamingManager> KEY = new Key<>(NamingManager.class);
-    public static final String PREF_MASTER_ID = "ssh.core.MASTER_ID";
+    static final String PREF_MASTER_ID = "ssh.core.MASTER_ID";
 
     private final boolean isMaster;
     private DeviceID ownID;

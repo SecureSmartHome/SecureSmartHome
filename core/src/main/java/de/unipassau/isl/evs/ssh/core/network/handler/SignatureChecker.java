@@ -12,7 +12,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.Security.MESSAGE_SIGN_ALG;
+import static de.unipassau.isl.evs.ssh.core.network.handler.SignatureGenerator.MESSAGE_SIGN_ALG;
 
 /**
  * The SignatureChecker class is a channel handler that is part of a ChannelPipeline and checks signatures of received messages.

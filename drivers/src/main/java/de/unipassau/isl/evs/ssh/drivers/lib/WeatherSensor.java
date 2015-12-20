@@ -4,12 +4,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
@@ -172,7 +172,7 @@ public class WeatherSensor extends AbstractComponent {
             message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
             OutgoingRouter router = container.require(OutgoingRouter.KEY);
-            router.sendMessage(namingManager.getMasterID(), CoreConstants.RoutingKeys.MASTER_PUSH_WEATHER_INFO, message);
+            router.sendMessage(namingManager.getMasterID(), RoutingKeys.MASTER_PUSH_WEATHER_INFO, message);
         }
     }
 }

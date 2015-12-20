@@ -16,7 +16,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 /**
  * Offers high level methods to interact with the tables associated with permissions in the database.
  * //TODO avoid unnecessary and annoying object construction because all parameters have to be wrapped as {@link Permission}
- * and simply take ({@link de.unipassau.isl.evs.ssh.core.Permission} permission, {@link String} moduleName) instead (Niko, 2015-12-20)
+ * and simply take ({@link de.unipassau.isl.evs.ssh.core.sec.Permission} permission, {@link String} moduleName) instead (Niko, 2015-12-20)
  *
  * @author Leon Sell
  */

@@ -9,7 +9,6 @@ import android.support.v7.app.NotificationCompat;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.activity.MainActivity;
-import de.unipassau.isl.evs.ssh.core.Permission;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
@@ -21,8 +20,9 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
 
 /**
  * Notification Handler for the App that receives Messages from the MasterNotificationHandler

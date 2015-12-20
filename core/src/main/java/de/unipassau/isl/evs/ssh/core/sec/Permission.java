@@ -1,9 +1,11 @@
-package de.unipassau.isl.evs.ssh.core;
+package de.unipassau.isl.evs.ssh.core.sec;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 import java.util.Arrays;
+
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 
 /**
  * //TODO why is the ID of the constant not also used as name for the database, so that {@link #valueOf(String)} could be used (Niko, 2015-12-20)
@@ -98,9 +100,17 @@ public enum Permission {
         return isTernary;
     }
 
+    /**
+     * @deprecated use {@link #getPermissions(CoreConstants.ModuleType)} instead
+     */
+    @Deprecated
     public static Permission[] getPermissions(String moduleType) {
+        return getPermissions(CoreConstants.ModuleType.valueOf(moduleType));
+    }
+
+    public static Permission[] getPermissions(CoreConstants.ModuleType moduleType) {
         switch (moduleType) {
-            case CoreConstants.ModuleType.LIGHT:
+            case Light:
                 return new Permission[]{SWITCH_LIGHT};
             default:
                 return null;

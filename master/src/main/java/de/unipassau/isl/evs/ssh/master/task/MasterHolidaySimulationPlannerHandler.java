@@ -26,9 +26,9 @@ import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_HOLIDAY_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_HOLIDAY_SET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_LIGHT_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET;
 
 /**
  * This handler calculates what actions need to take place in order to execute the holiday simulation.
@@ -51,13 +51,13 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
             //TODO Refactor if we eliminate one permission
             if (payload.switchOn() && hasPermission(message.getFromID(), new Permission(
-                    de.unipassau.isl.evs.ssh.core.Permission.START_HOLIDAY_SIMULATION.toString(), ""))) {
+                    de.unipassau.isl.evs.ssh.core.sec.Permission.START_HOLIDAY_SIMULATION.toString(), ""))) {
 
                 runHolidaySimulation = payload.switchOn();
                 replyStatus(message);
 
             } else if (!payload.switchOn() && hasPermission(message.getFromID(), new Permission(
-                    de.unipassau.isl.evs.ssh.core.Permission.STOP_HOLIDAY_SIMULATION.toString(), ""))) {
+                    de.unipassau.isl.evs.ssh.core.sec.Permission.STOP_HOLIDAY_SIMULATION.toString(), ""))) {
 
                 runHolidaySimulation = payload.switchOn();
                 replyStatus(message);

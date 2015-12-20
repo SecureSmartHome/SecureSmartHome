@@ -22,10 +22,10 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.GLOBAL_MODULES_UPDATE;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_MODULE_ADD;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_MODULE_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_MODULE_RENAME;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_RENAME;
 
 /**
  * The MasterModuleHandler sends updated lists of active Modules to ODROIDs and Clients
@@ -78,7 +78,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
             sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), createUpdateMessage());
         /* @author Leon Sell */
         } else if (MASTER_MODULE_RENAME.matches(message)) {
-            if (hasPermission(message.getFromID(), new Permission(de.unipassau.isl.evs.ssh.core.Permission.RENAME_MODULE.toString()))) {
+            if (hasPermission(message.getFromID(), new Permission(de.unipassau.isl.evs.ssh.core.sec.Permission.RENAME_MODULE.toString()))) {
                 if (handleRenameModule(message)) {
                     updateAllClients();
                 } else {
@@ -116,13 +116,13 @@ public class MasterModuleHandler extends AbstractMasterHandler {
         SlaveController slaveController = requireComponent(SlaveController.KEY);
         PermissionController permissionController = requireComponent(PermissionController.KEY);
         boolean success = false;
-        de.unipassau.isl.evs.ssh.core.Permission[] permissions = de.unipassau.isl.evs.ssh.core.Permission.getPermissions(module.getModuleType());
+        de.unipassau.isl.evs.ssh.core.sec.Permission[] permissions = de.unipassau.isl.evs.ssh.core.sec.Permission.getPermissions(module.getModuleType());
 
         try {
             slaveController.addModule(module);
 
             if (permissions != null) {
-                for (de.unipassau.isl.evs.ssh.core.Permission permission : permissions) {
+                for (de.unipassau.isl.evs.ssh.core.sec.Permission permission : permissions) {
                     permissionController.addPermission(new Permission(permission.toString(), module.getName()));
                 }
             }

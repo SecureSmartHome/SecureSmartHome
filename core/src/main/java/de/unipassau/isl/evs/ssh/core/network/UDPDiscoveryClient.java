@@ -30,7 +30,6 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.ScheduledFuture;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_MILLIS_BETWEEN_BROADCASTS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_HOST;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_REQUEST;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_RESPONSE;
@@ -46,6 +45,11 @@ public class UDPDiscoveryClient extends AbstractComponent {
     public static final Key<UDPDiscoveryClient> KEY = new Key<>(UDPDiscoveryClient.class);
 
     private static final String TAG = UDPDiscoveryClient.class.getSimpleName();
+
+    /**
+     * The maximum number of seconds the broadcast waits to be sent again.
+     */
+    private static final long CLIENT_MILLIS_BETWEEN_BROADCASTS = TimeUnit.SECONDS.toMillis(2);
 
     /**
      * The channel listening for incoming UDP packets.
@@ -219,7 +223,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
                         ReferenceCountUtil.release(request);
                         Log.i(TAG, "UDP response received " + address.getHostAddress() + ":" + port);
                         stopDiscovery();
-                        requireComponent(Client.KEY).onDiscoverySuccessful(address, port);
+                        requireComponent(Client.KEY).onMasterFound(address, port);
                         return;
                     } else {
                         Log.i(TAG, "UDP response received " + address.getHostAddress() + ":" + port

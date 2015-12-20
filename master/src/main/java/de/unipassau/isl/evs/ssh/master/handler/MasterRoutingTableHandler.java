@@ -21,8 +21,8 @@ import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.GLOBAL_MODULES_UPDATE;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_SLAVE_REGISTER;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_REGISTER;
 
 /**
  * Handles messages indicating that information of a device needs to be updated and writes these changes to the routing table.
@@ -38,7 +38,7 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler {
     public void handle(Message.AddressedMessage message) {
         saveMessage(message);
         if (MASTER_SLAVE_REGISTER.matches(message)) {
-            if (hasPermission(message.getFromID(), new Permission(de.unipassau.isl.evs.ssh.core.Permission.ADD_ODROID.toString()))) {
+            if (hasPermission(message.getFromID(), new Permission(de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID.toString()))) {
                 if (handleRegisterRequest(message)) {
                     updateAllClients();
                 } else {

@@ -19,16 +19,16 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_CAMERA_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_DOOR_BLOCK;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_DOOR_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_DOOR_RING;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_CAMERA_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_LOCK_SET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_STATUS_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_UNLATCH;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_CAMERA_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_BLOCK;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
 
 /**
  * The AppDoorHandler class sends and receives messages for door events.

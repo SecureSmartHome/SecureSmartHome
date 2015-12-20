@@ -25,7 +25,7 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USER_REGISTER;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER;
 
 /**
  * Handles messages indicating that a device wants to register itself at the system and also generates
@@ -45,7 +45,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_USER_REGISTER.matches(message)) {
-            if (hasPermission(message.getFromID(), new Permission(de.unipassau.isl.evs.ssh.core.Permission.ADD_USER.toString()))) {
+            if (hasPermission(message.getFromID(), new Permission(de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER.toString()))) {
                 handleInitRequest(message);
             }
         } else if (message.getPayload() instanceof MessageErrorPayload) {

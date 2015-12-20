@@ -8,16 +8,16 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_CLIMATE_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_CLIMATE_UPDATE;
 
 /**
  * AppClimateHandler class handles message from and to the
@@ -206,7 +206,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         Message message = new Message(climatePayload);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO, message);
+        router.sendMessageToMaster(RoutingKeys.MASTER_REQUEST_WEATHER_INFO, message);
     }
 
 
@@ -218,7 +218,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_CLIMATE_UPDATE.getKey());
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO, message);
+        router.sendMessageToMaster(RoutingKeys.MASTER_REQUEST_WEATHER_INFO, message);
     }
 
     //Lifecycle & Callbacks/////////////////////////////////////////////////////////////////////////

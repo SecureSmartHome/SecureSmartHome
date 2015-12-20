@@ -4,9 +4,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.test.InstrumentationTestCase;
 
-import de.unipassau.isl.evs.ssh.core.Permission;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 /**
  * Instrumentation test for the DatabaseConnector.

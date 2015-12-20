@@ -55,14 +55,14 @@ public class NamingManagerTest extends InstrumentationTestCase {
         // Clear SharedPreferences
         SharedPreferences sharedPref = context.getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.remove(CoreConstants.SharedPrefs.PREF_MASTER_ID);
+        editor.remove(NamingManager.PREF_MASTER_ID);
         editor.commit();
 
         // Generate a master certificate,
         X509Certificate certificate = createCert();
         // write master id to SharedPreferences,
         DeviceID masterId = DeviceID.fromCertificate(certificate);
-        editor.putString(CoreConstants.SharedPrefs.PREF_MASTER_ID, masterId.getIDString());
+        editor.putString(NamingManager.PREF_MASTER_ID, masterId.getIDString());
         editor.commit();
         // save the certificate
         container.require(KeyStoreController.KEY).saveCertificate(certificate, masterId.getIDString());
@@ -81,7 +81,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
         // Clear SharedPreferences
         SharedPreferences sharedPref = context.getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.remove(CoreConstants.SharedPrefs.PREF_MASTER_ID);
+        editor.remove(NamingManager.PREF_MASTER_ID);
         editor.commit();
 
         return container;

@@ -1,7 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.app.NotificationManager;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -18,9 +17,7 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
-
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.SharedPrefs.PREF_MASTER_ID;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 
 /**
  * As this Activity also displays information like whether the light is on or not, this Activity also
@@ -80,23 +77,10 @@ public class MainActivity extends BoundActivity
         //Initialise fragmentTransaction
         if (savedInstanceState == null || !savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
             // starts the main fragment when already registered, the welcomescreen fragment so the user can register.
-            Class<? extends Fragment> clazz = (deviceNotRegistered() ? WelcomeScreenFragment.class : MainFragment.class);
+            final boolean masterIDKnown = requireComponent(NamingManager.KEY).isMasterIDKnown();
+            Class<? extends Fragment> clazz = (masterIDKnown ? MainFragment.class : WelcomeScreenFragment.class);
             showFragmentByClass(clazz);
         }
-    }
-
-    /**
-     * Checks whether the device is registered in the system by checking the master_id in the SharedPreferences.
-     *
-     * @return If the device is already registered or not.
-     */
-    private boolean deviceNotRegistered() {
-        SharedPreferences sharedPreferences = getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
-        String master_id = null;
-        if (sharedPreferences != null) {
-            master_id = sharedPreferences.getString(PREF_MASTER_ID, null);
-        }
-        return master_id == null;
     }
 
     @Override

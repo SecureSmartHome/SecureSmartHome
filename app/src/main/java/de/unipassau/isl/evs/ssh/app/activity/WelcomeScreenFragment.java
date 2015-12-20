@@ -1,7 +1,5 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -11,11 +9,12 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
-import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+
+import static de.unipassau.isl.evs.ssh.core.network.Client.encodeToken;
 
 /**
  * WelcomeScreenFragment to display a welcome message to every user when he initially starts the app.
@@ -45,15 +44,10 @@ public class WelcomeScreenFragment extends ScanQRFragment {
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
         if (info != null) {
-            SharedPreferences sharedPreferences = container.require(ContainerService.KEY_CONTEXT).getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt(CoreConstants.NettyConstants.PREF_PORT, info.getPort());
-            editor.putString(CoreConstants.NettyConstants.PREF_HOST, info.getAddress().getHostAddress());
-            editor.putInt(CoreConstants.NettyConstants.PREF_PORT, info.getPort());
-            editor.putString(CoreConstants.SharedPrefs.PREF_TOKEN, android.util.Base64.encodeToString(info.getToken(), android.util.Base64.NO_WRAP));
-            editor.putString(CoreConstants.SharedPrefs.PREF_MASTER_ID, info.getID().getIDString());
-            editor.commit();
-            container.require(Client.KEY).onDiscoverySuccessful(info.getAddress(), info.getPort());
+            container.require(NamingManager.KEY)
+                    .setMasterID(info.getID());
+            container.require(Client.KEY)
+                    .onMasterFound(info.getAddress(), info.getPort(), encodeToken(info.getToken()));
             ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         }
     }

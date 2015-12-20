@@ -11,10 +11,10 @@ import net.aksingh.owmjapis.OpenWeatherMap;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
@@ -35,7 +35,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
 
     private void sendWarningNotification() {
         WeatherPayload payload = new WeatherPayload(true, "Door/Window is open and it will rain today"); //TODO refactor to use generic text
-        sendMessageLocal(CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND, new Message(payload));
+        sendMessageLocal(RoutingKeys.MASTER_NOTIFICATION_SEND, new Message(payload));
     }
 
     @Override

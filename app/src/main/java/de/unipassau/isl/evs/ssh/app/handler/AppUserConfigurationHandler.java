@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
@@ -17,12 +16,13 @@ import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_USERINFO_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_GET;
 
 /**
  * The AppUserConfigurationHandler handles the messaging that is needed to provide user and group
@@ -90,7 +90,7 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
         Message message = new Message(payload);
 
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USERINFO_GET.getKey());
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_USERINFO_GET, message);
+        router.sendMessageToMaster(RoutingKeys.MASTER_USERINFO_GET, message);
     }
 
     /**
@@ -159,7 +159,7 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
         Message message = new Message(payload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USERINFO_GET.getKey());
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_USERINFO_SET, message);
+        router.sendMessageToMaster(RoutingKeys.MASTER_USERINFO_SET, message);
     }
 
     /**

@@ -8,8 +8,6 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
  * @author Team
  */
 public class MasterConstants extends CoreConstants {
-    public static final String PREF_SERVER_PORT = "PREF_SERVER_PORT";
-
     /**
      * @author Christoph Fraedrich
      */

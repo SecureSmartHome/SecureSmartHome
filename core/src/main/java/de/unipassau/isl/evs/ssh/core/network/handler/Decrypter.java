@@ -12,7 +12,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.Security.MESSAGE_CRYPT_ALG;
+import static de.unipassau.isl.evs.ssh.core.network.handler.Encrypter.MESSAGE_CRYPT_ALG;
 
 /**
  * The Decrypter class is a channel handler that is part of a ChannelPipeline and provides decryption for system messages.

@@ -19,10 +19,11 @@ import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_MODULES_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.GLOBAL_MODULES_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_MODULES_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
 
 /**
  * AppModuleHandler offers a list of all Modules that are active in the System.
@@ -154,7 +155,7 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
         Message message = new Message(payload);
 
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_MODULES_GET.getKey());
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_MODULE_GET, message);
+        router.sendMessageToMaster(RoutingKeys.MASTER_MODULE_GET, message);
     }
 
     @Override

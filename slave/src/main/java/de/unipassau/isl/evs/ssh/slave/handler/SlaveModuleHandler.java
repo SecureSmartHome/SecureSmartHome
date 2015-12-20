@@ -28,7 +28,7 @@ import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.WeatherSensor;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.GLOBAL_MODULES_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
 
 /**
  * SlaveModuleHandler offers a list of all Modules that are active in the System and (un)registers

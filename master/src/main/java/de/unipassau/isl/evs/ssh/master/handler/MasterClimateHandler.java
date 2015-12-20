@@ -1,16 +1,16 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
-import de.unipassau.isl.evs.ssh.core.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.MasterConstants;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_PUSH_WEATHER_INFO;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_REQUEST_WEATHER_INFO;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_NOTIFICATION_SEND;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PUSH_WEATHER_INFO;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_REQUEST_WEATHER_INFO;
 
 /**
  * Handles climate messages and generates messages for each target and passes them to the OutgoingRouter.

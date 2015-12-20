@@ -9,10 +9,10 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_LIGHT_SET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_LIGHT_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_LIGHT_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET;
 
 /**
  * Handles light messages, logs them for the holiday simulation and generates messages
@@ -86,7 +86,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
         if (hasPermission(
                 message.getFromID(),
                 new Permission(
-                        de.unipassau.isl.evs.ssh.core.Permission.REQUEST_LIGHT_STATUS.toString(),
+                        de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS.toString(),
                         atModule.getName()
                 )
         )) {

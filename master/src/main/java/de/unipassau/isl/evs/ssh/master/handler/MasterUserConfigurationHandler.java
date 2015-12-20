@@ -11,7 +11,6 @@ import com.google.common.collect.Multimaps;
 import java.util.List;
 import java.util.Map;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
@@ -19,6 +18,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
@@ -62,9 +62,9 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     private void sendUpdateToUserDevice(DeviceID id) {
         Log.v(TAG, "sendUpdateToUser: " + id.getIDString());
         final Message userDeviceInformationMessage = new Message(generateUserDeviceInformationPayload());
-        sendMessage(id, CoreConstants.RoutingKeys.APP_USERINFO_GET, userDeviceInformationMessage);
+        sendMessage(id, RoutingKeys.APP_USERINFO_GET, userDeviceInformationMessage);
         final Message moduleInformationMessage = new Message(generateModuleInformationPayload());
-        sendMessage(id, CoreConstants.RoutingKeys.GLOBAL_MODULES_UPDATE, moduleInformationMessage);
+        sendMessage(id, RoutingKeys.GLOBAL_MODULES_UPDATE, moduleInformationMessage);
     }
 
     private void executeUserDeviceEdit(Message.AddressedMessage message) {
@@ -73,7 +73,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         switch (payload.getAction()) {
             case REMOVE_USERDEVICE:
                 if (hasPermission(message.getFromID(), new Permission(
-                        de.unipassau.isl.evs.ssh.core.Permission.DELETE_USER.toString(), ""))) {
+                        de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER.toString(), ""))) {
                     removeUserDevice(payload);
                 } else {
                     sendErrorMessage(message);
@@ -82,9 +82,9 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             case EDIT_USERDEVICE:
                 //TODO maybe refactor and unite both permissions?
                 if (hasPermission(message.getFromID(), new Permission(
-                        de.unipassau.isl.evs.ssh.core.Permission.CHANGE_USER_NAME.toString(), ""))
+                        de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME.toString(), ""))
                         && hasPermission(message.getFromID(), new Permission(
-                        de.unipassau.isl.evs.ssh.core.Permission.CHANGE_USER_GROUP.toString(), ""))) {
+                        de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP.toString(), ""))) {
                     editUserDevice(message, payload);
                 } else {
                     sendErrorMessage(message);
@@ -92,7 +92,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 break;
             case GRANT_PERMISSION:
                 if (hasPermission(message.getFromID(), new Permission(
-                        de.unipassau.isl.evs.ssh.core.Permission.GRANT_USER_PERMISSION.toString(), ""))) {
+                        de.unipassau.isl.evs.ssh.core.sec.Permission.GRANT_USER_PERMISSION.toString(), ""))) {
                     grantPermission(message, payload);
                 } else {
                     sendErrorMessage(message);
@@ -100,7 +100,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 break;
             case REVOKE_PERMISSION:
                 if (hasPermission(message.getFromID(), new Permission(
-                        de.unipassau.isl.evs.ssh.core.Permission.WITHDRAW_USER_PERMISSION.toString(), ""))) {
+                        de.unipassau.isl.evs.ssh.core.sec.Permission.WITHDRAW_USER_PERMISSION.toString(), ""))) {
                     revokePermission(payload);
                 } else {
                     sendErrorMessage(message);

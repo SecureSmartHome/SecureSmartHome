@@ -1,15 +1,15 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_CAMERA_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
 
 /**
  * Handles messages requesting pictures from the camera and generates messages, containing the pictures,
@@ -65,14 +65,14 @@ public class MasterCameraHandler extends AbstractMasterHandler {
         if (hasPermission(
                 message.getFromID(),
                 new Permission(
-                        de.unipassau.isl.evs.ssh.core.Permission.REQUEST_CAMERA_STATUS.toString(),
+                        de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_CAMERA_STATUS.toString(),
                         atModule.getName()
                 )
         )) {
             Message.AddressedMessage sendMessage =
                     sendMessage(
                             atModule.getAtSlave(),
-                            CoreConstants.RoutingKeys.SLAVE_CAMERA_GET, messageToSend
+                            RoutingKeys.SLAVE_CAMERA_GET, messageToSend
                     );
             putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
         } else {

@@ -2,10 +2,12 @@ package de.unipassau.isl.evs.ssh.core.network;
 
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
+import android.util.Base64;
 import android.util.Log;
 
 import java.net.InetAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
@@ -31,12 +33,9 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.util.Base64.encodeToString;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_MAX_DISCONNECTS;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_MILLIS_BETWEEN_DISCONNECTS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PORT;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.PREF_HOST;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.PREF_PORT;
 
 /**
  * A netty stack accepting connections to and from the master and handling communication with them using a netty pipeline.
@@ -49,7 +48,19 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.PREF_PO
 public class Client extends AbstractComponent {
     public static final Key<Client> KEY = new Key<>(Client.class);
 
+    /**
+     * The minimum number of seconds between
+     */
+    private static final long CLIENT_MILLIS_BETWEEN_DISCONNECTS = TimeUnit.SECONDS.toMillis(10);
+    /**
+     * Default value for maximum timeouts.
+     */
+    private static final int CLIENT_MAX_DISCONNECTS = 3;
+
     private static final String TAG = Client.class.getSimpleName();
+    static final String PREF_TOKEN = Client.class.getName() + ".TOKEN";
+    static final String PREF_HOST = Client.class.getName() + ".PREF_HOST";
+    static final String PREF_PORT = Client.class.getName() + ".PREF_PORT";
 
     /**
      * Receives messages from system components and decides how to route them to the targets.
@@ -135,19 +146,22 @@ public class Client extends AbstractComponent {
             // Setup the Executor and Connection Pool
             executor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("client"));
         }
-        // Read the previous host and port from the shared preferences
-        final String host = getSharedPrefs().getString(PREF_HOST, null);
-        final int port = getSharedPrefs().getInt(PREF_PORT, DEFAULT_PORT);
 
         // And queue the (re-)connect
         executor.submit(new Runnable() {
             @Override
             public void run() {
+                // Read the previous host and port from the shared preferences
+                final String host = getHost();
+                final int port = getPort();
+
                 // Connect to TCP if the address of the Server/Master is known and not too many connection attempts have failed
                 final NamingManager namingManager = getContainer().require(NamingManager.KEY);
-                //Todo: uncomment with different behaviour for slave and app.
+
+                //TODO: uncomment with different behaviour for slave and app.
+                //TODO would like to uncomment, any details about the problem? (Niko, 2015-12-20)
                 //if (!namingManager.isMasterIDKnown()) {
-                //    Log.w(TAG, "MasterID is null, waiting for onDiscoverySuccessful(host, port)");
+                //    Log.w(TAG, "MasterID is null, waiting for onMasterFound(host, port)");
                 //} else
                 if (host != null && shouldReconnectTCP()) {
                     connectClient(host, port);
@@ -266,11 +280,16 @@ public class Client extends AbstractComponent {
      * Called by {@link UDPDiscoveryClient} once it found a possible address of the master.
      * Saves the new address
      */
-    public void onDiscoverySuccessful(InetAddress address, int port) {
-        Log.i(TAG, "discovery successful, found " + address + ":" + port);
-        getSharedPrefs().edit()
-                .putString(PREF_HOST, address.getHostAddress())
-                .putInt(PREF_PORT, port)
+    public void onMasterFound(InetAddress address, int port) {
+        onMasterFound(address, port, null);
+    }
+
+    public void onMasterFound(InetAddress address, int port, String token) {
+        Log.i(TAG, "discovery successful, found " + address + ":" + port + " with token " + token);
+        editPrefs()
+                .setHost(address.getHostAddress())
+                .setPort(port)
+                .setRegistrationToken(token)
                 .commit();
         lastDisconnect = 0;
         disconnectsInARow = 0;
@@ -295,6 +314,8 @@ public class Client extends AbstractComponent {
         super.destroy();
     }
 
+    //Internal Getters//////////////////////////////////////////////////////////////////////////////////////////////////
+
     /**
      * EventLoopGroup for the {@link ClientIncomingDispatcher} and the {@link ClientOutgoingRouter}
      */
@@ -316,9 +337,7 @@ public class Client extends AbstractComponent {
         return incomingDispatcher;
     }
 
-    SharedPreferences getSharedPrefs() {
-        return getComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
-    }
+    //Public Getters////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * @return the local Address this client is listening on
@@ -353,5 +372,66 @@ public class Client extends AbstractComponent {
     public void awaitShutdown() throws InterruptedException {
         channelFuture.channel().closeFuture().await();
         executor.terminationFuture().await();
+    }
+
+    //Shared Preferences////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private SharedPreferences getSharedPrefs() {
+        return requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+    }
+
+    public String getRegistrationToken() {
+        return getSharedPrefs().getString(PREF_TOKEN, null);
+    }
+
+    public int getPort() {
+        return getSharedPrefs().getInt(PREF_PORT, DEFAULT_PORT);
+    }
+
+    public String getHost() {
+        return getSharedPrefs().getString(PREF_HOST, null);
+    }
+
+    public PrefEditor editPrefs() {
+        return new PrefEditor(getSharedPrefs().edit());
+    }
+
+    public static class PrefEditor {
+        private final SharedPreferences.Editor editor;
+
+        public PrefEditor(SharedPreferences.Editor editor) {
+            this.editor = editor;
+        }
+
+        public PrefEditor setRegistrationToken(String token) {
+            editor.putString(PREF_TOKEN, token);
+            return this;
+        }
+
+        public PrefEditor setRegistrationToken(byte[] token) {
+            return setRegistrationToken(encodeToken(token));
+        }
+
+        public PrefEditor setPort(int port) {
+            editor.putInt(PREF_PORT, port);
+            return this;
+        }
+
+        public PrefEditor setHost(String host) {
+            editor.putString(PREF_HOST, host);
+            return this;
+        }
+
+        public boolean commit() {
+            return editor.commit();
+        }
+
+        public void apply() {
+            editor.apply();
+        }
+    }
+
+    public static String encodeToken(byte[] token) {
+        return encodeToString(token, Base64.NO_WRAP);
     }
 }

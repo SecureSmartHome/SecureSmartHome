@@ -8,13 +8,13 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.Permission;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 
 /**

@@ -3,16 +3,16 @@ package de.unipassau.isl.evs.ssh.app.handler;
 import android.util.Log;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterSlavePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_SLAVE_REGISTER;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_SLAVE_REGISTER;
 
 /**
  * The AppAddSlaveHandler handles the messaging needed to add a new slave to the system.
@@ -44,6 +44,6 @@ public class AppAddSlaveHandler extends AbstractMessageHandler implements Compon
         RegisterSlavePayload payload = new RegisterSlavePayload(slaveName, slaveID);
         Message message = new Message(payload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_SLAVE_REGISTER.getKey());
-        getComponent(OutgoingRouter.KEY).sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_SLAVE_REGISTER, message);
+        getComponent(OutgoingRouter.KEY).sendMessageToMaster(RoutingKeys.MASTER_SLAVE_REGISTER, message);
     }
 }

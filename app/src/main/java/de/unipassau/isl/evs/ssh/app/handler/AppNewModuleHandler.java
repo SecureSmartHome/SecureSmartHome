@@ -12,8 +12,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.AddNewModulePayload;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_MODULE_ADD;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_MODULE_ADD;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_MODULE_ADD;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD;
 
 /**
  * The AppNewModuleHandler handles the messaging needed to register a new ElectronicModule.

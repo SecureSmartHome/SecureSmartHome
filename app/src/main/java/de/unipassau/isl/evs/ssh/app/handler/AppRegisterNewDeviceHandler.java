@@ -1,8 +1,5 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -10,9 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Component;
-import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -20,10 +15,11 @@ import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_USER_REGISTER;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_USER_REGISTER;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USER_REGISTER;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER;
 
 /**
  * The AppRegisterNewDeviceHandler handles the messaging to register a new UserDevice.
@@ -88,12 +84,11 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
     }
 
     private void handleUserRegisterResponse(GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload) {
-        final SharedPreferences prefs = getContainer().require(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         final NamingManager namingManager = getComponent(NamingManager.KEY);
+        final Client client = requireComponent(Client.KEY);
 
-        String host = prefs.getString(CoreConstants.NettyConstants.PREF_HOST, null);
-        int port = prefs.getInt(CoreConstants.NettyConstants.PREF_PORT, 0);
+        String host = client.getHost();
+        int port = client.getPort();
         Inet4Address address;
         try {
             address = ((Inet4Address) InetAddress.getByName(host));
@@ -101,6 +96,7 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
             throw new IllegalArgumentException("Unable to convert host address from shared prefs to "
                     + "an Inet4Address", e);
         }
+
         QRDeviceInformation qrDevInfo = new QRDeviceInformation(address, port, namingManager.getMasterID(),
                 generateNewRegisterTokenPayload.getToken());
         fireTokenResponse(qrDevInfo);

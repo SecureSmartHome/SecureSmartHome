@@ -41,7 +41,6 @@ import io.netty.util.internal.logging.Slf4JLoggerFactory;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PORT;
-import static de.unipassau.isl.evs.ssh.master.MasterConstants.PREF_SERVER_PORT;
 
 /**
  * The heart of the master server: a netty stack accepting connections from devices and handling communication with them using a netty pipeline.
@@ -54,7 +53,7 @@ import static de.unipassau.isl.evs.ssh.master.MasterConstants.PREF_SERVER_PORT;
 public class Server extends AbstractComponent {
     public static final Key<Server> KEY = new Key<>(Server.class);
 
-    private static final String TAG = Server.class.getSimpleName();
+    private static final String PREF_SERVER_PORT = "PREF_SERVER_PORT";
 
     /**
      * Distributes incoming messages to the responsible handlers.

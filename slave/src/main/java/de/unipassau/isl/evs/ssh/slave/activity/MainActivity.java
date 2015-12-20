@@ -31,7 +31,7 @@ import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.GLOBAL_DEMO;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_DEMO;
 
 /**
  * MainActivity for the slave app.

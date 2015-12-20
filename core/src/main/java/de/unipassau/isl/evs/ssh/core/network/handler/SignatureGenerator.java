@@ -11,13 +11,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.Security.MESSAGE_SIGN_ALG;
-
 /**
  * The SignatureGenerator class is a channel handler that is part of a ChannelPipeline and signs messages.
  */
 public class SignatureGenerator extends MessageToByteEncoder<ByteBuf> {
     private static final String TAG = SignatureGenerator.class.getSimpleName();
+    static final String MESSAGE_SIGN_ALG = "SHA224withECDSA";
 
     private final Signature signSignature;
 

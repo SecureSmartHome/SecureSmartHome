@@ -12,13 +12,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.Security.MESSAGE_CRYPT_ALG;
-
 /**
  * The Encrypter class is a channel handler that Is part of a ChannelPipeline and provides encryption for system messages.
  */
 public class Encrypter extends MessageToByteEncoder<ByteBuf> {
     private static final String TAG = Encrypter.class.getSimpleName();
+    static final String MESSAGE_CRYPT_ALG = "ECIES";
 
     private final Cipher encryptCipher;
 

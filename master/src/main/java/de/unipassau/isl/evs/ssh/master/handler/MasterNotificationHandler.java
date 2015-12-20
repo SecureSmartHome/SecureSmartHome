@@ -11,8 +11,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_NOTIFICATION_RECEIVE;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_NOTIFICATION_SEND;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_NOTIFICATION_SEND;
 
 /**
  * Handles notification messages and generates messages for each target and passes them to the OutgoingRouter.

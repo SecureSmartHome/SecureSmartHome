@@ -5,17 +5,17 @@ import android.util.Log;
 import java.io.IOException;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_LIGHT_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_LIGHT_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET;
 
 /**
  * Handles light messages and makes API calls accordingly.
@@ -49,7 +49,7 @@ public class SlaveLightHandler extends AbstractMessageHandler {
             final Message reply = new Message(new MessageErrorPayload(message.getPayload()));
             sendMessage(
                     message.getFromID(),
-                    CoreConstants.RoutingKeys.MASTER_LIGHT_GET,
+                    RoutingKeys.MASTER_LIGHT_GET,
                     reply
             );
         }

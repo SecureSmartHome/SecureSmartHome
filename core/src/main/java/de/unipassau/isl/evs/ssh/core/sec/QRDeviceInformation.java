@@ -33,7 +33,7 @@ import static io.netty.handler.codec.base64.Base64.encode;
 public class QRDeviceInformation implements Serializable {
     private static final QRCodeWriter writer = new QRCodeWriter();
     private static final int ADDRESS_LENGTH = 4;
-    public static final int TOKEN_LENGTH = 35;
+    public static final int TOKEN_LENGTH = 35; //TODO move to CoreConstants
     private static final int TOKEN_LENGTH_BASE64 = encode(new byte[TOKEN_LENGTH], NO_WRAP).length;
     private static final int DATA_LENGTH = 4 + 2 + TOKEN_LENGTH_BASE64 + DeviceID.ID_LENGTH;
 

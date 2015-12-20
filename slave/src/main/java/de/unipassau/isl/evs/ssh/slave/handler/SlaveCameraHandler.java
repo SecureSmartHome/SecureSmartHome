@@ -14,7 +14,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.SLAVE_CAMERA_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_CAMERA_GET;
 
 /**
  * Handles messages requesting pictures from the camera (via API calls) and generates messages,

@@ -144,12 +144,9 @@ public class ServerTest extends InstrumentationTestCase {
 
         SharedPreferences sharedPref = container.get(ContainerService.KEY_CONTEXT)
                 .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-        assertTrue(
-                sharedPref.edit()
-                        .clear()
-                        .putString(CoreConstants.NettyConstants.PREF_HOST, "localhost")
-                        .commit()
-        );
+        Client.PrefEditor editor = new Client.PrefEditor(sharedPref.edit().clear());
+        editor.setHost("localhost");
+        assertTrue(editor.commit());
     }
 
     @NonNull

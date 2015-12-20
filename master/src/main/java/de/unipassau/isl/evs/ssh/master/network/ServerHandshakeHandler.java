@@ -14,6 +14,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -42,10 +43,10 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ALL_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_ALL_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_READER_IDLE_TIME;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.CLIENT_WRITER_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.READER_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.WRITER_IDLE_TIME;
 
 /**
  * @author Niko Fink: Handshake Sequence
@@ -90,7 +91,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
 
         // Timeout Handler
         ctx.pipeline().addBefore(ctx.name(), IdleStateHandler.class.getSimpleName(),
-                new IdleStateHandler(CLIENT_READER_IDLE_TIME, CLIENT_WRITER_IDLE_TIME, CLIENT_ALL_IDLE_TIME));
+                new IdleStateHandler(READER_IDLE_TIME, WRITER_IDLE_TIME, ALL_IDLE_TIME));
         ctx.pipeline().addBefore(ctx.name(), TimeoutHandler.class.getSimpleName(), new TimeoutHandler());
 
         // Add exception handler
@@ -249,7 +250,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         Log.i(TAG, "Handshake with " + deviceID + " successful, current Pipeline: " + ctx.pipeline());
 
         Message message = new Message(new DeviceConnectedPayload(deviceID, ctx.channel()));
-        container.require(OutgoingRouter.KEY).sendMessageLocal(CoreConstants.RoutingKeys.MASTER_DEVICE_CONNECTED, message);
+        container.require(OutgoingRouter.KEY).sendMessageLocal(RoutingKeys.MASTER_DEVICE_CONNECTED, message);
     }
 
     private void setState(ChannelHandlerContext ctx, State expectedState, State newState) throws HandshakeException {

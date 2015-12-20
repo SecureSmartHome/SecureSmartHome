@@ -6,13 +6,13 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import de.unipassau.isl.evs.ssh.drivers.lib.ButtonSensor;
@@ -72,21 +72,21 @@ public class SlaveSystemHealthHandler extends AbstractMessageHandler implements 
                     ((ButtonSensor) driver).isPressed();
                 } catch (EvsIoException e) {
                     Message message = new Message(new SystemHealthPayload(true, module));
-                    sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
+                    sendMessageToMaster(RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
                 }
             } else if (ReedSensor.class.equals(clazz)) {
                 try {
                     ((ReedSensor) driver).isOpen();
                 } catch (EvsIoException e) {
                     Message message = new Message(new SystemHealthPayload(true, module));
-                    sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
+                    sendMessageToMaster(RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
                 }
             } else if (EdimaxPlugSwitch.class.equals(clazz)) {
                 try {
                     ((EdimaxPlugSwitch) driver).isOn();
                 } catch (IOException e) {
                     Message message = new Message(new SystemHealthPayload(true, module));
-                    sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
+                    sendMessageToMaster(RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
                 }
             }
         }

@@ -8,16 +8,16 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_LIGHT_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_LIGHT_UPDATE;
 
 /**
  * AppLightHandler class handles message from and to the
@@ -94,7 +94,7 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
         Message message = new Message(lightPayload);
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_GET, message);
+        router.sendMessageToMaster(RoutingKeys.MASTER_LIGHT_GET, message);
     }
 
     /**
@@ -111,7 +111,7 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_LIGHT_UPDATE.getKey());
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(CoreConstants.RoutingKeys.MASTER_LIGHT_SET, message);
+        router.sendMessageToMaster(RoutingKeys.MASTER_LIGHT_SET, message);
     }
 
     @Override

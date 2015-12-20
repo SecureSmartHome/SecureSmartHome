@@ -13,10 +13,10 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.APP_DOOR_RING;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_CAMERA_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_BELL_CAMERA_GET;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.RoutingKeys.MASTER_DOOR_BELL_RING;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BELL_CAMERA_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BELL_RING;
 
 /**
  * Handles messages received when the doorbell is used, requests a picture from the camera
@@ -53,7 +53,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
             for (UserDevice userDevice :
                     requireComponent(PermissionController.KEY).getAllUserDevicesWithPermission(
                             new Permission(
-                                    de.unipassau.isl.evs.ssh.core.Permission.BELL_RANG.toString(),
+                                    de.unipassau.isl.evs.ssh.core.sec.Permission.BELL_RANG.toString(),
                                     null
                             )
                     )) {
