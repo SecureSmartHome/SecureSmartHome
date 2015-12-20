@@ -27,7 +27,7 @@ public class RoutingKey<T> {
     }
 
     public static RoutingKey forMessage(Message.AddressedMessage message) {
-        return new RoutingKey<>(message.getRoutingKey(), message.getPayload().getClass());
+        return new RoutingKey<>(message.getRoutingKey(), message.getPayloadUnchecked().getClass());
     }
 
     public Class<T> getPayloadClass() {
@@ -43,8 +43,8 @@ public class RoutingKey<T> {
     }
 
     public boolean payloadMatches(Message message) {
-        return getPayloadClass().isInstance(message.getPayload()) ||
-                (getPayloadClass() == Void.class && message.getPayload() == null);
+        return getPayloadClass().isInstance(message.getPayloadUnchecked()) ||
+                (getPayloadClass() == Void.class && message.getPayloadUnchecked() == null);
     }
 
     public T getPayload(Message message) {
@@ -52,7 +52,7 @@ public class RoutingKey<T> {
                 || (message instanceof Message.AddressedMessage && !matches((Message.AddressedMessage) message))) {
             throw new IllegalArgumentException("Message doesn't match RoutingKey " + this);
         }
-        return message.getPayloadOfClass(getPayloadClass());
+        return message.getPayloadChecked(getPayloadClass());
     }
 
     @Override

@@ -40,13 +40,21 @@ public class Message implements Serializable {
         this.payload = payload;
     }
 
+    /**
+     * @deprecated use {@link RoutingKey#getPayload(Message)} for type-checked access that also checks the RoutingKey,
+     * or at least {@link #getPayloadChecked(Class)} for type-save access when the same Payload class is used for multiple RoutingKeys.
+     */
     @Deprecated
     public MessagePayload getPayload() {
+        return getPayloadUnchecked();
+    }
+
+    MessagePayload getPayloadUnchecked() {
         return payload;
     }
 
-    public <T> T getPayloadOfClass(Class<T> payloadClass) {
-        return payloadClass.cast(payload);
+    public <T> T getPayloadChecked(Class<T> payloadClass) {
+        return payloadClass.cast(getPayloadUnchecked());
     }
 
     public void setPayload(MessagePayload payload) {

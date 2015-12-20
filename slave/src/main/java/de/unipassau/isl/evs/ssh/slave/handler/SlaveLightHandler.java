@@ -33,7 +33,7 @@ public class SlaveLightHandler extends AbstractMessageHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         if (SLAVE_LIGHT_SET.matches(message) || SLAVE_LIGHT_GET.matches(message)) {
-            final LightPayload payload = message.getPayloadOfClass(LightPayload.class);
+            final LightPayload payload = message.getPayloadChecked(LightPayload.class);
             final Key<EdimaxPlugSwitch> key = new Key<>(
                     EdimaxPlugSwitch.class,
                     payload.getModule().getName()
@@ -88,7 +88,7 @@ public class SlaveLightHandler extends AbstractMessageHandler {
      * @param original message that should get a reply
      */
     private void replyStatus(Message.AddressedMessage original, EdimaxPlugSwitch plugSwitch) {
-        final LightPayload payload = original.getPayloadOfClass(LightPayload.class);
+        final LightPayload payload = original.getPayloadChecked(LightPayload.class);
         final Module module = payload.getModule();
         try {
             final Message reply = new Message(new LightPayload(plugSwitch.isOn(), module));

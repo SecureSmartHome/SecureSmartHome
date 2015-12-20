@@ -133,7 +133,7 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
     @Override
     public void handle(Message.AddressedMessage message) {
         if (APP_MODULES_GET.matches(message) || GLOBAL_MODULES_UPDATE.matches(message)) {
-            ModulesPayload payload = message.getPayloadOfClass(ModulesPayload.class);
+            ModulesPayload payload = message.getPayloadChecked(ModulesPayload.class);
             Set<Module> modules = payload.getModules();
             List<Slave> slaves = payload.getSlaves();
             ListMultimap<Slave, Module> modulesAtSlave = payload.getModulesAtSlaves();
