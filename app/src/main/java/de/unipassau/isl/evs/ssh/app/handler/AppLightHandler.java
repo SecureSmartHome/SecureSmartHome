@@ -10,10 +10,9 @@ import java.util.concurrent.TimeUnit;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
+import de.unipassau.isl.evs.ssh.core.handler.SimpleMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 
@@ -25,12 +24,21 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_LIGHT_UPDA
  *
  * @author Phil Werli
  */
-public class AppLightHandler extends AbstractMessageHandler implements Component {
+public class AppLightHandler extends SimpleMessageHandler<LightPayload> implements Component {
     public static final Key<AppLightHandler> KEY = new Key<>(AppLightHandler.class);
 
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(20);
     private final List<LightHandlerListener> listeners = new ArrayList<>();
     private final Map<Module, LightStatus> lightStatusMapping = new HashMap<>();
+
+    public AppLightHandler(){
+        super(APP_LIGHT_UPDATE);
+    }
+
+    @Override
+    protected void handleRouted(Message.AddressedMessage message, LightPayload payload) {
+        setCachedStatus(payload.getModule(), payload.getOn());
+    }
 
     /**
      * Changes the light status of a module.
@@ -112,21 +120,6 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(RoutingKeys.MASTER_LIGHT_SET, message);
-    }
-
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{APP_LIGHT_UPDATE};
-    }
-
-    @Override
-    public void handle(Message.AddressedMessage message) {
-        if (APP_LIGHT_UPDATE.matches(message)) {
-            LightPayload lightPayload = APP_LIGHT_UPDATE.getPayload(message);
-            setCachedStatus(lightPayload.getModule(), lightPayload.getOn());
-        } else {
-            invalidMessage(message);
-        }
     }
 
     /**
