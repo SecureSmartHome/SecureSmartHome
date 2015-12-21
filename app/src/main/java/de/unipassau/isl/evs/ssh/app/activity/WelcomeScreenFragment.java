@@ -44,6 +44,7 @@ public class WelcomeScreenFragment extends ScanQRFragment {
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
         if (info != null) {
+            //TODO Phil: what if QR Code is Scanned before Container is connected? (Niko, 2015-12-21)
             container.require(NamingManager.KEY)
                     .setMasterID(info.getID());
             container.require(Client.KEY)

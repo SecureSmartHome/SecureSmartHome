@@ -1,5 +1,8 @@
 package de.unipassau.isl.evs.ssh.core.handler;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -44,10 +47,12 @@ public abstract class AbstractMessageHandler implements MessageHandler {
         this.container = null;
     }
 
+    @Nullable
     protected IncomingDispatcher getDispatcher() {
         return dispatcher == null ? container.get(IncomingDispatcher.KEY) : dispatcher;
     }
 
+    @Nullable
     protected Container getContainer() {
         return dispatcher == null ? container : dispatcher.getContainer();
     }
@@ -60,6 +65,7 @@ public abstract class AbstractMessageHandler implements MessageHandler {
         return dispatcher != null;
     }
 
+    @Nullable
     protected <T extends Component> T getComponent(Key<T> key) {
         Container container = getContainer();
         if (container != null) {
@@ -69,6 +75,7 @@ public abstract class AbstractMessageHandler implements MessageHandler {
         }
     }
 
+    @NonNull
     protected <T extends Component> T requireComponent(Key<T> key) {
         Container container = getContainer();
         if (container != null) {
