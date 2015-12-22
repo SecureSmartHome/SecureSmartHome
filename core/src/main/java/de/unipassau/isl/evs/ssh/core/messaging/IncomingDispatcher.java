@@ -64,7 +64,13 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
             executor.submit(new Runnable() {
                 @Override
                 public void run() {
-                    handler.handle(msg);
+                    try {
+                        handler.handle(msg);
+                    } catch (Exception e) {
+                        Log.e(getClass().getSimpleName(),
+                                "Handler " + handler + " crashed while handling message " + msg
+                                        + " with Exception " + Log.getStackTraceString(e));
+                    }
                 }
             });
         }
