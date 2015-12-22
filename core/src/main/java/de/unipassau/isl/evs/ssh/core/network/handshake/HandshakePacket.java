@@ -3,12 +3,8 @@ package de.unipassau.isl.evs.ssh.core.network.handshake;
 import com.google.common.base.MoreObjects;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 import de.unipassau.isl.evs.ssh.core.BuildConfig;
 
@@ -20,27 +16,7 @@ public abstract class HandshakePacket implements Serializable {
      */
     private final String packetIdentifier = getClass().getSimpleName();
 
-    @Override
-    public String toString() {
-        final MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper(this);
-        final List<Field> fields = Arrays.asList(getClass().getFields());
-        Collections.sort(fields, new Comparator<Field>() {
-            @Override
-            public int compare(Field lhs, Field rhs) {
-                return lhs.getName().compareTo(rhs.getName());
-            }
-        });
-        for (Field field : fields) {
-            Object value;
-            try {
-                value = field.get(this);
-            } catch (IllegalAccessException e) {
-                value = e;
-            }
-            helper.add(field.getName(), value);
-        }
-        return helper.toString();
-    }
+    public abstract String toString();
 
     public static class Hello extends HandshakePacket {
         public final int protocolVersion = PROTOCOL_VERSION;
@@ -51,6 +27,16 @@ public abstract class HandshakePacket implements Serializable {
         public Hello(X509Certificate certificate, boolean isMaster) {
             this.certificate = certificate;
             this.isMaster = isMaster;
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                    .add("protocolVersion", protocolVersion)
+                    .add("buildConfig", buildConfig)
+                    .add("certificate", certificate)
+                    .add("isMaster", isMaster)
+                    .toString();
         }
 
         public static class SerializableBuildConfig implements Serializable {
@@ -106,6 +92,14 @@ public abstract class HandshakePacket implements Serializable {
             this.challenge = challenge;
             this.response = response;
         }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                    .add("challenge", Arrays.toString(challenge))
+                    .add("response", Arrays.toString(response))
+                    .toString();
+        }
     }
 
     public static class RegistrationRequest extends HandshakePacket {
@@ -113,6 +107,13 @@ public abstract class HandshakePacket implements Serializable {
 
         public RegistrationRequest(byte[] token) {
             this.token = token;
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                    .add("token", Arrays.toString(token))
+                    .toString();
         }
     }
 
@@ -123,6 +124,14 @@ public abstract class HandshakePacket implements Serializable {
         public ServerAuthenticationResponse(boolean isAuthenticated, String message) {
             this.isAuthenticated = isAuthenticated;
             this.message = message;
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                    .add("isAuthenticated", isAuthenticated)
+                    .add("message", message)
+                    .toString();
         }
     }
 }

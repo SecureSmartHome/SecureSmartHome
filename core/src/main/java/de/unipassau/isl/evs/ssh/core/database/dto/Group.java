@@ -8,7 +8,6 @@ import java.io.Serializable;
  * @author Leon Sell
  */
 public class Group implements Serializable {
-
     private String name;
     private String templateName;
 
@@ -34,5 +33,10 @@ public class Group implements Serializable {
 
     public void setTemplateName(String templateName) {
         this.templateName = templateName;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

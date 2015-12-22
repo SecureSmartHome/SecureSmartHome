@@ -189,14 +189,14 @@ public class DatabaseConnector extends AbstractComponent {
 
         private void fillTemplates(SQLiteDatabase db) {
             final int parentsTemplateID = 2;
-            for (int i = 0; i < Permission.binaryPermissions.length; i++) {
+            for (int i = 0; i < Permission.binaryPermissions.size(); i++) {
                 ContentValues values = new ContentValues(2);
                 values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID, i + 1);
                 values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID, parentsTemplateID);
                 db.insert(DatabaseContract.ComposedOfPermission.TABLE_NAME, null, values);
             }
 
-            int[] childrenPermissionsIDs = new int[]{25, 26, 27, 28, 29, 30, 31, 32, 33, 34};
+            int[] childrenPermissionsIDs = new int[]{25, 26, 27, 28, 29, 30, 31, 32, 33, 34}; //FIXME replace by Permission.REQUEST_LIGHT_STATUS.ordinal() (Niko, 2015-12-21)
 
             final int childrenTemplateID = 3;
             final int guestsTemplateID = 4;

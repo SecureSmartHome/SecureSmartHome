@@ -66,7 +66,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
                 message.getFromID(),
                 new Permission(
                         de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_CAMERA_STATUS.toString(),
-                        atModule.getName()
+                        null
                 )
         )) {
             Message.AddressedMessage sendMessage =

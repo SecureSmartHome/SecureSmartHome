@@ -3,96 +3,93 @@ package de.unipassau.isl.evs.ssh.core.sec;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 
 /**
- * //TODO why is the ID of the constant not also used as name for the database, so that {@link #valueOf(String)} could be used (Niko, 2015-12-20)
- *
- * @author Wolfgang Popp
- * @author Leon Sell
+ * @author Team
  */
 public enum Permission {
     //Odroid
-    ADD_ODROID("AddOdroid"),
-    RENAME_ODROID("RenameOdroid"),
-    DELETE_ODROID("DeleteOdroid"),
+    ADD_ODROID,
+    RENAME_ODROID,
+    DELETE_ODROID,
 
     //Sensor
-    ADD_SENSOR("AddSensor"),
-    RENAME_MODULE("RenameSensor"),
-    DELETE_SENSOR("DeleteSensor"),
+    ADD_SENSOR,
+    RENAME_MODULE,
+    DELETE_SENSOR,
 
     //Light
-    REQUEST_LIGHT_STATUS("RequestLightStatus"),
+    REQUEST_LIGHT_STATUS,
 
     // Window
-    REQUEST_WINDOW_STATUS("RequestWindowStatus"),
+    REQUEST_WINDOW_STATUS,
 
     //Door
-    REQUEST_DOOR_STATUS("RequestDoorStatus"),
-    LOCK_DOOR("LockDoor"),
-    UNLATCH_DOOR("UnlatchDoor"),
+    REQUEST_DOOR_STATUS,
+    LOCK_DOOR,
+    UNLATCH_DOOR,
 
     //Camera
-    REQUEST_CAMERA_STATUS("RequestCameraStatus"),
-    TAKE_CAMERA_PICTURE("TakeCameraPicture"),
+    REQUEST_CAMERA_STATUS,
+    TAKE_CAMERA_PICTURE,
 
     //WeaterStation
-    REQUEST_WEATHER_STATUS("RequestWeatherStatus"),
+    REQUEST_WEATHER_STATUS,
 
     //HolidaySimulation
-    START_HOLIDAY_SIMULATION("StartHolidaySimulation"),
-    STOP_HOLIDAY_SIMULATION("StopHolidaySimulation"),
+    START_HOLIDAY_SIMULATION,
+    STOP_HOLIDAY_SIMULATION,
 
     //User
-    ADD_USER("AddUser"),
-    DELETE_USER("DeleteUser"),
-    CHANGE_USER_NAME("ChangeUserName"),
-    CHANGE_USER_GROUP("ChangeUserGroup"),
-    GRANT_USER_PERMISSION("GrantUserPermission"),
-    WITHDRAW_USER_PERMISSION("WithdrawUserPermission"),
+    ADD_USER,
+    DELETE_USER,
+    CHANGE_USER_NAME,
+    CHANGE_USER_GROUP,
+    GRANT_USER_PERMISSION,
+    WITHDRAW_USER_PERMISSION,
 
     //Groups
-    ADD_GROUP("AddGroup"),
-    DELETE_GROUP("DeleteGroup"),
-    CHANGE_GROUP_NAME("ChangeGroupName"),
-    SHOW_GROUP_MEMBER("ShowGroupMembers"),
-    CHANGE_GROUP_TEMPLATE("ChangeGroupTemplate"),
+    ADD_GROUP,
+    DELETE_GROUP,
+    CHANGE_GROUP_NAME,
+    SHOW_GROUP_MEMBER,
+    CHANGE_GROUP_TEMPLATE,
 
     //Templates
-    CREATE_TEMPLATE("CreateTemplate"),
-    DELETE_TEMPLATE("DeleteTemplate"),
-    EDIT_TEMPLATE("EditTemplate"),
-    SHOW_TEMPLATE_PERMISSION("ShowTemplatePermission"),
+    CREATE_TEMPLATE,
+    DELETE_TEMPLATE,
+    EDIT_TEMPLATE,
+    SHOW_TEMPLATE_PERMISSION,
 
     //Notification Types
-    ODROID_ADDED("OdroidAdded"),
-    HUMIDITY_WARNING("HumidityWarning"),
-    BRIGHTNESS_WARNING("BrightnessWarning"),
-    HOLIDAY_MODE_SWITCHED_ON("HolidayModeSwitchedOn"),
-    HOLIDAY_MODE_SWITCHED_OFF("HolidayModeSwitchedOff"),
-    SYSTEM_HEALTH_WARNING("SystemHealthWarning"),
-    BELL_RANG("BellRang"),
-    WEATHER_WARNING("WeatherWarning"),
-    DOOR_UNLATCHED("DoorOpened"),
-    DOOR_LOCKED("DoorLocked"),
-    DOOR_UNLOCKED("DoorUnlocked"),
+    ODROID_ADDED,
+    HUMIDITY_WARNING,
+    BRIGHTNESS_WARNING,
+    HOLIDAY_MODE_SWITCHED_ON,
+    HOLIDAY_MODE_SWITCHED_OFF,
+    SYSTEM_HEALTH_WARNING,
+    BELL_RANG,
+    WEATHER_WARNING,
+    DOOR_UNLATCHED,
+    DOOR_LOCKED,
+    DOOR_UNLOCKED,
 
     //Ternary Permissions
-    SWITCH_LIGHT("SwitchLight", true);
+    SWITCH_LIGHT(true);
 
-    private final String name;
     private final boolean isTernary;
 
-    Permission(String name) {
-        this.name = name;
-        this.isTernary = false;
+    Permission() {
+        this(false);
     }
 
-    Permission(String name, boolean isTernary) {
-        this.name = name;
+    Permission(boolean isTernary) {
         this.isTernary = isTernary;
     }
 
@@ -117,20 +114,24 @@ public enum Permission {
         }
     }
 
-    public static final Permission[] binaryPermissions = Iterables.toArray(
-            Iterables.filter(Arrays.asList(values()),
-                    new Predicate<Permission>() {
-                        @Override
-                        public boolean apply(Permission input) {
-                            return !input.isTernary();
-                        }
-                    }
-            ),
-            Permission.class
-    );
+    public static final List<Permission> binaryPermissions = filter(new Predicate<Permission>() {
+        @Override
+        public boolean apply(Permission input) {
+            return !input.isTernary();
+        }
+    });
 
-    @Override
-    public String toString() {
-        return name;
+    public static final List<Permission> ternaryPermissions = filter(new Predicate<Permission>() {
+        @Override
+        public boolean apply(Permission input) {
+            return input.isTernary();
+        }
+    });
+
+    private static List<Permission> filter(Predicate<Permission> predicate) {
+        final ArrayList<Permission> list = new ArrayList<>();
+        final Iterable<Permission> iterable = Iterables.filter(Arrays.asList(values()), predicate);
+        Iterables.addAll(list, iterable);
+        return Collections.unmodifiableList(list);
     }
 }

@@ -21,7 +21,7 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
  * @author Niko Fink
  */
 public class BoundActivity extends AppCompatActivity {
-    private static final String TAG = BoundActivity.class.getSimpleName();
+    private final String TAG = getClass().getSimpleName() + "(BndAct)";
 
     private final Class<? extends ContainerService> serviceClass;
     private boolean serviceBound;
