@@ -78,6 +78,7 @@ public class DoorFragment extends BoundFragment {
 
     @Override
     public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
         getDoorHandler().addListener(doorListener);
         getDoorHandler().refresh();
         updateButtons();

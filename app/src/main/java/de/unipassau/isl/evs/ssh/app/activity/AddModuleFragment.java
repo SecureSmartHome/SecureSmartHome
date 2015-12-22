@@ -52,15 +52,17 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_addmodule, container, false);
+    }
 
-        View view = inflater.inflate(R.layout.fragment_addmodule, container, false);
-        LinearLayout layout = (LinearLayout) view.findViewById(R.id.add_module_layout);
+    private void buildView() {
+        LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.add_module_layout);
 
-        Spinner connectionTypeSpinner = (Spinner) view.findViewById(R.id.connection_type_spinner);
-        sensorTypeSpinner = (Spinner) view.findViewById(R.id.add_module_sensor_type_spinner);
+        Spinner connectionTypeSpinner = (Spinner) getActivity().findViewById(R.id.connection_type_spinner);
+        sensorTypeSpinner = (Spinner) getActivity().findViewById(R.id.add_module_sensor_type_spinner);
 
-        slaveSpinner = (Spinner) view.findViewById(R.id.add_module_slave_spinner);
-        nameInput = (EditText) view.findViewById(R.id.add_module_name_input);
+        slaveSpinner = (Spinner) getActivity().findViewById(R.id.add_module_slave_spinner);
+        nameInput = (EditText) getActivity().findViewById(R.id.add_module_name_input);
         wlanView = createViewWLAN(layout);
         usbView = createViewUSB(layout);
         gpioView = createViewGPIO(layout);
@@ -86,17 +88,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         sensorTypeSpinner.setAdapter(sensorTypeAdapter);
         connectionTypeSpinner.setAdapter(connectionTypeAdapter);
         connectionTypeSpinner.setOnItemSelectedListener(this);
-        return view;
-    }
 
-    // returns true if global input fields are filled in correctly
-    private boolean checkInputFields() {
-        return !nameInput.equals("") && slaveSpinner.isEnabled();
-    }
-
-    @Override
-    public void onContainerConnected(Container container) {
-        super.onContainerConnected(container);
         AppModuleHandler handler = getComponent(AppModuleHandler.KEY);
         AppNewModuleHandler newModuleHandler = getComponent(AppNewModuleHandler.KEY);
         if (handler == null || newModuleHandler == null) {
@@ -140,6 +132,17 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             }
         };
         newModuleHandler.addNewModuleListener(listener);
+    }
+
+    // returns true if global input fields are filled in correctly
+    private boolean checkInputFields() {
+        return !nameInput.equals("") && slaveSpinner.isEnabled();
+    }
+
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        buildView();
     }
 
     @Override
