@@ -11,7 +11,6 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  * @author Leon Sell
  */
 public class UserDevice implements Serializable {
-
     private String name;
     private String inGroup;
     private DeviceID userDeviceID;
@@ -47,5 +46,10 @@ public class UserDevice implements Serializable {
 
     public void setUserDeviceID(DeviceID userDeviceID) {
         this.userDeviceID = userDeviceID;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

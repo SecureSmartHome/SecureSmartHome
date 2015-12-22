@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.database.dto;
 
+import com.google.common.base.Strings;
+
 import java.io.Serializable;
 
 /**
@@ -39,5 +41,10 @@ public class Permission implements Serializable {
 
     public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
+    }
+
+    @Override
+    public String toString() {
+        return "Permission " + name + (Strings.isNullOrEmpty(moduleName) ? "" : "(module " + moduleName + ")");
     }
 }
