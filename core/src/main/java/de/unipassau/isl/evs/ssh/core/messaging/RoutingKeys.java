@@ -3,6 +3,7 @@ package de.unipassau.isl.evs.ssh.core.messaging;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.AddNewModulePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
@@ -16,6 +17,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterSlavePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RenameModulePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 
 /**
@@ -42,15 +44,15 @@ public class RoutingKeys {
     public static final RoutingKey<DoorLockPayload> MASTER_DOOR_LOCK_SET = new RoutingKey<>(PREFIX_MASTER + "/door/lock_set", DoorLockPayload.class);
     public static final RoutingKey<DoorLockPayload> MASTER_DOOR_LOCK_GET = new RoutingKey<>(PREFIX_MASTER + "/door/lock_get", DoorLockPayload.class);
     public static final RoutingKey<DoorStatusPayload> MASTER_DOOR_STATUS_GET = new RoutingKey<>(PREFIX_MASTER + "/door/status_get", DoorStatusPayload.class);
-    public static final RoutingKey<MessagePayload> MASTER_USERINFO_GET = new RoutingKey<>(PREFIX_MASTER + "/userinfo/get", MessagePayload.class);
-    public static final RoutingKey<MessagePayload> MASTER_USERINFO_SET = new RoutingKey<>(PREFIX_MASTER + "/userinfo/set", MessagePayload.class);
+    public static final RoutingKey<UserDeviceInformationPayload> MASTER_USERINFO_GET = new RoutingKey<>(PREFIX_MASTER + "/userinfo/get", UserDeviceInformationPayload.class);
+    public static final RoutingKey<UserDeviceEditPayload> MASTER_USERINFO_SET = new RoutingKey<>(PREFIX_MASTER + "/userinfo/set", UserDeviceEditPayload.class);
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_SET = new RoutingKey<>(PREFIX_MASTER + "/holiday/set", HolidaySimulationPayload.class);
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_GET = new RoutingKey<>(PREFIX_MASTER + "/holiday/get", HolidaySimulationPayload.class);
     public static final RoutingKey<AddNewModulePayload> MASTER_MODULE_ADD = new RoutingKey<>(PREFIX_MASTER + "/module/add", AddNewModulePayload.class);
     public static final RoutingKey<MessagePayload> MASTER_MODULE_GET = new RoutingKey<>(PREFIX_MASTER + "/module/get", MessagePayload.class);
     public static final RoutingKey<GenerateNewRegisterTokenPayload> MASTER_USER_REGISTER = new RoutingKey<>(PREFIX_MASTER + "/user/register", GenerateNewRegisterTokenPayload.class);
     public static final RoutingKey<RegisterSlavePayload> MASTER_SLAVE_REGISTER = new RoutingKey<>(PREFIX_MASTER + "/slave/register", RegisterSlavePayload.class);
-    public static final RoutingKey<MessagePayload> MASTER_DEVICE_CONNECTED = new RoutingKey<>(PREFIX_MASTER + "/device/connected", MessagePayload.class);
+    public static final RoutingKey<DeviceConnectedPayload> MASTER_DEVICE_CONNECTED = new RoutingKey<>(PREFIX_MASTER + "/device/connected", DeviceConnectedPayload.class);
     public static final RoutingKey<RenameModulePayload> MASTER_MODULE_RENAME = new RoutingKey<>(PREFIX_MASTER + "/module/modify", RenameModulePayload.class);
     public static final RoutingKey<SystemHealthPayload> MASTER_SYSTEM_HEALTH_CHECK = new RoutingKey<>(PREFIX_MASTER + "/systemhealth/check", SystemHealthPayload.class);
 

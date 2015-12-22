@@ -18,8 +18,6 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
@@ -30,6 +28,12 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
+
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERINFO_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERINFO_SET;
 
 /**
  * Handles messages indicating that a device wants to register itself at the system and also generates
@@ -43,33 +47,32 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         //FIXME //STOPSHIP will not work with new RoutingKeys (Niko, 2015-12-17)
-        if (message.getPayload() instanceof UserDeviceInformationPayload) {
+        //TODO the RoutingKeys used here are only based on guesses of 3 confused students in front of a laptop (Wolfi, Phil, Niko, 2015-12-22)
+        if (MASTER_USERINFO_GET.matches(message)) {
             sendUpdateToUserDevice(message.getFromID());
-        } else if (message.getPayload() instanceof UserDeviceEditPayload) {
-            executeUserDeviceEdit(message);
-        } else if (message.getPayload() instanceof DeviceConnectedPayload) {
-            sendUpdateToUserDevice(((DeviceConnectedPayload) message.getPayload()).deviceID);
+        } else if (MASTER_USERINFO_SET.matches(message)) {
+            executeUserDeviceEdit(message, MASTER_USERINFO_SET.getPayload(message));
+        } else if (MASTER_DEVICE_CONNECTED.matches(message)) {
+            sendUpdateToUserDevice(MASTER_DEVICE_CONNECTED.getPayload(message).deviceID);
         } else {
-            sendErrorMessage(message); //wrong payload received
+            invalidMessage(message);
         }
     }
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{};
+        return new RoutingKey[]{MASTER_DEVICE_CONNECTED, MASTER_USERINFO_GET, MASTER_USERINFO_SET};
     }
 
     private void sendUpdateToUserDevice(DeviceID id) {
         Log.v(TAG, "sendUpdateToUser: " + id.getIDString());
         final Message userDeviceInformationMessage = new Message(generateUserDeviceInformationPayload());
-        sendMessage(id, RoutingKeys.APP_USERINFO_GET, userDeviceInformationMessage);
+        sendMessage(id, APP_USERINFO_GET, userDeviceInformationMessage);
         final Message moduleInformationMessage = new Message(generateModuleInformationPayload());
-        sendMessage(id, RoutingKeys.GLOBAL_MODULES_UPDATE, moduleInformationMessage);
+        sendMessage(id, GLOBAL_MODULES_UPDATE, moduleInformationMessage);
     }
 
-    private void executeUserDeviceEdit(Message.AddressedMessage message) {
-        UserDeviceEditPayload payload = (UserDeviceEditPayload) message.getPayload();
-
+    private void executeUserDeviceEdit(Message.AddressedMessage message, UserDeviceEditPayload payload) {
         switch (payload.getAction()) {
             case REMOVE_USERDEVICE:
                 if (hasPermission(message.getFromID(), new Permission(
