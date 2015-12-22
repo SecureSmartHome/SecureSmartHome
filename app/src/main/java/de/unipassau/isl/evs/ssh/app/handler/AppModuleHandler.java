@@ -6,6 +6,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -32,6 +33,8 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES
  */
 public class AppModuleHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppModuleHandler> KEY = new Key<>(AppModuleHandler.class);
+
+    private List<AppModuleListener> listeners = new LinkedList<>();
 
     /**
      * Use sample code to filter for specific components
@@ -71,6 +74,20 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
     private Set<Module> components;
     private List<Slave> slaves;
     private ListMultimap<Slave, Module> modulesAtSlave;
+
+    public void addAppModuleListener(AppModuleListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeAppModuleListener(AppModuleListener listener) {
+        listeners.remove(listener);
+    }
+
+    private void fireModulesUpdated(){
+        for (AppModuleListener listener : listeners) {
+            listener.onModulesRefreshed();
+        }
+    }
 
     private void updateList(Set<Module> components, List<Slave> slaves, ListMultimap<Slave, Module> modulesAtSlave) {
         this.components = components;
@@ -140,6 +157,7 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
             ListMultimap<Slave, Module> modulesAtSlave = payload.getModulesAtSlaves();
             updateList(modules, slaves, modulesAtSlave);
             //Todo: don't do this. do the thing that really needs to be done. this is just here because it's working for now!
+            //TODO Use an AppModuleListener for this (Wolfgang, 2015-12-22)
             for (Module module : getLights()) {
                 requireComponent(AppLightHandler.KEY).setLight(module, false);
             }
@@ -161,5 +179,9 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
     @Override
     public RoutingKey[] getRoutingKeys() {
         return new RoutingKey[]{APP_MODULES_GET, GLOBAL_MODULES_UPDATE};
+    }
+
+    public interface AppModuleListener {
+        void onModulesRefreshed();
     }
 }

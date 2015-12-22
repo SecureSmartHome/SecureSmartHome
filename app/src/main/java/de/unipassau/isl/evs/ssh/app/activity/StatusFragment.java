@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -27,88 +27,176 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
  */
 public class StatusFragment extends BoundFragment {
 
+    private AppModuleHandler handler;
+    private ListView slaveListView;
+    private ListView moduleListView;
+    private TextView connectedSlavesText;
+    private TextView connectedModulesText;
+
+    AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
+        @Override
+        public void onModulesRefreshed() {
+            update();
+        }
+    };
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_status, container, false);
+        View view = inflater.inflate(R.layout.fragment_status, container, false);
+        slaveListView = (ListView) getActivity().findViewById(R.id.deviceStatusListView);
+        moduleListView = (ListView) getActivity().findViewById(R.id.deviceStatusModulesListView);
+        connectedSlavesText = (TextView) getActivity().findViewById(R.id.deviceStatusConnectedSlaves);
+        connectedModulesText = (TextView) getActivity().findViewById(R.id.deviceStatusConnectedModules);
+        return view;
     }
 
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
+        handler = container.require(AppModuleHandler.KEY);
+        handler.addAppModuleListener(listener);
 
-        ListView slaveListView = (ListView) getActivity().findViewById(R.id.deviceStatusListView);
-        ListView moduleListView = (ListView) getActivity().findViewById(R.id.deviceStatusModelsListView);
+        moduleListView.setAdapter(new ModuleAdapter());
+        slaveListView.setAdapter(new SlaveAdapter());
 
-        AppModuleHandler moduleHandler = getComponent(AppModuleHandler.KEY);
+        update();
+    }
 
-        Set<Module> modules = null;
-        List<Slave> slaves = null;
+    @Override
+    public void onContainerDisconnected() {
+        super.onContainerDisconnected();
+        handler.removeAppModuleListener(listener);
+    }
 
-        if (moduleHandler != null) {
-            modules = moduleHandler.getComponents();
-            slaves = moduleHandler.getSlaves();
-        }
-
+    private void update() {
+        List<Slave> slaves = handler.getSlaves();
         if (slaves == null || slaves.size() < 1) {
-            TextView connectedSlaves = (TextView) getActivity().findViewById(R.id.deviceStatusConnectedSlaves);
-            connectedSlaves.setText(R.string.NoSlavesConnected);
+            connectedSlavesText.setText(R.string.NoSlavesConnected);
         } else {
-            ArrayAdapter<Slave> slaveAdapter = new ArrayAdapter<Slave>(getActivity().getApplicationContext(),
-                    R.layout.device_status_list_item, slaves) {
-
-                @Override
-                public View getView(int position, View convertView, ViewGroup parent) {
-                    TableLayout layout;
-                    if (convertView == null) {
-                        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                        layout = (TableLayout) inflater.inflate(R.layout.device_status_list_item, parent, false);
-                    } else {
-                        layout = (TableLayout) convertView;
-                    }
-
-                    TextView slaveName = (TextView) layout.findViewById(R.id.deviceStatusSlaveName);
-                    TextView slaveId = (TextView) layout.findViewById(R.id.deviceStatusSlaveId);
-
-                    Slave slave = getItem(position);
-                    slaveName.setText(slave.getName());
-                    slaveId.setText(slave.getSlaveID().getId());
-                    return layout;
-                }
-            };
-            slaveListView.setAdapter(slaveAdapter);
+            connectedSlavesText.setText(R.string.deviceStatusConnectedSlaves);
         }
 
+        Set<Module> modules = handler.getComponents();
         if (modules == null || modules.size() < 1) {
-            TextView connectedModules = (TextView) getActivity().findViewById(R.id.deviceStatusConnectedModules);
-            connectedModules.setText(R.string.NoModulesConnected);
-
+            connectedModulesText.setText(R.string.NoModulesConnected);
         } else {
-            ArrayAdapter<Module> moduleAdapter = new ArrayAdapter<Module>(getActivity().getApplicationContext(),
-                    R.layout.device_status_module_item, modules.toArray(new Module[modules.size()])) {
+            connectedModulesText.setText(R.string.deviceStatusConnectedModules);
+        }
 
-                @Override
-                public View getView(int position, View convertView, ViewGroup parent) {
-                    TableLayout layout;
-                    if (convertView == null) {
-                        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                        layout = (TableLayout) inflater.inflate(R.layout.device_status_module_item, parent, false);
-                    } else {
-                        layout = (TableLayout) convertView;
-                    }
+        ((ModuleAdapter) moduleListView.getAdapter()).update();
+        ((SlaveAdapter) moduleListView.getAdapter()).update();
+    }
 
-                    TextView moduleName = (TextView) layout.findViewById(R.id.deviceStatusModuleName);
-                    TextView moduleType = (TextView) layout.findViewById(R.id.deviceStatusModuleType);
-                    TextView moduleConnectionType = (TextView) layout.findViewById(R.id.deviceStatusConnectionType);
+    private class SlaveAdapter extends BaseAdapter {
 
-                    Module module = getItem(position);
-                    moduleName.setText(module.getName());
-                    moduleType.setText(module.getModuleType());
-                    moduleConnectionType.setText(module.getModuleAccessPoint().getType());
-                    return layout;
-                }
-            };
-            moduleListView.setAdapter(moduleAdapter);
+        private List<Slave> slaves;
+
+        public SlaveAdapter() {
+            slaves = handler.getSlaves();
+        }
+
+        public void update() {
+            slaves = handler.getSlaves();
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public int getCount() {
+            if (handler == null) {
+                return 0;
+            }
+            return slaves.size();
+        }
+
+        @Override
+        public Slave getItem(int position) {
+            if (handler == null) {
+                return null;
+            }
+            return slaves.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            final Slave slave = getItem(position);
+            if (slave != null && slave.getName() != null) {
+                return slave.getName().hashCode();
+            }
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TableLayout layout;
+            if (convertView == null) {
+                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                layout = (TableLayout) inflater.inflate(R.layout.device_status_list_item, parent, false);
+            } else {
+                layout = (TableLayout) convertView;
+            }
+
+            TextView slaveName = (TextView) layout.findViewById(R.id.deviceStatusSlaveName);
+            TextView slaveId = (TextView) layout.findViewById(R.id.deviceStatusSlaveId);
+
+            Slave slave = getItem(position);
+            slaveName.setText(slave.getName());
+            slaveId.setText(slave.getSlaveID().getIDString());
+            return layout;
+        }
+    }
+
+    private class ModuleAdapter extends BaseAdapter {
+
+        Module[] modules;
+
+        public ModuleAdapter() {
+            modules = handler.getComponents().toArray(new Module[handler.getComponents().size()]);
+        }
+
+        public void update() {
+            modules = handler.getComponents().toArray(new Module[handler.getComponents().size()]);
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public int getCount() {
+            return modules.length;
+        }
+
+        @Override
+        public Module getItem(int position) {
+            return modules[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            final Module module = getItem(position);
+            if (module != null && module.getName() != null) {
+                return module.getName().hashCode();
+            }
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TableLayout layout;
+            if (convertView == null) {
+                LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                layout = (TableLayout) inflater.inflate(R.layout.device_status_module_item, parent, false);
+            } else {
+                layout = (TableLayout) convertView;
+            }
+
+            TextView moduleName = (TextView) layout.findViewById(R.id.deviceStatusModuleName);
+            TextView moduleType = (TextView) layout.findViewById(R.id.deviceStatusModuleType);
+            TextView moduleConnectionType = (TextView) layout.findViewById(R.id.deviceStatusConnectionType);
+
+            Module module = getItem(position);
+            moduleName.setText(module.getName());
+            moduleType.setText(module.getModuleType());
+            moduleConnectionType.setText(module.getModuleAccessPoint().getType());
+            return layout;
         }
     }
 }
