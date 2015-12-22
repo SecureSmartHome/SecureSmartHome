@@ -30,7 +30,7 @@ public class Encrypter extends MessageToByteEncoder<ByteBuf> {
     protected void encode(ChannelHandlerContext ctx, ByteBuf in, ByteBuf out) throws Exception {
         final int decryptedLength = in.readableBytes();
         final int encryptedLength = encryptCipher.getOutputSize(decryptedLength);
-        Log.v(TAG, "Encrypting " + decryptedLength + "b data to " + encryptedLength + "b of encrypted data");
+        //Log.v(TAG, "Encrypting " + decryptedLength + "b data to " + encryptedLength + "b of encrypted data");
         out.writeInt(encryptedLength);
 
         out.ensureWritable(encryptedLength);
