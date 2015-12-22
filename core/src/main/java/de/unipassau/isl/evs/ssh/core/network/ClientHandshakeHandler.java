@@ -27,14 +27,17 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.ReferenceCountUtil;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ALL_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_HANDSHAKE_FINISHED;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_CERT;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.READER_IDLE_TIME;
@@ -68,6 +71,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         Log.v(TAG, "channelRegistered " + ctx);
+        ctx.attr(ATTR_HANDSHAKE_FINISHED).set(false);
 
         // Add (de-)serialization Handlers before this Handler
         ctx.pipeline().addBefore(ctx.name(), ObjectEncoder.class.getSimpleName(), new ObjectEncoder());
@@ -113,6 +117,12 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
             ctx.close();
             throw e;
         }
+    }
+
+    @Override
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        Log.w(TAG, "Can't write data while authentication is pending, message was " + msg);
+        ReferenceCountUtil.release(msg);
     }
 
     private void handleHello(ChannelHandlerContext ctx, HandshakePacket.Hello msg) throws GeneralSecurityException {
@@ -171,6 +181,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
 
         if (msg.isAuthenticated) {
             setState(State.STATE_RECEIVED, State.FINISHED);
+            ctx.attr(ATTR_HANDSHAKE_FINISHED).set(true);
             Log.v(TAG, "Got State: authenticated, handshake successful");
             handshakeSuccessful(ctx);
         } else {
@@ -202,8 +213,11 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         // add Dispatcher
         ctx.pipeline().addBefore(ctx.name(), ClientIncomingDispatcher.class.getSimpleName(), client.getIncomingDispatcher());
 
+        // remove HandshakeHandler
         ctx.pipeline().remove(this);
+
         Log.v(TAG, "Handshake successful, current Pipeline: " + ctx.pipeline());
+        client.notifyClientConnected();
     }
 
     protected void handshakeFailed(ChannelHandlerContext ctx, String message) {
@@ -212,8 +226,8 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         }
 
         Log.e(TAG, "My Master rejected me, did he loose his mind? His message was: " + message);
+        client.notifyClientRejected(message);
         ctx.close();
-        //TODO show error dialog
     }
 
     private void setState(State expectedState, State newState) throws HandshakeException {
@@ -228,5 +242,4 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
     private enum State {
         EXPECT_HELLO, EXPECT_CHAP, EXPECT_STATE, STATE_RECEIVED, FINISHED, FAILED
     }
-
 }
