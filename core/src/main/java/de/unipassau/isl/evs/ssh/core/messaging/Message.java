@@ -1,7 +1,18 @@
 package de.unipassau.isl.evs.ssh.core.messaging;
 
+import android.support.annotation.NonNull;
+import android.util.Log;
+
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.ncoder.typedmap.Key;
@@ -97,15 +108,85 @@ public class Message implements Serializable {
     public String toString() {
         StringBuilder bob = new StringBuilder();
         bob.append("<").append(headerString()).append(">\n");
+
+        //Headers
         for (Map.Entry<Key<?>, Object> entry : headers.entrySet()) {
             bob.append(entry.getKey())
                     .append(": ")
                     .append(entry.getValue())
                     .append("\n");
         }
-        bob.append(payload)
-                .append("\n");
+
+        //Payload
+        bob.append(payload.getClass().getName()).append("{\n");
+        for (Field field : getFields(payload.getClass())) {
+            Object value;
+            try {
+                final boolean wasAccessible = field.isAccessible();
+                field.setAccessible(true);
+                value = field.get(payload);
+                if (!wasAccessible) {
+                    field.setAccessible(false);
+                }
+            } catch (IllegalAccessException e) {
+                value = e;
+            }
+            String string = valueToString(value);
+            if (string.length() > 1000) {
+                string = string.substring(0, 997) + "...";
+            }
+            bob.append("\t").append(field.getName()).append("=").append(string).append("\n");
+        }
+        bob.append("}\n");
+
         return bob.toString();
+    }
+
+    @NonNull
+    private String valueToString(Object value) {
+        if (value == null) {
+            return String.valueOf((Object) null);
+        } else if (value instanceof Throwable) {
+            return Log.getStackTraceString((Throwable) value);
+        } else if (value instanceof boolean[]) {
+            return Arrays.toString((boolean[]) value);
+        } else if (value instanceof byte[]) {
+            return Arrays.toString((byte[]) value);
+        } else if (value instanceof char[]) {
+            return Arrays.toString((char[]) value);
+        } else if (value instanceof double[]) {
+            return Arrays.toString((double[]) value);
+        } else if (value instanceof float[]) {
+            return Arrays.toString((float[]) value);
+        } else if (value instanceof int[]) {
+            return Arrays.toString((int[]) value);
+        } else if (value instanceof long[]) {
+            return Arrays.toString((long[]) value);
+        } else if (value instanceof short[]) {
+            return Arrays.toString((short[]) value);
+        } else if (value instanceof Object[]) {
+            return Arrays.deepToString((Object[]) value);
+        } else {
+            return String.valueOf(value);
+        }
+    }
+
+    @NonNull
+    private List<Field> getFields(Class<? extends MessagePayload> clazz) {
+        Set<Field> fieldSet = new HashSet<>();
+        fieldSet.addAll(Arrays.asList(clazz.getFields()));
+        for (Class c = clazz; c != Object.class && c != null; c = c.getSuperclass()) {
+            fieldSet.addAll(Arrays.asList(c.getDeclaredFields()));
+        }
+        List<Field> fieldList = new ArrayList<>();
+        fieldList.addAll(fieldSet);
+        Collections.sort(fieldList, new Comparator<Field>() {
+            @Override
+            public int compare(Field lhs, Field rhs) {
+                return lhs.getName().compareTo(rhs.getName());
+            }
+        });
+        return fieldList;
     }
 
     protected CharSequence headerString() {
@@ -183,7 +264,7 @@ public class Message implements Serializable {
 
         @Override
         protected CharSequence headerString() {
-            return super.headerString() + "#" + sequenceNr + " to " + toID + routingKey + " from " + fromID;
+            return super.headerString() + "#" + sequenceNr + " to " + toID.toShortString() + routingKey + " from " + fromID.toShortString();
         }
     }
 }
