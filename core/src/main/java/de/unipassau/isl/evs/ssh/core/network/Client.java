@@ -2,7 +2,7 @@ package de.unipassau.isl.evs.ssh.core.network;
 
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
-import android.util.Base64;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.net.InetAddress;
@@ -18,6 +18,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -35,7 +36,6 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
 import static android.content.Context.MODE_PRIVATE;
-import static android.util.Base64.encodeToString;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_HANDSHAKE_FINISHED;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PORT;
@@ -61,7 +61,8 @@ public class Client extends AbstractComponent {
     private static final int CLIENT_MAX_DISCONNECTS = 3;
 
     private static final String TAG = Client.class.getSimpleName();
-    static final String PREF_TOKEN = Client.class.getName() + ".TOKEN";
+    static final String PREF_TOKEN_ACTIVE = Client.class.getName() + ".PREF_TOKEN_ACTIVE";
+    static final String PREF_TOKEN_PASSIVE = Client.class.getName() + ".PREF_TOKEN_PASSIVE";
     static final String PREF_HOST = Client.class.getName() + ".PREF_HOST";
     static final String PREF_PORT = Client.class.getName() + ".PREF_PORT";
 
@@ -204,7 +205,8 @@ public class Client extends AbstractComponent {
                 .group(executor)
                 .channel(NioSocketChannel.class)
                 .handler(getHandshakeHandler())
-                .option(ChannelOption.SO_KEEPALIVE, true);
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) TimeUnit.SECONDS.toMillis(5));
 
         // Wait for the start of the client
         channelFuture = b.connect(host, port);
@@ -274,7 +276,7 @@ public class Client extends AbstractComponent {
             } else {
                 // otherwise just retry
                 lastDisconnect = time;
-                Log.i(TAG, "First disconnect recently   , retrying");
+                Log.i(TAG, "First disconnect recently, retrying");
             }
             initClient();
         } else {
@@ -295,7 +297,7 @@ public class Client extends AbstractComponent {
         editPrefs()
                 .setHost(address.getHostAddress())
                 .setPort(port)
-                .setRegistrationToken(token)
+                .setActiveRegistrationToken(token)
                 .commit();
         lastDisconnect = 0;
         disconnectsInARow = 0;
@@ -326,6 +328,7 @@ public class Client extends AbstractComponent {
     /**
      * EventLoopGroup for the {@link ClientIncomingDispatcher} and the {@link ClientOutgoingRouter}
      */
+    @Nullable
     EventLoopGroup getExecutor() {
         return executor;
     }
@@ -333,6 +336,7 @@ public class Client extends AbstractComponent {
     /**
      * Channel for the {@link ClientIncomingDispatcher} and the {@link ClientOutgoingRouter}
      */
+    @Nullable
     Channel getChannel() {
         return channelFuture != null ? channelFuture.channel() : null;
     }
@@ -340,6 +344,7 @@ public class Client extends AbstractComponent {
     /**
      * {@link IncomingDispatcher} that will be registered to the Pipeline by the {@link ClientHandshakeHandler}
      */
+    @NonNull
     ClientIncomingDispatcher getIncomingDispatcher() {
         return incomingDispatcher;
     }
@@ -349,6 +354,7 @@ public class Client extends AbstractComponent {
     /**
      * @return the local Address this client is listening on
      */
+    @Nullable
     public SocketAddress getAddress() {
         if (channelFuture == null || channelFuture.channel() == null) {
             return null;
@@ -394,8 +400,20 @@ public class Client extends AbstractComponent {
         return requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
     }
 
-    public String getRegistrationToken() {
-        return getSharedPrefs().getString(PREF_TOKEN, null);
+    public String getActiveRegistrationToken() {
+        return getSharedPrefs().getString(PREF_TOKEN_ACTIVE, null);
+    }
+
+    public byte[] getActiveRegistrationTokenBytes() {
+        return DeviceConnectInformation.decodeToken(getActiveRegistrationToken());
+    }
+
+    public String getPassiveRegistrationToken() {
+        return getSharedPrefs().getString(PREF_TOKEN_PASSIVE, null);
+    }
+
+    public byte[] getPassiveRegistrationTokenBytes() {
+        return DeviceConnectInformation.decodeToken(getPassiveRegistrationToken());
     }
 
     public int getPort() {
@@ -417,13 +435,22 @@ public class Client extends AbstractComponent {
             this.editor = editor;
         }
 
-        public PrefEditor setRegistrationToken(String token) {
-            editor.putString(PREF_TOKEN, token);
+        public PrefEditor setActiveRegistrationToken(String token) {
+            editor.putString(PREF_TOKEN_ACTIVE, token);
             return this;
         }
 
-        public PrefEditor setRegistrationToken(byte[] token) {
-            return setRegistrationToken(encodeToken(token));
+        public PrefEditor setActiveRegistrationToken(byte[] token) {
+            return setActiveRegistrationToken(DeviceConnectInformation.encodeToken(token));
+        }
+
+        public PrefEditor setPassiveRegistrationToken(String token) {
+            editor.putString(PREF_TOKEN_PASSIVE, token);
+            return this;
+        }
+
+        public PrefEditor setPassiveRegistrationToken(byte[] token) {
+            return setPassiveRegistrationToken(DeviceConnectInformation.encodeToken(token));
         }
 
         public PrefEditor setPort(int port) {
@@ -443,10 +470,6 @@ public class Client extends AbstractComponent {
         public void apply() {
             editor.apply();
         }
-    }
-
-    public static String encodeToken(byte[] token) {
-        return encodeToString(token, Base64.NO_WRAP);
     }
 
     //Listeners/////////////////////////////////////////////////////////////////////////////////////////////////////////

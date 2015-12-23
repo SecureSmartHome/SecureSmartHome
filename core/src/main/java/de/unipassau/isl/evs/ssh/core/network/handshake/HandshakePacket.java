@@ -102,17 +102,17 @@ public abstract class HandshakePacket implements Serializable {
         }
     }
 
-    public static class RegistrationRequest extends HandshakePacket {
-        public final byte[] token;
+    public static class ActiveRegistrationRequest extends HandshakePacket {
+        public final byte[] activeRegistrationToken;
 
-        public RegistrationRequest(byte[] token) {
-            this.token = token;
+        public ActiveRegistrationRequest(byte[] activeRegistrationToken) {
+            this.activeRegistrationToken = activeRegistrationToken;
         }
 
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
-                    .add("token", Arrays.toString(token))
+                    .add("activeRegistrationToken", Arrays.toString(activeRegistrationToken))
                     .toString();
         }
     }
@@ -120,10 +120,12 @@ public abstract class HandshakePacket implements Serializable {
     public static class ServerAuthenticationResponse extends HandshakePacket {
         public final boolean isAuthenticated;
         public final String message;
+        public final byte[] passiveRegistrationToken;
 
-        public ServerAuthenticationResponse(boolean isAuthenticated, String message) {
+        public ServerAuthenticationResponse(boolean isAuthenticated, String message, byte[] passiveRegistrationToken) {
             this.isAuthenticated = isAuthenticated;
             this.message = message;
+            this.passiveRegistrationToken = passiveRegistrationToken;
         }
 
         @Override
@@ -131,6 +133,7 @@ public abstract class HandshakePacket implements Serializable {
             return MoreObjects.toStringHelper(this)
                     .add("isAuthenticated", isAuthenticated)
                     .add("message", message)
+                    .add("passiveRegistrationToken", Arrays.toString(passiveRegistrationToken))
                     .toString();
         }
     }
