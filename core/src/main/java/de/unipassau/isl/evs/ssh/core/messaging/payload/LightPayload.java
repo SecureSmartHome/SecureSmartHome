@@ -12,7 +12,7 @@ public class LightPayload implements MessagePayload {
     private Module module;
     private boolean on;
 
-    //TODO change constructors so only a boolean is contained once we have the component which handles address stuff
+    //TODO-Chris change constructors so only a boolean is contained once we have the component which handles address stuff
     public LightPayload(boolean on, Module module) {
         this.on = on;
         this.module = module;

@@ -67,6 +67,7 @@ public class HolidayController extends AbstractComponent {
     }
 
     public List<HolidayAction> getHolidayActions(Date from, Date to) {
+        //FIXME shouldn't this do something?
         return new LinkedList();
     }
 }
