@@ -44,6 +44,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_DEMO;
 /**
  * MainActivity for the Master App
  *
+ * TODO Phil: build MainActivity for Slave.
  * @author Team
  */
 public class MainActivity extends BoundActivity {
