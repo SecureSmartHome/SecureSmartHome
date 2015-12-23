@@ -76,7 +76,8 @@ public class AddNewSlaveFragment extends ScanQRFragment {
             DeviceID slaveID = info.getID();
             String slaveName = slaveNameInput.getText().toString();
             AppAddSlaveHandler handler = getComponent(AppAddSlaveHandler.KEY);
-            handler.registerNewSlave(slaveID, slaveName);
+            final byte[] passiveRegistrationToken = info.getToken();
+            handler.registerNewSlave(slaveID, slaveName, passiveRegistrationToken);
             info = null;
             ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         }

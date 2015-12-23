@@ -30,6 +30,7 @@ public class SlaveController extends AbstractComponent {
                     + " = ?";
     private DatabaseConnector databaseConnector;
 
+
     @Override
     public void init(Container container) {
         super.init(container);
@@ -38,8 +39,8 @@ public class SlaveController extends AbstractComponent {
 
     @Override
     public void destroy() {
-        super.destroy();
         databaseConnector = null;
+        super.destroy();
     }
 
     /**
@@ -262,7 +263,8 @@ public class SlaveController extends AbstractComponent {
         List<Slave> slaves = new LinkedList<>();
         while (slavesCursor.moveToNext()) {
             slaves.add(new Slave(slavesCursor.getString(0),
-                    new DeviceID(slavesCursor.getString(1))));
+                    new DeviceID(slavesCursor.getString(1)),
+                    null)); //TODO read passiveRegistrationToken (Niko, 2015-12-23)
         }
         return slaves;
     }
@@ -294,7 +296,7 @@ public class SlaveController extends AbstractComponent {
             databaseConnector.executeSql("insert into "
                             + DatabaseContract.Slave.TABLE_NAME
                             + " (" + DatabaseContract.Slave.COLUMN_NAME
-                            + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT + ") values (?, ?)",
+                            + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT + ") values (?, ?)",  //TODO write passiveRegistrationToken (Niko, 2015-12-23)
                     new String[]{slave.getName(), slave.getSlaveID().getId()});
         } catch (SQLiteConstraintException sqlce) {
             throw new AlreadyInUseException("The given name or fingerprint is already used by another Slave.", sqlce);
@@ -337,7 +339,7 @@ public class SlaveController extends AbstractComponent {
                 + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT
                 + " = ?", new String[]{slaveID.getIDString()});
         if (slavesCursor.moveToNext()) {
-            return new Slave(slavesCursor.getString(0), new DeviceID(slavesCursor.getString(1)));
+            return new Slave(slavesCursor.getString(0), new DeviceID(slavesCursor.getString(1)), null); //TODO read passiveRegistrationToken (Niko, 2015-12-23)
         }
         return null;
     }

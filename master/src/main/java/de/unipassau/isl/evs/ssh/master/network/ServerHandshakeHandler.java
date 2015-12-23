@@ -11,6 +11,8 @@ import java.util.Arrays;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
+import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -186,14 +188,15 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         setState(ctx, State.CHECK_AUTH, State.CHECK_AUTH);
 
         final DeviceID deviceID = ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_ID).get();
-        if (isDeviceRegistered(deviceID)) {
+        final Slave slave = container.require(SlaveController.KEY).getSlave(deviceID);
+        final UserDevice userDevice = container.require(UserManagementController.KEY).getUserDevice(deviceID);
+        if (slave != null || userDevice != null) {
             setState(ctx, State.CHECK_AUTH, State.FINISHED);
 
             handshakeSuccessful(ctx);
 
-            container.require(MasterRegisterDeviceHandler.KEY).getRegistrationToken(deviceID);
             ctx.writeAndFlush(new HandshakePacket.ServerAuthenticationResponse(
-                    true, null, container.require(MasterRegisterDeviceHandler.KEY).getRegistrationToken(deviceID)
+                    true, null, (slave == null ? null : slave.getPassiveRegistrationToken())
             )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         } else {
             setState(ctx, State.CHECK_AUTH, State.EXPECT_REGISTER);
@@ -203,11 +206,6 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
                     false, "Unknown Client, please register.", null
             )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         }
-    }
-
-    private boolean isDeviceRegistered(DeviceID clientID) {
-        return container.require(SlaveController.KEY).getSlave(clientID) != null
-                || container.require(UserManagementController.KEY).getUserDevice(clientID) != null;
     }
 
     private void handleActiveRegistrationRequest(ChannelHandlerContext ctx, HandshakePacket.ActiveRegistrationRequest msg) throws HandshakeException {

@@ -63,7 +63,7 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler {
         RegisterSlavePayload registerSlavePayload = MASTER_SLAVE_REGISTER.getPayload(message);
         try {
             requireComponent(SlaveController.KEY).addSlave(new Slave(registerSlavePayload.getName(),
-                    registerSlavePayload.getSlaveID()));
+                    registerSlavePayload.getSlaveID(), registerSlavePayload.getPassiveRegistrationToken()));
             return true;
         } catch (AlreadyInUseException e) {
             Log.i(TAG, "Failed adding a new Slave because the given name (" + registerSlavePayload.getName()
