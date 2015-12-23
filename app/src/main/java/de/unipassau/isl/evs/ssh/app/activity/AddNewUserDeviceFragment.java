@@ -25,7 +25,7 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
-import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
 /**
  * This activity allows to enter information describing new user devices and provide a QR-Code
@@ -38,9 +38,9 @@ public class AddNewUserDeviceFragment extends BoundFragment {
     private static final String TAG = AddNewUserDeviceFragment.class.getSimpleName();
     private final AppRegisterNewDeviceHandler.RegisterNewDeviceListener registerNewDeviceListener = new AppRegisterNewDeviceHandler.RegisterNewDeviceListener() {
         @Override
-        public void tokenResponse(QRDeviceInformation qrDeviceInformation) {
+        public void tokenResponse(DeviceConnectInformation deviceConnectInformation) {
             Bundle bundle = new Bundle();
-            bundle.putSerializable(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, qrDeviceInformation);
+            bundle.putSerializable(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceConnectInformation);
             ((MainActivity) getActivity()).showFragmentByClass(QRCodeFragment.class, bundle);
         }
     };

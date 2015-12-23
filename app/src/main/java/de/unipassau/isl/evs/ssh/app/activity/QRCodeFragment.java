@@ -16,7 +16,7 @@ import com.google.zxing.WriterException;
 import java.io.Serializable;
 
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_MESSAGE;
@@ -43,9 +43,9 @@ public class QRCodeFragment extends BoundFragment {
      * @return the created QR-Code
      */
     private Bitmap createQRCodeBitmap() {
-        if (extra instanceof QRDeviceInformation) {
+        if (extra instanceof DeviceConnectInformation) {
             try {
-                return ((QRDeviceInformation) extra).toQRBitmap(Bitmap.Config.ARGB_8888, Color.BLACK, Color.WHITE);
+                return ((DeviceConnectInformation) extra).toQRBitmap(Bitmap.Config.ARGB_8888, Color.BLACK, Color.WHITE);
             } catch (WriterException e) {
                 throw new IllegalArgumentException("illegal QR-Code data", e);
             }

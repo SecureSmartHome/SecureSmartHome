@@ -12,9 +12,9 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
-import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
-import static de.unipassau.isl.evs.ssh.core.network.Client.encodeToken;
+import static de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation.encodeToken;
 
 /**
  * WelcomeScreenFragment to display a welcome message to every user when he initially starts the app.
@@ -23,7 +23,7 @@ import static de.unipassau.isl.evs.ssh.core.network.Client.encodeToken;
  * @author Phil Werli
  */
 public class WelcomeScreenFragment extends ScanQRFragment {
-    private QRDeviceInformation info;
+    private DeviceConnectInformation info;
 
     @Nullable
     @Override
@@ -54,7 +54,7 @@ public class WelcomeScreenFragment extends ScanQRFragment {
     }
 
     @Override
-    protected void onQRCodeScanned(QRDeviceInformation info) {
+    protected void onQRCodeScanned(DeviceConnectInformation info) {
         this.info = info;
     }
 }

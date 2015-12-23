@@ -25,13 +25,14 @@ import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
-import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.slave.R;
 import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_DEMO;
+import static de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation.encodeToken;
 
 /**
  * MainActivity for the slave app.
@@ -139,16 +140,20 @@ public class MainActivity extends BoundActivity {
 
     private void showQRCodeActivity() {
         Intent intent = new Intent(this, SlaveQRCodeActivity.class);
-        QRDeviceInformation deviceInformation = null;
+        DeviceConnectInformation deviceInformation = null;
         Context ctx = getApplicationContext();
         WifiManager wifiManager = ((WifiManager) ctx.getSystemService(Context.WIFI_SERVICE));
         String ipAddress = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
+        final byte[] token = DeviceConnectInformation.getRandomToken();
+        requireComponent(Client.KEY).editPrefs()
+                .setPassiveRegistrationToken(token)
+                .commit();
         try {
-            deviceInformation = new QRDeviceInformation(
+            deviceInformation = new DeviceConnectInformation(
                     (Inet4Address) Inet4Address.getByName(ipAddress),
                     CoreConstants.NettyConstants.DEFAULT_PORT,
                     requireComponent(NamingManager.KEY).getOwnID(),
-                    QRDeviceInformation.getRandomToken()
+                    token
             );
         } catch (UnknownHostException e) {
             Log.e(TAG, "Cannot show QRCode: " + e.getMessage());
@@ -156,8 +161,7 @@ public class MainActivity extends BoundActivity {
         Log.v(TAG, "HostNAME: " + deviceInformation.getAddress().getHostAddress());
         Log.v(TAG, "ID: " + deviceInformation.getID());
         Log.v(TAG, "Port: " + deviceInformation.getPort());
-        Log.v(TAG, "Token: " + android.util.Base64.encodeToString(deviceInformation.getToken(),
-                android.util.Base64.NO_WRAP));
+        Log.v(TAG, "Token: " + encodeToken(deviceInformation.getToken()));
         //NoDevice will allow any device to use this token
         intent.putExtra(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
         startActivity(intent);

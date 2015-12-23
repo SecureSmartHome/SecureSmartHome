@@ -8,7 +8,7 @@ import android.widget.Toast;
 
 import java.io.IOException;
 
-import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
 /**
  * The ScanQRFragment is a BoundFragment that can be extended to communicate with a QR-Code Scanner
@@ -51,7 +51,7 @@ public abstract class ScanQRFragment extends BoundFragment {
             if (resultCode == Activity.RESULT_OK) {
                 String contents = data.getStringExtra(ZXING_SCAN_RESULT);
                 try {
-                    final QRDeviceInformation info = QRDeviceInformation.fromDataString(contents);
+                    final DeviceConnectInformation info = DeviceConnectInformation.fromDataString(contents);
                     onQRCodeScanned(info);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -66,5 +66,5 @@ public abstract class ScanQRFragment extends BoundFragment {
      *
      * @param info the information contained in the QR-Code
      */
-    protected abstract void onQRCodeScanned(QRDeviceInformation info);
+    protected abstract void onQRCodeScanned(DeviceConnectInformation info);
 }

@@ -16,7 +16,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
-import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USER_REGISTER;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER;
@@ -40,9 +40,9 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
          * Called when the token for the new UserDevice was received and the QR Code can be
          * displayed now.
          *
-         * @param qrDeviceInformation the QR-Code information to display on the admin's screen
+         * @param deviceConnectInformation the QR-Code information to display on the admin's screen
          */
-        void tokenResponse(QRDeviceInformation qrDeviceInformation);
+        void tokenResponse(DeviceConnectInformation deviceConnectInformation);
     }
 
     /**
@@ -63,7 +63,7 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
         listeners.remove(listener);
     }
 
-    private void fireTokenResponse(QRDeviceInformation info) {
+    private void fireTokenResponse(DeviceConnectInformation info) {
         for (RegisterNewDeviceListener listener : listeners) {
             listener.tokenResponse(info);
         }
@@ -97,7 +97,7 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
                     + "an Inet4Address", e);
         }
 
-        QRDeviceInformation qrDevInfo = new QRDeviceInformation(address, port, namingManager.getMasterID(),
+        DeviceConnectInformation qrDevInfo = new DeviceConnectInformation(address, port, namingManager.getMasterID(),
                 generateNewRegisterTokenPayload.getToken());
         fireTokenResponse(qrDevInfo);
     }
