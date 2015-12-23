@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,12 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.google.common.io.Files;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import de.unipassau.isl.evs.ssh.app.R;
@@ -195,6 +202,11 @@ public class DoorFragment extends BoundFragment {
         // Decode image in background.
         @Override
         protected Bitmap doInBackground(byte[]... params) {
+            try (FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory(), "evs-image.jpg"))) {
+                fos.write(params[0]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             return BitmapFactory.decodeByteArray(params[0], 0, params[0].length);
         }
 
