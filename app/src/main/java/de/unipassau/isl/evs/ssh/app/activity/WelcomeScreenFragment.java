@@ -1,5 +1,8 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -9,6 +12,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
@@ -24,6 +28,21 @@ import static de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation.encodeT
  */
 public class WelcomeScreenFragment extends ScanQRFragment {
     private DeviceConnectInformation info;
+
+    private static final String LOCAL_MASTER_PACKAGE = "de.unipassau.isl.evs.ssh.master";
+    private static final String LOCAL_MASTER_ACTIVITY = LOCAL_MASTER_PACKAGE + ".activity.RegisterLocalAppActivity";
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        try {
+            //Try to open the Master Activity for adding a local device
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName(LOCAL_MASTER_PACKAGE, LOCAL_MASTER_ACTIVITY));
+            startActivityForResult(intent, CoreConstants.QRCodeInformation.REQUEST_CODE_SCAN_QR);
+        } catch (ActivityNotFoundException ignore) {
+        }
+    }
 
     @Nullable
     @Override
@@ -43,18 +62,20 @@ public class WelcomeScreenFragment extends ScanQRFragment {
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        if (info != null) {
-            //TODO Phil: what if QR Code is Scanned before Container is connected? (Niko, 2015-12-21)
-            container.require(NamingManager.KEY)
-                    .setMasterID(info.getID());
-            container.require(Client.KEY)
-                    .onMasterFound(info.getAddress(), info.getPort(), encodeToken(info.getToken()));
-            ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
-        }
+        maybeFoundMaster();
     }
 
     @Override
     protected void onQRCodeScanned(DeviceConnectInformation info) {
         this.info = info;
+        maybeFoundMaster();
+    }
+
+    private void maybeFoundMaster() {
+        if (info != null && getContainer() != null) {
+            getComponent(NamingManager.KEY).setMasterID(info.getID());
+            getComponent(Client.KEY).onMasterFound(info.getAddress(), info.getPort(), encodeToken(info.getToken()));
+            ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+        }
     }
 }

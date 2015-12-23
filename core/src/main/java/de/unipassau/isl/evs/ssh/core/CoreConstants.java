@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.core;
 
+import android.content.Intent;
+
 import java.security.cert.X509Certificate;
 
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
@@ -99,9 +101,17 @@ public class CoreConstants {
      *
      * @author Phil Werli
      */
-    public class QRCodeInformation {
+    public static class QRCodeInformation {
         public static final String EXTRA_QR_DEVICE_INFORMATION = "EXTRA_QR_DEVICE_INFORMATION";
         public static final String EXTRA_QR_MESSAGE = "EXTRA_QR_MESSAGE";
         public static final int QR_CODE_IMAGE_SCALE = 35;
+
+        public static final int REQUEST_CODE_SCAN_QR = 1;
+        public static final Intent ZXING_SCAN_INTENT = new Intent("com.google.zxing.client.android.SCAN");
+        public static final String ZXING_SCAN_RESULT = "SCAN_RESULT";
+
+        static {
+            ZXING_SCAN_INTENT.putExtra("SCAN_MODE", "QR_CODE_MODE");
+        }
     }
 }
