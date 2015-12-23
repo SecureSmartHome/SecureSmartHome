@@ -30,10 +30,8 @@ import static de.unipassau.isl.evs.ssh.core.sec.KeyStoreController.KEY;
 public class KeyStoreControllerTest extends InstrumentationTestCase {
     private static final String LOCAL_PRIVATE_KEY_ALIAS = "localPrivateKey";
     private static final String KEY_STORE_FILENAME = "encryptText-keystore.bks";
-    private static final String KEY_STORE_TYPE = "BKS";
     private static final String KEY_PAIR_ALGORITHM = "ECIES";
     private static final String KEY_PAIR_SIGNING_ALGORITHM = "SHA224withECDSA";
-    private static final String PUBLIC_KEY_PREFIX = "public_key:";
     private static final int ASYMMETRIC_KEY_SIZE = 256;
 
     static {
