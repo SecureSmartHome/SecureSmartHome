@@ -16,12 +16,12 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.common.collect.Lists;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
@@ -37,27 +37,27 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  */
 public class LightFragment extends BoundFragment {
     private static final String TAG = LightFragment.class.getSimpleName();
-    private LightListAdapter adapter;
+    private LightListAdapter adapter = new LightListAdapter();
     private final AppLightHandler.LightHandlerListener listener = new AppLightHandler.LightHandlerListener() {
         @Override
         public void statusChanged(Module module) {
             adapter.notifyDataSetChanged();
         }
     };
-    private ListView listView;
 
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
         container.require(AppLightHandler.KEY).addListener(listener);
-        adapter = new LightListAdapter();
-        listView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
-
 
     @Override
     public void onContainerDisconnected() {
-        getComponent(AppLightHandler.KEY).removeListener(listener);
+        final AppLightHandler component = getComponent(AppLightHandler.KEY);
+        if (component != null) {
+            component.removeListener(listener);
+        }
         super.onContainerDisconnected();
     }
 
@@ -65,7 +65,9 @@ public class LightFragment extends BoundFragment {
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_light, container, false);
-        listView = (ListView) root.findViewById(R.id.lightButtonContainer);
+        ListView listView = (ListView) root.findViewById(R.id.lightButtonContainer);
+        listView.setAdapter(adapter);
+
         FloatingActionButton fab = ((FloatingActionButton) root.findViewById(R.id.light_fab));
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,21 +79,11 @@ public class LightFragment extends BoundFragment {
     }
 
     private class LightListAdapter extends BaseAdapter {
-        private final LayoutInflater inflater;
-        private List<Module> lightModules;
-
-        public LightListAdapter() {
-            this.inflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            updateModuleList();
-        }
+        private LayoutInflater inflater;
+        private final List<Module> lightModules = new ArrayList<>();
 
         @Override
         public void notifyDataSetChanged() {
-            updateModuleList();
-            super.notifyDataSetChanged();
-        }
-
-        private void updateModuleList() {
             AppLightHandler handler = getComponent(AppLightHandler.KEY);
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
@@ -99,7 +91,8 @@ public class LightFragment extends BoundFragment {
             }
 
             final Map<Module, AppLightHandler.LightStatus> lightModulesStatus = handler.getAllLightModuleStates();
-            lightModules = Lists.newArrayList(lightModulesStatus.keySet());
+            lightModules.clear();
+            lightModules.addAll(lightModulesStatus.keySet());
             Collections.sort(lightModules, new Comparator<Module>() {
                 @Override
                 public int compare(Module lhs, Module rhs) {
@@ -112,6 +105,8 @@ public class LightFragment extends BoundFragment {
                     return lhs.getName().compareTo(rhs.getName());
                 }
             });
+
+            super.notifyDataSetChanged();
         }
 
         @Override
@@ -128,7 +123,12 @@ public class LightFragment extends BoundFragment {
         public long getItemId(int position) {
             final Module item = getItem(position);
             if (item != null && item.getName() != null) {
-                return item.getName().hashCode();
+                int hash = item.getName().hashCode();
+                final AppLightHandler appLightHandler = getComponent(AppLightHandler.KEY);
+                if (appLightHandler != null && appLightHandler.isLightOnCached(item)) {
+                    hash = ~hash;
+                }
+                return hash;
             } else {
                 return 0;
             }
@@ -136,7 +136,7 @@ public class LightFragment extends BoundFragment {
 
         @Override
         public boolean hasStableIds() {
-            return true;
+            return false;
         }
 
         /**
@@ -144,31 +144,43 @@ public class LightFragment extends BoundFragment {
          */
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            //create LinearLayout as defined in lightbutton.xml file
-            LinearLayout lightButtonLayout;
+            final Module module = getItem(position);
+            final AppLightHandler appLightHandler = getComponent(AppLightHandler.KEY);
+            final boolean isLightOn = appLightHandler != null && appLightHandler.isLightOnCached(module);
+            Log.v(TAG, "getView for #" + position + " " + module + " (turned " + (isLightOn ? "on" : "off") + ") from "
+                    + "Adapter@" + Objects.hash(this) + " | Fragment@" + Objects.hash(LightFragment.this));
+
+            final LinearLayout lightButtonLayout;
             if (convertView == null) {
+                if (inflater == null) {
+                    inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                }
+                //create LinearLayout as defined in lightbutton.xml file
                 lightButtonLayout = (LinearLayout) inflater.inflate(R.layout.lightbutton, parent, false);
             } else {
                 lightButtonLayout = (LinearLayout) convertView;
             }
 
-            final Module m = getItem(position);
-
-            TextView textView = (TextView) lightButtonLayout.findViewById(R.id.lightButtonTextView);
             Button button = (Button) lightButtonLayout.findViewById(R.id.lightButtonButton);
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    getComponent(AppLightHandler.KEY).toggleLight(m);
+                    final AppLightHandler appLightHandler = getComponent(AppLightHandler.KEY);
+                    if (appLightHandler != null) {
+                        appLightHandler.toggleLight(module);
+                    } else {
+                        Log.w(TAG, "Could not switch light, AppLightHandler not available");
+                    }
                 }
             });
-            // set up TextView
-            textView.setText(m.getName());
+            button.setEnabled(appLightHandler != null);
+
+            TextView textView = (TextView) lightButtonLayout.findViewById(R.id.lightButtonTextView);
+            textView.setText(module.getName());
 
             // set up ImageView and button
             ImageView imageViewOn = (ImageView) lightButtonLayout.findViewById(R.id.lightButtonImageViewOn);
             ImageView imageViewOff = (ImageView) lightButtonLayout.findViewById(R.id.lightButtonImageViewOff);
-            boolean isLightOn = getComponent(AppLightHandler.KEY).isLightOnCached(m);
             if (isLightOn) {
                 imageViewOff.setVisibility(View.GONE);
                 imageViewOn.setVisibility(View.VISIBLE);
