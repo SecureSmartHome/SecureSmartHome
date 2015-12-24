@@ -76,7 +76,7 @@ public class RoutingKeys {
     public static final RoutingKey<DoorBellPayload> APP_DOOR_RING = new RoutingKey<>(PREFIX_APP + "/door/ring", DoorBellPayload.class);
     public static final RoutingKey<MessagePayload> APP_HOLIDAY_SIMULATION = new RoutingKey<>(PREFIX_APP + "/holiday/get", MessagePayload.class);
     public static final RoutingKey<UserDeviceInformationPayload> APP_USERINFO_GET = new RoutingKey<>(PREFIX_APP + "/userdevice/get", UserDeviceInformationPayload.class);
-    public static final RoutingKey<Void> APP_MODULE_ADD = new RoutingKey<>(PREFIX_APP + "/module/add", Void.class);
+    public static final RoutingKey<AddNewModulePayload> APP_MODULE_ADD = new RoutingKey<>(PREFIX_APP + "/module/add", AddNewModulePayload.class);
     public static final RoutingKey<GenerateNewRegisterTokenPayload> APP_USER_REGISTER = new RoutingKey<>(PREFIX_APP + "/user/register", GenerateNewRegisterTokenPayload.class);
     public static final RoutingKey<MessagePayload> APP_SLAVE_REGISTER = new RoutingKey<>(PREFIX_APP + "/slave/register", MessagePayload.class);
 
