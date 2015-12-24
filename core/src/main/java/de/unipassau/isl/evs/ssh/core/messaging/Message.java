@@ -118,26 +118,30 @@ public class Message implements Serializable {
         }
 
         //Payload
-        bob.append(payload.getClass().getName()).append("{\n");
-        for (Field field : getFields(payload.getClass())) {
-            Object value;
-            try {
-                final boolean wasAccessible = field.isAccessible();
-                field.setAccessible(true);
-                value = field.get(payload);
-                if (!wasAccessible) {
-                    field.setAccessible(false);
+        if (payload == null) {
+            bob.append("null\n");
+        } else {
+            bob.append(payload.getClass().getName()).append("{\n");
+            for (Field field : getFields(payload.getClass())) {
+                Object value;
+                try {
+                    final boolean wasAccessible = field.isAccessible();
+                    field.setAccessible(true);
+                    value = field.get(payload);
+                    if (!wasAccessible) {
+                        field.setAccessible(false);
+                    }
+                } catch (IllegalAccessException e) {
+                    value = e;
                 }
-            } catch (IllegalAccessException e) {
-                value = e;
+                String string = valueToString(value);
+                if (string.length() > 1000) {
+                    string = string.substring(0, 997) + "...";
+                }
+                bob.append("\t").append(field.getName()).append("=").append(string).append("\n");
             }
-            String string = valueToString(value);
-            if (string.length() > 1000) {
-                string = string.substring(0, 997) + "...";
-            }
-            bob.append("\t").append(field.getName()).append("=").append(string).append("\n");
+            bob.append("}\n");
         }
-        bob.append("}\n");
 
         return bob.toString();
     }

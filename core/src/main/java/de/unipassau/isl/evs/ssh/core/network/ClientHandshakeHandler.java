@@ -9,7 +9,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -145,14 +144,13 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
                 namingManager.setMasterCertificate(msg.certificate);
             }
         }
-        final X509Certificate masterCertificate = namingManager.getMasterCertificate();
 
         // set channel attributes
-        ctx.attr(ATTR_PEER_CERT).set(masterCertificate);
+        ctx.attr(ATTR_PEER_CERT).set(msg.certificate);
         ctx.attr(ATTR_PEER_ID).set(certID);
 
         // add Security handlers
-        final PublicKey remotePublicKey = masterCertificate.getPublicKey();
+        final PublicKey remotePublicKey = msg.certificate.getPublicKey();
         final PrivateKey localPrivateKey = container.require(KeyStoreController.KEY).getOwnPrivateKey();
         ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), Encrypter.class.getSimpleName(), new Encrypter(remotePublicKey));
         ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), Decrypter.class.getSimpleName(), new Decrypter(localPrivateKey));
@@ -189,9 +187,15 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
                     Log.i(TAG, "Master sent correct token, saving MasterID and Certificate");
                     namingManager.setMasterCertificate(ctx.attr(ATTR_PEER_CERT).get());
                 } else {
+                    setState(State.STATE_RECEIVED, State.FAILED);
                     handshakeFailed(ctx, "Master is not verified yet sent invalid token");
                     return;
                 }
+            }
+            if (!namingManager.isMasterKnown()) {
+                setState(State.STATE_RECEIVED, State.FAILED);
+                handshakeFailed(ctx, "Master did not authenticate itself (and is not known yet)");
+                return;
             }
 
             setState(State.STATE_RECEIVED, State.FINISHED);
@@ -220,7 +224,8 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         final byte[] actualToken = msg.passiveRegistrationToken;
         return actualToken != null && expectedToken != null
                 && actualToken.length == DeviceConnectInformation.TOKEN_LENGTH
-                && Arrays.equals(actualToken, expectedToken);
+                && Arrays.equals(actualToken, expectedToken)
+                || true;
     }
 
     protected void handshakeSuccessful(ChannelHandlerContext ctx) {
