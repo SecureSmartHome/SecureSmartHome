@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,7 +42,15 @@ public class LightFragment extends BoundFragment {
     private final AppLightHandler.LightHandlerListener listener = new AppLightHandler.LightHandlerListener() {
         @Override
         public void statusChanged(Module module) {
-            adapter.notifyDataSetChanged();
+            final FragmentActivity activity = getActivity();
+            if (activity != null) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+            }
         }
     };
 
