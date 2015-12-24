@@ -173,7 +173,9 @@ public class MainActivity extends BoundActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == LOCAL_MASTER_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_CANCELED) {
+            if (resultCode == Activity.RESULT_OK) {
+                //TODO Niko: Show intermediate "waiting for connection" screen and don't show RegisterLocal dialogue again (Niko, 2015-12-24)
+            } else {
                 showQRCodeActivity(false);
             }
         }
