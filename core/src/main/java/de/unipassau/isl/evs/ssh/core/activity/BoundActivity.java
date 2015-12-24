@@ -29,16 +29,16 @@ public class BoundActivity extends AppCompatActivity {
     private final ServiceConnection serviceConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            serviceContainer = ((Container) service);
             Log.d(TAG, "Service " + name + " connected: " + service);
+            serviceContainer = ((Container) service);
             onContainerConnected(serviceContainer);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            serviceContainer = null;
             Log.d(TAG, "Service " + name + " disconnected");
             onContainerDisconnected();
+            serviceContainer = null;
         }
     };
 
@@ -52,14 +52,10 @@ public class BoundActivity extends AppCompatActivity {
     }
 
     /**
-     * {@inheritDoc}
-     * <p/>
-     * Also calls {@link #startService(Intent)} and {@link #bindService(Intent, ServiceConnection, int)} in order
+     * Calls {@link #startService(Intent)} and {@link #bindService(Intent, ServiceConnection, int)} in order
      * to connect to the {@link ContainerService}.
      */
-    @Override
-    protected void onStart() {
-        super.onStart();
+    protected void doBind() {
         Intent intent = new Intent(this, serviceClass);
         startService(intent);
         if (!serviceBound) {
@@ -72,20 +68,37 @@ public class BoundActivity extends AppCompatActivity {
     }
 
     /**
-     * {@inheritDoc}
-     * <p/>
-     * Also unbinds the Connection to the ContainerService.
+     * Unbinds the Connection to the ContainerService.
      */
-    @Override
-    protected void onStop() {
+    protected void doUnbind() {
         if (serviceBound) {
             Log.v(TAG, "onStop bound, unbinding");
             unbindService(serviceConn);
-            serviceContainer = null;
             serviceBound = false;
         } else {
             Log.v(TAG, "onStop not bound, unbinding unnecessary");
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * @see #doBind()
+     */
+    @Override
+    protected void onStart() {
+        super.onStart();
+        doBind();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * @see #doUnbind()
+     */
+    @Override
+    protected void onStop() {
+        doUnbind();
         super.onStop();
     }
 
