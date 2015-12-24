@@ -21,7 +21,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 
 /**
@@ -32,7 +31,6 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
  * @version 2.0
  */
 public class EdimaxPlugSwitch extends AbstractComponent {
-    public static final Key<EdimaxPlugSwitch> KEY = new Key<>(EdimaxPlugSwitch.class);
     private static final String TAG = EdimaxPlugSwitch.class.getSimpleName();
     private static final String XML_SET = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
             "<SMARTPLUG id=\"edimax\">" +
