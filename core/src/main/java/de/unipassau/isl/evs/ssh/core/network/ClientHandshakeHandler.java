@@ -225,7 +225,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         return actualToken != null && expectedToken != null
                 && actualToken.length == DeviceConnectInformation.TOKEN_LENGTH
                 && Arrays.equals(actualToken, expectedToken)
-                || true;
+                || true; //FIXME Niko: PassiveRegistrationToken not stored yet in DB, so check is disabled (Niko, 2015-12-24)
     }
 
     protected void handshakeSuccessful(ChannelHandlerContext ctx) {
@@ -235,10 +235,10 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
 
         // allow pings
         TimeoutHandler.setPingEnabled(ctx.channel(), true);
-
         // add Dispatcher
         ctx.pipeline().addBefore(ctx.name(), ClientIncomingDispatcher.class.getSimpleName(), client.getIncomingDispatcher());
-
+        // Logging is handled by IncomingDispatcher and OutgoingRouter
+        ctx.pipeline().remove(LoggingHandler.class.getSimpleName());
         // remove HandshakeHandler
         ctx.pipeline().remove(this);
 

@@ -15,6 +15,7 @@ import io.netty.channel.ChannelFutureListener;
  * @author Niko Fink
  */
 public abstract class OutgoingRouter extends AbstractComponent {
+    private static final String TAG = OutgoingRouter.class.getSimpleName();
     public static final Key<OutgoingRouter> KEY = new Key<>(OutgoingRouter.class);
 
     /**
@@ -39,9 +40,9 @@ public abstract class OutgoingRouter extends AbstractComponent {
         future.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
+                Log.v(TAG, "SENT " + amsg);
                 if (!future.isSuccess()) {
-                    Log.w(OutgoingRouter.this.getClass().getSimpleName(),
-                            "Could not send Message " + amsg + " because of " + Log.getStackTraceString(future.cause()));
+                    Log.w(TAG, "Could not send Message " + amsg + " because of " + Log.getStackTraceString(future.cause()));
                 }
             }
         });

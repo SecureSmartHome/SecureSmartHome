@@ -239,9 +239,11 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
 
         // allow pings
         TimeoutHandler.setPingEnabled(ctx.channel(), true);
-
         // add Dispatcher
         ctx.pipeline().addBefore(ctx.name(), ClientIncomingDispatcher.class.getSimpleName(), server.getIncomingDispatcher());
+        // Logging is handled by IncomingDispatcher and OutgoingRouter
+        ctx.pipeline().remove(LoggingHandler.class.getSimpleName());
+        // remove HandshakeHandler
         ctx.pipeline().remove(this);
 
         // Register connection
