@@ -26,10 +26,6 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.TEMPLAT
  */
 public class AddGroupFragment extends BoundFragment {
     private static final String TAG = AddNewUserDeviceFragment.class.getSimpleName();
-
-    private Spinner spinner;
-    private EditText inputGroupName;
-
     private final AppUserConfigurationHandler.UserInfoListener userInfoListener = new AppUserConfigurationHandler.UserInfoListener() {
         @Override
         public void userInfoUpdated() {
@@ -38,20 +34,32 @@ public class AddGroupFragment extends BoundFragment {
             toast.show();
         }
     };
+    private Spinner spinner;
+    private EditText inputGroupName;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_addnewgroup, container, false);
+    }
+
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        container.require(AppUserConfigurationHandler.KEY).addUserInfoListener(userInfoListener);
+        buildView();
+    }
+
+    private void buildView() {
         String[] templateNames = getArguments().getStringArray(TEMPLATE_DIALOG);
-        View view = inflater.inflate(R.layout.fragment_addnewgroup, container, false);
 
-        inputGroupName = (EditText) view.findViewById(R.id.addgroupfragment_group_name);
+        inputGroupName = (EditText) getActivity().findViewById(R.id.addgroupfragment_group_name);
 
-        spinner = (Spinner) view.findViewById(R.id.addgroupfragment_spinner);
+        spinner = (Spinner) getActivity().findViewById(R.id.addgroupfragment_spinner);
         spinner.setAdapter(new ArrayAdapter<>(getActivity().getApplicationContext(),
                 android.R.layout.simple_list_item_1,
                 (templateNames != null ? templateNames : new String[]{"Missing templates"})));
 
-        Button button = (Button) view.findViewById(R.id.addgroupfragment_button);
+        Button button = (Button) getActivity().findViewById(R.id.addgroupfragment_button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -65,13 +73,6 @@ public class AddGroupFragment extends BoundFragment {
                 }
             }
         });
-        return view;
-    }
-
-    @Override
-    public void onContainerConnected(Container container) {
-        super.onContainerConnected(container);
-        container.require(AppUserConfigurationHandler.KEY).addUserInfoListener(userInfoListener);
     }
 
     @Override

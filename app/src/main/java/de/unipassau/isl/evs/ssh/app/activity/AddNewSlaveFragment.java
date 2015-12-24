@@ -23,6 +23,7 @@ import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 public class AddNewSlaveFragment extends ScanQRFragment {
     private static final String TAG = AddNewSlaveFragment.class.getSimpleName();
     private static final String KEY_SLAVE_NAME = "SLAVE_NAME";
+
     private EditText slaveNameInput;
     private DeviceConnectInformation info;
 
@@ -30,8 +31,19 @@ public class AddNewSlaveFragment extends ScanQRFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_new_slave, container, false);
-        slaveNameInput = (EditText) view.findViewById(R.id.add_new_slave_name);
-        Button addNewSlaveButton = (Button) view.findViewById(R.id.add_new_slave_button);
+
+        if (savedInstanceState != null) {
+            String slaveName = savedInstanceState.getString(KEY_SLAVE_NAME);
+            if (slaveName != null) {
+                slaveNameInput.setText(slaveName);
+            }
+        }
+        return view;
+    }
+
+    private void buildView() {
+        slaveNameInput = (EditText) getActivity().findViewById(R.id.add_new_slave_name);
+        Button addNewSlaveButton = (Button) getActivity().findViewById(R.id.add_new_slave_button);
 
         addNewSlaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,14 +55,6 @@ public class AddNewSlaveFragment extends ScanQRFragment {
                 }
             }
         });
-
-        if (savedInstanceState != null) {
-            String slaveName = savedInstanceState.getString(KEY_SLAVE_NAME);
-            if (slaveName != null) {
-                slaveNameInput.setText(slaveName);
-            }
-        }
-        return view;
     }
 
     @Override
@@ -68,7 +72,8 @@ public class AddNewSlaveFragment extends ScanQRFragment {
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        registerSlave();
+        buildView();
+        registerSlave(); // FIXME why register here? ask wolfi
     }
 
     private void registerSlave() {
