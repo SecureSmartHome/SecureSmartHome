@@ -51,6 +51,13 @@
             android:label="@string/title_activity_register_local_app"
             android:theme="@style/Theme.AppCompat.Dialog">
         </activity>
+
+        <activity
+            android:name=".activity.RegisterLocalSlaveActivity"
+            android:exported="true"
+            android:label="@string/title_activity_register_local_slave"
+            android:theme="@style/Theme.AppCompat.Dialog">
+        </activity>
     </application>
 
 </manifest>

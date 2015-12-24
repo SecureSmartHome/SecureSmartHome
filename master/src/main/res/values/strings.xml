@@ -8,4 +8,5 @@
     <string name="qr_code_description">This is a QR-Code.</string>
     <string name="add_initial_device">Add Initial Device</string>
     <string name="title_activity_register_local_app">RegisterLocalAppActivity</string>
+    <string name="title_activity_register_local_slave">RegisterLocalSlaveActivity</string>
 </resources>
