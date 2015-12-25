@@ -4,6 +4,7 @@ package de.unipassau.isl.evs.ssh.master.network;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -168,6 +169,7 @@ public class Server extends AbstractComponent {
      *
      * @return the found Channel, or {@code null} if no Channel matches the given ID
      */
+    @Nullable
     public Channel findChannel(DeviceID id) {
         for (Channel channel : connections) {
             if (channel.isActive() && Objects.equals(channel.attr(ATTR_PEER_ID).get(), id)) {
@@ -187,6 +189,7 @@ public class Server extends AbstractComponent {
     /**
      * Channel for the {@link ServerIncomingDispatcher} and the {@link ServerOutgoingRouter}
      */
+    @Nullable
     Channel getChannel() {
         return serverChannel != null ? serverChannel.channel() : null;
     }

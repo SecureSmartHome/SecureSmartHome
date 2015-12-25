@@ -35,9 +35,9 @@ import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.group.ChannelGroup;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_DEMO;
 
@@ -97,11 +97,11 @@ public class MainActivity extends BoundActivity {
                     Toast.makeText(MainActivity.this, "Container not connected", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                final ChannelFuture future = outgoingRouter.sendMessageToMaster(GLOBAL_DEMO, message).getSendFuture();
+                final Future<Void> future = outgoingRouter.sendMessageToMaster(GLOBAL_DEMO, message).getSendFuture();
                 log("OUT:" + message.toString());
-                future.addListener(new ChannelFutureListener() {
+                future.addListener(new GenericFutureListener<Future<Void>>() {
                     @Override
-                    public void operationComplete(final ChannelFuture future) throws Exception {
+                    public void operationComplete(final Future<Void> future) throws Exception {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

@@ -7,7 +7,9 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
+import io.netty.util.concurrent.FailedFuture;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.SucceededFuture;
 
 /**
  * Receives messages from system components and decides how to route them to the targets.
@@ -16,18 +18,19 @@ import io.netty.channel.ChannelFuture;
  */
 public class ServerOutgoingRouter extends OutgoingRouter {
     @Override
-    protected ChannelFuture doSendMessage(Message.AddressedMessage amsg) {
+    protected Future<Void> doSendMessage(Message.AddressedMessage amsg) {
         if (Objects.equals(amsg.getToID(), getOwnID())) {
             //Send Local
             requireComponent(IncomingDispatcher.KEY).dispatch(amsg);
-            return requireComponent(Server.KEY).getChannel().newSucceededFuture();
+            return new SucceededFuture<>(requireComponent(Server.KEY).getExecutor().next(), null);
         } else {
             //Find client and send the message there
             Channel channel = requireComponent(Server.KEY).findChannel(amsg.getToID());
             if (channel == null || !channel.isOpen()) {
+                //TODO Niko: queue pending messages (Niko, 2015-12-25)
                 Exception e = new IOException("Client " + amsg.getToID() + " is not connected");
                 e.fillInStackTrace();
-                return requireComponent(Server.KEY).getChannel().newFailedFuture(e);
+                return new FailedFuture<>(requireComponent(Server.KEY).getExecutor().next(), e);
             } else {
                 return channel.writeAndFlush(amsg);
             }
