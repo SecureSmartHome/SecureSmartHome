@@ -38,7 +38,7 @@ import io.netty.util.internal.logging.Slf4JLoggerFactory;
 import static android.content.Context.MODE_PRIVATE;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_HANDSHAKE_FINISHED;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT;
 
 /**
  * A netty stack accepting connections to and from the master and handling communication with them using a netty pipeline.
@@ -415,7 +415,7 @@ public class Client extends AbstractComponent {
     }
 
     public int getPort() {
-        return getSharedPrefs().getInt(PREF_PORT, DEFAULT_PORT);
+        return getSharedPrefs().getInt(PREF_PORT, DEFAULT_LOCAL_PORT);
     }
 
     public String getHost() {

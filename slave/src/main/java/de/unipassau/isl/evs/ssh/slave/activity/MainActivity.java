@@ -194,7 +194,7 @@ public class MainActivity extends BoundActivity {
         try {
             deviceInformation = new DeviceConnectInformation(
                     (Inet4Address) Inet4Address.getByName(ipAddress),
-                    CoreConstants.NettyConstants.DEFAULT_PORT,
+                    CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT,
                     requireComponent(NamingManager.KEY).getOwnID(),
                     token
             );

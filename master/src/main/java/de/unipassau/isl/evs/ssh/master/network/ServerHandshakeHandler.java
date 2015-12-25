@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.master.network;
 
 import android.util.Log;
 
+import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -46,6 +47,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ALL_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.READER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.WRITER_IDLE_TIME;
@@ -109,7 +111,9 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         super.channelActive(ctx);
         assert container.require(NamingManager.KEY).isMaster();
         setState(ctx, null, State.EXPECT_HELLO);
-        Log.v(TAG, "Channel open, waiting for Client Hello");
+        final boolean isLocal = ((InetSocketAddress) ctx.channel().localAddress()).getPort() == server.getLocalPort();
+        ctx.attr(ATTR_LOCAL_CONNECTION).set(isLocal);
+        Log.v(TAG, "Channel to " + (isLocal ? "local" : "internet") + " device open, waiting for Client Hello");
         setChapChallenge(ctx, new byte[HandshakePacket.CHAP.CHALLENGE_LENGTH]);
     }
 
@@ -250,7 +254,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         server.getActiveChannels().add(ctx.channel());
         Log.i(TAG, "Handshake with " + deviceID + " successful, current Pipeline: " + ctx.pipeline());
 
-        Message message = new Message(new DeviceConnectedPayload(deviceID, ctx.channel()));
+        Message message = new Message(new DeviceConnectedPayload(deviceID, ctx.channel(), ctx.attr(ATTR_LOCAL_CONNECTION).get()));
         container.require(OutgoingRouter.KEY).sendMessageLocal(RoutingKeys.MASTER_DEVICE_CONNECTED, message);
     }
 
