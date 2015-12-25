@@ -26,6 +26,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PE
  * @author Niko Fink
  */
 public abstract class IncomingDispatcher extends ChannelHandlerAdapter implements Component {
+    private static final String TAG = IncomingDispatcher.class.getSimpleName();
     public static final Key<IncomingDispatcher> KEY = new Key<>(IncomingDispatcher.class);
 
     protected final SetMultimap<RoutingKey, MessageHandler> mappings = HashMultimap.create();
@@ -59,12 +60,17 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
     public boolean dispatch(final Message.AddressedMessage msg) {
         Set<MessageHandler> handlers = mappings.get(RoutingKey.forMessage(msg));
         final EventLoop executor = getExecutor();
-        Log.v(getClass().getSimpleName(), "Using EventLoop " + executor);
+        Log.v(TAG, "DISPATCH " + msg + " to " + handlers + " using " + executor);
         for (final MessageHandler handler : handlers) {
             executor.submit(new Runnable() {
                 @Override
                 public void run() {
-                    handler.handle(msg);
+                    try {
+                        handler.handle(msg);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Handler " + handler + " crashed while handling message " + msg
+                                + " with Exception " + Log.getStackTraceString(e));
+                    }
                 }
             });
         }

@@ -44,12 +44,12 @@ public class MasterContainer extends ContainerService {
         register(UserManagementController.KEY, new UserManagementController());
 
         register(MasterRegisterDeviceHandler.KEY, new MasterRegisterDeviceHandler());
+        register(MasterRoutingTableHandler.KEY, new MasterRoutingTableHandler());
 
         registerHandler(new MasterDoorBellHandler());
         registerHandler(new MasterModuleHandler());
         registerHandler(new MasterUserConfigurationHandler());
         registerHandler(new MasterNotificationHandler());
-        registerHandler(new MasterRoutingTableHandler());
         registerHandler(new MasterLightHandler());
         registerHandler(new MasterSystemHealthCheckHandler());
         registerHandler(new MasterCameraHandler());

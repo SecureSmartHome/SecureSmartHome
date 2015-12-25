@@ -29,6 +29,9 @@
         <activity
             android:name=".activity.SlaveQRCodeActivity"
             android:label="RegisterDevice"/>
+        <activity
+            android:name=".activity.OdroidCamera"
+            android:label="DoorCamera"/>
 
         <service android:name=".SlaveContainer"/>
 

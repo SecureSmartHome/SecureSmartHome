@@ -13,6 +13,7 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.MockAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -27,6 +28,7 @@ import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
 import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.WeatherSensor;
+import de.unipassau.isl.evs.ssh.drivers.mock.EdimaxPlugSwitchMock;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
 
@@ -123,12 +125,15 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
         String moduleName = plugSwitch.getName();
         Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, moduleName);
 
-        if (!(plugSwitch.getModuleAccessPoint() instanceof WLANAccessPoint)) {
+        if (plugSwitch.getModuleAccessPoint() instanceof WLANAccessPoint) {
+            WLANAccessPoint accessPoint = (WLANAccessPoint) plugSwitch.getModuleAccessPoint();
+            getContainer().register(key, new EdimaxPlugSwitch(accessPoint.getiPAddress(),
+                    accessPoint.getPort(), accessPoint.getUsername(), accessPoint.getPassword()));
+        } else if (plugSwitch.getModuleAccessPoint() instanceof MockAccessPoint) {
+            getContainer().register(key, new EdimaxPlugSwitchMock());
+        } else {
             throw new WrongAccessPointException();
         }
-        WLANAccessPoint accessPoint = (WLANAccessPoint) plugSwitch.getModuleAccessPoint();
-        getContainer().register(key, new EdimaxPlugSwitch(accessPoint.getiPAddress(),
-                accessPoint.getPort(), accessPoint.getUsername(), accessPoint.getPassword()));
     }
 
     private void unregisterModule(Set<Module> componentsToRemove) {

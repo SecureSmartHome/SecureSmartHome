@@ -31,6 +31,8 @@ public abstract class ModuleAccessPoint implements Serializable {
             case WLANAccessPoint.TYPE:
                 return WLANAccessPoint.fromCombinedModuleAccessPointInformation(
                         combinedModuleAccessPointInformation);
+            case MockAccessPoint.TYPE:
+                return new MockAccessPoint();
             default:
                 throw new IllegalArgumentException("Type " + type + "is not supported.");
         }

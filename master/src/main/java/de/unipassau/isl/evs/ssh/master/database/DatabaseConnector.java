@@ -12,6 +12,7 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.MockAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
@@ -127,6 +128,7 @@ public class DatabaseConnector extends AbstractComponent {
                 + DatabaseContract.ElectronicModule.COLUMN_WLAN_IP + " VARCHAR,"
                 + DatabaseContract.ElectronicModule.COLUMN_MODULE_TYPE + " VARCHAR NOT NULL,"
                 + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE + " VARCHAR CHECK("
+                + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE + " = '" + MockAccessPoint.TYPE + "' or "
                 + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE + " = '" + GPIOAccessPoint.TYPE + "' or "
                 + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE + " = '" + USBAccessPoint.TYPE + "' or "
                 + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE + " = '" + WLANAccessPoint.TYPE + "'),"
@@ -189,14 +191,14 @@ public class DatabaseConnector extends AbstractComponent {
 
         private void fillTemplates(SQLiteDatabase db) {
             final int parentsTemplateID = 2;
-            for (int i = 0; i < Permission.binaryPermissions.length; i++) {
+            for (int i = 0; i < Permission.binaryPermissions.size(); i++) {
                 ContentValues values = new ContentValues(2);
                 values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID, i + 1);
                 values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID, parentsTemplateID);
                 db.insert(DatabaseContract.ComposedOfPermission.TABLE_NAME, null, values);
             }
 
-            int[] childrenPermissionsIDs = new int[]{25, 26, 27, 28, 29, 30, 31, 32, 33, 34};
+            int[] childrenPermissionsIDs = new int[]{25, 26, 27, 28, 29, 30, 31, 32, 33, 34}; //FIXME replace by Permission.REQUEST_LIGHT_STATUS.ordinal() (Niko, 2015-12-21)
 
             final int childrenTemplateID = 3;
             final int guestsTemplateID = 4;

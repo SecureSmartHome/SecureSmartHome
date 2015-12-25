@@ -33,6 +33,11 @@ public class USBAccessPoint extends ModuleAccessPoint {
     }
 
     @Override
+    public int[] getDatabaseIndices() {
+        return new int[]{1};
+    }
+
+    @Override
     public String getType() {
         return TYPE;
     }
@@ -46,8 +51,7 @@ public class USBAccessPoint extends ModuleAccessPoint {
     }
 
     @Override
-    public int[] getDatabaseIndices() {
-
-        return new int[]{1};
+    public String toString() {
+        return getType() + "#" + getPort();
     }
 }

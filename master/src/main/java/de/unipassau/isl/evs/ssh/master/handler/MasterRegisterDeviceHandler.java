@@ -18,8 +18,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
-import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
@@ -64,7 +64,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
      * TODO javadoc
      */
     public byte[] generateNewRegisterToken(UserDevice device) {
-        byte[] token = QRDeviceInformation.getRandomToken();
+        byte[] token = DeviceConnectInformation.getRandomToken();
         userDeviceForToken.put(Base64.encodeToString(token, Base64.NO_WRAP), device);
         return token;
     }

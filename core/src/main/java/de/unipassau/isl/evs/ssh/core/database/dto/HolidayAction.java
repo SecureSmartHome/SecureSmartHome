@@ -8,7 +8,6 @@ package de.unipassau.isl.evs.ssh.core.database.dto;
  * @author Christoph Fraedrich
  */
 public class HolidayAction {
-
     private String moduleName;
     private long timeStamp;
     private String actionName;
@@ -36,5 +35,10 @@ public class HolidayAction {
 
     public String getActionName() {
         return actionName;
+    }
+
+    @Override
+    public String toString() {
+        return "HolidayAction{module='" + moduleName + "', action='" + actionName + "', timeStamp=" + timeStamp + "}";
     }
 }

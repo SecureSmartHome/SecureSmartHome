@@ -11,7 +11,6 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  * @author Leon Sell
  */
 public class Module implements Serializable {
-
     private String name;
     private DeviceID atSlave;
     private String moduleType;
@@ -80,5 +79,10 @@ public class Module implements Serializable {
         result = 31 * result + (moduleType != null ? moduleType.hashCode() : 0);
         result = 31 * result + (moduleAccessPoint != null ? moduleAccessPoint.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Module " + name + "{type " + moduleType + " at " + atSlave.toShortString() + " via " + moduleAccessPoint + '}';
     }
 }
