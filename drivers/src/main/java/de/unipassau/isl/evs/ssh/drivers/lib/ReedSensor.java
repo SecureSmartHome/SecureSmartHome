@@ -19,15 +19,15 @@ import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 /**
  * Class to get the values form a window/door sensor
  *
+ * @author Christoph Frädrich
  * @author Wolfram Gottschlich
- * @version 0.1
+ * @version 2.0
  */
 
 public class ReedSensor extends AbstractComponent {
     public static final Key<ReedSensor> KEY = new Key<>(ReedSensor.class);
     private final String moduleName;
     int address;
-    int dummyCount;
     private Container container;
     private ScheduledFuture future;
 
@@ -89,8 +89,8 @@ public class ReedSensor extends AbstractComponent {
         @Override
         public void run() {
             try {
-                if (future != null && sensor.isOpen()) {
-                    sendReedInfo();
+                if (future != null) {
+                    sendReedInfo(sensor.isOpen());
                 }
             } catch (EvsIoException e) {
                 e.printStackTrace();
@@ -99,9 +99,10 @@ public class ReedSensor extends AbstractComponent {
 
         /**
          * Sends info about doorbell being used
+         * @param open
          */
-        private void sendReedInfo() {
-            MessagePayload payload = new DoorStatusPayload(moduleName); //TODO FIXME
+        private void sendReedInfo(boolean open) {
+            MessagePayload payload = new DoorStatusPayload(open, moduleName);
 
             NamingManager namingManager = container.require(NamingManager.KEY);
 

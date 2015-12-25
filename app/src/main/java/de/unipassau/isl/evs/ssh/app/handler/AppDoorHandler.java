@@ -142,7 +142,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
     }
 
     private void refreshOpenStatus(String door) {
-        DoorStatusPayload doorPayload = new DoorStatusPayload(door);
+        DoorStatusPayload doorPayload = new DoorStatusPayload(false, door);
 
         Message message = new Message(doorPayload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET.getKey());

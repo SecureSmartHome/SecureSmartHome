@@ -9,26 +9,11 @@ public class DoorStatusPayload implements MessagePayload {
         this.moduleName = moduleName;
     }
 
-    public DoorStatusPayload(String moduleName) {
-        this.closed = false;
-        this.moduleName = moduleName;
-    }
-
     public boolean isClosed() {
         return closed;
-    }
-
-    public void setClosed(boolean closed) {
-        this.closed = closed;
     }
 
     public String getModuleName() {
         return moduleName;
     }
-
-    public void setModuleName(String moduleName) {
-        this.moduleName = moduleName;
-    }
-
-    //TODO refactor so we have two payloads, one for doors and one windows?
 }
