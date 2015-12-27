@@ -1,5 +1,9 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
@@ -19,25 +23,26 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_REQUEST
  */
 public class MasterClimateHandler extends AbstractMasterHandler {
     private boolean mainLampOn = false;
-    private ClimatePayload latestWeatherData;
+    private final Map<Module, ClimatePayload> latestWeatherData = new HashMap<>();
 
     @Override
     public void handle(Message.AddressedMessage message) {
         saveMessage(message);
         if (MASTER_PUSH_WEATHER_INFO.matches(message)) {
-            latestWeatherData = MASTER_PUSH_WEATHER_INFO.getPayload(message);
-            evaluateWeatherData(latestWeatherData);
-        } else if (MASTER_LIGHT_GET.matches(message)) {
+            ClimatePayload payload = MASTER_PUSH_WEATHER_INFO.getPayload(message);
+            latestWeatherData.put(payload.getModule(), payload) ;
+            evaluateWeatherData(payload);
+        } else if (MASTER_LIGHT_GET.matches(message) &&
+                message.getHeader(Message.HEADER_REFERENCES_ID) != null) {
+            //Reply to get request, this means this message actually contains an updated lamp value
+
             LightPayload payload = MASTER_LIGHT_GET.getPayload(message);
-            mainLampOn = payload.getOn(); //TODO check if this is the first lamp
+            mainLampOn = payload.getOn(); //TODO check if this is the first lamp, how?
         } else if (MASTER_REQUEST_WEATHER_INFO.matches(message)) {
-            //TODO make map of latestWeatherData to send data for each Weatherboard
-            //Todo: request weather state
-            if (latestWeatherData == null) {
-                latestWeatherData = new ClimatePayload(0, 0, 0, 0, 0, 0, 0, 0, "", null);
+            for(ClimatePayload payload : latestWeatherData.values()) {
+                sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY),
+                        new Message(payload));
             }
-            sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY),
-                    new Message(latestWeatherData));
         } else {
             invalidMessage(message);
         }
