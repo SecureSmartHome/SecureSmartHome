@@ -38,6 +38,7 @@ import io.netty.util.ReferenceCountUtil;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ALL_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_HANDSHAKE_FINISHED;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_CERT;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.READER_IDLE_TIME;
@@ -200,6 +201,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
 
             setState(State.STATE_RECEIVED, State.FINISHED);
             ctx.attr(ATTR_HANDSHAKE_FINISHED).set(true);
+            ctx.attr(ATTR_LOCAL_CONNECTION).set(msg.isConnectionLocal);
             Log.i(TAG, "Got State: authenticated, handshake successful");
             handshakeSuccessful(ctx);
         } else {

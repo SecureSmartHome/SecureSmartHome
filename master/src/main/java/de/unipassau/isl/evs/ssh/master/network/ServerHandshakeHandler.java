@@ -30,6 +30,7 @@ import de.unipassau.isl.evs.ssh.core.network.handler.SignatureGenerator;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakeException;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket;
+import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket.ServerAuthenticationResponse;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
@@ -199,15 +200,17 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
 
             handshakeSuccessful(ctx);
 
-            ctx.writeAndFlush(new HandshakePacket.ServerAuthenticationResponse(
-                    true, null, (slave == null ? null : slave.getPassiveRegistrationToken())
+            final byte[] passiveRegistrationToken = slave == null ? null : slave.getPassiveRegistrationToken();
+            final boolean isConnectionLocal = ctx.attr(ATTR_LOCAL_CONNECTION).get() == Boolean.TRUE;
+            ctx.writeAndFlush(ServerAuthenticationResponse.authenticated(
+                    null, passiveRegistrationToken, isConnectionLocal
             )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         } else {
             setState(ctx, State.CHECK_AUTH, State.EXPECT_REGISTER);
             Log.i(TAG, "Device " + deviceID + " is not registered, requesting registration");
 
-            ctx.writeAndFlush(new HandshakePacket.ServerAuthenticationResponse(
-                    false, "Unknown Client, please register.", null
+            ctx.writeAndFlush(ServerAuthenticationResponse.unauthenticated(
+                    "Unknown Client, please register."
             )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         }
     }
@@ -228,8 +231,8 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
             setState(ctx, State.CHECK_AUTH, State.EXPECT_REGISTER);
             Log.v(TAG, "Rejected registration request from " + ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_ID).get());
 
-            ctx.writeAndFlush(new HandshakePacket.ServerAuthenticationResponse(
-                    false, "Client registration rejected, closing connection.", null
+            ctx.writeAndFlush(ServerAuthenticationResponse.unauthenticated(
+                    "Client registration rejected, closing connection."
             )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         }
     }
