@@ -33,8 +33,9 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_DEMO;
 
 /**
  * MainActivity for the slave app.
+ * <p/>
+ * TODO Phil: build MainActivity for Slave. Connection Status, own ID and MasterID, connected modules and connection information.
  *
- * TODO Phil: build MainActivity for Slave.
  * @author Team
  */
 public class MainActivity extends BoundActivity {
@@ -69,6 +70,24 @@ public class MainActivity extends BoundActivity {
         super.onCreate(savedInstanceState);
         startService(new Intent(this, SlaveContainer.class));
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    public void onContainerConnected(Container container) {
+        final NamingManager namingManager = getComponent(NamingManager.KEY);
+        if (namingManager == null) {
+            ((TextView) findViewById(R.id.textViewDeviceID)).setText("???");
+            ((TextView) findViewById(R.id.textViewMasterID)).setText("???");
+        } else {
+            ((TextView) findViewById(R.id.textViewDeviceID)).setText(
+                    namingManager.getOwnID().getId()
+            );
+            if (namingManager.isMasterKnown()) {
+                ((TextView) findViewById(R.id.textViewMasterID)).setText(
+                        namingManager.getMasterID().getId()
+                );
+            }
+        }
 
         findViewById(R.id.textViewConnectionStatus).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,24 +126,7 @@ public class MainActivity extends BoundActivity {
                 });
             }
         });
-    }
 
-    @Override
-    public void onContainerConnected(Container container) {
-        final NamingManager namingManager = getComponent(NamingManager.KEY);
-        if (namingManager == null) {
-            ((TextView) findViewById(R.id.textViewDeviceID)).setText("???");
-            ((TextView) findViewById(R.id.textViewMasterID)).setText("???");
-        } else {
-            ((TextView) findViewById(R.id.textViewDeviceID)).setText(
-                    namingManager.getOwnID().getId()
-            );
-            if (namingManager.isMasterKnown()) {
-                ((TextView) findViewById(R.id.textViewMasterID)).setText(
-                        namingManager.getMasterID().getId()
-                );
-            }
-        }
 
         updateConnectionStatus();
 
@@ -173,7 +175,6 @@ public class MainActivity extends BoundActivity {
                     + (client.isExecutorAlive() ? "alive" : "dead") + "]";
         }
         ((TextView) findViewById(R.id.textViewConnectionStatus)).setText(status);
-
     }
 
     @Override

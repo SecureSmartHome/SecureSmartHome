@@ -6,8 +6,6 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.text.format.Formatter;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,8 +41,9 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_DEMO;
 
 /**
  * MainActivity for the Master App
+ * <p/>
+ * TODO Phil: build MainActivity for Master. Connection Status, own ID, connected modules and connection information.
  *
- * TODO Phil: build MainActivity for Slave.
  * @author Team
  */
 public class MainActivity extends BoundActivity {
@@ -81,6 +80,30 @@ public class MainActivity extends BoundActivity {
         super.onCreate(savedInstanceState);
         startService(new Intent(this, MasterContainer.class));
         setContentView(R.layout.activity_main);
+    }
+
+    /**
+     * Checks if there are no registered devices in the system.
+     *
+     * @return Whether no devices are registered in the master.
+     * author Phil Werli
+     */
+    private boolean hasNoRegisteredDevice() {
+        List<UserDevice> list = getContainer().require(UserManagementController.KEY).getUserDevices();
+        return list.size() == 0;
+    }
+
+
+    @Override
+    public void onContainerConnected(Container container) {
+        final NamingManager namingManager = getComponent(NamingManager.KEY);
+        if (namingManager == null) {
+            ((TextView) findViewById(R.id.textViewDeviceID)).setText("???");
+        } else {
+            ((TextView) findViewById(R.id.textViewDeviceID)).setText(
+                    namingManager.getOwnID().getIDString()
+            );
+        }
 
         findViewById(R.id.textViewConnectionStatus).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,30 +142,6 @@ public class MainActivity extends BoundActivity {
                 });
             }
         });
-    }
-
-    /**
-     * Checks if there are no registered devices in the system.
-     *
-     * @return Whether no devices are registered in the master.
-     * author Phil Werli
-     */
-    private boolean hasNoRegisteredDevice() {
-        List<UserDevice> list = getContainer().require(UserManagementController.KEY).getUserDevices();
-        return list.size() == 0;
-    }
-
-
-    @Override
-    public void onContainerConnected(Container container) {
-        final NamingManager namingManager = getComponent(NamingManager.KEY);
-        if (namingManager == null) {
-            ((TextView) findViewById(R.id.textViewDeviceID)).setText("???");
-        } else {
-            ((TextView) findViewById(R.id.textViewDeviceID)).setText(
-                    namingManager.getOwnID().getIDString()
-            );
-        }
 
         updateConnectionStatus();
 
@@ -217,27 +216,5 @@ public class MainActivity extends BoundActivity {
     private void log(String text) {
         Log.v("MASTER", text);
         ((TextView) findViewById(R.id.textViewLog)).append(text);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }
