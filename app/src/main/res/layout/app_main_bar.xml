@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--@author Andreas Bucher-->
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?><!--@author Andreas Bucher-->
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,7 +7,7 @@
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -18,24 +16,47 @@
             android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay"/>
+            android:layout_alignParentTop="true"
+            android:theme="@style/AppTheme.AppBarOverlay" />
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/appbar"
             android:background="@color/colorToolbar"
             android:elevation="16dp"
             android:minHeight="?attr/actionBarSize"
-            app:popupTheme="@style/AppTheme.PopupOverlay"/>
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/toolbar" />
 
-        </FrameLayout>
+        <LinearLayout
+            android:id="@+id/overlay_disconnected"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@id/fragment_container"
+            android:layout_alignEnd="@id/fragment_container"
+            android:layout_alignStart="@id/fragment_container"
+            android:layout_alignTop="@id/fragment_container"
+            android:background="#AA000000"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:visibility="gone">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/overlay_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/md_red_400"
+                android:gravity="center"
+                android:padding="16dp" />
+        </LinearLayout>
+    </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>
