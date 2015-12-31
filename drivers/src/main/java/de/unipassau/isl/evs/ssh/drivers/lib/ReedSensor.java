@@ -60,6 +60,10 @@ public class ReedSensor extends AbstractComponent {
         }
 
         return ret;
+
+        // TODO simplify this method (probably not our job) (Wolfgang, 2015-12-31)
+        // Here is an alternative implementation of this method:
+        //return EvsIo.readValue(address).startsWith("1");
     }
 
     @Override
