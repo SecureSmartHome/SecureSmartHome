@@ -23,7 +23,6 @@ import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
  */
 
 public class ButtonSensor extends AbstractComponent {
-    private static final String TAG = ButtonSensor.class.getSimpleName();
     public static final Key<ButtonSensor> KEY = new Key<>(ButtonSensor.class);
     private final String moduleName;
     int address;
@@ -80,6 +79,7 @@ public class ButtonSensor extends AbstractComponent {
 
 
     private class DoorPollingRunnable implements Runnable {
+        private final String TAG = DoorPollingRunnable.class.getSimpleName();
 
         private ButtonSensor sensor;
         private boolean isPressedFilter = false;
