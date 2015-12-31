@@ -45,13 +45,8 @@ public class SlaveLightHandler extends AbstractMessageHandler {
             }
             replyStatus(message, plugSwitch);
         } else {
-            //TODO check RoutingKey and call invalidMessage(message) otherwise
-            final Message reply = new Message(new MessageErrorPayload(message.getPayload()));
-            sendMessage(
-                    message.getFromID(),
-                    RoutingKeys.MASTER_LIGHT_GET,
-                    reply
-            );
+            //Received wrong routing key -> invalid message
+            invalidMessage(message);
         }
     }
 

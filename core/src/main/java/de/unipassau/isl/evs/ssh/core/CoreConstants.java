@@ -20,6 +20,11 @@ public class CoreConstants {
     public static final String FILE_SHARED_PREFS = "shared-preferences";
 
     /**
+     * API Key to Access Open Weather Map
+     */
+    public static final String OPENWEATHERMAP_API_KEY = "f5301a474451c6e1394268314b72a358";
+
+    /**
      * The class contains constants for the Netty Framework
      *
      * @author Niko Fink & Phil Werli

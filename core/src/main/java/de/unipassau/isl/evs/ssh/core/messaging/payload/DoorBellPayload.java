@@ -7,8 +7,8 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
  */
 public class DoorBellPayload implements MessagePayload {
 
-    String moduleName; //Name of the bell which is rang
-    CameraPayload cameraPayload; //Picture of the door camera
+    private String moduleName; //Name of the bell which is rang
+    private CameraPayload cameraPayload; //Picture of the door camera
 
     public DoorBellPayload(String moduleName) {
         this.moduleName = moduleName;

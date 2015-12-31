@@ -24,6 +24,7 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterSystemHealthCheckHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
+import de.unipassau.isl.evs.ssh.master.task.MasterWeatherCheckHandler;
 
 /**
  * This Container class manages dependencies needed in the Master part of the architecture.
@@ -55,6 +56,8 @@ public class MasterContainer extends ContainerService {
         registerHandler(new MasterCameraHandler());
         registerHandler(new MasterClimateHandler());
         registerHandler(new MasterHolidaySimulationPlannerHandler());
+
+        registerHandler(new MasterWeatherCheckHandler());
 
         //registerHandler(new MasterDoorHandler()); //FIXME was not registered before (Niko,  2015-12-17)
         //registerHandler(new MasterPermissionHandler());

@@ -1,7 +1,5 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
-import android.hardware.Camera;
-
 /**
  * Payload class for messages regarding camera interaction
  *
@@ -9,9 +7,9 @@ import android.hardware.Camera;
  */
 public class CameraPayload implements MessagePayload {
 
-    String moduleName;
-    int cameraID;
-    byte[] picture;
+    private String moduleName;
+    private int cameraID;
+    private byte[] picture;
 
     /**
      * Constructor for a CameraPayload only requesting the cameraID.
