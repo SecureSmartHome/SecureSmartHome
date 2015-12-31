@@ -1,11 +1,8 @@
 package de.unipassau.isl.evs.ssh.core.network.handler;
 
-import android.util.Log;
-
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.Signature;
-import java.util.Arrays;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -41,7 +38,7 @@ public class SignatureGenerator extends MessageToByteEncoder<ByteBuf> {
         out.writeInt(signatureLength);
         out.writeBytes(signature);
 
-        Log.v(TAG, "Signed " + dataLength + "b of data with " + signatureLength + "b signature" +
-                (Log.isLoggable(TAG, Log.VERBOSE) ? ": " + Arrays.toString(signature) : ""));
+        //Log.v(TAG, "Signed " + dataLength + "b of data with " + signatureLength + "b signature" +
+        //        (Log.isLoggable(TAG, Log.VERBOSE) ? ": " + Arrays.toString(signature) : ""));
     }
 }

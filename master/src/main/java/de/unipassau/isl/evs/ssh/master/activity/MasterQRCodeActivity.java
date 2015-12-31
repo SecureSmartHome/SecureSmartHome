@@ -13,7 +13,7 @@ import java.io.Serializable;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
-import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
 
@@ -43,9 +43,9 @@ public class MasterQRCodeActivity extends BoundActivity {
      */
     private Bitmap createQRCodeBitmap() {
         Serializable extra = getIntent().getExtras().getSerializable(EXTRA_QR_DEVICE_INFORMATION);
-        if (extra instanceof QRDeviceInformation) {
+        if (extra instanceof DeviceConnectInformation) {
             try {
-                return ((QRDeviceInformation) extra).toQRBitmap(Bitmap.Config.ARGB_8888, Color.BLACK, Color.WHITE);
+                return ((DeviceConnectInformation) extra).toQRBitmap(Bitmap.Config.ARGB_8888, Color.BLACK, Color.WHITE);
             } catch (WriterException e) {
                 throw new IllegalArgumentException("illegal QRCode data", e);
             }

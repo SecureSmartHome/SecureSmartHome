@@ -9,6 +9,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -26,14 +27,17 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
  * @author Andreas Bucher
  * @author Wolfgang Popp
  */
-public class MainActivity extends BoundActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends BoundActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final String SAVED_LAST_ACTIVE_FRAGMENT = "de.unipassau.isl.evs.ssh.app.activity.SAVED_LAST_ACTIVE_FRAGMENT";
+    private static final String SAVED_LAST_ACTIVE_FRAGMENT = MainActivity.class.getName() + ".SAVED_LAST_ACTIVE_FRAGMENT";
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
+
+    private boolean fragmentInitialized = false;
+    private Bundle savedInstanceState;
 
     public MainActivity() {
         super(AppContainer.class);
@@ -41,7 +45,8 @@ public class MainActivity extends BoundActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(this.savedInstanceState);
+        this.savedInstanceState = savedInstanceState;
         setContentView(R.layout.activity_main);
 
         //Set the fragment initially
@@ -63,23 +68,57 @@ public class MainActivity extends BoundActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //check intent if a specific fragment should be inflated when App is opened
-        if (getIntent().getAction().equals("ClimateFragment")) {
-            showFragmentByClass(ClimateFragment.class);
-        } else if (getIntent().getAction().equals("StatusFragment")) {
-            showFragmentByClass(StatusFragment.class);
-        } else if (getIntent().getAction().equals("LightFragment")) {
-            showFragmentByClass(LightFragment.class);
-        } else if (getIntent().getAction().equals("DoorFragment")) {
-            showFragmentByClass(DoorFragment.class);
+        if (!fragmentInitialized && getContainer() != null) {
+            fragmentInitialized = true;
+            showFragmentByClass(getInitialFragment());
         }
+    }
 
-        //Initialise fragmentTransaction
-        if (savedInstanceState == null || !savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
-            // starts the main fragment when already registered, the welcomescreen fragment so the user can register.
-            final boolean masterIDKnown = requireComponent(NamingManager.KEY).isMasterIDKnown();
-            Class<? extends Fragment> clazz = (masterIDKnown ? MainFragment.class : WelcomeScreenFragment.class);
-            showFragmentByClass(clazz);
+    @Override
+    public void onContainerConnected(Container container) {
+        final Fragment fragment = getCurrentFragment();
+        if (fragment instanceof BoundFragment) {
+            ((BoundFragment) fragment).onContainerConnected(container);
+        }
+        container.require(AppNotificationHandler.KEY).addNotificationObjects(notificationBuilder, notificationManager);
+
+        if (!fragmentInitialized) {
+            fragmentInitialized = true;
+            showFragmentByClass(getInitialFragment());
+        }
+    }
+
+    private Class getInitialFragment() {
+        if (!requireComponent(NamingManager.KEY).isMasterIDKnown()) {
+            return WelcomeScreenFragment.class;
+        }
+        if (getIntent() != null && getIntent().getAction() != null) {
+            switch (getIntent().getAction()) {
+                case "ClimateFragment":
+                    return ClimateFragment.class;
+                case "StatusFragment":
+                    return StatusFragment.class;
+                case "LightFragment":
+                    return LightFragment.class;
+                case "DoorFragment":
+                    return DoorFragment.class;
+            }
+        }
+        if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
+            try {
+                return Class.forName(savedInstanceState.getString(SAVED_LAST_ACTIVE_FRAGMENT));
+            } catch (ClassNotFoundException e) {
+                Log.w(TAG, "Could not load Fragment from saved instance state", e);
+            }
+        }
+        return MainFragment.class;
+    }
+
+    @Override
+    public void onContainerDisconnected() {
+        final Fragment fragment = getCurrentFragment();
+        if (fragment instanceof BoundFragment) {
+            ((BoundFragment) fragment).onContainerDisconnected();
         }
     }
 
@@ -188,22 +227,5 @@ public class MainActivity extends BoundActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    @Override
-    public void onContainerConnected(Container container) {
-        final Fragment fragment = getCurrentFragment();
-        if (fragment instanceof BoundFragment) {
-            ((BoundFragment) fragment).onContainerConnected(container);
-        }
-        container.require(AppNotificationHandler.KEY).addNotificationObjects(notificationBuilder, notificationManager);
-    }
-
-    @Override
-    public void onContainerDisconnected() {
-        final Fragment fragment = getCurrentFragment();
-        if (fragment instanceof BoundFragment) {
-            ((BoundFragment) fragment).onContainerDisconnected();
-        }
     }
 }

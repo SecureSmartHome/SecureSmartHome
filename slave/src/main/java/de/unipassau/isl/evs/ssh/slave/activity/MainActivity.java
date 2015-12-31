@@ -1,13 +1,15 @@
 package de.unipassau.isl.evs.ssh.slave.activity;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.format.Formatter;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,13 +27,15 @@ import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
-import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.slave.R;
 import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_DEMO;
+import static de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation.encodeToken;
 
 /**
  * MainActivity for the slave app.
@@ -133,22 +137,66 @@ public class MainActivity extends BoundActivity {
 
         boolean isMasterKnown = requireComponent(NamingManager.KEY).isMasterKnown();
         if (!isMasterKnown) {
-            showQRCodeActivity();
+            showQRCodeActivity(true);
         }
     }
 
-    private void showQRCodeActivity() {
-        Intent intent = new Intent(this, SlaveQRCodeActivity.class);
-        QRDeviceInformation deviceInformation = null;
+    private static final int LOCAL_MASTER_REQUEST_CODE = 2;
+    private static final String LOCAL_MASTER_PACKAGE = "de.unipassau.isl.evs.ssh.master";
+    private static final String LOCAL_MASTER_ACTIVITY = LOCAL_MASTER_PACKAGE + ".activity.RegisterLocalSlaveActivity";
+
+    private void showQRCodeActivity(boolean tryLocal) {
+        DeviceConnectInformation deviceInformation = getDeviceConnectInformation();
+
+        if (tryLocal) {
+            try {
+                //Try to open the Master Activity for adding a local slave
+                Intent intent = new Intent();
+                intent.setComponent(new ComponentName(LOCAL_MASTER_PACKAGE, LOCAL_MASTER_ACTIVITY));
+                intent.putExtra(EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
+                startActivityForResult(intent, LOCAL_MASTER_REQUEST_CODE);
+            } catch (ActivityNotFoundException ignore) {
+                //Or open the QR Code scanner
+                tryLocal = false;
+            }
+        }
+
+        if (!tryLocal) {
+            Intent intent = new Intent(this, SlaveQRCodeActivity.class);
+            intent.putExtra(EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == LOCAL_MASTER_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                //TODO Niko: Show intermediate "waiting for connection" screen and don't show RegisterLocal dialogue again (Niko, 2015-12-24)
+            } else {
+                showQRCodeActivity(false);
+            }
+        }
+    }
+
+    @NonNull
+    private DeviceConnectInformation getDeviceConnectInformation() {
+        DeviceConnectInformation deviceInformation = null;
         Context ctx = getApplicationContext();
         WifiManager wifiManager = ((WifiManager) ctx.getSystemService(Context.WIFI_SERVICE));
         String ipAddress = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
+        final byte[] token = DeviceConnectInformation.getRandomToken();
+        requireComponent(Client.KEY).editPrefs()
+                .setPassiveRegistrationToken(token)
+                .commit();
         try {
-            deviceInformation = new QRDeviceInformation(
+            deviceInformation = new DeviceConnectInformation(
                     (Inet4Address) Inet4Address.getByName(ipAddress),
                     CoreConstants.NettyConstants.DEFAULT_PORT,
                     requireComponent(NamingManager.KEY).getOwnID(),
-                    QRDeviceInformation.getRandomToken()
+                    token
             );
         } catch (UnknownHostException e) {
             Log.e(TAG, "Cannot show QRCode: " + e.getMessage());
@@ -156,11 +204,9 @@ public class MainActivity extends BoundActivity {
         Log.v(TAG, "HostNAME: " + deviceInformation.getAddress().getHostAddress());
         Log.v(TAG, "ID: " + deviceInformation.getID());
         Log.v(TAG, "Port: " + deviceInformation.getPort());
-        Log.v(TAG, "Token: " + android.util.Base64.encodeToString(deviceInformation.getToken(),
-                android.util.Base64.NO_WRAP));
+        Log.v(TAG, "Token: " + encodeToken(deviceInformation.getToken()));
         //NoDevice will allow any device to use this token
-        intent.putExtra(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
-        startActivity(intent);
+        return deviceInformation;
     }
 
     private void updateConnectionStatus() {
@@ -186,27 +232,5 @@ public class MainActivity extends BoundActivity {
     private void log(String text) {
         Log.v("SLAVE", text);
         ((TextView) findViewById(R.id.textViewLog)).append(text);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

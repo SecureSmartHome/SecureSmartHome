@@ -75,6 +75,7 @@
         <item>GPIO</item>
         <item>USB</item>
         <item>WLAN</item>
+        <item>Mock</item>
     </string-array>
 
     <string name="switchSimulationOn">Switch Simulation On</string>
@@ -102,6 +103,7 @@
     <string name="ip_address">IP Address:</string>
     <string name="port">Port:</string>
     <string name="add_wlan_module">Add WLAN module</string>
+    <string name="add_mock_module">Add mocked module</string>
     <string name="climate_sensor">Climate Sensor:</string>
     <string name="temperature_1">Temperature 1:</string>
     <string name="temperature2">Temperature 2:</string>

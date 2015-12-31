@@ -81,4 +81,9 @@ public class WLANAccessPoint extends ModuleAccessPoint {
     public void setiPAddress(String iPAddress) {
         this.iPAddress = iPAddress;
     }
+
+    @Override
+    public String toString() {
+        return getType() + "#" + getUsername() + "@" + getiPAddress() + ":" + getPort();
+    }
 }

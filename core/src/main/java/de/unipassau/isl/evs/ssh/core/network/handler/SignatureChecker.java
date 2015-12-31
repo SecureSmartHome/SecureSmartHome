@@ -1,12 +1,9 @@
 package de.unipassau.isl.evs.ssh.core.network.handler;
 
-import android.util.Log;
-
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.util.Arrays;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerAdapter;
@@ -39,9 +36,9 @@ public class SignatureChecker extends ChannelHandlerAdapter {
 
             verifySignature.update(data.nioBuffer());
             final boolean valid = verifySignature.verify(signature);
-            Log.v(TAG, "Read " + dataLength + "b of data with " + signatureLength + "b " +
-                    (valid ? "valid" : "invalid") + " signature" +
-                    (Log.isLoggable(TAG, Log.VERBOSE) ? ": " + Arrays.toString(signature) : ""));
+            //Log.v(TAG, "Read " + dataLength + "b of data with " + signatureLength + "b " +
+            //        (valid ? "valid" : "invalid") + " signature" +
+            //        (Log.isLoggable(TAG, Log.VERBOSE) ? ": " + Arrays.toString(signature) : ""));
             if (valid) {
                 data.retain();
                 ctx.fireChannelRead(data);

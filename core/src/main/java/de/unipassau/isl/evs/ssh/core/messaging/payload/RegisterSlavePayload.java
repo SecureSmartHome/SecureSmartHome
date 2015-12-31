@@ -1,6 +1,5 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
-import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
@@ -9,15 +8,12 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 public class RegisterSlavePayload implements MessagePayload {
     private String name;
     private DeviceID slaveID;
+    private byte[] passiveRegistrationToken;
 
-    public RegisterSlavePayload(Slave slave) {
-        this.name = slave.getName();
-        this.slaveID = slave.getSlaveID();
-    }
-
-    public RegisterSlavePayload(String name, DeviceID slaveID) {
+    public RegisterSlavePayload(String name, DeviceID slaveID, byte[] passiveRegistrationToken) {
         this.name = name;
         this.slaveID = slaveID;
+        this.passiveRegistrationToken = passiveRegistrationToken;
     }
 
     public String getName() {
@@ -34,5 +30,9 @@ public class RegisterSlavePayload implements MessagePayload {
 
     public void setSlaveID(DeviceID slaveID) {
         this.slaveID = slaveID;
+    }
+
+    public byte[] getPassiveRegistrationToken() {
+        return passiveRegistrationToken;
     }
 }
