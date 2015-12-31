@@ -168,40 +168,50 @@ public class DatabaseConnector extends AbstractComponent {
 
         private void insertPermissions(SQLiteDatabase db) {
             for (Permission permission : Permission.binaryPermissions) {
-                ContentValues values = new ContentValues(1);
+                ContentValues values = new ContentValues(2);
                 values.put(DatabaseContract.Permission.COLUMN_NAME, permission.toString());
+                values.put(DatabaseContract.Permission.COLUMN_ID, permission.ordinal());
                 db.insert(DatabaseContract.Permission.TABLE_NAME, null, values);
             }
         }
 
         private void insertGroups(SQLiteDatabase db) {
-            for (String defaultTemplate : defaultTemplates) {
-                ContentValues values = new ContentValues(1);
-                values.put(DatabaseContract.PermissionTemplate.COLUMN_NAME, defaultTemplate);
+            for (int i = 0; i < defaultTemplates.length; i++) {
+                ContentValues values = new ContentValues(2);
+                values.put(DatabaseContract.PermissionTemplate.COLUMN_NAME, defaultTemplates[i]);
+                values.put(DatabaseContract.PermissionTemplate.COLUMN_ID, i);
                 db.insert(DatabaseContract.PermissionTemplate.TABLE_NAME, null, values);
             }
 
             for (int i = 0; i < groupNames.length; i++) {
                 ContentValues values = new ContentValues(2);
                 values.put(DatabaseContract.Group.COLUMN_NAME, groupNames[i]);
-                values.put(DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID, i + 1);
+                values.put(DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID, i);
                 db.insert(DatabaseContract.Group.TABLE_NAME, null, values);
             }
         }
 
         private void fillTemplates(SQLiteDatabase db) {
-            final int parentsTemplateID = 2;
-            for (int i = 0; i < Permission.binaryPermissions.size(); i++) {
+            final int parentsTemplateID = 1;
+            for (Permission permission : Permission.binaryPermissions) {
                 ContentValues values = new ContentValues(2);
-                values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID, i + 1);
+                values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID, permission.ordinal());
                 values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID, parentsTemplateID);
                 db.insert(DatabaseContract.ComposedOfPermission.TABLE_NAME, null, values);
             }
 
-            int[] childrenPermissionsIDs = new int[]{25, 26, 27, 28, 29, 30, 31, 32, 33, 34}; //FIXME replace by Permission.REQUEST_LIGHT_STATUS.ordinal() (Niko, 2015-12-21)
+            int[] childrenPermissionsIDs = new int[]{
+                    Permission.HUMIDITY_WARNING.ordinal(),
+                    Permission.BRIGHTNESS_WARNING.ordinal(),
+                    Permission.BELL_RANG.ordinal(),
+                    Permission.WEATHER_WARNING.ordinal(),
+                    Permission.DOOR_UNLATCHED.ordinal(),
+                    Permission.DOOR_LOCKED.ordinal(),
+                    Permission.DOOR_UNLOCKED.ordinal()
+            };
 
-            final int childrenTemplateID = 3;
-            final int guestsTemplateID = 4;
+            final int childrenTemplateID = 2;
+            final int guestsTemplateID = 3;
             for (int permission : childrenPermissionsIDs) {
                 ContentValues values = new ContentValues(2);
                 values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID, permission);
@@ -222,7 +232,7 @@ public class DatabaseConnector extends AbstractComponent {
         }
 
         private void execSQLScript(String script, SQLiteDatabase db) {
-            String[] statements = script.split("\\;");
+            String[] statements = script.split(";");
             for (String statement : statements) {
                 //Log.v(TAG, "executing SQL statement: " + statement + ";");
                 db.execSQL(statement + ";");
