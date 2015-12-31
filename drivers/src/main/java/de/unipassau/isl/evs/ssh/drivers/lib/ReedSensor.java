@@ -78,6 +78,7 @@ public class ReedSensor extends AbstractComponent {
     }
 
 
+    // TESTME
     private class ReedPollingRunnable implements Runnable {
         private final String TAG = ReedPollingRunnable.class.getSimpleName();
         private final ReedSensor sensor;
@@ -102,11 +103,12 @@ public class ReedSensor extends AbstractComponent {
         }
 
         /**
-         * Sends info about doorbell being used
-         * @param open
+         * Sends a message describing whether the reed sensor is opened or closed.
+         *
+         * @param open true if this reed sensor is open
          */
         private void sendReedInfo(boolean open) {
-            MessagePayload payload = new DoorStatusPayload(open, moduleName);
+            MessagePayload payload = new DoorStatusPayload(!open, moduleName);
 
             NamingManager namingManager = container.require(NamingManager.KEY);
 
