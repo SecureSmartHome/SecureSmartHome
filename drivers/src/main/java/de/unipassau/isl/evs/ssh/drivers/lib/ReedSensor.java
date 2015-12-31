@@ -50,7 +50,7 @@ public class ReedSensor extends AbstractComponent {
         boolean ret = true;
         String result = "";
         result = EvsIo.readValue(address);
-        Log.w("EVS-IO", "EVS-REED:" + result + ":");
+        //Log.w("EVS-IO", "EVS-REED:" + result + ":");
 
 
         if (result.startsWith("1")) {
@@ -79,8 +79,9 @@ public class ReedSensor extends AbstractComponent {
 
 
     private class ReedPollingRunnable implements Runnable {
-
-        ReedSensor sensor;
+        private final String TAG = ReedPollingRunnable.class.getSimpleName();
+        private final ReedSensor sensor;
+        private boolean isOpenFilter = false;
 
         public ReedPollingRunnable(ReedSensor sensor) {
             this.sensor = sensor;
@@ -89,8 +90,11 @@ public class ReedSensor extends AbstractComponent {
         @Override
         public void run() {
             try {
-                if (future != null) {
-                    sendReedInfo(sensor.isOpen());
+                boolean isOpen = sensor.isOpen();
+                if (future != null && isOpen != isOpenFilter) {
+                    Log.i(TAG, "isOpen(): " + isOpen);
+                    isOpenFilter = isOpen;
+                    sendReedInfo(isOpen);
                 }
             } catch (EvsIoException e) {
                 e.printStackTrace();
