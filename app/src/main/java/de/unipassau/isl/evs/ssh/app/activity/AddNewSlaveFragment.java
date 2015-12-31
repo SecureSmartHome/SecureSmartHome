@@ -73,7 +73,6 @@ public class AddNewSlaveFragment extends ScanQRFragment {
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
         buildView();
-        registerSlave(); // FIXME why register here? ask wolfi
     }
 
     private void registerSlave() {

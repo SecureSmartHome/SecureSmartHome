@@ -220,7 +220,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
         showFragmentById(id);
 

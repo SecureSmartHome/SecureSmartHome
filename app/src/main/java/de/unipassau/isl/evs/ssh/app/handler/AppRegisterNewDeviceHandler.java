@@ -84,7 +84,7 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
     }
 
     private void handleUserRegisterResponse(GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload) {
-        final NamingManager namingManager = getComponent(NamingManager.KEY);
+        final NamingManager namingManager = requireComponent(NamingManager.KEY);
         final Client client = requireComponent(Client.KEY);
 
         String host = client.getHost();
@@ -105,14 +105,13 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
     /**
      * Sends a request message for a token to the master.
      *
-     * @param user
+     * @param user the user who is registered
      */
     public void requestToken(UserDevice user) {
-        Message message = new Message(new GenerateNewRegisterTokenPayload(null, user));
+        final Message message = new Message(new GenerateNewRegisterTokenPayload(null, user));
+        final OutgoingRouter outgoingRouter = requireComponent(OutgoingRouter.KEY);
+
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USER_REGISTER.getKey());
-        final OutgoingRouter outgoingRouter = getComponent(OutgoingRouter.KEY);
-        if (outgoingRouter != null) {
-            outgoingRouter.sendMessageToMaster(MASTER_USER_REGISTER, message);
-        } //Todo: what do when no container?
+        outgoingRouter.sendMessageToMaster(MASTER_USER_REGISTER, message);
     }
 }

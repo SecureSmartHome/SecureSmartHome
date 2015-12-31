@@ -56,7 +56,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
     }
 
     public void updateClient(DeviceID id) {
-        OutgoingRouter router = getComponent(OutgoingRouter.KEY);
+        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
         Message message = createUpdateMessage();
         router.sendMessage(id, GLOBAL_MODULES_UPDATE, message);
     }
@@ -69,10 +69,10 @@ public class MasterModuleHandler extends AbstractMasterHandler {
                 updateAllClients();
 
                 Message reply = new Message(new AddNewModulePayload(null));
-                OutgoingRouter router = getComponent(OutgoingRouter.KEY);
+                OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
                 router.sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
             } else {
-                //TODO handle (Niko, 2015-12-17)
+                // HANDLE (Niko, 2015-12-17)
             }
         } else if (MASTER_MODULE_GET.matches(message)) {
             sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), createUpdateMessage());
@@ -85,7 +85,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
                     sendErrorMessage(message);
                 }
             } else {
-                //TODO handle (Niko, 2015-12-17)
+                // HANDLE (Niko, 2015-12-17)
             }
         } else {
             invalidMessage(message);
@@ -135,7 +135,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
     }
 
     private void handleRemoveModule(String moduleName, Message.AddressedMessage message) {
-        SlaveController controller = getComponent(SlaveController.KEY);
+        SlaveController controller = requireComponent(SlaveController.KEY);
         controller.removeModule(moduleName);
         // TODO send message
     }
