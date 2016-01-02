@@ -92,7 +92,8 @@ public class UDPDiscoveryClient extends AbstractComponent {
                         .channel(NioDatagramChannel.class)
                         .group(requireComponent(Client.KEY).getExecutor())
                         .handler(new ResponseHandler())
-                        .option(ChannelOption.SO_BROADCAST, true);
+                        .option(ChannelOption.SO_BROADCAST, true)
+                        .option(ChannelOption.SO_REUSEADDR, true);
                 channel = b.bind(DISCOVERY_PORT);
             }
 

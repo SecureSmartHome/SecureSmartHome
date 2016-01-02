@@ -9,7 +9,7 @@ import java.util.Arrays;
 import de.unipassau.isl.evs.ssh.core.BuildConfig;
 
 public abstract class HandshakePacket implements Serializable {
-    public static final int PROTOCOL_VERSION = 2;
+    public static final int PROTOCOL_VERSION = 3;
 
     /**
      * Used for debugging purposes to easier identify HandshakePackets in network dumps
@@ -102,17 +102,17 @@ public abstract class HandshakePacket implements Serializable {
         }
     }
 
-    public static class RegistrationRequest extends HandshakePacket {
-        public final byte[] token;
+    public static class ActiveRegistrationRequest extends HandshakePacket {
+        public final byte[] activeRegistrationToken;
 
-        public RegistrationRequest(byte[] token) {
-            this.token = token;
+        public ActiveRegistrationRequest(byte[] activeRegistrationToken) {
+            this.activeRegistrationToken = activeRegistrationToken;
         }
 
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
-                    .add("token", Arrays.toString(token))
+                    .add("activeRegistrationToken", Arrays.toString(activeRegistrationToken))
                     .toString();
         }
     }
@@ -120,10 +120,22 @@ public abstract class HandshakePacket implements Serializable {
     public static class ServerAuthenticationResponse extends HandshakePacket {
         public final boolean isAuthenticated;
         public final String message;
+        public final byte[] passiveRegistrationToken;
+        public final boolean isConnectionLocal;
 
-        public ServerAuthenticationResponse(boolean isAuthenticated, String message) {
+        public ServerAuthenticationResponse(boolean isAuthenticated, String message, byte[] passiveRegistrationToken, boolean isConnectionLocal) {
             this.isAuthenticated = isAuthenticated;
             this.message = message;
+            this.passiveRegistrationToken = passiveRegistrationToken;
+            this.isConnectionLocal = isConnectionLocal;
+        }
+
+        public static ServerAuthenticationResponse authenticated(String message, byte[] passiveRegistrationToken, boolean isConnectionLocal) {
+            return new ServerAuthenticationResponse(true, message, passiveRegistrationToken, isConnectionLocal);
+        }
+
+        public static ServerAuthenticationResponse unauthenticated(String message) {
+            return new ServerAuthenticationResponse(false, message, null, false);
         }
 
         @Override
@@ -131,6 +143,8 @@ public abstract class HandshakePacket implements Serializable {
             return MoreObjects.toStringHelper(this)
                     .add("isAuthenticated", isAuthenticated)
                     .add("message", message)
+                    .add("passiveRegistrationToken", Arrays.toString(passiveRegistrationToken))
+                    .add("isConnectionLocal", isConnectionLocal)
                     .toString();
         }
     }

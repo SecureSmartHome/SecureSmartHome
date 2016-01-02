@@ -47,7 +47,7 @@ public class ControllerTest extends InstrumentationTestCase {
         permissionController.addTemplate("asdf");
 
         //Modules w/ Slaves to test Permissions
-        slaveController.addSlave(new Slave("s1", new DeviceID("1")));
+        slaveController.addSlave(new Slave("s1", new DeviceID("1"), null));
         slaveController.addModule(new Module("m1", new DeviceID("1"), CoreConstants.ModuleType.LIGHT,
                 new USBAccessPoint(1)));
 
@@ -200,7 +200,7 @@ public class ControllerTest extends InstrumentationTestCase {
         permissionController.addPermission(new Permission("perm1"));
         permissionController.addPermission(new Permission("perm2"));
         //Permission w/ module
-        slaveController.addSlave(new Slave("abc", new DeviceID("111")));
+        slaveController.addSlave(new Slave("abc", new DeviceID("111"), null));
         slaveController.addModule(new Module("m1", new DeviceID("111"), CoreConstants.ModuleType.DOOR_BUZZER,
                 new USBAccessPoint(1)));
         permissionController.addPermission(new Permission("perm3", "m1"));
@@ -437,9 +437,9 @@ public class ControllerTest extends InstrumentationTestCase {
         SlaveController slaveController = container.require(SlaveController.KEY);
 
         //Test slave init
-        slaveController.addSlave(new Slave("s1", new DeviceID("1")));
-        slaveController.addSlave(new Slave("s2", new DeviceID("2")));
-        slaveController.addSlave(new Slave("s3", new DeviceID("3")));
+        slaveController.addSlave(new Slave("s1", new DeviceID("1"), null));
+        slaveController.addSlave(new Slave("s2", new DeviceID("2"), null));
+        slaveController.addSlave(new Slave("s3", new DeviceID("3"), null));
         List<String> slaves = new LinkedList<>();
         for (Slave slave : slaveController.getSlaves()) {
             slaves.add(slave.getName());
@@ -448,13 +448,13 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Add already existing slave
         try {
-            slaveController.addSlave(new Slave("s1", new DeviceID("55")));
+            slaveController.addSlave(new Slave("s1", new DeviceID("55"), null));
             Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
         try {
-            slaveController.addSlave(new Slave("s55", new DeviceID("2")));
+            slaveController.addSlave(new Slave("s55", new DeviceID("2"), null));
             Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);

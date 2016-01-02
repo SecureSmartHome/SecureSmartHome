@@ -13,7 +13,7 @@ import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppAddSlaveHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
 /**
  * The AddNewSlaveFragment is used to add new Slaves to the SecureSmartHome.
@@ -25,7 +25,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
     private static final String KEY_SLAVE_NAME = "SLAVE_NAME";
 
     private EditText slaveNameInput;
-    private QRDeviceInformation info;
+    private DeviceConnectInformation info;
 
     @Nullable
     @Override
@@ -58,7 +58,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
     }
 
     @Override
-    protected void onQRCodeScanned(QRDeviceInformation info) {
+    protected void onQRCodeScanned(DeviceConnectInformation info) {
         this.info = info;
         registerSlave();
     }
@@ -81,7 +81,8 @@ public class AddNewSlaveFragment extends ScanQRFragment {
             DeviceID slaveID = info.getID();
             String slaveName = slaveNameInput.getText().toString();
             AppAddSlaveHandler handler = getComponent(AppAddSlaveHandler.KEY);
-            handler.registerNewSlave(slaveID, slaveName);
+            final byte[] passiveRegistrationToken = info.getToken();
+            handler.registerNewSlave(slaveID, slaveName, passiveRegistrationToken);
             info = null;
             ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         }

@@ -23,6 +23,7 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.MockAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
@@ -44,6 +45,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     private LinearLayout wlanView;
     private LinearLayout usbView;
     private LinearLayout gpioView;
+    private LinearLayout mockView;
 
     private Spinner slaveSpinner;
     private Spinner sensorTypeSpinner;
@@ -66,6 +68,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         wlanView = createViewWLAN(layout);
         usbView = createViewUSB(layout);
         gpioView = createViewGPIO(layout);
+        mockView = createViewMock(layout);
 
         ArrayAdapter<CharSequence> connectionTypeAdapter = ArrayAdapter.createFromResource(
                 getActivity().getApplicationContext(),
@@ -160,17 +163,26 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             layout.removeView(wlanView);
             layout.removeView(usbView);
             layout.removeView(gpioView);
+            layout.removeView(mockView);
             layout.addView(gpioView);
         } else if (types[1].equals(type)) {
             layout.removeView(wlanView);
             layout.removeView(gpioView);
             layout.removeView(usbView);
+            layout.removeView(mockView);
             layout.addView(usbView);
         } else if (types[2].equals(type)) {
             layout.removeView(usbView);
             layout.removeView(gpioView);
             layout.removeView(wlanView);
+            layout.removeView(mockView);
             layout.addView(wlanView);
+        } else if (types[3].equals(type)) {
+            layout.removeView(usbView);
+            layout.removeView(gpioView);
+            layout.removeView(wlanView);
+            layout.removeView(mockView);
+            layout.addView(mockView);
         }
     }
 
@@ -247,6 +259,21 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         });
 
         return wlanView;
+    }
+
+
+    private LinearLayout createViewMock(ViewGroup container) {
+        LinearLayout mockView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_mock, container, false);
+        Button button = (Button) mockView.findViewById(R.id.add_module_mock_button);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addNewModule(new MockAccessPoint());
+            }
+        });
+
+        return mockView;
     }
 
     private void addNewModule(ModuleAccessPoint accessPoint) {

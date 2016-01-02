@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.master.network;
 
 import android.util.Log;
 
+import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -11,6 +12,8 @@ import java.util.Arrays;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
+import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -27,6 +30,7 @@ import de.unipassau.isl.evs.ssh.core.network.handler.SignatureGenerator;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakeException;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket;
+import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket.ServerAuthenticationResponse;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
@@ -44,6 +48,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ALL_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.READER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.WRITER_IDLE_TIME;
@@ -107,7 +112,9 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         super.channelActive(ctx);
         assert container.require(NamingManager.KEY).isMaster();
         setState(ctx, null, State.EXPECT_HELLO);
-        Log.v(TAG, "Channel open, waiting for Client Hello");
+        final boolean isLocal = ((InetSocketAddress) ctx.channel().localAddress()).getPort() == server.getLocalPort();
+        ctx.attr(ATTR_LOCAL_CONNECTION).set(isLocal);
+        Log.v(TAG, "Channel to " + (isLocal ? "local" : "internet") + " device open, waiting for Client Hello");
         setChapChallenge(ctx, new byte[HandshakePacket.CHAP.CHALLENGE_LENGTH]);
     }
 
@@ -121,8 +128,8 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
                 } else {
                     handleFinalChapResponse(ctx, ((HandshakePacket.CHAP) msg));
                 }
-            } else if (msg instanceof HandshakePacket.RegistrationRequest) {
-                handleRegistrationRequest(ctx, ((HandshakePacket.RegistrationRequest) msg));
+            } else if (msg instanceof HandshakePacket.ActiveRegistrationRequest) {
+                handleActiveRegistrationRequest(ctx, ((HandshakePacket.ActiveRegistrationRequest) msg));
             } else {
                 throw new HandshakeException("Illegal Handshake packet received");
             }
@@ -186,36 +193,35 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         setState(ctx, State.CHECK_AUTH, State.CHECK_AUTH);
 
         final DeviceID deviceID = ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_ID).get();
-        if (isDeviceRegistered(deviceID)) {
+        final Slave slave = container.require(SlaveController.KEY).getSlave(deviceID);
+        final UserDevice userDevice = container.require(UserManagementController.KEY).getUserDevice(deviceID);
+        if (slave != null || userDevice != null) {
             setState(ctx, State.CHECK_AUTH, State.FINISHED);
 
             handshakeSuccessful(ctx);
 
-            ctx.writeAndFlush(new HandshakePacket.ServerAuthenticationResponse(
-                    true, null
+            final byte[] passiveRegistrationToken = slave == null ? null : slave.getPassiveRegistrationToken();
+            final boolean isConnectionLocal = ctx.attr(ATTR_LOCAL_CONNECTION).get() == Boolean.TRUE;
+            ctx.writeAndFlush(ServerAuthenticationResponse.authenticated(
+                    null, passiveRegistrationToken, isConnectionLocal
             )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         } else {
             setState(ctx, State.CHECK_AUTH, State.EXPECT_REGISTER);
             Log.i(TAG, "Device " + deviceID + " is not registered, requesting registration");
 
-            ctx.writeAndFlush(new HandshakePacket.ServerAuthenticationResponse(
-                    false, "Unknown Device, please register."
+            ctx.writeAndFlush(ServerAuthenticationResponse.unauthenticated(
+                    "Unknown Client, please register."
             )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         }
     }
 
-    private boolean isDeviceRegistered(DeviceID clientID) {
-        return container.require(SlaveController.KEY).getSlave(clientID) != null
-                || container.require(UserManagementController.KEY).getUserDevice(clientID) != null;
-    }
-
-    private void handleRegistrationRequest(ChannelHandlerContext ctx, HandshakePacket.RegistrationRequest msg) throws HandshakeException {
+    private void handleActiveRegistrationRequest(ChannelHandlerContext ctx, HandshakePacket.ActiveRegistrationRequest msg) throws HandshakeException {
         setState(ctx, State.EXPECT_REGISTER, State.CHECK_AUTH);
 
         // send client register info to handler
         boolean success = container.require(MasterRegisterDeviceHandler.KEY).registerDevice( //TODO add cert to KeyStore?
                 ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_CERT).get(),
-                msg.token
+                msg.activeRegistrationToken
         );
 
         if (success) {
@@ -225,8 +231,8 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
             setState(ctx, State.CHECK_AUTH, State.EXPECT_REGISTER);
             Log.v(TAG, "Rejected registration request from " + ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_ID).get());
 
-            ctx.writeAndFlush(new HandshakePacket.ServerAuthenticationResponse(
-                    false, "Registration rejected, closing connection"
+            ctx.writeAndFlush(ServerAuthenticationResponse.unauthenticated(
+                    "Client registration rejected, closing connection."
             )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         }
     }
@@ -240,16 +246,18 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
 
         // allow pings
         TimeoutHandler.setPingEnabled(ctx.channel(), true);
-
         // add Dispatcher
         ctx.pipeline().addBefore(ctx.name(), ClientIncomingDispatcher.class.getSimpleName(), server.getIncomingDispatcher());
+        // Logging is handled by IncomingDispatcher and OutgoingRouter
+        ctx.pipeline().remove(LoggingHandler.class.getSimpleName());
+        // remove HandshakeHandler
         ctx.pipeline().remove(this);
 
         // Register connection
         server.getActiveChannels().add(ctx.channel());
         Log.i(TAG, "Handshake with " + deviceID + " successful, current Pipeline: " + ctx.pipeline());
 
-        Message message = new Message(new DeviceConnectedPayload(deviceID, ctx.channel()));
+        Message message = new Message(new DeviceConnectedPayload(deviceID, ctx.channel(), ctx.attr(ATTR_LOCAL_CONNECTION).get()));
         container.require(OutgoingRouter.KEY).sendMessageLocal(RoutingKeys.MASTER_DEVICE_CONNECTED, message);
     }
 

@@ -12,13 +12,14 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 public class Slave implements Serializable {
     private String name;
     private DeviceID slaveID;
+    private byte[] passiveRegistrationToken;
 
-    public Slave() {
-    }
+    public Slave() {}
 
-    public Slave(String name, DeviceID slaveID) {
+    public Slave(String name, DeviceID slaveID, byte[] passiveRegistrationToken) {
         this.name = name;
         this.slaveID = slaveID;
+        this.passiveRegistrationToken = passiveRegistrationToken;
     }
 
     public String getName() {
@@ -35,6 +36,14 @@ public class Slave implements Serializable {
 
     public void setSlaveID(DeviceID slaveID) {
         this.slaveID = slaveID;
+    }
+
+    public byte[] getPassiveRegistrationToken() {
+        return passiveRegistrationToken;
+    }
+
+    public void setPassiveRegistrationToken(byte[] passiveRegistrationToken) {
+        this.passiveRegistrationToken = passiveRegistrationToken;
     }
 
     @Override

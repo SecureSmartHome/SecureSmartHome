@@ -4,6 +4,7 @@ package de.unipassau.isl.evs.ssh.master.network;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -40,7 +41,8 @@ import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PUBLIC_PORT;
 
 /**
  * The heart of the master server: a netty stack accepting connections from devices and handling communication with them using a netty pipeline.
@@ -53,7 +55,8 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT
 public class Server extends AbstractComponent {
     public static final Key<Server> KEY = new Key<>(Server.class);
 
-    private static final String PREF_SERVER_PORT = "PREF_SERVER_PORT";
+    private static final String PREF_SERVER_LOCAL_PORT = Server.class.getName() + ".PREF_SERVER_LOCAL_PORT";
+    private static final String PREF_SERVER_PUBLIC_PORT = Server.class.getName() + ".PREF_SERVER_PUBLIC_PORT";
 
     /**
      * Distributes incoming messages to the responsible handlers.
@@ -72,10 +75,15 @@ public class Server extends AbstractComponent {
      */
     private EventLoopGroup serverExecutor;
     /**
-     * The channel listening for incoming connections on the port of the server.
+     * The channel listening for incoming local connections on the port of the server.
      * Use {@link ChannelFuture#sync()} to wait for server startup.
      */
-    private ChannelFuture serverChannel;
+    private ChannelFuture localChannel;
+    /**
+     * The channel listening for incoming connections from the internet on the port of the server.
+     * Use {@link ChannelFuture#sync()} to wait for server startup.
+     */
+    private ChannelFuture publicChannel;
     /**
      * A ChannelGroup containing really <i>all</i> incoming connections.
      * If it isn't contained here, it is not connected to the Server.
@@ -131,8 +139,9 @@ public class Server extends AbstractComponent {
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
         //Wait for the start of the server
-        serverChannel = b.bind(getPort()).sync();
-        if (serverChannel == null) {
+        localChannel = b.bind(getLocalPort()).sync();
+        publicChannel = b.bind(getPublicPort()).sync();
+        if (localChannel == null || publicChannel == null) {
             throw new StartupException("Could not open server channel");
         }
     }
@@ -151,8 +160,11 @@ public class Server extends AbstractComponent {
      * Stop listening, close all connections and shut down the executors.
      */
     public void destroy() {
-        if (serverChannel != null && serverChannel.channel() != null) {
-            serverChannel.channel().close();
+        if (localChannel != null && localChannel.channel() != null) {
+            localChannel.channel().close();
+        }
+        if (publicChannel != null && publicChannel.channel() != null) {
+            publicChannel.channel().close();
         }
         if (serverExecutor != null) {
             serverExecutor.shutdownGracefully();
@@ -168,6 +180,7 @@ public class Server extends AbstractComponent {
      *
      * @return the found Channel, or {@code null} if no Channel matches the given ID
      */
+    @Nullable
     public Channel findChannel(DeviceID id) {
         for (Channel channel : connections) {
             if (channel.isActive() && Objects.equals(channel.attr(ATTR_PEER_ID).get(), id)) {
@@ -185,13 +198,6 @@ public class Server extends AbstractComponent {
     }
 
     /**
-     * Channel for the {@link ServerIncomingDispatcher} and the {@link ServerOutgoingRouter}
-     */
-    Channel getChannel() {
-        return serverChannel != null ? serverChannel.channel() : null;
-    }
-
-    /**
      * {@link IncomingDispatcher} that will be registered to the Pipeline by the {@link ServerHandshakeHandler}
      */
     ServerIncomingDispatcher getIncomingDispatcher() {
@@ -199,19 +205,37 @@ public class Server extends AbstractComponent {
     }
 
     /**
-     * @return the port of the Server set in the SharedPreferences or {@link CoreConstants.NettyConstants#DEFAULT_PORT}
+     * @return the port of the Server for local connections set in the SharedPreferences or {@link CoreConstants.NettyConstants#DEFAULT_LOCAL_PORT}
+     * @see #localChannel
      */
-    private int getPort() {
-        SharedPreferences sharedPref = getComponent(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-        return sharedPref.getInt(PREF_SERVER_PORT, DEFAULT_PORT);
+    int getLocalPort() {
+        return getSharedPreferences().getInt(PREF_SERVER_LOCAL_PORT, DEFAULT_LOCAL_PORT);
+    }
+
+    /**
+     * @return the port of the Server for connections from the internet set in the SharedPreferences or {@link CoreConstants.NettyConstants#DEFAULT_LOCAL_PORT}
+     * @see #publicChannel
+     */
+    int getPublicPort() {
+        return getSharedPreferences().getInt(PREF_SERVER_PUBLIC_PORT, DEFAULT_PUBLIC_PORT);
+    }
+
+    private SharedPreferences getSharedPreferences() {
+        return requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
     }
 
     /**
      * @return the local Address this server is listening on
      */
     public SocketAddress getAddress() {
-        return serverChannel.channel().localAddress();
+        return localChannel.channel().localAddress();
+    }
+
+    /**
+     * @return the public Address this server is listening on
+     */
+    public SocketAddress getPublicAddress() {
+        return publicChannel.channel().localAddress();
     }
 
     /**
@@ -234,7 +258,8 @@ public class Server extends AbstractComponent {
      * @return {@code true}, if the Server TCP channel is currently open
      */
     public boolean isChannelOpen() {
-        return serverChannel != null && serverChannel.channel() != null && serverChannel.channel().isOpen();
+        return localChannel != null && localChannel.channel() != null && localChannel.channel().isOpen()
+                && publicChannel != null && publicChannel.channel() != null && publicChannel.channel().isOpen();
     }
 
     /**
@@ -253,7 +278,7 @@ public class Server extends AbstractComponent {
      * @see Channel#closeFuture()
      */
     public void awaitShutdown() throws InterruptedException {
-        serverChannel.channel().closeFuture().await();
+        localChannel.channel().closeFuture().await();
         serverExecutor.terminationFuture().await();
     }
 }

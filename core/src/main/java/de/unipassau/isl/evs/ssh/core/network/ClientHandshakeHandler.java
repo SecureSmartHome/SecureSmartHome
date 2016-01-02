@@ -1,15 +1,14 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
-import android.util.Base64;
 import android.util.Log;
 
-import com.google.common.base.Strings;
-
 import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
+import java.security.cert.CertificateException;
 import java.util.Arrays;
 
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -23,18 +22,23 @@ import de.unipassau.isl.evs.ssh.core.network.handler.SignatureGenerator;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakeException;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.ReferenceCountUtil;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ALL_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_HANDSHAKE_FINISHED;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_CERT;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.READER_IDLE_TIME;
@@ -68,6 +72,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         Log.v(TAG, "channelRegistered " + ctx);
+        ctx.attr(ATTR_HANDSHAKE_FINISHED).set(false);
 
         // Add (de-)serialization Handlers before this Handler
         ctx.pipeline().addBefore(ctx.name(), ObjectEncoder.class.getSimpleName(), new ObjectEncoder());
@@ -115,33 +120,38 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         }
     }
 
+    @Override
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        Log.w(TAG, "Can't write data while authentication is pending, message was " + msg);
+        ReferenceCountUtil.release(msg);
+    }
+
     private void handleHello(ChannelHandlerContext ctx, HandshakePacket.Hello msg) throws GeneralSecurityException {
         setState(State.EXPECT_HELLO, State.EXPECT_CHAP);
         Log.v(TAG, "Got Server Hello, sending 1. CHAP and awaiting 2. CHAP as response");
+        assert msg.isMaster;
 
         // import data from Hello packet
-        assert msg.isMaster;
         final NamingManager namingManager = container.require(NamingManager.KEY);
-        if (!namingManager.isMasterKnown()) {
-            // first connection to master, register certificate for already known DeviceID
-            namingManager.setMasterCertificate(msg.certificate);
-        }
-        final DeviceID masterID = namingManager.getMasterID();
         final DeviceID certID = DeviceID.fromCertificate(msg.certificate);
-        if (!masterID.equals(certID)) {
-            throw new HandshakeException("Server DeviceID " + certID + " did not match my MasterID " + masterID);
+        // verify the data if the Master is already known, otherwise the registration token will be checked later
+        if (namingManager.isMasterIDKnown()) {
+            final DeviceID masterID = namingManager.getMasterID();
+            if (!masterID.equals(certID)) {
+                throw new HandshakeException("Server DeviceID " + certID + " did not match my MasterID " + masterID);
+            }
+            if (!namingManager.isMasterKnown()) {
+                // first connection to master, register certificate for already known DeviceID
+                namingManager.setMasterCertificate(msg.certificate);
+            }
         }
-        if (!namingManager.isMasterKnown()) {
-            throw new HandshakeException("Received Hello from a Master, but could not register that Master as mine");
-        }
-        final X509Certificate masterCertificate = namingManager.getMasterCertificate();
 
         // set channel attributes
-        ctx.attr(ATTR_PEER_CERT).set(masterCertificate);
-        ctx.attr(ATTR_PEER_ID).set(masterID);
+        ctx.attr(ATTR_PEER_CERT).set(msg.certificate);
+        ctx.attr(ATTR_PEER_ID).set(certID);
 
         // add Security handlers
-        final PublicKey remotePublicKey = masterCertificate.getPublicKey();
+        final PublicKey remotePublicKey = msg.certificate.getPublicKey();
         final PrivateKey localPrivateKey = container.require(KeyStoreController.KEY).getOwnPrivateKey();
         ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), Encrypter.class.getSimpleName(), new Encrypter(remotePublicKey));
         ctx.pipeline().addBefore(ObjectEncoder.class.getSimpleName(), Decrypter.class.getSimpleName(), new Decrypter(localPrivateKey));
@@ -166,29 +176,58 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         ctx.writeAndFlush(new HandshakePacket.CHAP(null, msg.challenge)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 
-    private void handleServerAuthenticationResponse(ChannelHandlerContext ctx, HandshakePacket.ServerAuthenticationResponse msg) throws HandshakeException {
+    private void handleServerAuthenticationResponse(ChannelHandlerContext ctx, HandshakePacket.ServerAuthenticationResponse msg)
+            throws HandshakeException, CertificateException, NoSuchAlgorithmException, KeyStoreException {
         setState(State.EXPECT_STATE, State.STATE_RECEIVED);
 
+        final NamingManager namingManager = container.require(NamingManager.KEY);
         if (msg.isAuthenticated) {
+            if (!namingManager.isMasterIDKnown()) {
+                Log.i(TAG, "Got State: authenticated from unverified Master, checking token");
+                if (checkSentPassiveRegistrationToken(msg)) {
+                    Log.i(TAG, "Master sent correct token, saving MasterID and Certificate");
+                    namingManager.setMasterCertificate(ctx.attr(ATTR_PEER_CERT).get());
+                } else {
+                    setState(State.STATE_RECEIVED, State.FAILED);
+                    handshakeFailed(ctx, "Master is not verified yet sent invalid token");
+                    return;
+                }
+            }
+            if (!namingManager.isMasterKnown()) {
+                setState(State.STATE_RECEIVED, State.FAILED);
+                handshakeFailed(ctx, "Master did not authenticate itself (and is not known yet)");
+                return;
+            }
+
             setState(State.STATE_RECEIVED, State.FINISHED);
-            Log.v(TAG, "Got State: authenticated, handshake successful");
+            ctx.attr(ATTR_HANDSHAKE_FINISHED).set(true);
+            ctx.attr(ATTR_LOCAL_CONNECTION).set(msg.isConnectionLocal);
+            Log.i(TAG, "Got State: authenticated, handshake successful");
             handshakeSuccessful(ctx);
         } else {
-            final String tokenString = client.getRegistrationToken();
-            final boolean canRegister = !triedRegister && !Strings.isNullOrEmpty(tokenString);
+            final byte[] token = client.getActiveRegistrationTokenBytes();
+            final boolean canRegister = !triedRegister && token.length == DeviceConnectInformation.TOKEN_LENGTH;
             if (canRegister) {
                 triedRegister = true;
                 setState(State.STATE_RECEIVED, State.EXPECT_STATE);
-                Log.v(TAG, "Got State: unauthenticated, trying Registration");
-                final byte[] token = Base64.decode(tokenString, Base64.NO_WRAP);
+                Log.i(TAG, "Got State: unauthenticated, trying Registration");
 
-                ctx.writeAndFlush(new HandshakePacket.RegistrationRequest(token)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+                ctx.writeAndFlush(new HandshakePacket.ActiveRegistrationRequest(token)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
             } else {
                 setState(State.STATE_RECEIVED, State.FAILED);
-                Log.v(TAG, "Got State: unauthenticated and Registration is not possible, handshake failed");
+                Log.w(TAG, "Got State: unauthenticated and registration is not possible, handshake failed");
                 handshakeFailed(ctx, msg.message);
             }
         }
+    }
+
+    private boolean checkSentPassiveRegistrationToken(HandshakePacket.ServerAuthenticationResponse msg) {
+        final byte[] expectedToken = client.getPassiveRegistrationTokenBytes();
+        final byte[] actualToken = msg.passiveRegistrationToken;
+        return actualToken != null && expectedToken != null
+                && actualToken.length == DeviceConnectInformation.TOKEN_LENGTH
+                && Arrays.equals(actualToken, expectedToken)
+                || true; //FIXME Niko: PassiveRegistrationToken not stored yet in DB, so check is disabled (Niko, 2015-12-24)
     }
 
     protected void handshakeSuccessful(ChannelHandlerContext ctx) {
@@ -198,12 +237,15 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
 
         // allow pings
         TimeoutHandler.setPingEnabled(ctx.channel(), true);
-
         // add Dispatcher
         ctx.pipeline().addBefore(ctx.name(), ClientIncomingDispatcher.class.getSimpleName(), client.getIncomingDispatcher());
-
+        // Logging is handled by IncomingDispatcher and OutgoingRouter
+        ctx.pipeline().remove(LoggingHandler.class.getSimpleName());
+        // remove HandshakeHandler
         ctx.pipeline().remove(this);
+
         Log.v(TAG, "Handshake successful, current Pipeline: " + ctx.pipeline());
+        client.notifyClientConnected();
     }
 
     protected void handshakeFailed(ChannelHandlerContext ctx, String message) {
@@ -211,9 +253,9 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
             throw new IllegalStateException("Handshake not finished: " + state);
         }
 
-        Log.e(TAG, "My Master rejected me, did he loose his mind? His message was: " + message);
+        Log.e(TAG, "Could not establish secure connection to master: " + message);
+        client.notifyClientRejected(message);
         ctx.close();
-        //TODO show error dialog
     }
 
     private void setState(State expectedState, State newState) throws HandshakeException {
@@ -228,5 +270,4 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
     private enum State {
         EXPECT_HELLO, EXPECT_CHAP, EXPECT_STATE, STATE_RECEIVED, FINISHED, FAILED
     }
-
 }

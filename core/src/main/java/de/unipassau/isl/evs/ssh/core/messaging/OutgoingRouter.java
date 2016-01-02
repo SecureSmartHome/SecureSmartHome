@@ -6,8 +6,8 @@ import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 /**
  * Receives messages from system components and decides how to route them to the targets.
@@ -15,13 +15,14 @@ import io.netty.channel.ChannelFutureListener;
  * @author Niko Fink
  */
 public abstract class OutgoingRouter extends AbstractComponent {
+    private static final String TAG = OutgoingRouter.class.getSimpleName();
     public static final Key<OutgoingRouter> KEY = new Key<>(OutgoingRouter.class);
 
     /**
      * Forwards the message to the correct internal Server or Client pipeline, depending on the
      * {@code de.unipassau.isl.evs.ssh.core.messaging.Message.AddressedMessage#toID toID} of the message.
      */
-    protected abstract ChannelFuture doSendMessage(Message.AddressedMessage message);
+    protected abstract Future<Void> doSendMessage(Message.AddressedMessage message);
 
     /**
      * Adds the Address Information to the message by wrapping it in an immutable
@@ -34,14 +35,14 @@ public abstract class OutgoingRouter extends AbstractComponent {
      */
     public Message.AddressedMessage sendMessage(DeviceID toID, String routingKey, Message msg) {
         final Message.AddressedMessage amsg = msg.setDestination(getOwnID(), toID, routingKey);
-        final ChannelFuture future = doSendMessage(amsg);
+        final Future<Void> future = doSendMessage(amsg);
         amsg.setSendFuture(future);
-        future.addListener(new ChannelFutureListener() {
+        future.addListener(new GenericFutureListener<Future<Void>>() {
             @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
+            public void operationComplete(Future<Void> future) throws Exception {
+                Log.v(TAG, "SENT " + amsg);
                 if (!future.isSuccess()) {
-                    Log.w(OutgoingRouter.this.getClass().getSimpleName(),
-                            "Could not send Message " + amsg + " because of " + Log.getStackTraceString(future.cause()));
+                    Log.w(TAG, "Could not send Message " + amsg + " because of " + Log.getStackTraceString(future.cause()));
                 }
             }
         });

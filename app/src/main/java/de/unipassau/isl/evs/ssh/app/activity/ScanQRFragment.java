@@ -8,7 +8,8 @@ import android.widget.Toast;
 
 import java.io.IOException;
 
-import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
 /**
  * The ScanQRFragment is a BoundFragment that can be extended to communicate with a QR-Code Scanner
@@ -18,14 +19,6 @@ import de.unipassau.isl.evs.ssh.core.sec.QRDeviceInformation;
  * @author Wolfgang Popp.
  */
 public abstract class ScanQRFragment extends BoundFragment {
-    private static final int REQUEST_CODE_SCAN_QR = 1;
-    private static final Intent ZXING_SCAN_INTENT = new Intent("com.google.zxing.client.android.SCAN");
-    private static final String ZXING_SCAN_RESULT = "SCAN_RESULT";
-
-    static {
-        ZXING_SCAN_INTENT.putExtra("SCAN_MODE", "QR_CODE_MODE");
-    }
-
     /**
      * Starts the QR-Code Scanner or an app store to install a QR-Code Scanner, if no scanner is
      * installed.
@@ -33,7 +26,7 @@ public abstract class ScanQRFragment extends BoundFragment {
     protected void requestScanQRCode() {
         try {
             // Try to open ZXing to scan the QR-Cde
-            startActivityForResult(ZXING_SCAN_INTENT, REQUEST_CODE_SCAN_QR);
+            startActivityForResult(CoreConstants.QRCodeInformation.ZXING_SCAN_INTENT, CoreConstants.QRCodeInformation.REQUEST_CODE_SCAN_QR);
         } catch (ActivityNotFoundException e) {
             // If it's not installed, open the Play Store and let the user install it
             Uri marketUri =
@@ -47,11 +40,11 @@ public abstract class ScanQRFragment extends BoundFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_CODE_SCAN_QR) {
+        if (requestCode == CoreConstants.QRCodeInformation.REQUEST_CODE_SCAN_QR) {
             if (resultCode == Activity.RESULT_OK) {
-                String contents = data.getStringExtra(ZXING_SCAN_RESULT);
+                String contents = data.getStringExtra(CoreConstants.QRCodeInformation.ZXING_SCAN_RESULT);
                 try {
-                    final QRDeviceInformation info = QRDeviceInformation.fromDataString(contents);
+                    final DeviceConnectInformation info = DeviceConnectInformation.fromDataString(contents);
                     onQRCodeScanned(info);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -66,5 +59,5 @@ public abstract class ScanQRFragment extends BoundFragment {
      *
      * @param info the information contained in the QR-Code
      */
-    protected abstract void onQRCodeScanned(QRDeviceInformation info);
+    protected abstract void onQRCodeScanned(DeviceConnectInformation info);
 }
