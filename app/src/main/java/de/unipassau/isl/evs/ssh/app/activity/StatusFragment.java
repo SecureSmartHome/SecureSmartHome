@@ -11,7 +11,6 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 import java.util.List;
-import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
@@ -27,38 +26,42 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
  */
 public class StatusFragment extends BoundFragment {
 
-    private AppModuleHandler handler;
     private ListView slaveListView;
     private ListView moduleListView;
     private TextView connectedSlavesText;
     private TextView connectedModulesText;
 
-    AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
+    private final AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
         @Override
         public void onModulesRefreshed() {
-            update();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    update();
+                }
+            });
         }
     };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_status, container, false);
-        slaveListView = (ListView) getActivity().findViewById(R.id.deviceStatusListView);
-        moduleListView = (ListView) getActivity().findViewById(R.id.deviceStatusModulesListView);
-        connectedSlavesText = (TextView) getActivity().findViewById(R.id.deviceStatusConnectedSlaves);
-        connectedModulesText = (TextView) getActivity().findViewById(R.id.deviceStatusConnectedModules);
+        slaveListView = (ListView) view.findViewById(R.id.deviceStatusListView);
+        moduleListView = (ListView) view.findViewById(R.id.deviceStatusModulesListView);
+        connectedSlavesText = (TextView) view.findViewById(R.id.deviceStatusConnectedSlaves);
+        connectedModulesText = (TextView) view.findViewById(R.id.deviceStatusConnectedModules);
         return view;
     }
 
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        handler = container.require(AppModuleHandler.KEY);
+
+        AppModuleHandler handler = container.require(AppModuleHandler.KEY);
         handler.addAppModuleListener(listener);
 
-        moduleListView.setAdapter(new ModuleAdapter());
-        slaveListView.setAdapter(new SlaveAdapter());
+        moduleListView.setAdapter(new ModuleAdapter(handler.getComponents()));
+        slaveListView.setAdapter(new SlaveAdapter(handler.getSlaves()));
 
         update();
     }
@@ -66,54 +69,49 @@ public class StatusFragment extends BoundFragment {
     @Override
     public void onContainerDisconnected() {
         super.onContainerDisconnected();
-        handler.removeAppModuleListener(listener);
+        getComponent(AppModuleHandler.KEY).removeAppModuleListener(listener);
     }
 
     private void update() {
+        AppModuleHandler handler = getComponent(AppModuleHandler.KEY);
         List<Slave> slaves = handler.getSlaves();
-        if (slaves == null || slaves.size() < 1) {
+        if (slaves.size() < 1) {
             connectedSlavesText.setText(R.string.NoSlavesConnected);
         } else {
             connectedSlavesText.setText(R.string.deviceStatusConnectedSlaves);
         }
 
-        Set<Module> modules = handler.getComponents();
-        if (modules == null || modules.size() < 1) {
+        List<Module> modules = handler.getComponents();
+        if (modules.size() < 1) {
             connectedModulesText.setText(R.string.NoModulesConnected);
         } else {
             connectedModulesText.setText(R.string.deviceStatusConnectedModules);
         }
 
-        ((ModuleAdapter) moduleListView.getAdapter()).update();
-        ((SlaveAdapter) moduleListView.getAdapter()).update();
+        ((ModuleAdapter) moduleListView.getAdapter()).update(handler.getComponents());
+        ((SlaveAdapter) slaveListView.getAdapter()).update(handler.getSlaves());
     }
 
     private class SlaveAdapter extends BaseAdapter {
 
         private List<Slave> slaves;
 
-        public SlaveAdapter() {
-            slaves = handler.getSlaves();
+        private SlaveAdapter(List<Slave> slaves) {
+            this.slaves = slaves;
         }
 
-        public void update() {
-            slaves = handler.getSlaves();
+        public void update(List<Slave> slaves) {
+            this.slaves = slaves;
             notifyDataSetChanged();
         }
 
         @Override
         public int getCount() {
-            if (handler == null) {
-                return 0;
-            }
             return slaves.size();
         }
 
         @Override
         public Slave getItem(int position) {
-            if (handler == null) {
-                return null;
-            }
             return slaves.get(position);
         }
 
@@ -148,25 +146,25 @@ public class StatusFragment extends BoundFragment {
 
     private class ModuleAdapter extends BaseAdapter {
 
-        Module[] modules;
+        private List<Module> modules;
 
-        public ModuleAdapter() {
-            modules = handler.getComponents().toArray(new Module[handler.getComponents().size()]);
+        public ModuleAdapter(List<Module> modules) {
+            this.modules = modules;
         }
 
-        public void update() {
-            modules = handler.getComponents().toArray(new Module[handler.getComponents().size()]);
+        public void update(List<Module> modules) {
+            this.modules = modules;
             notifyDataSetChanged();
         }
 
         @Override
         public int getCount() {
-            return modules.length;
+            return modules.size();
         }
 
         @Override
         public Module getItem(int position) {
-            return modules[position];
+            return modules.get(position);
         }
 
         @Override
