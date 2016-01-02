@@ -163,8 +163,6 @@ public class WeatherSensor extends AbstractComponent {
             ClimatePayload payload = new ClimatePayload(getTemperature1(), getTemperature2(), getPressure(),
                     getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), "", getModule());
 
-            //Todo set values
-
             NamingManager namingManager = container.require(NamingManager.KEY);
 
             Message message;
