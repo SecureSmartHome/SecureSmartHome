@@ -85,7 +85,7 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
 
     private void update() {
         UserDeviceInformationPayload payload = new UserDeviceInformationPayload();
-        OutgoingRouter router = getComponent(OutgoingRouter.KEY);
+        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
 
         Message message = new Message(payload);
 
@@ -158,7 +158,7 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
     private void sendEditMessage(MessagePayload payload) {
         Message message = new Message(payload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USERINFO_GET.getKey());
-        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
+        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
         router.sendMessageToMaster(RoutingKeys.MASTER_USERINFO_SET, message);
     }
 

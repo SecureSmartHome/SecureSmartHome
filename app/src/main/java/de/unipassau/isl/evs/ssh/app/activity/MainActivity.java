@@ -31,8 +31,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String SAVED_LAST_ACTIVE_FRAGMENT = MainActivity.class.getName() + ".SAVED_LAST_ACTIVE_FRAGMENT";
-    private NavigationView navigationView = null;
-    private Toolbar toolbar = null;
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
 
@@ -50,7 +48,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         setContentView(R.layout.activity_main);
 
         //Set the fragment initially
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         //Initialise Notifications
@@ -65,7 +63,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         if (!fragmentInitialized && getContainer() != null) {

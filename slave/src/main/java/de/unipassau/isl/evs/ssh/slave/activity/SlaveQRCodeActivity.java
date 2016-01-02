@@ -24,10 +24,6 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.QR_C
  * @author Wolfgang Popp.
  */
 public class SlaveQRCodeActivity extends BoundActivity {
-    /**
-     * The QR-Code which will be displayed.
-     */
-    private Bitmap bitmap;
 
     public SlaveQRCodeActivity() {
         super(SlaveContainer.class);
@@ -57,7 +53,7 @@ public class SlaveQRCodeActivity extends BoundActivity {
         setContentView(R.layout.activity_qrcode);
 
         ImageView imageview = ((ImageView) findViewById(R.id.qrcode_activity_qr_code));
-        bitmap = createQRCodeBitmap();
+        Bitmap bitmap = createQRCodeBitmap();
 
         //Workaround to scale QR-Code
         //Makes bitmap bigger than the screen. The ImageView adjusts the size itself.

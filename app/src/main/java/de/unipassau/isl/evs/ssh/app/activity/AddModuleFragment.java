@@ -101,7 +101,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
         List<Slave> slaves = handler.getSlaves();
 
-        if (slaves == null) {
+        if (slaves.size() < 1) {
             ArrayAdapter<String> slaveAdapter = new ArrayAdapter<>(
                     getActivity().getApplicationContext(),
                     android.R.layout.simple_spinner_dropdown_item,
@@ -139,7 +139,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     // returns true if global input fields are filled in correctly
     private boolean checkInputFields() {
-        return !nameInput.equals("") && slaveSpinner.isEnabled();
+        return !nameInput.getText().toString().equals("") && slaveSpinner.isEnabled();
     }
 
     @Override

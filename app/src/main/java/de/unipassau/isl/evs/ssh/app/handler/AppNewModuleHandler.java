@@ -84,7 +84,7 @@ public class AppNewModuleHandler extends AbstractMessageHandler implements Compo
      */
     public void addNewModule(Module module) {
         AddNewModulePayload payload = new AddNewModulePayload(module);
-        OutgoingRouter router = getComponent(OutgoingRouter.KEY);
+        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
 
         Message message = new Message(payload);
 

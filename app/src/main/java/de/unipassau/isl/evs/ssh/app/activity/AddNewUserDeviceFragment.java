@@ -36,6 +36,17 @@ import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
  */
 public class AddNewUserDeviceFragment extends BoundFragment {
     private static final String TAG = AddNewUserDeviceFragment.class.getSimpleName();
+    private List<String> groups;
+    private Spinner spinner;
+    private EditText inputUserName;
+
+    private final AppUserConfigurationHandler.UserInfoListener userConfigListener = new AppUserConfigurationHandler.UserInfoListener() {
+        @Override
+        public void userInfoUpdated() {
+            updateGroupSpinner();
+        }
+    };
+
     private final AppRegisterNewDeviceHandler.RegisterNewDeviceListener registerNewDeviceListener = new AppRegisterNewDeviceHandler.RegisterNewDeviceListener() {
         @Override
         public void tokenResponse(DeviceConnectInformation deviceConnectInformation) {
@@ -44,15 +55,6 @@ public class AddNewUserDeviceFragment extends BoundFragment {
             ((MainActivity) getActivity()).showFragmentByClass(QRCodeFragment.class, bundle);
         }
     };
-    private List<String> groups;
-    private Spinner spinner;
-    private final AppUserConfigurationHandler.UserInfoListener userConfigListener = new AppUserConfigurationHandler.UserInfoListener() {
-        @Override
-        public void userInfoUpdated() {
-            updateGroupSpinner();
-        }
-    };
-    private EditText inputUserName;
 
     private void updateGroupSpinner() {
         List<Group> allGroups = getComponent(AppUserConfigurationHandler.KEY).getAllGroups();
@@ -127,7 +129,7 @@ public class AddNewUserDeviceFragment extends BoundFragment {
 
         AppRegisterNewDeviceHandler registerHandler = getComponent(AppRegisterNewDeviceHandler.KEY);
         assert registerHandler != null;
-        registerHandler.addRegisterDeviceListener(registerNewDeviceListener);
+        registerHandler.removeRegisterDeviceListener(registerNewDeviceListener);
         super.onContainerDisconnected();
     }
 }

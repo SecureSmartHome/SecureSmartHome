@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--author: Wolfgang Popp-->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -10,19 +9,19 @@
         android:id="@+id/add_module_gpio_port_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/gpio_port"/>
+        android:text="@string/gpio_port" />
 
     <EditText
         android:id="@+id/add_module_gpio_port_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="number"/>
+        android:inputType="number" />
 
     <Button
         android:id="@+id/add_module_gpio_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="@string/add_gpio_module"/>
+        android:text="@string/add_gpio_module" />
 </LinearLayout>

@@ -37,7 +37,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
     private static final String TAG = MasterModuleHandler.class.getSimpleName();
 
     private Message createUpdateMessage() {
-        SlaveController slaveController = getComponent(SlaveController.KEY);
+        SlaveController slaveController = requireComponent(SlaveController.KEY);
         List<Slave> slaves = slaveController.getSlaves();
         ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
 

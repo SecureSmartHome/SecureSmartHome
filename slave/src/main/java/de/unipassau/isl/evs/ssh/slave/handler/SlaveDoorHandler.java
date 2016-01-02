@@ -54,6 +54,7 @@ public class SlaveDoorHandler extends AbstractMessageHandler {
         } catch (EvsIoException e) {
             Log.e(TAG, "Cannot get door status", e);
             sendErrorMessage(original);
+            // HANDLE (Wolfgang, 2016-02-01)
         }
     }
 

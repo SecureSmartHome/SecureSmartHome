@@ -211,7 +211,6 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         blockDoor(true);
     }
 
-
     /**
      * Refreshes the door photo by sending a message.
      */
