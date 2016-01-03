@@ -26,7 +26,7 @@ public class DatabaseConnectorTest extends InstrumentationTestCase {
         Context context = getInstrumentation().getTargetContext();
         container.register(ContainerService.KEY_CONTEXT, new ContainerService.ContextComponent(context));
 
-        context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
+        context.deleteDatabase(DatabaseConnector.DATABASE_NAME);
         container.register(DatabaseConnector.KEY, new DatabaseConnector());
 
         DatabaseConnector db = container.require(DatabaseConnector.KEY);

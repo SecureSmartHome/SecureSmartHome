@@ -25,6 +25,7 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
  */
 public class DatabaseConnector extends AbstractComponent {
     public static final Key<DatabaseConnector> KEY = new Key<>(DatabaseConnector.class);
+    public static final String DATABASE_NAME = "SecureSmartHome.db";
     private static final String TAG = DatabaseConnector.class.getSimpleName();
 
     private SQLiteDatabase database;
@@ -68,10 +69,9 @@ public class DatabaseConnector extends AbstractComponent {
         Log.v(TAG, "destroy:finished");
     }
 
-    public class DBOpenHelper extends SQLiteOpenHelper {
+    private class DBOpenHelper extends SQLiteOpenHelper {
         // If you change the database schema, you must increment the database version.
-        public static final int DATABASE_VERSION = 3;
-        public static final String DATABASE_NAME = "SecureSmartHome.db";
+        private static final int DATABASE_VERSION = 3;
         private static final String SQL_CREATE_DB = "CREATE TABLE " + DatabaseContract.UserDevice.TABLE_NAME + " ("
                 + DatabaseContract.UserDevice.COLUMN_ID + " INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.UserDevice.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
@@ -162,7 +162,7 @@ public class DatabaseConnector extends AbstractComponent {
         private String[] groupNames = {MasterRegisterDeviceHandler.NO_GROUP, "Parents", "Children", "Guests"};
 
 
-        public DBOpenHelper(Context context) {
+        private DBOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
