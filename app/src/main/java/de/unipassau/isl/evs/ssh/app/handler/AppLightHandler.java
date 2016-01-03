@@ -106,7 +106,7 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
     }
 
     /**
-     * Sends a SET-request with the light-module and it's status.
+     * Sends a SET-request with the light-module and its status.
      *
      * @param module The light-module which status should be changed.
      * @param status The status of the module.
@@ -140,6 +140,9 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
         void statusChanged(Module module);
     }
 
+    /**
+     * Inner class used to save the status of a light.
+     */
     public class LightStatus {
         private boolean isOn;
         private long timestamp;

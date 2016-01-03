@@ -13,6 +13,7 @@ import java.io.Serializable;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
@@ -32,6 +33,9 @@ public class MasterQRCodeActivity extends BoundActivity {
      */
     private Bitmap bitmap;
 
+    /**
+     * Default constructor. Calls {@code super} method.
+     */
     public MasterQRCodeActivity() {
         super(MasterContainer.class);
     }
@@ -57,6 +61,15 @@ public class MasterQRCodeActivity extends BoundActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        buildView();
+    }
+
+    private void buildView() {
         setContentView(R.layout.activity_qrcode);
 
         ImageView imageview = ((ImageView) findViewById(R.id.qrcode_activity_qr_code));
