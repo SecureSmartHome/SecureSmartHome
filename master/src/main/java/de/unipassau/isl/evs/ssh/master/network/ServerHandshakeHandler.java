@@ -1,7 +1,9 @@
 package de.unipassau.isl.evs.ssh.master.network;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
+import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -29,6 +31,7 @@ import de.unipassau.isl.evs.ssh.core.network.handler.SignatureGenerator;
 import de.unipassau.isl.evs.ssh.core.network.handler.TimeoutHandler;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakeException;
 import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket;
+import de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket.ServerAuthenticationResponse;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
@@ -46,19 +49,21 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ALL_IDLE_TIME;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.READER_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.WRITER_IDLE_TIME;
 
 /**
  * @author Niko Fink: Handshake Sequence
- * @author Christoph Fraedrich Registration
+ * @author Christoph Fraedrich: Registration
  */
+@SuppressLint("Assert")
 @ChannelHandler.Sharable
 public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     private static final String TAG = ServerHandshakeHandler.class.getSimpleName();
 
-    private static final AttributeKey<byte[]> CHAP_CALLENGE = AttributeKey.valueOf(ServerHandshakeHandler.class, "CHAP_CHALLENGE");
+    private static final AttributeKey<byte[]> CHAP_CHALLENGE = AttributeKey.valueOf(ServerHandshakeHandler.class, "CHAP_CHALLENGE");
     private static final AttributeKey<State> STATE = AttributeKey.valueOf(ServerHandshakeHandler.class, "STATE");
 
     private final Server server;
@@ -109,7 +114,9 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         super.channelActive(ctx);
         assert container.require(NamingManager.KEY).isMaster();
         setState(ctx, null, State.EXPECT_HELLO);
-        Log.v(TAG, "Channel open, waiting for Client Hello");
+        final boolean isLocal = ((InetSocketAddress) ctx.channel().localAddress()).getPort() == server.getLocalPort();
+        ctx.attr(ATTR_LOCAL_CONNECTION).set(isLocal);
+        Log.v(TAG, "Channel to " + (isLocal ? "local" : "internet") + " device open, waiting for Client Hello");
         setChapChallenge(ctx, new byte[HandshakePacket.CHAP.CHALLENGE_LENGTH]);
     }
 
@@ -195,15 +202,17 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
 
             handshakeSuccessful(ctx);
 
-            ctx.writeAndFlush(new HandshakePacket.ServerAuthenticationResponse(
-                    true, null, (slave == null ? null : slave.getPassiveRegistrationToken())
+            final byte[] passiveRegistrationToken = slave == null ? null : slave.getPassiveRegistrationToken();
+            final boolean isConnectionLocal = ctx.attr(ATTR_LOCAL_CONNECTION).get() == Boolean.TRUE;
+            ctx.writeAndFlush(ServerAuthenticationResponse.authenticated(
+                    null, passiveRegistrationToken, isConnectionLocal
             )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         } else {
             setState(ctx, State.CHECK_AUTH, State.EXPECT_REGISTER);
             Log.i(TAG, "Device " + deviceID + " is not registered, requesting registration");
 
-            ctx.writeAndFlush(new HandshakePacket.ServerAuthenticationResponse(
-                    false, "Unknown Client, please register.", null
+            ctx.writeAndFlush(ServerAuthenticationResponse.unauthenticated(
+                    "Unknown Client, please register."
             )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         }
     }
@@ -224,8 +233,8 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
             setState(ctx, State.CHECK_AUTH, State.EXPECT_REGISTER);
             Log.v(TAG, "Rejected registration request from " + ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_ID).get());
 
-            ctx.writeAndFlush(new HandshakePacket.ServerAuthenticationResponse(
-                    false, "Client registration rejected, closing connection.", null
+            ctx.writeAndFlush(ServerAuthenticationResponse.unauthenticated(
+                    "Client registration rejected, closing connection."
             )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
         }
     }
@@ -250,7 +259,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         server.getActiveChannels().add(ctx.channel());
         Log.i(TAG, "Handshake with " + deviceID + " successful, current Pipeline: " + ctx.pipeline());
 
-        Message message = new Message(new DeviceConnectedPayload(deviceID, ctx.channel()));
+        Message message = new Message(new DeviceConnectedPayload(deviceID, ctx.channel(), ctx.attr(ATTR_LOCAL_CONNECTION).get()));
         container.require(OutgoingRouter.KEY).sendMessageLocal(RoutingKeys.MASTER_DEVICE_CONNECTED, message);
     }
 
@@ -267,11 +276,11 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     }
 
     private void setChapChallenge(ChannelHandlerContext ctx, byte[] value) {
-        ctx.channel().attr(CHAP_CALLENGE).set(value);
+        ctx.channel().attr(CHAP_CHALLENGE).set(value);
     }
 
     private byte[] getChapChallenge(ChannelHandlerContext ctx) {
-        return ctx.channel().attr(CHAP_CALLENGE).get();
+        return ctx.channel().attr(CHAP_CHALLENGE).get();
     }
 
     private enum State {

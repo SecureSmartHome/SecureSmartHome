@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
@@ -17,13 +18,14 @@ public class ClientIncomingDispatcher extends IncomingDispatcher {
 
     private EventLoop eventLoop;
 
+    @NonNull
     protected EventLoop getExecutor() {
         if (eventLoop == null || eventLoop.isShuttingDown() || eventLoop.isShutdown()) {
             Log.v(TAG, "EventLoop unavailable (" + eventLoop + "), getting new one");
             Client client = getContainer().require(Client.KEY);
             if (!client.isExecutorAlive() || !client.isChannelOpen()) {
                 Log.w(TAG, "Could not dispatch message as Executor was shut down");
-                return null;
+                return null; //TODO Niko: handle exceptional state (Niko, 2015-01-03)
             }
             eventLoop = client.getExecutor().next();
         }

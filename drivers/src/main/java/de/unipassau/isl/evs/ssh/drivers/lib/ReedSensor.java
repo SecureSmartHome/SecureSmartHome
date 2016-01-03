@@ -50,7 +50,7 @@ public class ReedSensor extends AbstractComponent {
         boolean ret = true;
         String result = "";
         result = EvsIo.readValue(address);
-        Log.w("EVS-IO", "EVS-REED:" + result + ":");
+        //Log.w("EVS-IO", "EVS-REED:" + result + ":");
 
 
         if (result.startsWith("1")) {
@@ -60,6 +60,10 @@ public class ReedSensor extends AbstractComponent {
         }
 
         return ret;
+
+        // TODO simplify this method (probably not our job) (Wolfgang, 2015-12-31)
+        // Here is an alternative implementation of this method:
+        //return EvsIo.readValue(address).startsWith("1");
     }
 
     @Override
@@ -78,9 +82,11 @@ public class ReedSensor extends AbstractComponent {
     }
 
 
+    // TESTME
     private class ReedPollingRunnable implements Runnable {
-
-        ReedSensor sensor;
+        private final String TAG = ReedPollingRunnable.class.getSimpleName();
+        private final ReedSensor sensor;
+        private boolean isOpenFilter = false;
 
         public ReedPollingRunnable(ReedSensor sensor) {
             this.sensor = sensor;
@@ -89,8 +95,11 @@ public class ReedSensor extends AbstractComponent {
         @Override
         public void run() {
             try {
-                if (future != null) {
-                    sendReedInfo(sensor.isOpen());
+                boolean isOpen = sensor.isOpen();
+                if (future != null && isOpen != isOpenFilter) {
+                    Log.i(TAG, "isOpen(): " + isOpen);
+                    isOpenFilter = isOpen;
+                    sendReedInfo(isOpen);
                 }
             } catch (EvsIoException e) {
                 e.printStackTrace();
@@ -98,11 +107,12 @@ public class ReedSensor extends AbstractComponent {
         }
 
         /**
-         * Sends info about doorbell being used
-         * @param open
+         * Sends a message describing whether the reed sensor is opened or closed.
+         *
+         * @param open true if this reed sensor is open
          */
         private void sendReedInfo(boolean open) {
-            MessagePayload payload = new DoorStatusPayload(open, moduleName);
+            MessagePayload payload = new DoorStatusPayload(!open, moduleName);
 
             NamingManager namingManager = container.require(NamingManager.KEY);
 

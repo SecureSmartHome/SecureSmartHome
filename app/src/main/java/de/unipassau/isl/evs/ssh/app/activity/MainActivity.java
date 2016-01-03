@@ -12,6 +12,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
@@ -19,6 +24,8 @@ import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import de.unipassau.isl.evs.ssh.core.network.Client;
+import de.unipassau.isl.evs.ssh.core.network.ClientConnectionListener;
 
 /**
  * As this Activity also displays information like whether the light is on or not, this Activity also
@@ -33,11 +40,64 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     private static final String SAVED_LAST_ACTIVE_FRAGMENT = MainActivity.class.getName() + ".SAVED_LAST_ACTIVE_FRAGMENT";
     private NavigationView navigationView = null;
     private Toolbar toolbar = null;
+    private LinearLayout overlayDisconnected;
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
 
     private boolean fragmentInitialized = false;
     private Bundle savedInstanceState;
+
+    private ClientConnectionListener connectionListener = new ClientConnectionListener() {
+        @Override
+        public void onMasterFound() {
+
+        }
+
+        @Override
+        public void onClientConnecting() {
+
+        }
+
+        @Override
+        public void onClientConnected() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    overlayDisconnected.setVisibility(View.GONE);
+                }
+            });
+        }
+
+        @Override
+        public void onClientDisconnected() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showDisconnectedOverlay();
+                }
+            });
+        }
+
+        @Override
+        public void onClientRejected(String message) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showConnectionOverlay("Connection refused. Maybe the system has been reset?");
+                }
+            });
+        }
+    };
+
+    private void showConnectionOverlay(String text) {
+        overlayDisconnected.setVisibility(View.VISIBLE);
+        TextView textView = (TextView) overlayDisconnected.findViewById(R.id.overlay_text);
+        textView.setText(text);
+    }
+
+    private void showDisconnectedOverlay(){
+        showConnectionOverlay("No Connection to Secure Smart Home Server.");
+    }
 
     public MainActivity() {
         super(AppContainer.class);
@@ -52,6 +112,8 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         //Set the fragment initially
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        overlayDisconnected = (LinearLayout) findViewById(R.id.overlay_disconnected);
 
         //Initialise Notifications
         notificationBuilder = new NotificationCompat.Builder(this);
@@ -85,6 +147,13 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         if (!fragmentInitialized) {
             fragmentInitialized = true;
             showFragmentByClass(getInitialFragment());
+        }
+
+        Client client = container.require(Client.KEY);
+        client.addListener(connectionListener);
+
+        if (container.require(NamingManager.KEY).isMasterKnown() && !client.isConnectionEstablished()) {
+            showDisconnectedOverlay();
         }
     }
 
@@ -120,6 +189,8 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         if (fragment instanceof BoundFragment) {
             ((BoundFragment) fragment).onContainerDisconnected();
         }
+
+        requireComponent(Client.KEY).removeListener(connectionListener);
     }
 
     @Override
@@ -220,7 +291,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
         showFragmentById(id);
 

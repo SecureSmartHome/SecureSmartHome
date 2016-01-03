@@ -38,7 +38,7 @@ import io.netty.util.internal.logging.Slf4JLoggerFactory;
 import static android.content.Context.MODE_PRIVATE;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_HANDSHAKE_FINISHED;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT;
 
 /**
  * A netty stack accepting connections to and from the master and handling communication with them using a netty pipeline.
@@ -86,11 +86,11 @@ public class Client extends AbstractComponent {
     /**
      * Distributes incoming messages to the responsible handlers.
      */
-    private ClientIncomingDispatcher incomingDispatcher = new ClientIncomingDispatcher();
+    private final ClientIncomingDispatcher incomingDispatcher = new ClientIncomingDispatcher();
     /**
      * Send UDP Broadcasts when the Server can't be reached
      */
-    private UDPDiscoveryClient udpDiscovery = new UDPDiscoveryClient();
+    private final UDPDiscoveryClient udpDiscovery = new UDPDiscoveryClient();
     /**
      * Int used to calculate the time between the last and the current timeout.
      */
@@ -146,13 +146,9 @@ public class Client extends AbstractComponent {
             // Clean-up the closed channel as it is no longer needed
             channelFuture = null;
         }
-        if (!isExecutorAlive()) {
-            // Setup the Executor and Connection Pool
-            executor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("client"));
-        }
 
         // And queue the (re-)connect
-        executor.submit(new Runnable() {
+        getAliveExecutor().submit(new Runnable() {
             @Override
             public void run() {
                 // Read the previous host and port from the shared preferences
@@ -334,6 +330,18 @@ public class Client extends AbstractComponent {
     }
 
     /**
+     * EventLoopGroup for the {@link ClientIncomingDispatcher} and the {@link ClientOutgoingRouter}
+     */
+    @NonNull
+    EventLoopGroup getAliveExecutor() {
+        if (!isExecutorAlive()) {
+            // Setup the Executor and Connection Pool
+            executor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("client"));
+        }
+        return executor;
+    }
+
+    /**
      * Channel for the {@link ClientIncomingDispatcher} and the {@link ClientOutgoingRouter}
      */
     @Nullable
@@ -384,16 +392,6 @@ public class Client extends AbstractComponent {
         return isChannelOpen() && channelFuture.channel().attr(ATTR_HANDSHAKE_FINISHED).get() == Boolean.TRUE;
     }
 
-    /**
-     * Blocks until the Client has been completely shut down.
-     *
-     * @throws InterruptedException
-     */
-    public void awaitShutdown() throws InterruptedException {
-        channelFuture.channel().closeFuture().await();
-        executor.terminationFuture().await();
-    }
-
     //Shared Preferences////////////////////////////////////////////////////////////////////////////////////////////////
 
     private SharedPreferences getSharedPrefs() {
@@ -417,7 +415,7 @@ public class Client extends AbstractComponent {
     }
 
     public int getPort() {
-        return getSharedPrefs().getInt(PREF_PORT, DEFAULT_PORT);
+        return getSharedPrefs().getInt(PREF_PORT, DEFAULT_LOCAL_PORT);
     }
 
     public String getHost() {

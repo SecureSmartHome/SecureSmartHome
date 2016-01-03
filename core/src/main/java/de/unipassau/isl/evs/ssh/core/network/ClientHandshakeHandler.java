@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import java.security.GeneralSecurityException;
@@ -38,6 +39,7 @@ import io.netty.util.ReferenceCountUtil;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ALL_IDLE_TIME;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_HANDSHAKE_FINISHED;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_CERT;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PEER_ID;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.READER_IDLE_TIME;
@@ -47,12 +49,13 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.WRITER_
  * @author Niko Fink: Handshake Sequence
  * @author Christoph Fraedrich: Registration
  */
+@SuppressLint("Assert")
 public class ClientHandshakeHandler extends ChannelHandlerAdapter {
     private static final String TAG = ClientHandshakeHandler.class.getSimpleName();
 
     private final Client client;
     private final Container container;
-    private byte[] chapChallenge = new byte[HandshakePacket.CHAP.CHALLENGE_LENGTH];
+    private final byte[] chapChallenge = new byte[HandshakePacket.CHAP.CHALLENGE_LENGTH];
     private State state;
     private boolean triedRegister;
 
@@ -200,6 +203,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
 
             setState(State.STATE_RECEIVED, State.FINISHED);
             ctx.attr(ATTR_HANDSHAKE_FINISHED).set(true);
+            ctx.attr(ATTR_LOCAL_CONNECTION).set(msg.isConnectionLocal);
             Log.i(TAG, "Got State: authenticated, handshake successful");
             handshakeSuccessful(ctx);
         } else {

@@ -31,9 +31,13 @@ public class CoreConstants {
      */
     public static class NettyConstants {
         /**
+         * Default port used by netty for Connections from local network
+         */
+        public static final int DEFAULT_LOCAL_PORT = 13131;
+        /**
          * Default port used by netty
          */
-        public static final int DEFAULT_PORT = 13131;
+        public static final int DEFAULT_PUBLIC_PORT = 13130;
 
         /**
          * The time it takes in seconds after the client starts idle when reader isn't active.
@@ -63,6 +67,7 @@ public class CoreConstants {
         public static final AttributeKey<X509Certificate> ATTR_PEER_CERT = AttributeKey.valueOf(X509Certificate.class.getName());
         public static final AttributeKey<DeviceID> ATTR_PEER_ID = AttributeKey.valueOf(DeviceID.class.getName());
         public static final AttributeKey<Boolean> ATTR_HANDSHAKE_FINISHED = AttributeKey.valueOf("HandshakeFinished");
+        public static final AttributeKey<Boolean> ATTR_LOCAL_CONNECTION = AttributeKey.valueOf("LocalConnection");
     }
 
     /**

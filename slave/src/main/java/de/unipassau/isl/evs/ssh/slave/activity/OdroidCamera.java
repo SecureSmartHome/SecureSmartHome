@@ -20,6 +20,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
+import de.unipassau.isl.evs.ssh.slave.BuildConfig;
 import de.unipassau.isl.evs.ssh.slave.R;
 import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
 
@@ -49,11 +50,18 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.v(TAG, "onCreate()");
+        doBind();
 
-        //setVisible(false);
+        setVisible(BuildConfig.DEBUG); //only display in debug mode
         setContentView(R.layout.activity_camera);
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
         surfaceView.getHolder().addCallback(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        doUnbind();
+        super.onDestroy();
     }
 
     @Override

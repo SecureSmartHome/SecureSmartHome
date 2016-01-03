@@ -25,7 +25,7 @@ public class AppAddSlaveHandler extends AbstractMessageHandler implements Compon
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        //TODO Error Handling
+        // HANDLE
         Log.e(TAG, "Received message: " + message);
     }
 
