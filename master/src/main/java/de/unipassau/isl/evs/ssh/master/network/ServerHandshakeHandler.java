@@ -221,7 +221,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         setState(ctx, State.EXPECT_REGISTER, State.CHECK_AUTH);
 
         // send client register info to handler
-        boolean success = container.require(MasterRegisterDeviceHandler.KEY).registerDevice( //TODO add cert to KeyStore?
+        boolean success = container.require(MasterRegisterDeviceHandler.KEY).registerDevice(
                 ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_CERT).get(),
                 msg.activeRegistrationToken
         );
