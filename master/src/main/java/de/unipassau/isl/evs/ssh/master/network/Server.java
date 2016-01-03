@@ -30,7 +30,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.DefaultExecutorServiceFactory;
@@ -47,10 +46,10 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT
 /**
  * The heart of the master server: a netty stack accepting connections from devices and handling communication with them using a netty pipeline.
  * Additionally, it keeps track of timeouts and holds the global connection registry.
- * For details about the pipeline, see {@link #startServer()} and {@link #initChannel(SocketChannel)}.
+ * For details about the pipeline, see {@link #startServer()} and the {@link ServerHandshakeHandler} returned by {@link #getHandshakeHandler()}.
  * As this component is only active on the Master, the terms "Master" and "Server" are used interchangeably.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public class Server extends AbstractComponent {
     public static final Key<Server> KEY = new Key<>(Server.class);
@@ -69,7 +68,7 @@ public class Server extends AbstractComponent {
     /**
      * Reply to UDP Broadcasts from Clients that don't know my IP yet
      */
-    private UDPDiscoveryServer udpDiscovery = new UDPDiscoveryServer();
+    private final UDPDiscoveryServer udpDiscovery = new UDPDiscoveryServer();
     /**
      * The EventLoopGroup used for accepting connections
      */

@@ -36,7 +36,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVE
  * This component is responsible for responding to UDP discovery packets, signalling the address and port back to
  * {@link Client}s searching for this Master.
  *
- * @author Niko
+ * @author Niko Fink
  */
 public class UDPDiscoveryServer extends AbstractComponent {
     public static final Key<UDPDiscoveryServer> KEY = new Key<>(UDPDiscoveryServer.class);
@@ -171,7 +171,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
                 }
             }
             // forward all other packets to the pipeline
-            super.channelRead(ctx, msg);
+            super.channelRead(ctx, msg); //FIXME Niko: pipeline has only one handler, this makes no sense (Niko, 2015-12-28)
         }
 
         private boolean isDeviceRegistered(DeviceID clientID) {

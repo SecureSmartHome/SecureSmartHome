@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.activity;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +21,7 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
  *
  * @author Niko Fink
  */
+@SuppressLint("Registered")
 public class BoundActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName() + "(BndAct)";
 

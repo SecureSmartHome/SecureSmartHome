@@ -23,7 +23,7 @@ import de.ncoder.typedmap.TypedMap;
  * @author Niko Fink
  */
 public class SimpleContainer implements Container {
-    public final String TAG = "SContainer@" + Objects.hashCode(this);
+    private final String TAG = "SContainer@" + Objects.hashCode(this);
 
     private final TypedMap<Component> components = new TypedMap<>(new ConcurrentHashMap<Key<? extends Component>, Component>());
     private final List<Key<? extends Component>> log = new LinkedList<>();

@@ -16,7 +16,6 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
-import de.unipassau.isl.evs.ssh.core.naming.UnresolvableNamingException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
@@ -39,7 +38,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVE
  * This component is responsible for sending UDP discovery packets and signalling the new address and port back to the
  * {@link Client} if a new Master has been found.
  *
- * @author Phil, Niko
+ * @author Phil Werli & Niko Fink
  */
 public class UDPDiscoveryClient extends AbstractComponent {
     public static final Key<UDPDiscoveryClient> KEY = new Key<>(UDPDiscoveryClient.class);
@@ -237,10 +236,10 @@ public class UDPDiscoveryClient extends AbstractComponent {
                 }
             }
             // forward all other packets to the pipeline
-            super.channelRead(ctx, msg);
+            super.channelRead(ctx, msg); //FIXME Niko: pipeline has only one handler, this makes no sense (Niko, 2015-12-28)
         }
 
-        private boolean checkSignature(ByteBuf buffer, int dataStart, int dataEnd) throws UnresolvableNamingException {
+        private boolean checkSignature(ByteBuf buffer, int dataStart, int dataEnd) {
             try {
                 final NamingManager namingManager = requireComponent(NamingManager.KEY);
                 if (namingManager.isMasterKnown()) {
