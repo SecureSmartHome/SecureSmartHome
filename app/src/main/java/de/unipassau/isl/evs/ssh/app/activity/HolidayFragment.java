@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,13 +48,12 @@ public class HolidayFragment extends BoundFragment {
             }
         });
 
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_holiday, container, false);
+        return view;
     }
 
     @Override
     public void onContainerConnected(Container container) {
-        getHolidaySimulationHandler().addListener(holidaySimulationListener);
+        container.require(AppHolidaySimulationHandler.KEY).addListener(holidaySimulationListener);
         updateView();
     }
 
@@ -63,6 +63,7 @@ public class HolidayFragment extends BoundFragment {
         super.onContainerDisconnected();
     }
 
+    @Nullable
     private AppHolidaySimulationHandler getHolidaySimulationHandler() {
         return getComponent(AppHolidaySimulationHandler.KEY);
     }
