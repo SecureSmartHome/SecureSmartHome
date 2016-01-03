@@ -10,6 +10,8 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 /**
  * The SignatureGenerator class is a channel handler that is part of a ChannelPipeline and signs messages.
+ *
+ * @author Niko Fink
  */
 public class SignatureGenerator extends MessageToByteEncoder<ByteBuf> {
     private static final String TAG = SignatureGenerator.class.getSimpleName();

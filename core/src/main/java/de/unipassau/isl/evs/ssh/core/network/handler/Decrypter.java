@@ -14,6 +14,8 @@ import static de.unipassau.isl.evs.ssh.core.network.handler.Encrypter.MESSAGE_CR
 
 /**
  * The Decrypter class is a channel handler that is part of a ChannelPipeline and provides decryption for system messages.
+ *
+ * @author Niko Fink
  */
 public class Decrypter extends ReplayingDecoder {
     private static final String TAG = Decrypter.class.getSimpleName();

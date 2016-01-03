@@ -28,7 +28,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
 /**
- * This activity allows to enter information describing new user devices and provide a QR-Code
+ * This fragment allows to enter information describing new user devices and provide a QR-Code
  * which a given user device has to scan. If this functionality is used a message,
  * containing all needed information, is generated and passed to the OutgoingRouter.
  *

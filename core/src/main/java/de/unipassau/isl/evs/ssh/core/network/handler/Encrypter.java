@@ -14,6 +14,8 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 /**
  * The Encrypter class is a channel handler that Is part of a ChannelPipeline and provides encryption for system messages.
+ *
+ * @author Niko Fink
  */
 public class Encrypter extends MessageToByteEncoder<ByteBuf> {
     private static final String TAG = Encrypter.class.getSimpleName();
