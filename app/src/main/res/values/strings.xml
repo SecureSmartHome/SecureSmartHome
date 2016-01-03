@@ -122,4 +122,5 @@
     <string name="add_new_slave">Add New Slave</string>
     <string name="name_of_new_sensor">Name of the new Sensor:</string>
     <string name="connected_to_type">Connected to Slave:</string>
+    <string name="warn_no_slave_connected">No Slaves Connected</string>
 </resources>
