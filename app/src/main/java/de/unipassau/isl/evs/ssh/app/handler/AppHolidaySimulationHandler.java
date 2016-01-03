@@ -47,9 +47,7 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
      */
     public boolean isOn() {
         if (System.currentTimeMillis() - lastUpdate >= REFRESH_DELAY_MILLIS) {
-            // TODO Chris: you are sending a wrong payload! This crashes the app!
-            // Use a HolidaySimulationPayload or a different routingkey here. (Wolfgang, 2016-01-03)
-            sendMessageToMaster(MASTER_HOLIDAY_GET, new Message());
+            sendMessageToMaster(MASTER_HOLIDAY_GET, new Message(new HolidaySimulationPayload(false)));
         }
         return isOn;
     }
