@@ -47,6 +47,7 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
      * ArrayList<Module> modules = Lists.newArrayList(filtered);
      * </pre>
      */
+    // TODO fix deprecation warning. If this is changed then the payload Module.getModuleType() has to return an enum
     private static final Predicate<Module> PREDICATE_LIGHT = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {

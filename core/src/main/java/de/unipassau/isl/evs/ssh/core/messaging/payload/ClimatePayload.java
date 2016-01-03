@@ -53,7 +53,7 @@ public class ClimatePayload implements MessagePayload {
      *
      * @return ClimatePayload containing the ClimatePayload data.
      */
-    public ClimatePayload ClimatePayload() {
+    public ClimatePayload getClimatePayload() {
         return ClimatePayload.this;
     }
 
