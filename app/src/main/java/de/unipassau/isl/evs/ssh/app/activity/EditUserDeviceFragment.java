@@ -260,6 +260,7 @@ public class EditUserDeviceFragment extends BoundFragment {
             } else {
                 permissionLayout = (LinearLayout) convertView;
             }
+            // TODO Phil: gray out the permissions a user can't change.
 
             final Switch permissionSwitch = (Switch) permissionLayout.findViewById(R.id.listpermission_permission_switch);
             permissionSwitch.setText(permission.getName());

@@ -74,4 +74,10 @@ public class EditGroupFragment extends BoundFragment {
         super.onContainerConnected(container);
         buildView();
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // TODO Phil Save state of spinner. but I can't restore it in onCreateView as it is called after onContainerConnected
+        super.onSaveInstanceState(outState);
+    }
 }
