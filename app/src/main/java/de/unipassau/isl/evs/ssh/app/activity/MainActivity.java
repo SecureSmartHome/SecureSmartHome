@@ -79,7 +79,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    showConnectionOverlay("Connection refused. Maybe the system has been reset?");
+                    showConnectionOverlay(getString(R.string.warn_client_rejected));
                 }
             });
         }
@@ -92,7 +92,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     }
 
     private void showDisconnectedOverlay() {
-        showConnectionOverlay("No Connection to Secure Smart Home Server.");
+        showConnectionOverlay(getString(R.string.warn_no_connection_to_master));
     }
 
     public MainActivity() {

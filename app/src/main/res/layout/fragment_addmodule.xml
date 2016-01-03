@@ -3,8 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/add_module_layout"
         android:layout_width="match_parent"
@@ -60,8 +59,11 @@
             android:layout_height="wrap_content" />
 
         <include layout="@layout/addmodule_gpio" />
+
         <include layout="@layout/addmodule_mock" />
+
         <include layout="@layout/addmodule_usb" />
+
         <include layout="@layout/addmodule_wlan" />
 
     </LinearLayout>
