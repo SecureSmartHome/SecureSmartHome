@@ -119,4 +119,17 @@ public class CoreConstants {
             ZXING_SCAN_INTENT.putExtra("SCAN_MODE", "QR_CODE_MODE");
         }
     }
+
+    /**
+     * This class contains constants for different types of notifications.
+     *
+     * @author Christoph Frädrich
+     */
+    public enum NotificationType {
+        //TODO use when Notification System gets changed
+        UNKNOWN,
+        WEATHER_WARNING,
+        HUMIDITY_WARNING,
+        BRIGHTNESS_WARNING
+    }
 }
