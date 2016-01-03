@@ -13,10 +13,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
-import com.google.common.io.Files;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -36,7 +33,6 @@ public class DoorFragment extends BoundFragment {
     private static final String TAG = DoorFragment.class.getSimpleName();
     private Button openButton;
     private Button blockButton;
-    private ImageButton refreshButton;
     private ImageView imageView;
 
     private final DoorListener doorListener = new DoorListener() {
@@ -56,7 +52,7 @@ public class DoorFragment extends BoundFragment {
         View view = inflater.inflate(R.layout.fragment_door, container, false);
         openButton = (Button) view.findViewById(R.id.doorFragmentOpenButton);
         blockButton = (Button) view.findViewById(R.id.doorFragmentBlockButton);
-        refreshButton = (ImageButton) view.findViewById(R.id.doorFragmentRefreshButton);
+        ImageButton refreshButton = (ImageButton) view.findViewById(R.id.doorFragmentRefreshButton);
         imageView = (ImageView) view.findViewById(R.id.doorFragmentImageView);
 
         openButton.setOnClickListener(new View.OnClickListener() {
@@ -197,7 +193,7 @@ public class DoorFragment extends BoundFragment {
 
         private BitmapWorkerTask(ImageView imageView) {
             // Use a WeakReference to ensure the ImageView can be garbage collected
-            imageViewReference = new WeakReference<ImageView>(imageView);
+            imageViewReference = new WeakReference<>(imageView);
         }
 
         // Decode image in background.
@@ -214,7 +210,7 @@ public class DoorFragment extends BoundFragment {
         // Once complete, see if ImageView is still around and set bitmap.
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            if (imageViewReference != null && bitmap != null) {
+            if (bitmap != null) {
                 final ImageView imageView = imageViewReference.get();
                 if (imageView != null) {
                     imageView.setImageBitmap(bitmap);

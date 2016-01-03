@@ -16,7 +16,6 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;

@@ -28,7 +28,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
 /**
- * This activity allows to enter information describing new user devices and provide a QR-Code
+ * This fragment allows to enter information describing new user devices and provide a QR-Code
  * which a given user device has to scan. If this functionality is used a message,
  * containing all needed information, is generated and passed to the OutgoingRouter.
  *
@@ -39,6 +39,7 @@ public class AddNewUserDeviceFragment extends BoundFragment {
     private List<String> groups;
     private Spinner spinner;
     private EditText inputUserName;
+    private Button button;
 
     private final AppUserConfigurationHandler.UserInfoListener userConfigListener = new AppUserConfigurationHandler.UserInfoListener() {
         @Override
@@ -57,11 +58,18 @@ public class AddNewUserDeviceFragment extends BoundFragment {
     };
 
     private void updateGroupSpinner() {
-        List<Group> allGroups = getComponent(AppUserConfigurationHandler.KEY).getAllGroups();
+        AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        if (handler == null) {
+            Log.e(TAG, "Container not connected!");
+            return;
+        }
+
+        List<Group> allGroups = handler.getAllGroups();
         if (allGroups == null) {
             Log.i(TAG, "No groups available, yet.");
             return;
         }
+
         this.groups = Lists.newArrayList(Iterables.transform(allGroups, new Function<Group, String>() {
             @Override
             public String apply(Group input) {
@@ -80,12 +88,16 @@ public class AddNewUserDeviceFragment extends BoundFragment {
         View view = inflater.inflate(R.layout.fragment_addnewuserdevice, container, false);
         spinner = (Spinner) view.findViewById(R.id.groupSpinner);
         spinner.setAdapter(new ArrayAdapter<>(getActivity().getApplicationContext(),
-                android.R.layout.simple_list_item_1, new String[]{"Querying groups"}));
+                android.R.layout.simple_list_item_1, new String[]{getResources().getString(R.string.querying_groups)}));
         spinner.setEnabled(false);
 
         inputUserName = (EditText) view.findViewById(R.id.addNewDeviceUserName);
 
-        Button button = (Button) view.findViewById(R.id.add_user_button);
+        button = (Button) view.findViewById(R.id.add_user_button);
+        return view;
+    }
+
+    private void addButtonOnClickListener(final Button button, final Container container) {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -93,13 +105,12 @@ public class AddNewUserDeviceFragment extends BoundFragment {
                     String name = inputUserName.getText().toString();
                     String group = ((String) spinner.getSelectedItem());
                     UserDevice user = new UserDevice(name, group, null);
-                    getComponent(AppRegisterNewDeviceHandler.KEY).requestToken(user);
+                    container.require(AppRegisterNewDeviceHandler.KEY).requestToken(user);
                 } else {
                     ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_cannot_add_user));
                 }
             }
         });
-        return view;
     }
 
 
@@ -117,6 +128,7 @@ public class AddNewUserDeviceFragment extends BoundFragment {
 
         AppRegisterNewDeviceHandler registerHandler = container.require(AppRegisterNewDeviceHandler.KEY);
         registerHandler.addRegisterDeviceListener(registerNewDeviceListener);
+        addButtonOnClickListener(button, container);
         updateGroupSpinner();
     }
 

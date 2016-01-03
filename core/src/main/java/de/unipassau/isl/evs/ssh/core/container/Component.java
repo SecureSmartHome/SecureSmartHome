@@ -4,6 +4,8 @@ package de.unipassau.isl.evs.ssh.core.container;
  * Components are main parts of the system that have control over their initiation and shutdown process.
  * This means the steps needed to initialize or safely shutdown a Component is managed by itself,
  * whereas the time when either process takes place depends on the Object managing the component.
+ *
+ * @author Niko Fink
  */
 public interface Component {
 

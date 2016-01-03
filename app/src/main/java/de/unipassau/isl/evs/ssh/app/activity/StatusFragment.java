@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
  * @author Wolfgang Popp
  */
 public class StatusFragment extends BoundFragment {
+    private static final String TAG = StatusFragment.class.getSimpleName();
 
     private ListView slaveListView;
     private ListView moduleListView;
@@ -74,6 +76,10 @@ public class StatusFragment extends BoundFragment {
 
     private void update() {
         AppModuleHandler handler = getComponent(AppModuleHandler.KEY);
+        if (handler == null) {
+            Log.e(TAG, "update(): Container is not connected");
+            return;
+        }
         List<Slave> slaves = handler.getSlaves();
         if (slaves.size() < 1) {
             connectedSlavesText.setText(R.string.NoSlavesConnected);

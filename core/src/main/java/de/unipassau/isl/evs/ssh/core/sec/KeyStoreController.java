@@ -1,7 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.sec;
 
 import android.content.Context;
-import android.provider.Telephony;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.telephony.TelephonyManager;
