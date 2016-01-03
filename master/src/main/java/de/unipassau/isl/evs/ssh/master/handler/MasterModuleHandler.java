@@ -108,6 +108,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
         } catch (DatabaseControllerException e) {
             Log.e(TAG, "Error while adding new module: " + e.getCause().getMessage());
             sendErrorMessage(message);
+            // HANDLE (Wolfgang, 2016-01-03)
             return false;
         }
     }
@@ -129,6 +130,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
             success = true;
         } catch (DatabaseControllerException e) {
             Log.e(TAG, "Error while adding new module: " + e.getCause().getMessage());
+            // HANDLE (Wolfgang, 2016-01-03)
             sendErrorMessage(message);
         }
         return success;
