@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.messaging;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.common.collect.HashMultimap;
@@ -80,6 +81,7 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
     /**
      * @return the EventLoop used for dispatching all incoming messages
      */
+    @NonNull
     protected abstract EventLoop getExecutor();
 
     @Override
