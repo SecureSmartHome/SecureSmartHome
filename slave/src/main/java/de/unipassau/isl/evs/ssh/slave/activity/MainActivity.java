@@ -30,8 +30,8 @@ import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.slave.R;
 import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_DEMO;
@@ -91,11 +91,11 @@ public class MainActivity extends BoundActivity {
                     Toast.makeText(MainActivity.this, "Container not connected", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                final ChannelFuture future = outgoingRouter.sendMessageToMaster(GLOBAL_DEMO, message).getSendFuture();
+                final Future<Void> future = outgoingRouter.sendMessageToMaster(GLOBAL_DEMO, message).getSendFuture();
                 log("OUT:" + message.toString());
-                future.addListener(new ChannelFutureListener() {
+                future.addListener(new GenericFutureListener<Future<Void>>() {
                     @Override
-                    public void operationComplete(final ChannelFuture future) throws Exception {
+                    public void operationComplete(final Future<Void> future) throws Exception {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -194,7 +194,7 @@ public class MainActivity extends BoundActivity {
         try {
             deviceInformation = new DeviceConnectInformation(
                     (Inet4Address) Inet4Address.getByName(ipAddress),
-                    CoreConstants.NettyConstants.DEFAULT_PORT,
+                    CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT,
                     requireComponent(NamingManager.KEY).getOwnID(),
                     token
             );
