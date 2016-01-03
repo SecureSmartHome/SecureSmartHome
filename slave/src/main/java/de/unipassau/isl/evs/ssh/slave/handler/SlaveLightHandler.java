@@ -9,9 +9,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET;
@@ -45,13 +43,8 @@ public class SlaveLightHandler extends AbstractMessageHandler {
             }
             replyStatus(message, plugSwitch);
         } else {
-            //TODO check RoutingKey and call invalidMessage(message) otherwise
-            final Message reply = new Message(new MessageErrorPayload(message.getPayload()));
-            sendMessage(
-                    message.getFromID(),
-                    RoutingKeys.MASTER_LIGHT_GET,
-                    reply
-            );
+            //Received wrong routing key -> invalid message
+            invalidMessage(message);
         }
     }
 

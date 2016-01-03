@@ -36,7 +36,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
         //Check Certificate
         X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
         certGen.setSerialNumber(BigInteger.valueOf(1L));
-        certGen.setSubjectDN(new X500Principal("CN=evs")); //FIXME
+        certGen.setSubjectDN(new X500Principal("CN=evs"));
         certGen.setIssuerDN(new X500Principal("CN=evs"));
         certGen.setPublicKey(keyPair.getPublic());
         certGen.setNotBefore(new Date());

@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
@@ -21,7 +22,6 @@ import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
  * @author Wolfgang Popp
  */
 public class AddNewSlaveFragment extends ScanQRFragment {
-    private static final String TAG = AddNewSlaveFragment.class.getSimpleName();
     private static final String KEY_SLAVE_NAME = "SLAVE_NAME";
 
     private EditText slaveNameInput;
@@ -31,6 +31,8 @@ public class AddNewSlaveFragment extends ScanQRFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_new_slave, container, false);
+
+        slaveNameInput = (EditText) view.findViewById(R.id.add_new_slave_name);
 
         if (savedInstanceState != null) {
             String slaveName = savedInstanceState.getString(KEY_SLAVE_NAME);
@@ -42,7 +44,6 @@ public class AddNewSlaveFragment extends ScanQRFragment {
     }
 
     private void buildView() {
-        slaveNameInput = (EditText) getActivity().findViewById(R.id.add_new_slave_name);
         Button addNewSlaveButton = (Button) getActivity().findViewById(R.id.add_new_slave_button);
 
         addNewSlaveButton.setOnClickListener(new View.OnClickListener() {
@@ -73,18 +74,21 @@ public class AddNewSlaveFragment extends ScanQRFragment {
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
         buildView();
-        registerSlave(); // FIXME why register here? ask wolfi
     }
 
     private void registerSlave() {
-        if (info != null && isContainerConnected()) {
+        AppAddSlaveHandler handler = getComponent(AppAddSlaveHandler.KEY);
+
+        if (info != null && handler != null) {
             DeviceID slaveID = info.getID();
             String slaveName = slaveNameInput.getText().toString();
-            AppAddSlaveHandler handler = getComponent(AppAddSlaveHandler.KEY);
             final byte[] passiveRegistrationToken = info.getToken();
             handler.registerNewSlave(slaveID, slaveName, passiveRegistrationToken);
             info = null;
             ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+        } else {
+            Toast toast = Toast.makeText(getActivity().getApplicationContext(), R.string.cannot_add_slave, Toast.LENGTH_SHORT);
+            toast.show();
         }
     }
 }

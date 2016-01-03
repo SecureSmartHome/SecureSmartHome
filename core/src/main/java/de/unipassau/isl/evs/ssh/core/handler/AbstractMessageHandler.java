@@ -16,6 +16,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
+//TODO @author + javadoc (Wolfgang, 2016-01-03)
 public abstract class AbstractMessageHandler implements MessageHandler {
     private Container container;
     private IncomingDispatcher dispatcher;

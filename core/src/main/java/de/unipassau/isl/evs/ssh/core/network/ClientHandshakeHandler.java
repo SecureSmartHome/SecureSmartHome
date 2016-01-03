@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import java.security.GeneralSecurityException;
@@ -48,12 +49,13 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.WRITER_
  * @author Niko Fink: Handshake Sequence
  * @author Christoph Fraedrich: Registration
  */
+@SuppressLint("Assert")
 public class ClientHandshakeHandler extends ChannelHandlerAdapter {
     private static final String TAG = ClientHandshakeHandler.class.getSimpleName();
 
     private final Client client;
     private final Container container;
-    private byte[] chapChallenge = new byte[HandshakePacket.CHAP.CHALLENGE_LENGTH];
+    private final byte[] chapChallenge = new byte[HandshakePacket.CHAP.CHALLENGE_LENGTH];
     private State state;
     private boolean triedRegister;
 

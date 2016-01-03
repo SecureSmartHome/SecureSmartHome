@@ -132,8 +132,8 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
      * Refreshs the door status by sending a status request message.
      */
     public void refresh() {
-        List<Module> doors = getContainer().require(AppModuleHandler.KEY).getDoors();
-        if (doors == null || doors.size() < 1) {
+        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoors();
+        if (doors.size() < 1) {
             Log.e(TAG, "Could not get door status. No door installed");
             return;
         }
@@ -142,12 +142,12 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
     }
 
     private void refreshOpenStatus(String door) {
-        DoorStatusPayload doorPayload = new DoorStatusPayload(door);
+        DoorStatusPayload doorPayload = new DoorStatusPayload(false, door);
 
         Message message = new Message(doorPayload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET.getKey());
 
-        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
+        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
         router.sendMessageToMaster(MASTER_DOOR_STATUS_GET, message);
 
     }
@@ -158,7 +158,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         Message message = new Message(doorPayload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_BLOCK.getKey());
 
-        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
+        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
         router.sendMessageToMaster(MASTER_DOOR_LOCK_GET, message);
     }
 
@@ -166,8 +166,8 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
      * Sends a "OpenDoor" message to the master.
      */
     public void openDoor() {
-        List<Module> doors = getContainer().require(AppModuleHandler.KEY).getDoors();
-        if (doors == null) {
+        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoors();
+        if (doors.size() < 1) {
             Log.e(TAG, "Could not open the door. No door installed");
             return;
         }
@@ -176,14 +176,14 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         Message message = new Message(doorPayload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET.getKey());
 
-        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
+        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
         router.sendMessageToMaster(MASTER_DOOR_UNLATCH, message);
         isDoorOpen = true;
     }
 
     private void blockDoor(boolean isBlocked) {
-        List<Module> doors = getContainer().require(AppModuleHandler.KEY).getDoors();
-        if (doors == null) {
+        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoors();
+        if (doors.size() < 1) {
             Log.e(TAG, "Could not (un)block the door. No door installed");
             return;
         }
@@ -192,7 +192,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         Message message = new Message(doorPayload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_BLOCK.getKey());
 
-        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
+        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
         router.sendMessageToMaster(MASTER_DOOR_LOCK_SET, message);
         isDoorBlocked = isBlocked;
     }
@@ -211,13 +211,12 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         blockDoor(true);
     }
 
-
     /**
      * Refreshes the door photo by sending a message.
      */
     public void refreshImage() {
-        List<Module> cameras = getContainer().require(AppModuleHandler.KEY).getCameras();
-        if (cameras == null) {
+        List<Module> cameras = requireComponent(AppModuleHandler.KEY).getCameras();
+        if (cameras.size() < 1) {
             Log.e(TAG, "Could not refresh the door image. No camera avaliable");
             return;
         }
@@ -226,7 +225,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         Message message = new Message(payload);
         message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_CAMERA_GET.getKey());
 
-        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
+        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
         router.sendMessageToMaster(MASTER_CAMERA_GET, message);
     }
 }

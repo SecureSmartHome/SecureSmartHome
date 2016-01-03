@@ -4,6 +4,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 
 /**
+ * TODO JavaDoc
+ *
  * @author Niko Fink
  */
 public abstract class SimpleMessageHandler<T> extends AbstractMessageHandler {

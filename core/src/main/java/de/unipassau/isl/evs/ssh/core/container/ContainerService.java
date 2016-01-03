@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.container;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -19,6 +20,7 @@ import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
  *
  * @author Niko Fink
  */
+@SuppressLint("Registered")
 public class ContainerService extends Service implements Container {
     public static final Key<ContextComponent> KEY_CONTEXT = new Key<>(ContextComponent.class, "ContainerContext");
     private static final String TAG = ContainerService.class.getSimpleName();

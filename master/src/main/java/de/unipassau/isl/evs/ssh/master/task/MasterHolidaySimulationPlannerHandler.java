@@ -111,7 +111,10 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
     @Override
     public void destroy() {
-        //FIXME cancel scheduled task (Niko, 2015-12-17)
+        Scheduler scheduler = getContainer().require(Scheduler.KEY);
+        PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
+        scheduler.cancel(intent);
+        //TODO check me if this is correct
     }
 
     private class HolidayLightAction implements Runnable {

@@ -190,7 +190,7 @@ public class NamingManager extends AbstractComponent {
     public void init(Container container) {
         super.init(container);
 
-        final KeyStoreController keyStoreController = getContainer().require(KeyStoreController.KEY);
+        final KeyStoreController keyStoreController = requireComponent(KeyStoreController.KEY);
         ownCert = keyStoreController.getOwnCertificate();
         ownID = DeviceID.fromCertificate(ownCert);
 

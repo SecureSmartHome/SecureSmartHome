@@ -1,7 +1,9 @@
 package de.unipassau.isl.evs.ssh.core.database.dto;
 
 /**
- * TODO comment
+ * A HolidayAction describes an action that happened in the past and shall be re-executed
+ * when the HolidaySimulation is active. It describes which module {@link #moduleName} executed which
+ * action {@link #actionName} at what time {@link #timeStamp}.
  *
  * @author Christoph Fraedrich
  */
@@ -10,6 +12,13 @@ public class HolidayAction {
     private long timeStamp;
     private String actionName;
 
+    /**
+     * Creates a new HolidayAction Object
+     *
+     * @param moduleName of the module which is to be triggered
+     * @param timeStamp at which the action originally happened
+     * @param actionName action which is to be executed
+     */
     public HolidayAction(String moduleName, long timeStamp, String actionName) {
         this.moduleName = moduleName;
         this.timeStamp = timeStamp;

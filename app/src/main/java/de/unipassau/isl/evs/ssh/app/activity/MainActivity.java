@@ -13,10 +13,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
@@ -38,8 +36,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String SAVED_LAST_ACTIVE_FRAGMENT = MainActivity.class.getName() + ".SAVED_LAST_ACTIVE_FRAGMENT";
-    private NavigationView navigationView = null;
-    private Toolbar toolbar = null;
     private LinearLayout overlayDisconnected;
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
@@ -83,7 +79,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    showConnectionOverlay("Connection refused. Maybe the system has been reset?");
+                    showConnectionOverlay(getString(R.string.warn_client_rejected));
                 }
             });
         }
@@ -95,8 +91,8 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         textView.setText(text);
     }
 
-    private void showDisconnectedOverlay(){
-        showConnectionOverlay("No Connection to Secure Smart Home Server.");
+    private void showDisconnectedOverlay() {
+        showConnectionOverlay(getString(R.string.warn_no_connection_to_master));
     }
 
     public MainActivity() {
@@ -110,7 +106,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         setContentView(R.layout.activity_main);
 
         //Set the fragment initially
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         overlayDisconnected = (LinearLayout) findViewById(R.id.overlay_disconnected);
@@ -127,7 +123,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         if (!fragmentInitialized && getContainer() != null) {
@@ -173,6 +169,9 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
                     return DoorFragment.class;
             }
         }
+
+        // FIXME this destroys the fragment lifecycle, because a new Fragment is created when onContainerConnected is called.
+        // So onSaveInstanceState() does not work in fragments.
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
             try {
                 return Class.forName(savedInstanceState.getString(SAVED_LAST_ACTIVE_FRAGMENT));
@@ -291,7 +290,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
         showFragmentById(id);
 

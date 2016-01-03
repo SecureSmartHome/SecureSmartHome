@@ -11,15 +11,17 @@ import net.aksingh.owmjapis.OpenWeatherMap;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
+
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
 
 /**
  * Task/Handler that periodically checks the records of weather data provider and issues notifications
@@ -34,21 +36,21 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     private boolean windowClosed;
 
     private void sendWarningNotification() {
-        WeatherPayload payload = new WeatherPayload(true, "Door/Window is open and it will rain today"); //TODO refactor to use generic text
+        WeatherPayload payload = new WeatherPayload(true, "Please close all doors and windows. It will rain today.");
         sendMessageLocal(RoutingKeys.MASTER_NOTIFICATION_SEND, new Message(payload));
     }
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        //FIXME //STOPSHIP use correct RoutingKey instead and add to getRoutingKeys() (Niko, 2015-12-17)
-        if (message.getPayload() instanceof DoorStatusPayload) {
-            windowClosed = ((DoorStatusPayload) message.getPayload()).isClosed();
+        if (MASTER_DOOR_STATUS_GET.matches(message)
+                && message.getHeader(Message.HEADER_REFERENCES_ID) != null) {
+            windowClosed = MASTER_DOOR_STATUS_GET.getPayload(message).isClosed();
         }
     }
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{};
+        return new RoutingKey[]{MASTER_DOOR_STATUS_GET};
     }
 
     @Override
@@ -70,7 +72,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
 
     @Override
     public void onReceive(Intent intent) {
-        OpenWeatherMap owm = new OpenWeatherMap("f5301a474451c6e1394268314b72a358"); //TODO move to CoreConstants (Niko, 2015-12-17)
+        OpenWeatherMap owm = new OpenWeatherMap(CoreConstants.OPENWEATHERMAP_API_KEY);
         try {
             CurrentWeather cw = owm.currentWeatherByCityName("Passau"); //TODO use current location  (Niko, 2015-12-17)
             if (!windowClosed && cw.getRainInstance().hasRain()) {

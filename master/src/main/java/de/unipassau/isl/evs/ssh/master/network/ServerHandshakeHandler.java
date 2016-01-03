@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.master.network;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import java.net.InetSocketAddress;
@@ -55,13 +56,14 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.WRITER_
 
 /**
  * @author Niko Fink: Handshake Sequence
- * @author Christoph Fraedrich Registration
+ * @author Christoph Fraedrich: Registration
  */
+@SuppressLint("Assert")
 @ChannelHandler.Sharable
 public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     private static final String TAG = ServerHandshakeHandler.class.getSimpleName();
 
-    private static final AttributeKey<byte[]> CHAP_CALLENGE = AttributeKey.valueOf(ServerHandshakeHandler.class, "CHAP_CHALLENGE");
+    private static final AttributeKey<byte[]> CHAP_CHALLENGE = AttributeKey.valueOf(ServerHandshakeHandler.class, "CHAP_CHALLENGE");
     private static final AttributeKey<State> STATE = AttributeKey.valueOf(ServerHandshakeHandler.class, "STATE");
 
     private final Server server;
@@ -219,7 +221,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         setState(ctx, State.EXPECT_REGISTER, State.CHECK_AUTH);
 
         // send client register info to handler
-        boolean success = container.require(MasterRegisterDeviceHandler.KEY).registerDevice( //TODO add cert to KeyStore?
+        boolean success = container.require(MasterRegisterDeviceHandler.KEY).registerDevice(
                 ctx.attr(CoreConstants.NettyConstants.ATTR_PEER_CERT).get(),
                 msg.activeRegistrationToken
         );
@@ -274,11 +276,11 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
     }
 
     private void setChapChallenge(ChannelHandlerContext ctx, byte[] value) {
-        ctx.channel().attr(CHAP_CALLENGE).set(value);
+        ctx.channel().attr(CHAP_CHALLENGE).set(value);
     }
 
     private byte[] getChapChallenge(ChannelHandlerContext ctx) {
-        return ctx.channel().attr(CHAP_CALLENGE).get();
+        return ctx.channel().attr(CHAP_CHALLENGE).get();
     }
 
     private enum State {

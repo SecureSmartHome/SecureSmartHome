@@ -122,4 +122,11 @@
     <string name="add_new_slave">Add New Slave</string>
     <string name="name_of_new_sensor">Name of the new Sensor:</string>
     <string name="connected_to_type">Connected to Slave:</string>
+    <string name="warn_no_slave_connected">No Slaves Connected</string>
+    <string name="addmodule_sensor_type">Sensor Type:</string>
+    <string name="querying_groups">Querying groups</string>
+    <string name="cannot_add_slave">Cannot add the new Slave.</string>
+    <string name="warn_client_rejected">Connection refused. Maybe the system has been reset?</string>
+    <string name="warn_no_connection_to_master">No Connection to Secure Smart Home Server.</string>
+    <string name="malformed_qr_code">Malformed QR-Code</string>
 </resources>

@@ -31,7 +31,7 @@ public class ControllerTest extends InstrumentationTestCase {
     public void testTemplatesAndPermissions() throws DatabaseControllerException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
-        context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
+        context.deleteDatabase(DatabaseConnector.DATABASE_NAME);
         SimpleContainer container = new SimpleContainer();
         container.register(ContainerService.KEY_CONTEXT,
                 new ContainerService.ContextComponent(context));
@@ -178,7 +178,7 @@ public class ControllerTest extends InstrumentationTestCase {
     public void testUserDevicesSlashGroupsAndPermissions() throws DatabaseControllerException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
-        context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
+        context.deleteDatabase(DatabaseConnector.DATABASE_NAME);
         SimpleContainer container = new SimpleContainer();
         container.register(ContainerService.KEY_CONTEXT,
                 new ContainerService.ContextComponent(context));
@@ -428,7 +428,7 @@ public class ControllerTest extends InstrumentationTestCase {
     public void testSlaveController() throws DatabaseControllerException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
-        context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
+        context.deleteDatabase(DatabaseConnector.DATABASE_NAME);
         SimpleContainer container = new SimpleContainer();
         container.register(ContainerService.KEY_CONTEXT,
                 new ContainerService.ContextComponent(context));
@@ -553,7 +553,7 @@ public class ControllerTest extends InstrumentationTestCase {
     public void testHolidayController() throws InterruptedException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
-        context.deleteDatabase(DatabaseConnector.DBOpenHelper.DATABASE_NAME);
+        context.deleteDatabase(DatabaseConnector.DATABASE_NAME);
         SimpleContainer container = new SimpleContainer();
         container.register(ContainerService.KEY_CONTEXT,
                 new ContainerService.ContextComponent(context));

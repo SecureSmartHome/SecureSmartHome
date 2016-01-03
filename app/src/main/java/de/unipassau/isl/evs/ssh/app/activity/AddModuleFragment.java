@@ -38,9 +38,9 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  */
 public class AddModuleFragment extends BoundFragment implements AdapterView.OnItemSelectedListener {
 
-    private static final String TAG = AddModuleFragment.class.getSimpleName();
+    private static final String KEY_CONNECTION_TYPE_SPINNER_POSITION = "CONNECTION_TYPE_SPINNER_POSITION";
 
-    private AppNewModuleHandler.NewModuleListener listener;
+    private static final String TAG = AddModuleFragment.class.getSimpleName();
 
     private LinearLayout wlanView;
     private LinearLayout usbView;
@@ -49,32 +49,44 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private Spinner slaveSpinner;
     private Spinner sensorTypeSpinner;
+    private Spinner connectionTypeSpinner;
     private EditText nameInput;
 
+    private final AppNewModuleHandler.NewModuleListener listener = new AppNewModuleHandler.NewModuleListener() {
+        @Override
+        public void registrationFinished(boolean wasSuccessful) {
+            String text;
+            if (wasSuccessful) {
+                text = getResources().getString(R.string.added_module_success);
+            } else {
+                text = getResources().getString(R.string.added_module_fail);
+            }
+
+            Toast toast = Toast.makeText(getActivity().getApplicationContext(), text, Toast.LENGTH_LONG);
+            toast.show();
+        }
+    };
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_addmodule, container, false);
-    }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_addmodule, container, false);
 
-    private void buildView() {
-        LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.add_module_layout);
+        connectionTypeSpinner = (Spinner) view.findViewById(R.id.connection_type_spinner);
+        sensorTypeSpinner = (Spinner) view.findViewById(R.id.add_module_sensor_type_spinner);
+        slaveSpinner = (Spinner) view.findViewById(R.id.add_module_slave_spinner);
+        nameInput = (EditText) view.findViewById(R.id.add_module_name_input);
 
-        Spinner connectionTypeSpinner = (Spinner) getActivity().findViewById(R.id.connection_type_spinner);
-        sensorTypeSpinner = (Spinner) getActivity().findViewById(R.id.add_module_sensor_type_spinner);
-
-        slaveSpinner = (Spinner) getActivity().findViewById(R.id.add_module_slave_spinner);
-        nameInput = (EditText) getActivity().findViewById(R.id.add_module_name_input);
-        wlanView = createViewWLAN(layout);
-        usbView = createViewUSB(layout);
-        gpioView = createViewGPIO(layout);
-        mockView = createViewMock(layout);
+        wlanView = createViewWLAN(view);
+        usbView = createViewUSB(view);
+        gpioView = createViewGPIO(view);
+        mockView = createViewMock(view);
 
         ArrayAdapter<CharSequence> connectionTypeAdapter = ArrayAdapter.createFromResource(
                 getActivity().getApplicationContext(),
                 R.array.sensor_connection_types,
                 android.R.layout.simple_spinner_dropdown_item);
 
+        //TODO Fix deprecation warning. How can the spinner be filled with localized strings? (Wolfgang, 2016-03-01)
         ArrayAdapter<CharSequence> sensorTypeAdapter = new ArrayAdapter<CharSequence>(
                 getActivity().getApplicationContext(),
                 android.R.layout.simple_spinner_dropdown_item,
@@ -92,20 +104,24 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         connectionTypeSpinner.setAdapter(connectionTypeAdapter);
         connectionTypeSpinner.setOnItemSelectedListener(this);
 
-        AppModuleHandler handler = getComponent(AppModuleHandler.KEY);
-        AppNewModuleHandler newModuleHandler = getComponent(AppNewModuleHandler.KEY);
-        if (handler == null || newModuleHandler == null) {
-            Log.i(TAG, "Container not connected");
-            return;
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(KEY_CONNECTION_TYPE_SPINNER_POSITION)) {
+                int position = savedInstanceState.getInt(KEY_CONNECTION_TYPE_SPINNER_POSITION);
+                connectionTypeSpinner.setSelection(position);
+            }
         }
 
-        List<Slave> slaves = handler.getSlaves();
+        return view;
+    }
 
-        if (slaves == null) {
+    private void populateSlaveSpinner(Container container) {
+        List<Slave> slaves = container.require(AppModuleHandler.KEY).getSlaves();
+
+        if (slaves.size() < 1) {
             ArrayAdapter<String> slaveAdapter = new ArrayAdapter<>(
                     getActivity().getApplicationContext(),
                     android.R.layout.simple_spinner_dropdown_item,
-                    new String[]{"No Slaves Connected"});
+                    new String[]{getResources().getString(R.string.warn_no_slave_connected)});
 
             slaveSpinner.setEnabled(false);
             slaveSpinner.setAdapter(slaveAdapter);
@@ -118,34 +134,19 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             slaveSpinner.setEnabled(true);
             slaveSpinner.setAdapter(slaveAdapter);
         }
-
-        listener = new AppNewModuleHandler.NewModuleListener() {
-            @Override
-            public void registrationFinished(boolean wasSuccessful) {
-                String text;
-
-                if (wasSuccessful) {
-                    text = getActivity().getResources().getString(R.string.added_module_success);
-                } else {
-                    text = getActivity().getResources().getString(R.string.added_module_fail);
-                }
-
-                Toast toast = Toast.makeText(getActivity().getApplicationContext(), text, Toast.LENGTH_LONG);
-                toast.show();
-            }
-        };
-        newModuleHandler.addNewModuleListener(listener);
     }
 
     // returns true if global input fields are filled in correctly
     private boolean checkInputFields() {
-        return !nameInput.equals("") && slaveSpinner.isEnabled();
+        return !nameInput.getText().toString().equals("") && slaveSpinner.isEnabled();
     }
 
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        buildView();
+        AppNewModuleHandler newModuleHandler = container.require(AppNewModuleHandler.KEY);
+        newModuleHandler.addNewModuleListener(listener);
+        populateSlaveSpinner(container);
     }
 
     @Override
@@ -158,31 +159,27 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         String type = parent.getItemAtPosition(position).toString();
         String[] types = getResources().getStringArray(R.array.sensor_connection_types);
-        LinearLayout layout = (LinearLayout) getView().findViewById(R.id.add_module_layout);
+
         if (types[0].equals(type)) {
-            layout.removeView(wlanView);
-            layout.removeView(usbView);
-            layout.removeView(gpioView);
-            layout.removeView(mockView);
-            layout.addView(gpioView);
+            wlanView.setVisibility(View.GONE);
+            usbView.setVisibility(View.GONE);
+            mockView.setVisibility(View.GONE);
+            gpioView.setVisibility(View.VISIBLE);
         } else if (types[1].equals(type)) {
-            layout.removeView(wlanView);
-            layout.removeView(gpioView);
-            layout.removeView(usbView);
-            layout.removeView(mockView);
-            layout.addView(usbView);
+            wlanView.setVisibility(View.GONE);
+            usbView.setVisibility(View.VISIBLE);
+            mockView.setVisibility(View.GONE);
+            gpioView.setVisibility(View.GONE);
         } else if (types[2].equals(type)) {
-            layout.removeView(usbView);
-            layout.removeView(gpioView);
-            layout.removeView(wlanView);
-            layout.removeView(mockView);
-            layout.addView(wlanView);
+            wlanView.setVisibility(View.VISIBLE);
+            usbView.setVisibility(View.GONE);
+            mockView.setVisibility(View.GONE);
+            gpioView.setVisibility(View.GONE);
         } else if (types[3].equals(type)) {
-            layout.removeView(usbView);
-            layout.removeView(gpioView);
-            layout.removeView(wlanView);
-            layout.removeView(mockView);
-            layout.addView(mockView);
+            wlanView.setVisibility(View.GONE);
+            usbView.setVisibility(View.GONE);
+            mockView.setVisibility(View.VISIBLE);
+            gpioView.setVisibility(View.GONE);
         }
     }
 
@@ -191,8 +188,8 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     }
 
-    private LinearLayout createViewGPIO(ViewGroup container) {
-        LinearLayout gpioView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_gpio, container, false);
+    private LinearLayout createViewGPIO(View root) {
+        LinearLayout gpioView = (LinearLayout) root.findViewById(R.id.addmodule_gpio);
         Button button = (Button) gpioView.findViewById(R.id.add_module_gpio_button);
         final EditText gpioPortInput = (EditText) gpioView.findViewById(R.id.add_module_gpio_port_input);
 
@@ -212,8 +209,8 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         return gpioView;
     }
 
-    private LinearLayout createViewUSB(ViewGroup container) {
-        LinearLayout usbView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_usb, container, false);
+    private LinearLayout createViewUSB(View root) {
+        LinearLayout usbView = (LinearLayout) root.findViewById(R.id.addmodule_usb);
         Button button = (Button) usbView.findViewById(R.id.add_module_usb_button);
         final EditText usbPortInput = (EditText) usbView.findViewById(R.id.add_module_usb_port_input);
 
@@ -233,8 +230,8 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         return usbView;
     }
 
-    private LinearLayout createViewWLAN(ViewGroup container) {
-        LinearLayout wlanView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_wlan, container, false);
+    private LinearLayout createViewWLAN(View root) {
+        LinearLayout wlanView = (LinearLayout) root.findViewById(R.id.addmodule_wlan);
         Button button = (Button) wlanView.findViewById(R.id.add_module_wlan_button);
         final EditText usernameInput = (EditText) wlanView.findViewById(R.id.add_module_wlan_username_input);
         final EditText passwordInput = (EditText) wlanView.findViewById(R.id.add_module_wlan_password_input);
@@ -262,8 +259,8 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     }
 
 
-    private LinearLayout createViewMock(ViewGroup container) {
-        LinearLayout mockView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.addmodule_mock, container, false);
+    private LinearLayout createViewMock(View root) {
+        LinearLayout mockView = (LinearLayout) root.findViewById(R.id.addmodule_mock);
         Button button = (Button) mockView.findViewById(R.id.add_module_mock_button);
 
         button.setOnClickListener(new View.OnClickListener() {
@@ -274,6 +271,13 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         });
 
         return mockView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // TODO Save state of all spinners in this fragment. This lifecycle is currently broken (Wolfgang, 2016-03-01)
+        outState.putInt(KEY_CONNECTION_TYPE_SPINNER_POSITION, connectionTypeSpinner.getSelectedItemPosition());
+        super.onSaveInstanceState(outState);
     }
 
     private void addNewModule(ModuleAccessPoint accessPoint) {

@@ -13,6 +13,8 @@ import static de.unipassau.isl.evs.ssh.core.network.handler.SignatureGenerator.M
 
 /**
  * The SignatureChecker class is a channel handler that is part of a ChannelPipeline and checks signatures of received messages.
+ *
+ * @author Niko Fink
  */
 public class SignatureChecker extends ChannelHandlerAdapter {
     private static final String TAG = SignatureChecker.class.getSimpleName();

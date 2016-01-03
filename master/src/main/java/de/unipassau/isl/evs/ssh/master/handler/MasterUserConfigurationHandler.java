@@ -46,8 +46,6 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        //FIXME //STOPSHIP will not work with new RoutingKeys (Niko, 2015-12-17)
-        //TODO the RoutingKeys used here are only based on guesses of 3 confused students in front of a laptop (Wolfi, Phil, Niko, 2015-12-22)
         if (MASTER_USERINFO_GET.matches(message)) {
             sendUpdateToUserDevice(message.getFromID());
         } else if (MASTER_USERINFO_SET.matches(message)) {
@@ -79,6 +77,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                         de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER.toString(), ""))) {
                     removeUserDevice(payload);
                 } else {
+                    //HANDLE
                     sendErrorMessage(message);
                 }
                 break;
@@ -90,6 +89,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                         de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP.toString(), ""))) {
                     editUserDevice(message, payload);
                 } else {
+                    //HANDLE
                     sendErrorMessage(message);
                 }
                 break;
@@ -98,6 +98,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                         de.unipassau.isl.evs.ssh.core.sec.Permission.GRANT_USER_PERMISSION.toString(), ""))) {
                     grantPermission(message, payload);
                 } else {
+                    //HANDLE
                     sendErrorMessage(message);
                 }
                 break;
@@ -106,6 +107,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                         de.unipassau.isl.evs.ssh.core.sec.Permission.WITHDRAW_USER_PERMISSION.toString(), ""))) {
                     revokePermission(payload);
                 } else {
+                    //HANDLE
                     sendErrorMessage(message);
                 }
                 break;
@@ -129,6 +131,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             getContainer().require(UserManagementController.KEY).removeUserDevice(toRemove.getUserDeviceID());
             getContainer().require(UserManagementController.KEY).addUserDevice(toAdd);
         } catch (DatabaseControllerException e) {
+            //HANDLE
             sendErrorMessage(message);
         }
     }
@@ -143,6 +146,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 getContainer().require(PermissionController.KEY).addUserPermission(
                         toGrant.getUserDeviceID(), permission);
             } catch (UnknownReferenceException e) {
+                //HANDLE
                 sendErrorMessage(message);
             }
         }

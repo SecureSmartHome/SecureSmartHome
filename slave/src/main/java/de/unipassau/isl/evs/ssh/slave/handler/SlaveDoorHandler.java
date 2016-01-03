@@ -42,10 +42,10 @@ public class SlaveDoorHandler extends AbstractMessageHandler {
     }
 
     private void handleDoorStatus(Message.AddressedMessage original) {
-        DoorStatusPayload incomingPayload = (DoorStatusPayload) original.getPayload(); //FIXME ClassCastException for a SLAVE_DOOR_UNLATCH message DoorUnlatchPayload (Niko, 2015-12-19)
+        DoorStatusPayload incomingPayload = SLAVE_DOOR_STATUS_GET.getPayload(original);
         String moduleName = incomingPayload.getModuleName();
         Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
-        ReedSensor doorSensor = getContainer().require(key);
+        ReedSensor doorSensor = requireComponent(key);
 
         try {
             final Message reply = new Message(new DoorStatusPayload(doorSensor.isOpen(), moduleName));
@@ -54,17 +54,19 @@ public class SlaveDoorHandler extends AbstractMessageHandler {
         } catch (EvsIoException e) {
             Log.e(TAG, "Cannot get door status", e);
             sendErrorMessage(original);
+            // HANDLE (Wolfgang, 2016-02-01)
         }
     }
 
     private void handleUnlatchDoor(Message.AddressedMessage message) {
         DoorUnlatchPayload payload = SLAVE_DOOR_UNLATCH.getPayload(message);
         Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, payload.getModuleName());
-        DoorBuzzer doorBuzzer = getContainer().require(key);
+        DoorBuzzer doorBuzzer = requireComponent(key);
         try {
             doorBuzzer.unlock(3000);
         } catch (EvsIoException e) {
             Log.e(TAG, "Cannot unlock door", e);
+            // HANDLE
             sendErrorMessage(message);
         }
     }

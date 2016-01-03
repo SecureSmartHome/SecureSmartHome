@@ -6,6 +6,11 @@ import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ReferenceCountUtil;
 
+/**
+ * TODO JavaDoc
+ *
+ * @author Niko Fink
+ */
 public class PipelinePlug extends ChannelHandlerAdapter {
     private static final String TAG = PipelinePlug.class.getSimpleName();
 

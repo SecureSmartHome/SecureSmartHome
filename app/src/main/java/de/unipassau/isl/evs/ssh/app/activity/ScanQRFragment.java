@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import java.io.IOException;
 
+import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
@@ -48,7 +49,7 @@ public abstract class ScanQRFragment extends BoundFragment {
                     onQRCodeScanned(info);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Toast.makeText(getActivity(), "Malformed QR-Code", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), R.string.malformed_qr_code, Toast.LENGTH_SHORT).show();
                 }
             }
         }

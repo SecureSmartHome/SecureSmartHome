@@ -52,8 +52,6 @@ Java_de_unipassau_isl_evs_ssh_drivers_lib_WeatherSensor_readData(JNIEnv *env, jo
     LOGD("readData()");
 
     jclass thisWeather = env->GetObjectClass(instance);
-    jfieldID temp1ID = env->GetFieldID(thisWeather, "temp1", "D");
-    jfieldID pressureID = env->GetFieldID(thisWeather, "pressure", "D");
 
     int j;
     for (j = 0; j < 9; j++) {
@@ -82,12 +80,12 @@ Java_de_unipassau_isl_evs_ssh_drivers_lib_WeatherSensor_readData(JNIEnv *env, jo
             case '0':
                 temperature1 = atof(&readBuf[1]);
                 LOGD("Found value for temperature1: %f", temperature1);
-                env->SetDoubleField(instance, temp1ID, temperature1);
+                env->SetDoubleField(instance, env->GetFieldID(thisWeather, "temp1", "D"), temperature1);
                 break;
             case '1':
                 pressure = atof(&readBuf[1]);
                 LOGD("Found value for pressure: %f", pressure);
-                env->SetDoubleField(instance, pressureID, pressure);
+                env->SetDoubleField(instance, env->GetFieldID(thisWeather, "pressure", "D"), pressure);
                 break;
             case '2':
                 altitude = atof(&readBuf[1]);

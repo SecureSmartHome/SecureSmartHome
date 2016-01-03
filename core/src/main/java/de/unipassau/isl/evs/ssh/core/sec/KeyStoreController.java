@@ -3,6 +3,7 @@ package de.unipassau.isl.evs.ssh.core.sec;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import org.spongycastle.x509.X509V3CertificateGenerator;
@@ -30,6 +31,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -267,14 +269,49 @@ public class KeyStoreController extends AbstractComponent {
         return Collections.list(keyStore.aliases());
     }
 
-    // TODO: generate password from device ID
-    // https://stackoverflow.com/questions/2785485/is-there-a-unique-android-device-id/2853253#2853253
-
     private char[] getKeystorePassword() {
-        return "titBewgOt2".toCharArray();
+        TelephonyManager telephonyManager = ((TelephonyManager) getContainer()
+                .require(ContainerService.KEY_CONTEXT)
+                .getBaseContext()
+                .getSystemService(Context.TELEPHONY_SERVICE));
+
+        //We concatenate with empty strings to make sure we always have strings and never null
+        final String tmDevice = "" + telephonyManager.getDeviceId();
+        final String tmSerial = "" + telephonyManager.getSimSerialNumber();
+        final String androidId = "" + android
+                .provider
+                .Settings
+                .Secure
+                .getString(
+                        getContainer().require(ContainerService.KEY_CONTEXT).getContentResolver(),
+                        android.provider.Settings.Secure.ANDROID_ID);
+
+
+        final UUID uuid = new UUID(androidId.hashCode(), tmDevice.hashCode() << 32 | tmSerial.hashCode());
+
+        return uuid.toString().toCharArray();
     }
 
     private char[] getKeyPairPassword() {
-        return "clipnitLav9".toCharArray();
+        TelephonyManager telephonyManager = ((TelephonyManager) getContainer()
+                .require(ContainerService.KEY_CONTEXT)
+                .getBaseContext()
+                .getSystemService(Context.TELEPHONY_SERVICE));
+
+        //We concatenate with empty strings to make sure we always have strings and never null
+        final String tmDevice = "" + telephonyManager.getDeviceId();
+        final String tmSerial = "" + telephonyManager.getSimSerialNumber();
+        final String androidId = "" + android
+                .provider
+                .Settings
+                .Secure
+                .getString(
+                        getContainer().require(ContainerService.KEY_CONTEXT).getContentResolver(),
+                        android.provider.Settings.Secure.ANDROID_ID);
+
+
+        final UUID uuid = new UUID(tmSerial.hashCode(), androidId.hashCode() << 32 | tmDevice.hashCode());
+
+        return uuid.toString().toCharArray();
     }
 }

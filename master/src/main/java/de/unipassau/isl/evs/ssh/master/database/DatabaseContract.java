@@ -20,10 +20,6 @@ public class DatabaseContract {
         public static final String COLUMN_ID = "_ID";
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_ELECTRONIC_MODULE_ID = "electronicModuleId";
-
-        //Does not describe a table but constants for the PermissionTable entries
-        public class Values {
-        }
     }
 
     public class HasPermission {
