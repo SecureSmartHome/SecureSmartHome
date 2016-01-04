@@ -170,7 +170,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
             }
         }
 
-        // FIXME this destroys the fragment lifecycle, because a new Fragment is created when onContainerConnected is called.
+        // FIXME Niko: this destroys the fragment lifecycle, because a new Fragment is created when onContainerConnected is called.
         // So onSaveInstanceState() does not work in fragments.
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
             try {
