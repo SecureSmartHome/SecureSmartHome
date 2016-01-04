@@ -47,6 +47,7 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
      */
     public boolean isOn() {
         if (System.currentTimeMillis() - lastUpdate >= REFRESH_DELAY_MILLIS) {
+            // TODO Chris: this will crash the app if the master is not known
             sendMessageToMaster(MASTER_HOLIDAY_GET, new Message(new HolidaySimulationPayload(false)));
         }
         return isOn;
