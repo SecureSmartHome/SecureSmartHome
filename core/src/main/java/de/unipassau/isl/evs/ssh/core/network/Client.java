@@ -392,6 +392,17 @@ public class Client extends AbstractComponent {
         return isChannelOpen() && channelFuture.channel().attr(ATTR_HANDSHAKE_FINISHED).get() == Boolean.TRUE;
     }
 
+    /**
+     * Blocks until the Client has been completely shut down.
+     *
+     * @throws InterruptedException
+     */
+    // TODO Niko: handle edge cases
+    public void awaitShutdown() throws InterruptedException {
+        channelFuture.channel().closeFuture().await();
+        executor.terminationFuture().await();
+    }
+
     //Shared Preferences////////////////////////////////////////////////////////////////////////////////////////////////
 
     private SharedPreferences getSharedPrefs() {
