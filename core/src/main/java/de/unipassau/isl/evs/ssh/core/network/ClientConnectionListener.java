@@ -7,7 +7,7 @@ package de.unipassau.isl.evs.ssh.core.network;
 public interface ClientConnectionListener {
     void onMasterFound();
 
-    void onClientConnecting();
+    void onClientConnecting(String host, int port);
 
     void onClientConnected();
 

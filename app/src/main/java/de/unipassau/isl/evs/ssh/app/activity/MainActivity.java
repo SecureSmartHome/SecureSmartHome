@@ -50,7 +50,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         }
 
         @Override
-        public void onClientConnecting() {
+        public void onClientConnecting(String host, int port) {
 
         }
 
