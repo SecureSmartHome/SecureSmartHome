@@ -63,6 +63,7 @@ public class MasterContainer extends ContainerService {
         //registerHandler(new MasterPermissionHandler());
 
         Log.i(getClass().getSimpleName(), "Master set up! ID is " + require(NamingManager.KEY).getOwnID());
+        Log.i(getClass().getSimpleName(), "Routing Table set in " + require(IncomingDispatcher.KEY).toString());
     }
 
     private void registerHandler(AbstractMasterHandler masterHandler) {
