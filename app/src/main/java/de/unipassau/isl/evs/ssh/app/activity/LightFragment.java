@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
@@ -156,8 +155,6 @@ public class LightFragment extends BoundFragment {
             final Module module = getItem(position);
             final AppLightHandler appLightHandler = getComponent(AppLightHandler.KEY);
             final boolean isLightOn = appLightHandler != null && appLightHandler.isLightOnCached(module);
-            Log.v(TAG, "getView for #" + position + " " + module + " (turned " + (isLightOn ? "on" : "off") + ") from "
-                    + "Adapter@" + Objects.hash(this) + " | Fragment@" + Objects.hash(LightFragment.this));
 
             final LinearLayout lightButtonLayout;
             if (convertView == null) {
