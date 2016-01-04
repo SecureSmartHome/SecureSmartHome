@@ -1,129 +1,79 @@
 package de.unipassau.isl.evs.ssh.drivers.lib;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.PrintWriter;
 
-/**
- * Created by wg on 07.12.15.
- */
 public class EvsIo {
+    private static final String TAG = EvsIo.class.getSimpleName();
 
-    /*
-     * Initialisation of a pin
+    /**
+     * Set-Up a GPIO pin
      *
-     * @param IoAddress Pin number (see shifter shild)
-	 * @param direction For sensors "in" and for actuators "out"
-	 *
-	 * @return True if OK
+     * @param pin       pin number (see shifter shield)
+     * @param direction for sensors "in" and for actuators "out"
      */
-    public static boolean registerPin(int IoAddress, String direction) throws EvsIoException {
-        boolean ret = true;
-
-        // Register sensor
+    public static void registerPin(int pin, String direction) throws EvsIoException {
         try {
-            Log.w("EVS-IO", "EVS-IO: Register GPIO " + IoAddress + " with direction: " + direction);
-            Process su = Runtime.getRuntime().exec("su");
-            DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
+            Log.d(TAG, "Register GPIO " + pin + " with direction " + direction);
+            final Process su = Runtime.getRuntime().exec("su");
+            final PrintWriter w = new PrintWriter(su.getOutputStream());
 
-            outputStream.writeBytes("echo " + IoAddress + " > /sys/class/gpio/export\n");
-            outputStream.writeBytes("echo \"" + direction + "\" > /sys/class/gpio/gpio" + IoAddress + "/direction\n");
-            outputStream.flush();
+            w.println("echo " + pin + " > /sys/class/gpio/export");
+            w.println("echo \"" + direction + "\" > /sys/class/gpio/gpio" + pin + "/direction");
+            ////edge detection for sensors: rising/falling/both/none
+            //if (Strings.isNullOrEmpty(edge)) {
+            //    edge = "none";
+            //}
+            //w.println("echo \"" + edge + "\" > /sys/class/gpio/gpio" + pin + "/edge");
+            w.println("chmod 666 " + getValueFile(pin));
+            w.flush();
 
-            outputStream.writeBytes("exit\n");
-            outputStream.flush();
+            w.println("exit");
+            w.flush();
             su.waitFor();
-        } catch (Exception e) {
-            Log.w("EVS-IO", "EVS-IO error: " + e);
-            throw new EvsIoException("Could not register Pin: " + e);
+        } catch (IOException | InterruptedException e) {
+            throw new EvsIoException("Could not register pin " + pin, e);
         }
-        return ret;
     }
 
-    /*
+    /**
      * Read sensor value
      *
-     * @param IoAddress Pin number (see shifter shild)
-     *
-     * @return The read value
-    */
-    public static String readValue(int IoAdress) throws EvsIoException {
-        String ret = "";
-
-        // Register sensor
+     * @param pin pin number (see shifter shield)
+     * @return the value of the sensor
+     */
+    public static String readValue(int pin) throws EvsIoException {
         try {
-            InputStream response = null;
-            //Log.w("EVS-IO", "EVS-IO: Read GPIO " + IoAdress);
-            Process su = Runtime.getRuntime().exec("su");
-            DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
-            response = su.getInputStream();
-
-
-            outputStream.writeBytes("cat /sys/class/gpio/gpio" + IoAdress + "/value\n");
-            outputStream.flush();
-
-            outputStream.writeBytes("exit\n");
-            outputStream.flush();
-            su.waitFor();
-            String result = readFully(response);
-            //Log.w("EVS-IO", "EVS-IO: Read GPIO value: " + result);
-            ret = result;
-        } catch (Exception e) {
-            Log.w("EVS-IO", "EVS-IO error: " + e);
-            throw new EvsIoException("Could not register Pin: " + e);
+            return Files.toString(getValueFile(pin), Charsets.UTF_8);
+        } catch (IOException e) {
+            throw new EvsIoException("Could not read value of pin " + pin, e);
         }
-        return ret;
     }
 
-    /*
+    /**
      * Set actuator state
      *
-     * @param IoAddress Pin number (see shifter shild)
+     * @param pin   pin number (see shifter shield)
      * @param value value to set
-     *
-     * @return True if OK
-    */
-    public static boolean setValue(int IoAdress, boolean value) throws EvsIoException {
-        boolean ret = false;
-
-        // Register sensor
-        try {
-            Log.w("EVS-IO", "EVS-IO: Set GPIO " + IoAdress);
-            Process su = Runtime.getRuntime().exec("su");
-            DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
-            int valueInt = 0;
-
-            if (value == true) {
-                valueInt = 1;
-            } else {
-                valueInt = 0;
-            }
-
-            outputStream.writeBytes("echo " + valueInt + " > /sys/class/gpio/gpio" + IoAdress + "/value\n");
-            outputStream.flush();
-
-            outputStream.writeBytes("exit\n");
-            outputStream.flush();
-            su.waitFor();
-            ret = true;
-        } catch (Exception e) {
-            Log.w("EVS-IO", "EVS-IO error: " + e);
-            throw new EvsIoException("Could not register Pin: " + e);
+     */
+    public static void setValue(int pin, boolean value) throws EvsIoException {
+        try (FileOutputStream os = new FileOutputStream(getValueFile(pin))) {
+            os.write(value ? 1 : 0);
+        } catch (IOException e) {
+            throw new EvsIoException("Could not set value of pin " + pin + " to " + value, e);
         }
-        return ret;
     }
 
-    public static String readFully(InputStream is) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length = 0;
-        while ((length = is.read(buffer)) != -1) {
-            baos.write(buffer, 0, length);
-        }
-        return baos.toString("UTF-8");
+    @NonNull
+    private static File getValueFile(int pin) {
+        return new File("/sys/class/gpio/gpio" + pin + "/value");
     }
-
 }

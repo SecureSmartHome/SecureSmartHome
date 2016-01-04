@@ -3,7 +3,6 @@ package de.unipassau.isl.evs.ssh.drivers.lib;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
@@ -22,10 +21,8 @@ import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
  * @author Christoph Fraedrich
  * @version 2.1
  */
+@SuppressWarnings("CanBeFinal")
 public class WeatherSensor extends AbstractComponent {
-    public static final Key<WeatherSensor> KEY = new Key<>(WeatherSensor.class);
-    private static final String TAG = WeatherSensor.class.getSimpleName();
-
     static {
         System.loadLibrary("ssh-drivers");
     }
@@ -33,35 +30,35 @@ public class WeatherSensor extends AbstractComponent {
     private double temp1, temp2, pressure, altitude, humidity, uv;
     private int visible, ir;
     private Module module;
-    private Container container;
+
     private ScheduledFuture future;
 
     @Override
     public void init(Container container) {
+        super.init(container);
         initSerialInterface();
-        this.container = container;
-
         this.future = container.require(ExecutionServiceComponent.KEY).scheduleAtFixedRate(
-                new WeatherPollingRunnable(this), 0, 200, TimeUnit.MILLISECONDS);
+                new WeatherPollingRunnable(), 0, 200, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void destroy() {
         close();
         future.cancel(true);
+        super.destroy();
     }
 
     public void updateData() {
         readData();
     }
 
+    //Natives///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     /**
      * Initializes serial connection to Odroid Show and Weather board.
      * Remember to call close() at the end to close the connection.
      */
     private native void initSerialInterface();
-
-    //Natives///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Reads the current sensor data. The weather board only supports to read
@@ -75,79 +72,69 @@ public class WeatherSensor extends AbstractComponent {
      */
     private native void close();
 
-    /*
-    * returns last value from readData() for temperature sensor 1
-    */
+    //Getters///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @return the last value from readData() for temperature sensor 1
+     */
     public double getTemperature1() {
         return temp1;
     }
 
-    //Getters///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /*
-    * returns last value from readData() for temperature sensor 2
-    */
+    /**
+     * @return the last value from readData() for temperature sensor 2
+     */
     public double getTemperature2() {
         return temp2;
     }
 
-    /*
-    * returns last value from readData() for pressure sensor
-    */
+    /**
+     * @return the last value from readData() for pressure sensor
+     */
     public double getPressure() {
         return pressure;
     }
 
-    /*
-    * returns last value from readData() for humidity sensor
-    */
+    /**
+     * @return the last value from readData() for humidity sensor
+     */
     public double getHumidity() {
         return humidity;
     }
 
-    /*
-    * returns last value from readData() for altitude sensor
-    */
+    /**
+     * @return the last value from readData() for altitude sensor
+     */
     public double getAltitude() {
         return altitude;
     }
 
-    /*
-    * returns last value from readData() for UV index sensor
-    */
+    /**
+     * @return the last value from readData() for UV index sensor
+     */
     public double getUV() {
         return uv;
     }
 
-    /*
-    * returns last value from readData() for visible light sensor
-    */
+    /**
+     * @return the last value from readData() for visible light sensor
+     */
     public int getVisibleLight() {
         return visible;
     }
 
-    /*
-    * returns last value from readData() for infrared sensor
-    */
+    /**
+     * @return the last value from readData() for infrared sensor
+     */
     public int getInfrared() {
         return ir;
     }
 
-    /*
-    * returns last value from readData() for module Name of the sensor
-     */
     public Module getModule() {
-        return module;
+        return module; //FIXME always returns null (Niko, 2016-01-03)
     }
 
     private class WeatherPollingRunnable implements Runnable {
-
-        WeatherSensor sensor;
-
-        public WeatherPollingRunnable(WeatherSensor sensor) {
-            this.sensor = sensor;
-        }
-
         @Override
         public void run() {
             if (future != null) {
@@ -163,13 +150,10 @@ public class WeatherSensor extends AbstractComponent {
             ClimatePayload payload = new ClimatePayload(getTemperature1(), getTemperature2(), getPressure(),
                     getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), "", getModule());
 
-            NamingManager namingManager = container.require(NamingManager.KEY);
+            NamingManager namingManager = requireComponent(NamingManager.KEY);
 
-            Message message;
-            message = new Message(payload);
-            message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
-
-            OutgoingRouter router = container.require(OutgoingRouter.KEY);
+            Message message = new Message(payload);
+            OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
             router.sendMessage(namingManager.getMasterID(), RoutingKeys.MASTER_PUSH_WEATHER_INFO, message);
         }
     }

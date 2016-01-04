@@ -72,6 +72,7 @@ public class CoreConstants {
 
     /**
      * This class contains constants for ModuleTypes
+     * TODO Niko: fancy internationalized to String (Wolfi, 2016-01-04)
      */
     public enum ModuleType {
         Light,

@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.app;
 
+import android.util.Log;
+
 import de.unipassau.isl.evs.ssh.app.handler.AppAddSlaveHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppClimateHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
@@ -11,6 +13,7 @@ import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppRegisterNewDeviceHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
@@ -37,5 +40,7 @@ public class AppContainer extends ContainerService {
         register(AppNotificationHandler.KEY, new AppNotificationHandler());
         register(AppRegisterNewDeviceHandler.KEY, new AppRegisterNewDeviceHandler());
         register(AppUserConfigurationHandler.KEY, new AppUserConfigurationHandler());
+
+        Log.i(getClass().getSimpleName(), "Routing Table set in " + require(IncomingDispatcher.KEY).toString());
     }
 }

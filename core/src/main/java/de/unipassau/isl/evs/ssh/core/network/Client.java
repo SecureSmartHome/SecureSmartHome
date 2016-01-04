@@ -38,6 +38,7 @@ import io.netty.util.internal.logging.Slf4JLoggerFactory;
 import static android.content.Context.MODE_PRIVATE;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_HANDSHAKE_FINISHED;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT;
 
 /**
@@ -194,7 +195,7 @@ public class Client extends AbstractComponent {
      */
     protected void connectClient(String host, int port) {
         Log.i(TAG, "Client connecting to " + host + ":" + port);
-        notifyClientConnecting();
+        notifyClientConnecting(host, port);
 
         // TCP Connection
         Bootstrap b = new Bootstrap()
@@ -393,6 +394,13 @@ public class Client extends AbstractComponent {
     }
 
     /**
+     * @return {@code true}, if the Client is connected to the Master via a local, home network
+     */
+    public boolean isConnectionLocal() {
+        return isConnectionEstablished() && channelFuture.channel().attr(ATTR_LOCAL_CONNECTION).get() == Boolean.TRUE;
+    }
+
+    /**
      * Blocks until the Client has been completely shut down.
      *
      * @throws InterruptedException
@@ -499,9 +507,9 @@ public class Client extends AbstractComponent {
         }
     }
 
-    private void notifyClientConnecting() {
+    private void notifyClientConnecting(String host, int port) {
         for (ClientConnectionListener listener : listeners) {
-            listener.onClientConnecting();
+            listener.onClientConnecting(host, port);
         }
     }
 

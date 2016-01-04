@@ -38,6 +38,7 @@ public class SlaveContainer extends ContainerService {
         final NamingManager namingManager = require(NamingManager.KEY);
         Log.i(getClass().getSimpleName(), "Slave set up! ID is " + namingManager.getOwnID()
                 + "; Master is " + (namingManager.isMasterKnown() ? namingManager.getMasterID() : "unknown"));
+        Log.i(getClass().getSimpleName(), "Routing Table set in " + require(IncomingDispatcher.KEY).toString());
     }
 
     private void registerHandler(AbstractMessageHandler messageHandler) {
