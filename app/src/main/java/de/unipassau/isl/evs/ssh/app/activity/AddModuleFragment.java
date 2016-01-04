@@ -54,16 +54,22 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private final AppNewModuleHandler.NewModuleListener listener = new AppNewModuleHandler.NewModuleListener() {
         @Override
-        public void registrationFinished(boolean wasSuccessful) {
-            String text;
-            if (wasSuccessful) {
-                text = getResources().getString(R.string.added_module_success);
-            } else {
-                text = getResources().getString(R.string.added_module_fail);
-            }
+        public void registrationFinished(final boolean wasSuccessful) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String text;
+                    if (wasSuccessful) {
+                        text = getResources().getString(R.string.added_module_success);
+                    } else {
+                        text = getResources().getString(R.string.added_module_fail);
+                    }
 
-            Toast toast = Toast.makeText(getActivity().getApplicationContext(), text, Toast.LENGTH_LONG);
-            toast.show();
+                    Toast toast = Toast.makeText(getActivity().getApplicationContext(), text, Toast.LENGTH_LONG);
+                    toast.show();
+                    ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+                }
+            });
         }
     };
 
