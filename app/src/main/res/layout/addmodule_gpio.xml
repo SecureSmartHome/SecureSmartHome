@@ -9,6 +9,7 @@
         android:id="@+id/add_module_gpio_port_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:labelFor="@+id/add_module_gpio_port_input"
         android:text="@string/gpio_port" />
 
     <EditText
