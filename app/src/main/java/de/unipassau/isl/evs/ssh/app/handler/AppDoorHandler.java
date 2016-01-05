@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.app.activity.DoorFragment;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
@@ -41,14 +40,15 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
 
     private boolean isDoorBlocked = false;
     private boolean isDoorOpen = false;
-    private List<DoorFragment.DoorListener> listeners = new LinkedList<>();
+    private List<DoorListener> listeners = new LinkedList<>();
+    private byte[] picture = null;
 
     /**
      * Adds a DoorListener to this handler.
      *
      * @param listener the DoorListener that is added to handler.
      */
-    public void addListener(DoorFragment.DoorListener listener) {
+    public void addListener(DoorListener listener) {
         listeners.add(listener);
     }
 
@@ -57,7 +57,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
      *
      * @param listener the DoorListener that is removed from handler.
      */
-    public void removeListener(DoorFragment.DoorListener listener) {
+    public void removeListener(DoorListener listener) {
         listeners.remove(listener);
     }
 
@@ -67,13 +67,13 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         } else {
             Log.v(TAG, "Received picture.");
         }
-        for (DoorFragment.DoorListener listener : listeners) {
+        for (DoorListener listener : listeners) {
             listener.onPictureChanged(image);
         }
     }
 
     private void fireStatusUpdated() {
-        for (DoorFragment.DoorListener listener : listeners) {
+        for (DoorListener listener : listeners) {
             listener.onDoorStatusChanged();
         }
     }
@@ -90,7 +90,8 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
     public void handle(Message.AddressedMessage message) {
         if (APP_CAMERA_GET.matches(message)) {
             CameraPayload payload = APP_CAMERA_GET.getPayload(message);
-            fireImageUpdated(payload.getPicture());
+            picture = payload.getPicture();
+            fireImageUpdated(picture);
         } else if (APP_DOOR_BLOCK.matches(message)) {
             DoorLockPayload payload = APP_DOOR_BLOCK.getPayload(message);
             isDoorBlocked = !payload.isUnlock();
@@ -131,7 +132,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
     /**
      * Refreshs the door status by sending a status request message.
      */
-    public void refresh() {
+    public void refreshDoorStatus() {
         List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoors();
         if (doors.size() < 1) {
             Log.e(TAG, "Could not get door status. No door installed");
@@ -198,6 +199,15 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
     }
 
     /**
+     * Gets the last taken picture.
+     *
+     * @return the last taken picture or null if no picture has been taken yet.
+     */
+    public byte[] getPicture() {
+        return picture;
+    }
+
+    /**
      * Sends a "BlockDoor" message to the master.
      */
     public void blockDoor() {
@@ -227,5 +237,14 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
 
         OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
         router.sendMessageToMaster(MASTER_CAMERA_GET, message);
+    }
+
+    /**
+     * The listener interface to receive door events.
+     */
+    public interface DoorListener {
+        void onPictureChanged(byte[] image);
+
+        void onDoorStatusChanged();
     }
 }
