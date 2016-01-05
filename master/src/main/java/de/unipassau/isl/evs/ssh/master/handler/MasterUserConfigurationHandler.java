@@ -64,8 +64,13 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 
     private void sendUpdateToUserDevice(DeviceID id) {
         Log.v(TAG, "sendUpdateToUser: " + id.getIDString());
-        final Message userDeviceInformationMessage = new Message(generateUserDeviceInformationPayload());
-        sendMessage(id, APP_USERINFO_GET, userDeviceInformationMessage);
+
+        if (!isSlave(id)) {
+            final Message userDeviceInformationMessage = new Message(generateUserDeviceInformationPayload());
+            sendMessage(id, APP_USERINFO_GET, userDeviceInformationMessage);
+        }
+
+        //TODO this is probably not the correct location to send module information. This has to be done by the MasterModuleHandler
         final Message moduleInformationMessage = new Message(generateModuleInformationPayload());
         sendMessage(id, GLOBAL_MODULES_UPDATE, moduleInformationMessage);
     }
