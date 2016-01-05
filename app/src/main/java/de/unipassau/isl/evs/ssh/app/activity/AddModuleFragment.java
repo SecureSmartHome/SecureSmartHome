@@ -111,12 +111,12 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         List<String> moduleTypes = Lists.transform(Arrays.asList(ModuleType.values()), new Function<ModuleType, String>() {
             @Override
             public String apply(ModuleType input) {
-                return input.toLocalizedString(getActivity().getApplicationContext());
+                return input.toLocalizedString(getActivity());
             }
         });
 
         ArrayAdapter<String> sensorTypeAdapter = new ArrayAdapter<>(
-                getActivity().getApplicationContext(),
+                getActivity(),
                 android.R.layout.simple_spinner_dropdown_item, moduleTypes
         );
 
@@ -312,8 +312,9 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
         String name = nameInput.getText().toString();
         DeviceID atSlave = ((Slave) slaveSpinner.getSelectedItem()).getSlaveID();
-        String sensorType = (String) sensorTypeSpinner.getSelectedItem();
-        Module module = new Module(name, atSlave, ModuleType.valueOf(sensorType), accessPoint);
+        int position = sensorTypeSpinner.getSelectedItemPosition();
+        ModuleType moduleType = ModuleType.values()[position];
+        Module module = new Module(name, atSlave, moduleType, accessPoint);
 
         handler.addNewModule(module);
     }
