@@ -127,7 +127,7 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
         if (!keys.isEmpty()) {
             bob.append("\n");
             for (RoutingKey key : keys) {
-                bob.append('\r').append(key).append(" => ").append(mappings.get(key)).append('\n');
+                bob.append('\t').append(key).append(" => ").append(mappings.get(key)).append('\n');
             }
         }
         bob.append("]");

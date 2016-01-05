@@ -59,7 +59,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
         CameraPayload cameraPayload = MASTER_CAMERA_GET.getPayload(message);
         Module atModule = requireComponent(SlaveController.KEY).getModule(cameraPayload.getModuleName());
         Message messageToSend = new Message(cameraPayload);
-        messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
+        messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_CAMERA_GET.getKey());
 
         //Check permission
         if (hasPermission(

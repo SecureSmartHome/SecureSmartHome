@@ -102,7 +102,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                 )
         )) {
             final Message messageToSend = new Message(doorStatusPayload);
-            messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
+            messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_DOOR_STATUS_GET.getKey());
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),
                     SLAVE_DOOR_STATUS_GET,
@@ -188,7 +188,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         Module atModule = requireComponent(SlaveController.KEY)
                 .getModule(doorUnlatchPayload.getModuleName());
         Message messageToSend = new Message(doorUnlatchPayload);
-        messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
+        messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_DOOR_UNLATCH.getKey());
 
         if (requireComponent(PermissionController.KEY)
                 .hasPermission(message.getFromID(), new Permission(
