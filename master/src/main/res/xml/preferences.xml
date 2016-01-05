@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <EditTextPreference android:title="Local Port"
+        android:numeric="integer"
         android:key="master_local_port"
-        android:summary="Local port to connect to master"></EditTextPreference>
+        android:summary="Local port to connect to master"/>
     <EditTextPreference android:title="Public Port On Master"
+        android:numeric="integer"
         android:key="master_port_intern"
-        android:summary="Opened on Master to accept connections from extern"></EditTextPreference>
+        android:summary="Opened on Master to accept connections from extern"/>
     <EditTextPreference android:title="Public Port On Firewall"
+        android:numeric="integer"
         android:key="master_port_extern"
-        android:summary="Opened to connect to master from extern"></EditTextPreference>
+        android:summary="Opened to connect to master from extern"/>
     <EditTextPreference android:title="City Name"
         android:key="master_city_name"
-        android:summary="Name of the city for weather forecast"></EditTextPreference>
+        android:summary="Name of the city for weather forecast"/>
 </PreferenceScreen>
