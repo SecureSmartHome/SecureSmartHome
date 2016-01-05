@@ -104,15 +104,6 @@
     <string name="port">Port:</string>
     <string name="add_wlan_module">Add WLAN module</string>
     <string name="add_mock_module">Add mocked module</string>
-    <string name="climate_sensor">Climate Sensor:</string>
-    <string name="temperature_1">Temperature 1:</string>
-    <string name="temperature2">Temperature 2:</string>
-    <string name="pressure">Pressure:</string>
-    <string name="altitude">Altitude:</string>
-    <string name="humidity">Humidity:</string>
-    <string name="uv">UV:</string>
-    <string name="visible_1">Visible:</string>
-    <string name="ir">IR:</string>
     <string name="status_name">Name:</string>
     <string name="status_id">ID:</string>
     <string name="statusmodule_name">Name:</string>
@@ -129,4 +120,21 @@
     <string name="warn_client_rejected">Connection refused. Maybe the system has been reset?</string>
     <string name="warn_no_connection_to_master">No Connection to Secure Smart Home Server.</string>
     <string name="malformed_qr_code">Malformed QR-Code</string>
+
+    <!--Strings used in ClimateFragment-->
+    <string name="climate_sensor">Climate Sensor:</string>
+    <string name="temperature_1">Temperature 1:</string>
+    <string name="temperature2">Temperature 2:</string>
+    <string name="pressure">Pressure:</string>
+    <string name="altitude">Altitude:</string>
+    <string name="humidity">Humidity:</string>
+    <string name="uv">UV Index:</string>
+    <string name="visible_1">Visible:</string>
+    <string name="ir">IR:</string>
+
+    <string name="si_degree">%3.1f C°</string>
+    <string name="si_pressure">%4.1f Pa</string>
+    <string name="si_altitude">%4.2f m</string>
+    <string name="si_humidity">%3.2f %</string>
+    <string name="si_visible">%d%n Lux</string>
 </resources>

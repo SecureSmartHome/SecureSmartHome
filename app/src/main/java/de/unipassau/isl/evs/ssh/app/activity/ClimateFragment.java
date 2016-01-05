@@ -181,39 +181,37 @@ public class ClimateFragment extends BoundFragment {
             String name = m.getName();
             climateSensorView.setText(name);
 
-            // TODO check if units are correct
             TextView temp1View = (TextView) climateSensorLayout.findViewById(R.id.temp1);
-            double temp1 = getComponent(AppClimateHandler.KEY).getTemp1(m);
-            temp1View.setText(Double.toString(temp1) + " °C");
+            double temp1 = getContainer().require(AppClimateHandler.KEY).getTemp1(m);
+            temp1View.setText(String.format(getResources().getString(R.string.si_degree), temp1));
 
             TextView temp2View = (TextView) climateSensorLayout.findViewById(R.id.temp2);
-            double temp2 = getComponent(AppClimateHandler.KEY).getTemp2(m);
-            temp2View.setText(Double.toString(temp2) + " °C");
+            double temp2 = getContainer().require(AppClimateHandler.KEY).getTemp2(m);
+            temp2View.setText(String.format(getResources().getString(R.string.si_degree), temp2));
 
             TextView pressureView = (TextView) climateSensorLayout.findViewById(R.id.pressure);
-            double pressure = getComponent(AppClimateHandler.KEY).getPressure(m);
-            pressureView.setText(Double.toString(pressure) + " Pa");
+            double pressure = getContainer().require(AppClimateHandler.KEY).getPressure(m);
+            pressureView.setText(String.format(getResources().getString(R.string.si_pressure), pressure));
 
             TextView altitudeView = (TextView) climateSensorLayout.findViewById(R.id.altitude);
-            double altitude = getComponent(AppClimateHandler.KEY).getAltitude(m);
-            altitudeView.setText(Double.toString(altitude) + " m");
+            double altitude = getContainer().require(AppClimateHandler.KEY).getAltitude(m);
+            altitudeView.setText(String.format(getResources().getString(R.string.si_altitude), altitude));
 
             TextView humidityView = (TextView) climateSensorLayout.findViewById(R.id.humidity);
-            double humidity = getComponent(AppClimateHandler.KEY).getHumidity(m);
-            humidityView.setText(Double.toString(humidity) + " %");
+            double humidity = getContainer().require(AppClimateHandler.KEY).getHumidity(m);
+            humidityView.setText(String.format(getResources().getString(R.string.si_humidity), humidity));
 
             TextView uvView = (TextView) climateSensorLayout.findViewById(R.id.uv);
-            double uv = getComponent(AppClimateHandler.KEY).getUv(m);
-            uvView.setText(Double.toString(uv) + " W/m²");
+            double uv = getContainer().require(AppClimateHandler.KEY).getUv(m);
+            uvView.setText(String.format("%2.2f", uv));
 
             TextView visibleView = (TextView) climateSensorLayout.findViewById(R.id.visible);
-            int visible = getComponent(AppClimateHandler.KEY).getVisible(m);
-            //cd = Candela SI-unit for light intensity
-            visibleView.setText(Integer.toString(visible) + " cd");
+            int visible = getContainer().require(AppClimateHandler.KEY).getVisible(m);
+            visibleView.setText(String.format(getResources().getString(R.string.si_visible), visible));
 
             TextView irView = (TextView) climateSensorLayout.findViewById(R.id.ir);
-            int ir = getComponent(AppClimateHandler.KEY).getIr(m);
-            irView.setText(Integer.toString(ir) + " cd");
+            int ir = getContainer().require(AppClimateHandler.KEY).getIr(m);
+            irView.setText(String.format(getResources().getString(R.string.si_visible), ir));
 
             counter++;
             return climateSensorLayout;
