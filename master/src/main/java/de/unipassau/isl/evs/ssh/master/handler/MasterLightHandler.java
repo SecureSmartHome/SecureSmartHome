@@ -26,11 +26,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
         saveMessage(message);
 
         if (MASTER_LIGHT_SET.matches(message)) {
-            if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
-                handleSetRequest(message);
-            } else {
-                handleResponse(message);
-            }
+            handleSetRequest(message);
         } else if (MASTER_LIGHT_GET.matches(message)) {
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
                 handleGetRequest(message);
@@ -62,7 +58,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
         //)) {
         if (true) {
             final Message messageToSend = new Message(payload);
-            messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
+            messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_LIGHT_GET.getKey());
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),
                     SLAVE_LIGHT_SET,
@@ -91,7 +87,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
                 )
         )) {
             final Message messageToSend = new Message(payload);
-            messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, message.getRoutingKey());
+            messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_LIGHT_GET.getKey());
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),
                     SLAVE_LIGHT_GET,
