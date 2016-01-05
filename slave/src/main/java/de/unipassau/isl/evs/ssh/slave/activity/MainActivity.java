@@ -34,7 +34,6 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_DEMO;
 import static de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation.encodeToken;
 
 /**
@@ -102,41 +101,7 @@ public class MainActivity extends BoundActivity {
             }
         });
 
-        findViewById(R.id.buttonSend).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Message message = new Message();
-                final OutgoingRouter outgoingRouter = getComponent(OutgoingRouter.KEY);
-                if (outgoingRouter == null) {
-                    Toast.makeText(MainActivity.this, "Container not connected", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                final Future<Void> future = outgoingRouter.sendMessageToMaster(GLOBAL_DEMO, message).getSendFuture();
-                log("OUT:" + message.toString());
-                future.addListener(new GenericFutureListener<Future<Void>>() {
-                    @Override
-                    public void operationComplete(final Future<Void> future) throws Exception {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast toast;
-                                if (future.isSuccess()) {
-                                    toast = Toast.makeText(MainActivity.this, "Message sent", Toast.LENGTH_SHORT);
-                                } else {
-                                    toast = Toast.makeText(MainActivity.this, "Sending failed: " + future.cause(), Toast.LENGTH_LONG);
-                                }
-                                toast.show();
-                            }
-                        });
-                    }
-                });
-            }
-        });
-
-
         updateConnectionStatus();
-
-        requireComponent(IncomingDispatcher.KEY).registerHandler(handler, GLOBAL_DEMO);
 
         boolean isMasterKnown = requireComponent(NamingManager.KEY).isMasterKnown();
         if (!isMasterKnown) {
@@ -228,7 +193,6 @@ public class MainActivity extends BoundActivity {
     @Override
     public void onContainerDisconnected() {
         updateConnectionStatus();
-        requireComponent(IncomingDispatcher.KEY).unregisterHandler(handler, GLOBAL_DEMO);
     }
 
     private void log(String text) {
