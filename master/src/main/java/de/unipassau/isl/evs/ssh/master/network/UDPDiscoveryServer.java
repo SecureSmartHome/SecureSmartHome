@@ -68,9 +68,8 @@ public class UDPDiscoveryServer extends AbstractComponent {
                 .channel(NioDatagramChannel.class)
                 .group(requireComponent(Server.KEY).getExecutor())
                 .handler(new RequestHandler())
-                .option(ChannelOption.SO_BROADCAST, true)
-                .option(ChannelOption.SO_REUSEADDR, true);
-        channel = b.bind(CoreConstants.NettyConstants.DISCOVERY_PORT);
+                .option(ChannelOption.SO_BROADCAST, true);
+        channel = b.bind(CoreConstants.NettyConstants.DISCOVERY_SERVER_PORT);
     }
 
     @Override
@@ -100,7 +99,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
         final String addressString = request.recipient().getAddress().getHostAddress();
         final byte[] address = addressString.getBytes();
         final int port = ((InetSocketAddress) requireComponent(Server.KEY).getAddress()).getPort();
-        Log.i(TAG, "sendDiscoveryResponse " + addressString + ":" + port);
+        Log.i(TAG, "sendDiscoveryResponse with connection data " + addressString + ":" + port + " to " + request.sender());
 
         buffer.writeInt(header.length);
         buffer.writeBytes(header);
@@ -130,48 +129,48 @@ public class UDPDiscoveryServer extends AbstractComponent {
     private class RequestHandler extends ChannelHandlerAdapter {
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            if (msg instanceof DatagramPacket) {
+            try {
                 final DatagramPacket request = (DatagramPacket) msg;
                 final ByteBuf buffer = request.content();
+                buffer.markReaderIndex();
                 final String messageType = readString(buffer);
-                if (DISCOVERY_PAYLOAD_REQUEST.equals(messageType)) {
-                    final DeviceID ownID = requireComponent(NamingManager.KEY).getOwnID();
-                    final DeviceID clientID = readDeviceID(buffer);
-                    if (clientID == null) {
-                        Log.d(TAG, "Discarding UDP inquiry without client ID");
-                        ReferenceCountUtil.release(request);
-                        return;
-                    }
-
-                    final boolean isMasterKnown = buffer.readBoolean();
-                    if (isMasterKnown) {
-                        // if the master is known to the device, the IDs must match
-                        final DeviceID masterID = readDeviceID(buffer);
-                        if (!ownID.equals(masterID)) {
-                            Log.d(TAG, "Discarding UDP inquiry from " + clientID + "(" + request.sender() + ") " +
-                                    "that is not looking for me (" + ownID + ") but " + masterID);
-                            ReferenceCountUtil.release(request);
-                            return;
-                        }
-                    } else {
-                        // if the device doesn't know his master, the master must know the device
-                        if (!isDeviceRegistered(clientID)) {
-                            Log.d(TAG, "Discarding UDP inquiry from " + clientID + "(" + request.sender() + ") " +
-                                    "that is looking for any master and is not registered");
-                            ReferenceCountUtil.release(request);
-                            return;
-                        }
-                    }
-
-                    Log.d(TAG, "UDP inquiry received from " + clientID + "(" + request.sender() + ") that is looking for "
-                            + (isMasterKnown ? "me" : "any master and is registered here"));
-                    sendDiscoveryResponse(request);
-                    ReferenceCountUtil.release(request);
+                if (DISCOVERY_PAYLOAD_RESPONSE.equals(messageType)) {
+                    Log.d(TAG, "UDP discovery Server can't handle UDP response from " + request.sender());
+                    return;
+                } else if (!DISCOVERY_PAYLOAD_REQUEST.equals(messageType)) {
+                    Log.d(TAG, "Discarding UDP packet with illegal message type from " + request.sender() + ": " + messageType);
                     return;
                 }
+                final DeviceID ownID = requireComponent(NamingManager.KEY).getOwnID();
+                final DeviceID clientID = readDeviceID(buffer);
+                if (clientID == null) {
+                    Log.d(TAG, "Discarding UDP inquiry without client ID from " + request.sender());
+                    return;
+                }
+
+                final boolean isMasterKnown = buffer.readBoolean();
+                if (isMasterKnown) {
+                    // if the master is known to the device, the IDs must match
+                    final DeviceID masterID = readDeviceID(buffer);
+                    if (!ownID.equals(masterID)) {
+                        Log.d(TAG, "Discarding UDP inquiry from " + clientID + "(" + request.sender() + ") " +
+                                "that is not looking for me (" + ownID + ") but " + masterID);
+                        return;
+                    }
+                } else {
+                    // if the device doesn't know his master, the master must know the device
+                    if (!isDeviceRegistered(clientID)) {
+                        Log.d(TAG, "Discarding UDP inquiry from " + clientID + "(" + request.sender() + ") " +
+                                "that is looking for any master and is not registered");
+                        return;
+                    }
+                }
+                Log.d(TAG, "UDP inquiry received from " + clientID + "(" + request.sender() + ") that is looking for "
+                        + (isMasterKnown ? "me" : "any master and is registered here"));
+                sendDiscoveryResponse(request);
+            } finally {
+                ReferenceCountUtil.release(msg);
             }
-            // forward all other packets to the pipeline
-            super.channelRead(ctx, msg); //FIXME Niko: pipeline has only one handler, this makes no sense (Niko, 2015-12-28)
         }
 
         private boolean isDeviceRegistered(DeviceID clientID) {

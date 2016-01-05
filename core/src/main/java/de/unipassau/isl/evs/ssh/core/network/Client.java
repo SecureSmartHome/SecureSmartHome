@@ -31,6 +31,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.DefaultExecutorServiceFactory;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
@@ -149,7 +151,7 @@ public class Client extends AbstractComponent {
         }
 
         // And queue the (re-)connect
-        getAliveExecutor().submit(new Runnable() {
+        final Future<?> future = getAliveExecutor().submit(new Runnable() {
             @Override
             public void run() {
                 // Read the previous host and port from the shared preferences
@@ -157,12 +159,6 @@ public class Client extends AbstractComponent {
                 final int port = getPort();
 
                 // Connect to TCP if the address of the Server/Master is known and not too many connection attempts have failed
-                //TODO: uncomment with different behaviour for slave and app.
-                //TODO would like to uncomment, any details about the problem? (Niko, 2015-12-20)
-                //final NamingManager namingManager = requireComponent(NamingManager.KEY);
-                //if (!namingManager.isMasterIDKnown()) {
-                //    Log.w(TAG, "MasterID is null, waiting for onMasterFound(host, port)");
-                //} else
                 if (host != null && shouldReconnectTCP()) {
                     connectClient(host, port);
                 } else {
@@ -172,6 +168,14 @@ public class Client extends AbstractComponent {
                         Log.w(TAG, "Too many disconnects from " + host + ":" + port + ", trying UDP discovery");
                     }
                     requireComponent(UDPDiscoveryClient.KEY).startDiscovery();
+                }
+            }
+        });
+        future.addListener(new FutureListener<Object>() {
+            @Override
+            public void operationComplete(Future future) throws Exception {
+                if (!future.isSuccess()) {
+                    Log.w(TAG, "Could not schedule connect to master", future.cause());
                 }
             }
         });

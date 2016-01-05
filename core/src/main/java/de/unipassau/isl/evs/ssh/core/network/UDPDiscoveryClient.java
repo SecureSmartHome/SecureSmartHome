@@ -32,7 +32,7 @@ import io.netty.util.concurrent.ScheduledFuture;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_HOST;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_REQUEST;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_RESPONSE;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_SERVER_PORT;
 
 /**
  * This component is responsible for sending UDP discovery packets and signalling the new address and port back to the
@@ -91,9 +91,8 @@ public class UDPDiscoveryClient extends AbstractComponent {
                         .channel(NioDatagramChannel.class)
                         .group(requireComponent(Client.KEY).getExecutor())
                         .handler(new ResponseHandler())
-                        .option(ChannelOption.SO_BROADCAST, true)
-                        .option(ChannelOption.SO_REUSEADDR, true);
-                channel = b.bind(DISCOVERY_PORT);
+                        .option(ChannelOption.SO_BROADCAST, true);
+                channel = b.bind(0);
             }
 
             sendDiscoveryRequest();
@@ -192,7 +191,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
             buffer.writeBoolean(false);
         }
 
-        final InetSocketAddress recipient = new InetSocketAddress(DISCOVERY_HOST, DISCOVERY_PORT);
+        final InetSocketAddress recipient = new InetSocketAddress(DISCOVERY_HOST, DISCOVERY_SERVER_PORT);
         final DatagramPacket request = new DatagramPacket(buffer, recipient);
         return channel.channel().writeAndFlush(request);
     }
@@ -204,7 +203,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
     private class ResponseHandler extends ChannelHandlerAdapter {
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            if (msg instanceof DatagramPacket) {
+            try {
                 final DatagramPacket request = (DatagramPacket) msg;
                 final ByteBuf buffer = request.content();
 
@@ -220,23 +219,20 @@ public class UDPDiscoveryClient extends AbstractComponent {
                     final int dataEnd = buffer.readerIndex();
                     if (checkSignature(buffer, dataStart, dataEnd)) {
                         // got a new address for the master!
-                        ReferenceCountUtil.release(request);
                         Log.i(TAG, "UDP response received " + address.getHostAddress() + ":" + port);
                         stopDiscovery();
                         requireComponent(Client.KEY).onMasterFound(address, port);
-                        return;
                     } else {
                         Log.i(TAG, "UDP response received " + address.getHostAddress() + ":" + port
                                 + ", but signature is invalid");
                     }
-                } else if (DISCOVERY_PAYLOAD_REQUEST.equals(messageType)) {
-                    // discard own requests that are echoed by the router
-                    ReferenceCountUtil.release(request);
-                    return;
+                } else if (!DISCOVERY_PAYLOAD_REQUEST.equals(messageType)) {
+                    //discard own requests that are echoed by the router and requests sent by other clients and warn about all other packets
+                    Log.d(TAG, "Discarding UDP packet with illegal message type: " + messageType);
                 }
+            } finally {
+                ReferenceCountUtil.release(msg);
             }
-            // forward all other packets to the pipeline
-            super.channelRead(ctx, msg); //FIXME Niko: pipeline has only one handler, this makes no sense (Niko, 2015-12-28)
         }
 
         private boolean checkSignature(ByteBuf buffer, int dataStart, int dataEnd) {

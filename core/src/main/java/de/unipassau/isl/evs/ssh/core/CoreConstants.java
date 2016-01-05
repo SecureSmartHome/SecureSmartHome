@@ -60,7 +60,7 @@ public class CoreConstants {
         /**
          * Default discovery port used by netty
          */
-        public static final int DISCOVERY_PORT = 13132;
+        public static final int DISCOVERY_SERVER_PORT = 13132;
         public static final String DISCOVERY_HOST = "255.255.255.255";
         public static final String DISCOVERY_PAYLOAD_REQUEST = "de.unipassau.isl.evs.ssh.udp_discovery.REQUEST" + DISCOVERY_PROTOCOL_VERSION;
         public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE" + DISCOVERY_PROTOCOL_VERSION;
