@@ -1,5 +1,9 @@
 package de.unipassau.isl.evs.ssh.core.sec;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.support.annotation.NonNull;
+
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
@@ -133,5 +137,31 @@ public enum Permission {
         final Iterable<Permission> iterable = Iterables.filter(Arrays.asList(values()), predicate);
         Iterables.addAll(list, iterable);
         return Collections.unmodifiableList(list);
+    }
+
+    /**
+     * @return the localized Name of this Permission as defined in the strings.xml for the current locale.
+     * The identifier of the String constant is the lower case name of the enum constant with the prefix "perm_",
+     * so for {@link #ADD_ODROID} it would be "perm_add_odroid".
+     * If no localized name is found, the name of the constant as defined in the source code is used ({@link #name()}).
+     */
+    @NonNull
+    public String toLocalizedString(Context context) {
+        Resources res = context.getResources();
+        int resId = res.getIdentifier("perm_" + this.name().toLowerCase(), "string", context.getPackageName());
+        return resId == 0 ? name() : res.getString(resId);
+    }
+
+    /**
+     * @return the localized description of this Permission as defined in the strings.xml for the current locale.
+     * The identifier of the String constant is the lower case name of the enum constant with the prefix "perm-desc_",
+     * so for {@link #ADD_ODROID} it would be "perm-desc_add_odroid".
+     * If no localized description is found, the empty String is returned.
+     */
+    @NonNull
+    public String getLocalizedDescription(Context context) {
+        Resources res = context.getResources();
+        int resId = res.getIdentifier("perm-desc_" + this.name().toLowerCase(), "string", context.getPackageName());
+        return resId == 0 ? "" : res.getString(resId);
     }
 }
