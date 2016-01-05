@@ -65,7 +65,7 @@ public class AddNewUserDeviceFragment extends BoundFragment {
         }
 
         List<Group> allGroups = handler.getAllGroups();
-        if (allGroups == null) {
+        if (allGroups.size() < 1) {
             Log.i(TAG, "No groups available, yet.");
             return;
         }

@@ -1,8 +1,11 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
+import android.support.annotation.NonNull;
+
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ListMultimap;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -33,12 +36,12 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_G
 public class AppUserConfigurationHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppUserConfigurationHandler> KEY = new Key<>(AppUserConfigurationHandler.class);
 
-    private ImmutableListMultimap<UserDevice, Permission> usersToPermissions;
-    private ImmutableListMultimap<Group, UserDevice> groupToUserDevice;
-    private List<Permission> allPermissions;
-    private List<Group> allGroups;
+    private final ListMultimap<UserDevice, Permission> usersToPermissions = ArrayListMultimap.create();
+    private final ListMultimap<Group, UserDevice> groupToUserDevice = ArrayListMultimap.create();
+    private final List<Permission> allPermissions = new LinkedList<>();
+    private final List<Group> allGroups = new LinkedList<>();
 
-    private List<UserInfoListener> listeners = new LinkedList<>();
+    private final List<UserInfoListener> listeners = new LinkedList<>();
 
     /**
      * Adds the given listener to this handler.
@@ -73,10 +76,31 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
     public void handle(Message.AddressedMessage message) {
         if (APP_USERINFO_GET.matches(message)) {
             UserDeviceInformationPayload payload = APP_USERINFO_GET.getPayload(message);
-            this.usersToPermissions = payload.getUsersToPermissions();
-            this.groupToUserDevice = payload.getGroupToUserDevice();
-            this.allPermissions = payload.getAllPermissions();
-            this.allGroups = payload.getAllGroups();
+
+            ImmutableListMultimap<UserDevice, Permission> usersToPermissions = payload.getUsersToPermissions();
+            if (usersToPermissions != null) {
+                this.usersToPermissions.clear();
+                this.usersToPermissions.putAll(usersToPermissions);
+            }
+
+            ImmutableListMultimap<Group, UserDevice> groupToUserDevice = payload.getGroupToUserDevice();
+            if (groupToUserDevice != null) {
+                this.groupToUserDevice.clear();
+                this.groupToUserDevice.putAll(groupToUserDevice);
+            }
+
+            List<Permission> allPermissions = payload.getAllPermissions();
+            if (allPermissions != null) {
+                this.allPermissions.clear();
+                this.allPermissions.addAll(allPermissions);
+            }
+
+            List<Group> allGroups = payload.getAllGroups();
+            if (allGroups != null) {
+                this.allGroups.clear();
+                this.allGroups.addAll(allGroups);
+            }
+
             fireUserInfoUpdated();
         } else {
             invalidMessage(message);
@@ -96,49 +120,41 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
     /**
      * Returns a list of all groups.
      *
-     * @return a list of all groups or null if no groups are available
+     * @return a list of all groups
      */
-    public List<Group> getAllGroups() {
-        if (allGroups == null || allGroups.size() < 1) {
-            return null;
-        }
+    @NonNull
+    public ImmutableList<Group> getAllGroups() {
         return ImmutableList.copyOf(allGroups);
     }
 
     /**
      * Returns a list of all UserDevices.
      *
-     * @return a list of all UserDevices or null if no groups are available
+     * @return a list of all UserDevices
      */
-    public List<UserDevice> getAllUserDevices() {
-        if (usersToPermissions == null || usersToPermissions.size() < 1) {
-            return null;
-        }
-        return Lists.newArrayList(usersToPermissions.keySet());
+    @NonNull
+    public ImmutableList<UserDevice> getAllUserDevices() {
+        return ImmutableList.copyOf(usersToPermissions.keySet());
     }
 
     /**
      * Returns a list of all members of the given group.
      *
      * @param group the group
-     * @return a list of all members or null
+     * @return a list of all members
      */
-    public List<UserDevice> getAllGroupMembers(Group group) {
-        if (groupToUserDevice == null || groupToUserDevice.size() < 1) {
-            return null;
-        }
-        return groupToUserDevice.get(group);
+    @NonNull
+    public ImmutableList<UserDevice> getAllGroupMembers(Group group) {
+        return ImmutableList.copyOf(groupToUserDevice.get(group));
     }
 
     /**
      * Returns a list of all permissions.
      *
-     * @return a list of all permissions or null
+     * @return a list of all permissions
      */
-    public List<Permission> getAllPermissions() {
-        if (allPermissions == null || allPermissions.size() < 1) {
-            return null;
-        }
+    @NonNull
+    public ImmutableList<Permission> getAllPermissions() {
         return ImmutableList.copyOf(allPermissions);
     }
 
@@ -146,13 +162,11 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      * Returns a list of all permissions of the given user.
      *
      * @param user the user whose permissions are queried
-     * @return a list of all permissions of the user or null
+     * @return a list of all permissions of the user
      */
-    public List<Permission> getPermissionForUser(UserDevice user) {
-        if (usersToPermissions == null || usersToPermissions.size() < 1) {
-            return null;
-        }
-        return usersToPermissions.get(user);
+    @NonNull
+    public ImmutableList<Permission> getPermissionForUser(UserDevice user) {
+        return ImmutableList.copyOf(usersToPermissions.get(user));
     }
 
     private void sendEditMessage(MessagePayload payload) {

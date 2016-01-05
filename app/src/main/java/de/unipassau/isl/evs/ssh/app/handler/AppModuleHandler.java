@@ -76,9 +76,9 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
         }
     };
 
-    private Set<Module> components = new HashSet<>();
-    private List<Slave> slaves = new LinkedList<>();
-    private ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
+    private final Set<Module> components = new HashSet<>();
+    private final List<Slave> slaves = new LinkedList<>();
+    private final ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
 
     public void addAppModuleListener(AppModuleListener listener) {
         listeners.add(listener);
@@ -95,24 +95,19 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
     }
 
     private void updateList(Set<Module> components, List<Slave> slaves, ListMultimap<Slave, Module> modulesAtSlave) {
-
-        // Ensure global fields are never null
-        if (components == null) {
-            this.components = new HashSet<>();
-        } else {
-            this.components = components;
+        this.components.clear();
+        if (components != null) {
+            this.components.addAll(components);
         }
 
-        if (slaves == null) {
-            this.slaves = new LinkedList<>();
-        } else {
-            this.slaves = slaves;
+        this.slaves.clear();
+        if (slaves != null) {
+            this.slaves.addAll(slaves);
         }
 
-        if (modulesAtSlave == null) {
-            this.modulesAtSlave = ArrayListMultimap.create();
-        } else {
-            this.modulesAtSlave = modulesAtSlave;
+        this.modulesAtSlave.clear();
+        if (modulesAtSlave != null) {
+            this.modulesAtSlave.putAll(modulesAtSlave);
         }
 
         fireModulesUpdated();

@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
 
 import java.security.SignatureException;
@@ -116,5 +117,20 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
 
     public Container getContainer() {
         return container;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder bob = new StringBuilder();
+        bob.append(getClass().getSimpleName()).append(" [");
+        final Multiset<RoutingKey> keys = mappings.keys();
+        if (!keys.isEmpty()) {
+            bob.append("\n");
+            for (RoutingKey key : keys) {
+                bob.append('\r').append(key).append(" => ").append(mappings.get(key)).append('\n');
+            }
+        }
+        bob.append("]");
+        return bob.toString();
     }
 }

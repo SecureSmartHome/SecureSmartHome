@@ -92,6 +92,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
             throw new WrongAccessPointException();
         }
         GPIOAccessPoint accessPoint = (GPIOAccessPoint) buttonSensor.getModuleAccessPoint();
+        assert getContainer() != null;
         getContainer().register(key, new ButtonSensor(accessPoint.getPort(), moduleName));
     }
 
@@ -102,6 +103,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
             throw new WrongAccessPointException();
         }
         GPIOAccessPoint accessPoint = (GPIOAccessPoint) doorBuzzer.getModuleAccessPoint();
+        assert getContainer() != null;
         getContainer().register(key, new DoorBuzzer(accessPoint.getPort()));
     }
 
@@ -112,16 +114,20 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
             throw new WrongAccessPointException();
         }
         GPIOAccessPoint accessPoint = (GPIOAccessPoint) reedSensor.getModuleAccessPoint();
+        assert getContainer() != null;
         getContainer().register(key, new ReedSensor(accessPoint.getPort(), moduleName));
     }
 
     private void registerWeatherSensor(Module weatherSensor) {
         String moduleName = weatherSensor.getName();
         Key<WeatherSensor> key = new Key<>(WeatherSensor.class, moduleName);
+        assert getContainer() != null;
         getContainer().register(key, new WeatherSensor());
     }
 
     private void registerEdimaxPlugSwitch(Module plugSwitch) throws WrongAccessPointException {
+        assert getContainer() != null;
+
         String moduleName = plugSwitch.getName();
         Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, moduleName);
 
@@ -139,6 +145,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
     private void unregisterModule(Set<Module> componentsToRemove) {
         for (Module module : componentsToRemove) {
             Key<? extends Component> key = new Key<>(getDriverClass(module), module.getName());
+            assert getContainer() != null;
             getContainer().unregister(key);
         }
     }
@@ -184,6 +191,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
             try {
                 updateModule(modules);
             } catch (WrongAccessPointException | EvsIoException e) {
+                // HANDLE
                 Log.e(TAG, "Could not update Modules from payload " + payload, e);
                 sendMessage(
                         message.getFromID(),
@@ -192,6 +200,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
                 );
             }
         } else {
+            // HANDLE
             invalidMessage(message);
         }
     }

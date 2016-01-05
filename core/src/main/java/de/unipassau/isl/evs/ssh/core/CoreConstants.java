@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.core;
 
+import android.content.Context;
 import android.content.Intent;
 
 import java.security.cert.X509Certificate;
@@ -72,15 +73,26 @@ public class CoreConstants {
 
     /**
      * This class contains constants for ModuleTypes
+     * TODO Niko: fancy internationalized to String (Wolfi, 2016-01-04)
      */
     public enum ModuleType {
-        Light,
-        WeatherBoard,
-        DoorBuzzer,
-        DoorSensor,
-        WindowSensor,
-        Webcam,
-        Doorbell;
+        Light(R.string.module_type_light),
+        WeatherBoard(R.string.module_type_weather_board),
+        DoorBuzzer(R.string.module_type_door_buzzer),
+        DoorSensor(R.string.module_type_door_sensor),
+        WindowSensor(R.string.module_type_window_sensor),
+        Webcam(R.string.module_type_webcam),
+        Doorbell(R.string.module_type_doorbell);
+
+        private final int resID;
+
+        ModuleType(int resID){
+            this.resID = resID;
+        }
+
+        public String toLocalizedString(Context ctx) {
+            return ctx.getResources().getString(this.resID);
+        }
 
         @Deprecated
         public static final String LIGHT = "Light";

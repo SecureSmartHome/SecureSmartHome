@@ -13,13 +13,16 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+
+import java.util.Arrays;
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppNewModuleHandler;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
@@ -29,6 +32,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoi
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.ModuleType;
 
 /**
  * This fragment allows to add new sensors to the system. If this functionality is used, a message
@@ -47,6 +52,11 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     private LinearLayout gpioView;
     private LinearLayout mockView;
 
+    private Button addWLANButton;
+    private Button addMockButton;
+    private Button addUSBButton;
+    private Button addGPIOButton;
+
     private Spinner slaveSpinner;
     private Spinner sensorTypeSpinner;
     private Spinner connectionTypeSpinner;
@@ -54,16 +64,27 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private final AppNewModuleHandler.NewModuleListener listener = new AppNewModuleHandler.NewModuleListener() {
         @Override
-        public void registrationFinished(boolean wasSuccessful) {
-            String text;
-            if (wasSuccessful) {
-                text = getResources().getString(R.string.added_module_success);
-            } else {
-                text = getResources().getString(R.string.added_module_fail);
-            }
+        public void registrationFinished(final boolean wasSuccessful) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String text;
+                    if (wasSuccessful) {
+                        text = getResources().getString(R.string.added_module_success);
+                    } else {
+                        text = getResources().getString(R.string.added_module_fail);
+                    }
 
-            Toast toast = Toast.makeText(getActivity().getApplicationContext(), text, Toast.LENGTH_LONG);
-            toast.show();
+                    addWLANButton.setEnabled(true);
+                    addMockButton.setEnabled(true);
+                    addUSBButton.setEnabled(true);
+                    addGPIOButton.setEnabled(true);
+
+                    Toast toast = Toast.makeText(getActivity().getApplicationContext(), text, Toast.LENGTH_LONG);
+                    toast.show();
+                    ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+                }
+            });
         }
     };
 
@@ -86,19 +107,17 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
                 R.array.sensor_connection_types,
                 android.R.layout.simple_spinner_dropdown_item);
 
-        //TODO Fix deprecation warning. How can the spinner be filled with localized strings? (Wolfgang, 2016-03-01)
-        ArrayAdapter<CharSequence> sensorTypeAdapter = new ArrayAdapter<CharSequence>(
+        List<String> moduleTypes = Lists.transform(Arrays.asList(ModuleType.values()), new Function<ModuleType, String>() {
+            @Override
+            public String apply(ModuleType input) {
+                return input.toLocalizedString(getActivity().getApplicationContext());
+            }
+        });
+
+        ArrayAdapter<String> sensorTypeAdapter = new ArrayAdapter<>(
                 getActivity().getApplicationContext(),
-                android.R.layout.simple_spinner_dropdown_item,
-                new String[]{
-                        CoreConstants.ModuleType.LIGHT,
-                        CoreConstants.ModuleType.WEATHER_BOARD,
-                        CoreConstants.ModuleType.DOOR_BUZZER,
-                        CoreConstants.ModuleType.DOOR_SENSOR,
-                        CoreConstants.ModuleType.WINDOW_SENSOR,
-                        CoreConstants.ModuleType.WEBCAM,
-                        CoreConstants.ModuleType.DOORBELL,
-                });
+                android.R.layout.simple_spinner_dropdown_item, moduleTypes
+        );
 
         sensorTypeSpinner.setAdapter(sensorTypeAdapter);
         connectionTypeSpinner.setAdapter(connectionTypeAdapter);
@@ -190,10 +209,10 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private LinearLayout createViewGPIO(View root) {
         LinearLayout gpioView = (LinearLayout) root.findViewById(R.id.addmodule_gpio);
-        Button button = (Button) gpioView.findViewById(R.id.add_module_gpio_button);
+        addGPIOButton = (Button) gpioView.findViewById(R.id.add_module_gpio_button);
         final EditText gpioPortInput = (EditText) gpioView.findViewById(R.id.add_module_gpio_port_input);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        addGPIOButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String gpioPort = gpioPortInput.getText().toString();
@@ -211,10 +230,10 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private LinearLayout createViewUSB(View root) {
         LinearLayout usbView = (LinearLayout) root.findViewById(R.id.addmodule_usb);
-        Button button = (Button) usbView.findViewById(R.id.add_module_usb_button);
+        addUSBButton = (Button) usbView.findViewById(R.id.add_module_usb_button);
         final EditText usbPortInput = (EditText) usbView.findViewById(R.id.add_module_usb_port_input);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        addUSBButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String usbPort = usbPortInput.getText().toString();
@@ -232,13 +251,13 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private LinearLayout createViewWLAN(View root) {
         LinearLayout wlanView = (LinearLayout) root.findViewById(R.id.addmodule_wlan);
-        Button button = (Button) wlanView.findViewById(R.id.add_module_wlan_button);
+        addWLANButton = (Button) wlanView.findViewById(R.id.add_module_wlan_button);
         final EditText usernameInput = (EditText) wlanView.findViewById(R.id.add_module_wlan_username_input);
         final EditText passwordInput = (EditText) wlanView.findViewById(R.id.add_module_wlan_password_input);
         final EditText portInput = (EditText) wlanView.findViewById(R.id.add_module_wlan_port_input);
         final EditText ipAdressInput = (EditText) wlanView.findViewById(R.id.add_module_wlan_ip_input);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        addWLANButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String username = usernameInput.getText().toString();
@@ -250,6 +269,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
                     ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_fill_all_fields));
                 } else {
                     WLANAccessPoint accessPoint = new WLANAccessPoint(Integer.valueOf(port), username, password, ipAdress);
+                    addWLANButton.setEnabled(false);
                     addNewModule(accessPoint);
                 }
             }
@@ -261,11 +281,12 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private LinearLayout createViewMock(View root) {
         LinearLayout mockView = (LinearLayout) root.findViewById(R.id.addmodule_mock);
-        Button button = (Button) mockView.findViewById(R.id.add_module_mock_button);
+        addMockButton = (Button) mockView.findViewById(R.id.add_module_mock_button);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        addMockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                addMockButton.setEnabled(false);
                 addNewModule(new MockAccessPoint());
             }
         });

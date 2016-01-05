@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +36,7 @@ public class DoorFragment extends BoundFragment {
     private Button blockButton;
     private ImageView imageView;
 
-    private final DoorListener doorListener = new DoorListener() {
+    private final AppDoorHandler.DoorListener doorListener = new AppDoorHandler.DoorListener() {
         @Override
         public void onPictureChanged(byte[] image) {
             displayImage(image);
@@ -82,8 +83,16 @@ public class DoorFragment extends BoundFragment {
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        getDoorHandler().addListener(doorListener);
-        getDoorHandler().refresh();
+        final AppDoorHandler handler = container.require(AppDoorHandler.KEY);
+        handler.addListener(doorListener);
+        handler.refreshDoorStatus();
+
+        byte[] image = handler.getPicture();
+
+        if (image != null) {
+            displayImage(image);
+        }
+
         updateButtons();
     }
 
@@ -93,8 +102,20 @@ public class DoorFragment extends BoundFragment {
         super.onContainerDisconnected();
     }
 
+    @Nullable
     private AppDoorHandler getDoorHandler() {
         return getComponent(AppDoorHandler.KEY);
+    }
+
+    private void refreshImage() {
+        AppDoorHandler handler = getDoorHandler();
+
+        if (handler == null) {
+            Log.i(TAG, "Container not bound.");
+            return;
+        }
+
+        handler.refreshImage();
     }
 
     /**
@@ -131,10 +152,6 @@ public class DoorFragment extends BoundFragment {
             handler.blockDoor();
         }
         updateButtons();
-    }
-
-    private void refreshImage() {
-        getDoorHandler().refreshImage();
     }
 
     /**
@@ -174,15 +191,6 @@ public class DoorFragment extends BoundFragment {
                 openButton.setEnabled(true);
             }
         }
-    }
-
-    /**
-     * The listener interface to receive door events.
-     */
-    public interface DoorListener {
-        void onPictureChanged(byte[] image);
-
-        void onDoorStatusChanged();
     }
 
     /**

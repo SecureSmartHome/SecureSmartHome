@@ -29,6 +29,11 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
 
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(20);
     private final List<LightHandlerListener> listeners = new ArrayList<>();
+
+    // TODO this map has to be updated as soon as new lightmodules become available.
+    // Use an AppModuleHandler.AppModuleListener to get notified when modules become available.
+    // This handler has to query the status of each new lamp as well.
+    // also fix comment in AppModuleHandler.handle()!!
     private final Map<Module, LightStatus> lightStatusMapping = new HashMap<>();
 
     public AppLightHandler(){

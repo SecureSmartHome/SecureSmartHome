@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.app.NotificationManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
@@ -9,7 +10,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,7 +50,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         }
 
         @Override
-        public void onClientConnecting() {
+        public void onClientConnecting(String host, int port) {
 
         }
 
@@ -126,10 +126,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        if (!fragmentInitialized && getContainer() != null) {
-            fragmentInitialized = true;
-            showFragmentByClass(getInitialFragment());
-        }
+        showInitialFragment();
     }
 
     @Override
@@ -140,10 +137,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         }
         container.require(AppNotificationHandler.KEY).addNotificationObjects(notificationBuilder, notificationManager);
 
-        if (!fragmentInitialized) {
-            fragmentInitialized = true;
-            showFragmentByClass(getInitialFragment());
-        }
+        showInitialFragment();
 
         Client client = container.require(Client.KEY);
         client.addListener(connectionListener);
@@ -153,6 +147,17 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         }
     }
 
+    private void showInitialFragment() {
+        if (!fragmentInitialized && getContainer() != null) {
+            fragmentInitialized = true;
+            final Class initialFragment = getInitialFragment();
+            if (initialFragment != null) {
+                showFragmentByClass(initialFragment);
+            }
+        }
+    }
+
+    @Nullable
     private Class getInitialFragment() {
         if (!requireComponent(NamingManager.KEY).isMasterIDKnown()) {
             return WelcomeScreenFragment.class;
@@ -170,14 +175,8 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
             }
         }
 
-        // FIXME this destroys the fragment lifecycle, because a new Fragment is created when onContainerConnected is called.
-        // So onSaveInstanceState() does not work in fragments.
-        if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LAST_ACTIVE_FRAGMENT)) {
-            try {
-                return Class.forName(savedInstanceState.getString(SAVED_LAST_ACTIVE_FRAGMENT));
-            } catch (ClassNotFoundException e) {
-                Log.w(TAG, "Could not load Fragment from saved instance state", e);
-            }
+        if (savedInstanceState != null) {
+            return null; //fragment will be added automatically by fragment manager
         }
         return MainFragment.class;
     }
