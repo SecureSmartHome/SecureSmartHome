@@ -65,9 +65,8 @@
     <string name="added_module_success">Added module successfully</string>
     <string name="added_module_fail">Adding new module failed</string>
     <string name="permission_dialog_title">Edit Permission</string>
-    <string name="is_in_group">"is in group "</string>
-    <string name="dot">" . "</string>
-    <string name="device_id">"Device ID: "</string>
+    <string name="is_in_group">"is in group %1$s."</string>
+    <string name="device_id">"Device ID: %1$s"</string>
     <string name="error_cannot_add_user">Cannot add new user. Missing information.</string>
     <string name="error_cannot_add_group">Cannot add new group. Missing information.</string>
     <string-array name="sensor_connection_types">

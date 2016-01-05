@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,10 +28,10 @@ import static de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation.encodeT
  * @author Phil Werli
  */
 public class WelcomeScreenFragment extends ScanQRFragment {
-    private DeviceConnectInformation info;
-
+    private static final String TAG = WelcomeScreenFragment.class.getSimpleName();
     private static final String LOCAL_MASTER_PACKAGE = "de.unipassau.isl.evs.ssh.master";
     private static final String LOCAL_MASTER_ACTIVITY = LOCAL_MASTER_PACKAGE + ".activity.RegisterLocalAppActivity";
+    private DeviceConnectInformation info;
 
     @Override
     public void onStart() {
@@ -73,8 +74,22 @@ public class WelcomeScreenFragment extends ScanQRFragment {
 
     private void maybeFoundMaster() {
         if (info != null && getContainer() != null) {
-            getComponent(NamingManager.KEY).setMasterID(info.getID());
-            getComponent(Client.KEY).onMasterFound(info.getAddress(), info.getPort(), encodeToken(info.getToken()));
+
+            // sets MasterID from info.
+            NamingManager namingManager = getComponent(NamingManager.KEY);
+            if (namingManager == null) {
+                Log.i(TAG, "Container not yet connected!");
+            } else {
+                namingManager.setMasterID(info.getID());
+            }
+
+            // sets address from info.
+            Client client = getComponent(Client.KEY);
+            if (client == null) {
+                Log.i(TAG, "Container not yet connected!");
+            } else {
+                client.onMasterFound(info.getAddress(), info.getPort(), encodeToken(info.getToken()));
+            }
             ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         }
     }
