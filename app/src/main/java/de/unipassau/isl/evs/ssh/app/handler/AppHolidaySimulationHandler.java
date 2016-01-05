@@ -68,6 +68,7 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
     public void switchHolidaySimulation(boolean on) {
         HolidaySimulationPayload payload = new HolidaySimulationPayload(on);
         Message message = new Message(payload);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_HOLIDAY_GET.getKey());
         sendMessageToMaster(MASTER_HOLIDAY_SET, message);
     }
 

@@ -105,6 +105,7 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
         LightPayload lightPayload = new LightPayload(false, m);
 
         Message message = new Message(lightPayload);
+        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_LIGHT_UPDATE.getKey());
 
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(RoutingKeys.MASTER_LIGHT_GET, message);
