@@ -13,13 +13,16 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+
+import java.util.Arrays;
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppNewModuleHandler;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
@@ -29,6 +32,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoi
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.ModuleType;
 
 /**
  * This fragment allows to add new sensors to the system. If this functionality is used, a message
@@ -102,19 +107,17 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
                 R.array.sensor_connection_types,
                 android.R.layout.simple_spinner_dropdown_item);
 
-        //TODO Fix deprecation warning. How can the spinner be filled with localized strings? (Wolfgang, 2016-03-01)
-        ArrayAdapter<CharSequence> sensorTypeAdapter = new ArrayAdapter<CharSequence>(
+        List<String> moduleTypes = Lists.transform(Arrays.asList(ModuleType.values()), new Function<ModuleType, String>() {
+            @Override
+            public String apply(ModuleType input) {
+                return input.toLocalizedString(getActivity().getApplicationContext());
+            }
+        });
+
+        ArrayAdapter<String> sensorTypeAdapter = new ArrayAdapter<>(
                 getActivity().getApplicationContext(),
-                android.R.layout.simple_spinner_dropdown_item,
-                new String[]{
-                        CoreConstants.ModuleType.LIGHT,
-                        CoreConstants.ModuleType.WEATHER_BOARD,
-                        CoreConstants.ModuleType.DOOR_BUZZER,
-                        CoreConstants.ModuleType.DOOR_SENSOR,
-                        CoreConstants.ModuleType.WINDOW_SENSOR,
-                        CoreConstants.ModuleType.WEBCAM,
-                        CoreConstants.ModuleType.DOORBELL,
-                });
+                android.R.layout.simple_spinner_dropdown_item, moduleTypes
+        );
 
         sensorTypeSpinner.setAdapter(sensorTypeAdapter);
         connectionTypeSpinner.setAdapter(connectionTypeAdapter);
