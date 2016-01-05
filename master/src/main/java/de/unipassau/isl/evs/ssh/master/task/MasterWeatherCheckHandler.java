@@ -2,7 +2,9 @@ package de.unipassau.isl.evs.ssh.master.task;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import net.aksingh.owmjapis.CurrentWeather;
@@ -13,14 +15,17 @@ import java.util.concurrent.TimeUnit;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
+import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
 
 /**
@@ -74,9 +79,13 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     public void onReceive(Intent intent) {
         OpenWeatherMap owm = new OpenWeatherMap(CoreConstants.OPENWEATHERMAP_API_KEY);
         try {
-            CurrentWeather cw = owm.currentWeatherByCityName("Passau"); //TODO use current location  (Niko, 2015-12-17)
-            if (!windowClosed && cw.getRainInstance().hasRain()) {
-                sendWarningNotification();
+            SharedPreferences sharedPreferences = requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+            String city = sharedPreferences.getString(String.valueOf(R.string.master_city_name), null);
+            if (city != null) {
+                CurrentWeather cw = owm.currentWeatherByCityName(city);
+                if (!windowClosed && cw.getRainInstance().hasRain()) {
+                    sendWarningNotification();
+                }
             }
         } catch (Exception e) {
             Log.wtf(TAG, e);

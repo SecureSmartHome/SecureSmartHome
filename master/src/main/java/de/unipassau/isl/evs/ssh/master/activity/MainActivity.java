@@ -234,6 +234,8 @@ public class MainActivity extends BoundActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, MasterPreferenceActivity.class);
+            startActivity(intent);
             return true;
         }
 

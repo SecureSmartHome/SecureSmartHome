@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <header android:fragment="com.example.android.apis.preference.MasterPreferenceActivity$PrefsFragment"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="Preferences"
+        android:summary="Preferences for Master." />
+</PreferenceScreen>
