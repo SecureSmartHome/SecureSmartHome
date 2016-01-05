@@ -33,9 +33,6 @@ import de.unipassau.isl.evs.ssh.core.network.ClientConnectionListener;
  * @author Wolfgang Popp
  */
 public class MainActivity extends BoundActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private static final String TAG = MainActivity.class.getSimpleName();
-
-    private static final String SAVED_LAST_ACTIVE_FRAGMENT = MainActivity.class.getName() + ".SAVED_LAST_ACTIVE_FRAGMENT";
     private LinearLayout overlayDisconnected;
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
@@ -208,12 +205,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString(SAVED_LAST_ACTIVE_FRAGMENT, getCurrentFragment().getClass().getName());
     }
 
     // returns the currently displayed Fragment

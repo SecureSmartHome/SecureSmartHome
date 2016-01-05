@@ -36,11 +36,10 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_RE
 public class MasterRegisterDeviceHandler extends AbstractMasterHandler implements Component {
     public static final Key<MasterRegisterDeviceHandler> KEY = new Key<>(MasterRegisterDeviceHandler.class);
 
-    //Todo: close qr code after first register.
-    //TODO:
+    //TODO Leon: move to CoreConstants and internationalize (Niko, 2016-01-05)
     public static final String FIRST_USER = "Admin";
     public static final String NO_GROUP = "No Group";
-    private Map<String, UserDevice> userDeviceForToken = new HashMap<>();
+    private final Map<String, UserDevice> userDeviceForToken = new HashMap<>();
 
     @Override
     public void handle(Message.AddressedMessage message) {
