@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">EVS SSH master</string>
+    <string name="app_name">Secure Smart Home - Master</string>
     <string name="title_activity_main">MainActivity</string>
 
     <string name="hello_world">Hello world!</string>
@@ -9,4 +9,12 @@
     <string name="add_initial_device">Add Initial Device</string>
     <string name="title_activity_register_local_app">RegisterLocalAppActivity</string>
     <string name="title_activity_register_local_slave">RegisterLocalSlaveActivity</string>
+    <string name="title_activity_preferences">Preferences</string>
+    <string name="preferences">Preferences</string>
+
+    <!--                   SharedPreferencesKey                    -->
+    <string name="master_city_name">MasterCityName</string>
+    <string name="master_local_port">MasterLocalPort</string>
+    <string name="master_port_intern">MasterPortIntern</string>
+    <string name="master_port_extern">MasterPortExtern</string>
 </resources>

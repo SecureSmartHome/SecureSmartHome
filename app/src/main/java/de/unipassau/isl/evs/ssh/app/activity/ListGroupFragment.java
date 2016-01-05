@@ -75,7 +75,7 @@ public class ListGroupFragment extends BoundFragment {
                 bundle.putSerializable(EDIT_GROUP_DIALOG, item);
                 String[] templates = buildTemplatesFromGroups();
                 if (templates != null) {
-                    bundle.putStringArray(TEMPLATE_DIALOG, buildTemplatesFromGroups());
+                    bundle.putStringArray(TEMPLATE_DIALOG, templates);
                 }
                 ((MainActivity) getActivity()).showFragmentByClass(EditGroupFragment.class, bundle);
                 return true;
@@ -101,22 +101,24 @@ public class ListGroupFragment extends BoundFragment {
      * @return A String Array of Template names generated from all groups.
      */
     private String[] buildTemplatesFromGroups() {
-        List<Group> groups = getComponent(AppUserConfigurationHandler.KEY).getAllGroups();
-        if (groups == null) {
-            return null;
-        }
-        List<String> templateNames = Lists.newArrayList(Iterables.transform(groups, new Function<Group, String>() {
-            @Override
-            public String apply(Group input) {
-                return input.getTemplateName();
+        String[] templateArray = new String[0];
+        AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        if (handler == null) {
+            Log.i(TAG, "Container not yet connected!");
+        } else {
+            List<Group> groups = handler.getAllGroups();
+            List<String> templateNames = Lists.newArrayList(Iterables.transform(groups, new Function<Group, String>() {
+                @Override
+                public String apply(Group input) {
+                    return input.getTemplateName();
+                }
+            }));
+            templateArray = new String[templateNames.size()];
+            int counter = 0;
+            for (String s : templateNames) {
+                templateArray[counter] = s;
+                counter++;
             }
-        }));
-        String[] templateArray = new String[templateNames.size()];
-        int counter = 0;
-        for (String s :
-                templateNames) {
-            templateArray[counter] = s;
-            counter++;
         }
         return templateArray;
     }
@@ -141,24 +143,20 @@ public class ListGroupFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-
             List<Group> allGroups = handler.getAllGroups();
-
-            if (allGroups != null) {
-                groups = Lists.newArrayList(allGroups);
-                Collections.sort(groups, new Comparator<Group>() {
-                    @Override
-                    public int compare(Group lhs, Group rhs) {
-                        if (lhs.getName() == null) {
-                            return rhs.getName() == null ? 0 : 1;
-                        }
-                        if (rhs.getName() == null) {
-                            return -1;
-                        }
-                        return lhs.getName().compareTo(rhs.getName());
+            groups = Lists.newArrayList(allGroups);
+            Collections.sort(groups, new Comparator<Group>() {
+                @Override
+                public int compare(Group lhs, Group rhs) {
+                    if (lhs.getName() == null) {
+                        return rhs.getName() == null ? 0 : 1;
                     }
-                });
-            }
+                    if (rhs.getName() == null) {
+                        return -1;
+                    }
+                    return lhs.getName().compareTo(rhs.getName());
+                }
+            });
         }
 
         @Override
@@ -227,8 +225,11 @@ public class ListGroupFragment extends BoundFragment {
          */
         private String createGroupMemberText(Group group) {
             String groupMemberText = "This group has no members.";
-            List<UserDevice> groupMembers = getComponent(AppUserConfigurationHandler.KEY).getAllGroupMembers(group);
-            if (groupMembers != null) {
+            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+            if (handler == null) {
+                Log.i(TAG, "Container not yet connected!");
+            } else {
+                List<UserDevice> groupMembers = handler.getAllGroupMembers(group);
                 int numberOfMembers = groupMembers.size();
                 if (numberOfMembers >= 3) {
                     groupMemberText = groupMembers.get(0).getName() + " and " + groupMembers.get(1).getName() + " and more are members";

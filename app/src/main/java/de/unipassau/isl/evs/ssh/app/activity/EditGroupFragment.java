@@ -43,13 +43,18 @@ public class EditGroupFragment extends BoundFragment {
                 android.R.layout.simple_list_item_1,
                 (templateNames != null ? templateNames : new String[]{"Missing templates"})));
 
+        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        if (handler == null) {
+            Log.i(TAG, "Container not yet connected!");
+            return;
+        }
         Button editButton = (Button) getActivity().findViewById(R.id.editgroupfragment_button_edit);
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String name = inputGroupName.getText().toString();
                 String template = ((String) spinner.getSelectedItem());
-                getComponent(AppUserConfigurationHandler.KEY).editGroup(group, new Group(name, template));
+                handler.editGroup(group, new Group(name, template));
                 Log.i(TAG, "Group " + name + " edited.");
                 String toastText = "Group " + name + " edited.";
                 Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
@@ -60,7 +65,7 @@ public class EditGroupFragment extends BoundFragment {
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getComponent(AppUserConfigurationHandler.KEY).removeGroup(group);
+                handler.removeGroup(group);
                 Log.i(TAG, "Group " + group.getName() + " removed.");
                 String toastText = "Group " + group.getName() + " removed.";
                 Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
@@ -73,5 +78,11 @@ public class EditGroupFragment extends BoundFragment {
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
         buildView();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // TODO Phil Save state of spinner. but I can't restore it in onCreateView as it is called after onContainerConnected
+        super.onSaveInstanceState(outState);
     }
 }

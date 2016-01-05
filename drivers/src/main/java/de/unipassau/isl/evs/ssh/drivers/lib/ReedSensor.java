@@ -118,7 +118,6 @@ public class ReedSensor extends AbstractComponent {
 
             Message message;
             message = new Message(payload);
-            message.putHeader(Message.HEADER_TIMESTAMP, System.currentTimeMillis());
 
             OutgoingRouter router = container.require(OutgoingRouter.KEY);
             router.sendMessage(namingManager.getMasterID(), RoutingKeys.MASTER_DOOR_STATUS_GET, message);

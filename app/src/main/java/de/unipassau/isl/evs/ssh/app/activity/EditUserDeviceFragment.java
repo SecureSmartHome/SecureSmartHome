@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -25,7 +26,6 @@ import android.widget.Toast;
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -69,11 +69,13 @@ public class EditUserDeviceFragment extends BoundFragment {
         TextView deviceName = ((TextView) getActivity().findViewById(R.id.userdevice_user_name));
         deviceName.setText(device.getName());
 
-        TextView deviceGroup = ((TextView) getActivity().findViewById(R.id.userdevice_user_group));
-        deviceGroup.setText(getResources().getString(R.string.is_in_group) + device.getInGroup() + getResources().getString(R.string.dot));
+        Resources res = getResources();
 
         TextView deviceID = ((TextView) getActivity().findViewById(R.id.userdevice_user_deviceid));
-        deviceID.setText(getResources().getString(R.string.device_id) + device.getUserDeviceID().getIDString());
+        deviceID.setText(String.format(res.getString(R.string.device_id), device.getUserDeviceID().getIDString()));
+
+        TextView deviceGroup = ((TextView) getActivity().findViewById(R.id.userdevice_user_group));
+        deviceGroup.setText(String.format(res.getString(R.string.is_in_group), device.getInGroup()));
 
         Button editButton = (Button) getActivity().findViewById(R.id.userdevice_edit_button);
         editButton.setOnClickListener(new View.OnClickListener() {
@@ -104,16 +106,19 @@ public class EditUserDeviceFragment extends BoundFragment {
      * @return A String Array of group names.
      */
     private String[] listGroups() {
-        List<Group> groups = getComponent(AppUserConfigurationHandler.KEY).getAllGroups();
-        if (groups == null) {
-            return null;
-        }
-        String[] groupNames = new String[groups.size()];
-        int counter = 0;
-        for (Group g :
-                groups) {
-            groupNames[counter] = g.getName();
-            counter++;
+        AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        String[] groupNames = new String[0];
+        if (handler == null) {
+            Log.i(TAG, "Container not yet connected!");
+        } else {
+            List<Group> groups = handler.getAllGroups();
+            groupNames = new String[groups.size()];
+            int counter = 0;
+            for (Group g :
+                    groups) {
+                groupNames[counter] = g.getName();
+                counter++;
+            }
         }
         return groupNames;
     }
@@ -131,46 +136,56 @@ public class EditUserDeviceFragment extends BoundFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         final EditText userDeviceName = (EditText) dialogView.findViewById(R.id.editdevicedialog_username);
-        List<String> groupList = new ArrayList<>(Arrays.asList(groupNames));
+        List<String> groupList = new ArrayList<>();
+        if (groupNames == null) {
+            Log.i(TAG, "Empty bundle");
+        } else {
+            Collections.addAll(groupList, groupNames);
+        }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_spinner_dropdown_item, groupList);
         final Spinner groupName = ((Spinner) dialogView.findViewById(R.id.editdevicedialog_spinner));
         groupName.setAdapter(adapter);
 
         final AlertDialog dialog = builder.create();
-        builder.setMessage(R.string.edit_group_dialog_title)
-                .setView(dialogView)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.edit, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        String name = userDeviceName.getText().toString();
-                        String group = ((String) groupName.getSelectedItem());
-                        getComponent(AppUserConfigurationHandler.KEY).editUserDevice(userDevice,
-                                new UserDevice(name, group, userDevice.getUserDeviceID()));
-                        String toastText = "Device " + name + " edited.";
-                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                })
-                .setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        getComponent(AppUserConfigurationHandler.KEY).removeUserDevice(userDevice);
-                        String toastText = "Device " + userDevice.getName() + " removed.";
-                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                })
-                .create()
-                .show();
+        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        if (handler == null) {
+            Log.i(TAG, "Container not yet connected!");
+        } else if (userDevice == null) {
+            Log.i(TAG, "No device found.");
+        } else {
+            builder.setMessage(R.string.edit_group_dialog_title)
+                    .setView(dialogView)
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.edit, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            String name = userDeviceName.getText().toString();
+                            String group = ((String) groupName.getSelectedItem());
+                            handler.editUserDevice(userDevice, new UserDevice(name, group, userDevice.getUserDeviceID()));
+                            String toastText = "Device " + name + " edited.";
+                            Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
+                    })
+                    .setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            handler.removeUserDevice(userDevice);
+                            String toastText = "Device " + userDevice.getName() + " removed.";
+                            Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
+                    })
+                    .create()
+                    .show();
+        }
         userDeviceName.requestFocus();
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         return dialog;
     }
-
 
     private class PermissionListAdapter extends BaseAdapter {
         private List<Permission> allPermissions;
@@ -196,21 +211,19 @@ public class EditUserDeviceFragment extends BoundFragment {
 
             List<Permission> tempPermissionList = handler.getAllPermissions();
 
-            if (tempPermissionList != null) {
-                allPermissions = Lists.newArrayList(tempPermissionList);
-                Collections.sort(allPermissions, new Comparator<Permission>() {
-                    @Override
-                    public int compare(Permission lhs, Permission rhs) {
-                        if (lhs.getName() == null) {
-                            return rhs.getName() == null ? 0 : 1;
-                        }
-                        if (rhs.getName() == null) {
-                            return -1;
-                        }
-                        return lhs.getName().compareTo(rhs.getName());
+            allPermissions = Lists.newArrayList(tempPermissionList);
+            Collections.sort(allPermissions, new Comparator<Permission>() {
+                @Override
+                public int compare(Permission lhs, Permission rhs) {
+                    if (lhs.getName() == null) {
+                        return rhs.getName() == null ? 0 : 1;
                     }
-                });
-            }
+                    if (rhs.getName() == null) {
+                        return -1;
+                    }
+                    return lhs.getName().compareTo(rhs.getName());
+                }
+            });
         }
 
         @Override
@@ -260,26 +273,31 @@ public class EditUserDeviceFragment extends BoundFragment {
             } else {
                 permissionLayout = (LinearLayout) convertView;
             }
+            // TODO Phil: gray out the permissions a user can't change.
 
             final Switch permissionSwitch = (Switch) permissionLayout.findViewById(R.id.listpermission_permission_switch);
-            permissionSwitch.setText(permission.getName());
-            permissionSwitch.setChecked(userDeviceHasPermission(permission));
-            permissionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        getComponent(AppUserConfigurationHandler.KEY).grantPermission(device, permission);
-                        Log.i(TAG, permission.getName() + " granted for user device " + device.getName());
-                    } else {
-                        getComponent(AppUserConfigurationHandler.KEY).revokePermission(device, permission);
-                        Log.i(TAG, permission.getName() + " revoked for user device " + device.getName());
+            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+            if (handler == null) {
+                Log.i(TAG, "Container not yet connected!");
+            } else {
+                permissionSwitch.setText(permission.getName());
+                permissionSwitch.setChecked(userDeviceHasPermission(permission));
+                permissionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            handler.grantPermission(device, permission);
+                            Log.i(TAG, permission.getName() + " granted for user device " + device.getName());
+                        } else {
+                            handler.revokePermission(device, permission);
+                            Log.i(TAG, permission.getName() + " revoked for user device " + device.getName());
+                        }
+                        permissionSwitch.toggle();
                     }
-                    permissionSwitch.toggle();
-                }
-            });
-
-            TextView textViewPermissionType = ((TextView) permissionLayout.findViewById(R.id.listpermission_permission_type));
-            textViewPermissionType.setText(createPermissionTypeText(permission));
+                });
+                TextView textViewPermissionType = ((TextView) permissionLayout.findViewById(R.id.listpermission_permission_type));
+                textViewPermissionType.setText(createPermissionTypeText(permission));
+            }
 
             return permissionLayout;
         }

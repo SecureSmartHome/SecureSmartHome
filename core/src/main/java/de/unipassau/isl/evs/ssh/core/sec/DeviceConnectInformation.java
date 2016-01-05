@@ -26,6 +26,8 @@ import static io.netty.handler.codec.base64.Base64.decode;
 import static io.netty.handler.codec.base64.Base64.encode;
 
 /**
+ * //TODO add javadoc
+ *
  * @author Niko Fink
  */
 public class DeviceConnectInformation implements Serializable {

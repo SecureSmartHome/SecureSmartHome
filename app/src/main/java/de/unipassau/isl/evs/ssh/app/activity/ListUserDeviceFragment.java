@@ -114,16 +114,25 @@ public class ListUserDeviceFragment extends BoundFragment {
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        builder.setMessage(getResources().getString(R.string.deleteuserdevice_dialog_title) + " " + userDevice.getName() + "?")
-                .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        getComponent(AppUserConfigurationHandler.KEY).removeUserDevice(userDevice);
-                    }
-                })
-                .setNegativeButton(R.string.cancel, null)
-                .create()
-                .show();
+        if (userDevice == null) {
+            Log.i(TAG, "No device found.");
+        } else {
+            builder.setMessage(R.string.deleteuserdevice_dialog_title + " " + userDevice.getName() + "?")
+                    .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+                            if (handler == null) {
+                                Log.i(TAG, "Container not yet connected!");
+                            } else {
+                                handler.removeUserDevice(userDevice);
+                            }
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, null)
+                    .create()
+                    .show();
+        }
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -154,21 +163,19 @@ public class ListUserDeviceFragment extends BoundFragment {
 
             List<UserDevice> allUserDevices = handler.getAllGroupMembers(group);
 
-            if (allUserDevices != null) {
-                userDevices = Lists.newArrayList(allUserDevices);
-                Collections.sort(userDevices, new Comparator<UserDevice>() {
-                    @Override
-                    public int compare(UserDevice lhs, UserDevice rhs) {
-                        if (lhs.getName() == null) {
-                            return rhs.getName() == null ? 0 : 1;
-                        }
-                        if (rhs.getName() == null) {
-                            return -1;
-                        }
-                        return lhs.getName().compareTo(rhs.getName());
+            userDevices = Lists.newArrayList(allUserDevices);
+            Collections.sort(userDevices, new Comparator<UserDevice>() {
+                @Override
+                public int compare(UserDevice lhs, UserDevice rhs) {
+                    if (lhs.getName() == null) {
+                        return rhs.getName() == null ? 0 : 1;
                     }
-                });
-            }
+                    if (rhs.getName() == null) {
+                        return -1;
+                    }
+                    return lhs.getName().compareTo(rhs.getName());
+                }
+            });
         }
 
         @Override
