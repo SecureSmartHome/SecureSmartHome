@@ -228,8 +228,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         final byte[] actualToken = msg.passiveRegistrationToken;
         return actualToken != null && expectedToken != null
                 && actualToken.length == DeviceConnectInformation.TOKEN_LENGTH
-                && Arrays.equals(actualToken, expectedToken)
-                || true; //FIXME Niko: PassiveRegistrationToken not stored yet in DB, so check is disabled (Niko, 2015-12-24)
+                && Arrays.equals(actualToken, expectedToken);
     }
 
     protected void handshakeSuccessful(ChannelHandlerContext ctx) {

@@ -25,6 +25,11 @@ import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
+/**
+ * TODO Niko: javadoc (Niko, 2016-01-05)
+ *
+ * @author Niko Fink
+ */
 public class RegisterLocalAppActivity extends BoundActivity {
     private boolean userAccepted = false;
 

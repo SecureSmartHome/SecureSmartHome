@@ -1,8 +1,11 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
+/**
+ * @author Leon Sell
+ */
 public class DoorStatusPayload implements MessagePayload {
-    boolean closed;
-    String moduleName;
+    final boolean closed;
+    final String moduleName;
 
     public DoorStatusPayload(boolean closed, String moduleName) {
         this.closed = closed;

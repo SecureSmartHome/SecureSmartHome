@@ -51,7 +51,12 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
 
-
+/*
+ * The spongycastle implementation is overwritten because the current version isn't working properly.
+ * See http://www.bouncycastle.org/jira/browse/BJA-577
+ *
+ * @author Niko Fink
+ */
 public class IESCipher
         extends CipherSpi {
     private final JcaJceHelper helper = new BCJcaJceHelper();

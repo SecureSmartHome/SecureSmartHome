@@ -199,14 +199,15 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         final UserDevice userDevice = container.require(UserManagementController.KEY).getUserDevice(deviceID);
         if (slave != null || userDevice != null) {
             setState(ctx, State.CHECK_AUTH, State.FINISHED);
-
-            handshakeSuccessful(ctx);
+            Log.i(TAG, "Device " + deviceID + " is registered as " + (slave != null ? "Slave " + slave : "UserDevice " + userDevice));
 
             final byte[] passiveRegistrationToken = slave == null ? null : slave.getPassiveRegistrationToken();
             final boolean isConnectionLocal = ctx.attr(ATTR_LOCAL_CONNECTION).get() == Boolean.TRUE;
             ctx.writeAndFlush(ServerAuthenticationResponse.authenticated(
                     null, passiveRegistrationToken, isConnectionLocal
             )).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+
+            handshakeSuccessful(ctx);
         } else {
             setState(ctx, State.CHECK_AUTH, State.EXPECT_REGISTER);
             Log.i(TAG, "Device " + deviceID + " is not registered, requesting registration");

@@ -8,6 +8,11 @@ import java.util.Arrays;
 
 import de.unipassau.isl.evs.ssh.core.BuildConfig;
 
+/**
+ * TODO Niko: javadoc (Niko, 2016-01-05)
+ *
+ * @author Niko Fink
+ */
 public abstract class HandshakePacket implements Serializable {
     public static final int PROTOCOL_VERSION = 3;
 

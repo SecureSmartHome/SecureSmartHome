@@ -2,6 +2,8 @@ package de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint;
 
 /**
  * Mock ModuleAccessPoint that indicates a Mock driver should be used.
+ *
+ * @author Niko Fink
  */
 public class MockAccessPoint extends ModuleAccessPoint {
     public static final String TYPE = "MOCK";

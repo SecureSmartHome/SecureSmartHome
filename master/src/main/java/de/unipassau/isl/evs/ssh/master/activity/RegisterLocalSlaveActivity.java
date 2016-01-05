@@ -20,6 +20,11 @@ import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRoutingTableHandler;
 
+/**
+ * TODO Niko: javadoc (Niko, 2016-01-05)
+ *
+ * @author Niko Fink
+ */
 public class RegisterLocalSlaveActivity extends BoundActivity {
     private boolean userAccepted = false;
 

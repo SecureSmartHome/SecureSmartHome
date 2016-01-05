@@ -5,6 +5,8 @@ import java.io.Serializable;
 /**
  * Marker Interface wish is to be implemented by any payload class.
  * Payload classes will be added to the project once they are needed during development.
+ *
+ * @author Team
  */
 public interface MessagePayload extends Serializable {
 }

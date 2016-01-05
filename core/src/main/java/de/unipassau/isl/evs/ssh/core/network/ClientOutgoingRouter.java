@@ -29,7 +29,7 @@ public class ClientOutgoingRouter extends OutgoingRouter {
                 //noinspection ConstantConditions
                 return client.getChannel().writeAndFlush(amsg);
             } else {
-                //TODO Niko: queue pending messages (Niko, 2015-12-25)
+                //in a future version, pending messages could be queued instead of failed directly
                 Exception e = new IOException("Master " + amsg.getToID() + " is not connected");
                 e.fillInStackTrace();
                 return new FailedFuture<>(requireComponent(Client.KEY).getAliveExecutor().next(), e);

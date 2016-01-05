@@ -2,11 +2,14 @@ package de.unipassau.isl.evs.ssh.master.database;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
+import android.support.annotation.NonNull;
 
 import com.google.common.collect.ObjectArrays;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
@@ -30,7 +33,7 @@ public class SlaveController extends AbstractComponent {
                     + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT
                     + " = ?";
     private DatabaseConnector databaseConnector;
-
+    private final Map<DeviceID, byte[]> passiveRegistrationTokens = new HashMap<>();
 
     @Override
     public void init(Container container) {
@@ -267,9 +270,7 @@ public class SlaveController extends AbstractComponent {
                 + " from " + DatabaseContract.Slave.TABLE_NAME, new String[]{});
         List<Slave> slaves = new LinkedList<>();
         while (slavesCursor.moveToNext()) {
-            slaves.add(new Slave(slavesCursor.getString(0),
-                    new DeviceID(slavesCursor.getString(1)),
-                    null)); //TODO read passiveRegistrationToken (Niko, 2015-12-23)
+            slaves.add(cursorToDTO(slavesCursor));
         }
         return slaves;
     }
@@ -301,8 +302,9 @@ public class SlaveController extends AbstractComponent {
             databaseConnector.executeSql("insert into "
                             + DatabaseContract.Slave.TABLE_NAME
                             + " (" + DatabaseContract.Slave.COLUMN_NAME
-                            + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT + ") values (?, ?)",  //TODO write passiveRegistrationToken (Niko, 2015-12-23)
+                            + ", " + DatabaseContract.Slave.COLUMN_FINGERPRINT + ") values (?, ?)",
                     new String[]{slave.getName(), slave.getSlaveID().getIDString()});
+            passiveRegistrationTokens.put(slave.getSlaveID(), slave.getPassiveRegistrationToken());
         } catch (SQLiteConstraintException sqlce) {
             throw new AlreadyInUseException("The given name or fingerprint is already used by another Slave.", sqlce);
         }
@@ -344,9 +346,19 @@ public class SlaveController extends AbstractComponent {
                 + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT
                 + " = ?", new String[]{slaveID.getIDString()});
         if (slavesCursor.moveToNext()) {
-            return new Slave(slavesCursor.getString(0), new DeviceID(slavesCursor.getString(1)), null); //TODO read passiveRegistrationToken (Niko, 2015-12-23)
+            return cursorToDTO(slavesCursor);
         }
         return null;
+    }
+
+    @NonNull
+    private Slave cursorToDTO(Cursor slavesCursor) {
+        final DeviceID slaveID = new DeviceID(slavesCursor.getString(1));
+        return new Slave(
+                slavesCursor.getString(0),
+                slaveID,
+                passiveRegistrationTokens.get(slaveID)
+        );
     }
 
     public List<Module> getModulesByType(CoreConstants.ModuleType type) {

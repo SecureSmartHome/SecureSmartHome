@@ -23,11 +23,12 @@ public class ServerIncomingDispatcher extends IncomingDispatcher {
         if (eventLoop == null || eventLoop.isShuttingDown() || eventLoop.isShutdown()) {
             Log.v(TAG, "EventLoop unavailable (" + eventLoop + "), getting new one");
             Server server = getContainer().require(Server.KEY);
-            if (!server.isExecutorAlive() || !server.isChannelOpen()) {
-                Log.w(TAG, "Could not dispatch message as Executor was shut down");
-                return null; //TODO Niko: handle exceptional state (Niko, 2015-01-03)
+            if (server.isExecutorAlive() && server.isChannelOpen()) {
+                eventLoop = server.getExecutor().next();
             }
-            eventLoop = server.getExecutor().next();
+        }
+        if (eventLoop == null) {
+            throw new IllegalStateException("Could not dispatch message as Executor was shut down");
         }
         return eventLoop;
     }
