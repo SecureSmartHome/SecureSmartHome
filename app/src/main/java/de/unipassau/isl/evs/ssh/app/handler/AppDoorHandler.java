@@ -22,7 +22,6 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_CAMERA_GET
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_BLOCK;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_SET;
@@ -103,9 +102,10 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
         } else if (APP_DOOR_RING.matches(message)) {
             DoorBellPayload doorBellPayload = APP_DOOR_RING.getPayload(message);
             fireImageUpdated(doorBellPayload.getCameraPayload().getPicture());
-            Message messageToSend = new Message(doorBellPayload);
-            requireComponent(OutgoingRouter.KEY).sendMessageLocal(APP_NOTIFICATION_RECEIVE,
-                    messageToSend);
+
+            // TODO Notifications. Why does the doorhandler send notification messages?? (Wolfgang, 2016-01-05)
+            // Message messageToSend = new Message(doorBellPayload);
+            // requireComponent(OutgoingRouter.KEY).sendMessageLocal(APP_NOTIFICATION_RECEIVE, messageToSend);
         } else {
             invalidMessage(message);
         }
