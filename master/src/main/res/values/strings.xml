@@ -9,6 +9,7 @@
     <string name="add_initial_device">Add Initial Device</string>
     <string name="title_activity_register_local_app">RegisterLocalAppActivity</string>
     <string name="title_activity_register_local_slave">RegisterLocalSlaveActivity</string>
+    <string name="title_activity_preferences">Preferences</string>
     <string name="preferences">Preferences</string>
 
     <!--                   SharedPreferencesKey                    -->

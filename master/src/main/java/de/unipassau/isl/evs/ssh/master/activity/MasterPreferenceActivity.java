@@ -3,8 +3,6 @@ package de.unipassau.isl.evs.ssh.master.activity;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.master.R;
@@ -45,8 +43,11 @@ public class MasterPreferenceActivity extends PreferenceActivity {
 
             // Load the preferences from an XML resource
             addPreferencesFromResource(R.xml.preferences);
-
-
         }
+    }
+
+    @Override
+    protected boolean isValidFragment(String fragmentName) {
+        return fragmentName.equals(PrefsFragment.class.getName());
     }
 }
