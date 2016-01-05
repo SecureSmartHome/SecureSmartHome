@@ -10,6 +10,7 @@ import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_SET;
@@ -47,8 +48,10 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
      */
     public boolean isOn() {
         if (System.currentTimeMillis() - lastUpdate >= REFRESH_DELAY_MILLIS) {
-            // TODO Chris: this will crash the app if the master is not known
-            sendMessageToMaster(MASTER_HOLIDAY_GET, new Message(new HolidaySimulationPayload(false)));
+            if (getContainer().require(NamingManager.KEY).isMasterKnown()) {
+                sendMessageToMaster(MASTER_HOLIDAY_GET, new Message(
+                        new HolidaySimulationPayload(false)));
+            }
         }
         return isOn;
     }
