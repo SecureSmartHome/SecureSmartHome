@@ -25,13 +25,6 @@ public class UserDeviceEditPayload implements MessagePayload {
 
     }
 
-    public static UserDeviceEditPayload newAddUserPayload(UserDevice userDevice) {
-        UserDeviceEditPayload payload = new UserDeviceEditPayload();
-        payload.action = Action.ADD_USERDEVICE;
-        payload.userDevice = userDevice;
-        return payload;
-    }
-
     public static UserDeviceEditPayload newRemoveUserPayload(UserDevice userDevice) {
         UserDeviceEditPayload payload = new UserDeviceEditPayload();
         payload.action = Action.REMOVE_USERDEVICE;
@@ -65,13 +58,6 @@ public class UserDeviceEditPayload implements MessagePayload {
 
     public Action getAction() {
         return action;
-    }
-
-    public UserDevice getUserDeviceToAdd() {
-        if (action != Action.ADD_USERDEVICE) {
-            throw new IllegalStateException("Invalid action");
-        }
-        return userDevice;
     }
 
     public UserDevice getUserDeviceToRemove() {
@@ -109,7 +95,7 @@ public class UserDeviceEditPayload implements MessagePayload {
     }
 
     public enum Action {
-        ADD_USERDEVICE, REMOVE_USERDEVICE,
+        REMOVE_USERDEVICE,
         EDIT_USERDEVICE,
         GRANT_PERMISSION, REVOKE_PERMISSION
     }
