@@ -27,10 +27,10 @@ public class ServerOutgoingRouter extends OutgoingRouter {
             //Find client and send the message there
             Channel channel = requireComponent(Server.KEY).findChannel(amsg.getToID());
             if (channel == null || !channel.isOpen()) {
-                //TODO Niko: queue pending messages (Niko, 2015-12-25)
                 Exception e = new IOException("Client " + amsg.getToID() + " is not connected");
                 e.fillInStackTrace();
                 return new FailedFuture<>(requireComponent(Server.KEY).getExecutor().next(), e);
+                //in a future version, pending messages could be queued instead of failed directly
             } else {
                 return channel.writeAndFlush(amsg);
             }
