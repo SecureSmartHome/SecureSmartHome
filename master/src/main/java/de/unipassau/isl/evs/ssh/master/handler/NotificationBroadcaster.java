@@ -3,6 +3,7 @@ package de.unipassau.isl.evs.ssh.master.handler;
 import java.io.Serializable;
 import java.util.List;
 
+import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
@@ -26,6 +27,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_NOTIFIC
  */
 public class NotificationBroadcaster implements Component {
 
+    public static Key<NotificationBroadcaster> KEY = new Key<>(NotificationBroadcaster.class) ;
     private Container container;
 
     //TODO Check if everythings fine

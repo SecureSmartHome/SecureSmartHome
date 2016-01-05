@@ -22,9 +22,10 @@ public class MasterSystemHealthCheckHandler extends AbstractMasterHandler {
         if (MASTER_SYSTEM_HEALTH_CHECK.matches(message)) {
             final SystemHealthPayload payload = MASTER_SYSTEM_HEALTH_CHECK.getPayload(message);
             if (payload.getHasError()) {
-                String name = payload.getModule().getName();
+                //FIXME Andi: Change to use NotificationBroadcaster and not send message yourself
+/*                String name = payload.getModule().getName();
                 MessagePayload respPayload = new NotificationPayload(SYSTEM_HEALTH_WARNING.toString(), "Error at module: " + name);
-                sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(respPayload));
+                sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(respPayload));*/
             }
         } else {
             invalidMessage(message);

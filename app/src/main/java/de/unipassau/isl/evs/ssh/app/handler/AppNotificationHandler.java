@@ -54,7 +54,8 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         if (message.getPayload() instanceof NotificationPayload) {
             NotificationPayload notificationPayload = ((NotificationPayload) message.getPayload());
             //TODO make openthisfragment constants in coreconstants
-            displayNotification("Notification", notificationPayload.getMessage(), "ClimateFragment", 55);
+
+            //displayNotification("Notification", notificationPayload.getMessage(), "ClimateFragment", 55);//FIXME
             //Climate Warnings
         } else if (message.getPayload() instanceof ClimatePayload) {
             ClimatePayload payload = (ClimatePayload) message.getPayload();

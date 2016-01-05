@@ -148,7 +148,8 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             setLocked(atModule.getName(), !doorLockPayload.isUnlock());
 
             //Send notification
-            if (doorLockPayload.isUnlock()) {
+            //FIXME Andi: Change to use NotificationBroadcaster and not send message yourself
+            /*if (doorLockPayload.isUnlock()) {
                 sendMessageLocal(
                         MASTER_NOTIFICATION_SEND,
                         new Message(
@@ -166,7 +167,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                                         DOOR_LOCKED_MESSAGE
                                 )
                         ));
-            }
+            }*/
         } else {
             //no permission
             sendErrorMessage(message);
@@ -174,13 +175,14 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorUnlatchResponse(Message.AddressedMessage message) {
-        Message.AddressedMessage correspondingMessage =
+        //FIXME Andi: Change to use NotificationBroadcaster and not send message yourself
+       /* Message.AddressedMessage correspondingMessage =
                 getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
         Message messageToSend = new Message(new NotificationPayload(
                 de.unipassau.isl.evs.ssh.core.sec.Permission.DOOR_UNLATCHED.toString(), DOOR_UNLATCHED_MESSAGE));
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
-        sendMessageLocal(MASTER_NOTIFICATION_SEND, messageToSend);
+        sendMessageLocal(MASTER_NOTIFICATION_SEND, messageToSend);*/
     }
 
     private void handleDoorUnlatch(Message.AddressedMessage message) {

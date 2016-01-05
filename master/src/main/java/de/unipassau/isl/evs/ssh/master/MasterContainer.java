@@ -17,7 +17,7 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterClimateHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterDoorBellHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterModuleHandler;
-import de.unipassau.isl.evs.ssh.master.handler.MasterNotificationHandler;
+import de.unipassau.isl.evs.ssh.master.handler.NotificationBroadcaster;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRoutingTableHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterSystemHealthCheckHandler;
@@ -47,10 +47,11 @@ public class MasterContainer extends ContainerService {
         register(MasterRegisterDeviceHandler.KEY, new MasterRegisterDeviceHandler());
         register(MasterRoutingTableHandler.KEY, new MasterRoutingTableHandler());
 
+        register(NotificationBroadcaster.KEY, new NotificationBroadcaster());
+
         registerHandler(new MasterDoorBellHandler());
         registerHandler(new MasterModuleHandler());
         registerHandler(new MasterUserConfigurationHandler());
-        registerHandler(new MasterNotificationHandler());
         registerHandler(new MasterLightHandler());
         registerHandler(new MasterSystemHealthCheckHandler());
         registerHandler(new MasterCameraHandler());

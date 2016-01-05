@@ -13,7 +13,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_
 
 /**
  * Handles messages requesting pictures from the camera and generates messages, containing the pictures,
- * and sends these to the responsible MasterNotificationHandler.
+ * and sends these to the responsible NotificationBroadcaster.
  *
  * @author Leon Sell
  */

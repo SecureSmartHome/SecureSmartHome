@@ -6,6 +6,7 @@ import android.content.Intent;
 import java.security.cert.X509Certificate;
 
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import io.netty.util.AttributeKey;
 import io.netty.util.ResourceLeakDetector;
 
@@ -135,18 +136,5 @@ public class CoreConstants {
         static {
             ZXING_SCAN_INTENT.putExtra("SCAN_MODE", "QR_CODE_MODE");
         }
-    }
-
-    /**
-     * This class contains constants for different types of notifications.
-     *
-     * @author Christoph Frädrich
-     */
-    public enum NotificationType {
-        //TODO use when Notification System gets changed
-        UNKNOWN,
-        WEATHER_WARNING,
-        HUMIDITY_WARNING,
-        BRIGHTNESS_WARNING
     }
 }
