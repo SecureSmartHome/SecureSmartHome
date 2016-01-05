@@ -119,7 +119,7 @@ public class Message implements Serializable {
 
         //Payload
         if (payload == null) {
-            bob.append("null\n");
+            bob.append("null");
         } else {
             bob.append(payload.getClass().getName()).append("{\n");
             for (Field field : getFields(payload.getClass())) {
@@ -140,7 +140,7 @@ public class Message implements Serializable {
                 }
                 bob.append("\t").append(field.getName()).append("=").append(string).append("\n");
             }
-            bob.append("}\n");
+            bob.append("}");
         }
 
         return bob.toString();
