@@ -34,6 +34,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES
  * AppModuleHandler offers a list of all Modules that are active in the System.
  *
  * @author Andreas Bucher
+ * @author Wolfgang Popp
  */
 public class AppModuleHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppModuleHandler> KEY = new Key<>(AppModuleHandler.class);
@@ -47,32 +48,31 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
      * ArrayList<Module> modules = Lists.newArrayList(filtered);
      * </pre>
      */
-    // TODO fix deprecation warning. If this is changed then the payload Module.getModuleType() has to return an enum
     private static final Predicate<Module> PREDICATE_LIGHT = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
-            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.LIGHT);
+            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.Light);
         }
     };
 
     private static final Predicate<Module> PREDICATE_DOOR = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
-            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.DOOR_SENSOR);
+            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.DoorSensor);
         }
     };
 
     private static final Predicate<Module> PREDICATE_WEATHER = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
-            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.WEATHER_BOARD);
+            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.WeatherBoard);
         }
     };
 
     private static final Predicate<Module> PREDICATE_CAMERA = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
-            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.WEBCAM);
+            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.Webcam);
         }
     };
 

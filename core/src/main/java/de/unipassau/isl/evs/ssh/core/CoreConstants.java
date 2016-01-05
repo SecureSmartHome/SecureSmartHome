@@ -92,21 +92,6 @@ public class CoreConstants {
         public String toLocalizedString(Context ctx) {
             return ctx.getResources().getString(this.resID);
         }
-
-        @Deprecated
-        public static final String LIGHT = "Light";
-        @Deprecated
-        public static final String WEATHER_BOARD = "WeatherBoard";
-        @Deprecated
-        public static final String DOOR_BUZZER = "DoorBuzzer";
-        @Deprecated
-        public static final String DOOR_SENSOR = "DoorSensor";
-        @Deprecated
-        public static final String WINDOW_SENSOR = "WindowSensor";
-        @Deprecated
-        public static final String WEBCAM = "Webcam";
-        @Deprecated
-        public static final String DOORBELL = "Doorbell";
     }
 
     /**

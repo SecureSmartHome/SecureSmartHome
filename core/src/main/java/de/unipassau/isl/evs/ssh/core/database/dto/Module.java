@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.core.database.dto;
 
 import java.io.Serializable;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccessPoint;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
@@ -13,13 +14,13 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 public class Module implements Serializable {
     private String name;
     private DeviceID atSlave;
-    private String moduleType;
+    private CoreConstants.ModuleType moduleType;
     private ModuleAccessPoint moduleAccessPoint;
 
     public Module() {
     }
 
-    public Module(String name, DeviceID atSlave, String moduleType, ModuleAccessPoint moduleAccessPoint) {
+    public Module(String name, DeviceID atSlave, CoreConstants.ModuleType moduleType, ModuleAccessPoint moduleAccessPoint) {
         this.name = name;
         this.atSlave = atSlave;
         this.moduleType = moduleType;
@@ -42,11 +43,11 @@ public class Module implements Serializable {
         this.atSlave = atSlave;
     }
 
-    public String getModuleType() {
+    public CoreConstants.ModuleType getModuleType() {
         return moduleType;
     }
 
-    public void setModuleType(String moduleType) {
+    public void setModuleType(CoreConstants.ModuleType moduleType) {
         this.moduleType = moduleType;
     }
 

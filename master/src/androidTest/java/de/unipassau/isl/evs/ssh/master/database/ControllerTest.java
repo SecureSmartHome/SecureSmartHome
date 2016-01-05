@@ -48,7 +48,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Modules w/ Slaves to test Permissions
         slaveController.addSlave(new Slave("s1", new DeviceID("1"), null));
-        slaveController.addModule(new Module("m1", new DeviceID("1"), CoreConstants.ModuleType.LIGHT,
+        slaveController.addModule(new Module("m1", new DeviceID("1"), CoreConstants.ModuleType.Light,
                 new USBAccessPoint(1)));
 
         //Add Permissions
@@ -201,7 +201,7 @@ public class ControllerTest extends InstrumentationTestCase {
         permissionController.addPermission(new Permission("perm2"));
         //Permission w/ module
         slaveController.addSlave(new Slave("abc", new DeviceID("111"), null));
-        slaveController.addModule(new Module("m1", new DeviceID("111"), CoreConstants.ModuleType.DOOR_BUZZER,
+        slaveController.addModule(new Module("m1", new DeviceID("111"), CoreConstants.ModuleType.DoorBuzzer,
                 new USBAccessPoint(1)));
         permissionController.addPermission(new Permission("perm3", "m1"));
 
@@ -461,9 +461,9 @@ public class ControllerTest extends InstrumentationTestCase {
         }
 
         //Test modules init
-        slaveController.addModule(new Module("m1", new DeviceID("1"), CoreConstants.ModuleType.WEATHER_BOARD,
+        slaveController.addModule(new Module("m1", new DeviceID("1"), CoreConstants.ModuleType.WeatherBoard,
                 new USBAccessPoint(2)));
-        slaveController.addModule(new Module("m2", new DeviceID("1"), CoreConstants.ModuleType.WEBCAM,
+        slaveController.addModule(new Module("m2", new DeviceID("1"), CoreConstants.ModuleType.Webcam,
                 new USBAccessPoint(1)));
         assertNotNull(slaveController.getModule("m1"));
         assertNotNull(slaveController.getModule("m2"));
@@ -471,7 +471,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Test to init modules at none existing slaves
         try {
-            slaveController.addModule(new Module("m1", new DeviceID("99"), CoreConstants.ModuleType.DOOR_SENSOR,
+            slaveController.addModule(new Module("m1", new DeviceID("99"), CoreConstants.ModuleType.DoorSensor,
                     new USBAccessPoint(2)));
             Assert.fail("Permission controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
@@ -480,7 +480,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Add module with already existing name
         try {
-            slaveController.addModule(new Module("m2", new DeviceID("1"), CoreConstants.ModuleType.DOOR_SENSOR,
+            slaveController.addModule(new Module("m2", new DeviceID("1"), CoreConstants.ModuleType.DoorSensor,
                     new USBAccessPoint(1)));
             Assert.fail("Permission controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {

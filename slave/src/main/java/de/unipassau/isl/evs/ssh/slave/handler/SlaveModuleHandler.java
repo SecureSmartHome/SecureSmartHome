@@ -10,6 +10,7 @@ import java.util.Set;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.CoreConstants.ModuleType;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
@@ -30,6 +31,7 @@ import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.WeatherSensor;
 import de.unipassau.isl.evs.ssh.drivers.mock.EdimaxPlugSwitchMock;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.ModuleType.*;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
 
 /**
@@ -153,20 +155,20 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
     public Class<? extends Component> getDriverClass(Module module) {
         Class<? extends Component> clazz = null;
         switch (module.getModuleType()) {
-            case CoreConstants.ModuleType.WINDOW_SENSOR:
-            case CoreConstants.ModuleType.DOOR_SENSOR:
+            case WindowSensor:
+            case DoorSensor:
                 clazz = ReedSensor.class;
                 break;
-            case CoreConstants.ModuleType.WEATHER_BOARD:
+            case WeatherBoard:
                 clazz = WeatherSensor.class;
                 break;
-            case CoreConstants.ModuleType.DOOR_BUZZER:
+            case DoorBuzzer:
                 clazz = DoorBuzzer.class;
                 break;
-            case CoreConstants.ModuleType.DOORBELL:
+            case Doorbell:
                 clazz = ButtonSensor.class;
                 break;
-            case CoreConstants.ModuleType.LIGHT:
+            case Light:
                 clazz = EdimaxPlugSwitch.class;
                 break;
         }

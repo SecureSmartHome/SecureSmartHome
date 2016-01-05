@@ -15,6 +15,7 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
@@ -198,7 +199,7 @@ public class StatusFragment extends BoundFragment {
 
             Module module = getItem(position);
             moduleName.setText(module.getName());
-            moduleType.setText(module.getModuleType());
+            moduleType.setText(module.getModuleType().toLocalizedString(getActivity().getApplicationContext()));
             moduleConnectionType.setText(module.getModuleAccessPoint().getType());
             return layout;
         }

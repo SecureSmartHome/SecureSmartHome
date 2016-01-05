@@ -23,6 +23,7 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppNewModuleHandler;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
@@ -312,7 +313,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         String name = nameInput.getText().toString();
         DeviceID atSlave = ((Slave) slaveSpinner.getSelectedItem()).getSlaveID();
         String sensorType = (String) sensorTypeSpinner.getSelectedItem();
-        Module module = new Module(name, atSlave, sensorType, accessPoint);
+        Module module = new Module(name, atSlave, ModuleType.valueOf(sensorType), accessPoint);
 
         handler.addNewModule(module);
     }
