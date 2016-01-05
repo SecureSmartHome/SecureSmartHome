@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.CoreConstants.ModuleType;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
@@ -31,7 +29,6 @@ import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.WeatherSensor;
 import de.unipassau.isl.evs.ssh.drivers.mock.EdimaxPlugSwitchMock;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.ModuleType.*;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
 
 /**
@@ -73,6 +70,11 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
     private void registerModules(Set<Module> componentsToAdd) throws WrongAccessPointException, EvsIoException {
         for (Module module : componentsToAdd) {
             Class<? extends Component> clazz = getDriverClass(module);
+            if (clazz == null) {
+                Log.i(TAG, "Module has unknown type/accesspoint combination");
+                return;
+            }
+
             if (clazz.getName().equals(ButtonSensor.class.getName())) {
                 registerButtonSensor(module);
             } else if (clazz.getName().equals(DoorBuzzer.class.getName())) {
