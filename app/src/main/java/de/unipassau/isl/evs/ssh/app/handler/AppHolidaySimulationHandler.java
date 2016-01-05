@@ -12,6 +12,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_HOLIDAY_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_SET;
 
@@ -30,8 +31,8 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (MASTER_HOLIDAY_SET.matches(message)) {
-            this.isOn = MASTER_HOLIDAY_SET.getPayload(message).switchOn();
+        if (APP_HOLIDAY_GET.matches(message)) {
+            this.isOn = APP_HOLIDAY_GET.getPayload(message).switchOn();
             fireStatusChanged();
         } else {
             invalidMessage(message);
@@ -49,6 +50,8 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
     public boolean isOn() {
         if (System.currentTimeMillis() - lastUpdate >= REFRESH_DELAY_MILLIS) {
             if (getContainer().require(NamingManager.KEY).isMasterKnown()) {
+                Message message = new Message(new HolidaySimulationPayload(false));
+                message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_HOLIDAY_GET.getKey());
                 sendMessageToMaster(MASTER_HOLIDAY_GET, new Message(
                         new HolidaySimulationPayload(false)));
             }

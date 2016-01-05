@@ -79,6 +79,7 @@ public class RoutingKeys {
     public static final RoutingKey<AddNewModulePayload> APP_MODULE_ADD = new RoutingKey<>(PREFIX_APP + "/module/add", AddNewModulePayload.class);
     public static final RoutingKey<GenerateNewRegisterTokenPayload> APP_USER_REGISTER = new RoutingKey<>(PREFIX_APP + "/user/register", GenerateNewRegisterTokenPayload.class);
     public static final RoutingKey<MessagePayload> APP_SLAVE_REGISTER = new RoutingKey<>(PREFIX_APP + "/slave/register", MessagePayload.class);
+    public static final RoutingKey<HolidaySimulationPayload> APP_HOLIDAY_GET = new RoutingKey<>(PREFIX_APP + "/holiday/get", HolidaySimulationPayload.class);
 
     // Global
     public static final RoutingKey<ModulesPayload> GLOBAL_MODULES_UPDATE = new RoutingKey<>(PREFIX_GLOBAL + "/modules/update", ModulesPayload.class);
