@@ -66,6 +66,7 @@ public class AppNewModuleHandler extends AbstractMessageHandler implements Compo
     public void handle(Message.AddressedMessage message) {
         if (APP_MODULE_ADD.matches(message)) {
             fireRegistrationFinished(true);
+            //HANDLE registration failed
         } else {
             invalidMessage(message);
         }

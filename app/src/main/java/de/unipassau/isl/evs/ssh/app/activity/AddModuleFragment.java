@@ -47,6 +47,11 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     private LinearLayout gpioView;
     private LinearLayout mockView;
 
+    private Button addWLANButton;
+    private Button addMockButton;
+    private Button addUSBButton;
+    private Button addGPIOButton;
+
     private Spinner slaveSpinner;
     private Spinner sensorTypeSpinner;
     private Spinner connectionTypeSpinner;
@@ -64,6 +69,11 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
                     } else {
                         text = getResources().getString(R.string.added_module_fail);
                     }
+
+                    addWLANButton.setEnabled(true);
+                    addMockButton.setEnabled(true);
+                    addUSBButton.setEnabled(true);
+                    addGPIOButton.setEnabled(true);
 
                     Toast toast = Toast.makeText(getActivity().getApplicationContext(), text, Toast.LENGTH_LONG);
                     toast.show();
@@ -196,10 +206,10 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private LinearLayout createViewGPIO(View root) {
         LinearLayout gpioView = (LinearLayout) root.findViewById(R.id.addmodule_gpio);
-        Button button = (Button) gpioView.findViewById(R.id.add_module_gpio_button);
+        addGPIOButton = (Button) gpioView.findViewById(R.id.add_module_gpio_button);
         final EditText gpioPortInput = (EditText) gpioView.findViewById(R.id.add_module_gpio_port_input);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        addGPIOButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String gpioPort = gpioPortInput.getText().toString();
@@ -217,10 +227,10 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private LinearLayout createViewUSB(View root) {
         LinearLayout usbView = (LinearLayout) root.findViewById(R.id.addmodule_usb);
-        Button button = (Button) usbView.findViewById(R.id.add_module_usb_button);
+        addUSBButton = (Button) usbView.findViewById(R.id.add_module_usb_button);
         final EditText usbPortInput = (EditText) usbView.findViewById(R.id.add_module_usb_port_input);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        addUSBButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String usbPort = usbPortInput.getText().toString();
@@ -238,13 +248,13 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private LinearLayout createViewWLAN(View root) {
         LinearLayout wlanView = (LinearLayout) root.findViewById(R.id.addmodule_wlan);
-        Button button = (Button) wlanView.findViewById(R.id.add_module_wlan_button);
+        addWLANButton = (Button) wlanView.findViewById(R.id.add_module_wlan_button);
         final EditText usernameInput = (EditText) wlanView.findViewById(R.id.add_module_wlan_username_input);
         final EditText passwordInput = (EditText) wlanView.findViewById(R.id.add_module_wlan_password_input);
         final EditText portInput = (EditText) wlanView.findViewById(R.id.add_module_wlan_port_input);
         final EditText ipAdressInput = (EditText) wlanView.findViewById(R.id.add_module_wlan_ip_input);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        addWLANButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String username = usernameInput.getText().toString();
@@ -256,6 +266,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
                     ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_fill_all_fields));
                 } else {
                     WLANAccessPoint accessPoint = new WLANAccessPoint(Integer.valueOf(port), username, password, ipAdress);
+                    addWLANButton.setEnabled(false);
                     addNewModule(accessPoint);
                 }
             }
@@ -267,11 +278,12 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private LinearLayout createViewMock(View root) {
         LinearLayout mockView = (LinearLayout) root.findViewById(R.id.addmodule_mock);
-        Button button = (Button) mockView.findViewById(R.id.add_module_mock_button);
+        addMockButton = (Button) mockView.findViewById(R.id.add_module_mock_button);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        addMockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                addMockButton.setEnabled(false);
                 addNewModule(new MockAccessPoint());
             }
         });
