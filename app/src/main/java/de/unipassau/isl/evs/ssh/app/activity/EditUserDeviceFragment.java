@@ -72,10 +72,10 @@ public class EditUserDeviceFragment extends BoundFragment {
         Resources res = getResources();
 
         TextView deviceID = ((TextView) getActivity().findViewById(R.id.userdevice_user_deviceid));
-        deviceID.setText(res.getString(R.string.device_id, device.getUserDeviceID().getIDString()));
+        deviceID.setText(String.format(res.getString(R.string.device_id), device.getUserDeviceID().getIDString()));
 
         TextView deviceGroup = ((TextView) getActivity().findViewById(R.id.userdevice_user_group));
-        deviceGroup.setText(res.getString(R.string.is_in_group, device.getInGroup()));
+        deviceGroup.setText(String.format(res.getString(R.string.is_in_group), device.getInGroup()));
 
         Button editButton = (Button) getActivity().findViewById(R.id.userdevice_edit_button);
         editButton.setOnClickListener(new View.OnClickListener() {
