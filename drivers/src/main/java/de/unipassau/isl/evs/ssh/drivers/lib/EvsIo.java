@@ -11,8 +11,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+/**
+ * Utility class for getting and setting GPIO pins.
+ *
+ * @author Betreuer
+ * @author Niko Fink
+ */
 public class EvsIo {
     private static final String TAG = EvsIo.class.getSimpleName();
+
+    private EvsIo() {}
 
     /**
      * Set-Up a GPIO pin
