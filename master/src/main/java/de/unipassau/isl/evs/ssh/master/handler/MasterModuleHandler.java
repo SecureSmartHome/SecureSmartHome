@@ -78,7 +78,11 @@ public class MasterModuleHandler extends AbstractMasterHandler {
             sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), createUpdateMessage());
         /* @author Leon Sell */
         } else if (MASTER_MODULE_RENAME.matches(message)) {
-            if (hasPermission(message.getFromID(), new Permission(de.unipassau.isl.evs.ssh.core.sec.Permission.RENAME_MODULE.toString()))) {
+            if (hasPermission(
+                    message.getFromID(),
+                    de.unipassau.isl.evs.ssh.core.sec.Permission.RENAME_MODULE.toString(),
+                    null
+            )) {
                 if (handleRenameModule(message)) {
                     updateAllClients();
                 } else {
@@ -124,7 +128,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
 
             if (permissions != null) {
                 for (de.unipassau.isl.evs.ssh.core.sec.Permission permission : permissions) {
-                    permissionController.addPermission(new Permission(permission.toString(), module.getName()));
+                    permissionController.addPermission(permission.toString(), module.getName());
                 }
             }
             success = true;

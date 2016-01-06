@@ -56,9 +56,7 @@ public class MasterNotificationHandler extends AbstractMasterHandler {
 
     private void sendMessageToAllReceivers(Message messageToSend, String type, RoutingKey routingKey) {
         final List<UserDevice> allUserDevicesWithPermission = requireComponent(PermissionController.KEY)
-                .getAllUserDevicesWithPermission(
-                        new Permission(type, null)
-                );
+                .getAllUserDevicesWithPermission(type, null);
         for (UserDevice userDevice : allUserDevicesWithPermission) {
             sendMessage(userDevice.getUserDeviceID(), routingKey, messageToSend);
         }

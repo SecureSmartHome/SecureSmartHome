@@ -50,14 +50,20 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
             HolidaySimulationPayload payload = MASTER_HOLIDAY_SET.getPayload(message);
 
             //TODO Refactor if we eliminate one permission
-            if (payload.switchOn() && hasPermission(message.getFromID(), new Permission(
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.START_HOLIDAY_SIMULATION.toString(), ""))) {
+            if (payload.switchOn() && hasPermission(
+                    message.getFromID(),
+                    de.unipassau.isl.evs.ssh.core.sec.Permission.START_HOLIDAY_SIMULATION.toString(),
+                    null
+            )) {
 
                 runHolidaySimulation = payload.switchOn();
                 replyStatus(message);
 
-            } else if (!payload.switchOn() && hasPermission(message.getFromID(), new Permission(
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.STOP_HOLIDAY_SIMULATION.toString(), ""))) {
+            } else if (!payload.switchOn() && hasPermission(
+                    message.getFromID(),
+                    de.unipassau.isl.evs.ssh.core.sec.Permission.STOP_HOLIDAY_SIMULATION.toString(),
+                    null
+            )) {
 
                 runHolidaySimulation = payload.switchOn();
                 replyStatus(message);

@@ -113,14 +113,16 @@ public class PermissionController extends AbstractComponent {
      * Returns whether a given user has a given Permission.
      *
      * @param userDeviceID DeviceID associated with the user.
-     * @param permission   Permission to check.
+     * @param permissionName Name of the permission to check.
+     * @param moduleName Module the permission applies for.
      * @return true if has permissions otherwise false.
      */
-    public boolean hasPermission(DeviceID userDeviceID, Permission permission) {
+    public boolean hasPermission(DeviceID userDeviceID, String permissionName, String moduleName) {
         Cursor permissionCursor;
-        if (permission.getModuleName() == null) {
+        if (moduleName == null) {
             permissionCursor = databaseConnector
-                    .executeSql("select * from " + DatabaseContract.HasPermission.TABLE_NAME
+                    .executeSql(
+                            "select * from " + DatabaseContract.HasPermission.TABLE_NAME
                             + " hp join " + DatabaseContract.Permission.TABLE_NAME + " p on "
                             + "hp." + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
                             + " = p." + DatabaseContract.Permission.COLUMN_ID
@@ -130,10 +132,12 @@ public class PermissionController extends AbstractComponent {
                             + " where p." + DatabaseContract.Permission.COLUMN_NAME
                             + " = ? and p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
                             + " is NULL and ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
-                            + " = ?", new String[]{permission.getName(), userDeviceID.getId()});
+                            + " = ?", new String[]{ permissionName, userDeviceID.getIDString() }
+                    );
         } else {
             permissionCursor = databaseConnector
-                    .executeSql("select * from " + DatabaseContract.HasPermission.TABLE_NAME
+                    .executeSql(
+                            "select * from " + DatabaseContract.HasPermission.TABLE_NAME
                             + " hp join " + DatabaseContract.Permission.TABLE_NAME + " p on "
                             + "hp." + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
                             + " = p." + DatabaseContract.Permission.COLUMN_ID
@@ -146,8 +150,8 @@ public class PermissionController extends AbstractComponent {
                             + " where p." + DatabaseContract.Permission.COLUMN_NAME
                             + " = ? and m." + DatabaseContract.ElectronicModule.COLUMN_NAME
                             + " = ? and ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
-                            + " = ?", new String[]{permission.getName(), permission.getModuleName(),
-                            userDeviceID.getId()});
+                            + " = ?", new String[] { permissionName, moduleName, userDeviceID.getIDString() }
+                    );
         }
         return permissionCursor.moveToNext();
     }
@@ -172,18 +176,21 @@ public class PermissionController extends AbstractComponent {
      * Add a Permission to a Template.
      *
      * @param templateName Name of the Template.
-     * @param permission   Permission to add to the Template.
+     * @param permissionName Name of the permission.
+     * @param moduleName Module the permission applies for.
      */
-    public void addPermissionToTemplate(String templateName, Permission permission) throws UnknownReferenceException {
+    public void addPermissionToTemplate(String templateName, String permissionName, String moduleName)
+            throws UnknownReferenceException {
         try {
-            if (permission.getModuleName() == null) {
+            if (moduleName == null) {
                 databaseConnector.executeSql("insert into "
                                 + DatabaseContract.ComposedOfPermission.TABLE_NAME
                                 + " (" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
                                 + ", " + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
                                 + ") values ((" + PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY
                                 + "), (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
-                        new String[]{permission.getName(), templateName});
+                        new String[] { permissionName, templateName }
+                );
             } else {
                 databaseConnector.executeSql("insert into "
                                 + DatabaseContract.ComposedOfPermission.TABLE_NAME
@@ -191,7 +198,8 @@ public class PermissionController extends AbstractComponent {
                                 + ", " + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
                                 + ") values ((" + PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY
                                 + "), (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
-                        new String[]{permission.getName(), permission.getModuleName(), templateName});
+                        new String[] { permissionName, moduleName, templateName }
+                );
             }
         } catch (SQLiteConstraintException sqlce) {
             throw new UnknownReferenceException("The given Template or Permission does not exist in the database",
@@ -203,17 +211,19 @@ public class PermissionController extends AbstractComponent {
      * Remove a Permission from a Template.
      *
      * @param templateName Name of the Template.
-     * @param permission   Permission to remove.
+     * @param permissionName Name of the permission.
+     * @param moduleName Module the permission applies for.
      */
-    public void removePermissionFromTemplate(String templateName, Permission permission) {
-        if (permission.getModuleName() == null) {
+    public void removePermissionFromTemplate(String templateName, String permissionName, String moduleName) {
+        if (moduleName == null) {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.ComposedOfPermission.TABLE_NAME
                             + " where " + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
                             + " = (" + PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY + ") and "
                             + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
                             + " = (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + ")",
-                    new String[]{permission.getName(), templateName});
+                    new String[] {permissionName, templateName }
+            );
         } else {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.ComposedOfPermission.TABLE_NAME
@@ -221,7 +231,8 @@ public class PermissionController extends AbstractComponent {
                             + " = (" + PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY + ") and "
                             + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
                             + " = (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + ")",
-                    new String[]{permission.getName(), permission.getModuleName(), templateName});
+                    new String[] { permissionName, moduleName, templateName }
+            );
         }
     }
 
@@ -229,18 +240,21 @@ public class PermissionController extends AbstractComponent {
      * Add a Permission for a UserDevice.
      *
      * @param userDeviceID DeviceID of the UserDevice.
-     * @param permission   Permission to give to UserDevice.
+     * @param permissionName Name of the permission.
+     * @param moduleName Module the permission applies for.
      */
-    public void addUserPermission(DeviceID userDeviceID, Permission permission) throws UnknownReferenceException {
+    public void addUserPermission(DeviceID userDeviceID, String permissionName, String moduleName)
+            throws UnknownReferenceException {
         try {
-            if (permission.getModuleName() == null) {
+            if (moduleName == null) {
                 databaseConnector.executeSql("insert into "
                         + DatabaseContract.HasPermission.TABLE_NAME
                         + " (" + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
                         + ", " + DatabaseContract.HasPermission.COLUMN_USER_ID
                         + ") values ((" + PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY
                         + "), (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
-                        + "))", new String[]{permission.getName(), userDeviceID.getId()});
+                        + "))", new String[] { permissionName, userDeviceID.getIDString() }
+                );
             } else {
                 databaseConnector.executeSql("insert into "
                         + DatabaseContract.HasPermission.TABLE_NAME
@@ -248,8 +262,8 @@ public class PermissionController extends AbstractComponent {
                         + ", " + DatabaseContract.HasPermission.COLUMN_USER_ID
                         + ") values ((" + PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY
                         + "), (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
-                        + "))", new String[]{permission.getName(), permission.getModuleName(),
-                        userDeviceID.getId()});
+                        + "))", new String[] { permissionName, moduleName, userDeviceID.getIDString() }
+                );
             }
         } catch (SQLiteConstraintException sqlce) {
             throw new UnknownReferenceException(
@@ -261,17 +275,19 @@ public class PermissionController extends AbstractComponent {
      * Remove a Permission for a UserDevice.
      *
      * @param userDeviceID DeviceID of the UserDevice.
-     * @param permission   Permission to take from UserDevice.
+     * @param permissionName Name of the permission.
+     * @param moduleName Module the permission applies for.
      */
-    public void removeUserPermission(DeviceID userDeviceID, Permission permission) {
-        if (permission.getModuleName() == null) {
+    public void removeUserPermission(DeviceID userDeviceID, String permissionName, String moduleName) {
+        if (moduleName == null) {
             databaseConnector.executeSql("delete from "
                     + DatabaseContract.HasPermission.TABLE_NAME
                     + " where " + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
                     + " = (" + PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY
                     + ") and " + DatabaseContract.HasPermission.COLUMN_USER_ID
                     + " = (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
-                    + ")", new String[]{permission.getName(), userDeviceID.getId()});
+                    + ")", new String[] { permissionName, userDeviceID.getIDString() }
+            );
         } else {
             databaseConnector.executeSql("delete from "
                     + DatabaseContract.HasPermission.TABLE_NAME
@@ -279,7 +295,8 @@ public class PermissionController extends AbstractComponent {
                     + " = (" + PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY
                     + ") and " + DatabaseContract.HasPermission.COLUMN_USER_ID
                     + " = (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
-                    + ")", new String[]{permission.getName(), permission.getModuleName(), userDeviceID.getId()});
+                    + ")", new String[] { permissionName, moduleName, userDeviceID.getIDString() }
+            );
         }
     }
 
@@ -303,22 +320,25 @@ public class PermissionController extends AbstractComponent {
     /**
      * Adds a new Permission to the database.
      *
-     * @param permission Permission to add.
+     * @param permissionName Name of the permission.
+     * @param moduleName Module the permission applies for.
      */
-    public void addPermission(Permission permission) throws DatabaseControllerException {
+    public void addPermission(String permissionName, String moduleName) throws DatabaseControllerException {
         try {
-            if (permission.getModuleName() == null) {
+            if (moduleName == null) {
                 databaseConnector.executeSql("insert into "
                         + DatabaseContract.Permission.TABLE_NAME
                         + " (" + DatabaseContract.Permission.COLUMN_NAME + ")"
-                        + " values (?)", new String[]{permission.getName()});
+                        + " values (?)", new String[] { permissionName }
+                );
             } else {
                 databaseConnector.executeSql("insert into "
                                 + DatabaseContract.Permission.TABLE_NAME
                                 + " (" + DatabaseContract.Permission.COLUMN_NAME
                                 + ", " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + ")"
                                 + "values (?, (" + MODULE_ID_FROM_NAME_SQL_QUERY + "))",
-                        new String[]{permission.getName(), permission.getModuleName()});
+                        new String[] { permissionName, moduleName }
+                );
             }
         } catch (SQLiteConstraintException sqlce) {
             throw new DatabaseControllerException("Either the name-module combination is already exists in the database"
@@ -329,22 +349,25 @@ public class PermissionController extends AbstractComponent {
     /**
      * Removes a Permission from the database.
      *
-     * @param permission Permission to remove.
+     * @param permissionName Name of the permission.
+     * @param moduleName Module the permission applies for.
      */
-    public void removePermission(Permission permission) {
-        if (permission.getModuleName() == null) {
+    public void removePermission(String permissionName, String moduleName) {
+        if (moduleName == null) {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.Permission.TABLE_NAME
                             + " where " + DatabaseContract.Permission.COLUMN_NAME
                             + " = ? and " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL",
-                    new String[]{permission.getName()});
+                    new String[] { permissionName }
+            );
         } else {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.Permission.TABLE_NAME
                             + " where " + DatabaseContract.Permission.COLUMN_NAME
                             + " = ? and " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
                             + " = (" + MODULE_ID_FROM_NAME_SQL_QUERY + ")",
-                    new String[]{permission.getName(), permission.getModuleName()});
+                    new String[] { permissionName, moduleName }
+            );
         }
     }
 
@@ -410,15 +433,17 @@ public class PermissionController extends AbstractComponent {
         }
     }
 
+    //Todo unit test
     /**
-     * //Todo unit test, doc
+     * Returns all UserDevices that have a given permission.
      *
-     * @param permission
-     * @return
+     * @param permissionName Name of the permission.
+     * @param moduleName Module the permission applies for.
+     * @return List of the UserDevices.
      */
-    public List<UserDevice> getAllUserDevicesWithPermission(Permission permission) {
+    public List<UserDevice> getAllUserDevicesWithPermission(String permissionName, String moduleName) {
         Cursor userDevicesCursor;
-        if (permission.getModuleName() == null) {
+        if (moduleName == null) {
             userDevicesCursor = databaseConnector.executeSql("select"
                     + " u." + DatabaseContract.UserDevice.COLUMN_NAME
                     + ", u." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
@@ -435,7 +460,8 @@ public class PermissionController extends AbstractComponent {
                     + " = g." + DatabaseContract.Group.COLUMN_ID
                     + " where p." + DatabaseContract.Permission.COLUMN_NAME
                     + " = ? and p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
-                    + " is NULL", new String[]{permission.getName()});
+                    + " is NULL", new String[] { permissionName }
+            );
         } else {
             userDevicesCursor = databaseConnector.executeSql("select"
                     + " u." + DatabaseContract.UserDevice.COLUMN_NAME
@@ -456,7 +482,8 @@ public class PermissionController extends AbstractComponent {
                     + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
                     + " where p." + DatabaseContract.Permission.COLUMN_NAME
                     + " = ? and m." + DatabaseContract.ElectronicModule.COLUMN_NAME
-                    + " = ?", new String[]{permission.getName(), permission.getModuleName()});
+                    + " = ?", new String[] { permissionName, moduleName }
+            );
         }
         List<UserDevice> userDevices = new LinkedList<>();
         while (userDevicesCursor.moveToNext()) {

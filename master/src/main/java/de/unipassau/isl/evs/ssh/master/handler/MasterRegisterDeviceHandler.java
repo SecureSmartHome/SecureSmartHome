@@ -44,7 +44,11 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_USER_REGISTER.matches(message)) {
-            if (hasPermission(message.getFromID(), new Permission(de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER.toString()))) {
+            if (hasPermission(
+                    message.getFromID(),
+                    de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER.toString(),
+                    null
+            )) {
                 handleInitRequest(message);
             }
         } else if (message.getPayload() instanceof MessageErrorPayload) {
@@ -106,7 +110,11 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
             List<Permission> permissions = requireComponent(PermissionController.KEY).getPermissions();
             for (Permission permission : permissions) {
                 try {
-                    requireComponent(PermissionController.KEY).addUserPermission(deviceID, permission);
+                    requireComponent(PermissionController.KEY).addUserPermission(
+                            deviceID,
+                            permission.getName(),
+                            permission.getModuleName()
+                    );
                 } catch (UnknownReferenceException ure) {
                     throw new IllegalArgumentException("There was a problem adding all permissions to the newly added user. " +
                             "Maybe a permission was deleted while adding permissions to the new user.", ure);
@@ -119,7 +127,11 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                     .getPermissionsOfTemplate(templateName);
             for (Permission permission : permissions) {
                 try {
-                    requireComponent(PermissionController.KEY).addUserPermission(deviceID, permission);
+                    requireComponent(PermissionController.KEY).addUserPermission(
+                            deviceID,
+                            permission.getName(),
+                            permission.getModuleName()
+                    );
                 } catch (UnknownReferenceException ure) {
                     throw new IllegalArgumentException("There was a problem adding all permissions to the newly added user. " +
                             "Maybe a permission was deleted while adding permissions to the new user.", ure);

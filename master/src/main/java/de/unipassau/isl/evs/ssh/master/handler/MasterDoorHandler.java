@@ -96,10 +96,8 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         //Get status
         if (hasPermission(
                 message.getFromID(),
-                new Permission(
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_DOOR_STATUS.toString(),
-                        atModule.getName()
-                )
+                de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_DOOR_STATUS.toString(),
+                atModule.getName()
         )) {
             final Message messageToSend = new Message(doorStatusPayload);
             messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_DOOR_STATUS_GET.getKey());
@@ -120,16 +118,15 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         Module atModule = requireComponent(SlaveController.KEY)
                 .getModule(doorLockPayload.getModuleName());
 
-        if (requireComponent(PermissionController.KEY)
-                .hasPermission(message.getFromID(), new Permission(
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_DOOR_STATUS.toString(), atModule.getName()))) {
-
-
+        if (hasPermission(
+                message.getFromID(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_DOOR_STATUS.toString(),
+                atModule.getName()
+        )) {
             Message messageToSend = new Message(new DoorLockPayload(getLocked(atModule.getName()), atModule.getName()));
             messageToSend.putHeader(Message.HEADER_REFERENCES_ID, message.getSequenceNr());
 
             sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), message);
-
         } else {
             //no permission
             sendErrorMessage(message);
@@ -141,10 +138,11 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         Module atModule = requireComponent(SlaveController.KEY)
                 .getModule(doorLockPayload.getModuleName());
 
-        if (requireComponent(PermissionController.KEY)
-                .hasPermission(message.getFromID(), new Permission(
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.LOCK_DOOR.toString(), atModule.getName()))) {
-
+        if (hasPermission(
+                message.getFromID(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.LOCK_DOOR.toString(),
+                atModule.getName()
+        )) {
             setLocked(atModule.getName(), !doorLockPayload.isUnlock());
 
             //Send notification
@@ -190,10 +188,10 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         Message messageToSend = new Message(doorUnlatchPayload);
         messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_DOOR_UNLATCH.getKey());
 
-        if (requireComponent(PermissionController.KEY)
-                .hasPermission(message.getFromID(), new Permission(
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR.toString(), atModule.getName()))) {
-
+        if (hasPermission(message.getFromID(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR.toString(),
+                atModule.getName()
+        )) {
             if (!getLocked(atModule.getName())) {
                 Message.AddressedMessage sendMessage =
                         sendMessage(
