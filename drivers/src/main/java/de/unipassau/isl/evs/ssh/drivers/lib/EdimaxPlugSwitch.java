@@ -5,6 +5,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -85,7 +86,7 @@ public class EdimaxPlugSwitch extends AbstractComponent {
         String command = String.format(XML_SET, on ? "ON" : "OFF");
         String response = executePost(url, command);
         Log.d(TAG, "Response: " + response);
-        return parseResponse(response) == on;
+        return parseResponseSet(response);
     }
 
     /**
@@ -97,7 +98,7 @@ public class EdimaxPlugSwitch extends AbstractComponent {
     public boolean isOn() throws IOException {
         final String response = executePost(url, XML_GET);
         Log.d(TAG, "Response: " + response);
-        return parseResponse(response);
+        return parseResponseGet(response);
     }
 
     /**
@@ -146,7 +147,29 @@ public class EdimaxPlugSwitch extends AbstractComponent {
         }
     }
 
-    private boolean parseResponse(String response) throws IOException {
+    private boolean parseResponseSet(String response) throws IOException {
+        // Parse the response String
+        final Document document;
+        try {
+            final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            document = builder.parse(new InputSource(new StringReader(response)));
+        } catch (ParserConfigurationException | SAXException e) {
+            throw new IOException("Could not parse response", e);
+        }
+
+        // Extract response status
+        Element setup = document.getElementById("setup");
+        if (setup != null) {
+            String status = setup.getTextContent();
+            Log.d(TAG, "Status of set: " + status);
+            return status.toLowerCase().equals("ok");
+        }
+        else {
+            throw new IOException("Response missing id 'setup'");
+        }
+    }
+
+    private boolean parseResponseGet(String response) throws IOException {
         // Parse the response String
         final Document document;
         try {

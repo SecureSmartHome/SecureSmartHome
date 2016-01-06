@@ -268,7 +268,7 @@ public class Message implements Serializable {
 
         @Override
         protected CharSequence headerString() {
-            return super.headerString() + "#" + sequenceNr + " to " + toID.toShortString() + routingKey + " from " + fromID.toShortString();
+            return super.headerString() + "#" + sequenceNr + " from " + fromID.toShortString() +" to " + toID.toShortString() + routingKey;
         }
     }
 }
