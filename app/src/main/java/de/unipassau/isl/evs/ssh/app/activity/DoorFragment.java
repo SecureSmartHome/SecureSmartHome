@@ -98,7 +98,12 @@ public class DoorFragment extends BoundFragment {
 
     @Override
     public void onContainerDisconnected() {
-        getDoorHandler().removeListener(doorListener);
+        AppDoorHandler doorHandler = getDoorHandler();
+
+        if (doorHandler != null) {
+            doorHandler.removeListener(doorListener);
+        }
+
         super.onContainerDisconnected();
     }
 

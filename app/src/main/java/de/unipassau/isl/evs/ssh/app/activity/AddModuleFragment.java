@@ -23,7 +23,6 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppNewModuleHandler;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
@@ -171,7 +170,10 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     @Override
     public void onContainerDisconnected() {
-        getComponent(AppNewModuleHandler.KEY).removeNewModuleListener(listener);
+        AppNewModuleHandler handler = getComponent(AppNewModuleHandler.KEY);
+        if (handler != null) {
+            handler.removeNewModuleListener(listener);
+        }
         super.onContainerDisconnected();
     }
 
