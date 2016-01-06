@@ -145,7 +145,7 @@ public class DatabaseConnector extends AbstractComponent {
                 + DatabaseContract.HolidayLog.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
                 + DatabaseContract.HolidayLog.COLUMN_ELECTRONIC_MODULE_ID + " INTEGER,"
                 + DatabaseContract.HolidayLog.COLUMN_ACTION + " VARCHAR NOT NULL,"
-                + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " INTEGER NOT NULL"
+                + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " INTEGER NOT NULL,"
                 + "FOREIGN KEY(" + DatabaseContract.HolidayLog.COLUMN_ELECTRONIC_MODULE_ID + ") REFERENCES " + DatabaseContract.ElectronicModule.TABLE_NAME + "(" + DatabaseContract.ElectronicModule.COLUMN_ID + ") ON DELETE CASCADE"
                 + ");";
 
