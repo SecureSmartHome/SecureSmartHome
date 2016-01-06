@@ -33,6 +33,7 @@ import de.unipassau.isl.evs.ssh.core.network.ClientConnectionListener;
  * @author Wolfgang Popp
  */
 public class MainActivity extends BoundActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String KEY_LAST_FRAGMENT = "LAST_FRAGMENT";
     private LinearLayout overlayDisconnected;
     private NotificationCompat.Builder notificationBuilder;
     private NotificationManager notificationManager;
@@ -98,7 +99,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(this.savedInstanceState);
+        super.onCreate(savedInstanceState);
         this.savedInstanceState = savedInstanceState;
         setContentView(R.layout.activity_main);
 
@@ -172,7 +173,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
             }
         }
 
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_LAST_FRAGMENT)) {
             return null; //fragment will be added automatically by fragment manager
         }
         return MainFragment.class;
@@ -198,6 +199,12 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(KEY_LAST_FRAGMENT, getCurrentFragment().getClass().getName());
     }
 
     @Override
