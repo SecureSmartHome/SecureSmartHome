@@ -87,8 +87,8 @@ public class LightFragment extends BoundFragment {
     }
 
     private class LightListAdapter extends BaseAdapter {
-        private LayoutInflater inflater;
         private final List<Module> lightModules = new ArrayList<>();
+        private LayoutInflater inflater;
 
         @Override
         public void notifyDataSetChanged() {
@@ -133,7 +133,7 @@ public class LightFragment extends BoundFragment {
             if (item != null && item.getName() != null) {
                 int hash = item.getName().hashCode();
                 final AppLightHandler appLightHandler = getComponent(AppLightHandler.KEY);
-                if (appLightHandler != null && appLightHandler.isLightOnCached(item)) {
+                if (appLightHandler != null && appLightHandler.isLightOn(item)) {
                     hash = ~hash;
                 }
                 return hash;
@@ -154,7 +154,7 @@ public class LightFragment extends BoundFragment {
         public View getView(int position, View convertView, ViewGroup parent) {
             final Module module = getItem(position);
             final AppLightHandler appLightHandler = getComponent(AppLightHandler.KEY);
-            final boolean isLightOn = appLightHandler != null && appLightHandler.isLightOnCached(module);
+            final boolean isLightOn = appLightHandler != null && appLightHandler.isLightOn(module);
 
             final LinearLayout lightButtonLayout;
             if (convertView == null) {

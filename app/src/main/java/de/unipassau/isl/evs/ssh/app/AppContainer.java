@@ -30,12 +30,13 @@ public class AppContainer extends ContainerService {
         register(NamingManager.KEY, new NamingManager(false));
         register(Client.KEY, new Client());
 
+        register(AppModuleHandler.KEY, new AppModuleHandler());
+
         register(AppAddSlaveHandler.KEY, new AppAddSlaveHandler());
         register(AppClimateHandler.KEY, new AppClimateHandler());
         register(AppDoorHandler.KEY, new AppDoorHandler());
         register(AppHolidaySimulationHandler.KEY, new AppHolidaySimulationHandler());
         register(AppLightHandler.KEY, new AppLightHandler());
-        register(AppModuleHandler.KEY, new AppModuleHandler());
         register(AppNewModuleHandler.KEY, new AppNewModuleHandler());
         register(AppNotificationHandler.KEY, new AppNotificationHandler());
         register(AppRegisterNewDeviceHandler.KEY, new AppRegisterNewDeviceHandler());
