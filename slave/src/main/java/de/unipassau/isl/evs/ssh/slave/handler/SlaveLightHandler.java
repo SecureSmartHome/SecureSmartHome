@@ -30,18 +30,10 @@ public class SlaveLightHandler extends AbstractMessageHandler {
      */
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (SLAVE_LIGHT_SET.matches(message) || SLAVE_LIGHT_GET.matches(message)) {
-            final LightPayload payload = message.getPayloadChecked(LightPayload.class);
-            final Key<EdimaxPlugSwitch> key = new Key<>(
-                    EdimaxPlugSwitch.class,
-                    payload.getModule().getName()
-            );
-            final EdimaxPlugSwitch plugSwitch = requireComponent(key);
-
-            if (SLAVE_LIGHT_SET.matches(message)) {
-                switchLight(message, plugSwitch);
-            }
-            replyStatus(message, plugSwitch);
+        if (SLAVE_LIGHT_SET.matches(message)) {
+            handleSet(message);
+        } else if (SLAVE_LIGHT_GET.matches(message)) {
+            handleGet(message);
         } else {
             //Received wrong routing key -> invalid message
             invalidMessage(message);
@@ -53,25 +45,39 @@ public class SlaveLightHandler extends AbstractMessageHandler {
         return new RoutingKey[]{SLAVE_LIGHT_SET, SLAVE_LIGHT_GET};
     }
 
-    /**
-     * Method the hides switching the light on and off
-     *
-     * @param original   message that should get a reply
-     * @param plugSwitch representing the driver of the lamp which is to be switched
-     */
-    private void switchLight(Message.AddressedMessage original, EdimaxPlugSwitch plugSwitch) {
-        final LightPayload payload = SLAVE_LIGHT_SET.getPayload(original);
+    private void handleSet(Message.AddressedMessage message) {
+        final LightPayload payload = message.getPayloadChecked(LightPayload.class);
+        final Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, payload.getModule().getName());
+        final EdimaxPlugSwitch plugSwitch = requireComponent(key);
+
+        boolean success = false;
+        boolean isOn = payload.getOn();
+
         try {
-            if (payload.getOn() != plugSwitch.isOn()) {
-                final boolean success = plugSwitch.setOn(payload.getOn());
-                if (!success) {
-                    Log.e(TAG, "Lamp did change status (should be " + payload.getOn() + ")");
-                    sendErrorMessage(original);
-                }
-            }
+            success = plugSwitch.setOn(isOn);
         } catch (IOException e) {
             Log.e(TAG, "Cannot switch lamp due to error", e);
-            sendErrorMessage(original);
+        }
+
+        if (success) {
+            replyStatus(message, isOn);
+        } else {
+            //HANDLE
+            sendErrorMessage(message);
+        }
+    }
+
+    private void handleGet(Message.AddressedMessage message) {
+        final LightPayload payload = message.getPayloadChecked(LightPayload.class);
+        final Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, payload.getModule().getName());
+        final EdimaxPlugSwitch plugSwitch = requireComponent(key);
+
+        try {
+            replyStatus(message, plugSwitch.isOn());
+        } catch (IOException e) {
+            Log.e(TAG, "Cannot retrieve lamp status due to error", e);
+            //HANDLE
+            sendErrorMessage(message);
         }
     }
 
@@ -80,20 +86,11 @@ public class SlaveLightHandler extends AbstractMessageHandler {
      *
      * @param original message that should get a reply
      */
-    private void replyStatus(Message.AddressedMessage original, EdimaxPlugSwitch plugSwitch) {
+    private void replyStatus(Message.AddressedMessage original, boolean isOn) {
         final LightPayload payload = original.getPayloadChecked(LightPayload.class);
         final Module module = payload.getModule();
-        try {
-            final Message reply = new Message(new LightPayload(plugSwitch.isOn(), module));
-            reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
-            sendMessage(
-                    original.getFromID(),
-                    original.getHeader(Message.HEADER_REPLY_TO_KEY),
-                    reply
-            );
-        } catch (IOException e) {
-            Log.e(TAG, "Cannot retrieve lamp status due to error", e);
-            sendErrorMessage(original);
-        }
+        final Message reply = new Message(new LightPayload(isOn, module));
+        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
+        sendMessage(original.getFromID(), original.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
     }
 }
