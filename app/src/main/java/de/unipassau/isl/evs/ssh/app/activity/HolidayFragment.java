@@ -59,7 +59,10 @@ public class HolidayFragment extends BoundFragment {
 
     @Override
     public void onContainerDisconnected() {
-        getHolidaySimulationHandler().removeListener(holidaySimulationListener);
+        if (getHolidaySimulationHandler() != null) {
+            getHolidaySimulationHandler().removeListener(holidaySimulationListener);
+        }
+
         super.onContainerDisconnected();
     }
 
