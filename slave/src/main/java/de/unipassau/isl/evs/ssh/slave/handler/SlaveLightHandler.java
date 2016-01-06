@@ -19,6 +19,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SE
  * Handles light messages and makes API calls accordingly.
  *
  * @author Christoph Fraedrich
+ * @author Wolfgang Popp
  */
 public class SlaveLightHandler extends AbstractMessageHandler {
     private static final String TAG = SlaveLightHandler.class.getSimpleName();

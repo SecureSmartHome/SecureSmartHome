@@ -29,6 +29,7 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
  *
  * @author Wolfram Gottschlich
  * @author Niko Fink
+ * @author Wolfgang Popp
  * @version 2.0
  */
 public class EdimaxPlugSwitch extends AbstractComponent {
