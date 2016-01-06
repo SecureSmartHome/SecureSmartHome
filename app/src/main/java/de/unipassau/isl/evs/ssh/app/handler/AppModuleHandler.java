@@ -38,9 +38,6 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES
  */
 public class AppModuleHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppModuleHandler> KEY = new Key<>(AppModuleHandler.class);
-
-    private List<AppModuleListener> listeners = new LinkedList<>();
-
     /**
      * Use sample code to filter for specific components
      * <pre>
@@ -54,31 +51,28 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
             return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.Light);
         }
     };
-
     private static final Predicate<Module> PREDICATE_DOOR = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
             return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.DoorSensor);
         }
     };
-
     private static final Predicate<Module> PREDICATE_WEATHER = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
             return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.WeatherBoard);
         }
     };
-
     private static final Predicate<Module> PREDICATE_CAMERA = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
             return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.Webcam);
         }
     };
-
     private final Set<Module> components = new HashSet<>();
     private final List<Slave> slaves = new LinkedList<>();
     private final ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
+    private List<AppModuleListener> listeners = new LinkedList<>();
 
     public void addAppModuleListener(AppModuleListener listener) {
         listeners.add(listener);
@@ -166,11 +160,6 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
             List<Slave> slaves = payload.getSlaves();
             ListMultimap<Slave, Module> modulesAtSlave = payload.getModulesAtSlaves();
             updateList(modules, slaves, modulesAtSlave);
-            //Todo: don't do this. do the thing that really needs to be done. this is just here because it's working for now!
-            //TODO Use an AppModuleListener for this (Wolfgang, 2015-12-22)
-            for (Module module : getLights()) {
-                requireComponent(AppLightHandler.KEY).setLight(module, false);
-            }
         } else {
             invalidMessage(message);
         }

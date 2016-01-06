@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.SimpleMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -27,17 +28,41 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_LIGHT_UPDA
 public class AppLightHandler extends SimpleMessageHandler<LightPayload> implements Component {
     public static final Key<AppLightHandler> KEY = new Key<>(AppLightHandler.class);
 
+    private static final String TAG = AppLightHandler.class.getSimpleName();
+
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(20);
     private final List<LightHandlerListener> listeners = new ArrayList<>();
-
-    // TODO this map has to be updated as soon as new lightmodules become available.
-    // Use an AppModuleHandler.AppModuleListener to get notified when modules become available.
-    // This handler has to query the status of each new lamp as well.
-    // also fix comment in AppModuleHandler.handle()!!
     private final Map<Module, LightStatus> lightStatusMapping = new HashMap<>();
+    private AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
+        @Override
+        public void onModulesRefreshed() {
+            update();
+        }
+    };
 
-    public AppLightHandler(){
+    public AppLightHandler() {
         super(APP_LIGHT_UPDATE);
+    }
+
+    @Override
+    public void init(Container container) {
+        super.init(container);
+        requireComponent(AppModuleHandler.KEY).addAppModuleListener(listener);
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        requireComponent(AppModuleHandler.KEY).removeAppModuleListener(listener);
+    }
+
+    private void update() {
+        lightStatusMapping.clear();
+        List<Module> lights = requireComponent(AppModuleHandler.KEY).getLights();
+        for (Module m : lights) {
+            lightStatusMapping.put(m, new LightStatus(false));
+            requestLightStatus(m);
+        }
     }
 
     @Override
@@ -51,7 +76,7 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
      * @param module The module which status is changed.
      */
     public void toggleLight(Module module) {
-        setLight(module, !isLightOnCached(module));
+        setLight(module, !isLightOn(module));
     }
 
     private void setCachedStatus(Module module, boolean isOn) {
@@ -73,19 +98,19 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
      */
     public boolean isLightOn(Module module) {
         final LightStatus status = lightStatusMapping.get(module);
-        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+        if (status != null && System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
             requestLightStatus(module);
         }
         return isLightOnCached(module);
     }
 
     /**
-     * Return if a light-status is already cached.
+     * Return the light status if already cached.
      *
      * @param module the light module
-     * @return if a light-status is already cached.
+     * @return <code>true</code> if a light-status is already cached and the light is turned on.
      */
-    public boolean isLightOnCached(Module module) {
+    private boolean isLightOnCached(Module module) {
         final LightStatus status = lightStatusMapping.get(module);
         return status != null && status.isOn();
     }
@@ -99,7 +124,7 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
 
 
     /**
-     * Sends a request for the status of a module.
+     * Sends a GET-request for the status of a module.
      */
     private void requestLightStatus(Module m) {
         LightPayload lightPayload = new LightPayload(false, m);
