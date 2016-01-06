@@ -305,7 +305,7 @@ public class PermissionController extends AbstractComponent {
      *
      * @param permission Permission to add.
      */
-    public void addPermission(Permission permission) throws AlreadyInUseException {
+    public void addPermission(Permission permission) throws DatabaseControllerException {
         try {
             if (permission.getModuleName() == null) {
                 databaseConnector.executeSql("insert into "
@@ -321,8 +321,8 @@ public class PermissionController extends AbstractComponent {
                         new String[]{permission.getName(), permission.getModuleName()});
             }
         } catch (SQLiteConstraintException sqlce) {
-            throw new AlreadyInUseException("The name-module combination is already used by another Permission.",
-                    sqlce);
+            throw new DatabaseControllerException("Either the name-module combination is already exists in the database"
+                    + " or the given module doesn't exist.", sqlce);
         }
     }
 

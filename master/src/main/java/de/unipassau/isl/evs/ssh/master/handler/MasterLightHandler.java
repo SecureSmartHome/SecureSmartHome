@@ -1,6 +1,9 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import android.util.Log;
+
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -8,6 +11,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
+import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET;
@@ -21,6 +25,8 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SE
  * @author Leon Sell
  */
 public class MasterLightHandler extends AbstractMasterHandler {
+    private static final String TAG = MasterLightHandler.class.getSimpleName();
+
     @Override
     public void handle(Message.AddressedMessage message) {
         saveMessage(message);
@@ -65,10 +71,20 @@ public class MasterLightHandler extends AbstractMasterHandler {
                     messageToSend
             );
             putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
-            if (payload.getOn()) {
-                requireComponent(HolidayController.KEY).addHolidayLogEntry(CoreConstants.LogActions.LIGHT_ON_ACTION);
-            } else {
-                requireComponent(HolidayController.KEY).addHolidayLogEntry(CoreConstants.LogActions.LIGHT_OFF_ACTION);
+            try {
+                if (payload.getOn()) {
+                    requireComponent(HolidayController.KEY).addHolidayLogEntryNow(
+                            CoreConstants.LogActions.LIGHT_ON_ACTION,
+                            payload.getModule().getName()
+                    );
+                } else {
+                    requireComponent(HolidayController.KEY).addHolidayLogEntryNow(
+                            CoreConstants.LogActions.LIGHT_OFF_ACTION,
+                            payload.getModule().getName()
+                    );
+                }
+            } catch (UnknownReferenceException ure) {
+                Log.i(TAG, "Can't created holiday log entry because the given module doesn't exist in the database.");
             }
         } else {
             //no permission

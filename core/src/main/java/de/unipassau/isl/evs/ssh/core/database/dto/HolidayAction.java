@@ -25,6 +25,18 @@ public class HolidayAction {
         this.actionName = actionName;
     }
 
+    /**
+     * Creates a new HolidayAction Object using the current time as timestamp
+     *
+     * @param moduleName of the module which is to be triggered
+     * @param actionName action which is to be executed
+     */
+    public HolidayAction(String moduleName, String actionName) {
+        this.moduleName = moduleName;
+        this.actionName = actionName;
+        timeStamp = System.currentTimeMillis();
+    }
+
     public String getModuleName() {
         return moduleName;
     }

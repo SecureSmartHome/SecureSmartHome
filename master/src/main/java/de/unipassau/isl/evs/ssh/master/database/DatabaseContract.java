@@ -33,6 +33,7 @@ public class DatabaseContract {
         public static final String COLUMN_ID = "_ID";
         public static final String COLUMN_ACTION = "action";
         public static final String COLUMN_TIMESTAMP = "timestamp";
+        public static final String COLUMN_ELECTRONIC_MODULE_ID = "electronicModuleId";
     }
 
     public class Group {
