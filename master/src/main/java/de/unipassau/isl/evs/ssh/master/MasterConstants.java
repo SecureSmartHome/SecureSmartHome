@@ -17,6 +17,6 @@ public class MasterConstants extends CoreConstants {
         public static final double PRESSURE = 100;
         public static final double TEMP1 = 21;
         public static final double TEMP2 = 25;
-        public static final int VISIBLE_LIGHT = 500;
+        public static final int VISIBLE_LIGHT = 35;
     }
 }

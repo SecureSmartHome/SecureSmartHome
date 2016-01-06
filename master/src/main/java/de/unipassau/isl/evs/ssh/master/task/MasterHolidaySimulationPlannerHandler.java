@@ -63,6 +63,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
                 replyStatus(message);
 
             } else {
+                //Handle
                 sendErrorMessage(message);
             }
         } else {
@@ -83,11 +84,13 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
     @Override
     public void onReceive(Intent intent) {
-        if (runHolidaySimulation) {
+        //Cannot do anything without the container
+        if (runHolidaySimulation && getContainer() != null) {
             List<HolidayAction> logEntriesRange = getContainer().require(HolidayController.KEY).getHolidayActions(new Date(),
                     new Date(System.currentTimeMillis() + SCHEDULE_LOOKAHEAD_MILLIS));
 
             for (HolidayAction a : logEntriesRange) {
+                //Cannot do anything better as the standard java date api sucks
                 int minNow = new Date(System.currentTimeMillis()).getMinutes();
                 int minPast = new Date(a.getTimeStamp()).getMinutes();
 
@@ -104,17 +107,20 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
     @Override
     public void init(Container container) {
-        Scheduler scheduler = getContainer().require(Scheduler.KEY);
-        PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
-        scheduler.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), SCHEDULE_LOOKAHEAD_MILLIS, intent);
+        if (getContainer() != null) {
+            Scheduler scheduler = getContainer().require(Scheduler.KEY);
+            PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
+            scheduler.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), SCHEDULE_LOOKAHEAD_MILLIS, intent);
+        }
     }
 
     @Override
     public void destroy() {
-        Scheduler scheduler = getContainer().require(Scheduler.KEY);
-        PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
-        scheduler.cancel(intent);
-        //TODO check me if this is correct
+        if (getContainer() != null) {
+            Scheduler scheduler = getContainer().require(Scheduler.KEY);
+            PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
+            scheduler.cancel(intent);
+        }
     }
 
     private class HolidayLightAction implements Runnable {
@@ -130,15 +136,17 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
         @Override
         public void run() {
             boolean on = false;
-            Module module = getContainer().require(SlaveController.KEY).getModule(moduleName);
-            if (actionName.equals(CoreConstants.LogActions.LIGHT_ON_ACTION)) {
-                on = true;
-            } else if (actionName.equals(CoreConstants.LogActions.LIGHT_OFF_ACTION)) {
-                on = false;
+            if (getContainer() != null) {
+                Module module = getContainer().require(SlaveController.KEY).getModule(moduleName);
+                if (actionName.equals(CoreConstants.LogActions.LIGHT_ON_ACTION)) {
+                    on = true;
+                } else if (actionName.equals(CoreConstants.LogActions.LIGHT_OFF_ACTION)) {
+                    on = false;
+                }
+                MessagePayload payload = new LightPayload(on, module);
+                Message message = new Message(payload);
+                sendMessage(module.getAtSlave(), SLAVE_LIGHT_SET, message);
             }
-            MessagePayload payload = new LightPayload(on, module);
-            Message message = new Message(payload);
-            sendMessage(module.getAtSlave(), SLAVE_LIGHT_SET, message);
         }
     }
 }

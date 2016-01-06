@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -122,7 +123,9 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 
     private void removeUserDevice(UserDeviceEditPayload payload) {
         UserDevice userDevice = payload.getUserDeviceToRemove();
-        getContainer().require(UserManagementController.KEY).removeUserDevice(userDevice.getUserDeviceID());
+        if (getContainer() != null) {
+            getContainer().require(UserManagementController.KEY).removeUserDevice(userDevice.getUserDeviceID());
+        }
     }
 
     private void editUserDevice(Message.AddressedMessage message, UserDeviceEditPayload payload) {
@@ -133,8 +136,10 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 
         try {
             //TODO: for Refactor. New Method that updates a userdevice
-            getContainer().require(UserManagementController.KEY).removeUserDevice(toRemove.getUserDeviceID());
-            getContainer().require(UserManagementController.KEY).addUserDevice(toAdd);
+            if (getContainer() != null) {
+                getContainer().require(UserManagementController.KEY).removeUserDevice(toRemove.getUserDeviceID());
+                getContainer().require(UserManagementController.KEY).addUserDevice(toAdd);
+            }
         } catch (DatabaseControllerException e) {
             //HANDLE
             sendErrorMessage(message);
@@ -163,16 +168,27 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 
         UserDevice toRevoke = ((UserDevice[]) userToRevokePermission.keySet().toArray())[0];
         for (Permission permission : userToRevokePermission.get(toRevoke)) {
-            getContainer().require(PermissionController.KEY).removeUserPermission(
-                    toRevoke.getUserDeviceID(), permission);
+            if (getContainer() != null) {
+                getContainer().require(PermissionController.KEY).removeUserPermission(
+                        toRevoke.getUserDeviceID(), permission);
+            }
         }
     }
 
     private UserDeviceInformationPayload generateUserDeviceInformationPayload() {
         final PermissionController permissionController = requireComponent(PermissionController.KEY);
-        final List<Group> groups = getContainer().require(UserManagementController.KEY).getGroups();
-        final List<UserDevice> userDevices = getContainer().require(UserManagementController.KEY).getUserDevices();
-        List<Permission> permissions = getContainer().require(PermissionController.KEY).getPermissions();
+        final List<Group> groups;
+        final List<UserDevice> userDevices;
+        List<Permission> permissions;
+        if (getContainer() != null) {
+            groups = getContainer().require(UserManagementController.KEY).getGroups();
+            userDevices = getContainer().require(UserManagementController.KEY).getUserDevices();
+            permissions = getContainer().require(PermissionController.KEY).getPermissions();
+        } else {
+            groups = new LinkedList<>();
+            userDevices = new LinkedList<>();
+            permissions = new LinkedList<>();
+        }
 
         ImmutableListMultimap<Group, UserDevice> groupDeviceMapping = Multimaps.index(userDevices,
                 new Function<UserDevice, Group>() {
@@ -192,26 +208,36 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             userHasPermissions.putAll(userDevice, permissionController.getPermissionsOfUserDevice(userDevice.getUserDeviceID()));
         }
 
-        UserDeviceInformationPayload payload = new UserDeviceInformationPayload(
+        return new UserDeviceInformationPayload(
                 ImmutableListMultimap.copyOf(userHasPermissions),
                 ImmutableListMultimap.copyOf(groupDeviceMapping),
                 permissions,
                 groups
         );
-
-        return payload;
     }
 
     private MessagePayload generateModuleInformationPayload() {
         SlaveController slaveController = getComponent(SlaveController.KEY);
-        List<Slave> slaves = slaveController.getSlaves();
-        ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
+        List<Slave> slaves;
+        if (slaveController != null) {
+            slaves = slaveController.getSlaves();
 
-        for (Slave slave : slaves) {
-            modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
+            ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
+
+            for (Slave slave : slaves) {
+                modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
+            }
+
+            return new ModulesPayload(modulesAtSlave, slaves);
+        } else {
+            ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
+            slaves = new LinkedList<>();
+            //Payload contains nothing as we cannot get the SlaveController to get the information needed
+            return new ModulesPayload(modulesAtSlave, slaves);
         }
 
-        return new ModulesPayload(modulesAtSlave, slaves);
+
+
     }
 
 }

@@ -49,7 +49,7 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
      */
     public boolean isOn() {
         if (System.currentTimeMillis() - lastUpdate >= REFRESH_DELAY_MILLIS) {
-            if (getContainer().require(NamingManager.KEY).isMasterKnown()) {
+            if (getContainer() != null && getContainer().require(NamingManager.KEY).isMasterKnown()) {
                 Message message = new Message(new HolidaySimulationPayload(false));
                 message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_HOLIDAY_GET.getKey());
                 sendMessageToMaster(MASTER_HOLIDAY_GET, new Message(

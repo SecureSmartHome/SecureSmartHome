@@ -66,11 +66,13 @@ public class SlaveLightHandler extends AbstractMessageHandler {
                 final boolean success = plugSwitch.setOn(payload.getOn());
                 if (!success) {
                     Log.e(TAG, "Lamp did change status (should be " + payload.getOn() + ")");
+                    //Handle
                     sendErrorMessage(original);
                 }
             }
         } catch (IOException e) {
             Log.e(TAG, "Cannot switch lamp due to error", e);
+            //Handle
             sendErrorMessage(original);
         }
     }
@@ -93,6 +95,7 @@ public class SlaveLightHandler extends AbstractMessageHandler {
             );
         } catch (IOException e) {
             Log.e(TAG, "Cannot retrieve lamp status due to error", e);
+            //Handle
             sendErrorMessage(original);
         }
     }
