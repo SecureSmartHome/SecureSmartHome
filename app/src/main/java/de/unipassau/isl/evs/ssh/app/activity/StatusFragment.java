@@ -15,7 +15,6 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
@@ -72,7 +71,11 @@ public class StatusFragment extends BoundFragment {
     @Override
     public void onContainerDisconnected() {
         super.onContainerDisconnected();
-        getComponent(AppModuleHandler.KEY).removeAppModuleListener(listener);
+
+        AppModuleHandler handler = getComponent(AppModuleHandler.KEY);
+        if (handler != null) {
+            handler.removeAppModuleListener(listener);
+        }
     }
 
     private void update() {
