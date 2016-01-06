@@ -30,7 +30,7 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
 
     private static final String TAG = AppLightHandler.class.getSimpleName();
 
-    private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(20);
+    private static final long REFRESH_DELAY_MILLIS = TimeUnit.MINUTES.toMillis(2);
     private final List<LightHandlerListener> listeners = new ArrayList<>();
     private final Map<Module, LightStatus> lightStatusMapping = new HashMap<>();
     private AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
@@ -98,7 +98,10 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
      */
     public boolean isLightOn(Module module) {
         final LightStatus status = lightStatusMapping.get(module);
-        if (status != null && System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+        if (status == null) {
+            requestLightStatus(module);
+        } else if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+            status.updateTimeStamp();
             requestLightStatus(module);
         }
         return isLightOnCached(module);
@@ -188,6 +191,10 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
 
         void setOn(boolean isOn) {
             this.isOn = isOn;
+            updateTimeStamp();
+        }
+
+        void updateTimeStamp() {
             timestamp = System.currentTimeMillis();
         }
 
