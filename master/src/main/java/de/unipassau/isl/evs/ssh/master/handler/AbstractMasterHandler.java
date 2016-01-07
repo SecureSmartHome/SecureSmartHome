@@ -93,9 +93,10 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
         return userDeviceID.equals(requireComponent(NamingManager.KEY).getMasterID());
     }
 
-    protected boolean hasPermission(DeviceID userDeviceID, String permissionName, String moduleName) {
+    protected boolean hasPermission(DeviceID userDeviceID, de.unipassau.isl.evs.ssh.core.sec.Permission permission,
+                                    String moduleName) {
         return isMaster(userDeviceID)
-                || requireComponent(PermissionController.KEY).hasPermission(userDeviceID, permissionName, moduleName);
+                || requireComponent(PermissionController.KEY).hasPermission(userDeviceID, permission, moduleName);
     }
 
     @Deprecated

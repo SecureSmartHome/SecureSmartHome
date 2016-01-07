@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.master.handler;
 
 import java.util.List;
 
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
@@ -49,14 +48,17 @@ public class MasterNotificationHandler extends AbstractMasterHandler {
 
         sendMessageToAllReceivers(
                 messageToSend,
-                notificationPayload.getType(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.valueOf(notificationPayload.getType()),
                 APP_NOTIFICATION_RECEIVE
         );
     }
 
-    private void sendMessageToAllReceivers(Message messageToSend, String type, RoutingKey routingKey) {
+    private void sendMessageToAllReceivers(Message messageToSend,
+                                           de.unipassau.isl.evs.ssh.core.sec.Permission permission,
+                                           RoutingKey routingKey
+    ) {
         final List<UserDevice> allUserDevicesWithPermission = requireComponent(PermissionController.KEY)
-                .getAllUserDevicesWithPermission(type, null);
+                .getAllUserDevicesWithPermission(permission, null);
         for (UserDevice userDevice : allUserDevicesWithPermission) {
             sendMessage(userDevice.getUserDeviceID(), routingKey, messageToSend);
         }

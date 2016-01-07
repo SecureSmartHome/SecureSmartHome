@@ -81,7 +81,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             case REMOVE_USERDEVICE:
                 if (hasPermission(
                         message.getFromID(),
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER.toString(), null
+                        de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER, null
                 )) {
                     removeUserDevice(payload);
                 } else {
@@ -93,12 +93,12 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 //TODO maybe refactor and unite both permissions?
                 if (hasPermission(
                         message.getFromID(),
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME.toString(),
+                        de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME,
                         null
                     )
                     && hasPermission(
                         message.getFromID(),
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP.toString(),
+                        de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP,
                         null
                 )) {
                     editUserDevice(message, payload);
@@ -110,7 +110,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             case GRANT_PERMISSION:
                 if (hasPermission(
                         message.getFromID(),
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.GRANT_USER_PERMISSION.toString(),
+                        de.unipassau.isl.evs.ssh.core.sec.Permission.GRANT_USER_PERMISSION,
                         null
                 )) {
                     grantPermission(message, payload);
@@ -122,7 +122,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             case REVOKE_PERMISSION:
                 if (hasPermission(
                         message.getFromID(),
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.WITHDRAW_USER_PERMISSION.toString(),
+                        de.unipassau.isl.evs.ssh.core.sec.Permission.WITHDRAW_USER_PERMISSION,
                         null
                 )) {
                     revokePermission(payload);
@@ -169,7 +169,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             try {
                 getContainer().require(PermissionController.KEY).addUserPermission(
                         toGrant.getUserDeviceID(),
-                        permission.getName(),
+                        permission.getPermission(),
                         permission.getModuleName()
                 );
             } catch (UnknownReferenceException e) {
@@ -188,7 +188,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             if (getContainer() != null) {
                 getContainer().require(PermissionController.KEY).removeUserPermission(
                         toRevoke.getUserDeviceID(),
-                        permission.getName(),
+                        permission.getPermission(),
                         permission.getModuleName()
                 );
             }

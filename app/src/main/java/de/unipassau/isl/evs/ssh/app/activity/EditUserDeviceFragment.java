@@ -215,13 +215,13 @@ public class EditUserDeviceFragment extends BoundFragment {
             Collections.sort(allPermissions, new Comparator<Permission>() {
                 @Override
                 public int compare(Permission lhs, Permission rhs) {
-                    if (lhs.getName() == null) {
-                        return rhs.getName() == null ? 0 : 1;
+                    if (lhs.getPermission() == null) {
+                        return rhs.getPermission() == null ? 0 : 1;
                     }
-                    if (rhs.getName() == null) {
+                    if (rhs.getPermission() == null) {
                         return -1;
                     }
-                    return lhs.getName().compareTo(rhs.getName());
+                    return lhs.getPermission().compareTo(rhs.getPermission());
                 }
             });
         }
@@ -247,8 +247,8 @@ public class EditUserDeviceFragment extends BoundFragment {
         @Override
         public long getItemId(int position) {
             final Permission item = getItem(position);
-            if (item != null && item.getName() != null) {
-                return item.getName().hashCode();
+            if (item != null && item.getPermission() != null) {
+                return item.getPermission().hashCode();
             } else {
                 return 0;
             }
@@ -280,17 +280,19 @@ public class EditUserDeviceFragment extends BoundFragment {
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
             } else {
-                permissionSwitch.setText(permission.getName());
+                permissionSwitch.setText(permission.getPermission().toLocalizedString(getActivity()));
                 permissionSwitch.setChecked(userDeviceHasPermission(permission));
                 permissionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (isChecked) {
                             handler.grantPermission(device, permission);
-                            Log.i(TAG, permission.getName() + " granted for user device " + device.getName());
+                            Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
+                                    + " granted for user device " + device.getName());
                         } else {
                             handler.revokePermission(device, permission);
-                            Log.i(TAG, permission.getName() + " revoked for user device " + device.getName());
+                            Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
+                                    + " revoked for user device " + device.getName());
                         }
                         permissionSwitch.toggle();
                     }

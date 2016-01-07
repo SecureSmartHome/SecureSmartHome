@@ -56,7 +56,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
         final Module atModule = payload.getModule();
         if (hasPermission(
                 message.getFromID(),
-                de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT.toString(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT,
                 atModule.getName()
         )) {
             final Message messageToSend = new Message(payload);
@@ -93,7 +93,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
         final Module atModule = payload.getModule();
         if (hasPermission(
                 message.getFromID(),
-                de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS.toString(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS,
                 atModule.getName()
         )) {
             final Message messageToSend = new Message(payload);

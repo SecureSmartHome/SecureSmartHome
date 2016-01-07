@@ -96,7 +96,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         //Get status
         if (hasPermission(
                 message.getFromID(),
-                de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_DOOR_STATUS.toString(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_DOOR_STATUS,
                 atModule.getName()
         )) {
             final Message messageToSend = new Message(doorStatusPayload);
@@ -120,7 +120,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
         if (hasPermission(
                 message.getFromID(),
-                de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_DOOR_STATUS.toString(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_DOOR_STATUS,
                 atModule.getName()
         )) {
             Message messageToSend = new Message(new DoorLockPayload(getLocked(atModule.getName()), atModule.getName()));
@@ -140,7 +140,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
         if (hasPermission(
                 message.getFromID(),
-                de.unipassau.isl.evs.ssh.core.sec.Permission.LOCK_DOOR.toString(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.LOCK_DOOR,
                 atModule.getName()
         )) {
             setLocked(atModule.getName(), !doorLockPayload.isUnlock());
@@ -189,7 +189,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_DOOR_UNLATCH.getKey());
 
         if (hasPermission(message.getFromID(),
-                de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR.toString(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR,
                 atModule.getName()
         )) {
             if (!getLocked(atModule.getName())) {
