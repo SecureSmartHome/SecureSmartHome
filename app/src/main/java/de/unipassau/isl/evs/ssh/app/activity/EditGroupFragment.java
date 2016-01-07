@@ -54,7 +54,8 @@ public class EditGroupFragment extends BoundFragment {
             public void onClick(View v) {
                 String name = inputGroupName.getText().toString();
                 String template = ((String) spinner.getSelectedItem());
-                handler.editGroup(group, new Group(name, template));
+                handler.setGroupName(group, name);
+                handler.setGroupTemplate(group, template);
                 Log.i(TAG, "Group " + name + " edited.");
                 String toastText = "Group " + name + " edited.";
                 Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);

@@ -125,7 +125,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                             if (handler == null) {
                                 Log.i(TAG, "Container not yet connected!");
                             } else {
-                                handler.removeUserDevice(userDevice);
+                                handler.removeUserDevice(userDevice.getUserDeviceID());
                             }
                         }
                     })
