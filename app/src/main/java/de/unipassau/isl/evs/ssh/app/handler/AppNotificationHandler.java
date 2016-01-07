@@ -50,7 +50,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     private NotificationCompat.Builder notificationBuilder;
 
     /**
-     * To add new notification type, add an if-statement with the new message payload.
+     * Handles different Notification types.
      *
      * @param message Message to handle.
      */
@@ -89,6 +89,8 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
                         break;
                     case DOOR_UNLATCHED:
                         issueDoorUnlatched(DOOR_UNLATCHED_ID, args);
+                        break;
+                    default: invalidMessage(message);
                         break;
                 }
             } else {
@@ -180,7 +182,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
 
         //Build notification
         notificationBuilder.setSmallIcon(R.drawable.ic_home_light);
-        notificationBuilder.setColor(R.color.colorPrimaryDark);
+        notificationBuilder.setColor(R.color.colorPrimary);
         notificationBuilder.setWhen(System.currentTimeMillis());
         notificationBuilder.setContentTitle(title);
         notificationBuilder.setContentText(text);

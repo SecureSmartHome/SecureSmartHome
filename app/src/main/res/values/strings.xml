@@ -132,11 +132,11 @@
     <string name="visible_1">Visible:</string>
     <string name="ir">IR:</string>
 
-    <string name="si_degree">%3.1f C°</string>
-    <string name="si_pressure">%4.1f Pa</string>
-    <string name="si_altitude">%4.2f m</string>
-    <string name="si_humidity">%3.2f %</string>
-    <string name="si_visible">%d%n Lux</string>
+    <string formatted="false" name="si_degree">%3.1f C°</string>
+    <string formatted="false" name="si_pressure">%4.1f Pa</string>
+    <string formatted="false" name="si_altitude">%4.2f m</string>
+    <string formatted="false" name="si_humidity">%3.2f %</string>
+    <string formatted="false" name="si_visible">%d%n Lux</string>
 
     <!--Strings used for Notifications-->
     <string name="climate_notification_title">Climate Warning!</string>
