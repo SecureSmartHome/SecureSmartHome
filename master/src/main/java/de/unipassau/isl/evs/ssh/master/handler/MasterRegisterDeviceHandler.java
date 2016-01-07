@@ -46,7 +46,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
         if (MASTER_USER_REGISTER.matches(message)) {
             if (hasPermission(
                     message.getFromID(),
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER.toString(),
+                    de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER,
                     null
             )) {
                 handleInitRequest(message);
@@ -112,7 +112,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                 try {
                     requireComponent(PermissionController.KEY).addUserPermission(
                             deviceID,
-                            permission.getName(),
+                            permission.getPermission(),
                             permission.getModuleName()
                     );
                 } catch (UnknownReferenceException ure) {
@@ -129,7 +129,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                 try {
                     requireComponent(PermissionController.KEY).addUserPermission(
                             deviceID,
-                            permission.getName(),
+                            permission.getPermission(),
                             permission.getModuleName()
                     );
                 } catch (UnknownReferenceException ure) {

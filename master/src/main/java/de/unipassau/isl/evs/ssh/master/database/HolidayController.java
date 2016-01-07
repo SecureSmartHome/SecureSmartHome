@@ -3,6 +3,8 @@ package de.unipassau.isl.evs.ssh.master.database;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 
+import com.google.common.base.Strings;
+
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,7 +48,7 @@ public class HolidayController extends AbstractComponent {
      * @param moduleName Module where the action occurs.
      */
     public void addHolidayLogEntryNow(String action, String moduleName) throws UnknownReferenceException {
-        if (moduleName == null) {
+        if (Strings.isNullOrEmpty(moduleName)) {
             databaseConnector.executeSql(
                     "insert into " + DatabaseContract.HolidayLog.TABLE_NAME
                             + " (" + DatabaseContract.HolidayLog.COLUMN_ACTION
@@ -110,6 +112,23 @@ public class HolidayController extends AbstractComponent {
             actions.add(new HolidayAction(
                             holidayEntriesCursor.getString(1),
                             holidayEntriesCursor.getLong(2),
+                            holidayEntriesCursor.getString(0)
+                    )
+            );
+        }
+        holidayEntriesCursor = databaseConnector.executeSql("select "
+                        + DatabaseContract.HolidayLog.COLUMN_ACTION
+                        + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
+                        + " from " + DatabaseContract.HolidayLog.TABLE_NAME
+                        + " where " + DatabaseContract.HolidayLog.COLUMN_ELECTRONIC_MODULE_ID
+                        + " is NULL"
+                        + " and " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
+                        + " >= ? and " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " <= ?",
+                new String[]{String.valueOf(from.getTime()), String.valueOf(to.getTime())});
+        while (holidayEntriesCursor.moveToNext()) {
+            actions.add(new HolidayAction(
+                            null,
+                            holidayEntriesCursor.getLong(1),
                             holidayEntriesCursor.getString(0)
                     )
             );

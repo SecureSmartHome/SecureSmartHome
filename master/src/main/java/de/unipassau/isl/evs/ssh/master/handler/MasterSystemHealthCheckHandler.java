@@ -26,6 +26,7 @@ public class MasterSystemHealthCheckHandler extends AbstractMasterHandler {
                 MessagePayload respPayload = new NotificationPayload(SYSTEM_HEALTH_WARNING.toString(), "Error at module: " + name);
                 sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(respPayload));
             }
+            //TODO propagate message that shows that a modul is accessible again
         } else {
             invalidMessage(message);
         }

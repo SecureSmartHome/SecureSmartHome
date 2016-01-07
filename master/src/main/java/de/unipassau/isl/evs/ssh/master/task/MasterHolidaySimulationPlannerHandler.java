@@ -52,7 +52,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
             //TODO Refactor if we eliminate one permission
             if (payload.switchOn() && hasPermission(
                     message.getFromID(),
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.START_HOLIDAY_SIMULATION.toString(),
+                    de.unipassau.isl.evs.ssh.core.sec.Permission.START_HOLIDAY_SIMULATION,
                     null
             )) {
 
@@ -61,7 +61,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
             } else if (!payload.switchOn() && hasPermission(
                     message.getFromID(),
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.STOP_HOLIDAY_SIMULATION.toString(),
+                    de.unipassau.isl.evs.ssh.core.sec.Permission.STOP_HOLIDAY_SIMULATION,
                     null
             )) {
 

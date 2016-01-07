@@ -34,8 +34,7 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
     private static final String TAG = OdroidCamera.class.getSimpleName();
     private static final String EXTRA_CAMERA_ID = OdroidCamera.class.getName() + ".CameraID";
     private static final String EXTRA_MODULE_NAME = OdroidCamera.class.getName() + ".ModuleName";
-    private static final String EXTRA_REPLY_TO_SEQUENCE_NR = OdroidCamera.class.getName() + ".ReplyToSequenceNr";
-    private static final String EXTRA_REPLY_TO_KEY = OdroidCamera.class.getName() + ".ReplyToKey";
+    private static final String EXTRA_REPLY_TO_MESSAGE = OdroidCamera.class.getName() + ".ReplyToMessage";
 
     private Camera camera;
     private Camera.Parameters params;
@@ -144,17 +143,15 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
         CameraPayload payload = new CameraPayload(getCameraID(), getModuleName());
         payload.setPicture(jpegData);
         Message reply = new Message(payload);
-        reply.putHeader(Message.HEADER_REFERENCES_ID, getReplyToSequenceNr());
-        requireComponent(OutgoingRouter.KEY).sendMessageToMaster(getReplyToKey(), reply);
+        requireComponent(OutgoingRouter.KEY).sendReply(getReplyToMessage(), reply);
     }
 
-    public static Intent getIntent(Context context, int cameraId, String moduleName, int replyToSequenceNumber, String replyToKey) {
+    public static Intent getIntent(Context context, int cameraId, String moduleName, Message.AddressedMessage replyToMessage) {
         Intent intent = new Intent(context, OdroidCamera.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(EXTRA_CAMERA_ID, cameraId);
         intent.putExtra(EXTRA_MODULE_NAME, moduleName);
-        intent.putExtra(EXTRA_REPLY_TO_SEQUENCE_NR, replyToSequenceNumber);
-        intent.putExtra(EXTRA_REPLY_TO_KEY, replyToKey);
+        intent.putExtra(EXTRA_REPLY_TO_MESSAGE, replyToMessage);
         return intent;
     }
 
@@ -166,11 +163,7 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
         return getIntent().getStringExtra(EXTRA_MODULE_NAME);
     }
 
-    private int getReplyToSequenceNr() {
-        return getIntent().getIntExtra(EXTRA_REPLY_TO_SEQUENCE_NR, -1);
-    }
-
-    private String getReplyToKey() {
-        return getIntent().getStringExtra(EXTRA_REPLY_TO_KEY);
+    private Message.AddressedMessage getReplyToMessage() {
+        return (Message.AddressedMessage) getIntent().getSerializableExtra(EXTRA_REPLY_TO_MESSAGE);
     }
 }

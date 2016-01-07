@@ -34,8 +34,7 @@ public class SlaveCameraHandler extends AbstractMessageHandler {
                     context,
                     payload.getCameraID(),
                     payload.getModuleName(),
-                    message.getSequenceNr(),
-                    message.getHeader(Message.HEADER_REPLY_TO_KEY)
+                    message
             );
             Log.d(getClass().getSimpleName(), "Starting Camera Activity: " + intent);
             context.startActivity(intent);

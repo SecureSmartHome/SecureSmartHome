@@ -43,7 +43,7 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler implements 
         if (MASTER_SLAVE_REGISTER.matches(message)) {
             if (hasPermission(
                     message.getFromID(),
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID.toString(),
+                    de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID,
                     null
             )) {
                 RegisterSlavePayload registerSlavePayload = MASTER_SLAVE_REGISTER.getPayload(message);

@@ -31,6 +31,10 @@ import io.netty.util.concurrent.Future;
 public class Message implements Serializable {
     public static final Key<Long> HEADER_TIMESTAMP = new Key<>(Long.class, "timestamp");
     public static final Key<Integer> HEADER_REFERENCES_ID = new Key<>(Integer.class, "referencesID");
+    /**
+     * @deprecated replaced by {@link RoutingKey#getReplyKey(String)}
+     */
+    @Deprecated
     public static final Key<String> HEADER_REPLY_TO_KEY = new Key<>(String.class, "replyToKey");
 
     private static final AtomicInteger sequenceCounter = new AtomicInteger();

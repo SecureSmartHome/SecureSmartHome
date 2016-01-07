@@ -52,7 +52,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
 
             for (UserDevice userDevice :
                     requireComponent(PermissionController.KEY).getAllUserDevicesWithPermission(
-                            de.unipassau.isl.evs.ssh.core.sec.Permission.BELL_RANG.toString(),
+                            de.unipassau.isl.evs.ssh.core.sec.Permission.BELL_RANG,
                             null
                     )) {
                 sendMessage(userDevice.getUserDeviceID(), APP_DOOR_RING, messageToSend);

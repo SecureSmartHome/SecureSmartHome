@@ -63,7 +63,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
         } else if (MASTER_MODULE_RENAME.matches(message)) {
             if (hasPermission(
                     message.getFromID(),
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.RENAME_MODULE.toString(),
+                    de.unipassau.isl.evs.ssh.core.sec.Permission.RENAME_MODULE,
                     null
             )) {
                 if (handleRenameModule(message)) {
@@ -124,14 +124,15 @@ public class MasterModuleHandler extends AbstractMasterHandler {
         SlaveController slaveController = requireComponent(SlaveController.KEY);
         PermissionController permissionController = requireComponent(PermissionController.KEY);
         boolean success = false;
-        de.unipassau.isl.evs.ssh.core.sec.Permission[] permissions = de.unipassau.isl.evs.ssh.core.sec.Permission.getPermissions(module.getModuleType());
+        de.unipassau.isl.evs.ssh.core.sec.Permission[] permissions =
+                de.unipassau.isl.evs.ssh.core.sec.Permission.getPermissions(module.getModuleType());
 
         try {
             slaveController.addModule(module);
 
             if (permissions != null) {
                 for (de.unipassau.isl.evs.ssh.core.sec.Permission permission : permissions) {
-                    permissionController.addPermission(permission.toString(), module.getName());
+                    permissionController.addPermission(permission, module.getName());
                 }
             }
             success = true;

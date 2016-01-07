@@ -12,27 +12,24 @@ import java.io.Serializable;
  * @author Leon Sell
  */
 public class Permission implements Serializable {
-    String name;
+    de.unipassau.isl.evs.ssh.core.sec.Permission permission;
     String moduleName;
 
-    public Permission() {
+    public Permission(de.unipassau.isl.evs.ssh.core.sec.Permission permission) {
+        this.permission = permission;
     }
 
-    public Permission(String name) {
-        this.name = name;
-    }
-
-    public Permission(String name, String moduleName) {
-        this.name = name;
+    public Permission(de.unipassau.isl.evs.ssh.core.sec.Permission permission, String moduleName) {
+        this.permission = permission;
         this.moduleName = moduleName;
     }
 
-    public String getName() {
-        return name;
+    public de.unipassau.isl.evs.ssh.core.sec.Permission getPermission() {
+        return permission;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setPermission(de.unipassau.isl.evs.ssh.core.sec.Permission permission) {
+        this.permission = permission;
     }
 
     public String getModuleName() {
@@ -45,6 +42,7 @@ public class Permission implements Serializable {
 
     @Override
     public String toString() {
-        return "Permission " + name + (Strings.isNullOrEmpty(moduleName) ? "" : "(module " + moduleName + ")");
+        return "Permission " + permission.toString() + (Strings.isNullOrEmpty(moduleName) ?
+                "" : " (module " + moduleName + ")");
     }
 }
