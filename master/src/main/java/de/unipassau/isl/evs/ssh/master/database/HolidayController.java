@@ -116,6 +116,23 @@ public class HolidayController extends AbstractComponent {
                     )
             );
         }
+        holidayEntriesCursor = databaseConnector.executeSql("select "
+                        + DatabaseContract.HolidayLog.COLUMN_ACTION
+                        + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
+                        + " from " + DatabaseContract.HolidayLog.TABLE_NAME
+                        + " where " + DatabaseContract.HolidayLog.COLUMN_ELECTRONIC_MODULE_ID
+                        + " is NULL"
+                        + " and " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
+                        + " >= ? and " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " <= ?",
+                new String[]{String.valueOf(from.getTime()), String.valueOf(to.getTime())});
+        while (holidayEntriesCursor.moveToNext()) {
+            actions.add(new HolidayAction(
+                            null,
+                            holidayEntriesCursor.getLong(1),
+                            holidayEntriesCursor.getString(0)
+                    )
+            );
+        }
         return actions;
     }
 }
