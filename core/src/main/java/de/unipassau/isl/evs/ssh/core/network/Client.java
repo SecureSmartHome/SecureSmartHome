@@ -336,9 +336,10 @@ public class Client extends AbstractComponent {
 
     /**
      * EventLoopGroup for the {@link ClientIncomingDispatcher} and the {@link ClientOutgoingRouter}
+     * //TODO Niko: move to interface (Niko, 2016-01-07)
      */
     @NonNull
-    EventLoopGroup getAliveExecutor() {
+    public EventLoopGroup getAliveExecutor() {
         if (!isExecutorAlive()) {
             // Setup the Executor and Connection Pool
             executor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("client"));

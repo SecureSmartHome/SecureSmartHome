@@ -1,11 +1,12 @@
 package de.unipassau.isl.evs.ssh.core.messaging;
 
+import android.support.annotation.NonNull;
+
 /**
- * TODO also differentiate between request and response, i.e. for message.getHeader(Message.HEADER_REFERENCES_ID) == null (Niko, 2015-12-17)
- *
  * @author Niko Fink
  */
 public class RoutingKey<T> {
+    private static final String SUFFIX_REPLY = "/reply";
     private final Class<T> clazz;
     private final String key;
 
@@ -20,22 +21,40 @@ public class RoutingKey<T> {
         this.key = key;
     }
 
+    @NonNull
     @SuppressWarnings("unchecked")
     public static <T> RoutingKey<T> forName(String identifier, String clazz)
             throws ClassNotFoundException, ClassCastException {
         return new RoutingKey<>(identifier, (Class<T>) Class.forName(clazz));
     }
 
+    @NonNull
     public static RoutingKey forMessage(Message.AddressedMessage message) {
         return new RoutingKey<>(message.getRoutingKey(), message.getPayloadUnchecked().getClass());
     }
 
+    @NonNull
     public Class<T> getPayloadClass() {
         return clazz;
     }
 
+    @NonNull
     public String getKey() {
         return key;
+    }
+
+    @NonNull
+    public <V> RoutingKey<V> getReply(Class<V> replyPayload) {
+        return new RoutingKey<>(getReplyKey(key), replyPayload);
+    }
+
+    @NonNull
+    public static String getReplyKey(String key) {
+        return key + SUFFIX_REPLY;
+    }
+
+    public boolean isReply() {
+        return key.endsWith(SUFFIX_REPLY);
     }
 
     public boolean matches(Message.AddressedMessage message) {

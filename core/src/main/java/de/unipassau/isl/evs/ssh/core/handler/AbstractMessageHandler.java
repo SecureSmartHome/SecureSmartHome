@@ -114,6 +114,10 @@ public abstract class AbstractMessageHandler implements MessageHandler {
         return requireComponent(OutgoingRouter.KEY).sendMessageToMaster(routingKey, msg);
     }
 
+    protected Message.AddressedMessage sendReply(Message.AddressedMessage original, Message reply) {
+        return requireComponent(OutgoingRouter.KEY).sendReply(original, reply);
+    }
+
     /**
      * Respond with an error message to a given AddressedMessage.
      *
