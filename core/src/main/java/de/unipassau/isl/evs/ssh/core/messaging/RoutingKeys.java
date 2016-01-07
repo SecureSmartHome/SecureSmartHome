@@ -5,13 +5,13 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteUserPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
@@ -19,6 +19,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterSlavePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RenameModulePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupNamePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupTemplatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetPermissionPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserGroupPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserNamePayload;
@@ -68,19 +70,35 @@ public class RoutingKeys {
     // BEGIN: MasterUserConfigHandler
     public static final RoutingKey<SetPermissionPayload> MASTER_PERMISSION_SET = new RoutingKey<>(PREFIX_MASTER + "/permission/set", SetPermissionPayload.class);
     public static final RoutingKey<Void> MASTER_PERMISSION_SET_REPLY = MASTER_PERMISSION_SET.getReply(Void.class);
-    public static final RoutingKey<ErrorPayload> MASTER_PERMISSION_SET_ERROR = MASTER_PERMISSION_SET.getError(ErrorPayload.class);
+    public static final RoutingKey<ErrorPayload> MASTER_PERMISSION_SET_ERROR = MASTER_PERMISSION_SET.getReply(ErrorPayload.class);
 
-    public static final RoutingKey<SetUserNamePayload> MASTER_USERNAME_SET = new RoutingKey<>(PREFIX_MASTER + "/user/name/set", SetUserNamePayload.class);
-    public static final RoutingKey<Void> MASTER_USERNAME_SET_REPLY = MASTER_USERNAME_SET.getReply(Void.class);
-    public static final RoutingKey<ErrorPayload> MASTER_USERNAME_SET_ERROR = MASTER_USERNAME_SET.getError(ErrorPayload.class);
+    public static final RoutingKey<SetUserNamePayload> MASTER_USER_SET_NAME = new RoutingKey<>(PREFIX_MASTER + "/user/set/name", SetUserNamePayload.class);
+    public static final RoutingKey<Void> MASTER_USERNAME_SET_REPLY = MASTER_USER_SET_NAME.getReply(Void.class);
+    public static final RoutingKey<ErrorPayload> MASTER_USERNAME_SET_ERROR = MASTER_USER_SET_NAME.getReply(ErrorPayload.class);
 
-    public static final RoutingKey<SetUserGroupPayload> MASTER_USERGROUP_SET = new RoutingKey<>(PREFIX_MASTER + "/user/group/set", SetUserGroupPayload.class);
-    public static final RoutingKey<Void> MASTER_USERGROUP_SET_REPLY = MASTER_USERGROUP_SET.getReply(Void.class);
-    public static final RoutingKey<ErrorPayload> MASTER_USERGROUP_SET_ERROR = MASTER_USERNAME_SET.getError(ErrorPayload.class);
+    public static final RoutingKey<SetUserGroupPayload> MASTER_USER_SET_GROUP = new RoutingKey<>(PREFIX_MASTER + "/user/set/group", SetUserGroupPayload.class);
+    public static final RoutingKey<Void> MASTER_USER_SET_GROUP_REPLY = MASTER_USER_SET_GROUP.getReply(Void.class);
+    public static final RoutingKey<ErrorPayload> MASTER_USER_SET_GROUP_ERROR = MASTER_USER_SET_NAME.getReply(ErrorPayload.class);
 
     public static final RoutingKey<DeleteUserPayload> MASTER_USER_DELETE = new RoutingKey<>(PREFIX_MASTER + "/user/delete", DeleteUserPayload.class);
     public static final RoutingKey<Void> MASTER_USER_DELETE_REPLY = MASTER_USER_DELETE.getReply(Void.class);
-    public static final RoutingKey<ErrorPayload> MASTER_USER_DELETE_ERROR = MASTER_USER_DELETE.getError(ErrorPayload.class);
+    public static final RoutingKey<ErrorPayload> MASTER_USER_DELETE_ERROR = MASTER_USER_DELETE.getReply(ErrorPayload.class);
+
+    public static final RoutingKey<GroupPayload> MASTER_GROUP_ADD = new RoutingKey<>(PREFIX_MASTER + "/group/add", GroupPayload.class);
+    public static final RoutingKey<Void> MASTER_GROUP_ADD_REPLY = MASTER_GROUP_ADD.getReply(Void.class);
+    public static final RoutingKey<ErrorPayload> MASTER_GROUP_ADD_ERROR = MASTER_GROUP_ADD.getReply(ErrorPayload.class);
+
+    public static final RoutingKey<GroupPayload> MASTER_GROUP_DELETE = new RoutingKey<>(PREFIX_MASTER + "/group/delete", GroupPayload.class);
+    public static final RoutingKey<Void> MASTER_GROUP_DELETE_REPLY = MASTER_GROUP_DELETE.getReply(Void.class);
+    public static final RoutingKey<ErrorPayload> MASTER_GROUP_DELETE_ERROR = MASTER_GROUP_DELETE.getReply(ErrorPayload.class);
+
+    public static final RoutingKey<SetGroupNamePayload> MASTER_GROUP_SET_NAME = new RoutingKey<>(PREFIX_MASTER + "/group/set/name", SetGroupNamePayload.class);
+    public static final RoutingKey<Void> MASTER_GROUP_SET_NAME_REPLY = MASTER_GROUP_SET_NAME.getReply(Void.class);
+    public static final RoutingKey<ErrorPayload> MASTER_GROUP_SET_NAME_ERROR = MASTER_GROUP_SET_NAME.getReply(ErrorPayload.class);
+
+    public static final RoutingKey<SetGroupTemplatePayload> MASTER_GROUP_SET_TEMPLATE = new RoutingKey<>(PREFIX_MASTER + "/group/set/template", SetGroupTemplatePayload.class);
+    public static final RoutingKey<Void> MASTER_GROUP_SET_TEMPLATE_REPLY = MASTER_GROUP_SET_TEMPLATE.getReply(Void.class);
+    public static final RoutingKey<ErrorPayload> MASTER_GROUP_SET_TEMPLATE_ERROR = MASTER_GROUP_SET_TEMPLATE.getReply(ErrorPayload.class);
     // END: MasterUserConfigHandler
 
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_SET = new RoutingKey<>(PREFIX_MASTER + "/holiday/set", HolidaySimulationPayload.class);

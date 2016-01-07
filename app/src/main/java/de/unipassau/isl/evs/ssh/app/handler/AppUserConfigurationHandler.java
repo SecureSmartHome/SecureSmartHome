@@ -19,6 +19,9 @@ import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteUserPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupNamePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupTemplatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetPermissionPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserGroupPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserNamePayload;
@@ -26,9 +29,29 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayl
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_ADD;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_ADD_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_ADD_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_DELETE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_DELETE_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_DELETE_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_NAME;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_NAME_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_NAME_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_TEMPLATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_TEMPLATE_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_TEMPLATE_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERGROUP_SET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_NAME;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE;
 
 /**
@@ -73,7 +96,25 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{APP_USERINFO_UPDATE};
+        return new RoutingKey[]{
+                APP_USERINFO_UPDATE,
+                MASTER_PERMISSION_SET_ERROR,
+                MASTER_PERMISSION_SET_REPLY,
+                MASTER_USERNAME_SET_ERROR,
+                MASTER_USERNAME_SET_REPLY,
+                MASTER_USER_SET_GROUP_ERROR,
+                MASTER_USER_SET_GROUP_REPLY,
+                MASTER_USER_DELETE_ERROR,
+                MASTER_USER_DELETE_REPLY,
+                MASTER_GROUP_ADD_ERROR,
+                MASTER_GROUP_ADD_REPLY,
+                MASTER_GROUP_DELETE_ERROR,
+                MASTER_GROUP_DELETE_REPLY,
+                MASTER_GROUP_SET_NAME_ERROR,
+                MASTER_GROUP_SET_NAME_REPLY,
+                MASTER_GROUP_SET_TEMPLATE_ERROR,
+                MASTER_GROUP_SET_TEMPLATE_REPLY
+        };
     }
 
     @Override
@@ -169,7 +210,8 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      * @param group the group to add
      */
     public void addGroup(Group group) {
-        //TODO
+        Message message = new Message(new GroupPayload(group, GroupPayload.ACTION.CREATE));
+        sendMessageToMaster(MASTER_GROUP_ADD, message);
     }
 
     /**
@@ -178,27 +220,28 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      * @param group the group to remove
      */
     public void removeGroup(Group group) {
-        //TODO
+        Message message = new Message(new GroupPayload(group, GroupPayload.ACTION.DELETE));
+        sendMessageToMaster(MASTER_GROUP_DELETE, message);
     }
 
-    // TODO use groupid
     public void setGroupName(Group group, String groupName) {
-
+        Message message = new Message(new SetGroupNamePayload(group, groupName));
+        sendMessageToMaster(MASTER_GROUP_SET_NAME, message);
     }
 
-    // TODO use groupid, templateid
     public void setGroupTemplate(Group group, String templateName) {
-
+        Message message = new Message(new SetGroupTemplatePayload(group, templateName));
+        sendMessageToMaster(MASTER_GROUP_SET_TEMPLATE, message);
     }
 
     public void setUserName(DeviceID user, String username) {
         SetUserNamePayload payload = new SetUserNamePayload(user, username);
-        sendMessageToMaster(MASTER_USERNAME_SET, new Message(payload));
+        sendMessageToMaster(MASTER_USER_SET_NAME, new Message(payload));
     }
 
     public void setUserGroup(DeviceID user, String groupName) {
         SetUserGroupPayload payload = new SetUserGroupPayload(user, groupName);
-        sendMessageToMaster(MASTER_USERGROUP_SET, new Message(payload));
+        sendMessageToMaster(MASTER_USER_SET_GROUP, new Message(payload));
     }
 
     /**
