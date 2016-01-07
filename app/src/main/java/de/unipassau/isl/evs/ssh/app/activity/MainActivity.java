@@ -138,8 +138,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         if (fragment instanceof BoundFragment) {
             ((BoundFragment) fragment).onContainerConnected(container);
         }
-        container.require(AppNotificationHandler.KEY).addNotificationObjects(notificationBuilder, notificationManager);
-
         if (!fragmentInitialized) {
             fragmentInitialized = true;
             showFragmentByClass(getInitialFragment());

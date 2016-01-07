@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.NotificationCompat;
 
 import java.io.Serializable;
@@ -47,10 +48,6 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     private static final int DOOR_UNLATCHED_ID = 9;
     private static final int DOOR_LOCKED = 10;
     private static final int DOOR_UNLOCKED = 11;
-
-
-    private NotificationManager notificationManager;
-    private NotificationCompat.Builder notificationBuilder;
 
     /**
      * Handles different Notification types.
@@ -100,11 +97,11 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
                         issueDoorUnlocked(DOOR_UNLOCKED);
                         break;
                     default:
-                        invalidMessage(message);
+                        //HANDLE
                         break;
                 }
             } else {
-                invalidMessage(message);
+                //HANDLE
             }
         } else {
             invalidMessage(message);
@@ -207,6 +204,26 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     private void displayNotification(String title, String text, String openThisFragment, int notificationID) {
         final int REQUEST_CODE = 0;
 
+        //If Notification is clicked send to this Page
+        Context context = getContainer().get(ContainerService.KEY_CONTEXT);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
+
+       /* Intent intent = new Intent(context, MainActivity.class);
+        intent.setAction(openThisFragment);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        notificationBuilder.setContentIntent(pendingIntent);
+       */
+        Intent resultIntent = new Intent(context , openThisFragment.getClass());
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        stackBuilder.addParentStack(openThisFragment.getClass());
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        notificationBuilder.setContentIntent(resultPendingIntent);
+
         //Build notification
         notificationBuilder.setSmallIcon(R.drawable.ic_home_light);
         notificationBuilder.setColor(R.color.colorPrimary);
@@ -214,21 +231,10 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         notificationBuilder.setContentTitle(title);
         notificationBuilder.setContentText(text);
 
-        //If Notification is clicked send to this Page
-        Context context = getContainer().get(ContainerService.KEY_CONTEXT);
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.setAction(openThisFragment);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        notificationBuilder.setContentIntent(pendingIntent);
 
         //Send notification out to Device
+        NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(notificationID, notificationBuilder.build());
-    }
-
-    //FIXME why is this passed in by the MainActivity? (Niko, 2015-12-16)
-    public void addNotificationObjects(NotificationCompat.Builder notificationBuilder,
-                                       NotificationManager notificationManager) {
-        this.notificationBuilder = notificationBuilder;
-        this.notificationManager = notificationManager;
     }
 }
