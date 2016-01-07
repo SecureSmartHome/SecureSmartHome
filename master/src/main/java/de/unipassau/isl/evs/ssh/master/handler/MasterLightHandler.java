@@ -54,15 +54,11 @@ public class MasterLightHandler extends AbstractMasterHandler {
     private void handleSetRequest(Message.AddressedMessage message) {
         final LightPayload payload = MASTER_LIGHT_SET.getPayload(message);
         final Module atModule = payload.getModule();
-        //Todo: uncomment when permission are better integrated
-        //if (hasPermission(
-        //        message.getFromID(),
-        //        new Permission(
-        //                DatabaseContract.Permission.Values.SWITCH_LIGHT,
-        //                atModule.getName()
-        //        )
-        //)) {
-        if (true) {
+        if (hasPermission(
+                message.getFromID(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT.toString(),
+                atModule.getName()
+        )) {
             final Message messageToSend = new Message(payload);
             messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_LIGHT_GET.getKey());
             final Message.AddressedMessage sendMessage = sendMessage(
