@@ -80,8 +80,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
                     addUSBButton.setEnabled(true);
                     addGPIOButton.setEnabled(true);
 
-                    Toast toast = Toast.makeText(getActivity().getApplicationContext(), text, Toast.LENGTH_LONG);
-                    toast.show();
+                    Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
                     ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
                 }
             });
@@ -103,7 +102,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         mockView = createViewMock(view);
 
         ArrayAdapter<CharSequence> connectionTypeAdapter = ArrayAdapter.createFromResource(
-                getActivity().getApplicationContext(),
+                getActivity(),
                 R.array.sensor_connection_types,
                 android.R.layout.simple_spinner_dropdown_item);
 
@@ -138,7 +137,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
         if (slaves.size() < 1) {
             ArrayAdapter<String> slaveAdapter = new ArrayAdapter<>(
-                    getActivity().getApplicationContext(),
+                    getActivity(),
                     android.R.layout.simple_spinner_dropdown_item,
                     new String[]{getResources().getString(R.string.warn_no_slave_connected)});
 
@@ -146,9 +145,8 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             slaveSpinner.setAdapter(slaveAdapter);
         } else {
             ArrayAdapter<Slave> slaveAdapter = new ArrayAdapter<>(
-                    getActivity().getApplicationContext(),
-                    android.R.layout.simple_spinner_dropdown_item,
-                    slaves);
+                    getActivity(), android.R.layout.simple_spinner_dropdown_item, slaves
+            );
 
             slaveSpinner.setEnabled(true);
             slaveSpinner.setAdapter(slaveAdapter);

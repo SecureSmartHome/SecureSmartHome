@@ -76,8 +76,7 @@ public class AddNewUserDeviceFragment extends BoundFragment {
                 return input.getName();
             }
         }));
-        SpinnerAdapter adapter = new ArrayAdapter<>(getActivity().getApplicationContext(),
-                android.R.layout.simple_list_item_1, groups);
+        SpinnerAdapter adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, groups);
         spinner.setAdapter(adapter);
         spinner.setEnabled(true);
     }
@@ -87,8 +86,8 @@ public class AddNewUserDeviceFragment extends BoundFragment {
 
         View view = inflater.inflate(R.layout.fragment_addnewuserdevice, container, false);
         spinner = (Spinner) view.findViewById(R.id.groupSpinner);
-        spinner.setAdapter(new ArrayAdapter<>(getActivity().getApplicationContext(),
-                android.R.layout.simple_list_item_1, new String[]{getResources().getString(R.string.querying_groups)}));
+        spinner.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1,
+                new String[]{getResources().getString(R.string.querying_groups)}));
         spinner.setEnabled(false);
 
         inputUserName = (EditText) view.findViewById(R.id.addNewDeviceUserName);
