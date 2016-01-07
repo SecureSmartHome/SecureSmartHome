@@ -12,8 +12,8 @@ import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 
+import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET;
@@ -32,15 +32,13 @@ public class MasterLightHandler extends AbstractMasterHandler {
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        saveMessage(message);
-
         if (MASTER_LIGHT_SET.matches(message)) {
             handleSetRequest(message);
         } else if (MASTER_LIGHT_GET.matches(message)) {
             handleGetRequest(message);
         } else if (SLAVE_LIGHT_GET_REPLY.matches(message)) {
             handleGetResponse(message);
-        } else if (SLAVE_LIGHT_SET_REPLY.matches(message)){
+        } else if (SLAVE_LIGHT_SET_REPLY.matches(message)) {
             handleSetResponse(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
@@ -51,7 +49,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[] { MASTER_LIGHT_SET, MASTER_LIGHT_GET, SLAVE_LIGHT_SET_REPLY, SLAVE_LIGHT_GET_REPLY };
+        return new RoutingKey[]{MASTER_LIGHT_SET, MASTER_LIGHT_GET, SLAVE_LIGHT_SET_REPLY, SLAVE_LIGHT_GET_REPLY};
     }
 
     private void handleSetRequest(Message.AddressedMessage message) {
@@ -68,7 +66,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
                     SLAVE_LIGHT_SET,
                     messageToSend
             );
-            putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
+            recordReceivedMessageProxy(message, sendMessage);
             try {
                 if (payload.getOn()) {
                     requireComponent(HolidayController.KEY).addHolidayLogEntryNow(
@@ -104,7 +102,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
                     SLAVE_LIGHT_GET,
                     messageToSend
             );
-            putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
+            recordReceivedMessageProxy(message, sendMessage);
         } else {
             //no permission
             sendErrorMessage(message);
@@ -112,8 +110,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
     }
 
     private void handleSetResponse(Message.AddressedMessage message) {
-        final Message.AddressedMessage correspondingMessage =
-                getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
+        final Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
         final LightPayload lightPayload = SLAVE_LIGHT_SET_REPLY.getPayload(message);
         final Message messageToSend = new Message(lightPayload);
 
@@ -128,16 +125,8 @@ public class MasterLightHandler extends AbstractMasterHandler {
     }
 
     private void handleGetResponse(Message.AddressedMessage message) {
-        final Message.AddressedMessage correspondingMessage =
-                getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
+        final Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(Message.HEADER_REFERENCES_ID));
         final Message messageToSend = new Message(SLAVE_LIGHT_GET_REPLY.getPayload(message));
-
-        messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
-
-        sendMessage(
-                correspondingMessage.getFromID(),
-                MASTER_LIGHT_GET_REPLY,
-                messageToSend
-        );
+        sendReply(correspondingMessage, messageToSend);
     }
 }

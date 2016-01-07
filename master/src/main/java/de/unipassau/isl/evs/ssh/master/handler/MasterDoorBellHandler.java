@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.master.handler;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
@@ -13,6 +12,7 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
+import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BELL_CAMERA_GET;
@@ -28,8 +28,6 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BE
 public class MasterDoorBellHandler extends AbstractMasterHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
-        saveMessage(message);
-
         if (MASTER_DOOR_BELL_RING.matches(message)) {
             handleDoorBellRing(message);
         } else if (MASTER_DOOR_BELL_CAMERA_GET.matches(message)) {
@@ -44,7 +42,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
     private void handleCameraResponse(Message.AddressedMessage message) {//Check if message comes from master
         if (requireComponent(NamingManager.KEY).getMasterID().equals(message.getFromID())) {
             CameraPayload cameraPayload = MASTER_DOOR_BELL_CAMERA_GET.getPayload(message);
-            Message.AddressedMessage correspondingMessage = getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
+            Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
             DoorBellPayload doorBellPayload = MASTER_DOOR_BELL_RING.getPayload(correspondingMessage);
             doorBellPayload.setCameraPayload(cameraPayload);
 
@@ -75,7 +73,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
                             MASTER_CAMERA_GET,
                             messageToSend
                     );
-            putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
+            recordReceivedMessageProxy(message, sendMessage);
         } else {
             //no permission
             sendErrorMessage(message);

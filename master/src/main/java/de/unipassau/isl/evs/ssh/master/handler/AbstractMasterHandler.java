@@ -1,18 +1,22 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+
+import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
 
 /**
  * This is a MasterHandler providing functionality all MasterHandlers need. This will avoid needing to implement the
@@ -21,59 +25,36 @@ import de.unipassau.isl.evs.ssh.master.database.SlaveController;
  * @author Leon Sell
  */
 public abstract class AbstractMasterHandler extends AbstractMessageHandler {
-    private Map<Integer, Message.AddressedMessage> inbox = new HashMap<>();
-    private Map<Integer, Integer> onBehalfOfMessage = new HashMap<>();
+    private Map<Integer, Message.AddressedMessage> proxiedMessages = new HashMap<>();
 
     /**
-     * Save a Message to be able to respond to Messages from the app after requesting information from the slave.
+     * Remember that I sent another message (the proxy message) in order to fulfill a received request.
+     * The originally received message will be mapped to the sequence number of the proxy message,
+     * so that it can be later retrieved using the {@link Message#HEADER_REFERENCES_ID} of the reply for the proxy message.
      *
-     * @param message Message to save.
+     * @see #takeProxiedReceivedMessage(int)
+     * @param receivedMessage the Message with a Request from the App or the Slave that was received.
+     * @param proxyMessage    the Message that was sent by me (the Master) in order to get data required for responding
+     *                        to the original request.
      */
-    protected void saveMessage(Message.AddressedMessage message) {
-        //TODO clear sometime.
-        inbox.put(message.getSequenceNr(), message);
+    protected void recordReceivedMessageProxy(Message.AddressedMessage receivedMessage, Message.AddressedMessage proxyMessage) {
+        final DeviceID masterID = requireComponent(NamingManager.KEY).getMasterID();
+        if (!proxyMessage.getFromID().equals(masterID)) {
+            Log.w(getClass().getSimpleName(), "Messages from other devices can't act as proxy: " + proxyMessage);
+        }
+        proxiedMessages.put(proxyMessage.getSequenceNr(), receivedMessage);
     }
 
     /**
-     * Get a saved Message.
+     * Get the originally received message identified by the sequence number of the proxy message that was sent to
+     * fulfill the original message.
      *
-     * @param sequenceNr Sequence number of the requested Message.
-     * @return Requested message.
+     * @param proxySequenceNumber the sequence number of the proxy message, usually obtained from the reply to the
+     *                            proxy message by getting the {@link Message#HEADER_REFERENCES_ID} header field.
+     * @return the message that I originally received.
      */
-    protected Message.AddressedMessage getMessage(int sequenceNr) {
-        return inbox.get(sequenceNr);
-    }
-
-    /**
-     * Get saved Message by sequence number of the Message send on behalf of the saved Message.
-     *
-     * @param sequenceNr Sequence number of the Message send on behalf of the saved Message.
-     * @return Requested Message.
-     */
-    protected Message.AddressedMessage getMessageOnBehalfOfSequenceNr(int sequenceNr) {
-        return getMessage(getSequenceNrOnBehalfOfSequenceNr(sequenceNr));
-    }
-
-    /**
-     * Make a connection between a received Message sequence number and the Message sequence number of the Message send
-     * on behalf of that Message.
-     *
-     * @param newMessageSequenceNr        Message sequence number of the Message send on behalf of the Message.
-     * @param onBehalfOfMessageSequenceNr Message sequence number of the original Message.
-     */
-    protected void putOnBehalfOf(int newMessageSequenceNr, int onBehalfOfMessageSequenceNr) {
-        onBehalfOfMessage.put(newMessageSequenceNr, onBehalfOfMessageSequenceNr);
-
-    }
-
-    /**
-     * Request the Message sequence number of a previously made connection between Message sequence numbers.
-     *
-     * @param sequenceNr The Message sequence number of the Message send on behalf of the requested Message.
-     * @return Requested Message's sequence number..
-     */
-    protected Integer getSequenceNrOnBehalfOfSequenceNr(int sequenceNr) {
-        return onBehalfOfMessage.get(sequenceNr);
+    protected Message.AddressedMessage takeProxiedReceivedMessage(int proxySequenceNumber) {
+        return proxiedMessages.remove(proxySequenceNumber);
     }
 
     /**
@@ -96,17 +77,15 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
         return userDeviceID.equals(requireComponent(NamingManager.KEY).getMasterID());
     }
 
-    protected boolean hasPermission(DeviceID userDeviceID, de.unipassau.isl.evs.ssh.core.sec.Permission permission,
-                                    String moduleName) {
-        return isMaster(userDeviceID)
-                || requireComponent(PermissionController.KEY).hasPermission(userDeviceID, permission, moduleName);
+    protected boolean hasPermission(DeviceID userDeviceID, Permission permission, String moduleName) {
+        return isMaster(userDeviceID) || requireComponent(PermissionController.KEY)
+                .hasPermission(userDeviceID, permission, moduleName);
     }
 
     @Deprecated
     protected void handleErrorMessage(Message.AddressedMessage message) {
-        if (message.getHeader(Message.HEADER_REFERENCES_ID) != null) {
-            final Message.AddressedMessage correspondingMessage = getMessageOnBehalfOfSequenceNr(
-                    message.getHeader(Message.HEADER_REFERENCES_ID));
+        if (message.getHeader(HEADER_REFERENCES_ID) != null) {
+            final Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
             sendMessage(
                     correspondingMessage.getFromID(),
                     correspondingMessage.getHeader(Message.HEADER_REPLY_TO_KEY),
@@ -117,7 +96,7 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
 
     protected void sendMessageToAllDevicesWithPermission(
             Message messageToSend,
-            de.unipassau.isl.evs.ssh.core.sec.Permission permission,
+            Permission permission,
             String moduleName,
             RoutingKey routingKey
     ) {

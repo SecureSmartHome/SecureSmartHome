@@ -27,7 +27,6 @@ public class MasterClimateHandler extends AbstractMasterHandler {
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        saveMessage(message);
         if (MASTER_PUSH_WEATHER_INFO.matches(message)) {
             ClimatePayload payload = MASTER_PUSH_WEATHER_INFO.getPayload(message);
             latestWeatherData.put(payload.getModule(), payload) ;

@@ -3,7 +3,6 @@ package de.unipassau.isl.evs.ssh.master.handler;
 import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
@@ -11,9 +10,9 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
-import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
+import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
@@ -39,8 +38,6 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        saveMessage(message);
-
         if (MASTER_DOOR_UNLATCH.matches(message)) {
             //Response or request?
             if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
@@ -77,8 +74,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
     private void handleDoorStatusGetResponse(Message.AddressedMessage message) {
         //Response
-        final Message.AddressedMessage correspondingMessage =
-                getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
+        final Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
         final Message messageToSend = new Message(MASTER_DOOR_STATUS_GET.getPayload(message));
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
@@ -106,7 +102,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                     SLAVE_DOOR_STATUS_GET,
                     messageToSend
             );
-            putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
+            recordReceivedMessageProxy(message, sendMessage);
         } else {
             //no permission
             sendErrorMessage(message);
@@ -172,8 +168,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorUnlatchResponse(Message.AddressedMessage message) {
-        Message.AddressedMessage correspondingMessage =
-                getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
+        Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
         Message messageToSend = new Message(new NotificationPayload(
                 de.unipassau.isl.evs.ssh.core.sec.Permission.DOOR_UNLATCHED.toString(), DOOR_UNLATCHED_MESSAGE));
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
@@ -199,7 +194,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                                 SLAVE_DOOR_UNLATCH,
                                 messageToSend
                         );
-                putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
+                recordReceivedMessageProxy(message, sendMessage);
             } else {
                 //locked
                 sendErrorMessage(message);

@@ -10,7 +10,6 @@ import java.util.List;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -39,7 +38,6 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler implements 
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        saveMessage(message);
         if (MASTER_SLAVE_REGISTER.matches(message)) {
             handleSlaveRegister(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
