@@ -44,7 +44,6 @@ public class NotificationPayload implements MessagePayload {
         BRIGHTNESS_WARNING(Permission.BRIGHTNESS_WARNING),
         HUMIDITY_WARNING(Permission.HUMIDITY_WARNING),
         SYSTEM_HEALTH_WARNING(Permission.SYSTEM_HEALTH_WARNING),
-        ODROID_ADDED(Permission.ODROID_ADDED),
         HOLIDAY_MODE_SWITCHED_ON(Permission.HOLIDAY_MODE_SWITCHED_ON),
         HOLIDAY_MODE_SWITCHED_OFF(Permission.HOLIDAY_MODE_SWITCHED_OFF),
         BELL_RANG(Permission.BELL_RANG),
