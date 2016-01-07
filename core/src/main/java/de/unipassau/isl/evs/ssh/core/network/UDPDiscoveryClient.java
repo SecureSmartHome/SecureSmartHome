@@ -59,7 +59,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
      */
     private WifiManager.MulticastLock multicastLock;
     /**
-     * A boolean indicating when the discovery has been started using {@link #startDiscovery()} and no new Master has been
+     * A boolean indicating when the discovery has been started using {@link #startDiscovery(long)} and no new Master has been
      * found or {@link #stopDiscovery()} has been called.
      */
     private boolean isDiscoveryRunning = false;
@@ -67,12 +67,21 @@ public class UDPDiscoveryClient extends AbstractComponent {
      * The Future returned from the {@link io.netty.channel.EventLoop} for the next scheduled retry of {@link #sendDiscoveryRequest()}
      */
     private ScheduledFuture<?> retryFuture;
+    /**
+     * The timestamp when discovery should stop, or {@code 0} if discovery should run indefinitely.
+     */
+    private long timeout = 0;
 
     /**
      * Start discovery if it is not running yet and send the first discovery request.
      */
-    public void startDiscovery() {
-        Log.i(TAG, "startDiscovery, " + (isDiscoveryRunning ? "already" : "currently not") + " running");
+    public void startDiscovery(long timeout) {
+        if (this.timeout > 0 && timeout > 0) {
+            this.timeout = Math.max(this.timeout, timeout);
+        } else {
+            this.timeout = timeout;
+        }
+        Log.i(TAG, "startDiscovery, " + (isDiscoveryRunning ? "already" : "currently not") + " running with timeout " + timeout);
         if (!isDiscoveryRunning) {
             isDiscoveryRunning = true;
 
@@ -110,12 +119,16 @@ public class UDPDiscoveryClient extends AbstractComponent {
         // don't schedule a second execution if one is already pending
         final boolean isExecutionPending = retryFuture != null && !retryFuture.isDone();
         if (isDiscoveryRunning && !isExecutionPending) {
-            if (requireComponent(Client.KEY).isChannelOpen()) {
-                Log.d(TAG, "scheduleDiscoveryRetry(), but Client Channel is open. Was stopDiscovery called?");
+            if (requireComponent(Client.KEY).isChannelOpen() && timeout == 0) {
+                Log.d(TAG, "scheduleDiscoveryRetry() running indefinitely, but Client Channel is open. Was stopDiscovery called?");
             }
-            retryFuture = requireComponent(Client.KEY).getExecutor().schedule(new Runnable() {
+            retryFuture = requireComponent(Client.KEY).getAliveExecutor().schedule(new Runnable() {
                 @Override
                 public void run() {
+                    if (System.currentTimeMillis() > timeout) {
+                        Log.i(TAG, "Stopping discovery after timeout");
+                        stopDiscovery();
+                    }
                     if (isDiscoveryRunning) {
                         sendDiscoveryRequest();
                         /* Mark this future as completed, so that the next discovery request will be scheduled.
@@ -148,6 +161,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
     public void stopDiscovery() {
         Log.d(TAG, "stopDiscovery " + (isDiscoveryRunning ? "currently running" : ""));
         isDiscoveryRunning = false;
+        timeout = 0;
         if (retryFuture != null && !retryFuture.isDone()) {
             retryFuture.cancel(true);
         }
@@ -213,17 +227,18 @@ public class UDPDiscoveryClient extends AbstractComponent {
                     String addressString = readString(buffer);
                     // the address originally sent from the master is discarded, as using the address from which the
                     // message came works even if I'm in a different subnet
-                    InetAddress address = request.sender().getAddress();
-
+                    final InetAddress address = request.sender().getAddress();
                     final int port = buffer.readInt();
+                    final InetSocketAddress socketAddress = new InetSocketAddress(address, port);
+
                     final int dataEnd = buffer.readerIndex();
                     if (checkSignature(buffer, dataStart, dataEnd)) {
                         // got a new address for the master!
-                        Log.i(TAG, "UDP response received " + address.getHostAddress() + ":" + port);
+                        Log.i(TAG, "UDP response received " + socketAddress);
                         stopDiscovery();
-                        requireComponent(Client.KEY).onMasterFound(address, port);
+                        requireComponent(Client.KEY).onMasterFound(socketAddress);
                     } else {
-                        Log.i(TAG, "UDP response received " + address.getHostAddress() + ":" + port
+                        Log.i(TAG, "UDP response received " + socketAddress
                                 + ", but signature is invalid");
                     }
                 } else if (!DISCOVERY_PAYLOAD_REQUEST.equals(messageType)) {

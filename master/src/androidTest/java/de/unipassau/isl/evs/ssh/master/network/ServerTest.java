@@ -32,6 +32,8 @@ import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT;
+
 public class ServerTest extends InstrumentationTestCase {
     public void testStartup() throws IOException, InterruptedException {
         SimpleContainer container = new SimpleContainer();
@@ -145,7 +147,7 @@ public class ServerTest extends InstrumentationTestCase {
         SharedPreferences sharedPref = container.get(ContainerService.KEY_CONTEXT)
                 .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         Client.PrefEditor editor = new Client.PrefEditor(sharedPref.edit().clear());
-        editor.setHost("localhost");
+        editor.setLastAddress(InetSocketAddress.createUnresolved("localhost", DEFAULT_LOCAL_PORT));
         assertTrue(editor.commit());
     }
 

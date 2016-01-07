@@ -13,7 +13,6 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.security.SecureRandom;
 
@@ -38,12 +37,12 @@ public class DeviceConnectInformation implements Serializable {
     private static final int DATA_LENGTH = 4 + 2 + TOKEN_BASE64_LENGTH + DeviceID.ID_LENGTH;
     private static final int BASE64_FLAGS = android.util.Base64.NO_WRAP;
 
-    private final Inet4Address address;
+    private final InetAddress address;
     private final int port;
     private final DeviceID id;
     private final byte[] token;
 
-    public DeviceConnectInformation(Inet4Address address, int port, DeviceID id, byte[] token) {
+    public DeviceConnectInformation(InetAddress address, int port, DeviceID id, byte[] token) {
         if (address.getAddress().length != ADDRESS_LENGTH) {
             throw new IllegalArgumentException("illegal address length");
         }
@@ -56,7 +55,7 @@ public class DeviceConnectInformation implements Serializable {
         this.token = token;
     }
 
-    public Inet4Address getAddress() {
+    public InetAddress getAddress() {
         return address;
     }
 
@@ -82,7 +81,7 @@ public class DeviceConnectInformation implements Serializable {
 
         final byte[] addressData = new byte[ADDRESS_LENGTH];
         byteBuf.readBytes(addressData);
-        final Inet4Address address = (Inet4Address) InetAddress.getByAddress(addressData);
+        final InetAddress address = InetAddress.getByAddress(addressData);
         final int port = byteBuf.readUnsignedShort();
         final byte[] idData = new byte[DeviceID.ID_LENGTH];
         byteBuf.readBytes(idData);
