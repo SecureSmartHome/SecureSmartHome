@@ -90,13 +90,12 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler implements 
     }
 
     public void updateClient(DeviceID id) {
-        OutgoingRouter router = getComponent(OutgoingRouter.KEY);
-        Message message = createUpdateMessage();
-        router.sendMessage(id, GLOBAL_MODULES_UPDATE, message);
+        final Message message = createUpdateMessage();
+        requireComponent(OutgoingRouter.KEY).sendMessage(id, GLOBAL_MODULES_UPDATE, message);
     }
 
     private Message createUpdateMessage() {
-        SlaveController slaveController = getComponent(SlaveController.KEY);
+        final SlaveController slaveController = requireComponent(SlaveController.KEY);
         List<Slave> slaves = slaveController.getSlaves();
         ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
 
