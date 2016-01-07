@@ -13,25 +13,19 @@ import java.util.List;
 import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
-import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
-import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
-import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_GET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERINFO_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERINFO_SET;
@@ -70,10 +64,6 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             final Message userDeviceInformationMessage = new Message(generateUserDeviceInformationPayload());
             sendMessage(id, APP_USERINFO_GET, userDeviceInformationMessage);
         }
-
-        //TODO this is probably not the correct location to send module information. This has to be done by the MasterModuleHandler
-        final Message moduleInformationMessage = new Message(generateModuleInformationPayload());
-        sendMessage(id, GLOBAL_MODULES_UPDATE, moduleInformationMessage);
     }
 
     private void executeUserDeviceEdit(Message.AddressedMessage message, UserDeviceEditPayload payload) {
@@ -95,8 +85,8 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                         message.getFromID(),
                         de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME.toString(),
                         null
-                    )
-                    && hasPermission(
+                )
+                        && hasPermission(
                         message.getFromID(),
                         de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP.toString(),
                         null
@@ -167,7 +157,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         UserDevice toGrant = ((UserDevice[]) userToGrantPermission.keySet().toArray())[0];
         for (Permission permission : userToGrantPermission.get(toGrant)) {
             try {
-                getContainer().require(PermissionController.KEY).addUserPermission(
+                requireComponent(PermissionController.KEY).addUserPermission(
                         toGrant.getUserDeviceID(),
                         permission.getName(),
                         permission.getModuleName()
@@ -234,26 +224,5 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 permissions,
                 groups
         );
-    }
-
-    private MessagePayload generateModuleInformationPayload() {
-        SlaveController slaveController = getComponent(SlaveController.KEY);
-        List<Slave> slaves;
-        if (slaveController != null) {
-            slaves = slaveController.getSlaves();
-
-            ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
-
-            for (Slave slave : slaves) {
-                modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
-            }
-
-            return new ModulesPayload(modulesAtSlave, slaves);
-        } else {
-            ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
-            slaves = new LinkedList<>();
-            //Payload contains nothing as we cannot get the SlaveController to get the information needed
-            return new ModulesPayload(modulesAtSlave, slaves);
-        }
     }
 }

@@ -8,7 +8,6 @@ import com.google.common.collect.ListMultimap;
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -23,6 +22,7 @@ import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_RENAME;
@@ -36,34 +36,17 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_
 public class MasterModuleHandler extends AbstractMasterHandler {
     private static final String TAG = MasterModuleHandler.class.getSimpleName();
 
-    private Message createUpdateMessage() {
-        SlaveController slaveController = requireComponent(SlaveController.KEY);
-        List<Slave> slaves = slaveController.getSlaves();
-        ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
-
-        for (Slave slave : slaves) {
-            modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
-        }
-
-        return new Message(new ModulesPayload(modulesAtSlave, slaves));
-    }
-
-    private void updateAllClients() {
-        Iterable<DeviceID> connectedClients = requireComponent(Server.KEY).getActiveDevices();
-        for (DeviceID connectedClient : connectedClients) {
-            updateClient(connectedClient);
-        }
-    }
-
-    public void updateClient(DeviceID id) {
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        Message message = createUpdateMessage();
-        router.sendMessage(id, GLOBAL_MODULES_UPDATE, message);
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_MODULE_ADD, MASTER_MODULE_GET, MASTER_MODULE_RENAME, MASTER_DEVICE_CONNECTED};
     }
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (MASTER_MODULE_ADD.matches(message)) {
+        if (MASTER_DEVICE_CONNECTED.matches(message)) {
+            DeviceID deviceID = MASTER_DEVICE_CONNECTED.getPayload(message).deviceID;
+            updateClient(deviceID);
+        } else if (MASTER_MODULE_ADD.matches(message)) {
             AddNewModulePayload payload = MASTER_MODULE_ADD.getPayload(message);
             if (handleAddModule(payload.getModule(), message)) {
                 updateAllClients();
@@ -97,10 +80,30 @@ public class MasterModuleHandler extends AbstractMasterHandler {
         // TODO handle remove sensor
     }
 
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_MODULE_ADD, MASTER_MODULE_GET, MASTER_MODULE_RENAME};
+    private Message createUpdateMessage() {
+        SlaveController slaveController = requireComponent(SlaveController.KEY);
+        List<Slave> slaves = slaveController.getSlaves();
+        ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
+
+        for (Slave slave : slaves) {
+            modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
+        }
+
+        return new Message(new ModulesPayload(modulesAtSlave, slaves));
     }
+
+    private void updateAllClients() {
+        Iterable<DeviceID> connectedClients = requireComponent(Server.KEY).getActiveDevices();
+        for (DeviceID connectedClient : connectedClients) {
+            updateClient(connectedClient);
+        }
+    }
+
+    public void updateClient(DeviceID id) {
+        Message message = createUpdateMessage();
+        sendMessage(id, GLOBAL_MODULES_UPDATE, message);
+    }
+
 
     /* @author Leon Sell */
     private boolean handleRenameModule(Message.AddressedMessage message) {
