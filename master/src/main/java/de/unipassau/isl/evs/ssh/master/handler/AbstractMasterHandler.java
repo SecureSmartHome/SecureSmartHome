@@ -8,8 +8,10 @@ import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
+import de.unipassau.isl.evs.ssh.core.handler.NoPermissionException;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
@@ -105,5 +107,10 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
         for (UserDevice userDevice : allUserDevicesWithPermission) {
             sendMessage(userDevice.getUserDeviceID(), routingKey, messageToSend);
         }
+    }
+
+    protected void sendNoPermissionReply(Message.AddressedMessage original, de.unipassau.isl.evs.ssh.core.sec.Permission permission){
+        Message message = new Message(new ErrorPayload(new NoPermissionException(permission)));
+        sendReply(original, message);
     }
 }

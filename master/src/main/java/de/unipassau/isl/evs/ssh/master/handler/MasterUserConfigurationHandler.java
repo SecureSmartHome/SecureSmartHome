@@ -10,57 +10,250 @@ import com.google.common.collect.Multimaps;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
-import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
-import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteUserPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupNamePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupTemplatePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetPermissionPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserGroupPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserNamePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
+import de.unipassau.isl.evs.ssh.master.database.IsReferencedException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
-import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_GET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERINFO_GET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERINFO_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_ADD;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_DELETE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_NAME;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_TEMPLATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_NAME;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_GROUP;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_GROUP_NAME;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_GROUP_TEMPLATE;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_GROUP;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.GRANT_USER_PERMISSION;
 
 /**
  * Handles messages indicating that a device wants to register itself at the system and also generates
  * messages for each target that needs to know of this event and passes them to the OutgoingRouter.
  *
  * @author Christoph Fraedrich
+ * @author Wolfgang Popp
  */
 public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     private static final String TAG = MasterUserConfigurationHandler.class.getSimpleName();
 
     @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{
+                MASTER_DEVICE_CONNECTED,
+                MASTER_PERMISSION_SET,
+                MASTER_USER_SET_GROUP,
+                MASTER_USER_SET_NAME,
+                MASTER_USER_DELETE,
+                MASTER_GROUP_ADD,
+                MASTER_GROUP_DELETE,
+                MASTER_GROUP_SET_NAME,
+                MASTER_GROUP_SET_TEMPLATE
+        };
+    }
+
+    @Override
     public void handle(Message.AddressedMessage message) {
-        if (MASTER_USERINFO_GET.matches(message)) {
-            sendUpdateToUserDevice(message.getFromID());
-        } else if (MASTER_USERINFO_SET.matches(message)) {
-            executeUserDeviceEdit(message, MASTER_USERINFO_SET.getPayload(message));
-        } else if (MASTER_DEVICE_CONNECTED.matches(message)) {
+        if (MASTER_DEVICE_CONNECTED.matches(message)) {
             sendUpdateToUserDevice(MASTER_DEVICE_CONNECTED.getPayload(message).deviceID);
+        } else if (MASTER_PERMISSION_SET.matches(message)) {
+            setPermission(MASTER_PERMISSION_SET.getPayload(message), message);
+        } else if (MASTER_USER_SET_GROUP.matches(message)) {
+            setUserGroup(MASTER_USER_SET_GROUP.getPayload(message), message);
+        } else if (MASTER_USER_SET_NAME.matches(message)) {
+            setUserName(MASTER_USER_SET_NAME.getPayload(message), message);
+        } else if (MASTER_USER_DELETE.matches(message)) {
+            deleteUser(MASTER_USER_DELETE.getPayload(message), message);
+        } else if (MASTER_GROUP_ADD.matches(message)) {
+            addGroup(MASTER_GROUP_ADD.getPayload(message), message);
+        } else if (MASTER_GROUP_DELETE.matches(message)) {
+            deleteGroup(MASTER_GROUP_DELETE.getPayload(message), message);
+        } else if (MASTER_GROUP_SET_NAME.matches(message)) {
+            setGroupName(MASTER_GROUP_SET_NAME.getPayload(message), message);
+        } else if (MASTER_GROUP_SET_TEMPLATE.matches(message)) {
+            setGroupTemplate(MASTER_GROUP_SET_TEMPLATE.getPayload(message), message);
         } else {
             invalidMessage(message);
         }
     }
 
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_DEVICE_CONNECTED, MASTER_USERINFO_GET, MASTER_USERINFO_SET};
+    private void addGroup(GroupPayload payload, Message.AddressedMessage original) {
+        DeviceID fromID = original.getFromID();
+
+        if (!hasPermission(fromID, ADD_GROUP, null)) {
+            sendNoPermissionReply(original, ADD_GROUP);
+            return;
+        }
+
+        try {
+            requireComponent(UserManagementController.KEY).addGroup(payload.getGroup());
+            sendOnSuccess(original);
+        } catch (DatabaseControllerException e) {
+            sendError(original, e);
+        }
+    }
+
+    private void deleteGroup(GroupPayload payload, Message.AddressedMessage original) {
+        DeviceID fromID = original.getFromID();
+
+        if (!hasPermission(fromID, DELETE_GROUP, null)) {
+            sendNoPermissionReply(original, DELETE_GROUP);
+            return;
+        }
+
+        try {
+            requireComponent(UserManagementController.KEY).removeGroup(payload.getGroup().getName());
+            sendOnSuccess(original);
+        } catch (IsReferencedException e) {
+            sendError(original, e);
+        }
+    }
+
+    private void setGroupName(SetGroupNamePayload payload, Message.AddressedMessage original) {
+        DeviceID fromID = original.getFromID();
+
+        if (!hasPermission(fromID, CHANGE_GROUP_NAME, null)) {
+            sendNoPermissionReply(original, CHANGE_GROUP_NAME);
+            return;
+        }
+
+        try {
+            requireComponent(UserManagementController.KEY).changeGroupName(payload.getGroup().getName(), payload.getNewName());
+            sendOnSuccess(original);
+        } catch (AlreadyInUseException e) {
+            sendError(original, e);
+        }
+    }
+
+    private void setGroupTemplate(SetGroupTemplatePayload payload, Message.AddressedMessage original) {
+        DeviceID fromID = original.getFromID();
+
+        if (!hasPermission(fromID, CHANGE_GROUP_TEMPLATE, null)) {
+            sendNoPermissionReply(original, CHANGE_GROUP_TEMPLATE);
+            return;
+        }
+
+        try {
+            requireComponent(UserManagementController.KEY).changeTemplateOfGroup(payload.getGroup().getName(), payload.getTemplateName());
+            sendOnSuccess(original);
+        } catch (UnknownReferenceException e) {
+            sendError(original, e);
+        }
+    }
+
+    private void setUserName(SetUserNamePayload payload, Message.AddressedMessage original) {
+        DeviceID fromID = original.getFromID();
+
+        if (!hasPermission(fromID, CHANGE_USER_NAME, null)) {
+            sendNoPermissionReply(original, CHANGE_USER_NAME);
+            return;
+        }
+
+        try {
+            requireComponent(UserManagementController.KEY).changeUserDeviceName(payload.getUser(), payload.getUsername());
+            sendOnSuccess(original);
+        } catch (AlreadyInUseException e) {
+            sendError(original, e);
+        }
+    }
+
+    private void deleteUser(DeleteUserPayload payload, Message.AddressedMessage original) {
+        DeviceID fromID = original.getFromID();
+
+        if (!hasPermission(fromID, DELETE_USER, null)) {
+            sendNoPermissionReply(original, DELETE_USER);
+            return;
+        }
+
+        requireComponent(UserManagementController.KEY).removeUserDevice(payload.getUser());
+        sendOnSuccess(original);
+    }
+
+    private void setUserGroup(SetUserGroupPayload payload, Message.AddressedMessage original) {
+        DeviceID fromID = original.getFromID();
+
+        if (!hasPermission(fromID, CHANGE_USER_GROUP, null)) {
+            sendNoPermissionReply(original, CHANGE_USER_GROUP);
+            return;
+        }
+
+        try {
+            requireComponent(UserManagementController.KEY).changeGroupMembership(payload.getUser(), payload.getGroupName());
+            sendOnSuccess(original);
+        } catch (UnknownReferenceException e) {
+            sendError(original, e);
+        }
+    }
+
+    private void setPermission(SetPermissionPayload payload, Message.AddressedMessage original) {
+        PermissionController controller = requireComponent(PermissionController.KEY);
+        DeviceID fromID = original.getFromID();
+
+        if (!hasPermission(fromID, GRANT_USER_PERMISSION, null)) {
+            sendNoPermissionReply(original, GRANT_USER_PERMISSION);
+            return;
+        }
+
+        de.unipassau.isl.evs.ssh.core.sec.Permission permission = payload.getPermission().getPermission();
+        String moduleName = payload.getPermission().getModuleName();
+
+        boolean success = false;
+        if (payload.getAction().equals(SetPermissionPayload.Action.GRANT)) {
+            try {
+                controller.addUserPermission(payload.getUser(), permission, moduleName);
+                success = true;
+            } catch (UnknownReferenceException e) {
+                sendError(original, e);
+            }
+        } else if (payload.getAction().equals(SetPermissionPayload.Action.REVOKE)) {
+            controller.removeUserPermission(payload.getUser(), permission, moduleName);
+            success = true;
+        }
+
+        if (success) {
+            sendOnSuccess(original);
+        }
+    }
+
+    private void sendOnSuccess(Message.AddressedMessage original) {
+        sendReply(original, new Message());
+        broadcastUserConfigurationUpdated();
+    }
+
+    private void sendError(Message.AddressedMessage original, Exception e) {
+        sendReply(original, new Message(new ErrorPayload(e)));
+    }
+
+    private void broadcastUserConfigurationUpdated() {
+        List<UserDevice> userDevices = requireComponent(UserManagementController.KEY).getUserDevices();
+        for (UserDevice userDevice : userDevices) {
+            sendUpdateToUserDevice(userDevice.getUserDeviceID());
+        }
     }
 
     private void sendUpdateToUserDevice(DeviceID id) {
@@ -68,130 +261,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
 
         if (!isSlave(id)) {
             final Message userDeviceInformationMessage = new Message(generateUserDeviceInformationPayload());
-            sendMessage(id, APP_USERINFO_GET, userDeviceInformationMessage);
-        }
-
-        //TODO this is probably not the correct location to send module information. This has to be done by the MasterModuleHandler
-        final Message moduleInformationMessage = new Message(generateModuleInformationPayload());
-        sendMessage(id, GLOBAL_MODULES_UPDATE, moduleInformationMessage);
-    }
-
-    private void executeUserDeviceEdit(Message.AddressedMessage message, UserDeviceEditPayload payload) {
-        switch (payload.getAction()) {
-            case REMOVE_USERDEVICE:
-                if (hasPermission(
-                        message.getFromID(),
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER, null
-                )) {
-                    removeUserDevice(payload);
-                } else {
-                    //HANDLE
-                    sendErrorMessage(message);
-                }
-                break;
-            case EDIT_USERDEVICE:
-                //TODO maybe refactor and unite both permissions?
-                if (hasPermission(
-                        message.getFromID(),
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME,
-                        null
-                    )
-                    && hasPermission(
-                        message.getFromID(),
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP,
-                        null
-                )) {
-                    editUserDevice(message, payload);
-                } else {
-                    //HANDLE
-                    sendErrorMessage(message);
-                }
-                break;
-            case GRANT_PERMISSION:
-                if (hasPermission(
-                        message.getFromID(),
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.GRANT_USER_PERMISSION,
-                        null
-                )) {
-                    grantPermission(message, payload);
-                } else {
-                    //HANDLE
-                    sendErrorMessage(message);
-                }
-                break;
-            case REVOKE_PERMISSION:
-                if (hasPermission(
-                        message.getFromID(),
-                        de.unipassau.isl.evs.ssh.core.sec.Permission.WITHDRAW_USER_PERMISSION,
-                        null
-                )) {
-                    revokePermission(payload);
-                } else {
-                    //HANDLE
-                    sendErrorMessage(message);
-                }
-                break;
-        }
-        sendUpdateToUserDevice(message.getFromID());
-    }
-
-    private void removeUserDevice(UserDeviceEditPayload payload) {
-        UserDevice userDevice = payload.getUserDeviceToRemove();
-        if (getContainer() != null) {
-            getContainer().require(UserManagementController.KEY).removeUserDevice(userDevice.getUserDeviceID());
-        }
-    }
-
-    private void editUserDevice(Message.AddressedMessage message, UserDeviceEditPayload payload) {
-        Map<UserDevice, UserDevice> userToEdit = payload.getUserToEdit();
-        //This is possible, because the map never has more then 2 values. It is used as a form of a tuple
-        UserDevice toRemove = ((UserDevice[]) userToEdit.keySet().toArray())[0];
-        UserDevice toAdd = userToEdit.get(toRemove);
-
-        try {
-            //TODO: for Refactor. New Method that updates a userdevice
-            if (getContainer() != null) {
-                getContainer().require(UserManagementController.KEY).removeUserDevice(toRemove.getUserDeviceID());
-                getContainer().require(UserManagementController.KEY).addUserDevice(toAdd);
-            }
-        } catch (DatabaseControllerException e) {
-            //HANDLE
-            sendErrorMessage(message);
-        }
-    }
-
-    private void grantPermission(Message.AddressedMessage message, UserDeviceEditPayload payload) {
-        ImmutableListMultimap<UserDevice, Permission> userToGrantPermission = payload.getUserToGrantPermission();
-        //This is possible, because the map never has more then 2 values. It is used as a form of a tuple
-
-        UserDevice toGrant = ((UserDevice[]) userToGrantPermission.keySet().toArray())[0];
-        for (Permission permission : userToGrantPermission.get(toGrant)) {
-            try {
-                getContainer().require(PermissionController.KEY).addUserPermission(
-                        toGrant.getUserDeviceID(),
-                        permission.getPermission(),
-                        permission.getModuleName()
-                );
-            } catch (UnknownReferenceException e) {
-                //HANDLE
-                sendErrorMessage(message);
-            }
-        }
-    }
-
-    private void revokePermission(UserDeviceEditPayload payload) {
-        ImmutableListMultimap<UserDevice, Permission> userToRevokePermission = payload.getUserToRevokePermission();
-        //This is possible, because the map never has more then 2 values. It is used as a form of a tuple
-
-        UserDevice toRevoke = ((UserDevice[]) userToRevokePermission.keySet().toArray())[0];
-        for (Permission permission : userToRevokePermission.get(toRevoke)) {
-            if (getContainer() != null) {
-                getContainer().require(PermissionController.KEY).removeUserPermission(
-                        toRevoke.getUserDeviceID(),
-                        permission.getPermission(),
-                        permission.getModuleName()
-                );
-            }
+            sendMessage(id, APP_USERINFO_UPDATE, userDeviceInformationMessage);
         }
     }
 
@@ -234,26 +304,5 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 permissions,
                 groups
         );
-    }
-
-    private MessagePayload generateModuleInformationPayload() {
-        SlaveController slaveController = getComponent(SlaveController.KEY);
-        List<Slave> slaves;
-        if (slaveController != null) {
-            slaves = slaveController.getSlaves();
-
-            ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
-
-            for (Slave slave : slaves) {
-                modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
-            }
-
-            return new ModulesPayload(modulesAtSlave, slaves);
-        } else {
-            ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
-            slaves = new LinkedList<>();
-            //Payload contains nothing as we cannot get the SlaveController to get the information needed
-            return new ModulesPayload(modulesAtSlave, slaves);
-        }
     }
 }

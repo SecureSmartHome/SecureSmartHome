@@ -162,7 +162,8 @@ public class EditUserDeviceFragment extends BoundFragment {
                         public void onClick(DialogInterface dialog, int id) {
                             String name = userDeviceName.getText().toString();
                             String group = ((String) groupName.getSelectedItem());
-                            handler.editUserDevice(userDevice, new UserDevice(name, group, userDevice.getUserDeviceID()));
+                            handler.setUserGroup(userDevice.getUserDeviceID(), group);
+                            handler.setUserName(userDevice.getUserDeviceID(), name);
                             String toastText = "Device " + name + " edited.";
                             Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
                             toast.show();
@@ -171,7 +172,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                     .setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            handler.removeUserDevice(userDevice);
+                            handler.removeUserDevice(userDevice.getUserDeviceID());
                             String toastText = "Device " + userDevice.getName() + " removed.";
                             Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
                             toast.show();
@@ -286,11 +287,11 @@ public class EditUserDeviceFragment extends BoundFragment {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (isChecked) {
-                            handler.grantPermission(device, permission);
+                            handler.grantPermission(device.getUserDeviceID(), permission);
                             Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
                                     + " granted for user device " + device.getName());
                         } else {
-                            handler.revokePermission(device, permission);
+                            handler.revokePermission(device.getUserDeviceID(), permission);
                             Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
                                     + " revoked for user device " + device.getName());
                         }
