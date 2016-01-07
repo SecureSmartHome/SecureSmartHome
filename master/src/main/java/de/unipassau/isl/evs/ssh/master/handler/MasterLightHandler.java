@@ -3,20 +3,23 @@ package de.unipassau.isl.evs.ssh.master.handler;
 import android.util.Log;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET_REPLY;
 
 /**
  * Handles light messages, logs them for the holiday simulation and generates messages
@@ -34,11 +37,11 @@ public class MasterLightHandler extends AbstractMasterHandler {
         if (MASTER_LIGHT_SET.matches(message)) {
             handleSetRequest(message);
         } else if (MASTER_LIGHT_GET.matches(message)) {
-            if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
-                handleGetRequest(message);
-            } else {
-                handleResponse(message);
-            }
+            handleGetRequest(message);
+        } else if (SLAVE_LIGHT_GET_REPLY.matches(message)) {
+            handleGetResponse(message);
+        } else if (SLAVE_LIGHT_SET_REPLY.matches(message)){
+            handleSetResponse(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
@@ -48,7 +51,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_LIGHT_SET, MASTER_LIGHT_GET};
+        return new RoutingKey[] { MASTER_LIGHT_SET, MASTER_LIGHT_GET, SLAVE_LIGHT_SET_REPLY, SLAVE_LIGHT_GET_REPLY };
     }
 
     private void handleSetRequest(Message.AddressedMessage message) {
@@ -60,7 +63,6 @@ public class MasterLightHandler extends AbstractMasterHandler {
                 atModule.getName()
         )) {
             final Message messageToSend = new Message(payload);
-            messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_LIGHT_GET.getKey());
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),
                     SLAVE_LIGHT_SET,
@@ -97,7 +99,6 @@ public class MasterLightHandler extends AbstractMasterHandler {
                 atModule.getName()
         )) {
             final Message messageToSend = new Message(payload);
-            messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_LIGHT_GET.getKey());
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),
                     SLAVE_LIGHT_GET,
@@ -110,16 +111,32 @@ public class MasterLightHandler extends AbstractMasterHandler {
         }
     }
 
-    private void handleResponse(Message.AddressedMessage message) {
+    private void handleSetResponse(Message.AddressedMessage message) {
         final Message.AddressedMessage correspondingMessage =
                 getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
-        final Message messageToSend = new Message(message.getPayload());
+        final LightPayload lightPayload = SLAVE_LIGHT_SET_REPLY.getPayload(message);
+        final Message messageToSend = new Message(lightPayload);
+
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
-        //works for get and set, so no switch required
+        sendMessageToAllDevicesWithPermission(
+                messageToSend,
+                Permission.REQUEST_LIGHT_STATUS,
+                lightPayload.getModule().getName(),
+                MASTER_LIGHT_SET_REPLY
+        );
+    }
+
+    private void handleGetResponse(Message.AddressedMessage message) {
+        final Message.AddressedMessage correspondingMessage =
+                getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
+        final Message messageToSend = new Message(SLAVE_LIGHT_GET_REPLY.getPayload(message));
+
+        messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
+
         sendMessage(
                 correspondingMessage.getFromID(),
-                correspondingMessage.getHeader(Message.HEADER_REPLY_TO_KEY),
+                MASTER_LIGHT_GET_REPLY,
                 messageToSend
         );
     }

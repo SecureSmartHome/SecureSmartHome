@@ -1,11 +1,14 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
@@ -110,5 +113,18 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
                     new Message(message.getPayload())
             );
         } //else ignore
+    }
+
+    protected void sendMessageToAllDevicesWithPermission(
+            Message messageToSend,
+            de.unipassau.isl.evs.ssh.core.sec.Permission permission,
+            String moduleName,
+            RoutingKey routingKey
+    ) {
+        final List<UserDevice> allUserDevicesWithPermission = requireComponent(PermissionController.KEY)
+                .getAllUserDevicesWithPermission(permission, moduleName);
+        for (UserDevice userDevice : allUserDevicesWithPermission) {
+            sendMessage(userDevice.getUserDeviceID(), routingKey, messageToSend);
+        }
     }
 }
