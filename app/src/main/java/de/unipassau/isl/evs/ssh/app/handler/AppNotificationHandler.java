@@ -222,7 +222,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         notificationBuilder.setColor(R.color.colorPrimary);
         notificationBuilder.setWhen(System.currentTimeMillis());
         notificationBuilder.setContentTitle(title);
-        notificationBuilder.setContentText(text);//maybe obsolete because of bigText style.
+        //notificationBuilder.setContentText(text);//maybe obsolete because of bigText style.
         notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
         notificationBuilder.setVibrate(new long[]{0, 500, 110, 500, 110, 450, 110, 200, 110,
                 170, 40, 450, 110, 200, 110, 170, 40, 500});
