@@ -37,7 +37,6 @@ public class Message implements Serializable {
     @Deprecated
     public static final Key<String> HEADER_REPLY_TO_KEY = new Key<>(String.class, "replyToKey");
 
-    private static final AtomicInteger sequenceCounter = new AtomicInteger();
     private final TypedMap<Object> headers;
     private MessagePayload payload;
 
@@ -68,6 +67,12 @@ public class Message implements Serializable {
         return payload;
     }
 
+    /**
+     * Cast and return the payload contained in this Message to the given class.
+     * If the one single RoutingKey is known for this message, use {@link RoutingKey#getPayload(Message)} instead.
+     *
+     * @throws ClassCastException
+     */
     public <T> T getPayloadChecked(Class<T> payloadClass) {
         return payloadClass.cast(getPayloadUnchecked());
     }
@@ -125,29 +130,33 @@ public class Message implements Serializable {
         if (payload == null) {
             bob.append("null");
         } else {
-            bob.append(payload.getClass().getName()).append("{\n");
-            for (Field field : getFields(payload.getClass())) {
-                Object value;
-                try {
-                    final boolean wasAccessible = field.isAccessible();
-                    field.setAccessible(true);
-                    value = field.get(payload);
-                    if (!wasAccessible) {
-                        field.setAccessible(false);
-                    }
-                } catch (IllegalAccessException e) {
-                    value = e;
-                }
-                String string = valueToString(value);
-                if (string.length() > 1000) {
-                    string = string.substring(0, 997) + "...";
-                }
-                bob.append("\t").append(field.getName()).append("=").append(string).append("\n");
-            }
-            bob.append("}");
+            payloadToString(bob);
         }
 
         return bob.toString();
+    }
+
+    private void payloadToString(StringBuilder bob) {
+        bob.append(payload.getClass().getName()).append("{\n");
+        for (Field field : getFields(payload.getClass())) {
+            Object value;
+            try {
+                final boolean wasAccessible = field.isAccessible();
+                field.setAccessible(true);
+                value = field.get(payload);
+                if (!wasAccessible) {
+                    field.setAccessible(false);
+                }
+            } catch (IllegalAccessException e) {
+                value = e;
+            }
+            String string = valueToString(value);
+            if (string.length() > 1000) {
+                string = string.substring(0, 997) + "...";
+            }
+            bob.append("\t").append(field.getName()).append("=").append(string).append("\n");
+        }
+        bob.append("}");
     }
 
     @NonNull
@@ -202,7 +211,8 @@ public class Message implements Serializable {
     }
 
     /**
-     * Extend this Message to an AddressedMessage.
+     * Extend this Message to an AddressedMessage, also sets {@link #HEADER_TIMESTAMP} and
+     * {@link AddressedMessage#getSequenceNr() sequence number}.
      *
      * @param fromID     ID of the sending device.
      * @param toID       ID of the receiving device.
@@ -214,7 +224,8 @@ public class Message implements Serializable {
     }
 
     /**
-     * An AddressedMessage is an immutable Message with additional information about to sender and the receiver.
+     * An AddressedMessage is an immutable Message with additional information about sender and receiver.
+     * Additionally, the String part of the RoutingKey is transferred. The Class part will be inferred based on the used payload.
      */
     public static class AddressedMessage extends Message {
         private final DeviceID fromID;
@@ -223,6 +234,8 @@ public class Message implements Serializable {
         private final int sequenceNr;
 
         private transient Future<Void> sendFuture;
+
+        private static final AtomicInteger sequenceCounter = new AtomicInteger();
 
         private AddressedMessage(Message from, DeviceID fromID, DeviceID toID, String routingKey) {
             this(new TypedMap<>(from.headers), from.payload, fromID, toID, routingKey);
@@ -236,11 +249,17 @@ public class Message implements Serializable {
             sequenceNr = sequenceCounter.getAndIncrement();
         }
 
+        /**
+         * @throws UnsupportedOperationException this class is immutable
+         */
         @Override
         public void setPayload(MessagePayload payload) {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * @throws UnsupportedOperationException this class is immutable
+         */
         @Override
         AddressedMessage setDestination(DeviceID fromID, DeviceID toID, String routingKey) {
             throw new UnsupportedOperationException("destination already set");
@@ -262,6 +281,9 @@ public class Message implements Serializable {
             return sequenceNr;
         }
 
+        /**
+         * @return a Future indicating if this message was sent successfully or not. {@code null} for received AddressedMessages.
+         */
         public Future<Void> getSendFuture() {
             return sendFuture;
         }

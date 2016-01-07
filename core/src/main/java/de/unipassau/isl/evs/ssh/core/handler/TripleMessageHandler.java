@@ -4,7 +4,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 
 /**
- * TODO JavaDoc
+ * Convenience base class for MessageHandles that can handle exactly 3 types of Messages.
+ *
  * @author Niko Fink
  */
 public abstract class TripleMessageHandler<T, U, V> extends AbstractMessageHandler {

@@ -17,7 +17,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
 /**
- * Activity that automatically binds itself to the ContainerService to enable Activities to access the Container.
+ * Activity that automatically binds itself to the {@link ContainerService} to enable Activities to access the Container.
  *
  * @author Niko Fink
  */
@@ -25,8 +25,18 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 public class BoundActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName() + "(BndAct)";
 
+    /**
+     * The class of the ContainerService that this Activity should bind to.
+     */
     private final Class<? extends ContainerService> serviceClass;
+    /**
+     * {@code true}, if {@link Context#bindService(Intent, ServiceConnection, int)} has successfully been called and
+     * {@link Context#unbindService(ServiceConnection)} hasn't been called yet.
+     */
     private boolean serviceBound;
+    /**
+     * The ContainerService this Activity is bound to.
+     */
     private Container serviceContainer;
     private final ServiceConnection serviceConn = new ServiceConnection() {
         @Override
@@ -39,6 +49,9 @@ public class BoundActivity extends AppCompatActivity {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d(TAG, "Service " + name + " disconnected");
+            if (serviceContainer instanceof IBinder && !((IBinder) serviceContainer).isBinderAlive()) {
+                serviceContainer = null; //can't use container any more if the binder is dead
+            }
             onContainerDisconnected();
             serviceContainer = null;
         }
@@ -85,6 +98,7 @@ public class BoundActivity extends AppCompatActivity {
     /**
      * {@inheritDoc}
      * <p/>
+     *
      * @see #doBind()
      */
     @Override
@@ -96,6 +110,7 @@ public class BoundActivity extends AppCompatActivity {
     /**
      * {@inheritDoc}
      * <p/>
+     *
      * @see #doUnbind()
      */
     @Override
@@ -155,8 +170,10 @@ public class BoundActivity extends AppCompatActivity {
      * Container itself are not available.
      *
      * @see Container#require(Key)
+     * @deprecated will throw an IllegalStateException and crash the App if the container is not connected
      */
     @NonNull
+    @Deprecated
     protected <T extends Component> T requireComponent(Key<T> key) {
         Container container = getContainer();
         if (container != null) {

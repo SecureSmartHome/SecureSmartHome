@@ -102,7 +102,7 @@ public abstract class OutgoingRouter extends AbstractComponent {
 
     /**
      * Sends a reply message to the device the original message came from.
-     * Also sets the HEADER_REFERENCES_ID of the sent message to the sequence number of the original message.
+     * Also sets the {@link Message#HEADER_REFERENCES_ID} of the sent message to the sequence number of the original message.
      *
      * @see #sendMessage(DeviceID, String, Message)
      */

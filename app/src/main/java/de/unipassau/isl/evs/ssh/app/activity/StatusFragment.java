@@ -202,7 +202,7 @@ public class StatusFragment extends BoundFragment {
 
             Module module = getItem(position);
             moduleName.setText(module.getName());
-            moduleType.setText(module.getModuleType().toLocalizedString(getActivity().getApplicationContext()));
+            moduleType.setText(module.getModuleType().toLocalizedString(getActivity()));
             moduleConnectionType.setText(module.getModuleAccessPoint().getType());
             return layout;
         }

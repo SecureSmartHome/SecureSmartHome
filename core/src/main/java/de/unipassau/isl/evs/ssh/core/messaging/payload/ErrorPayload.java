@@ -3,6 +3,9 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
 import android.content.Context;
 
 /**
+ * Payload sent in a reply message if a requested exception fails.
+ * Extends Exception so that it can be thrown as a whole on the receiver side.
+ *
  * @author Niko Sell
  */
 public class ErrorPayload extends Exception implements MessagePayload {

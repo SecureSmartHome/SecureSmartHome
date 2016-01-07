@@ -12,7 +12,6 @@ import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
@@ -23,15 +22,12 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.slave.R;
 import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION;
 import static de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation.encodeToken;
@@ -152,8 +148,7 @@ public class MainActivity extends BoundActivity {
     @NonNull
     private DeviceConnectInformation getDeviceConnectInformation() {
         DeviceConnectInformation deviceInformation = null;
-        Context ctx = getApplicationContext();
-        WifiManager wifiManager = ((WifiManager) ctx.getSystemService(Context.WIFI_SERVICE));
+        WifiManager wifiManager = ((WifiManager) getSystemService(Context.WIFI_SERVICE));
         String ipAddress = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
         final byte[] token = DeviceConnectInformation.getRandomToken();
         requireComponent(Client.KEY).editPrefs()
