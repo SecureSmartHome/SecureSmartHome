@@ -68,7 +68,6 @@ public enum Permission {
     SHOW_TEMPLATE_PERMISSION,
 
     //Notification Types
-    ODROID_ADDED,
     HUMIDITY_WARNING,
     BRIGHTNESS_WARNING,
     HOLIDAY_MODE_SWITCHED_ON,

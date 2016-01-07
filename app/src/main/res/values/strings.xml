@@ -149,7 +149,6 @@
     <string name="system_health_warning_text" formatted="false">The module %s is not responding anymore.</string>
     <string name="door_bell_notification_title">The Doorbell rang!</string>
     <string name="door_bell_notification_text">You have visitors at your door.</string>
-    <string name="odroid_added_title">ODROID was added!</string>
     <string name="holiday_mode_switched_on_title">Holiday Mode Active!</string>
     <string name="holiday_mode_switched_on_text">Your home is now controlling itself.</string>
     <string name="holiday_mode_switched_off_title">Holiday Mode Inactive!</string>

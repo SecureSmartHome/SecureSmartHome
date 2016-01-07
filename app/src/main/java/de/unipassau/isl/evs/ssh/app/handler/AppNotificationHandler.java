@@ -42,12 +42,11 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     private static final int WEATHER_WARNING_ID = 3;
     private static final int SYSTEM_HEALTH_WARNING_ID = 4;
     private static final int DOOR_BELL_NOTIFICATION_ID = 5;
-    private static final int ODROID_ADDED_ID = 6;
-    private static final int HOLIDAY_MODE_SWITCHED_ON_ID = 7;
-    private static final int HOLIDAY_MODE_SWITCHED_OFF_ID = 8;
-    private static final int DOOR_UNLATCHED_ID = 9;
-    private static final int DOOR_LOCKED = 10;
-    private static final int DOOR_UNLOCKED = 11;
+    private static final int HOLIDAY_MODE_SWITCHED_ON_ID = 6;
+    private static final int HOLIDAY_MODE_SWITCHED_OFF_ID = 7;
+    private static final int DOOR_UNLATCHED_ID = 8;
+    private static final int DOOR_LOCKED = 9;
+    private static final int DOOR_UNLOCKED = 10;
     private static final String TAG = AppNotificationHandler.class.getSimpleName();
 
     /**
@@ -76,9 +75,6 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
                     case SYSTEM_HEALTH_WARNING:
                         issueSystemHealthWarning(SYSTEM_HEALTH_WARNING_ID, args);
                         break;
-                    case ODROID_ADDED:
-                        issueOdroidAdded(ODROID_ADDED_ID, args);
-                        break;
                     case HOLIDAY_MODE_SWITCHED_ON:
                         issueHolidayModeSwitchedOn(HOLIDAY_MODE_SWITCHED_ON_ID);
                         break;
@@ -86,7 +82,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
                         issueHolidayModeSwitchedOff(HOLIDAY_MODE_SWITCHED_OFF_ID);
                         break;
                     case BELL_RANG:
-                        issueDoorBellNotification(DOOR_BELL_NOTIFICATION_ID, args);
+                        issueDoorBellNotification(DOOR_BELL_NOTIFICATION_ID);
                         break;
                     case DOOR_UNLATCHED:
                         issueDoorUnlatched(DOOR_UNLATCHED_ID);
@@ -150,17 +146,10 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     }
 
     //TODO add picture to notification?
-    private void issueDoorBellNotification(int notificationID, Serializable[] args) {
+    private void issueDoorBellNotification(int notificationID) {
         String title = Resources.getSystem().getString(R.string.door_bell_notification_title);
         String text = Resources.getSystem().getString(R.string.door_bell_notification_text);
         displayNotification(title, text, DOOR_FRAGMENT, notificationID);
-    }
-
-    //TODO bedarf klären
-    private void issueOdroidAdded(int notificationID, Serializable[] args) {
-        String title = Resources.getSystem().getString(R.string.odroid_added_title);
-        String text = "War das wirklich nötig???";
-        displayNotification(title, text, STATUS_FRAGMENT, notificationID);
     }
 
     private void issueHolidayModeSwitchedOn(int notificationID) {
@@ -234,11 +223,11 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
 
 
         //Send notification out to Device
-        if(context.getSystemService(Context.NOTIFICATION_SERVICE) != null){
+        if (context.getSystemService(Context.NOTIFICATION_SERVICE) != null) {
             NotificationManager notificationManager =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.notify(notificationID, notificationBuilder.build());
-        }else{
+        } else {
             Log.e(TAG, "ERROR! context.getSystemService(Context.NOTIFICATION_SERVICE) was null (AppNotificationHandler)");
         }
     }

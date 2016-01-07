@@ -165,6 +165,10 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
                     return LightFragment.class;
                 case "DoorFragment":
                     return DoorFragment.class;
+                case "MainFragment":
+                    return MainFragment.class;
+                case "HolidayFragment":
+                    return HolidayFragment.class;
             }
         }
 
