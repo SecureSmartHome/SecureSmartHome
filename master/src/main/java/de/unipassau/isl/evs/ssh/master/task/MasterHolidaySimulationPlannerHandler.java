@@ -19,12 +19,14 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_SET;
@@ -44,6 +46,8 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
     @Override
     public void handle(Message.AddressedMessage message) {
+        NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
+
         if (MASTER_HOLIDAY_GET.matches(message)) {
             replyStatus(message);
         } else if (MASTER_HOLIDAY_SET.matches(message)) {
@@ -52,15 +56,15 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
             //TODO Refactor if we eliminate one permission
             if (payload.switchOn() && hasPermission(message.getFromID(), new Permission(
                     de.unipassau.isl.evs.ssh.core.sec.Permission.START_HOLIDAY_SIMULATION.toString(), ""))) {
-
                 runHolidaySimulation = payload.switchOn();
                 replyStatus(message);
-
+                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.HOLIDAY_MODE_SWITCHED_ON, payload.switchOn());
             } else if (!payload.switchOn() && hasPermission(message.getFromID(), new Permission(
                     de.unipassau.isl.evs.ssh.core.sec.Permission.STOP_HOLIDAY_SIMULATION.toString(), ""))) {
 
                 runHolidaySimulation = payload.switchOn();
                 replyStatus(message);
+                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.HOLIDAY_MODE_SWITCHED_OFF, payload.switchOn());
 
             } else {
                 sendErrorMessage(message);

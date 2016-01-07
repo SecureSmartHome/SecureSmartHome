@@ -9,9 +9,11 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
@@ -47,6 +49,8 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
             Message.AddressedMessage correspondingMessage = getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
             DoorBellPayload doorBellPayload = MASTER_DOOR_BELL_RING.getPayload(correspondingMessage);
             doorBellPayload.setCameraPayload(cameraPayload);
+            NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
+            notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.BELL_RANG, doorBellPayload);
 
             Message messageToSend = new Message(doorBellPayload);
 

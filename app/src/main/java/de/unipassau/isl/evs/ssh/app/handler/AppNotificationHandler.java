@@ -45,6 +45,9 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     private static final int HOLIDAY_MODE_SWITCHED_ON_ID = 7;
     private static final int HOLIDAY_MODE_SWITCHED_OFF_ID = 8;
     private static final int DOOR_UNLATCHED_ID = 9;
+    private static final int DOOR_LOCKED = 10;
+    private static final int DOOR_UNLOCKED = 11;
+
 
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
@@ -79,22 +82,25 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
                         issueOdroidAdded(ODROID_ADDED_ID, args);
                         break;
                     case HOLIDAY_MODE_SWITCHED_ON:
-                        issueHolidayModeSwitchedOn(HOLIDAY_MODE_SWITCHED_ON_ID, args);
+                        issueHolidayModeSwitchedOn(HOLIDAY_MODE_SWITCHED_ON_ID);
                         break;
                     case HOLIDAY_MODE_SWITCHED_OFF:
-                        issueHolidayModeSwitchedOff(HOLIDAY_MODE_SWITCHED_OFF_ID, args);
+                        issueHolidayModeSwitchedOff(HOLIDAY_MODE_SWITCHED_OFF_ID);
                         break;
                     case BELL_RANG:
                         issueDoorBellNotification(DOOR_BELL_NOTIFICATION_ID, args);
                         break;
                     case DOOR_UNLATCHED:
-                        issueDoorUnlatched(DOOR_UNLATCHED_ID, args);
+                        issueDoorUnlatched(DOOR_UNLATCHED_ID);
                         break;
-                    case DOOR_LOCKED://TODO
+                    case DOOR_LOCKED:
+                        issueDoorLocked(DOOR_LOCKED);
                         break;
-                    case DOOR_UNLOCKED://TODO
+                    case DOOR_UNLOCKED:
+                        issueDoorUnlocked(DOOR_UNLOCKED);
                         break;
-                    default: invalidMessage(message);
+                    default:
+                        invalidMessage(message);
                         break;
                 }
             } else {
@@ -138,48 +144,54 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     }
 
     private void issueSystemHealthWarning(int notificationID, Serializable[] args) {
-        String title = Resources.getSystem().getString(R.string.system_healt_warning_title);
+        String title = Resources.getSystem().getString(R.string.system_health_warning_title);
         String moduleName = (String) args[0];
         String text = String.format(Resources.getSystem().getString(R.string.system_health_warning_text), moduleName);
         displayNotification(title, text, STATUS_FRAGMENT, notificationID);
     }
 
+    //TODO add picture to notification?
     private void issueDoorBellNotification(int notificationID, Serializable[] args) {
         String title = Resources.getSystem().getString(R.string.door_bell_notification_title);
-        String text = ("Door Bell rang at front door!");
+        String text = Resources.getSystem().getString(R.string.door_bell_notification_text);
         displayNotification(title, text, DOOR_FRAGMENT, notificationID);
     }
 
+    //TODO bedarf klären
     private void issueOdroidAdded(int notificationID, Serializable[] args) {
         String title = Resources.getSystem().getString(R.string.odroid_added_title);
-        String text = null;
+        String text = "War das wirklich nötig???";
         displayNotification(title, text, STATUS_FRAGMENT, notificationID);
     }
 
-    private void issueHolidayModeSwitchedOn(int notificationID, Serializable[] args) {
+    private void issueHolidayModeSwitchedOn(int notificationID) {
         String title = Resources.getSystem().getString(R.string.holiday_mode_switched_on_title);
-        String text = null;
+        String text = Resources.getSystem().getString(R.string.holiday_mode_switched_on_text);
         displayNotification(title, text, HOLIDAY_FRAGMENT, notificationID);
     }
 
-    private void issueHolidayModeSwitchedOff(int notificationID, Serializable[] args) {
+    private void issueHolidayModeSwitchedOff(int notificationID) {
         String title = Resources.getSystem().getString(R.string.holiday_mode_switched_off_title);
-        String text = null;
+        String text = Resources.getSystem().getString(R.string.holiday_mode_switched_off_text);
         displayNotification(title, text, HOLIDAY_FRAGMENT, notificationID);
     }
 
-    private void issueDoorUnlatched(int notificationID, Serializable[] args) {
+    private void issueDoorUnlatched(int notificationID) {
         String title = Resources.getSystem().getString(R.string.door_unlatched_title);
-        String text = null;
+        String text = Resources.getSystem().getString(R.string.door_unlatched_text);
         displayNotification(title, text, MAIN_FRAGMENT, notificationID);
     }
 
-    private void issueDoorLocked(int notificationID, Serializable[] args){
-
+    private void issueDoorLocked(int notificationID) {
+        String title = Resources.getSystem().getString(R.string.door_locked_title);
+        String text = Resources.getSystem().getString(R.string.door_locked_text);
+        displayNotification(title, text, MAIN_FRAGMENT, notificationID);
     }
 
-    private void issueDoorUnlocked(int notificationID, Serializable[] args){
-
+    private void issueDoorUnlocked(int notificationID) {
+        String title = Resources.getSystem().getString(R.string.door_unlocked_title);
+        String text = Resources.getSystem().getString(R.string.door_unlocked_text);
+        displayNotification(title, text, MAIN_FRAGMENT, notificationID);
     }
 
     /**

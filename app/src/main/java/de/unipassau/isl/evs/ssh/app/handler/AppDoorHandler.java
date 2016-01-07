@@ -17,6 +17,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_CAMERA_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_BLOCK;
@@ -100,12 +101,6 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
             DoorStatusPayload payload = APP_DOOR_GET.getPayload(message);
             isDoorOpen = !payload.isClosed();
             fireStatusUpdated();
-        } else if (APP_DOOR_RING.matches(message)) {
-            DoorBellPayload doorBellPayload = APP_DOOR_RING.getPayload(message);
-            fireImageUpdated(doorBellPayload.getCameraPayload().getPicture());
-            Message messageToSend = new Message(doorBellPayload);
-            requireComponent(OutgoingRouter.KEY).sendMessageLocal(APP_NOTIFICATION_RECEIVE,
-                    messageToSend);
         } else {
             invalidMessage(message);
         }

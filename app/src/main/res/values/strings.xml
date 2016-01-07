@@ -132,27 +132,33 @@
     <string name="visible_1">Visible:</string>
     <string name="ir">IR:</string>
 
-    <string formatted="false" name="si_degree">%3.1f C°</string>
-    <string formatted="false" name="si_pressure">%4.1f Pa</string>
-    <string formatted="false" name="si_altitude">%4.2f m</string>
-    <string formatted="false" name="si_humidity">%3.2f %</string>
-    <string formatted="false" name="si_visible">%d%n Lux</string>
+    <string name="si_degree" formatted="false">%3.1f C°</string>
+    <string name="si_pressure" formatted="false">%4.1f Pa</string>
+    <string name="si_altitude" formatted="false">%4.2f m</string>
+    <string name="si_humidity" formatted="false">%3.2f %</string>
+    <string name="si_visible" formatted="false">%d%n Lux</string>
 
     <!--Strings used for Notifications-->
     <string name="climate_notification_title">Climate Warning!</string>
-    <string formatted="false" name="climate_notification_text">Your indoor humidity is at %3.2f % please air your home.</string>
+    <string name="climate_notification_text" formatted="false">Your indoor humidity is at %3.2f % please air your home.</string>
     <string name="brightness_warning_title">Light Warning!</string>
-    <string formatted="false" name="brightness_warning_text">It has %d%n Lux in your room, which should be bright enough.</string>
+    <string name="brightness_warning_text" formatted="false">It has %d%n Lux in your room, which should be bright enough.</string>
     <string name="weather_warning_title">Weather Warning!</string>
     <string name="weather_warning_text">Please close all doors and windows. It will rain today.</string>
     <string name="system_health_warning_title">Component failed!</string>
     <string name="system_health_warning_text">The module %s is not responding anymore.</string>
     <string name="door_bell_notification_title">The Doorbell rang!</string>
+    <string name="door_bell_notification_text">You have visitors at your door.</string>
     <string name="odroid_added_title">ODROID was added!</string>
     <string name="holiday_mode_switched_on_title">Holiday Mode Active!</string>
+    <string name="holiday_mode_switched_on_text">Your home is now controlling itself.</string>
     <string name="holiday_mode_switched_off_title">Holiday Mode Inactive!</string>
+    <string name="holiday_mode_switched_off_text">You have now the control over your home. Welcome back!</string>
     <string name="door_unlatched_title">Door is now open!</string>
+    <string name="door_unlatched_text"></string>
     <string name="door_locked_title">Door is now locked!</string>
+    <string name="door_locked_text">Unauthorised users can't open it anymore.</string>
     <string name="door_unlocked_title">Door is now unlocked!</string>
+    <string name="door_unlocked_text">Others users can now open it.</string>
 
 </resources>

@@ -21,19 +21,24 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
  */
 public class NotificationBroadcaster implements Component {
 
-    public static Key<NotificationBroadcaster> KEY = new Key<>(NotificationBroadcaster.class) ;
+    public static Key<NotificationBroadcaster> KEY = new Key<>(NotificationBroadcaster.class);
     private Container container;
 
     //TODO Check if everythings fine
     public void sendMessageToAllReceivers(NotificationPayload.NotificationType type, Serializable... args) {
         final List<UserDevice> allUserDevicesWithPermission = container.require(PermissionController.KEY)
-                .getAllUserDevicesWithPermission(new Permission(type.getReceivePermission().name())); //This might give an error as we do not
-                                                                                                      // know if the enums and DTOs have the same names
+                .getAllUserDevicesWithPermission(new Permission(type.getReceivePermission().name()));
+        //This might give an error as we do not
+        // know if the enums and DTOs have the same names
+        if (type.equals(NotificationPayload.NotificationType.WEATHER_WARNING)) {
+            //TODO if no one is at home everyone should get the WeatherWarning, if someone is at home, only them should get a notification.
 
-        NotificationPayload payload = new NotificationPayload(type, args);
-        Message messageToSend = new Message(payload);
-        for (UserDevice userDevice : allUserDevicesWithPermission) {
-            container.require(OutgoingRouter.KEY).sendMessage(userDevice.getUserDeviceID(), RoutingKeys.APP_NOTIFICATION_RECEIVE, messageToSend);
+        } else {
+            NotificationPayload payload = new NotificationPayload(type, args);
+            Message messageToSend = new Message(payload);
+            for (UserDevice userDevice : allUserDevicesWithPermission) {
+                container.require(OutgoingRouter.KEY).sendMessage(userDevice.getUserDeviceID(), RoutingKeys.APP_NOTIFICATION_RECEIVE, messageToSend);
+            }
         }
     }
 

@@ -13,12 +13,12 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_NOTIFICATION_SEND;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH;
 
@@ -32,6 +32,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     private static final String DOOR_UNLATCHED_MESSAGE = "Door unlatched";
     private static final String DOOR_UNLOCKED_MESSAGE = "Door unlocked";
     private static final String DOOR_LOCKED_MESSAGE = "Door locked";
+    NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
     //FIXME lockedFor is used but never assigned, which would usually result in an NPE, except if the code was never tested nor run...
     // maybe the following line and some tests would be suitable? (Niko, 2015-12-20)
     //private final Map<Integer, Boolean> lockedFor = new HashMap<>();
@@ -49,6 +50,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             } else {
                 //Response
                 handleDoorUnlatchResponse(message);
+                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.DOOR_UNLATCHED, message);
             }
         } else if (MASTER_DOOR_LOCK_SET.matches(message)) {
             handleDoorLockSet(message);
@@ -148,26 +150,11 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             setLocked(atModule.getName(), !doorLockPayload.isUnlock());
 
             //Send notification
-            //FIXME Andi: Change to use NotificationBroadcaster and not send message yourself
-            /*if (doorLockPayload.isUnlock()) {
-                sendMessageLocal(
-                        MASTER_NOTIFICATION_SEND,
-                        new Message(
-                                new NotificationPayload(
-                                        de.unipassau.isl.evs.ssh.core.sec.Permission.DOOR_UNLOCKED.toString(),
-                                        DOOR_UNLOCKED_MESSAGE
-                                )
-                        ));
+            if (doorLockPayload.isUnlock()) {
+                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.DOOR_UNLOCKED);
             } else {
-                sendMessageLocal(
-                        MASTER_NOTIFICATION_SEND,
-                        new Message(
-                                new NotificationPayload(
-                                        de.unipassau.isl.evs.ssh.core.sec.Permission.DOOR_LOCKED.toString(),
-                                        DOOR_LOCKED_MESSAGE
-                                )
-                        ));
-            }*/
+                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.DOOR_LOCKED);
+            }
         } else {
             //no permission
             sendErrorMessage(message);
