@@ -129,5 +129,5 @@
     <string name="warn_no_connection_to_master">No Connection to Secure Smart Home Server.</string>
     <string name="malformed_qr_code">Malformed QR-Code</string>
     <string name="edit_userdevice">Edit a user device</string>
-    <string name="missing_permission">Can\'t grant permissions. Permission missing.</string>
+    <string name="missing_permission">Missing Permission.</string>
 </resources>

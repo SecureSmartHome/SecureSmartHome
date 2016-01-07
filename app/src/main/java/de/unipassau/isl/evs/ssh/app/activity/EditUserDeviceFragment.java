@@ -18,7 +18,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -268,22 +267,13 @@ public class EditUserDeviceFragment extends BoundFragment {
         public View getView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = getActivity().getLayoutInflater();
             final Permission permission = getItem(position);
-            RelativeLayout permissionLayout;
+            LinearLayout permissionLayout;
             if (convertView == null) {
-                permissionLayout = (RelativeLayout) inflater.inflate(R.layout.permissionlayout, parent, false);
+                permissionLayout = (LinearLayout) inflater.inflate(R.layout.permissionlayout, parent, false);
             } else {
-                permissionLayout = (RelativeLayout) convertView;
+                permissionLayout = (LinearLayout) convertView;
             }
-            // TODO Phil: gray out the permissions a user can't change.
-
-            boolean userHasPermission = userDeviceHasPermission(permission);
-            if (!userHasPermission) {
-                LinearLayout overlay = ((LinearLayout) permissionLayout.findViewById(R.id.overlay_permission));
-                overlay.setVisibility(View.VISIBLE);
-
-                TextView overlay_text = (TextView) permissionLayout.findViewById(R.id.overlay_permission_text);
-                overlay_text.setText(R.string.missing_permission);
-            }
+            // TODO Phil: gray all permissions if a user can't edit permissions at all
 
             final Switch permissionSwitch = (Switch) permissionLayout.findViewById(R.id.listpermission_permission_switch);
             final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
@@ -291,7 +281,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
             } else {
                 permissionSwitch.setText(permission.getName());
-                permissionSwitch.setChecked(userHasPermission);
+                permissionSwitch.setChecked(userDeviceHasPermission(permission));
                 permissionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
