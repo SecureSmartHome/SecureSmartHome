@@ -39,7 +39,7 @@ public class EditGroupFragment extends BoundFragment {
         final EditText inputGroupName = (EditText) getActivity().findViewById(R.id.editgroupfragment_group_name);
 
         final Spinner spinner = (Spinner) getActivity().findViewById(R.id.editgroupfragment_spinner);
-        spinner.setAdapter(new ArrayAdapter<>(getActivity().getApplicationContext(),
+        spinner.setAdapter(new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1,
                 (templateNames != null ? templateNames : new String[]{"Missing templates"})));
 
