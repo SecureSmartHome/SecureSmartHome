@@ -5,6 +5,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
@@ -219,7 +222,13 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         notificationBuilder.setColor(R.color.colorPrimary);
         notificationBuilder.setWhen(System.currentTimeMillis());
         notificationBuilder.setContentTitle(title);
-        notificationBuilder.setContentText(text);
+        notificationBuilder.setContentText(text);//maybe obsolete because of bigText style.
+        notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
+        notificationBuilder.setVibrate(new long[]{0, 500, 110, 500, 110, 450, 110, 200, 110,
+                170, 40, 450, 110, 200, 110, 170, 40, 500});
+        notificationBuilder.setLights(R.color.colorPrimary, 3000, 3000);
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        notificationBuilder.setSound(alarmSound);
 
 
         //Send notification out to Device
