@@ -7,12 +7,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 
 import java.io.Serializable;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.app.activity.MainActivity;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
@@ -48,6 +48,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     private static final int DOOR_UNLATCHED_ID = 9;
     private static final int DOOR_LOCKED = 10;
     private static final int DOOR_UNLOCKED = 11;
+    private static final String TAG = AppNotificationHandler.class.getSimpleName();
 
     /**
      * Handles different Notification types.
@@ -213,7 +214,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         PendingIntent pendingIntent = PendingIntent.getActivity(context, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notificationBuilder.setContentIntent(pendingIntent);
        */
-        Intent resultIntent = new Intent(context , openThisFragment.getClass());
+        Intent resultIntent = new Intent(context, openThisFragment.getClass());
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addParentStack(openThisFragment.getClass());
         stackBuilder.addNextIntent(resultIntent);
@@ -233,8 +234,12 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
 
 
         //Send notification out to Device
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(notificationID, notificationBuilder.build());
+        if(context.getSystemService(Context.NOTIFICATION_SERVICE) != null){
+            NotificationManager notificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.notify(notificationID, notificationBuilder.build());
+        }else{
+            Log.e(TAG, "ERROR! context.getSystemService(Context.NOTIFICATION_SERVICE) was null (AppNotificationHandler)");
+        }
     }
 }
