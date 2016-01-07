@@ -3,6 +3,8 @@ package de.unipassau.isl.evs.ssh.master.database;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 
+import com.google.common.base.Strings;
+
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,7 +48,7 @@ public class HolidayController extends AbstractComponent {
      * @param moduleName Module where the action occurs.
      */
     public void addHolidayLogEntryNow(String action, String moduleName) throws UnknownReferenceException {
-        if (moduleName == null) {
+        if (Strings.isNullOrEmpty(moduleName)) {
             databaseConnector.executeSql(
                     "insert into " + DatabaseContract.HolidayLog.TABLE_NAME
                             + " (" + DatabaseContract.HolidayLog.COLUMN_ACTION
