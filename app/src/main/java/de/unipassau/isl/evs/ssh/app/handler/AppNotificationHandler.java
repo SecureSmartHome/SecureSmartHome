@@ -6,22 +6,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.NotificationCompat;
 
+import java.io.Serializable;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.activity.MainActivity;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
-import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
-import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.CLIMATE_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.DOOR_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.LIGHT_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.STATUS_FRAGMENT;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
 
 /**
@@ -38,6 +38,10 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     private static final int WEATHER_WARNING_ID = 3;
     private static final int SYSTEM_HEALTH_WARNING_ID = 4;
     private static final int DOOR_BELL_NOTIFICATION_ID = 5;
+    private static final int ODROID_ADDED_ID = 6;
+    private static final int HOLIDAY_MODE_SWITCHED_ON_ID = 7;
+    private static final int HOLIDAY_MODE_SWITCHED_OFF_ID = 8;
+    private static final int DOOR_UNLATCHED_ID = 9;
 
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
@@ -49,36 +53,35 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
      */
     @Override
     public void handle(Message.AddressedMessage message) {
-        //FIXME //STOPSHIP will not work with new RoutingKeys (Niko, 2015-12-16)
-        //TODO either notificationpayload or switch case for other payloads
-        if (message.getPayload() instanceof NotificationPayload) {
-            NotificationPayload notificationPayload = ((NotificationPayload) message.getPayload());
-            //TODO make openthisfragment constants in coreconstants
+        if (APP_NOTIFICATION_RECEIVE.getPayload(message) != null) {
+            if(APP_NOTIFICATION_RECEIVE.getPayload(message) instanceof NotificationPayload){
+                NotificationPayload notificationPayload = (APP_NOTIFICATION_RECEIVE.getPayload(message));
+                NotificationPayload.NotificationType type = notificationPayload.getType();
+                Serializable[] args = notificationPayload.getArgs();
 
-            //displayNotification("Notification", notificationPayload.getMessage(), "ClimateFragment", 55);//FIXME
-            //Climate Warnings
-        } else if (message.getPayload() instanceof ClimatePayload) {
-            ClimatePayload payload = (ClimatePayload) message.getPayload();
-
-            //TODO comparing the notification type name with the name of a permission?? that must be a tough mental typecast (Niko, 2015-12-20)
-            if (payload.getNotificationType().equals(Permission.BRIGHTNESS_WARNING.toString())) {
-                issueBrightnessWarning(BRIGHTNESS_WARNING_ID);
-                issueClimateNotification(HUMIDITY_WARNING_ID);
-            } else if (payload.getNotificationType().equals(Permission.HUMIDITY_WARNING.toString())) {
-                issueClimateNotification(HUMIDITY_WARNING_ID);
+                switch(type){
+                    case WEATHER_WARNING: issueWeatherWarning(WEATHER_WARNING_ID, args);
+                        break;
+                    case BRIGHTNESS_WARNING: issueBrightnessWarning(BRIGHTNESS_WARNING_ID, args);
+                        break;
+                    case HUMIDITY_WARNING: issueClimateNotification(HUMIDITY_WARNING_ID, args);
+                        break;
+                    case SYSTEM_HEALTH_WARNING: issueSystemHealthWarning(SYSTEM_HEALTH_WARNING_ID, args);
+                        break;
+                    case ODROID_ADDED: issueOdroidAdded(ODROID_ADDED_ID, args);
+                        break;
+                    case HOLIDAY_MODE_SWITCHED_ON: issueHolidayModeSwitchedOn(HOLIDAY_MODE_SWITCHED_ON_ID, args);
+                        break;
+                    case HOLIDAY_MODE_SWITCHED_OFF: issueHolidayModeSwitchedOff(HOLIDAY_MODE_SWITCHED_OFF_ID, args);
+                        break;
+                    case BELL_RANG: issueDoorBellNotification(DOOR_BELL_NOTIFICATION_ID, args);
+                        break;
+                    case DOOR_UNLATCHED: issueDoorUnlatched(DOOR_UNLATCHED_ID, args);
+                        break;
+                }
+            }else{
+                invalidMessage(message);
             }
-            //Weather Warnings
-        } else if (message.getPayload() instanceof WeatherPayload) {
-            WeatherPayload payload = (WeatherPayload) message.getPayload();
-            issueWeatherWarning(WEATHER_WARNING_ID, payload.getWarnText());
-            //System Health Warning
-        } else if (message.getPayload() instanceof SystemHealthPayload) {
-            SystemHealthPayload payload = (SystemHealthPayload) message.getPayload();
-            issueSystemHealthWarning(SYSTEM_HEALTH_WARNING_ID, payload);
-        } else if (message.getPayload() instanceof DoorBellPayload) {
-            // Door Bell Notification
-            DoorBellPayload payload = ((DoorBellPayload) message.getPayload());
-            issueDoorBellNotification(DOOR_BELL_NOTIFICATION_ID, payload);
         } else {
             invalidMessage(message);
         }
@@ -95,37 +98,54 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
      *
      * @param notificationID Is a unique ID for the Notification
      */
-    private void issueClimateNotification(int notificationID) {
+    //TODO edit title and text
+    private void issueClimateNotification(int notificationID, Serializable[] args) {
         String title = "Climate Warning!";
         String text = "Please open Window! Humidity high.";
-        displayNotification(title, text, "ClimateFragment", notificationID);
+        displayNotification(title, text, CLIMATE_FRAGMENT, notificationID);
     }
 
-    private void issueBrightnessWarning(int notificationID) {
+    private void issueBrightnessWarning(int notificationID, Serializable[] args) {
         String title = "Light Warning!";
         String text = "Please turn off lights to save energy.";
-        displayNotification(title, text, "LightFragment", notificationID);
+        displayNotification(title, text, LIGHT_FRAGMENT, notificationID);
     }
 
-    private void issueWeatherWarning(int notificationID, String warnText) {
+    private void issueWeatherWarning(int notificationID, Serializable[] args) {
         String title = "Weather Warning!";
-        displayNotification(title, warnText, "ClimateFragment", notificationID);
+        String text = "Warn Text!";
+        displayNotification(title, text, CLIMATE_FRAGMENT, notificationID);
     }
 
-    private void issueSystemHealthWarning(int notificationID, SystemHealthPayload payload) {
+    private void issueSystemHealthWarning(int notificationID, Serializable[] args) {
         String title = "Component failed!";
-        Module module = payload.getModule();
-        String text = (module.getName() + " at " + module.getAtSlave() + " "
-                + module.getModuleType() + " failed.");
-        displayNotification(title, text, "StatusFragment", notificationID);
+        String text = ("ERROR AT: ");
+        displayNotification(title, text, STATUS_FRAGMENT, notificationID);
     }
 
-    private void issueDoorBellNotification(int notificationID, DoorBellPayload payload) {
+    private void issueDoorBellNotification(int notificationID, Serializable[] args) {
         String title = "The Door Bell rang";
-        String text = ("Door Bell rang at " + payload.getModuleName() + "!");
-        displayNotification(title, text, "DoorFragment", notificationID);
+        String text = ("Door Bell rang at front door!");
+        displayNotification(title, text, DOOR_FRAGMENT, notificationID);
     }
 
+    private void issueOdroidAdded(int notificationID, Serializable[] args){
+        String title = null;
+        String text = null;
+        displayNotification(title, text, STATUS_FRAGMENT, notificationID);
+    }
+
+    private void issueHolidayModeSwitchedOn (int notificationID, Serializable[] args){
+
+    }
+
+    private void issueHolidayModeSwitchedOff (int notificationID, Serializable[] args){
+
+    }
+
+    private void issueDoorUnlatched (int notificationID, Serializable[] args){
+
+    }
     /**
      * Builds the Notification with the given text and displays it on the user-device.
      * If user clicks on it, the ssh app will open.
@@ -141,7 +161,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
 
         //Build notification
         notificationBuilder.setSmallIcon(R.drawable.ic_home_light);
-        notificationBuilder.setColor(2718207);//TODO use resource instead (Niko, 2015-12-16)
+        notificationBuilder.setColor(R.color.colorPrimaryDark);
         notificationBuilder.setWhen(System.currentTimeMillis());
         notificationBuilder.setContentTitle(title);
         notificationBuilder.setContentText(text);

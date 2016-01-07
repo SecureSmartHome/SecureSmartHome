@@ -137,4 +137,12 @@ public class CoreConstants {
             ZXING_SCAN_INTENT.putExtra("SCAN_MODE", "QR_CODE_MODE");
         }
     }
+
+    public static class NotificationOpenThisFragment {
+        public static final String CLIMATE_FRAGMENT = "ClimateFragment";
+        public static final String LIGHT_FRAGMENT = "LightFragment";
+        public static final String STATUS_FRAGMENT = "StatusFragment";
+        public static final String DOOR_FRAGMENT = "DoorFragment";
+        public static final String MAIN_FRAGMENT = "MainFragment";
+    }
 }

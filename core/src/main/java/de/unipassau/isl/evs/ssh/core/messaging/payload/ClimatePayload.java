@@ -49,7 +49,7 @@ public class ClimatePayload implements MessagePayload {
     }
 
     /**
-     * TODO write text
+     * Payload containing current WeatherSensor data.
      *
      * @return ClimatePayload containing the ClimatePayload data.
      */

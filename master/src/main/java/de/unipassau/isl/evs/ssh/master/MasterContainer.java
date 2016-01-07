@@ -17,7 +17,7 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterClimateHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterDoorBellHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterModuleHandler;
-import de.unipassau.isl.evs.ssh.master.handler.NotificationBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRoutingTableHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterSystemHealthCheckHandler;

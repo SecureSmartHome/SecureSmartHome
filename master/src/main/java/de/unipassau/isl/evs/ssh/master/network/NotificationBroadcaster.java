@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.master.handler;
+package de.unipassau.isl.evs.ssh.master.network;
 
 import java.io.Serializable;
 import java.util.List;
@@ -10,15 +10,9 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
-import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
-
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_NOTIFICATION_SEND;
 
 /**
  * Handles notification messages and generates messages for each target and passes them to the OutgoingRouter.
