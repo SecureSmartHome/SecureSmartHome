@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
  */
 public class RoutingKey<T> {
     private static final String SUFFIX_REPLY = "/reply";
+    private static final String SUFFIX_ERROR = "/error";
     private final Class<T> clazz;
     private final String key;
 
@@ -49,12 +50,26 @@ public class RoutingKey<T> {
     }
 
     @NonNull
+    public <V> RoutingKey<V> getError(Class<V> replyPayload) {
+        return new RoutingKey<>(getErrorKey(key), replyPayload);
+    }
+
+    @NonNull
     public static String getReplyKey(String key) {
         return key + SUFFIX_REPLY;
     }
 
+    @NonNull
+    public static String getErrorKey(String key) {
+        return key + SUFFIX_ERROR;
+    }
+
     public boolean isReply() {
         return key.endsWith(SUFFIX_REPLY);
+    }
+
+    public boolean isError() {
+        return key.endsWith(SUFFIX_ERROR);
     }
 
     public boolean matches(Message.AddressedMessage message) {
