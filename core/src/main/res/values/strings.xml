@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">EVS SSH core</string>
     <string name="module_type_light">Light</string>
-    <string name="module_type_weather_board">Weather Board</string>
-    <string name="module_type_door_buzzer">Doorbuzzer</string>
-    <string name="module_type_door_sensor">Door sensor</string>
-    <string name="module_type_window_sensor">Window sensor</string>
+    <string name="module_type_weather_board">Weatherboard</string>
+    <string name="module_type_door_buzzer">Door Buzzer</string>
+    <string name="module_type_door_sensor">Door Sensor</string>
+    <string name="module_type_window_sensor">Window Sensor</string>
     <string name="module_type_webcam">Webcam</string>
-    <string name="module_type_doorbell">doorbell</string>
+    <string name="module_type_doorbell">Doorbell</string>
 
 </resources>
