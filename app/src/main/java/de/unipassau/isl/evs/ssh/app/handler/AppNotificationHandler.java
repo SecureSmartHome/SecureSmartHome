@@ -103,6 +103,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
                 }
             } else {
                 //HANDLE
+                Log.e(TAG, "ERROR! Received wrong Payload Type!");
             }
         } else {
             invalidMessage(message);
@@ -203,7 +204,6 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
      * @param notificationID   unique ID for this type of Notification
      */
     private void displayNotification(String title, String text, String openThisFragment, int notificationID) {
-        final int REQUEST_CODE = 0;
 
         //If Notification is clicked send to this Page
         Context context = getContainer().get(ContainerService.KEY_CONTEXT);
