@@ -140,13 +140,19 @@
 
     <!--Strings used for Notifications-->
     <string name="climate_notification_title">Climate Warning!</string>
+    <string formatted="false" name="climate_notification_text">Your indoor humidity is at %3.2f % please air your home.</string>
     <string name="brightness_warning_title">Light Warning!</string>
+    <string formatted="false" name="brightness_warning_text">It has %d%n Lux in your room, which should be bright enough.</string>
     <string name="weather_warning_title">Weather Warning!</string>
-    <string name="system_healt_warning_title">Component failed!</string>
+    <string name="weather_warning_text">Please close all doors and windows. It will rain today.</string>
+    <string name="system_health_warning_title">Component failed!</string>
+    <string name="system_health_warning_text">The module %s is not responding anymore.</string>
     <string name="door_bell_notification_title">The Doorbell rang!</string>
     <string name="odroid_added_title">ODROID was added!</string>
     <string name="holiday_mode_switched_on_title">Holiday Mode Active!</string>
     <string name="holiday_mode_switched_off_title">Holiday Mode Inactive!</string>
     <string name="door_unlatched_title">Door is now open!</string>
+    <string name="door_locked_title">Door is now locked!</string>
+    <string name="door_unlocked_title">Door is now unlocked!</string>
 
 </resources>

@@ -90,6 +90,10 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
                     case DOOR_UNLATCHED:
                         issueDoorUnlatched(DOOR_UNLATCHED_ID, args);
                         break;
+                    case DOOR_LOCKED://TODO
+                        break;
+                    case DOOR_UNLOCKED://TODO
+                        break;
                     default: invalidMessage(message);
                         break;
                 }
@@ -112,28 +116,31 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
      *
      * @param notificationID Is a unique ID for the Notification
      */
-    //TODO edit title and text
+    //TODO edit text and text formatting
     private void issueClimateNotification(int notificationID, Serializable[] args) {
+        double humidity = (Double) args[0];
         String title = Resources.getSystem().getString(R.string.climate_notification_title);
-        String text = "Please open Window! Humidity high.";
+        String text = String.format(Resources.getSystem().getString(R.string.climate_notification_text), humidity);
         displayNotification(title, text, CLIMATE_FRAGMENT, notificationID);
     }
 
     private void issueBrightnessWarning(int notificationID, Serializable[] args) {
+        double visibleLight = (Double) args[0];
         String title = Resources.getSystem().getString(R.string.brightness_warning_title);
-        String text = "Please turn off lights to save energy.";
+        String text = String.format(Resources.getSystem().getString(R.string.brightness_warning_text), visibleLight);
         displayNotification(title, text, LIGHT_FRAGMENT, notificationID);
     }
 
     private void issueWeatherWarning(int notificationID, Serializable[] args) {
         String title = Resources.getSystem().getString(R.string.weather_warning_title);
-        String text = "Warn Text!";
+        String text = (String) args[0]; //TODO string hardcoded in MasterWeatherCheckHandler
         displayNotification(title, text, CLIMATE_FRAGMENT, notificationID);
     }
 
     private void issueSystemHealthWarning(int notificationID, Serializable[] args) {
         String title = Resources.getSystem().getString(R.string.system_healt_warning_title);
-        String text = ("ERROR AT: ");
+        String moduleName = (String) args[0];
+        String text = String.format(Resources.getSystem().getString(R.string.system_health_warning_text), moduleName);
         displayNotification(title, text, STATUS_FRAGMENT, notificationID);
     }
 
@@ -165,6 +172,14 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         String title = Resources.getSystem().getString(R.string.door_unlatched_title);
         String text = null;
         displayNotification(title, text, MAIN_FRAGMENT, notificationID);
+    }
+
+    private void issueDoorLocked(int notificationID, Serializable[] args){
+
+    }
+
+    private void issueDoorUnlocked(int notificationID, Serializable[] args){
+
     }
 
     /**

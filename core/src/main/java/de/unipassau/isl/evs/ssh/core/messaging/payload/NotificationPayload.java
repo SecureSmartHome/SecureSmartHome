@@ -48,7 +48,9 @@ public class NotificationPayload implements MessagePayload {
         HOLIDAY_MODE_SWITCHED_ON(Permission.HOLIDAY_MODE_SWITCHED_ON),
         HOLIDAY_MODE_SWITCHED_OFF(Permission.HOLIDAY_MODE_SWITCHED_OFF),
         BELL_RANG(Permission.BELL_RANG),
-        DOOR_UNLATCHED(Permission.DOOR_UNLATCHED);
+        DOOR_UNLATCHED(Permission.DOOR_UNLATCHED),
+        DOOR_LOCKED(Permission.DOOR_LOCKED),
+        DOOR_UNLOCKED(Permission.DOOR_UNLOCKED);
 
         private final Permission receivePermission;
 

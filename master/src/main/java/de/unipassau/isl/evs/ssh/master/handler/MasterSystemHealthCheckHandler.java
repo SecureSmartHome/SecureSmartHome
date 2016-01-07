@@ -1,10 +1,13 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import java.io.Serializable;
+
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_NOTIFICATION_SEND;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK;
@@ -22,10 +25,9 @@ public class MasterSystemHealthCheckHandler extends AbstractMasterHandler {
         if (MASTER_SYSTEM_HEALTH_CHECK.matches(message)) {
             final SystemHealthPayload payload = MASTER_SYSTEM_HEALTH_CHECK.getPayload(message);
             if (payload.getHasError()) {
-                //FIXME Andi: Change to use NotificationBroadcaster and not send message yourself
-/*                String name = payload.getModule().getName();
-                MessagePayload respPayload = new NotificationPayload(SYSTEM_HEALTH_WARNING.toString(), "Error at module: " + name);
-                sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(respPayload));*/
+                Serializable name = payload.getModule().getName();
+                NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
+                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.SYSTEM_HEALTH_WARNING, name);
             }
         } else {
             invalidMessage(message);
