@@ -9,7 +9,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_CAMERA_GET_REPLY;
 
 /**
  * Handles messages requesting pictures from the camera and generates messages, containing the pictures,
@@ -24,7 +24,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
         saveMessage(message);
         if (MASTER_CAMERA_GET.matches(message)) {
             handleGetRequest(message);
-        } else if (MASTER_CAMERA_GET_REPLY.matches(message)) {
+        } else if (SLAVE_CAMERA_GET_REPLY.matches(message)) {
             handleResponse(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
@@ -35,7 +35,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_CAMERA_GET, MASTER_CAMERA_GET_REPLY};
+        return new RoutingKey[]{MASTER_CAMERA_GET, SLAVE_CAMERA_GET_REPLY};
     }
 
     private void handleGetRequest(Message.AddressedMessage message) {
@@ -61,7 +61,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
     }
 
     private void handleResponse(Message.AddressedMessage message) {
-        CameraPayload cameraPayload = MASTER_CAMERA_GET_REPLY.getPayload(message);
+        CameraPayload cameraPayload = SLAVE_CAMERA_GET_REPLY.getPayload(message);
         Message.AddressedMessage correspondingMessage =
                 getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
         Message messageToSend = new Message(cameraPayload);
