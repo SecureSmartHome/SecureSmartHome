@@ -2,6 +2,8 @@ package de.unipassau.isl.evs.ssh.core.messaging;
 
 import android.support.annotation.NonNull;
 
+import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
+
 /**
  * @author Niko Fink
  */
@@ -31,7 +33,8 @@ public class RoutingKey<T> {
 
     @NonNull
     public static RoutingKey forMessage(Message.AddressedMessage message) {
-        return new RoutingKey<>(message.getRoutingKey(), message.getPayloadUnchecked().getClass());
+        final MessagePayload payload = message.getPayloadUnchecked();
+        return new RoutingKey<>(message.getRoutingKey(), payload == null ? Void.class : payload.getClass());
     }
 
     @NonNull

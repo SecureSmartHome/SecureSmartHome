@@ -10,7 +10,6 @@ import java.util.List;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -39,32 +38,35 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler implements 
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        saveMessage(message);
         if (MASTER_SLAVE_REGISTER.matches(message)) {
-            if (hasPermission(
-                    message.getFromID(),
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID,
-                    null
-            )) {
-                RegisterSlavePayload registerSlavePayload = MASTER_SLAVE_REGISTER.getPayload(message);
-                try {
-                    registerSlave(new Slave(
-                            registerSlavePayload.getName(),
-                            registerSlavePayload.getSlaveID(),
-                            registerSlavePayload.getPassiveRegistrationToken()
-                    ));
-                } catch (AlreadyInUseException e) {
-                    Log.i(TAG, "Failed adding a new Slave because the given name (" + registerSlavePayload.getName()
-                            + ") is already in use.");
-                    sendErrorMessage(message);
-                }
-            } else {
-                //TODO handle (Niko, 2015-12-17)
-            }
+            handleSlaveRegister(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
             invalidMessage(message);
+        }
+    }
+
+    private void handleSlaveRegister(Message.AddressedMessage message) {
+        if (hasPermission(
+                message.getFromID(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID,
+                null
+        )) {
+            RegisterSlavePayload registerSlavePayload = MASTER_SLAVE_REGISTER.getPayload(message);
+            try {
+                registerSlave(new Slave(
+                        registerSlavePayload.getName(),
+                        registerSlavePayload.getSlaveID(),
+                        registerSlavePayload.getPassiveRegistrationToken()
+                ));
+            } catch (AlreadyInUseException e) {
+                Log.i(TAG, "Failed adding a new Slave because the given name (" + registerSlavePayload.getName()
+                        + ") is already in use.");
+                sendErrorMessage(message);
+            }
+        } else {
+            //TODO handle (Niko, 2015-12-17)
         }
     }
 
@@ -86,13 +88,12 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler implements 
     }
 
     public void updateClient(DeviceID id) {
-        OutgoingRouter router = getComponent(OutgoingRouter.KEY);
-        Message message = createUpdateMessage();
-        router.sendMessage(id, GLOBAL_MODULES_UPDATE, message);
+        final Message message = createUpdateMessage();
+        requireComponent(OutgoingRouter.KEY).sendMessage(id, GLOBAL_MODULES_UPDATE, message);
     }
 
     private Message createUpdateMessage() {
-        SlaveController slaveController = getComponent(SlaveController.KEY);
+        final SlaveController slaveController = requireComponent(SlaveController.KEY);
         List<Slave> slaves = slaveController.getSlaves();
         ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
 

@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import java.net.InetSocketAddress;
+
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -88,7 +90,7 @@ public class WelcomeScreenFragment extends ScanQRFragment {
             if (client == null) {
                 Log.i(TAG, "Container not yet connected!");
             } else {
-                client.onMasterFound(info.getAddress(), info.getPort(), encodeToken(info.getToken()));
+                client.onMasterFound(new InetSocketAddress(info.getAddress(), info.getPort()), encodeToken(info.getToken()));
             }
             ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         }

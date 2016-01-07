@@ -1,9 +1,9 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
@@ -11,13 +11,18 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
-import de.unipassau.isl.evs.ssh.master.database.PermissionController;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
+import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_NOTIFICATION_SEND;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH;
@@ -32,37 +37,22 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     private static final String DOOR_UNLATCHED_MESSAGE = "Door unlatched";
     private static final String DOOR_UNLOCKED_MESSAGE = "Door unlocked";
     private static final String DOOR_LOCKED_MESSAGE = "Door locked";
-    //FIXME lockedFor is used but never assigned, which would usually result in an NPE, except if the code was never tested nor run...
-    // maybe the following line and some tests would be suitable? (Niko, 2015-12-20)
-    //private final Map<Integer, Boolean> lockedFor = new HashMap<>();
-    private Map<Integer, Boolean> lockedFor;
+    private final Map<Integer, Boolean> lockedFor = new HashMap<>();
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        saveMessage(message);
-
         if (MASTER_DOOR_UNLATCH.matches(message)) {
-            //Response or request?
-            if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
-                //Request
-                handleDoorUnlatch(message);
-            } else {
-                //Response
-                handleDoorUnlatchResponse(message);
-            }
+            handleDoorUnlatch(message);
+        } else if (SLAVE_DOOR_UNLATCH_REPLY.matches(message)) {
+            handleDoorUnlatchResponse(message);
         } else if (MASTER_DOOR_LOCK_SET.matches(message)) {
             handleDoorLockSet(message);
         } else if (MASTER_DOOR_LOCK_GET.matches(message)) {
             handleDoorLockGet(message);
         } else if (MASTER_DOOR_STATUS_GET.matches(message)) {
-            //Response or request?
-            if (message.getHeader(Message.HEADER_REFERENCES_ID) == null) {
-                //Request
                 handleDoorStatusGet(message);
-            } else {
-                //Response
-                handleDoorStatusGetResponse(message);
-            }
+        } else if (SLAVE_DOOR_STATUS_GET_REPLY.matches(message)) {
+            handleDoorStatusGetResponse(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
@@ -72,41 +62,45 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_DOOR_UNLATCH, MASTER_DOOR_LOCK_SET, MASTER_DOOR_LOCK_GET, MASTER_DOOR_STATUS_GET};
+        return new RoutingKey[] {
+                MASTER_DOOR_UNLATCH,
+                SLAVE_DOOR_UNLATCH_REPLY,
+                MASTER_DOOR_LOCK_SET,
+                MASTER_DOOR_LOCK_GET,
+                MASTER_DOOR_STATUS_GET,
+                SLAVE_DOOR_STATUS_GET_REPLY
+        };
     }
 
     private void handleDoorStatusGetResponse(Message.AddressedMessage message) {
         //Response
         final Message.AddressedMessage correspondingMessage =
-                getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
-        final Message messageToSend = new Message(MASTER_DOOR_STATUS_GET.getPayload(message));
+                takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
+        final Message messageToSend = new Message(MASTER_DOOR_STATUS_GET_REPLY.getPayload(message));
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
-        //works for get and set, so no switch required
         sendMessage(
                 correspondingMessage.getFromID(),
-                correspondingMessage.getHeader(Message.HEADER_REPLY_TO_KEY),
+                MASTER_DOOR_STATUS_GET_REPLY,
                 messageToSend
         );
     }
 
     private void handleDoorStatusGet(Message.AddressedMessage message) {
-        DoorStatusPayload doorStatusPayload = MASTER_DOOR_STATUS_GET.getPayload(message);
+        final DoorStatusPayload doorStatusPayload = MASTER_DOOR_STATUS_GET.getPayload(message);
         final Module atModule = requireComponent(SlaveController.KEY).getModule(doorStatusPayload.getModuleName());
-        //Get status
         if (hasPermission(
                 message.getFromID(),
                 de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_DOOR_STATUS,
                 atModule.getName()
         )) {
             final Message messageToSend = new Message(doorStatusPayload);
-            messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_DOOR_STATUS_GET.getKey());
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),
                     SLAVE_DOOR_STATUS_GET,
                     messageToSend
             );
-            putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
+            recordReceivedMessageProxy(message, sendMessage);
         } else {
             //no permission
             sendErrorMessage(message);
@@ -114,8 +108,8 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorLockGet(Message.AddressedMessage message) {
-        DoorLockPayload doorLockPayload = MASTER_DOOR_LOCK_GET.getPayload(message);
-        Module atModule = requireComponent(SlaveController.KEY)
+        final DoorLockPayload doorLockPayload = MASTER_DOOR_LOCK_GET.getPayload(message);
+        final Module atModule = requireComponent(SlaveController.KEY)
                 .getModule(doorLockPayload.getModuleName());
 
         if (hasPermission(
@@ -123,10 +117,15 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                 de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_DOOR_STATUS,
                 atModule.getName()
         )) {
-            Message messageToSend = new Message(new DoorLockPayload(getLocked(atModule.getName()), atModule.getName()));
+            final Message messageToSend =
+                    new Message(new DoorLockPayload(getLocked(atModule.getName()), atModule.getName()));
             messageToSend.putHeader(Message.HEADER_REFERENCES_ID, message.getSequenceNr());
 
-            sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), message);
+            sendMessage(
+                    message.getFromID(),
+                    MASTER_DOOR_LOCK_GET_REPLY,
+                    message
+            );
         } else {
             //no permission
             sendErrorMessage(message);
@@ -134,8 +133,8 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorLockSet(Message.AddressedMessage message) {
-        DoorLockPayload doorLockPayload = MASTER_DOOR_LOCK_SET.getPayload(message);
-        Module atModule = requireComponent(SlaveController.KEY)
+        final DoorLockPayload doorLockPayload = MASTER_DOOR_LOCK_SET.getPayload(message);
+        final Module atModule = requireComponent(SlaveController.KEY)
                 .getModule(doorLockPayload.getModuleName());
 
         if (hasPermission(
@@ -145,26 +144,26 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         )) {
             setLocked(atModule.getName(), !doorLockPayload.isUnlock());
 
-            //Send notification
+            final Permission permission;
+            final String notificationMessage;
+
             if (doorLockPayload.isUnlock()) {
-                sendMessageLocal(
-                        MASTER_NOTIFICATION_SEND,
-                        new Message(
-                                new NotificationPayload(
-                                        de.unipassau.isl.evs.ssh.core.sec.Permission.DOOR_UNLOCKED.toString(),
-                                        DOOR_UNLOCKED_MESSAGE
-                                )
-                        ));
+                permission = de.unipassau.isl.evs.ssh.core.sec.Permission.DOOR_UNLOCKED;
+                notificationMessage = DOOR_UNLOCKED_MESSAGE;
             } else {
-                sendMessageLocal(
-                        MASTER_NOTIFICATION_SEND,
-                        new Message(
-                                new NotificationPayload(
-                                        de.unipassau.isl.evs.ssh.core.sec.Permission.DOOR_LOCKED.toString(),
-                                        DOOR_LOCKED_MESSAGE
-                                )
-                        ));
+                permission = de.unipassau.isl.evs.ssh.core.sec.Permission.DOOR_LOCKED;
+                notificationMessage = DOOR_LOCKED_MESSAGE;
             }
+
+            sendMessageLocal(
+                    MASTER_NOTIFICATION_SEND,
+                    new Message(
+                            new NotificationPayload(
+                                    permission.toString(),
+                                    notificationMessage
+                            )
+                    )
+            );
         } else {
             //no permission
             sendErrorMessage(message);
@@ -172,9 +171,9 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorUnlatchResponse(Message.AddressedMessage message) {
-        Message.AddressedMessage correspondingMessage =
-                getMessageOnBehalfOfSequenceNr(message.getHeader(Message.HEADER_REFERENCES_ID));
-        Message messageToSend = new Message(new NotificationPayload(
+        final Message.AddressedMessage correspondingMessage =
+                takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
+        final Message messageToSend = new Message(new NotificationPayload(
                 de.unipassau.isl.evs.ssh.core.sec.Permission.DOOR_UNLATCHED.toString(), DOOR_UNLATCHED_MESSAGE));
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
@@ -182,11 +181,10 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorUnlatch(Message.AddressedMessage message) {
-        DoorUnlatchPayload doorUnlatchPayload = MASTER_DOOR_UNLATCH.getPayload(message);
-        Module atModule = requireComponent(SlaveController.KEY)
+        final DoorUnlatchPayload doorUnlatchPayload = MASTER_DOOR_UNLATCH.getPayload(message);
+        final Module atModule = requireComponent(SlaveController.KEY)
                 .getModule(doorUnlatchPayload.getModuleName());
-        Message messageToSend = new Message(doorUnlatchPayload);
-        messageToSend.putHeader(Message.HEADER_REPLY_TO_KEY, MASTER_DOOR_UNLATCH.getKey());
+        final Message messageToSend = new Message(doorUnlatchPayload);
 
         if (hasPermission(message.getFromID(),
                 de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR,
@@ -199,7 +197,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                                 SLAVE_DOOR_UNLATCH,
                                 messageToSend
                         );
-                putOnBehalfOf(sendMessage.getSequenceNr(), message.getSequenceNr());
+                recordReceivedMessageProxy(message, sendMessage);
             } else {
                 //locked
                 sendErrorMessage(message);

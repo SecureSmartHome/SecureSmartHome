@@ -5,6 +5,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteUserPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
@@ -30,8 +31,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayl
  * @author Team
  */
 public class RoutingKeys {
-    private RoutingKeys() {
-    }
+    private RoutingKeys() {}
 
     private static final String PREFIX_MASTER = "/master";
     private static final String PREFIX_SLAVE = "/slave";
@@ -50,7 +50,6 @@ public class RoutingKeys {
     public static final RoutingKey<CameraPayload> MASTER_DOOR_BELL_CAMERA_GET = new RoutingKey<>(PREFIX_MASTER + "/doorbell/camera/get", CameraPayload.class);
 
     public static final RoutingKey<CameraPayload> MASTER_CAMERA_GET = new RoutingKey<>(PREFIX_MASTER + "/camera/get", CameraPayload.class);
-    public static final RoutingKey<CameraPayload> MASTER_CAMERA_GET_REPLY = MASTER_CAMERA_GET.getReply(CameraPayload.class);
 
     public static final RoutingKey<MessagePayload> MASTER_REQUEST_WEATHER_INFO = new RoutingKey<>(PREFIX_MASTER + "/weatherinfo/request", MessagePayload.class);
     public static final RoutingKey<ClimatePayload> MASTER_PUSH_WEATHER_INFO = new RoutingKey<>(PREFIX_MASTER + "/weatherinfo/push", ClimatePayload.class);
@@ -58,8 +57,10 @@ public class RoutingKeys {
     public static final RoutingKey<NotificationPayload> MASTER_NOTIFICATION_SEND = new RoutingKey<>(PREFIX_MASTER + "/notification/send", NotificationPayload.class);
 
     public static final RoutingKey<DoorStatusPayload> MASTER_DOOR_STATUS_GET = new RoutingKey<>(PREFIX_MASTER + "/door/status_get", DoorStatusPayload.class);
+    public static final RoutingKey<DoorStatusPayload> MASTER_DOOR_STATUS_GET_REPLY = MASTER_DOOR_STATUS_GET.getReply(DoorStatusPayload.class);
     public static final RoutingKey<DoorLockPayload> MASTER_DOOR_LOCK_SET = new RoutingKey<>(PREFIX_MASTER + "/door/lock_set", DoorLockPayload.class);
     public static final RoutingKey<DoorLockPayload> MASTER_DOOR_LOCK_GET = new RoutingKey<>(PREFIX_MASTER + "/door/lock_get", DoorLockPayload.class);
+    public static final RoutingKey<DoorLockPayload> MASTER_DOOR_LOCK_GET_REPLY = MASTER_DOOR_LOCK_GET.getReply(DoorLockPayload.class);
     public static final RoutingKey<DoorUnlatchPayload> MASTER_DOOR_UNLATCH = new RoutingKey<>(PREFIX_MASTER + "/door/unlatch", DoorUnlatchPayload.class);
 
     public static final RoutingKey<GenerateNewRegisterTokenPayload> MASTER_USER_REGISTER = new RoutingKey<>(PREFIX_MASTER + "/user/register", GenerateNewRegisterTokenPayload.class);
@@ -90,6 +91,7 @@ public class RoutingKeys {
     public static final RoutingKey<RenameModulePayload> MASTER_MODULE_RENAME = new RoutingKey<>(PREFIX_MASTER + "/module/modify", RenameModulePayload.class);
 
     public static final RoutingKey<RegisterSlavePayload> MASTER_SLAVE_REGISTER = new RoutingKey<>(PREFIX_MASTER + "/slave/register", RegisterSlavePayload.class);
+
     public static final RoutingKey<SystemHealthPayload> MASTER_SYSTEM_HEALTH_CHECK = new RoutingKey<>(PREFIX_MASTER + "/systemhealth/check", SystemHealthPayload.class);
 
     public static final RoutingKey<DeviceConnectedPayload> MASTER_DEVICE_CONNECTED = new RoutingKey<>(PREFIX_MASTER + "/device/connected", DeviceConnectedPayload.class);
@@ -100,8 +102,11 @@ public class RoutingKeys {
     public static final RoutingKey<LightPayload> SLAVE_LIGHT_GET_REPLY = SLAVE_LIGHT_GET.getReply(LightPayload.class);
     public static final RoutingKey<LightPayload> SLAVE_LIGHT_SET_REPLY = SLAVE_LIGHT_GET.getReply(LightPayload.class);
     public static final RoutingKey<CameraPayload> SLAVE_CAMERA_GET = new RoutingKey<>(PREFIX_SLAVE + "/camera/get", CameraPayload.class);
+    public static final RoutingKey<CameraPayload> SLAVE_CAMERA_GET_REPLY = SLAVE_CAMERA_GET.getReply(CameraPayload.class);
     public static final RoutingKey<DoorStatusPayload> SLAVE_DOOR_STATUS_GET = new RoutingKey<>(PREFIX_SLAVE + "/door/status_get", DoorStatusPayload.class);
+    public static final RoutingKey<DoorStatusPayload> SLAVE_DOOR_STATUS_GET_REPLY = SLAVE_DOOR_STATUS_GET.getReply(DoorStatusPayload.class);
     public static final RoutingKey<DoorUnlatchPayload> SLAVE_DOOR_UNLATCH = new RoutingKey<>(PREFIX_SLAVE + "/door/unlatch", DoorUnlatchPayload.class);
+    public static final RoutingKey<Void> SLAVE_DOOR_UNLATCH_REPLY = SLAVE_DOOR_UNLATCH.getReply(Void.class);
 
     // App
     public static final RoutingKey<MessagePayload> APP_MODULES_GET = new RoutingKey<>(PREFIX_APP + "/module/get", MessagePayload.class);

@@ -1,8 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -86,19 +84,19 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
     private void handleUserRegisterResponse(GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload) {
         final NamingManager namingManager = requireComponent(NamingManager.KEY);
         final Client client = requireComponent(Client.KEY);
-
-        String host = client.getHost();
-        int port = client.getPort();
-        Inet4Address address;
-        try {
-            address = ((Inet4Address) InetAddress.getByName(host));
-        } catch (UnknownHostException e) {
-            throw new IllegalArgumentException("Unable to convert host address from shared prefs to "
-                    + "an Inet4Address", e);
+        InetSocketAddress address = client.getAddress();
+        if (address == null) {
+            address = client.getConnectAddress();
         }
-
-        DeviceConnectInformation qrDevInfo = new DeviceConnectInformation(address, port, namingManager.getMasterID(),
-                generateNewRegisterTokenPayload.getToken());
+        if (address == null) {
+            throw new IllegalStateException("Client not connected");
+        }
+        DeviceConnectInformation qrDevInfo = new DeviceConnectInformation(
+                address.getAddress(),
+                address.getPort(),
+                namingManager.getMasterID(),
+                generateNewRegisterTokenPayload.getToken()
+        );
         fireTokenResponse(qrDevInfo);
     }
 
