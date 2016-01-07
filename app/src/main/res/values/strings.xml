@@ -137,4 +137,16 @@
     <string name="si_altitude">%4.2f m</string>
     <string name="si_humidity">%3.2f %</string>
     <string name="si_visible">%d%n Lux</string>
+
+    <!--Strings used for Notifications-->
+    <string name="climate_notification_title">Climate Warning!</string>
+    <string name="brightness_warning_title">Light Warning!</string>
+    <string name="weather_warning_title">Weather Warning!</string>
+    <string name="system_healt_warning_title">Component failed!</string>
+    <string name="door_bell_notification_title">The Doorbell rang!</string>
+    <string name="odroid_added_title">ODROID was added!</string>
+    <string name="holiday_mode_switched_on_title">Holiday Mode Active!</string>
+    <string name="holiday_mode_switched_off_title">Holiday Mode Inactive!</string>
+    <string name="door_unlatched_title">Door is now open!</string>
+
 </resources>

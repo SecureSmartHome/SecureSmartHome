@@ -87,7 +87,7 @@ public class CoreConstants {
 
         private final int resID;
 
-        ModuleType(int resID){
+        ModuleType(int resID) {
             this.resID = resID;
         }
 
@@ -138,11 +138,17 @@ public class CoreConstants {
         }
     }
 
+    /**
+     * Contains information about which Fragment should be opened after clicking on a Notification.
+     *
+     * @author Andreas Bucher
+     */
     public static class NotificationOpenThisFragment {
         public static final String CLIMATE_FRAGMENT = "ClimateFragment";
         public static final String LIGHT_FRAGMENT = "LightFragment";
         public static final String STATUS_FRAGMENT = "StatusFragment";
         public static final String DOOR_FRAGMENT = "DoorFragment";
+        public static final String HOLIDAY_FRAGMENT = "HolidayFragment";
         public static final String MAIN_FRAGMENT = "MainFragment";
     }
 }

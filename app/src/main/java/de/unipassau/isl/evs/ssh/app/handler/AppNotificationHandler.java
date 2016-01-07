@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.support.v7.app.NotificationCompat;
 
 import java.io.Serializable;
@@ -20,7 +21,9 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.CLIMATE_FRAGMENT;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.DOOR_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.HOLIDAY_FRAGMENT;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.LIGHT_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.MAIN_FRAGMENT;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.STATUS_FRAGMENT;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
 
@@ -54,32 +57,41 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     @Override
     public void handle(Message.AddressedMessage message) {
         if (APP_NOTIFICATION_RECEIVE.getPayload(message) != null) {
-            if(APP_NOTIFICATION_RECEIVE.getPayload(message) instanceof NotificationPayload){
+            if (APP_NOTIFICATION_RECEIVE.getPayload(message) instanceof NotificationPayload) {
                 NotificationPayload notificationPayload = (APP_NOTIFICATION_RECEIVE.getPayload(message));
                 NotificationPayload.NotificationType type = notificationPayload.getType();
                 Serializable[] args = notificationPayload.getArgs();
 
-                switch(type){
-                    case WEATHER_WARNING: issueWeatherWarning(WEATHER_WARNING_ID, args);
+                switch (type) {
+                    case WEATHER_WARNING:
+                        issueWeatherWarning(WEATHER_WARNING_ID, args);
                         break;
-                    case BRIGHTNESS_WARNING: issueBrightnessWarning(BRIGHTNESS_WARNING_ID, args);
+                    case BRIGHTNESS_WARNING:
+                        issueBrightnessWarning(BRIGHTNESS_WARNING_ID, args);
                         break;
-                    case HUMIDITY_WARNING: issueClimateNotification(HUMIDITY_WARNING_ID, args);
+                    case HUMIDITY_WARNING:
+                        issueClimateNotification(HUMIDITY_WARNING_ID, args);
                         break;
-                    case SYSTEM_HEALTH_WARNING: issueSystemHealthWarning(SYSTEM_HEALTH_WARNING_ID, args);
+                    case SYSTEM_HEALTH_WARNING:
+                        issueSystemHealthWarning(SYSTEM_HEALTH_WARNING_ID, args);
                         break;
-                    case ODROID_ADDED: issueOdroidAdded(ODROID_ADDED_ID, args);
+                    case ODROID_ADDED:
+                        issueOdroidAdded(ODROID_ADDED_ID, args);
                         break;
-                    case HOLIDAY_MODE_SWITCHED_ON: issueHolidayModeSwitchedOn(HOLIDAY_MODE_SWITCHED_ON_ID, args);
+                    case HOLIDAY_MODE_SWITCHED_ON:
+                        issueHolidayModeSwitchedOn(HOLIDAY_MODE_SWITCHED_ON_ID, args);
                         break;
-                    case HOLIDAY_MODE_SWITCHED_OFF: issueHolidayModeSwitchedOff(HOLIDAY_MODE_SWITCHED_OFF_ID, args);
+                    case HOLIDAY_MODE_SWITCHED_OFF:
+                        issueHolidayModeSwitchedOff(HOLIDAY_MODE_SWITCHED_OFF_ID, args);
                         break;
-                    case BELL_RANG: issueDoorBellNotification(DOOR_BELL_NOTIFICATION_ID, args);
+                    case BELL_RANG:
+                        issueDoorBellNotification(DOOR_BELL_NOTIFICATION_ID, args);
                         break;
-                    case DOOR_UNLATCHED: issueDoorUnlatched(DOOR_UNLATCHED_ID, args);
+                    case DOOR_UNLATCHED:
+                        issueDoorUnlatched(DOOR_UNLATCHED_ID, args);
                         break;
                 }
-            }else{
+            } else {
                 invalidMessage(message);
             }
         } else {
@@ -100,52 +112,59 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
      */
     //TODO edit title and text
     private void issueClimateNotification(int notificationID, Serializable[] args) {
-        String title = "Climate Warning!";
+        String title = Resources.getSystem().getString(R.string.climate_notification_title);
         String text = "Please open Window! Humidity high.";
         displayNotification(title, text, CLIMATE_FRAGMENT, notificationID);
     }
 
     private void issueBrightnessWarning(int notificationID, Serializable[] args) {
-        String title = "Light Warning!";
+        String title = Resources.getSystem().getString(R.string.brightness_warning_title);
         String text = "Please turn off lights to save energy.";
         displayNotification(title, text, LIGHT_FRAGMENT, notificationID);
     }
 
     private void issueWeatherWarning(int notificationID, Serializable[] args) {
-        String title = "Weather Warning!";
+        String title = Resources.getSystem().getString(R.string.weather_warning_title);
         String text = "Warn Text!";
         displayNotification(title, text, CLIMATE_FRAGMENT, notificationID);
     }
 
     private void issueSystemHealthWarning(int notificationID, Serializable[] args) {
-        String title = "Component failed!";
+        String title = Resources.getSystem().getString(R.string.system_healt_warning_title);
         String text = ("ERROR AT: ");
         displayNotification(title, text, STATUS_FRAGMENT, notificationID);
     }
 
     private void issueDoorBellNotification(int notificationID, Serializable[] args) {
-        String title = "The Door Bell rang";
+        String title = Resources.getSystem().getString(R.string.door_bell_notification_title);
         String text = ("Door Bell rang at front door!");
         displayNotification(title, text, DOOR_FRAGMENT, notificationID);
     }
 
-    private void issueOdroidAdded(int notificationID, Serializable[] args){
-        String title = null;
+    private void issueOdroidAdded(int notificationID, Serializable[] args) {
+        String title = Resources.getSystem().getString(R.string.odroid_added_title);
         String text = null;
         displayNotification(title, text, STATUS_FRAGMENT, notificationID);
     }
 
-    private void issueHolidayModeSwitchedOn (int notificationID, Serializable[] args){
-
+    private void issueHolidayModeSwitchedOn(int notificationID, Serializable[] args) {
+        String title = Resources.getSystem().getString(R.string.holiday_mode_switched_on_title);
+        String text = null;
+        displayNotification(title, text, HOLIDAY_FRAGMENT, notificationID);
     }
 
-    private void issueHolidayModeSwitchedOff (int notificationID, Serializable[] args){
-
+    private void issueHolidayModeSwitchedOff(int notificationID, Serializable[] args) {
+        String title = Resources.getSystem().getString(R.string.holiday_mode_switched_off_title);
+        String text = null;
+        displayNotification(title, text, HOLIDAY_FRAGMENT, notificationID);
     }
 
-    private void issueDoorUnlatched (int notificationID, Serializable[] args){
-
+    private void issueDoorUnlatched(int notificationID, Serializable[] args) {
+        String title = Resources.getSystem().getString(R.string.door_unlatched_title);
+        String text = null;
+        displayNotification(title, text, MAIN_FRAGMENT, notificationID);
     }
+
     /**
      * Builds the Notification with the given text and displays it on the user-device.
      * If user clicks on it, the ssh app will open.
