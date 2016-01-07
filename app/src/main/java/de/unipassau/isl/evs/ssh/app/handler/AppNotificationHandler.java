@@ -203,7 +203,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         PendingIntent pendingIntent = PendingIntent.getActivity(context, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notificationBuilder.setContentIntent(pendingIntent);
        */
-        Intent resultIntent = new Intent(context, openThisFragment.getClass());
+        Intent resultIntent = new Intent(openThisFragment);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addParentStack(openThisFragment.getClass());
         stackBuilder.addNextIntent(resultIntent);

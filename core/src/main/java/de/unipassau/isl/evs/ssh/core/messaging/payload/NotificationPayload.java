@@ -38,7 +38,6 @@ public class NotificationPayload implements MessagePayload {
      * @author Christoph Frädrich
      */
     public enum NotificationType {
-        //TODO use when Notification System gets changed
         UNKNOWN(null),
         WEATHER_WARNING(Permission.WEATHER_WARNING),
         BRIGHTNESS_WARNING(Permission.BRIGHTNESS_WARNING),
