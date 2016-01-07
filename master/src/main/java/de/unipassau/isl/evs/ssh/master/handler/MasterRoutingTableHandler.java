@@ -41,30 +41,34 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler implements 
     public void handle(Message.AddressedMessage message) {
         saveMessage(message);
         if (MASTER_SLAVE_REGISTER.matches(message)) {
-            if (hasPermission(
-                    message.getFromID(),
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID,
-                    null
-            )) {
-                RegisterSlavePayload registerSlavePayload = MASTER_SLAVE_REGISTER.getPayload(message);
-                try {
-                    registerSlave(new Slave(
-                            registerSlavePayload.getName(),
-                            registerSlavePayload.getSlaveID(),
-                            registerSlavePayload.getPassiveRegistrationToken()
-                    ));
-                } catch (AlreadyInUseException e) {
-                    Log.i(TAG, "Failed adding a new Slave because the given name (" + registerSlavePayload.getName()
-                            + ") is already in use.");
-                    sendErrorMessage(message);
-                }
-            } else {
-                //TODO handle (Niko, 2015-12-17)
-            }
+            handleSlaveRegister(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
             invalidMessage(message);
+        }
+    }
+
+    private void handleSlaveRegister(Message.AddressedMessage message) {
+        if (hasPermission(
+                message.getFromID(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID,
+                null
+        )) {
+            RegisterSlavePayload registerSlavePayload = MASTER_SLAVE_REGISTER.getPayload(message);
+            try {
+                registerSlave(new Slave(
+                        registerSlavePayload.getName(),
+                        registerSlavePayload.getSlaveID(),
+                        registerSlavePayload.getPassiveRegistrationToken()
+                ));
+            } catch (AlreadyInUseException e) {
+                Log.i(TAG, "Failed adding a new Slave because the given name (" + registerSlavePayload.getName()
+                        + ") is already in use.");
+                sendErrorMessage(message);
+            }
+        } else {
+            //TODO handle (Niko, 2015-12-17)
         }
     }
 
