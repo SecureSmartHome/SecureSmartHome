@@ -1,16 +1,20 @@
 package de.unipassau.isl.evs.ssh.slave.handler;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
@@ -26,20 +30,11 @@ import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
  *
  * @author Christoph Fraedrich
  */
-public class SlaveSystemHealthHandler extends AbstractMessageHandler implements Component {
-    //TODO maybe refactor to task instead of handler. So far we do not answer messages
+public class SlaveSystemHealthHandler extends AbstractComponent {
     public static final Key<SlaveSystemHealthHandler> KEY = new Key<>(SlaveSystemHealthHandler.class);
 
     private ScheduledFuture future;
-
-    @Override
-    public void handle(Message.AddressedMessage message) {
-    }
-
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[0];
-    }
+    private final ArrayList<Module> failedModules = new ArrayList();
 
     @Override
     public void init(Container container) {
@@ -66,29 +61,39 @@ public class SlaveSystemHealthHandler extends AbstractMessageHandler implements 
             }
         }
 
-        //TODO create mapping to failed modules to send message if a modul is accessible again
         private void checkStatus(Class clazz, Component driver, Module module) {
+            boolean success = true;
+
             if (ButtonSensor.class.equals(clazz)) {
                 try {
                     ((ButtonSensor) driver).isPressed();
                 } catch (EvsIoException e) {
-                    Message message = new Message(new SystemHealthPayload(true, module));
-                    sendMessageToMaster(RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
+                    success = false;
                 }
             } else if (ReedSensor.class.equals(clazz)) {
                 try {
                     ((ReedSensor) driver).isOpen();
                 } catch (EvsIoException e) {
-                    Message message = new Message(new SystemHealthPayload(true, module));
-                    sendMessageToMaster(RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
+                    success = false;
                 }
             } else if (EdimaxPlugSwitch.class.equals(clazz)) {
                 try {
                     ((EdimaxPlugSwitch) driver).isOn();
                 } catch (IOException e) {
-                    Message message = new Message(new SystemHealthPayload(true, module));
-                    sendMessageToMaster(RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
+                    success = false;
                 }
+            }
+
+            if (success) {
+                if (failedModules.contains(module)) {
+                    failedModules.remove(module);
+                }
+            } else {
+                //Check for availabiltiy failed, send error message
+                failedModules.add(module);
+                Message message = new Message(new SystemHealthPayload(true, module));
+                requireComponent(OutgoingRouter.KEY).sendMessageToMaster(
+                        RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
             }
         }
     }
