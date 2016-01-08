@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,8 +9,10 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.MasterConstants;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_NOTIFICATION_SEND;
@@ -34,6 +37,7 @@ public class MasterClimateHandler extends AbstractMasterHandler {
         } else if (MASTER_LIGHT_GET.matches(message) &&
                 message.getHeader(Message.HEADER_REFERENCES_ID) != null) {
             //Reply to get request, this means this message actually contains an updated lamp value
+
             LightPayload payload = MASTER_LIGHT_GET.getPayload(message);
 
             latestLightStatus.put(payload.getModule(), payload.getOn());
@@ -53,17 +57,19 @@ public class MasterClimateHandler extends AbstractMasterHandler {
     }
 
     private void evaluateWeatherData(ClimatePayload payload) {
+        NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
         //The following values will not be checked as they are not of interest: Altitude, Pressure, Temp1, Temp2
         if (payload.getHumidity() > MasterConstants.ClimateThreshold.HUMIDITY) {
-            ClimatePayload newPayload = new ClimatePayload(payload, Permission.HUMIDITY_WARNING.toString());
-            sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(newPayload));
+            Serializable serializableHumidity = payload.getHumidity();
+            notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.HUMIDITY_WARNING, serializableHumidity);
         }
-
-        if(payload.getVisible() > MasterConstants.ClimateThreshold.VISIBLE_LIGHT )
-        for (Module module : latestLightStatus.keySet()) {
-            if (latestLightStatus.get(module)) {
-                ClimatePayload newPayload = new ClimatePayload(payload, Permission.BRIGHTNESS_WARNING.toString());
-                sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(newPayload));
+        //TODO Schwellwert puffer hinzufügen. Wenn lampe eingeschaltet und über Schwellwert keine warnung.
+        if (payload.getVisible() > MasterConstants.ClimateThreshold.VISIBLE_LIGHT) {
+            for (Module module : latestLightStatus.keySet()) {
+                if (latestLightStatus.get(module)) {
+                    Serializable serializableLight = payload.getVisible();
+                    notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.BRIGHTNESS_WARNING, serializableLight);
+                }
             }
         }
     }

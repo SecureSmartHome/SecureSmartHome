@@ -13,6 +13,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_GET;
@@ -37,6 +38,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     private static final String DOOR_UNLATCHED_MESSAGE = "Door unlatched";
     private static final String DOOR_UNLOCKED_MESSAGE = "Door unlocked";
     private static final String DOOR_LOCKED_MESSAGE = "Door locked";
+    NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
     private final Map<Integer, Boolean> lockedFor = new HashMap<>();
 
     @Override
@@ -45,6 +47,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             handleDoorUnlatch(message);
         } else if (SLAVE_DOOR_UNLATCH_REPLY.matches(message)) {
             handleDoorUnlatchResponse(message);
+            notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.DOOR_UNLATCHED, message);
         } else if (MASTER_DOOR_LOCK_SET.matches(message)) {
             handleDoorLockSet(message);
         } else if (MASTER_DOOR_LOCK_GET.matches(message)) {
@@ -144,26 +147,11 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         )) {
             setLocked(atModule.getName(), !doorLockPayload.isUnlock());
 
-            final Permission permission;
-            final String notificationMessage;
-
             if (doorLockPayload.isUnlock()) {
-                permission = de.unipassau.isl.evs.ssh.core.sec.Permission.DOOR_UNLOCKED;
-                notificationMessage = DOOR_UNLOCKED_MESSAGE;
+                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.DOOR_UNLOCKED);
             } else {
-                permission = de.unipassau.isl.evs.ssh.core.sec.Permission.DOOR_LOCKED;
-                notificationMessage = DOOR_LOCKED_MESSAGE;
+                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.DOOR_LOCKED);
             }
-
-            sendMessageLocal(
-                    MASTER_NOTIFICATION_SEND,
-                    new Message(
-                            new NotificationPayload(
-                                    permission.toString(),
-                                    notificationMessage
-                            )
-                    )
-            );
         } else {
             //no permission
             sendErrorMessage(message);
@@ -171,6 +159,8 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorUnlatchResponse(Message.AddressedMessage message) {
+        //FIXME Andi: Change to use NotificationBroadcaster and not send message yourself
+        /*
         final Message.AddressedMessage correspondingMessage =
                 takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
         final Message messageToSend = new Message(new NotificationPayload(
@@ -178,6 +168,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
         sendMessageLocal(MASTER_NOTIFICATION_SEND, messageToSend);
+        */
     }
 
     private void handleDoorUnlatch(Message.AddressedMessage message) {

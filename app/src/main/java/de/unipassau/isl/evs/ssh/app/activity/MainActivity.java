@@ -135,8 +135,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         if (fragment instanceof BoundFragment) {
             ((BoundFragment) fragment).onContainerConnected(container);
         }
-        container.require(AppNotificationHandler.KEY).addNotificationObjects(notificationBuilder, notificationManager);
-
         showInitialFragment();
 
         Client client = container.require(Client.KEY);
@@ -172,6 +170,10 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
                     return LightFragment.class;
                 case "DoorFragment":
                     return DoorFragment.class;
+                case "MainFragment":
+                    return MainFragment.class;
+                case "HolidayFragment":
+                    return HolidayFragment.class;
             }
         }
 

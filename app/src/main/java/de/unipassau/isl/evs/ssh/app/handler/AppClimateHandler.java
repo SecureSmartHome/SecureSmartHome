@@ -190,8 +190,6 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         return Collections.unmodifiableMap(climateStatusMapping);
     }
 
-    ////Network/////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * Sends Message to MasterClimateHandler to request SensorData of Module m.
      *
@@ -210,7 +208,6 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         router.sendMessageToMaster(RoutingKeys.MASTER_REQUEST_WEATHER_INFO, message);
     }
 
-
     private void setClimate(ClimatePayload payload, String s) {
         ClimatePayload climatePayload = new ClimatePayload(payload, s);
 
@@ -221,8 +218,6 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
         router.sendMessageToMaster(RoutingKeys.MASTER_REQUEST_WEATHER_INFO, message);
     }
-
-    //Lifecycle & Callbacks/////////////////////////////////////////////////////////////////////////
 
     /**
      * Handles received Message from MasterClimateHandler. Refreshes SensorData.
@@ -341,5 +336,4 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
             return timestamp;
         }
     }
-
 }

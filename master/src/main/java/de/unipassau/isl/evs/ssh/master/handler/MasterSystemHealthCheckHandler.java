@@ -1,10 +1,13 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import java.io.Serializable;
+
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_NOTIFICATION_SEND;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK;
@@ -23,9 +26,9 @@ public class MasterSystemHealthCheckHandler extends AbstractMasterHandler {
             final SystemHealthPayload payload = MASTER_SYSTEM_HEALTH_CHECK.getPayload(message);
             // TODO: what happens when there's no error? (07.01.16, Leon)
             if (payload.getHasError()) {
-                String name = payload.getModule().getName();
-                MessagePayload respPayload = new NotificationPayload(SYSTEM_HEALTH_WARNING.toString(), "Error at module: " + name);
-                sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(respPayload));
+                Serializable name = payload.getModule().getName();
+                NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
+                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.SYSTEM_HEALTH_WARNING, name);
             }
             //TODO propagate message that shows that a modul is accessible again
         } else {
