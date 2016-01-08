@@ -2,7 +2,7 @@ package de.unipassau.isl.evs.ssh.app;
 
 import android.util.Log;
 
-import de.unipassau.isl.evs.ssh.app.handler.AppAddSlaveHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppSlaveManagementHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppClimateHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppHolidaySimulationHandler;
@@ -32,7 +32,7 @@ public class AppContainer extends ContainerService {
 
         register(AppModuleHandler.KEY, new AppModuleHandler());
 
-        register(AppAddSlaveHandler.KEY, new AppAddSlaveHandler());
+        register(AppSlaveManagementHandler.KEY, new AppSlaveManagementHandler());
         register(AppClimateHandler.KEY, new AppClimateHandler());
         register(AppDoorHandler.KEY, new AppDoorHandler());
         register(AppHolidaySimulationHandler.KEY, new AppHolidaySimulationHandler());

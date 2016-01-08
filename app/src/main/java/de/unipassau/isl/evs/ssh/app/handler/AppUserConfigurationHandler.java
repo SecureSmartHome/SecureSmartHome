@@ -18,7 +18,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteUserPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteDevicePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupNamePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupTemplatePayload;
@@ -272,7 +272,7 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      * @param user the user to remove
      */
     public void removeUserDevice(DeviceID user) {
-        DeleteUserPayload payload = new DeleteUserPayload(user);
+        DeleteDevicePayload payload = new DeleteDevicePayload(user);
         sendMessageToMaster(MASTER_USER_DELETE, new Message(payload));
     }
 
