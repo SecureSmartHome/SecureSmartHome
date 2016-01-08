@@ -10,9 +10,12 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
+import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET_REPLY;
@@ -40,6 +43,8 @@ public class MasterLightHandler extends AbstractMasterHandler {
             handleGetResponse(message);
         } else if (SLAVE_LIGHT_SET_REPLY.matches(message)) {
             handleSetResponse(message);
+        } else if (MASTER_DOOR_UNLATCH.matches(message)) {
+            handleDeviceConnected(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
@@ -49,7 +54,11 @@ public class MasterLightHandler extends AbstractMasterHandler {
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_LIGHT_SET, MASTER_LIGHT_GET, SLAVE_LIGHT_SET_REPLY, SLAVE_LIGHT_GET_REPLY};
+        return new RoutingKey[]{MASTER_LIGHT_SET,
+                MASTER_LIGHT_GET,
+                SLAVE_LIGHT_SET_REPLY,
+                SLAVE_LIGHT_GET_REPLY,
+                MASTER_DOOR_UNLATCH};
     }
 
     private void handleSetRequest(Message.AddressedMessage message) {
@@ -128,5 +137,30 @@ public class MasterLightHandler extends AbstractMasterHandler {
         final Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(Message.HEADER_REFERENCES_ID));
         final Message messageToSend = new Message(SLAVE_LIGHT_GET_REPLY.getPayload(message));
         sendReply(correspondingMessage, messageToSend);
+    }
+
+    private void handleDeviceConnected(Message.AddressedMessage message) {
+        //TODO check if this is the correct deviceID
+        boolean switchedPosition = getComponent(MasterUserLocationHandler.KEY).switchedPositionToLocal(message.getFromID(), 2);
+
+        if (hasPermission(message.getFromID(), Permission.UNLATCH_DOOR, null)) {
+            if (switchedPosition) {
+                //Switch all lights on as user comes home
+                for (Module module : getComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.Light)) {
+                    try {
+                        requireComponent(HolidayController.KEY).addHolidayLogEntryNow(
+                                CoreConstants.LogActions.LIGHT_ON_ACTION,
+                                module.getName()
+                        );
+                    } catch (UnknownReferenceException e) {
+                        Log.i(TAG, "Can't created holiday log entry because the given module doesn't exist in the database.");
+                    }
+
+                    LightPayload payload = new LightPayload(true, module);
+                    final Message messageToSend = new Message(payload);
+                    sendMessage(module.getAtSlave(), SLAVE_LIGHT_SET, messageToSend);
+                }
+            }
+        }
     }
 }
