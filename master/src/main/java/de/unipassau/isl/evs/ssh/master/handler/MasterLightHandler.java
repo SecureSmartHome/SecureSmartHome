@@ -144,7 +144,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
         boolean switchedPosition = getComponent(MasterUserLocationHandler.KEY).switchedPositionToLocal(message.getFromID(), 2);
 
         if (hasPermission(message.getFromID(), Permission.UNLATCH_DOOR, null)) {
-            if (switchedPosition) {
+            if (switchedPosition) {  //TODO check if also open if someone is not home and opens?
                 //Switch all lights on as user comes home
                 for (Module module : getComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.Light)) {
                     try {
