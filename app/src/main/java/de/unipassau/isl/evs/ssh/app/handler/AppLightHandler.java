@@ -11,13 +11,18 @@ import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.handler.SimpleMessageHandler;
+import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_LIGHT_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET_REPLY;
 
 /**
  * AppLightHandler class handles message from and to the
@@ -25,7 +30,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_LIGHT_UPDA
  *
  * @author Phil Werli
  */
-public class AppLightHandler extends SimpleMessageHandler<LightPayload> implements Component {
+public class AppLightHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppLightHandler> KEY = new Key<>(AppLightHandler.class);
 
     private static final String TAG = AppLightHandler.class.getSimpleName();
@@ -33,6 +38,7 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.MINUTES.toMillis(2);
     private final List<LightHandlerListener> listeners = new ArrayList<>();
     private final Map<Module, LightStatus> lightStatusMapping = new HashMap<>();
+
     private AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
         @Override
         public void onModulesRefreshed() {
@@ -40,8 +46,31 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
         }
     };
 
-    public AppLightHandler() {
-        super(APP_LIGHT_UPDATE);
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{
+                APP_LIGHT_UPDATE,
+                //MASTER_LIGHT_SET_ERROR,
+                MASTER_LIGHT_SET_REPLY,
+                //MASTER_LIGHT_GET_ERROR,
+                MASTER_LIGHT_GET_REPLY
+        };
+    }
+
+    @Override
+    public void handle(Message.AddressedMessage message) {
+        if (APP_LIGHT_UPDATE.matches(message)) {
+            LightPayload payload = APP_LIGHT_UPDATE.getPayload(message);
+            setCachedStatus(payload.getModule(), payload.getOn());
+        } else if (MASTER_LIGHT_SET_REPLY.matches(message)) {
+            LightPayload payload = MASTER_LIGHT_SET_REPLY.getPayload(message);
+            setCachedStatus(payload.getModule(), payload.getOn());
+        } else if (MASTER_LIGHT_GET_REPLY.matches(message)) {
+            LightPayload payload = MASTER_LIGHT_GET_REPLY.getPayload(message);
+            setCachedStatus(payload.getModule(), payload.getOn());
+        } else {
+            invalidMessage(message);
+        }
     }
 
     @Override
@@ -63,11 +92,6 @@ public class AppLightHandler extends SimpleMessageHandler<LightPayload> implemen
             lightStatusMapping.put(m, new LightStatus(false));
             requestLightStatus(m);
         }
-    }
-
-    @Override
-    protected void handleRouted(Message.AddressedMessage message, LightPayload payload) {
-        setCachedStatus(payload.getModule(), payload.getOn());
     }
 
     /**
