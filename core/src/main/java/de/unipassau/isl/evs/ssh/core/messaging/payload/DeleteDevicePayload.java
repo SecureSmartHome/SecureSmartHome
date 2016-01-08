@@ -5,10 +5,10 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 /**
  * @author Wolfgang Popp.
  */
-public class DeleteUserPayload implements MessagePayload {
+public class DeleteDevicePayload implements MessagePayload {
     private DeviceID user;
 
-    public DeleteUserPayload(DeviceID user) {
+    public DeleteDevicePayload(DeviceID user) {
         this.user = user;
     }
 

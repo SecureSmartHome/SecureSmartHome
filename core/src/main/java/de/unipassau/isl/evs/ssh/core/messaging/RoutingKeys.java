@@ -3,7 +3,7 @@ package de.unipassau.isl.evs.ssh.core.messaging;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModifyModulePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteUserPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteDevicePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
@@ -79,7 +79,7 @@ public class RoutingKeys {
     public static final RoutingKey<Void> MASTER_USER_SET_GROUP_REPLY = MASTER_USER_SET_GROUP.getReply(Void.class);
     public static final RoutingKey<ErrorPayload> MASTER_USER_SET_GROUP_ERROR = MASTER_USER_SET_NAME.getReply(ErrorPayload.class);
 
-    public static final RoutingKey<DeleteUserPayload> MASTER_USER_DELETE = new RoutingKey<>(PREFIX_MASTER + "/user/delete", DeleteUserPayload.class);
+    public static final RoutingKey<DeleteDevicePayload> MASTER_USER_DELETE = new RoutingKey<>(PREFIX_MASTER + "/user/delete", DeleteDevicePayload.class);
     public static final RoutingKey<Void> MASTER_USER_DELETE_REPLY = MASTER_USER_DELETE.getReply(Void.class);
     public static final RoutingKey<ErrorPayload> MASTER_USER_DELETE_ERROR = MASTER_USER_DELETE.getReply(ErrorPayload.class);
 
@@ -112,8 +112,15 @@ public class RoutingKeys {
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_SET = new RoutingKey<>(PREFIX_MASTER + "/holiday/set", HolidaySimulationPayload.class);
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_GET = new RoutingKey<>(PREFIX_MASTER + "/holiday/get", HolidaySimulationPayload.class);
 
-
+    // BEGIN: MasterSlaveManagementHandler
     public static final RoutingKey<RegisterSlavePayload> MASTER_SLAVE_REGISTER = new RoutingKey<>(PREFIX_MASTER + "/slave/register", RegisterSlavePayload.class);
+    public static final RoutingKey<Void> MASTER_SLAVE_REGISTER_REPLY = MASTER_SLAVE_REGISTER.getReply(Void.class);
+    public static final RoutingKey<ErrorPayload> MASTER_SLAVE_REGISTER_ERROR = MASTER_SLAVE_REGISTER.getReply(ErrorPayload.class);
+
+    public static final RoutingKey<DeleteDevicePayload> MASTER_SLAVE_DELETE = new RoutingKey<>(PREFIX_MASTER + "/slave/delete", DeleteDevicePayload.class);
+    public static final RoutingKey<Void> MASTER_SLAVE_DELETE_REPLY = MASTER_SLAVE_DELETE.getReply(Void.class);
+    public static final RoutingKey<ErrorPayload> MASTER_SLAVE_DELETE_ERROR = MASTER_SLAVE_DELETE.getReply(ErrorPayload.class);
+    // END: MasterSlaveManagementHandler
 
     public static final RoutingKey<SystemHealthPayload> MASTER_SYSTEM_HEALTH_CHECK = new RoutingKey<>(PREFIX_MASTER + "/systemhealth/check", SystemHealthPayload.class);
 
