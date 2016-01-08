@@ -28,9 +28,24 @@
             android:label="@string/add_initial_device">
             <intent-filter>
                 <action android:name="android.intent.action.QRCODE"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".activity.MasterPreferenceActivity"
+            android:exported="true"
+            android:label="@string/title_activity_preferences">
+        </activity>
+        <activity
+            android:name=".activity.RegisterLocalAppActivity"
+            android:exported="true"
+            android:label="@string/title_activity_register_local_app"
+            android:theme="@style/Theme.AppCompat.Dialog">
+        </activity>
+        <activity
+            android:name=".activity.RegisterLocalSlaveActivity"
+            android:exported="true"
+            android:label="@string/title_activity_register_local_slave"
+            android:theme="@style/Theme.AppCompat.Dialog">
         </activity>
 
         <service android:name=".MasterContainer"/>
@@ -44,26 +59,5 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
-
-        <activity
-            android:name=".activity.RegisterLocalAppActivity"
-            android:exported="true"
-            android:label="@string/title_activity_register_local_app"
-            android:theme="@style/Theme.AppCompat.Dialog">
-        </activity>
-
-        <activity
-            android:name=".activity.RegisterLocalSlaveActivity"
-            android:exported="true"
-            android:label="@string/title_activity_register_local_slave"
-            android:theme="@style/Theme.AppCompat.Dialog">
-        </activity>
-        <activity
-            android:name=".activity.MasterPreferenceActivity"
-            android:exported="true"
-            android:label="@string/title_activity_preferences"
-            android:theme="@style/Theme.AppCompat.Dialog">
-        </activity>
     </application>
-
 </manifest>

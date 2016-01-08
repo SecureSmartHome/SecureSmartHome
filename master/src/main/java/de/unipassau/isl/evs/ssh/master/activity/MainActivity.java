@@ -1,10 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.activity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,27 +14,20 @@ import android.widget.TextView;
 
 import com.google.common.collect.Lists;
 
-import java.net.Inet4Address;
-import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
-import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
-import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
-import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
@@ -49,42 +39,26 @@ import io.netty.channel.group.ChannelGroup;
  *
  * @author Team
  */
-public class MainActivity extends BoundActivity {
+public class MainActivity extends MasterStartUpActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private ListView slaveList;
     private ListView userDeviceList;
 
-    public MainActivity() {
-        super(MasterContainer.class);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        startService(new Intent(this, MasterContainer.class));
-        setContentView(R.layout.activity_main);
-    }
-
-    /**
-     * Checks if there are no registered devices in the system.
-     *
-     * @return Whether no devices are registered in the master.
-     * author Phil Werli
-     */
-    private boolean hasNoRegisteredDevice() {
-        UserManagementController component = getComponent(UserManagementController.KEY);
-        if (component == null) {
-            Log.i(TAG, "Container not yet connected.");
-            return true;
+        if (!isSwitching()) {
+            setContentView(R.layout.activity_main);
         }
-        List<UserDevice> list = component.getUserDevices();
-        return list.size() == 0;
     }
 
     @Override
     public void onContainerConnected(Container container) {
-        showRegisterQROnFirstBoot();
+        super.onContainerConnected(container);
+        if (isSwitching()) {
+            return;
+        }
 
         List<Slave> slaves = new LinkedList<>();
         final SlaveController slaveController = getComponent(SlaveController.KEY);
@@ -100,48 +74,6 @@ public class MainActivity extends BoundActivity {
         }
         userDeviceList.setAdapter(new UserDeviceAdapter(userDevices));
     }
-
-    /**
-     * start MasterQRCodeActivity when no devices are registered yet
-     */
-    private void showRegisterQROnFirstBoot() {
-        if (hasNoRegisteredDevice()) {
-            Intent intent = new Intent(this, MasterQRCodeActivity.class);
-            DeviceConnectInformation deviceInformation = null;
-            Context ctx = requireComponent(ContainerService.KEY_CONTEXT);
-            WifiManager wifiManager = ((WifiManager) ctx.getSystemService(Context.WIFI_SERVICE));
-            String ipAddress = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
-            UserDevice userDevice = new UserDevice(
-                    MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.NO_GROUP,
-                    DeviceID.NO_DEVICE
-            );
-            try {
-                deviceInformation = new DeviceConnectInformation(
-                        (Inet4Address) Inet4Address.getByName(ipAddress),
-                        CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT,
-                        requireComponent(NamingManager.KEY).getMasterID(),
-                        requireComponent(MasterRegisterDeviceHandler.KEY).generateNewRegisterToken(userDevice)
-                );
-            } catch (UnknownHostException e) {
-                //Todo: handle error
-            }
-            Log.v(TAG, "HostNAME: " + deviceInformation.getAddress().getHostAddress());
-            Log.v(TAG, "ID: " + deviceInformation.getID());
-            Log.v(TAG, "Port: " + deviceInformation.getPort());
-            Log.v(TAG, "Token: " + android.util.Base64.encodeToString(deviceInformation.getToken(),
-                    android.util.Base64.NO_WRAP));
-            //NoDevice will allow any device to use this token
-            intent.putExtra(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
-            startActivity(intent);
-        }
-    }
-
-
-
-    @Override
-    public void onContainerDisconnected() {
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -242,7 +174,7 @@ public class MainActivity extends BoundActivity {
         final Server server = getComponent(Server.KEY);
         if (server == null) {
             Log.i(TAG, "Container not yet connected.");
-            return 404;
+            return 0;
         }
         ChannelGroup activeChannels = server.getActiveChannels();
         return activeChannels.size();

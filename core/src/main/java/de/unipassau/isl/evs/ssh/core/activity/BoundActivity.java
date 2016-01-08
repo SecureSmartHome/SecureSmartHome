@@ -56,6 +56,7 @@ public class BoundActivity extends AppCompatActivity {
             serviceContainer = null;
         }
     };
+    private final boolean bindOnStart;
 
     /**
      * Constructor for the BoundActivity
@@ -63,7 +64,19 @@ public class BoundActivity extends AppCompatActivity {
      * @param serviceClass class of the ContainerService to start, used for generating the Intent with {@link Intent#Intent(Context, Class)}
      */
     public BoundActivity(Class<? extends ContainerService> serviceClass) {
+        this(serviceClass, true);
+    }
+
+
+    /**
+     * Constructor for the BoundActivity
+     *
+     * @param serviceClass class of the ContainerService to start, used for generating the Intent with {@link Intent#Intent(Context, Class)}
+     * @param bindOnStart  whether doBind should be automatically in onStart
+     */
+    public BoundActivity(Class<? extends ContainerService> serviceClass, boolean bindOnStart) {
         this.serviceClass = serviceClass;
+        this.bindOnStart = bindOnStart;
     }
 
     /**
@@ -104,7 +117,9 @@ public class BoundActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        doBind();
+        if (bindOnStart) {
+            doBind();
+        }
     }
 
     /**
@@ -115,7 +130,9 @@ public class BoundActivity extends AppCompatActivity {
      */
     @Override
     protected void onStop() {
-        doUnbind();
+        if (bindOnStart) {
+            doUnbind();
+        }
         super.onStop();
     }
 

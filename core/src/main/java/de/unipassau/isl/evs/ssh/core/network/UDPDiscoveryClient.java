@@ -125,7 +125,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
             retryFuture = requireComponent(Client.KEY).getAliveExecutor().schedule(new Runnable() {
                 @Override
                 public void run() {
-                    if (System.currentTimeMillis() > timeout) {
+                    if (timeout > 0 && System.currentTimeMillis() > timeout) {
                         Log.i(TAG, "Stopping discovery after timeout");
                         stopDiscovery();
                     }

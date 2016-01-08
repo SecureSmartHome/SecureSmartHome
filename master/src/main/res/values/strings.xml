@@ -4,7 +4,7 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="please_scan_device">Scan the QR-Code with your device.</string>
+    <string name="please_scan_device">Scan the QR-Code with your Android device to register it as first admin device.</string>
     <string name="qr_code_description">This is a QR-Code.</string>
     <string name="add_initial_device">Add Initial Device</string>
     <string name="title_activity_register_local_app">RegisterLocalAppActivity</string>
