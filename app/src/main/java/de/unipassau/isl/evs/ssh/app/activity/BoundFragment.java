@@ -3,16 +3,20 @@ package de.unipassau.isl.evs.ssh.app.activity;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 /**
  * A Fragment which can be attached to a {@link BoundActivity} and has utility methods for accessing the
- * Container(Service) the Activity is bound to.
+ * {@link de.unipassau.isl.evs.ssh.core.container.ContainerService Container(Service)} the Activity is bound to.
  *
+ * @see BoundActivity
  * @author Niko Fink
  */
 public class BoundFragment extends Fragment {
@@ -65,7 +69,8 @@ public class BoundFragment extends Fragment {
     }
 
     /**
-     * Returns the Container of the BoundActivity this Fragment is attached to, which must itself be bound to a ContainerService.
+     * Returns the Container of the BoundActivity this Fragment is attached to, which must itself be bound to a ContainerService,
+     * or {@code null} if this Fragment is not attached to an Activity or the attached Activity isn't currently bound.
      *
      * @see BoundActivity#getContainer()
      */
@@ -94,7 +99,33 @@ public class BoundFragment extends Fragment {
         }
     }
 
+    /**
+     * @return {@code true} if the container is connected, i.e. {@link #getContainer()} returns a valid container
+     */
     public boolean isContainerConnected() {
         return getContainer() != null;
+    }
+
+    /**
+     * Wraps and returns a Listener that will, as soon as its operationComplete is called, call the operationComplete
+     * of the given listener, but on the UI Thread.
+     */
+    protected <T extends Future<?>> GenericFutureListener<T> listenerOnUiThread(final GenericFutureListener<T> listener) {
+        return new GenericFutureListener<T>() {
+            @Override
+            public void operationComplete(final T future) throws Exception {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            listener.operationComplete(future);
+                        } catch (Exception e) {
+                            Log.w(BoundFragment.this.getClass().getSimpleName(),
+                                    "Listener for Future " + future + " threw an Exception", e);
+                        }
+                    }
+                });
+            }
+        };
     }
 }

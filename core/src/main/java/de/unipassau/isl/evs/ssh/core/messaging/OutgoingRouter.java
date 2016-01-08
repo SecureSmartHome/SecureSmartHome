@@ -67,6 +67,10 @@ public abstract class OutgoingRouter extends AbstractComponent {
         return sendMessage(getMasterID(), routingKey, message);
     }
 
+    /**
+     * @throws IllegalArgumentException if the payload defined in the RoutingKey doesn't match the payload of the message.
+     * @see #sendMessage(DeviceID, String, Message)
+     */
     public Message.AddressedMessage sendMessage(DeviceID toID, RoutingKey routingKey, Message msg) {
         if (!routingKey.payloadMatches(msg)) {
             throw new IllegalArgumentException("Message payload does not match routing key " + routingKey + ":\n" + msg);
@@ -74,6 +78,10 @@ public abstract class OutgoingRouter extends AbstractComponent {
         return sendMessage(toID, routingKey.getKey(), msg);
     }
 
+    /**
+     * @throws IllegalArgumentException if the payload defined in the RoutingKey doesn't match the payload of the message.
+     * @see #sendMessageLocal(String, Message)
+     */
     public Message.AddressedMessage sendMessageLocal(RoutingKey routingKey, Message msg) {
         if (!routingKey.payloadMatches(msg)) {
             throw new IllegalArgumentException("Message payload does not match routing key " + routingKey + ":\n" + msg);
@@ -81,11 +89,26 @@ public abstract class OutgoingRouter extends AbstractComponent {
         return sendMessageLocal(routingKey.getKey(), msg);
     }
 
+    /**
+     * @throws IllegalArgumentException if the payload defined in the RoutingKey doesn't match the payload of the message.
+     * @see #sendMessageToMaster(String, Message)
+     */
     public Message.AddressedMessage sendMessageToMaster(RoutingKey routingKey, Message msg) {
         if (!routingKey.payloadMatches(msg)) {
             throw new IllegalArgumentException("Message payload does not match routing key " + routingKey + ":\n" + msg);
         }
         return sendMessageToMaster(routingKey.getKey(), msg);
+    }
+
+    /**
+     * Sends a reply message to the device the original message came from.
+     * Also sets the {@link Message#HEADER_REFERENCES_ID} of the sent message to the sequence number of the original message.
+     *
+     * @see #sendMessage(DeviceID, String, Message)
+     */
+    public Message.AddressedMessage sendReply(Message.AddressedMessage original, Message reply) {
+        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
+        return sendMessage(original.getFromID(), RoutingKey.getReplyKey(original.getRoutingKey()), reply);
     }
 
     protected DeviceID getMasterID() {

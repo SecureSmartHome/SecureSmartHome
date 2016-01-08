@@ -142,7 +142,10 @@ public class UserManagementController extends AbstractComponent {
      * @param oldName Old name of the UserDevice.
      * @param newName New name of the UserDevice.
      */
-    public void changeUserDeviceName(String oldName, String newName) throws AlreadyInUseException {
+    public void changeUserDeviceName(DeviceID deviceID, String newName) throws AlreadyInUseException {
+        //TODO Leon rewrite this method to use DeviceID in signature
+        //STOPSHIP
+        /*
         try {
             databaseConnector.executeSql("update "
                             + DatabaseContract.UserDevice.TABLE_NAME
@@ -152,6 +155,7 @@ public class UserManagementController extends AbstractComponent {
         } catch (SQLiteConstraintException sqlce) {
             throw new AlreadyInUseException("The given name is already used by another UserDevice.", sqlce);
         }
+        */
     }
 
     /**

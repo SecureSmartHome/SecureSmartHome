@@ -16,12 +16,15 @@ import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 
 /**
  * An Android {@link Service} that manages a {@link SimpleContainer} and its {@link Component}s.
- * Android Activity can bind to this Service and communicate with the {@link Container}.
+ * Android Activities can bind to this Service and communicate with the {@link Container}.
  *
  * @author Niko Fink
  */
 @SuppressLint("Registered")
 public class ContainerService extends Service implements Container {
+    /**
+     * The Context of this Service is registered to the Container, so that all contained Components can use the Context of the Service.
+     */
     public static final Key<ContextComponent> KEY_CONTEXT = new Key<>(ContextComponent.class, "ContainerContext");
     private static final String TAG = ContainerService.class.getSimpleName();
     private final Container container = new SimpleContainer();

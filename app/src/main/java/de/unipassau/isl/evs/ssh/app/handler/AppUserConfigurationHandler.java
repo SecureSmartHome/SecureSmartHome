@@ -17,15 +17,42 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupEditPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceEditPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteUserPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupNamePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupTemplatePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetPermissionPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserGroupPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserNamePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_ADD;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_ADD_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_ADD_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_DELETE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_DELETE_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_DELETE_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_NAME;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_NAME_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_NAME_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_TEMPLATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_TEMPLATE_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_TEMPLATE_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_NAME;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE;
 
 /**
  * The AppUserConfigurationHandler handles the messaging that is needed to provide user and group
@@ -69,13 +96,31 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{APP_USERINFO_GET};
+        return new RoutingKey[]{
+                APP_USERINFO_UPDATE,
+                MASTER_PERMISSION_SET_ERROR,
+                MASTER_PERMISSION_SET_REPLY,
+                MASTER_USERNAME_SET_ERROR,
+                MASTER_USERNAME_SET_REPLY,
+                MASTER_USER_SET_GROUP_ERROR,
+                MASTER_USER_SET_GROUP_REPLY,
+                MASTER_USER_DELETE_ERROR,
+                MASTER_USER_DELETE_REPLY,
+                MASTER_GROUP_ADD_ERROR,
+                MASTER_GROUP_ADD_REPLY,
+                MASTER_GROUP_DELETE_ERROR,
+                MASTER_GROUP_DELETE_REPLY,
+                MASTER_GROUP_SET_NAME_ERROR,
+                MASTER_GROUP_SET_NAME_REPLY,
+                MASTER_GROUP_SET_TEMPLATE_ERROR,
+                MASTER_GROUP_SET_TEMPLATE_REPLY
+        };
     }
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (APP_USERINFO_GET.matches(message)) {
-            UserDeviceInformationPayload payload = APP_USERINFO_GET.getPayload(message);
+        if (APP_USERINFO_UPDATE.matches(message)) {
+            UserDeviceInformationPayload payload = APP_USERINFO_UPDATE.getPayload(message);
 
             ImmutableListMultimap<UserDevice, Permission> usersToPermissions = payload.getUsersToPermissions();
             if (usersToPermissions != null) {
@@ -105,16 +150,6 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
         } else {
             invalidMessage(message);
         }
-    }
-
-    private void update() {
-        UserDeviceInformationPayload payload = new UserDeviceInformationPayload();
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-
-        Message message = new Message(payload);
-
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USERINFO_GET.getKey());
-        router.sendMessageToMaster(RoutingKeys.MASTER_USERINFO_GET, message);
     }
 
     /**
@@ -169,21 +204,14 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
         return ImmutableList.copyOf(usersToPermissions.get(user));
     }
 
-    private void sendEditMessage(MessagePayload payload) {
-        Message message = new Message(payload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USERINFO_GET.getKey());
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(RoutingKeys.MASTER_USERINFO_SET, message);
-    }
-
     /**
      * Sends a message to master to add the given group.
      *
      * @param group the group to add
      */
     public void addGroup(Group group) {
-        GroupEditPayload payload = GroupEditPayload.newAddGroupPayload(group);
-        sendEditMessage(payload);
+        Message message = new Message(new GroupPayload(group, GroupPayload.ACTION.CREATE));
+        sendMessageToMaster(MASTER_GROUP_ADD, message);
     }
 
     /**
@@ -192,62 +220,60 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      * @param group the group to remove
      */
     public void removeGroup(Group group) {
-        GroupEditPayload payload = GroupEditPayload.newRemoveGroupPayload(group);
-        sendEditMessage(payload);
+        Message message = new Message(new GroupPayload(group, GroupPayload.ACTION.DELETE));
+        sendMessageToMaster(MASTER_GROUP_DELETE, message);
     }
 
-    /**
-     * Sends a message to master to update the given {@code oldGroup} to the given {@code newGroup}
-     *
-     * @param oldGroup the group to edit
-     * @param newGroup the new group information
-     */
-    public void editGroup(Group oldGroup, Group newGroup) {
-        GroupEditPayload payload = GroupEditPayload.newEditGroupPayload(oldGroup, newGroup);
-        sendEditMessage(payload);
+    public void setGroupName(Group group, String groupName) {
+        Message message = new Message(new SetGroupNamePayload(group, groupName));
+        sendMessageToMaster(MASTER_GROUP_SET_NAME, message);
+    }
+
+    public void setGroupTemplate(Group group, String templateName) {
+        Message message = new Message(new SetGroupTemplatePayload(group, templateName));
+        sendMessageToMaster(MASTER_GROUP_SET_TEMPLATE, message);
+    }
+
+    public void setUserName(DeviceID user, String username) {
+        SetUserNamePayload payload = new SetUserNamePayload(user, username);
+        sendMessageToMaster(MASTER_USER_SET_NAME, new Message(payload));
+    }
+
+    public void setUserGroup(DeviceID user, String groupName) {
+        SetUserGroupPayload payload = new SetUserGroupPayload(user, groupName);
+        sendMessageToMaster(MASTER_USER_SET_GROUP, new Message(payload));
     }
 
     /**
      * Sends a message to master to grant the given permission to the given device.
      *
-     * @param device     the UserDevice to grant the permission
+     * @param user       the user to grant the permission
      * @param permission the permission to grant
      */
-    public void grantPermission(UserDevice device, Permission permission) {
-        UserDeviceEditPayload payload = UserDeviceEditPayload.newGrantPermissionPayload(device, permission);
-        sendEditMessage(payload);
+    public void grantPermission(DeviceID user, Permission permission) {
+        SetPermissionPayload payload = new SetPermissionPayload(user, permission, SetPermissionPayload.Action.GRANT);
+        sendMessageToMaster(MASTER_PERMISSION_SET, new Message(payload));
     }
 
     /**
      * Sends a message to master to remove the given permission from the given UserDevice.
      *
-     * @param device     the UserDevice to remove the permission from
+     * @param user       the user to remove the permission from
      * @param permission the permission to remove
      */
-    public void revokePermission(UserDevice device, Permission permission) {
-        UserDeviceEditPayload payload = UserDeviceEditPayload.newRevokePermissionPayload(device, permission);
-        sendEditMessage(payload);
-    }
-
-    /**
-     * Sends a message to master to edit the given user device.
-     *
-     * @param oldDevice the UserDevice that gets edited
-     * @param newDevice the new configuration for {@code oldUserDevice}
-     */
-    public void editUserDevice(UserDevice oldDevice, UserDevice newDevice) {
-        UserDeviceEditPayload payload = UserDeviceEditPayload.newEditUserPayload(oldDevice, newDevice);
-        sendEditMessage(payload);
+    public void revokePermission(DeviceID user, Permission permission) {
+        SetPermissionPayload payload = new SetPermissionPayload(user, permission, SetPermissionPayload.Action.REVOKE);
+        sendMessageToMaster(MASTER_PERMISSION_SET, new Message(payload));
     }
 
     /**
      * Sends a message to master to remove the given UserDevice.
      *
-     * @param userDevice the UserDevice to remove
+     * @param user the user to remove
      */
-    public void removeUserDevice(UserDevice userDevice) {
-        UserDeviceEditPayload payload = UserDeviceEditPayload.newRemoveUserPayload(userDevice);
-        sendEditMessage(payload);
+    public void removeUserDevice(DeviceID user) {
+        DeleteUserPayload payload = new DeleteUserPayload(user);
+        sendMessageToMaster(MASTER_USER_DELETE, new Message(payload));
     }
 
     /**

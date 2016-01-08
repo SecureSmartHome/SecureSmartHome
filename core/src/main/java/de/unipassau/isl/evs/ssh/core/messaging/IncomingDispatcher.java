@@ -48,7 +48,7 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
                 throw new SignatureException("Connected to Device with ID " + peerID + " but received message " +
                         "seemingly from " + msg.getFromID());
             }
-            if (dispatch(msg)) return;
+            if (dispatch(msg)) return; //if no Handler can handle the Message, forward it in the pipeline
         }
         super.channelRead(ctx, in);
     }
@@ -58,6 +58,7 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
      *
      * @param msg AddressedMessage to dispatch.
      * @return {@code true} if the Message was forwarded to at least one MessageHandler.
+     * @see #getExecutor()
      */
     public boolean dispatch(final Message.AddressedMessage msg) {
         Set<MessageHandler> handlers = mappings.get(RoutingKey.forMessage(msg));

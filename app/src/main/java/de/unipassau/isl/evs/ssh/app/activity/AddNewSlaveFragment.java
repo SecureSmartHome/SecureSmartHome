@@ -64,8 +64,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
             handler.registerNewSlave(slaveID, slaveName, passiveRegistrationToken);
             ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         } else {
-            Toast toast = Toast.makeText(getActivity().getApplicationContext(), R.string.cannot_add_slave, Toast.LENGTH_SHORT);
-            toast.show();
+            Toast.makeText(getActivity(), R.string.cannot_add_slave, Toast.LENGTH_SHORT).show();
         }
     }
 

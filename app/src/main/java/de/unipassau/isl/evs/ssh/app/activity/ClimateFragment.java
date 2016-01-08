@@ -72,7 +72,7 @@ public class ClimateFragment extends BoundFragment {
         private List<Module> climateSensorModules;
 
         public ClimateListAdapter() {
-            this.inflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            this.inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             updateModuleList();
         }
 

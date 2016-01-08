@@ -4,7 +4,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 
 /**
- * TODO JavaDoc
+ * Convenience base class for MessageHandles that can handle exactly one type of Message.
  *
  * @author Niko Fink
  */

@@ -69,8 +69,8 @@ public class AbstractComponent implements Component {
     }
 
     /**
-     * Checks and returns whether a required Component required by the given component is
-     * already registered in the container.
+     * Fetch the Component from the Container or throw an {@link IllegalStateException} if the Component or the
+     * Container itself are not available.
      *
      * @see Container#require(Key)
      */
@@ -84,11 +84,6 @@ public class AbstractComponent implements Component {
         }
     }
 
-    /**
-     * Method that returns a String for the given component
-     *
-     * @return String for the given component
-     */
     @Override
     public String toString() {
         String name = getClass().getSimpleName();

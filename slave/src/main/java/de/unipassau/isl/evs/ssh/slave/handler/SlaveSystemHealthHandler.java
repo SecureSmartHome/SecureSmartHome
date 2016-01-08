@@ -66,6 +66,7 @@ public class SlaveSystemHealthHandler extends AbstractMessageHandler implements 
             }
         }
 
+        //TODO create mapping to failed modules to send message if a modul is accessible again
         private void checkStatus(Class clazz, Component driver, Module module) {
             if (ButtonSensor.class.equals(clazz)) {
                 try {

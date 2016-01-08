@@ -8,7 +8,6 @@ import com.google.common.collect.ListMultimap;
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -23,6 +22,7 @@ import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_RENAME;
@@ -35,6 +35,50 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_
  */
 public class MasterModuleHandler extends AbstractMasterHandler {
     private static final String TAG = MasterModuleHandler.class.getSimpleName();
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_MODULE_ADD, MASTER_MODULE_GET, MASTER_MODULE_RENAME, MASTER_DEVICE_CONNECTED};
+    }
+
+    @Override
+    public void handle(Message.AddressedMessage message) {
+        if (MASTER_DEVICE_CONNECTED.matches(message)) {
+            DeviceID deviceID = MASTER_DEVICE_CONNECTED.getPayload(message).deviceID;
+            updateClient(deviceID);
+        } else if (MASTER_MODULE_ADD.matches(message)) {
+            AddNewModulePayload payload = MASTER_MODULE_ADD.getPayload(message);
+            if (handleAddModule(payload.getModule(), message)) {
+                updateAllClients();
+
+                Message reply = new Message(new AddNewModulePayload(null));
+                OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
+                router.sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
+            } else {
+                // HANDLE (Niko, 2015-12-17)
+            }
+        } else if (MASTER_MODULE_GET.matches(message)) {
+            sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), createUpdateMessage());
+        /* @author Leon Sell */
+        } else if (MASTER_MODULE_RENAME.matches(message)) {
+            if (hasPermission(
+                    message.getFromID(),
+                    de.unipassau.isl.evs.ssh.core.sec.Permission.RENAME_MODULE,
+                    null
+            )) {
+                if (handleRenameModule(message)) {
+                    updateAllClients();
+                } else {
+                    sendErrorMessage(message);
+                }
+            } else {
+                // HANDLE (Niko, 2015-12-17)
+            }
+        } else {
+            invalidMessage(message);
+        }
+        // TODO handle remove sensor
+    }
 
     private Message createUpdateMessage() {
         SlaveController slaveController = requireComponent(SlaveController.KEY);
@@ -56,51 +100,10 @@ public class MasterModuleHandler extends AbstractMasterHandler {
     }
 
     public void updateClient(DeviceID id) {
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
         Message message = createUpdateMessage();
-        router.sendMessage(id, GLOBAL_MODULES_UPDATE, message);
+        sendMessage(id, GLOBAL_MODULES_UPDATE, message);
     }
 
-    @Override
-    public void handle(Message.AddressedMessage message) {
-        if (MASTER_MODULE_ADD.matches(message)) {
-            AddNewModulePayload payload = MASTER_MODULE_ADD.getPayload(message);
-            if (handleAddModule(payload.getModule(), message)) {
-                updateAllClients();
-
-                Message reply = new Message(new AddNewModulePayload(null));
-                OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-                router.sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
-            } else {
-                // HANDLE (Niko, 2015-12-17)
-            }
-        } else if (MASTER_MODULE_GET.matches(message)) {
-            sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), createUpdateMessage());
-        /* @author Leon Sell */
-        } else if (MASTER_MODULE_RENAME.matches(message)) {
-            if (hasPermission(
-                    message.getFromID(),
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.RENAME_MODULE.toString(),
-                    null
-            )) {
-                if (handleRenameModule(message)) {
-                    updateAllClients();
-                } else {
-                    sendErrorMessage(message);
-                }
-            } else {
-                // HANDLE (Niko, 2015-12-17)
-            }
-        } else {
-            invalidMessage(message);
-        }
-        // TODO handle remove sensor
-    }
-
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_MODULE_ADD, MASTER_MODULE_GET, MASTER_MODULE_RENAME};
-    }
 
     /* @author Leon Sell */
     private boolean handleRenameModule(Message.AddressedMessage message) {
@@ -121,14 +124,15 @@ public class MasterModuleHandler extends AbstractMasterHandler {
         SlaveController slaveController = requireComponent(SlaveController.KEY);
         PermissionController permissionController = requireComponent(PermissionController.KEY);
         boolean success = false;
-        de.unipassau.isl.evs.ssh.core.sec.Permission[] permissions = de.unipassau.isl.evs.ssh.core.sec.Permission.getPermissions(module.getModuleType());
+        de.unipassau.isl.evs.ssh.core.sec.Permission[] permissions =
+                de.unipassau.isl.evs.ssh.core.sec.Permission.getPermissions(module.getModuleType());
 
         try {
             slaveController.addModule(module);
 
             if (permissions != null) {
                 for (de.unipassau.isl.evs.ssh.core.sec.Permission permission : permissions) {
-                    permissionController.addPermission(permission.toString(), module.getName());
+                    permissionController.addPermission(permission, module.getName());
                 }
             }
             success = true;

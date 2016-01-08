@@ -5,9 +5,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 
 /**
- * Handlers perform actions based on the received messages and there field of responsibility.
- * In case the executed actions result in the need of notifying another system component,
- * a new message is generated and passed on to the OutgoingRouter.
+ * MessageHandlers perform actions based on the received messages such as processing and logging data and notifying other system components.
  *
  * @author Niko Fink
  */
@@ -15,22 +13,17 @@ public interface MessageHandler {
     /**
      * Will perform actions based on the message given, e.g. permission/sanity checks.
      *
-     * @param message Message to handle.
+     * @param message message to handle.
      */
     void handle(Message.AddressedMessage message);
 
     /**
-     * TODO JavaDoc
-     *
-     * @param dispatcher
-     * @param routingKey
+     * Called by the {@link IncomingDispatcher} this Handler was added to with the RoutingKey the Handler was added for.
      */
     void handlerAdded(IncomingDispatcher dispatcher, RoutingKey routingKey);
 
     /**
-     * TODO JavaDoc
-     *
-     * @param routingKey
+     * Called by the {@link IncomingDispatcher} this Handler was added to once a mapping for a certain RoutingKey has been removed.
      */
     void handlerRemoved(RoutingKey routingKey);
 }

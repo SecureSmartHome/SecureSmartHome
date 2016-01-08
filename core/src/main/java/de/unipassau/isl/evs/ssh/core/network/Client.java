@@ -1,12 +1,17 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.net.InetAddress;
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +46,6 @@ import static android.content.Context.MODE_PRIVATE;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_HANDSHAKE_FINISHED;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT;
 
 /**
  * A netty stack accepting connections to and from the master and handling communication with them using a netty pipeline.
@@ -49,7 +53,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT
  * For details about switching to UDP discovery, see {@link #initClient()} and {@link #shouldReconnectTCP()}.
  * This component is used by the Slave and the end-user android App.
  *
- * @author Phil Werli
+ * @author Phil Werli & Niko Fink
  */
 public class Client extends AbstractComponent {
     public static final Key<Client> KEY = new Key<>(Client.class);
@@ -66,6 +70,8 @@ public class Client extends AbstractComponent {
     private static final String TAG = Client.class.getSimpleName();
     static final String PREF_TOKEN_ACTIVE = Client.class.getName() + ".PREF_TOKEN_ACTIVE";
     static final String PREF_TOKEN_PASSIVE = Client.class.getName() + ".PREF_TOKEN_PASSIVE";
+    static final String LAST_HOST = Client.class.getName() + ".LAST_HOST";
+    static final String LAST_PORT = Client.class.getName() + ".LAST_PORT";
     static final String PREF_HOST = Client.class.getName() + ".PREF_HOST";
     static final String PREF_PORT = Client.class.getName() + ".PREF_PORT";
 
@@ -94,6 +100,28 @@ public class Client extends AbstractComponent {
      * Send UDP Broadcasts when the Server can't be reached
      */
     private final UDPDiscoveryClient udpDiscovery = new UDPDiscoveryClient();
+    /**
+     * An android BroadcastReceiver that is notified once the Phone connects to or is disconnected from a WiFi network.
+     */
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager conMan = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo netInfo = conMan.getActiveNetworkInfo();
+            if (netInfo.isConnected() && !isConnectionLocal()) {
+                final boolean connectionEstablished = isConnectionEstablished();
+                final long timeout;
+                // only search for 30 seconds if a connection is already established
+                if (connectionEstablished) {
+                    timeout = TimeUnit.SECONDS.toMillis(30);
+                } else {
+                    timeout = 0;
+                }
+                Log.d(TAG, (connectionEstablished ? "Rescanning" : "Scanning") + " network for possible local connections after NetworkInfo change: " + netInfo);
+                udpDiscovery.startDiscovery(timeout);
+            }
+        }
+    };
     /**
      * Int used to calculate the time between the last and the current timeout.
      */
@@ -125,6 +153,9 @@ public class Client extends AbstractComponent {
         // And try to connect
         isActive = true;
         initClient();
+        // register BroadcastListener
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        requireComponent(ContainerService.KEY_CONTEXT).registerReceiver(broadcastReceiver, filter);
     }
 
     /**
@@ -155,19 +186,31 @@ public class Client extends AbstractComponent {
             @Override
             public void run() {
                 // Read the previous host and port from the shared preferences
-                final String host = getHost();
-                final int port = getPort();
+                InetSocketAddress address = getLastAddress();
 
                 // Connect to TCP if the address of the Server/Master is known and not too many connection attempts have failed
-                if (host != null && shouldReconnectTCP()) {
-                    connectClient(host, port);
+                boolean shouldReconnectTCP = shouldReconnectTCP();
+                if (address != null && !shouldReconnectTCP) {
+                    // if too many attempts failed with the last address, retry with the configured address
+                    editPrefs().setLastAddress(null).commit();
+                    lastDisconnect = 0;
+                    disconnectsInARow = 0;
+                    shouldReconnectTCP = true;
+                    address = getConfiguredAddress();
+                } else if (address == null) {
+                    // if no previous address is found, use the configured address
+                    address = getConfiguredAddress();
+                }
+
+                if (address != null && shouldReconnectTCP) {
+                    connectClient(address);
                 } else {
-                    if (host == null) {
+                    if (address == null) {
                         Log.w(TAG, "No master known, starting UDP discovery");
                     } else {
-                        Log.w(TAG, "Too many disconnects from " + host + ":" + port + ", trying UDP discovery");
+                        Log.w(TAG, "Too many disconnects from " + address + ", trying UDP discovery");
                     }
-                    requireComponent(UDPDiscoveryClient.KEY).startDiscovery();
+                    requireComponent(UDPDiscoveryClient.KEY).startDiscovery(0);
                 }
             }
         });
@@ -197,9 +240,9 @@ public class Client extends AbstractComponent {
      * If the connection fails, {@link #channelClosed(Channel)} is called until to many retries are made and the Client
      * switches to searching the master via UDP discovery using the {@link UDPDiscoveryClient}.
      */
-    protected void connectClient(String host, int port) {
-        Log.i(TAG, "Client connecting to " + host + ":" + port);
-        notifyClientConnecting(host, port);
+    protected void connectClient(InetSocketAddress address) {
+        Log.i(TAG, "Client connecting to " + address);
+        notifyClientConnecting(address.getHostString(), address.getPort());
 
         // TCP Connection
         Bootstrap b = new Bootstrap()
@@ -210,7 +253,7 @@ public class Client extends AbstractComponent {
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) TimeUnit.SECONDS.toMillis(5));
 
         // Wait for the start of the client
-        channelFuture = b.connect(host, port);
+        channelFuture = b.connect(address);
         channelFuture.addListener(new ChannelFutureListener() {
             /**
              * Called once the operation completes, either because the connect was successful or because of an error.
@@ -289,17 +332,17 @@ public class Client extends AbstractComponent {
      * Called by {@link UDPDiscoveryClient} once it found a possible address of the master.
      * Saves the new address
      */
-    public void onMasterFound(InetAddress address, int port) {
-        onMasterFound(address, port, null);
+    public void onMasterFound(InetSocketAddress address) {
+        onMasterFound(address, null);
     }
 
-    public void onMasterFound(InetAddress address, int port, String token) {
-        Log.i(TAG, "discovery successful, found " + address + ":" + port + " with token " + token);
-        editPrefs()
-                .setHost(address.getHostAddress())
-                .setPort(port)
-                .setActiveRegistrationToken(token)
-                .commit();
+    public void onMasterFound(InetSocketAddress address, String token) {
+        Log.i(TAG, "discovery successful, found " + address + " with token " + token);
+        final PrefEditor editor = editPrefs().setLastAddress(address);
+        if (token != null) {
+            editor.setActiveRegistrationToken(token);
+        }
+        editor.commit();
         lastDisconnect = 0;
         disconnectsInARow = 0;
         notifyMasterFound();
@@ -321,6 +364,7 @@ public class Client extends AbstractComponent {
         getContainer().unregister(udpDiscovery);
         getContainer().unregister(outgoingRouter);
         getContainer().unregister(incomingDispatcher);
+        requireComponent(ContainerService.KEY_CONTEXT).unregisterReceiver(broadcastReceiver);
         super.destroy();
     }
 
@@ -336,9 +380,10 @@ public class Client extends AbstractComponent {
 
     /**
      * EventLoopGroup for the {@link ClientIncomingDispatcher} and the {@link ClientOutgoingRouter}
+     * //TODO Niko: move to interface (Niko, 2016-01-07)
      */
     @NonNull
-    EventLoopGroup getAliveExecutor() {
+    public EventLoopGroup getAliveExecutor() {
         if (!isExecutorAlive()) {
             // Setup the Executor and Connection Pool
             executor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("client"));
@@ -368,11 +413,11 @@ public class Client extends AbstractComponent {
      * @return the local Address this client is listening on
      */
     @Nullable
-    public SocketAddress getAddress() {
+    public InetSocketAddress getAddress() {
         if (channelFuture == null || channelFuture.channel() == null) {
             return null;
         } else {
-            return channelFuture.channel().localAddress();
+            return (InetSocketAddress) channelFuture.channel().localAddress();
         }
     }
 
@@ -409,10 +454,13 @@ public class Client extends AbstractComponent {
      *
      * @throws InterruptedException
      */
-    // TODO Niko: handle edge cases
     public void awaitShutdown() throws InterruptedException {
-        channelFuture.channel().closeFuture().await();
-        executor.terminationFuture().await();
+        if (channelFuture != null && channelFuture.channel() != null) {
+            channelFuture.channel().closeFuture().await();
+        }
+        if (executor != null) {
+            executor.terminationFuture().await();
+        }
     }
 
     //Shared Preferences////////////////////////////////////////////////////////////////////////////////////////////////
@@ -437,12 +485,32 @@ public class Client extends AbstractComponent {
         return DeviceConnectInformation.decodeToken(getPassiveRegistrationToken());
     }
 
-    public int getPort() {
-        return getSharedPrefs().getInt(PREF_PORT, DEFAULT_LOCAL_PORT);
+    public InetSocketAddress getConnectAddress() {
+        InetSocketAddress address = getLastAddress();
+        if (address == null) {
+            address = getConfiguredAddress();
+        }
+        return address;
     }
 
-    public String getHost() {
-        return getSharedPrefs().getString(PREF_HOST, null);
+    public InetSocketAddress getLastAddress() {
+        return getPrefsAddress(LAST_HOST, LAST_PORT);
+    }
+
+    public InetSocketAddress getConfiguredAddress() {
+        return getPrefsAddress(PREF_HOST, PREF_PORT);
+    }
+
+    @Nullable
+    private InetSocketAddress getPrefsAddress(String prefsHost, String prefsPort) {
+        final SharedPreferences prefs = getSharedPrefs();
+        final String host = prefs.getString(prefsHost, null);
+        final int port = prefs.getInt(prefsPort, -1);
+        if (host == null || port < 0) {
+            return null;
+        } else {
+            return InetSocketAddress.createUnresolved(host, port);
+        }
     }
 
     public PrefEditor editPrefs() {
@@ -474,14 +542,24 @@ public class Client extends AbstractComponent {
             return setPassiveRegistrationToken(DeviceConnectInformation.encodeToken(token));
         }
 
-        public PrefEditor setPort(int port) {
-            editor.putInt(PREF_PORT, port);
+        public PrefEditor setLastAddress(InetSocketAddress address) {
+            setPrefsAddress(address, LAST_HOST, LAST_PORT);
             return this;
         }
 
-        public PrefEditor setHost(String host) {
-            editor.putString(PREF_HOST, host);
+        public PrefEditor setConfiguredAddress(InetSocketAddress address) {
+            setPrefsAddress(address, PREF_HOST, PREF_PORT);
             return this;
+        }
+
+        private void setPrefsAddress(InetSocketAddress address, String prefHost, String prefPort) {
+            if (address == null) {
+                editor.remove(prefPort);
+                editor.remove(prefHost);
+            } else {
+                editor.putInt(prefPort, address.getPort());
+                editor.putString(prefHost, address.getHostString());
+            }
         }
 
         public boolean commit() {

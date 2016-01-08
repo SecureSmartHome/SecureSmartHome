@@ -22,12 +22,11 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_REQUEST
  * @author Christoph Fraedrich
  */
 public class MasterClimateHandler extends AbstractMasterHandler {
-    private boolean mainLampOn = false;
     private final Map<Module, ClimatePayload> latestWeatherData = new HashMap<>();
+    private final Map<Module, Boolean> latestLightStatus = new HashMap<>();
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        saveMessage(message);
         if (MASTER_PUSH_WEATHER_INFO.matches(message)) {
             ClimatePayload payload = MASTER_PUSH_WEATHER_INFO.getPayload(message);
             latestWeatherData.put(payload.getModule(), payload) ;
@@ -35,9 +34,9 @@ public class MasterClimateHandler extends AbstractMasterHandler {
         } else if (MASTER_LIGHT_GET.matches(message) &&
                 message.getHeader(Message.HEADER_REFERENCES_ID) != null) {
             //Reply to get request, this means this message actually contains an updated lamp value
-
             LightPayload payload = MASTER_LIGHT_GET.getPayload(message);
-            mainLampOn = payload.getOn(); //TODO check if this is the first lamp, how?
+
+            latestLightStatus.put(payload.getModule(), payload.getOn());
         } else if (MASTER_REQUEST_WEATHER_INFO.matches(message)) {
             for(ClimatePayload payload : latestWeatherData.values()) {
                 sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY),
@@ -59,9 +58,13 @@ public class MasterClimateHandler extends AbstractMasterHandler {
             ClimatePayload newPayload = new ClimatePayload(payload, Permission.HUMIDITY_WARNING.toString());
             sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(newPayload));
         }
-        if (payload.getVisible() > MasterConstants.ClimateThreshold.VISIBLE_LIGHT && mainLampOn) {
-            ClimatePayload newPayload = new ClimatePayload(payload, Permission.BRIGHTNESS_WARNING.toString());
-            sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(newPayload));
+
+        if(payload.getVisible() > MasterConstants.ClimateThreshold.VISIBLE_LIGHT )
+        for (Module module : latestLightStatus.keySet()) {
+            if (latestLightStatus.get(module)) {
+                ClimatePayload newPayload = new ClimatePayload(payload, Permission.BRIGHTNESS_WARNING.toString());
+                sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(newPayload));
+            }
         }
     }
 }

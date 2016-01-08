@@ -44,13 +44,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_USER_REGISTER.matches(message)) {
-            if (hasPermission(
-                    message.getFromID(),
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER.toString(),
-                    null
-            )) {
-                handleInitRequest(message);
-            }
+            handleInitRequest(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
@@ -60,25 +54,27 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_USER_REGISTER};
+        return new RoutingKey[] { MASTER_USER_REGISTER };
     }
 
     /**
-     * TODO javadoc
+     * Generates a new token which devices can use to register at the system.
+     * @param device information which will be associated with the device using this token to register.
+     * @return the generated token.
      */
     public byte[] generateNewRegisterToken(UserDevice device) {
-        byte[] token = DeviceConnectInformation.getRandomToken();
+        final byte[] token = DeviceConnectInformation.getRandomToken();
         userDeviceForToken.put(Base64.encodeToString(token, Base64.NO_WRAP), device);
         return token;
     }
 
     /**
+     * Uses the information saved for the given token to register the new device.
      * @return {@code true} if the registration was successful
      */
     public boolean registerDevice(X509Certificate certificate, byte[] token) {
-        String base64Token = Base64.encodeToString(token, Base64.NO_WRAP);
-        DeviceID deviceID;
-        deviceID = DeviceID.fromCertificate(certificate);
+        final String base64Token = Base64.encodeToString(token, Base64.NO_WRAP);
+        final DeviceID deviceID = DeviceID.fromCertificate(certificate);
         if (userDeviceForToken.containsKey(base64Token)) {
             UserDevice newDevice = userDeviceForToken.get(base64Token);
             newDevice.setUserDeviceID(deviceID);
@@ -86,8 +82,8 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
             try {
                 requireComponent(KeyStoreController.KEY).saveCertificate(certificate, deviceID.getIDString());
             } catch (GeneralSecurityException gse) {
-                throw new IllegalArgumentException("An error occurred while adding the certificate of the new device to"
-                        + " the KeyStore.", gse); //FIXME
+                throw new RuntimeException("An error occurred while adding the certificate of the new device to"
+                        + " the KeyStore.", gse);
             }
             addUserDeviceToDatabase(deviceID, newDevice);
             userDeviceForToken.remove(base64Token);
@@ -103,20 +99,20 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
         try {
             requireComponent(UserManagementController.KEY).addUserDevice(newDevice);
         } catch (DatabaseControllerException dce) {
-            throw new IllegalArgumentException("An error occurred while adding the new device to the database", dce);
+            throw new RuntimeException("An error occurred while adding the new device to the database", dce);
         }
-        //Add permissions
+        //Add permissions. First device gets all permissions. Others get the permissions of the group they belong to.
         if (requireComponent(UserManagementController.KEY).getUserDevices().size() == 1) {
             List<Permission> permissions = requireComponent(PermissionController.KEY).getPermissions();
             for (Permission permission : permissions) {
                 try {
                     requireComponent(PermissionController.KEY).addUserPermission(
                             deviceID,
-                            permission.getName(),
+                            permission.getPermission(),
                             permission.getModuleName()
                     );
                 } catch (UnknownReferenceException ure) {
-                    throw new IllegalArgumentException("There was a problem adding all permissions to the newly added user. " +
+                    throw new RuntimeException("There was a problem adding all permissions to the newly added user. " +
                             "Maybe a permission was deleted while adding permissions to the new user.", ure);
                 }
             }
@@ -129,11 +125,11 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                 try {
                     requireComponent(PermissionController.KEY).addUserPermission(
                             deviceID,
-                            permission.getName(),
+                            permission.getPermission(),
                             permission.getModuleName()
                     );
                 } catch (UnknownReferenceException ure) {
-                    throw new IllegalArgumentException("There was a problem adding all permissions to the newly added user. " +
+                    throw new RuntimeException("There was a problem adding all permissions to the newly added user. " +
                             "Maybe a permission was deleted while adding permissions to the new user.", ure);
                 }
             }
@@ -141,12 +137,19 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     }
 
     private void handleInitRequest(Message.AddressedMessage message) {
-        GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload = MASTER_USER_REGISTER.getPayload(message);
-        byte[] newToken = generateNewRegisterToken(generateNewRegisterTokenPayload.getUserDevice());
-        String base64Token = Base64.encodeToString(newToken, Base64.NO_WRAP);
-        userDeviceForToken.put(base64Token, generateNewRegisterTokenPayload.getUserDevice());
-        Message reply = new Message(new GenerateNewRegisterTokenPayload(newToken,
-                generateNewRegisterTokenPayload.getUserDevice()));
-        sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
+        if (hasPermission(
+                message.getFromID(),
+                de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER,
+                null
+        )) {
+            GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload = MASTER_USER_REGISTER.getPayload(message);
+            byte[] newToken = generateNewRegisterToken(generateNewRegisterTokenPayload.getUserDevice());
+            String base64Token = Base64.encodeToString(newToken, Base64.NO_WRAP);
+            userDeviceForToken.put(base64Token, generateNewRegisterTokenPayload.getUserDevice());
+            Message reply = new Message(new GenerateNewRegisterTokenPayload(newToken,
+                    generateNewRegisterTokenPayload.getUserDevice()));
+            sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
+        }
+        //TODO Leon: else error message (Leon, 07.01.16)
     }
 }

@@ -21,11 +21,13 @@ public class MasterSystemHealthCheckHandler extends AbstractMasterHandler {
     public void handle(Message.AddressedMessage message) {
         if (MASTER_SYSTEM_HEALTH_CHECK.matches(message)) {
             final SystemHealthPayload payload = MASTER_SYSTEM_HEALTH_CHECK.getPayload(message);
+            // TODO: what happens when there's no error? (07.01.16, Leon)
             if (payload.getHasError()) {
                 String name = payload.getModule().getName();
                 MessagePayload respPayload = new NotificationPayload(SYSTEM_HEALTH_WARNING.toString(), "Error at module: " + name);
                 sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(respPayload));
             }
+            //TODO propagate message that shows that a modul is accessible again
         } else {
             invalidMessage(message);
         }
