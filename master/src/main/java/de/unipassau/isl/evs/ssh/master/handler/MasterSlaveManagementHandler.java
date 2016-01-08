@@ -2,27 +2,16 @@ package de.unipassau.isl.evs.ssh.master.handler;
 
 import android.util.Log;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-
-import java.util.List;
-
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
-import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterSlavePayload;
-import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
-import de.unipassau.isl.evs.ssh.master.network.Server;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_REGISTER;
 
 /**
@@ -32,9 +21,9 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_R
  *
  * @author Leon Sell
  */
-public class MasterRoutingTableHandler extends AbstractMasterHandler implements Component {
-    public static final Key<MasterRoutingTableHandler> KEY = new Key<>(MasterRoutingTableHandler.class);
-    private static final String TAG = MasterRoutingTableHandler.class.getSimpleName();
+public class MasterSlaveManagementHandler extends ModuleBroadcastHandler implements Component {
+    public static final Key<MasterSlaveManagementHandler> KEY = new Key<>(MasterSlaveManagementHandler.class);
+    private static final String TAG = MasterSlaveManagementHandler.class.getSimpleName();
 
     @Override
     public void handle(Message.AddressedMessage message) {
@@ -42,6 +31,7 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler implements 
             handleSlaveRegister(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
+            //TODO Leon handle MASTER_SLAVE_DELETE
         } else {
             invalidMessage(message);
         }
@@ -78,29 +68,5 @@ public class MasterRoutingTableHandler extends AbstractMasterHandler implements 
     public void registerSlave(Slave slave) throws AlreadyInUseException {
         requireComponent(SlaveController.KEY).addSlave(slave);
         updateAllClients();
-    }
-
-    private void updateAllClients() {
-        Iterable<DeviceID> connectedClients = requireComponent(Server.KEY).getActiveDevices();
-        for (DeviceID connectedClient : connectedClients) {
-            updateClient(connectedClient);
-        }
-    }
-
-    public void updateClient(DeviceID id) {
-        final Message message = createUpdateMessage();
-        requireComponent(OutgoingRouter.KEY).sendMessage(id, GLOBAL_MODULES_UPDATE, message);
-    }
-
-    private Message createUpdateMessage() {
-        final SlaveController slaveController = requireComponent(SlaveController.KEY);
-        List<Slave> slaves = slaveController.getSlaves();
-        ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
-
-        for (Slave slave : slaves) {
-            modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
-        }
-
-        return new Message(new ModulesPayload(modulesAtSlave, slaves));
     }
 }

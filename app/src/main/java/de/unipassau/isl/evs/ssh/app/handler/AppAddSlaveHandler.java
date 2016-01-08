@@ -31,6 +31,7 @@ public class AppAddSlaveHandler extends AbstractMessageHandler implements Compon
 
     @Override
     public RoutingKey[] getRoutingKeys() {
+        //TODO HANDLE delete slave
         return new RoutingKey[]{APP_SLAVE_REGISTER};
     }
 

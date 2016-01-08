@@ -1,25 +1,17 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-
-import java.util.List;
-
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
+import de.unipassau.isl.evs.ssh.core.handler.WrongAccessPointException;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModifyModulePayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
-import de.unipassau.isl.evs.ssh.master.network.Server;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_REMOVE;
@@ -30,7 +22,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_
  * @author Andreas Bucher
  * @author Wolfgang Popp
  */
-public class MasterModuleHandler extends AbstractMasterHandler {
+public class MasterModuleHandler extends ModuleBroadcastHandler {
 
     @Override
     public RoutingKey[] getRoutingKeys() {
@@ -71,7 +63,14 @@ public class MasterModuleHandler extends AbstractMasterHandler {
             return;
         }
 
+
         Module module = payload.getModule();
+
+        if (!module.getModuleType().isValidAccessPoint(module.getModuleAccessPoint())) {
+            sendError(original, new WrongAccessPointException(module.getModuleAccessPoint().getType()));
+            return;
+        }
+
         SlaveController slaveController = requireComponent(SlaveController.KEY);
         PermissionController permissionController = requireComponent(PermissionController.KEY);
         Permission[] permissions = Permission.getPermissions(module.getModuleType());
@@ -94,30 +93,6 @@ public class MasterModuleHandler extends AbstractMasterHandler {
     private void sendOnSuccess(Message.AddressedMessage original) {
         updateAllClients();
         sendReply(original, new Message());
-    }
-
-    private Message createUpdateMessage() {
-        SlaveController slaveController = requireComponent(SlaveController.KEY);
-        List<Slave> slaves = slaveController.getSlaves();
-        ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
-
-        for (Slave slave : slaves) {
-            modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
-        }
-
-        return new Message(new ModulesPayload(modulesAtSlave, slaves));
-    }
-
-    private void updateAllClients() {
-        Iterable<DeviceID> connectedClients = requireComponent(Server.KEY).getActiveDevices();
-        for (DeviceID connectedClient : connectedClients) {
-            updateClient(connectedClient);
-        }
-    }
-
-    public void updateClient(DeviceID id) {
-        Message message = createUpdateMessage();
-        sendMessage(id, GLOBAL_MODULES_UPDATE, message);
     }
 
     private void sendError(Message.AddressedMessage original, Exception e) {
