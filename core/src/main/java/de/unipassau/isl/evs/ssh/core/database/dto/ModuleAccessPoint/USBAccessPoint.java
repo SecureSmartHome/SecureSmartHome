@@ -9,9 +9,6 @@ public class USBAccessPoint extends ModuleAccessPoint {
     public static final String TYPE = "USB";
     private int port;
 
-    public USBAccessPoint() {
-    }
-
     public USBAccessPoint(int port) {
         this.port = port;
     }

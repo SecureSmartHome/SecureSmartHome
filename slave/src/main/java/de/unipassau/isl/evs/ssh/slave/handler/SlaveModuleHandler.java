@@ -13,11 +13,13 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.MockAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
+import de.unipassau.isl.evs.ssh.core.handler.WrongAccessPointException;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -91,41 +93,53 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
 
     private void registerButtonSensor(Module buttonSensor) throws WrongAccessPointException, EvsIoException {
         String moduleName = buttonSensor.getName();
-        Key<ButtonSensor> key = new Key<>(ButtonSensor.class, moduleName);
-        if (!(buttonSensor.getModuleAccessPoint() instanceof GPIOAccessPoint)) {
+        GPIOAccessPoint accessPoint = (GPIOAccessPoint) buttonSensor.getModuleAccessPoint();
+
+        if (!buttonSensor.getModuleType().isValidAccessPoint(accessPoint)) {
             throw new WrongAccessPointException();
         }
-        GPIOAccessPoint accessPoint = (GPIOAccessPoint) buttonSensor.getModuleAccessPoint();
+
         assert getContainer() != null;
+        Key<ButtonSensor> key = new Key<>(ButtonSensor.class, moduleName);
         getContainer().register(key, new ButtonSensor(accessPoint.getPort(), moduleName));
     }
 
     private void registerDoorBuzzer(Module doorBuzzer) throws WrongAccessPointException, EvsIoException {
         String moduleName = doorBuzzer.getName();
-        Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, moduleName);
-        if (!(doorBuzzer.getModuleAccessPoint() instanceof GPIOAccessPoint)) {
+        GPIOAccessPoint accessPoint = (GPIOAccessPoint) doorBuzzer.getModuleAccessPoint();
+
+        if (!(doorBuzzer.getModuleType().isValidAccessPoint(accessPoint))) {
             throw new WrongAccessPointException();
         }
-        GPIOAccessPoint accessPoint = (GPIOAccessPoint) doorBuzzer.getModuleAccessPoint();
+
         assert getContainer() != null;
+        Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, moduleName);
         getContainer().register(key, new DoorBuzzer(accessPoint.getPort()));
     }
 
     private void registerReedSensor(Module reedSensor) throws WrongAccessPointException, EvsIoException {
         String moduleName = reedSensor.getName();
-        Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
-        if (!(reedSensor.getModuleAccessPoint() instanceof GPIOAccessPoint)) {
+        GPIOAccessPoint accessPoint = (GPIOAccessPoint) reedSensor.getModuleAccessPoint();
+
+        if (!(reedSensor.getModuleType().isValidAccessPoint(accessPoint))) {
             throw new WrongAccessPointException();
         }
-        GPIOAccessPoint accessPoint = (GPIOAccessPoint) reedSensor.getModuleAccessPoint();
+
+        Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
         assert getContainer() != null;
         getContainer().register(key, new ReedSensor(accessPoint.getPort(), moduleName));
     }
 
-    private void registerWeatherSensor(Module weatherSensor) {
+    private void registerWeatherSensor(Module weatherSensor) throws WrongAccessPointException {
         String moduleName = weatherSensor.getName();
-        Key<WeatherSensor> key = new Key<>(WeatherSensor.class, moduleName);
+        USBAccessPoint accessPoint = (USBAccessPoint) weatherSensor.getModuleAccessPoint();
+
+        if (!weatherSensor.getModuleType().isValidAccessPoint(accessPoint)) {
+            throw new WrongAccessPointException();
+        }
+
         assert getContainer() != null;
+        Key<WeatherSensor> key = new Key<>(WeatherSensor.class, moduleName);
         getContainer().register(key, new WeatherSensor());
     }
 
@@ -133,16 +147,19 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
         assert getContainer() != null;
 
         String moduleName = plugSwitch.getName();
-        Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, moduleName);
 
-        if (plugSwitch.getModuleAccessPoint() instanceof WLANAccessPoint) {
+        if (!plugSwitch.getModuleType().isValidAccessPoint(plugSwitch.getModuleAccessPoint())) {
+            throw new WrongAccessPointException();
+        }
+
+        if ( plugSwitch.getModuleAccessPoint().getType().equals(WLANAccessPoint.TYPE)) {
+            Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, moduleName);
             WLANAccessPoint accessPoint = (WLANAccessPoint) plugSwitch.getModuleAccessPoint();
             getContainer().register(key, new EdimaxPlugSwitch(accessPoint.getiPAddress(),
                     accessPoint.getPort(), accessPoint.getUsername(), accessPoint.getPassword()));
-        } else if (plugSwitch.getModuleAccessPoint() instanceof MockAccessPoint) {
+        } else if (plugSwitch.getModuleAccessPoint().getType().equals(MockAccessPoint.TYPE)) {
+            Key<EdimaxPlugSwitchMock> key = new Key<>(EdimaxPlugSwitchMock.class, moduleName);
             getContainer().register(key, new EdimaxPlugSwitchMock());
-        } else {
-            throw new WrongAccessPointException();
         }
     }
 
@@ -195,16 +212,9 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
             try {
                 updateModule(modules);
             } catch (WrongAccessPointException | EvsIoException e) {
-                // HANDLE
-                Log.e(TAG, "Could not update Modules from payload " + payload, e);
-                sendMessage(
-                        message.getFromID(),
-                        message.getHeader(Message.HEADER_REPLY_TO_KEY),
-                        new Message(new MessageErrorPayload(message.getPayload()))
-                );
+                sendReply(message, new Message(new ErrorPayload(e)));
             }
         } else {
-            // HANDLE
             invalidMessage(message);
         }
     }
@@ -212,23 +222,5 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
     @Override
     public RoutingKey[] getRoutingKeys() {
         return new RoutingKey[]{GLOBAL_MODULES_UPDATE};
-    }
-
-    private class WrongAccessPointException extends Exception {
-        public WrongAccessPointException() {
-            super();
-        }
-
-        public WrongAccessPointException(String message) {
-            super(message);
-        }
-
-        public WrongAccessPointException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public WrongAccessPointException(Throwable cause) {
-            super(cause);
-        }
     }
 }

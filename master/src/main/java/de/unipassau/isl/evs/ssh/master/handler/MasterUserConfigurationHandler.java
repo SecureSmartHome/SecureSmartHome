@@ -32,6 +32,7 @@ import de.unipassau.isl.evs.ssh.master.database.IsReferencedException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
+import de.unipassau.isl.evs.ssh.master.network.Server;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
@@ -250,9 +251,8 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     }
 
     private void broadcastUserConfigurationUpdated() {
-        List<UserDevice> userDevices = requireComponent(UserManagementController.KEY).getUserDevices();
-        for (UserDevice userDevice : userDevices) {
-            sendUpdateToUserDevice(userDevice.getUserDeviceID());
+        for (DeviceID deviceID : requireComponent(Server.KEY).getActiveDevices()) {
+            sendUpdateToUserDevice(deviceID);
         }
     }
 

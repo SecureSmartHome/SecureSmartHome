@@ -18,7 +18,7 @@ import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
-import de.unipassau.isl.evs.ssh.master.handler.MasterRoutingTableHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterSlaveManagementHandler;
 
 /**
  * TODO Niko: javadoc (Niko, 2016-01-05)
@@ -56,7 +56,7 @@ public class RegisterLocalSlaveActivity extends BoundActivity {
                 );
 
                 try {
-                    requireComponent(MasterRoutingTableHandler.KEY).registerSlave(slave);
+                    requireComponent(MasterSlaveManagementHandler.KEY).registerSlave(slave);
                     setResult(Activity.RESULT_OK);
                     finish();
                 } catch (AlreadyInUseException e) {

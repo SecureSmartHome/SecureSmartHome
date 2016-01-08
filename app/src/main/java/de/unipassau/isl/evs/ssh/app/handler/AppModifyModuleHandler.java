@@ -8,20 +8,22 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.AddNewModulePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ModifyModulePayload;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_MODULE_ADD;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_REMOVE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_REMOVE_REPLY;
 
 /**
- * The AppNewModuleHandler handles the messaging needed to register a new ElectronicModule.
+ * The AppModifyModuleHandler handles the messaging needed to register a new ElectronicModule.
  *
  * @author Wolfgang Popp
  */
-public class AppNewModuleHandler extends AbstractMessageHandler implements Component {
-    public static final Key<AppNewModuleHandler> KEY = new Key<>(AppNewModuleHandler.class);
+public class AppModifyModuleHandler extends AbstractMessageHandler implements Component {
+    public static final Key<AppModifyModuleHandler> KEY = new Key<>(AppModifyModuleHandler.class);
 
     private List<NewModuleListener> listeners = new LinkedList<>();
 
@@ -43,7 +45,7 @@ public class AppNewModuleHandler extends AbstractMessageHandler implements Compo
      *
      * @param listener the listener to add
      */
-    public void addNewModuleListener(AppNewModuleHandler.NewModuleListener listener) {
+    public void addNewModuleListener(AppModifyModuleHandler.NewModuleListener listener) {
         listeners.add(listener);
     }
 
@@ -52,7 +54,7 @@ public class AppNewModuleHandler extends AbstractMessageHandler implements Compo
      *
      * @param listener the listener to remove
      */
-    public void removeNewModuleListener(AppNewModuleHandler.NewModuleListener listener) {
+    public void removeNewModuleListener(AppModifyModuleHandler.NewModuleListener listener) {
         listeners.remove(listener);
     }
 
@@ -64,9 +66,12 @@ public class AppNewModuleHandler extends AbstractMessageHandler implements Compo
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (APP_MODULE_ADD.matches(message)) {
+        if (MASTER_MODULE_ADD_REPLY.matches(message)) {
             fireRegistrationFinished(true);
-            //HANDLE registration failed
+        } else if (MASTER_MODULE_ADD_ERROR.matches(message)) {
+            fireRegistrationFinished(false);
+        } else if (MASTER_MODULE_REMOVE_REPLY.matches(message)) {
+            // fireRegistrationFinished(false);
         } else {
             invalidMessage(message);
         }
@@ -74,7 +79,11 @@ public class AppNewModuleHandler extends AbstractMessageHandler implements Compo
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{APP_MODULE_ADD};
+        return new RoutingKey[]{
+                MASTER_MODULE_ADD_REPLY,
+                MASTER_MODULE_ADD_ERROR,
+                MASTER_MODULE_REMOVE_REPLY
+        };
     }
 
     /**
@@ -84,12 +93,12 @@ public class AppNewModuleHandler extends AbstractMessageHandler implements Compo
      * @param module the module to register
      */
     public void addNewModule(Module module) {
-        AddNewModulePayload payload = new AddNewModulePayload(module);
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
+        ModifyModulePayload payload = new ModifyModulePayload(module);
+        sendMessageToMaster(MASTER_MODULE_ADD, new Message(payload));
+    }
 
-        Message message = new Message(payload);
-
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_MODULE_ADD.getKey());
-        router.sendMessageToMaster(MASTER_MODULE_ADD, message);
+    public void removeModule(Module module){
+        ModifyModulePayload payload = new ModifyModulePayload(module);
+        sendMessageToMaster(MASTER_MODULE_REMOVE, new Message(payload));
     }
 }

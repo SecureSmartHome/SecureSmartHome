@@ -48,6 +48,11 @@ public class ClimatePayload implements MessagePayload {
         this.notificationType = notificationType;
     }
 
+    /**
+     * Payload containing current WeatherSensor data.
+     *
+     * @return ClimatePayload containing the ClimatePayload data.
+     */
     public ClimatePayload getClimatePayload() {
         return ClimatePayload.this;
     }

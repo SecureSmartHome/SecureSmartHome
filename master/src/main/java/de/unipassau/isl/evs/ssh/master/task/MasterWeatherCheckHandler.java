@@ -10,6 +10,7 @@ import android.util.Log;
 import net.aksingh.owmjapis.CurrentWeather;
 import net.aksingh.owmjapis.OpenWeatherMap;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
@@ -19,11 +20,13 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
@@ -41,8 +44,12 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     private boolean windowClosed;
 
     private void sendWarningNotification() {
+        //TODO chris: should warntext always be the same? (It will snow today)
+        //No hardcoded strings, only in strings.xml
         WeatherPayload payload = new WeatherPayload(true, "Please close all doors and windows. It will rain today.");
-        sendMessageLocal(RoutingKeys.MASTER_NOTIFICATION_SEND, new Message(payload));
+        Serializable serializableWeather = payload.getWarnText();
+        NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
+        notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.WEATHER_WARNING, serializableWeather);
     }
 
     @Override

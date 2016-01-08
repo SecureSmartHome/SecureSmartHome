@@ -15,11 +15,12 @@ import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterCameraHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterClimateHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterDoorBellHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterDoorHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterModuleHandler;
-import de.unipassau.isl.evs.ssh.master.handler.MasterNotificationHandler;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
-import de.unipassau.isl.evs.ssh.master.handler.MasterRoutingTableHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterSlaveManagementHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterSystemHealthCheckHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserLocationHandler;
@@ -46,14 +47,16 @@ public class MasterContainer extends ContainerService {
         register(UserManagementController.KEY, new UserManagementController());
 
         register(MasterRegisterDeviceHandler.KEY, new MasterRegisterDeviceHandler());
-        register(MasterRoutingTableHandler.KEY, new MasterRoutingTableHandler());
         register(MasterUserLocationHandler.KEY, new MasterUserLocationHandler());
         register(MasterClimateHandler.KEY, new MasterClimateHandler());
+        register(MasterSlaveManagementHandler.KEY, new MasterSlaveManagementHandler());
+
+        register(NotificationBroadcaster.KEY, new NotificationBroadcaster());
+
 
         registerHandler(new MasterDoorBellHandler());
         registerHandler(new MasterModuleHandler());
         registerHandler(new MasterUserConfigurationHandler());
-        registerHandler(new MasterNotificationHandler());
         registerHandler(new MasterLightHandler());
         registerHandler(new MasterSystemHealthCheckHandler());
         registerHandler(new MasterCameraHandler());
@@ -61,7 +64,7 @@ public class MasterContainer extends ContainerService {
 
         registerHandler(new MasterWeatherCheckHandler());
 
-        //registerHandler(new MasterDoorHandler()); //FIXME was not registered before (Niko,  2015-12-17)
+        registerHandler(new MasterDoorHandler());
         //registerHandler(new MasterPermissionHandler());
 
         Log.i(getClass().getSimpleName(), "Master set up! ID is " + require(NamingManager.KEY).getOwnID());

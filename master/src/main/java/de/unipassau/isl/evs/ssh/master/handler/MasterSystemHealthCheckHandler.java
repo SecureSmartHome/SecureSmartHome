@@ -1,14 +1,14 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import java.io.Serializable;
+
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_NOTIFICATION_SEND;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.SYSTEM_HEALTH_WARNING;
 
 /**
  * Handler that periodically checks if hardware system components are still active and working properly.
@@ -22,14 +22,13 @@ public class MasterSystemHealthCheckHandler extends AbstractMasterHandler {
         if (MASTER_SYSTEM_HEALTH_CHECK.matches(message)) {
             final SystemHealthPayload payload = MASTER_SYSTEM_HEALTH_CHECK.getPayload(message);
             if (payload.getHasError()) {
-                String name = payload.getModule().getName();
-                MessagePayload respPayload = new NotificationPayload(SYSTEM_HEALTH_WARNING.toString(), "Error at module: " + name);
-                sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(respPayload));
+                Serializable name = payload.getModule().getName();
+                NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
+                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.SYSTEM_HEALTH_WARNING, true, name);
             } else {
-                //FIXME use new notification system.
-                String name = payload.getModule().getName();
-                MessagePayload respPayload = new NotificationPayload(SYSTEM_HEALTH_WARNING.toString(), "Error resolved at module: " + name);
-                sendMessageLocal(MASTER_NOTIFICATION_SEND, new Message(respPayload));
+                Serializable name = payload.getModule().getName();
+                NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
+                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.SYSTEM_HEALTH_WARNING, false, name);
             }
         } else {
             invalidMessage(message);
