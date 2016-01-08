@@ -54,8 +54,8 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT
 public class Server extends AbstractComponent {
     public static final Key<Server> KEY = new Key<>(Server.class);
 
-    private static final String PREF_SERVER_LOCAL_PORT = Server.class.getName() + ".PREF_SERVER_LOCAL_PORT";
-    private static final String PREF_SERVER_PUBLIC_PORT = Server.class.getName() + ".PREF_SERVER_PUBLIC_PORT";
+    public static final String PREF_SERVER_LOCAL_PORT = Server.class.getName() + ".PREF_SERVER_LOCAL_PORT";
+    public static final String PREF_SERVER_PUBLIC_PORT = Server.class.getName() + ".PREF_SERVER_PUBLIC_PORT";
 
     /**
      * Distributes incoming messages to the responsible handlers.
@@ -138,10 +138,21 @@ public class Server extends AbstractComponent {
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
         //Wait for the start of the server
-        localChannel = b.bind(getLocalPort()).sync();
-        publicChannel = b.bind(getPublicPort()).sync();
-        if (localChannel == null || publicChannel == null) {
+        final int localPort = getLocalPort();
+        if (localPort <= 0) {
+            throw new StartupException("Illegal localPort " + localPort);
+        }
+        localChannel = b.bind(localPort).sync();
+        if (localChannel == null) {
             throw new StartupException("Could not open server channel");
+        }
+
+        final int publicPort = getPublicPort();
+        if (publicPort > 0 && localPort != publicPort) {
+            publicChannel = b.bind(publicPort).sync();
+            if (publicChannel == null) {
+                throw new StartupException("Could not open server channel");
+            }
         }
     }
 
@@ -208,7 +219,11 @@ public class Server extends AbstractComponent {
      * @see #localChannel
      */
     int getLocalPort() {
-        return getSharedPreferences().getInt(PREF_SERVER_LOCAL_PORT, DEFAULT_LOCAL_PORT);
+        try {
+            return getSharedPreferences().getInt(PREF_SERVER_LOCAL_PORT, DEFAULT_LOCAL_PORT);
+        } catch (ClassCastException e) {
+            return DEFAULT_LOCAL_PORT;
+        }
     }
 
     /**
@@ -216,7 +231,11 @@ public class Server extends AbstractComponent {
      * @see #publicChannel
      */
     int getPublicPort() {
-        return getSharedPreferences().getInt(PREF_SERVER_PUBLIC_PORT, DEFAULT_PUBLIC_PORT);
+        try {
+            return getSharedPreferences().getInt(PREF_SERVER_PUBLIC_PORT, DEFAULT_PUBLIC_PORT);
+        } catch (ClassCastException e) {
+            return DEFAULT_LOCAL_PORT;
+        }
     }
 
     private SharedPreferences getSharedPreferences() {
@@ -257,8 +276,7 @@ public class Server extends AbstractComponent {
      * @return {@code true}, if the Server TCP channel is currently open
      */
     public boolean isChannelOpen() {
-        return localChannel != null && localChannel.channel() != null && localChannel.channel().isOpen()
-                && publicChannel != null && publicChannel.channel() != null && publicChannel.channel().isOpen();
+        return localChannel != null && localChannel.channel() != null && localChannel.channel().isOpen();
     }
 
     /**

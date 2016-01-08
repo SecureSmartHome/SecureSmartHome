@@ -4,6 +4,11 @@
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
-        android:showAsAction="never"
         android:title="@string/action_settings" />
+    <!--FIXME this is only for testing-->
+    <item
+        android:id="@+id/action_restart"
+        android:orderInCategory="100"
+        android:title="@string/restart"
+        />
 </menu>

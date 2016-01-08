@@ -16,7 +16,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteUserPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteDevicePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupNamePayload;
@@ -183,7 +183,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         }
     }
 
-    private void deleteUser(DeleteUserPayload payload, Message.AddressedMessage original) {
+    private void deleteUser(DeleteDevicePayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
 
         if (!hasPermission(fromID, DELETE_USER, null)) {
