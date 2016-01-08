@@ -44,7 +44,6 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     private boolean windowClosed;
 
     private void sendWarningNotification() {
-        //TODO chris: should warntext always be the same? (It will snow today)
         //No hardcoded strings, only in strings.xml
         NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
         notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.WEATHER_WARNING);
@@ -89,7 +88,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
             if (city != null) {
                 CurrentWeather cw = owm.currentWeatherByCityName(city);
                 if (!windowClosed && cw.getRainInstance().hasRain()) {
-                    sendWarningNotification("");
+                    sendWarningNotification();
                 }
             }
         } catch (Exception e) {
