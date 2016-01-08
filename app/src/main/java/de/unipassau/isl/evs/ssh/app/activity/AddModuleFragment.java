@@ -21,8 +21,8 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
+import de.unipassau.isl.evs.ssh.app.handler.AppModifyModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
-import de.unipassau.isl.evs.ssh.app.handler.AppNewModuleHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
@@ -62,7 +62,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     private Spinner connectionTypeSpinner;
     private EditText nameInput;
 
-    private final AppNewModuleHandler.NewModuleListener listener = new AppNewModuleHandler.NewModuleListener() {
+    private final AppModifyModuleHandler.NewModuleListener listener = new AppModifyModuleHandler.NewModuleListener() {
         @Override
         public void registrationFinished(final boolean wasSuccessful) {
             getActivity().runOnUiThread(new Runnable() {
@@ -161,14 +161,14 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        AppNewModuleHandler newModuleHandler = container.require(AppNewModuleHandler.KEY);
+        AppModifyModuleHandler newModuleHandler = container.require(AppModifyModuleHandler.KEY);
         newModuleHandler.addNewModuleListener(listener);
         populateSlaveSpinner(container);
     }
 
     @Override
     public void onContainerDisconnected() {
-        AppNewModuleHandler handler = getComponent(AppNewModuleHandler.KEY);
+        AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
         if (handler != null) {
             handler.removeNewModuleListener(listener);
         }
@@ -303,7 +303,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     }
 
     private void addNewModule(ModuleAccessPoint accessPoint) {
-        AppNewModuleHandler handler = getComponent(AppNewModuleHandler.KEY);
+        AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
 
         if (handler == null) {
             Log.e(TAG, "Container not connected");

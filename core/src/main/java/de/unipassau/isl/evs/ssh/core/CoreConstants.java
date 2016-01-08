@@ -5,6 +5,13 @@ import android.content.Intent;
 
 import java.security.cert.X509Certificate;
 
+import de.unipassau.isl.evs.ssh.core.container.Component;
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.MockAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import io.netty.util.AttributeKey;
@@ -92,6 +99,28 @@ public class CoreConstants {
 
         public String toLocalizedString(Context ctx) {
             return ctx.getResources().getString(this.resID);
+        }
+
+        public boolean isValidAccessPoint(ModuleAccessPoint accessPoint){
+            switch (this) {
+                case Light:
+                    return accessPoint.getType().equals(WLANAccessPoint.TYPE);
+                case WeatherBoard:
+                    return accessPoint.getType().equals(USBAccessPoint.TYPE);
+                case DoorBuzzer:
+                    return accessPoint.getType().equals(GPIOAccessPoint.TYPE);
+                case DoorSensor:
+                    return accessPoint.getType().equals(GPIOAccessPoint.TYPE);
+                case WindowSensor:
+                    return accessPoint.getType().equals(GPIOAccessPoint.TYPE);
+                case Webcam:
+                    return accessPoint.getType().equals(USBAccessPoint.TYPE)
+                            || accessPoint.getType().equals(MockAccessPoint.TYPE);
+                case Doorbell:
+                    return accessPoint.getType().equals(GPIOAccessPoint.TYPE);
+                default:
+                    return false;
+            }
         }
     }
 

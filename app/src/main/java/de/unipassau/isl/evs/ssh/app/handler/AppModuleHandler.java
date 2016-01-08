@@ -165,19 +165,11 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
         }
     }
 
-    private void update() {
-        ModulesPayload payload = new ModulesPayload();
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-
-        Message message = new Message(payload);
-
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_MODULES_GET.getKey());
-        router.sendMessageToMaster(RoutingKeys.MASTER_MODULE_GET, message);
-    }
-
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{APP_MODULES_GET, GLOBAL_MODULES_UPDATE};
+        return new RoutingKey[]{
+                GLOBAL_MODULES_UPDATE
+        };
     }
 
     public interface AppModuleListener {

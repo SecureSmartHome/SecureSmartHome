@@ -1,6 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.messaging;
 
-import de.unipassau.isl.evs.ssh.core.messaging.payload.AddNewModulePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ModifyModulePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteUserPayload;
@@ -18,7 +18,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterSlavePayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.RenameModulePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupNamePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupTemplatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetPermissionPayload;
@@ -102,12 +101,18 @@ public class RoutingKeys {
     public static final RoutingKey<ErrorPayload> MASTER_GROUP_SET_TEMPLATE_ERROR = MASTER_GROUP_SET_TEMPLATE.getReply(ErrorPayload.class);
     // END: MasterUserConfigHandler
 
+    // BEGIN: MasterModuleHandler
+    public static final RoutingKey<ModifyModulePayload> MASTER_MODULE_ADD = new RoutingKey<>(PREFIX_MASTER + "/module/add", ModifyModulePayload.class);
+    public static final RoutingKey<Void> MASTER_MODULE_ADD_REPLY = MASTER_MODULE_ADD.getReply(Void.class);
+    public static final RoutingKey<ErrorPayload> MASTER_MODULE_ADD_ERROR = MASTER_MODULE_ADD.getReply(ErrorPayload.class);
+
+    public static final RoutingKey<ModifyModulePayload> MASTER_MODULE_REMOVE = new RoutingKey<>(PREFIX_MASTER + "/module/remove", ModifyModulePayload.class);
+    public static final RoutingKey<Void> MASTER_MODULE_REMOVE_REPLY = MASTER_MODULE_REMOVE.getReply(Void.class);
+    // END: MasterModuleHandler
+
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_SET = new RoutingKey<>(PREFIX_MASTER + "/holiday/set", HolidaySimulationPayload.class);
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_GET = new RoutingKey<>(PREFIX_MASTER + "/holiday/get", HolidaySimulationPayload.class);
 
-    public static final RoutingKey<AddNewModulePayload> MASTER_MODULE_ADD = new RoutingKey<>(PREFIX_MASTER + "/module/add", AddNewModulePayload.class);
-    public static final RoutingKey<MessagePayload> MASTER_MODULE_GET = new RoutingKey<>(PREFIX_MASTER + "/module/get", MessagePayload.class);
-    public static final RoutingKey<RenameModulePayload> MASTER_MODULE_RENAME = new RoutingKey<>(PREFIX_MASTER + "/module/modify", RenameModulePayload.class);
 
     public static final RoutingKey<RegisterSlavePayload> MASTER_SLAVE_REGISTER = new RoutingKey<>(PREFIX_MASTER + "/slave/register", RegisterSlavePayload.class);
 
@@ -137,7 +142,7 @@ public class RoutingKeys {
     public static final RoutingKey<DoorStatusPayload> APP_DOOR_GET = new RoutingKey<>(PREFIX_APP + "/door/get", DoorStatusPayload.class);
     public static final RoutingKey<DoorBellPayload> APP_DOOR_RING = new RoutingKey<>(PREFIX_APP + "/door/ring", DoorBellPayload.class);
     public static final RoutingKey<UserDeviceInformationPayload> APP_USERINFO_UPDATE = new RoutingKey<>(PREFIX_APP + "/userdevice/update", UserDeviceInformationPayload.class);
-    public static final RoutingKey<AddNewModulePayload> APP_MODULE_ADD = new RoutingKey<>(PREFIX_APP + "/module/add", AddNewModulePayload.class);
+    public static final RoutingKey<ModifyModulePayload> APP_MODULE_ADD = new RoutingKey<>(PREFIX_APP + "/module/add", ModifyModulePayload.class);
     public static final RoutingKey<GenerateNewRegisterTokenPayload> APP_USER_REGISTER = new RoutingKey<>(PREFIX_APP + "/user/register", GenerateNewRegisterTokenPayload.class);
     public static final RoutingKey<MessagePayload> APP_SLAVE_REGISTER = new RoutingKey<>(PREFIX_APP + "/slave/register", MessagePayload.class);
     public static final RoutingKey<HolidaySimulationPayload> APP_HOLIDAY_GET = new RoutingKey<>(PREFIX_APP + "/holiday/get", HolidaySimulationPayload.class);
