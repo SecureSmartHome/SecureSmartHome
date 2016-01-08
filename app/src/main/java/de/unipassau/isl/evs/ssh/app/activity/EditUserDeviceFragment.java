@@ -260,6 +260,16 @@ public class EditUserDeviceFragment extends BoundFragment {
             return true;
         }
 
+        @Override
+        public boolean areAllItemsEnabled() {
+            return mayEdit();
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            return areAllItemsEnabled();
+        }
+
         /**
          * Creates a view for every permission registered in the system. If the user device is granted a permission
          * the switch button is {@code On}.
@@ -274,7 +284,10 @@ public class EditUserDeviceFragment extends BoundFragment {
             } else {
                 permissionLayout = (LinearLayout) convertView;
             }
-            // TODO Phil: gray all permissions if a user can't edit permissions at all
+            boolean userHasPermission = userDeviceHasPermission(permission);
+            if (userHasPermission) {
+                // TODO Phil: gray all permissions if a user can't edit permissions at all
+            }
 
             final Switch permissionSwitch = (Switch) permissionLayout.findViewById(R.id.listpermission_permission_switch);
             final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
@@ -282,7 +295,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
             } else {
                 permissionSwitch.setText(permission.getPermission().toLocalizedString(getActivity()));
-                permissionSwitch.setChecked(userDeviceHasPermission(permission));
+                permissionSwitch.setChecked(userHasPermission);
                 permissionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -323,10 +336,21 @@ public class EditUserDeviceFragment extends BoundFragment {
         }
 
         /**
+         * @return {@code true} if
+         */
+        private boolean mayEdit() {
+            // FIXME finish him
+            Permission permission = new Permission(Permission.GRANT_USER_PERMISSION);
+            return userDeviceHasPermission(permission);
+        }
+
+        /**
          * @return If a user device is granted a certain permission.
          */
         private boolean userDeviceHasPermission(Permission permission) {
+
             return userPermissions.contains(permission);
         }
+
     }
 }
