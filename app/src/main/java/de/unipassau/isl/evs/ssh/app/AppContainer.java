@@ -7,8 +7,8 @@ import de.unipassau.isl.evs.ssh.app.handler.AppClimateHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppHolidaySimulationHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppModifyModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
-import de.unipassau.isl.evs.ssh.app.handler.AppNewModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppRegisterNewDeviceHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
@@ -37,7 +37,7 @@ public class AppContainer extends ContainerService {
         register(AppDoorHandler.KEY, new AppDoorHandler());
         register(AppHolidaySimulationHandler.KEY, new AppHolidaySimulationHandler());
         register(AppLightHandler.KEY, new AppLightHandler());
-        register(AppNewModuleHandler.KEY, new AppNewModuleHandler());
+        register(AppModifyModuleHandler.KEY, new AppModifyModuleHandler());
         register(AppNotificationHandler.KEY, new AppNotificationHandler());
         register(AppRegisterNewDeviceHandler.KEY, new AppRegisterNewDeviceHandler());
         register(AppUserConfigurationHandler.KEY, new AppUserConfigurationHandler());

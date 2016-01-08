@@ -204,7 +204,6 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
                 );
             }
         } else {
-            // HANDLE
             invalidMessage(message);
         }
     }
