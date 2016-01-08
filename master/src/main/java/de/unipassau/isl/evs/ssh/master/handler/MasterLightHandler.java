@@ -26,6 +26,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GE
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT;
 
 /**
  * Handles light messages, logs them for the holiday simulation and generates messages
@@ -68,36 +69,33 @@ public class MasterLightHandler extends AbstractMasterHandler {
     private void handleSetRequest(Message.AddressedMessage message) {
         final LightPayload payload = MASTER_LIGHT_SET.getPayload(message);
         final Module atModule = payload.getModule();
-        if (hasPermission(
-                message.getFromID(),
-                de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT,
-                atModule.getName()
-        )) {
-            final Message messageToSend = new Message(payload);
-            final Message.AddressedMessage sendMessage = sendMessage(
-                    atModule.getAtSlave(),
-                    SLAVE_LIGHT_SET,
-                    messageToSend
-            );
-            recordReceivedMessageProxy(message, sendMessage);
-            try {
-                if (payload.getOn()) {
-                    requireComponent(HolidayController.KEY).addHolidayLogEntryNow(
-                            CoreConstants.LogActions.LIGHT_ON_ACTION,
-                            payload.getModule().getName()
-                    );
-                } else {
-                    requireComponent(HolidayController.KEY).addHolidayLogEntryNow(
-                            CoreConstants.LogActions.LIGHT_OFF_ACTION,
-                            payload.getModule().getName()
-                    );
-                }
-            } catch (UnknownReferenceException ure) {
-                Log.i(TAG, "Can't created holiday log entry because the given module doesn't exist in the database.");
+
+        if (!hasPermission(message.getFromID(), SWITCH_LIGHT, atModule.getName())) {
+            sendNoPermissionReply(message, SWITCH_LIGHT);
+            return;
+        }
+
+        final Message messageToSend = new Message(payload);
+        final Message.AddressedMessage sendMessage = sendMessage(
+                atModule.getAtSlave(),
+                SLAVE_LIGHT_SET,
+                messageToSend
+        );
+        recordReceivedMessageProxy(message, sendMessage);
+        try {
+            if (payload.getOn()) {
+                requireComponent(HolidayController.KEY).addHolidayLogEntryNow(
+                        CoreConstants.LogActions.LIGHT_ON_ACTION,
+                        atModule.getName()
+                );
+            } else {
+                requireComponent(HolidayController.KEY).addHolidayLogEntryNow(
+                        CoreConstants.LogActions.LIGHT_OFF_ACTION,
+                        atModule.getName()
+                );
             }
-        } else {
-            //no permission
-            sendErrorMessage(message);
+        } catch (UnknownReferenceException ure) {
+            Log.i(TAG, "Can't created holiday log entry because the given module doesn't exist in the database.");
         }
     }
 
@@ -132,9 +130,11 @@ public class MasterLightHandler extends AbstractMasterHandler {
         sendMessageToAllDevicesWithPermission(
                 messageToSend,
                 Permission.REQUEST_LIGHT_STATUS,
-                lightPayload.getModule().getName(),
+                null,
                 MASTER_LIGHT_SET_REPLY
         );
+
+        //TODO Leon: broadcast lightstatus to all connected devices
     }
 
     private void handleGetResponse(Message.AddressedMessage message) {
