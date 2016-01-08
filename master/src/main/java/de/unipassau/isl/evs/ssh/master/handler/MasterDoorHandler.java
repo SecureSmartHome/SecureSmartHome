@@ -11,8 +11,10 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
+import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_GET;
@@ -173,7 +175,24 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                 recordReceivedMessageProxy(message, sendMessage);
             } else {
                 //locked
+                //Handle
                 sendErrorMessage(message);
+            }
+        } else if (hasPermission(message.getFromID(), Permission.UNLATCH_DOOR_ON_HOLIDAY, null)) {
+            if (requireComponent(MasterHolidaySimulationPlannerHandler.KEY).isRunHolidaySimulation()) {
+                if (!getLocked(atModule.getName())) {
+                    Message.AddressedMessage sendMessage =
+                            sendMessage(
+                                    atModule.getAtSlave(),
+                                    SLAVE_DOOR_UNLATCH,
+                                    messageToSend
+                            );
+                    recordReceivedMessageProxy(message, sendMessage);
+                } else {
+                    //locked
+                    //Handle
+                    sendErrorMessage(message);
+                }
             }
         } else {
             //no permission

@@ -41,7 +41,8 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SE
  */
 public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler implements ScheduledComponent {
     private static final long SCHEDULE_LOOKAHEAD_MILLIS = TimeUnit.HOURS.toMillis(1);
-    private static final Key<MasterHolidaySimulationPlannerHandler> KEY = new Key<>(MasterHolidaySimulationPlannerHandler.class);
+    public static final Key<MasterHolidaySimulationPlannerHandler> KEY = new Key<>(MasterHolidaySimulationPlannerHandler.class);
+
     private boolean runHolidaySimulation = false;
 
     @Override
@@ -159,5 +160,9 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
                 sendMessage(module.getAtSlave(), SLAVE_LIGHT_SET, message);
             }
         }
+    }
+
+    public boolean isRunHolidaySimulation() {
+        return runHolidaySimulation;
     }
 }
