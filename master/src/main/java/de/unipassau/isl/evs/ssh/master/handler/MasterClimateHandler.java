@@ -3,6 +3,8 @@ package de.unipassau.isl.evs.ssh.master.handler;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
@@ -15,13 +17,16 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_G
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_NOTIFICATION_SEND;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PUSH_WEATHER_INFO;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_REQUEST_WEATHER_INFO;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET_REPLY;
 
 /**
  * Handles climate messages and generates messages for each target and passes them to the OutgoingRouter.
  *
  * @author Christoph Fraedrich
  */
-public class MasterClimateHandler extends AbstractMasterHandler {
+public class MasterClimateHandler extends AbstractMasterHandler implements Component {
+    public static final Key<MasterClimateHandler> KEY = new Key<>(MasterClimateHandler.class);
+
     private final Map<Module, ClimatePayload> latestWeatherData = new HashMap<>();
     private final Map<Module, Boolean> latestLightStatus = new HashMap<>();
 
@@ -31,10 +36,9 @@ public class MasterClimateHandler extends AbstractMasterHandler {
             ClimatePayload payload = MASTER_PUSH_WEATHER_INFO.getPayload(message);
             latestWeatherData.put(payload.getModule(), payload) ;
             evaluateWeatherData(payload);
-        } else if (MASTER_LIGHT_GET.matches(message) &&
-                message.getHeader(Message.HEADER_REFERENCES_ID) != null) {
+        } else if (SLAVE_LIGHT_GET_REPLY.matches(message)) {
             //Reply to get request, this means this message actually contains an updated lamp value
-            LightPayload payload = MASTER_LIGHT_GET.getPayload(message);
+            LightPayload payload = SLAVE_LIGHT_GET_REPLY.getPayload(message);
 
             latestLightStatus.put(payload.getModule(), payload.getOn());
         } else if (MASTER_REQUEST_WEATHER_INFO.matches(message)) {
@@ -49,7 +53,11 @@ public class MasterClimateHandler extends AbstractMasterHandler {
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_PUSH_WEATHER_INFO, MASTER_LIGHT_GET, MASTER_REQUEST_WEATHER_INFO};
+        return new RoutingKey[]{MASTER_PUSH_WEATHER_INFO, SLAVE_LIGHT_GET_REPLY, MASTER_REQUEST_WEATHER_INFO};
+    }
+
+    public Map<Module, ClimatePayload> getLatestWeatherData() {
+        return new HashMap<>(latestWeatherData);
     }
 
     private void evaluateWeatherData(ClimatePayload payload) {

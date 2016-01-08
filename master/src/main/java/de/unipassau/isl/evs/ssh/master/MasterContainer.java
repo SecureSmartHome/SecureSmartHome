@@ -48,6 +48,7 @@ public class MasterContainer extends ContainerService {
         register(MasterRegisterDeviceHandler.KEY, new MasterRegisterDeviceHandler());
         register(MasterRoutingTableHandler.KEY, new MasterRoutingTableHandler());
         register(MasterUserLocationHandler.KEY, new MasterUserLocationHandler());
+        register(MasterClimateHandler.KEY, new MasterClimateHandler());
 
         registerHandler(new MasterDoorBellHandler());
         registerHandler(new MasterModuleHandler());
@@ -56,7 +57,6 @@ public class MasterContainer extends ContainerService {
         registerHandler(new MasterLightHandler());
         registerHandler(new MasterSystemHealthCheckHandler());
         registerHandler(new MasterCameraHandler());
-        registerHandler(new MasterClimateHandler());
         registerHandler(new MasterHolidaySimulationPlannerHandler());
 
         registerHandler(new MasterWeatherCheckHandler());
