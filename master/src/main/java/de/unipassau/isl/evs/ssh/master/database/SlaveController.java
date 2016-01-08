@@ -27,11 +27,6 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  */
 public class SlaveController extends AbstractComponent {
     public static final Key<SlaveController> KEY = new Key<>(SlaveController.class);
-    private static final String SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY =
-            "select " + DatabaseContract.Slave.COLUMN_ID
-                    + " from " + DatabaseContract.Slave.TABLE_NAME
-                    + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT
-                    + " = ?";
     private DatabaseConnector databaseConnector;
     private final Map<DeviceID, byte[]> passiveRegistrationTokens = new HashMap<>();
 
@@ -89,7 +84,7 @@ public class SlaveController extends AbstractComponent {
                             + DatabaseContract.ElectronicModule.COLUMN_CONNECTOR_TYPE + ", "
                             + DatabaseContract.ElectronicModule.COLUMN_SLAVE_ID + ", "
                             + DatabaseContract.ElectronicModule.COLUMN_NAME + ") values "
-                            + "(?, ?, ?, ?, ?, ?, ?, ?, (" + SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY + "), ?)",
+                            + "(?, ?, ?, ?, ?, ?, ?, ?, (" + DatabaseContract.SqlQueries.SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY + "), ?)",
                     ObjectArrays.concat(
                             createCombinedModulesAccessInformationFromSingle(module.getModuleAccessPoint()),
                             new String[]{module.getModuleType().toString(), module.getModuleAccessPoint().getType(),

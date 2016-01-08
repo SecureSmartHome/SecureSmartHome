@@ -22,12 +22,6 @@ import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 public class HolidayController extends AbstractComponent {
     public static final Key<HolidayController> KEY = new Key<>(HolidayController.class);
     private DatabaseConnector databaseConnector;
-    // TODO: 06.01.16 Leon, create class containing all queries
-    private static final String MODULE_ID_FROM_NAME_SQL_QUERY =
-            "select " + DatabaseContract.ElectronicModule.COLUMN_ID
-                    + " from " + DatabaseContract.ElectronicModule.TABLE_NAME
-                    + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME
-                    + " = ?";
 
     @Override
     public void init(Container container) {
@@ -62,7 +56,7 @@ public class HolidayController extends AbstractComponent {
                                 + " (" + DatabaseContract.HolidayLog.COLUMN_ACTION
                                 + ", " + DatabaseContract.HolidayLog.COLUMN_ELECTRONIC_MODULE_ID
                                 + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + ") values (?,("
-                                + MODULE_ID_FROM_NAME_SQL_QUERY + "),?)",
+                                + DatabaseContract.SqlQueries.MODULE_ID_FROM_NAME_SQL_QUERY + "),?)",
                         new String[]{ action, moduleName, String.valueOf(System.currentTimeMillis()) }
                 );
             } catch (SQLiteConstraintException sqlce) {

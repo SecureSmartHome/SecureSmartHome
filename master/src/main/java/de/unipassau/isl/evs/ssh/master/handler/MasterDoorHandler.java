@@ -53,7 +53,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         } else if (MASTER_DOOR_LOCK_GET.matches(message)) {
             handleDoorLockGet(message);
         } else if (MASTER_DOOR_STATUS_GET.matches(message)) {
-                handleDoorStatusGet(message);
+            handleDoorStatusGet(message);
         } else if (SLAVE_DOOR_STATUS_GET_REPLY.matches(message)) {
             handleDoorStatusGetResponse(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
@@ -65,7 +65,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[] {
+        return new RoutingKey[]{
                 MASTER_DOOR_UNLATCH,
                 SLAVE_DOOR_UNLATCH_REPLY,
                 MASTER_DOOR_LOCK_SET,

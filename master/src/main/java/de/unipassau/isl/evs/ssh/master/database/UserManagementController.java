@@ -20,16 +20,6 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  */
 public class UserManagementController extends AbstractComponent {
     public static final Key<UserManagementController> KEY = new Key<>(UserManagementController.class);
-    private static final String TEMPLATE_ID_FROM_NAME_SQL_QUERY =
-            "select " + DatabaseContract.PermissionTemplate.COLUMN_ID
-                    + " from " + DatabaseContract.PermissionTemplate.TABLE_NAME
-                    + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
-                    + " = ?";
-    private static final String GROUP_ID_FROM_NAME_SQL_QUERY =
-            "select " + DatabaseContract.Group.COLUMN_ID
-                    + " from " + DatabaseContract.Group.TABLE_NAME
-                    + " where " + DatabaseContract.Group.COLUMN_NAME
-                    + " = ?";
     private DatabaseConnector databaseConnector;
 
     @Override
@@ -55,7 +45,7 @@ public class UserManagementController extends AbstractComponent {
                             + DatabaseContract.Group.TABLE_NAME
                             + " (" + DatabaseContract.Group.COLUMN_NAME + ","
                             + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + ") values (?,("
-                            + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
+                            + DatabaseContract.SqlQueries.TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
                     new String[]{group.getName(), group.getTemplateName()});
         } catch (SQLiteConstraintException sqlce) {
             throw new DatabaseControllerException("Either the given Template does not exist in the database"
@@ -166,7 +156,7 @@ public class UserManagementController extends AbstractComponent {
                             + " (" + DatabaseContract.UserDevice.COLUMN_NAME + ","
                             + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + ","
                             + DatabaseContract.UserDevice.COLUMN_GROUP_ID + ") values (?, ?,("
-                            + GROUP_ID_FROM_NAME_SQL_QUERY + "))",
+                            + DatabaseContract.SqlQueries.GROUP_ID_FROM_NAME_SQL_QUERY + "))",
                     new String[]{userDevice.getName(), userDevice.getUserDeviceID().getId(),
                             userDevice.getInGroup()});
         } catch (SQLiteConstraintException sqlce) {
@@ -198,7 +188,7 @@ public class UserManagementController extends AbstractComponent {
         try {
             databaseConnector.executeSql("update " + DatabaseContract.Group.TABLE_NAME
                             + " set " + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID
-                            + " = (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY
+                            + " = (" + DatabaseContract.SqlQueries.TEMPLATE_ID_FROM_NAME_SQL_QUERY
                             + ") where " + DatabaseContract.Group.COLUMN_NAME + " = ?",
                     new String[]{templateName, groupName});
         } catch (SQLiteConstraintException sqlce) {
@@ -216,7 +206,7 @@ public class UserManagementController extends AbstractComponent {
         try {
             databaseConnector.executeSql("update " + DatabaseContract.UserDevice.TABLE_NAME
                             + " set " + DatabaseContract.UserDevice.COLUMN_GROUP_ID
-                            + " = (" + GROUP_ID_FROM_NAME_SQL_QUERY
+                            + " = (" + DatabaseContract.SqlQueries.GROUP_ID_FROM_NAME_SQL_QUERY
                             + ") where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
                     new String[]{groupName, userDeviceID.getId()});
         } catch (SQLiteConstraintException sqlce) {
