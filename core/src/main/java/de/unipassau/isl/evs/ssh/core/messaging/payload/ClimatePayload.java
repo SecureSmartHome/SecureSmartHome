@@ -48,11 +48,6 @@ public class ClimatePayload implements MessagePayload {
         this.notificationType = notificationType;
     }
 
-    /**
-     * TODO write text
-     *
-     * @return ClimatePayload containing the ClimatePayload data.
-     */
     public ClimatePayload getClimatePayload() {
         return ClimatePayload.this;
     }
