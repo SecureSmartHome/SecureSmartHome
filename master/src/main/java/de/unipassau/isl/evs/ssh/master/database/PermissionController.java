@@ -478,6 +478,11 @@ public class PermissionController extends AbstractComponent {
         return userDevices;
     }
 
+    /**
+     * Get all permissions that a given user device has.
+     * @param userDeviceID The UserDevice which has the Permissions which will be returned.
+     * @return List of all Permissions that the given UserDevice has.
+     */
     public List<Permission> getPermissionsOfUserDevice(DeviceID userDeviceID) {
         List<Permission> permissions = new LinkedList<>();
         Cursor permissionCursor;

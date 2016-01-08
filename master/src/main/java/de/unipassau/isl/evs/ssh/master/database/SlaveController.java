@@ -265,7 +265,7 @@ public class SlaveController extends AbstractComponent {
                 + " from " + DatabaseContract.Slave.TABLE_NAME, new String[]{});
         List<Slave> slaves = new LinkedList<>();
         while (slavesCursor.moveToNext()) {
-            slaves.add(cursorToDTO(slavesCursor));
+            slaves.add(cursorToSlave(slavesCursor));
         }
         return slaves;
     }
@@ -321,6 +321,11 @@ public class SlaveController extends AbstractComponent {
         }
     }
 
+    /**
+     * Get internal database id for a given Module.
+     * @param moduleName Name of the Module.
+     * @return The database id of the given Module.
+     */
     public Integer getModuleID(String moduleName) {
         Cursor moduleCursor = databaseConnector.executeSql("select "
                 + DatabaseContract.ElectronicModule.COLUMN_ID
@@ -333,6 +338,11 @@ public class SlaveController extends AbstractComponent {
         return null;
     }
 
+    /**
+     * Get a Slave by its DeviceID.
+     * @param slaveID DeviceID of the Slave.
+     * @return The Slave associated with the DeviceID.
+     */
     public Slave getSlave(DeviceID slaveID) {
         Cursor slavesCursor = databaseConnector.executeSql("select "
                 + DatabaseContract.Slave.COLUMN_NAME
@@ -341,13 +351,13 @@ public class SlaveController extends AbstractComponent {
                 + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT
                 + " = ?", new String[]{slaveID.getIDString()});
         if (slavesCursor.moveToNext()) {
-            return cursorToDTO(slavesCursor);
+            return cursorToSlave(slavesCursor);
         }
         return null;
     }
 
     @NonNull
-    private Slave cursorToDTO(Cursor slavesCursor) {
+    private Slave cursorToSlave(Cursor slavesCursor) {
         final DeviceID slaveID = new DeviceID(slavesCursor.getString(1));
         return new Slave(
                 slavesCursor.getString(0),
@@ -356,6 +366,12 @@ public class SlaveController extends AbstractComponent {
         );
     }
 
+    /**
+     * Get all Modules of a given type.
+     * @param type Type of the Modules to get.
+     * @return List of all Modules with given type.
+     */
+    @NonNull
     public List<Module> getModulesByType(CoreConstants.ModuleType type) {
         //Notice: again changed order for convenience reasons when creating the ModuleAccessPoint.
         Cursor modulesCursor = databaseConnector.executeSql("select" +

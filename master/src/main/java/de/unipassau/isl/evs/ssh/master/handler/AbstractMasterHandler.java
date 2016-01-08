@@ -79,9 +79,26 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
         return userDeviceID.equals(requireComponent(NamingManager.KEY).getMasterID());
     }
 
+    /**
+     * Check if a given Device has a given Permission. Master has all Permission.
+     * @param userDeviceID DeviceID of the Device.
+     * @param permission Permission to check for.
+     * @param moduleName Module the Permission applies for.
+     * @return true if has permissions otherwise false.
+     */
     protected boolean hasPermission(DeviceID userDeviceID, Permission permission, String moduleName) {
         return isMaster(userDeviceID) || requireComponent(PermissionController.KEY)
                 .hasPermission(userDeviceID, permission, moduleName);
+    }
+
+    /**
+     * Has Permission for Permissions that are independent of a Module.
+     * @param userDeviceID DeviceID of the Device.
+     * @param permission Permission to check for.
+     * @return true if has permissions otherwise false.
+     */
+    protected boolean hasPermission(DeviceID userDeviceID, Permission permission) {
+        return hasPermission(userDeviceID, permission, null);
     }
 
     @Deprecated
@@ -96,6 +113,13 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
         } //else ignore
     }
 
+    /**
+     * Send a message to all Devices that have a given Permission.
+     * @param messageToSend Message to send to the devices.
+     * @param permission Permission the Device has to have.
+     * @param moduleName Module to Permission applies for.
+     * @param routingKey RoutingKey to send the message with.
+     */
     protected void sendMessageToAllDevicesWithPermission(
             Message messageToSend,
             Permission permission,
@@ -109,6 +133,11 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
         }
     }
 
+    /**
+     * Send a reply containing a no permission error.
+     * @param original Message to reply to
+     * @param permission Permission the author of the original Message doesn't have.
+     */
     protected void sendNoPermissionReply(Message.AddressedMessage original, de.unipassau.isl.evs.ssh.core.sec.Permission permission){
         Message message = new Message(new ErrorPayload(new NoPermissionException(permission)));
         sendReply(original, message);
