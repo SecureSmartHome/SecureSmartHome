@@ -2,10 +2,14 @@ package de.unipassau.isl.evs.ssh.master.handler;
 
 import android.util.Log;
 
+import java.util.List;
+import java.util.Map;
+
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
@@ -31,6 +35,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SE
  */
 public class MasterLightHandler extends AbstractMasterHandler {
     private static final String TAG = MasterLightHandler.class.getSimpleName();
+    private static final int BRIGHTNESS_LOWER_THRESHOLD = 20000; //TODO migrate to constants
 
     @Override
     public void handle(Message.AddressedMessage message) {
@@ -133,7 +138,9 @@ public class MasterLightHandler extends AbstractMasterHandler {
     }
 
     private void handleGetResponse(Message.AddressedMessage message) {
-        final Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(Message.HEADER_REFERENCES_ID));
+        final Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(
+                message.getHeader(Message.HEADER_REFERENCES_ID));
+
         final Message messageToSend = new Message(SLAVE_LIGHT_GET_REPLY.getPayload(message));
         sendReply(correspondingMessage, messageToSend);
     }
@@ -144,20 +151,34 @@ public class MasterLightHandler extends AbstractMasterHandler {
 
         if (hasPermission(message.getFromID(), Permission.UNLATCH_DOOR, null)) {
             if (switchedPosition || isExtern) {
-                //Switch all lights on as user comes home
-                for (Module module : requireComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.Light)) {
-                    try {
-                        requireComponent(HolidayController.KEY).addHolidayLogEntryNow(
-                                CoreConstants.LogActions.LIGHT_ON_ACTION,
-                                module.getName()
-                        );
-                    } catch (UnknownReferenceException e) {
-                        Log.i(TAG, "Can't created holiday log entry because the given module doesn't exist in the database.");
-                    }
+                boolean tooDark = false;
+                final List<Module> modulesByType = requireComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.WeatherBoard);
 
-                    LightPayload payload = new LightPayload(true, module);
-                    final Message messageToSend = new Message(payload);
-                    sendMessage(module.getAtSlave(), SLAVE_LIGHT_SET, messageToSend);
+                for (Module module : modulesByType) {
+                    final Map<Module, ClimatePayload> latestWeatherData = requireComponent(MasterClimateHandler.KEY).getLatestWeatherData();
+
+                    if (latestWeatherData.get(module).getVisible() < BRIGHTNESS_LOWER_THRESHOLD) {
+                        tooDark = true;
+                        break;
+                    }
+                }
+
+                if (tooDark) {
+                    //Switch all lights on as user comes home and it is too dark
+                    for (Module module : requireComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.Light)) {
+                        try {
+                            requireComponent(HolidayController.KEY).addHolidayLogEntryNow(
+                                    CoreConstants.LogActions.LIGHT_ON_ACTION,
+                                    module.getName()
+                            );
+                        } catch (UnknownReferenceException e) {
+                            Log.i(TAG, "Can't created holiday log entry because the given module doesn't exist in the database.");
+                        }
+
+                        LightPayload payload = new LightPayload(true, module);
+                        final Message messageToSend = new Message(payload);
+                        sendMessage(module.getAtSlave(), SLAVE_LIGHT_SET, messageToSend);
+                    }
                 }
             }
         }
