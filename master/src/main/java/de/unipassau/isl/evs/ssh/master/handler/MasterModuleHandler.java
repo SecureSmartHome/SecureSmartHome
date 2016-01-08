@@ -59,7 +59,6 @@ public class MasterModuleHandler extends AbstractMasterHandler {
             }
         } else if (MASTER_MODULE_GET.matches(message)) {
             sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), createUpdateMessage());
-        /* @author Leon Sell */
         } else if (MASTER_MODULE_RENAME.matches(message)) {
             if (hasPermission(
                     message.getFromID(),
@@ -105,7 +104,6 @@ public class MasterModuleHandler extends AbstractMasterHandler {
     }
 
 
-    /* @author Leon Sell */
     private boolean handleRenameModule(Message.AddressedMessage message) {
         RenameModulePayload renameModulePayload = MASTER_MODULE_RENAME.getPayload(message);
         try {
