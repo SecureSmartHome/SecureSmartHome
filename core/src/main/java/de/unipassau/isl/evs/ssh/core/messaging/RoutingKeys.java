@@ -42,9 +42,10 @@ public class RoutingKeys {
     // Master
     public static final RoutingKey<LightPayload> MASTER_LIGHT_GET = new RoutingKey<>(PREFIX_MASTER + "/light/get", LightPayload.class);
     public static final RoutingKey<LightPayload> MASTER_LIGHT_GET_REPLY = MASTER_LIGHT_GET.getReply(LightPayload.class);
-    public static final RoutingKey<LightPayload> MASTER_LIGHT_SET_REPLY = MASTER_LIGHT_GET.getReply(LightPayload.class);
     public static final RoutingKey<ErrorPayload> MASTER_LIGHT_GET_ERROR = MASTER_LIGHT_GET.getReply(ErrorPayload.class);
     public static final RoutingKey<LightPayload> MASTER_LIGHT_SET = new RoutingKey<>(PREFIX_MASTER + "/light/set", LightPayload.class);
+    public static final RoutingKey<LightPayload> MASTER_LIGHT_SET_REPLY = MASTER_LIGHT_SET.getReply(LightPayload.class);
+    public static final RoutingKey<ErrorPayload> MASTER_LIGHT_SET_ERROR = MASTER_LIGHT_SET.getReply(ErrorPayload.class);
 
     public static final RoutingKey<DoorBellPayload> MASTER_DOOR_BELL_RING = new RoutingKey<>(PREFIX_MASTER + "/doorbell/ring", DoorBellPayload.class);
     @Deprecated //use MASTER_CAMERA_GET
@@ -128,11 +129,16 @@ public class RoutingKeys {
 
     public static final RoutingKey<DeviceConnectedPayload> MASTER_DEVICE_CONNECTED = new RoutingKey<>(PREFIX_MASTER + "/device/connected", DeviceConnectedPayload.class);
 
-    // Slave
-    public static final RoutingKey<MessagePayload> SLAVE_LIGHT_GET = new RoutingKey<>(PREFIX_SLAVE + "/light/get", MessagePayload.class);
-    public static final RoutingKey<LightPayload> SLAVE_LIGHT_SET = new RoutingKey<>(PREFIX_SLAVE + "/light/set", LightPayload.class);
+    // BEGIN: SlaveLightHandler
+    public static final RoutingKey<LightPayload> SLAVE_LIGHT_GET = new RoutingKey<>(PREFIX_SLAVE + "/light/get", LightPayload.class);
     public static final RoutingKey<LightPayload> SLAVE_LIGHT_GET_REPLY = SLAVE_LIGHT_GET.getReply(LightPayload.class);
+    public static final RoutingKey<ErrorPayload> SLAVE_LIGHT_GET_ERROR = SLAVE_LIGHT_GET.getReply(ErrorPayload.class);
+
+    public static final RoutingKey<LightPayload> SLAVE_LIGHT_SET = new RoutingKey<>(PREFIX_SLAVE + "/light/set", LightPayload.class);
     public static final RoutingKey<LightPayload> SLAVE_LIGHT_SET_REPLY = SLAVE_LIGHT_GET.getReply(LightPayload.class);
+    public static final RoutingKey<ErrorPayload> SLAVE_LIGHT_SET_ERROR = SLAVE_LIGHT_GET.getReply(ErrorPayload.class);
+    // END: SlaveLightHandler
+
     public static final RoutingKey<CameraPayload> SLAVE_CAMERA_GET = new RoutingKey<>(PREFIX_SLAVE + "/camera/get", CameraPayload.class);
     public static final RoutingKey<CameraPayload> SLAVE_CAMERA_GET_REPLY = SLAVE_CAMERA_GET.getReply(CameraPayload.class);
     public static final RoutingKey<DoorStatusPayload> SLAVE_DOOR_STATUS_GET = new RoutingKey<>(PREFIX_SLAVE + "/door/status_get", DoorStatusPayload.class);
