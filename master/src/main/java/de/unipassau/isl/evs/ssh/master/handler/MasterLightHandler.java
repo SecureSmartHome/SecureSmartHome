@@ -14,7 +14,6 @@ import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET;
@@ -44,7 +43,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
         } else if (SLAVE_LIGHT_SET_REPLY.matches(message)) {
             handleSetResponse(message);
         } else if (MASTER_DOOR_UNLATCH.matches(message)) {
-            handleDeviceConnected(message);
+            handleDoorUnlatched(message);
         } else if (message.getPayload() instanceof MessageErrorPayload) {
             handleErrorMessage(message);
         } else {
@@ -139,14 +138,14 @@ public class MasterLightHandler extends AbstractMasterHandler {
         sendReply(correspondingMessage, messageToSend);
     }
 
-    private void handleDeviceConnected(Message.AddressedMessage message) {
-        //TODO check if this is the correct deviceID
-        boolean switchedPosition = getComponent(MasterUserLocationHandler.KEY).switchedPositionToLocal(message.getFromID(), 2);
+    private void handleDoorUnlatched(Message.AddressedMessage message) {
+        boolean switchedPosition = requireComponent(MasterUserLocationHandler.KEY).switchedPositionToLocal(message.getFromID(), 2);
+        boolean isExtern = !requireComponent(MasterUserLocationHandler.KEY).isDeviceLocal(message.getFromID());
 
         if (hasPermission(message.getFromID(), Permission.UNLATCH_DOOR, null)) {
-            if (switchedPosition) {  //TODO check if also open if someone is not home and opens?
+            if (switchedPosition || isExtern) {
                 //Switch all lights on as user comes home
-                for (Module module : getComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.Light)) {
+                for (Module module : requireComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.Light)) {
                     try {
                         requireComponent(HolidayController.KEY).addHolidayLogEntryNow(
                                 CoreConstants.LogActions.LIGHT_ON_ACTION,
