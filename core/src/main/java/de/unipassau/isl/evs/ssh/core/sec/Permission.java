@@ -38,6 +38,7 @@ public enum Permission {
     REQUEST_DOOR_STATUS,
     LOCK_DOOR,
     UNLATCH_DOOR,
+    UNLATCH_DOOR_ON_HOLIDAY,
 
     //Camera
     REQUEST_CAMERA_STATUS,
