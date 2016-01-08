@@ -65,7 +65,6 @@ public class HolidayController extends AbstractComponent {
         }
     }
 
-    // TODO: 06.01.16 Leon, remove and update test.
     /**
      * Returns all actions logged and saved into the holiday table in a given range of time.
      *
@@ -73,22 +72,6 @@ public class HolidayController extends AbstractComponent {
      * @param to   End point in time of the range.
      * @return List of the entries found.
      */
-    @Deprecated
-    public List<String> getLogEntriesRange(Date from, Date to) {
-        Cursor holidayEntriesCursor = databaseConnector.executeSql("select "
-                        + DatabaseContract.HolidayLog.COLUMN_ACTION
-                        + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
-                        + " from " + DatabaseContract.HolidayLog.TABLE_NAME
-                        + " where " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
-                        + " >= ? and " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " <= ?",
-                new String[]{String.valueOf(from.getTime()), String.valueOf(to.getTime())});
-        List<String> actions = new LinkedList<>();
-        while (holidayEntriesCursor.moveToNext()) {
-            actions.add(holidayEntriesCursor.getString(0));
-        }
-        return actions;
-    }
-
     public List<HolidayAction> getHolidayActions(Date from, Date to) {
         Cursor holidayEntriesCursor = databaseConnector.executeSql("select "
                         + "h." + DatabaseContract.HolidayLog.COLUMN_ACTION
