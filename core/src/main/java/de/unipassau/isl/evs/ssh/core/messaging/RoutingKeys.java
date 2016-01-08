@@ -66,6 +66,7 @@ public class RoutingKeys {
     public static final RoutingKey<DoorUnlatchPayload> MASTER_DOOR_UNLATCH = new RoutingKey<>(PREFIX_MASTER + "/door/unlatch", DoorUnlatchPayload.class);
 
     public static final RoutingKey<GenerateNewRegisterTokenPayload> MASTER_USER_REGISTER = new RoutingKey<>(PREFIX_MASTER + "/user/register", GenerateNewRegisterTokenPayload.class);
+    public static final RoutingKey<Void> MASTER_USER_REGISTER_REPLY = MASTER_USER_REGISTER.getReply(Void.class);
 
     // BEGIN: MasterUserConfigHandler
     public static final RoutingKey<SetPermissionPayload> MASTER_PERMISSION_SET = new RoutingKey<>(PREFIX_MASTER + "/permission/set", SetPermissionPayload.class);

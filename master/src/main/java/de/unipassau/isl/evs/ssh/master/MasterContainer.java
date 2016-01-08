@@ -15,6 +15,7 @@ import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterCameraHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterClimateHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterDoorBellHandler;
+import de.unipassau.isl.evs.ssh.master.handler.MasterDoorHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterLightHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterModuleHandler;
 import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
@@ -60,7 +61,7 @@ public class MasterContainer extends ContainerService {
 
         registerHandler(new MasterWeatherCheckHandler());
 
-        //registerHandler(new MasterDoorHandler()); //FIXME was not registered before (Niko,  2015-12-17)
+        registerHandler(new MasterDoorHandler());
         //registerHandler(new MasterPermissionHandler());
 
         Log.i(getClass().getSimpleName(), "Master set up! ID is " + require(NamingManager.KEY).getOwnID());

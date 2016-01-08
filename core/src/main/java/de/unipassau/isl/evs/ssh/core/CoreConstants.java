@@ -13,7 +13,6 @@ import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccess
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import io.netty.util.AttributeKey;
 import io.netty.util.ResourceLeakDetector;
 

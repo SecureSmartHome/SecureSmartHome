@@ -26,6 +26,7 @@ import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER_REPLY;
 
 /**
  * Handles messages indicating that a device wants to register itself at the system and also generates
@@ -148,7 +149,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
             userDeviceForToken.put(base64Token, generateNewRegisterTokenPayload.getUserDevice());
             Message reply = new Message(new GenerateNewRegisterTokenPayload(newToken,
                     generateNewRegisterTokenPayload.getUserDevice()));
-            sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
+            sendMessage(message.getFromID(), MASTER_USER_REGISTER_REPLY, reply);
         }
         //TODO Leon: else error message (Leon, 07.01.16)
     }
