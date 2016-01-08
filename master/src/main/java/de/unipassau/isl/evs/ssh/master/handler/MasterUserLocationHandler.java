@@ -85,4 +85,15 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
 
         return false;
     }
+
+    /**
+     *
+     * Returns if a device is currently in local network
+     *
+     * @param deviceID of the device that is to be checked
+     * @return true if device is in local network
+     */
+    public boolean isDeviceLocal(DeviceID deviceID) {
+        return MASTER_DEVICE_CONNECTED.getPayload(positionMap.get(deviceID).get(0)).isLocal;
+    }
 }
