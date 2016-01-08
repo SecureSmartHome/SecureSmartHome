@@ -7,6 +7,10 @@ package de.unipassau.isl.evs.ssh.master.database;
  * @author Wolfgang Popp
  */
 public class DatabaseContract {
+
+    /**
+     * @author Leon Sell
+     */
     public class SqlQueries {
         static final String SLAVE_ID_FROM_FINGERPRINT_SQL_QUERY =
                 "select " + DatabaseContract.Slave.COLUMN_ID
