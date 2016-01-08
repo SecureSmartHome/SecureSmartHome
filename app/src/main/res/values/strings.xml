@@ -144,8 +144,10 @@
     <string name="brightness_warning_text" formatted="false">It has %d%n Lux in your room, which should be bright enough.</string>
     <string name="weather_warning_title">Weather Warning!</string>
     <string name="weather_warning_text">Please close all doors and windows. It will rain today.</string>
-    <string name="system_health_warning_title">Component failed!</string>
-    <string name="system_health_warning_text" formatted="false">The module %s is not responding anymore.</string>
+    <string name="system_health_warning_title_failed">Component failed!</string>
+    <string name="system_health_warning_title_fixed">Component failure resolved!</string>
+    <string name="system_health_warning_text_failure" formatted="false">The module %s is not responding anymore.</string>
+    <string name="system_health_warning_text_fixed" formatted="false">The module %s is not responding again.</string>
     <string name="door_bell_notification_title">The Doorbell rang!</string>
     <string name="door_bell_notification_text">You have visitors at your door.</string>
     <string name="holiday_mode_switched_on_title">Holiday Mode Active!</string>

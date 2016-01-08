@@ -142,9 +142,19 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     }
 
     private void issueSystemHealthWarning(int notificationID, Serializable[] args) {
-        String title = Resources.getSystem().getString(R.string.system_health_warning_title);
-        String moduleName = (String) args[0];
-        String text = String.format(Resources.getSystem().getString(R.string.system_health_warning_text), moduleName);
+
+        String moduleName = (String) args[1];
+
+        String title;
+        String text;
+        if (((boolean) args[0])) {
+            title = Resources.getSystem().getString(R.string.system_health_warning_title_failed);
+            text = String.format(Resources.getSystem().getString(R.string.system_health_warning_text_failure), moduleName);
+        } else {
+            title = Resources.getSystem().getString(R.string.system_health_warning_title_fixed);
+            text = String.format(Resources.getSystem().getString(R.string.system_health_warning_text_fixed), moduleName);
+        }
+
         displayNotification(title, text, STATUS_FRAGMENT, notificationID);
     }
 
