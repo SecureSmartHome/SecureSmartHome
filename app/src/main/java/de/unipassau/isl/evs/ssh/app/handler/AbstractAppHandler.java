@@ -8,8 +8,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
-import de.unipassau.isl.evs.ssh.core.network.Client;
-import io.netty.util.concurrent.DefaultPromise;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
@@ -41,7 +40,7 @@ public abstract class AbstractAppHandler extends AbstractMessageHandler {
         if (!message.getFromID().equals(requireComponent(NamingManager.KEY).getMasterID())) {
             throw new IllegalArgumentException("Can only track messages sent by me");
         }
-        final DefaultPromise<T> promise = new DefaultPromise<>(requireComponent(Client.KEY).getAliveExecutor().next());
+        final Promise<T> promise = requireComponent(ExecutionServiceComponent.KEY).newPromise();
         message.getSendFuture().addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
             public void operationComplete(Future<? super Void> future) throws Exception {
@@ -50,9 +49,19 @@ public abstract class AbstractAppHandler extends AbstractMessageHandler {
                 }
             }
         });
+        //TODO Niko: track performance and timing (Niko, 2016-01-09)
         promise.setUncancellable();
         mappings.put(message.getSequenceNr(), promise);
         return promise;
+    }
+
+    /**
+     * Generate a new FailedFuture for requests that couldn't even be sent.
+     * {@link Future#isDone()} will return {@code true} and {@link Future#isSuccess()} {@code false},
+     * {@link Future#cause()} is set to the given Throwable.
+     */
+    protected <T extends MessagePayload> Future<T> newFailedFuture(Throwable cause) {
+        return requireComponent(ExecutionServiceComponent.KEY).newFailedFuture(cause);
     }
 
     /**

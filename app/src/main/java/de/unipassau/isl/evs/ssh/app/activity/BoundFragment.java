@@ -16,8 +16,8 @@ import io.netty.util.concurrent.GenericFutureListener;
  * A Fragment which can be attached to a {@link BoundActivity} and has utility methods for accessing the
  * {@link de.unipassau.isl.evs.ssh.core.container.ContainerService Container(Service)} the Activity is bound to.
  *
- * @see BoundActivity
  * @author Niko Fink
+ * @see BoundActivity
  */
 public class BoundFragment extends Fragment {
     /**
@@ -111,20 +111,25 @@ public class BoundFragment extends Fragment {
      * of the given listener, but on the UI Thread.
      */
     protected <T extends Future<?>> GenericFutureListener<T> listenerOnUiThread(final GenericFutureListener<T> listener) {
+        final String tag = BoundFragment.this.getClass().getSimpleName();
         return new GenericFutureListener<T>() {
             @Override
             public void operationComplete(final T future) throws Exception {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            listener.operationComplete(future);
-                        } catch (Exception e) {
-                            Log.w(BoundFragment.this.getClass().getSimpleName(),
-                                    "Listener for Future " + future + " threw an Exception", e);
+                final FragmentActivity activity = getActivity();
+                if (activity == null) {
+                    Log.i(tag, "Not calling listener " + listener + " of future " + future + " as fragment is no longer attached.");
+                } else {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                listener.operationComplete(future);
+                            } catch (Exception e) {
+                                Log.w(tag, "Listener for Future " + future + " threw an Exception", e);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         };
     }
