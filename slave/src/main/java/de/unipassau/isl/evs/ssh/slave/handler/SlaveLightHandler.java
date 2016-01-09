@@ -48,21 +48,16 @@ public class SlaveLightHandler extends AbstractMessageHandler {
         final Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, payload.getModule().getName());
         final EdimaxPlugSwitch plugSwitch = requireComponent(key);
 
-        boolean isOn = payload.getOn();
-        boolean success;
 
         try {
-            success = plugSwitch.setOn(isOn);
-        } catch (IOException e) {
-            success = false;
-        }
-
-        if (success) {
+            boolean isOn = payload.getOn();
+            // EdimaxPlugSwitch's isOn() and setOn() are very slow.
+            // To avoid calling them, ignore result of setOn()
+            plugSwitch.setOn(isOn);
             replyStatus(original, isOn);
-        } else {
-            sendReply(original, new Message(new ErrorPayload("Cannot switch light")));
+        } catch (IOException e) {
+            sendReply(original, new Message(new ErrorPayload(e)));
         }
-
     }
 
     private void handleGet(LightPayload payload, Message.AddressedMessage original) {

@@ -93,8 +93,8 @@ public class EdimaxPlugSwitch extends AbstractComponent {
     /**
      * Checks the current status of the Smart Plug
      *
-     * @return true if the Smart Plug is On
-     * @throws IOException
+     * @return     @Overridetrue if the Smart Plug is On
+     * @throws     @OverrideIOException
      */
     public boolean isOn() throws IOException {
         final String response = executePost(url, XML_GET);

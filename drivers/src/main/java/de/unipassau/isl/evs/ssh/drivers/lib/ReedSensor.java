@@ -112,7 +112,7 @@ public class ReedSensor extends AbstractComponent {
          * @param open true if this reed sensor is open
          */
         private void sendReedInfo(boolean open) {
-            MessagePayload payload = new DoorStatusPayload(!open, moduleName);
+            MessagePayload payload = new DoorStatusPayload(open, false, moduleName);
 
             NamingManager namingManager = container.require(NamingManager.KEY);
 
@@ -120,7 +120,7 @@ public class ReedSensor extends AbstractComponent {
             message = new Message(payload);
 
             OutgoingRouter router = container.require(OutgoingRouter.KEY);
-            router.sendMessage(namingManager.getMasterID(), RoutingKeys.MASTER_DOOR_STATUS_GET, message);
+            router.sendMessage(namingManager.getMasterID(), RoutingKeys.MASTER_DOOR_STATUS_UPDATE, message);
         }
     }
 

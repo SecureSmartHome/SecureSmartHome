@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,6 +23,9 @@ import java.lang.ref.WeakReference;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
 /**
  * This fragment allows to display information contained in door messages
@@ -85,7 +89,6 @@ public class DoorFragment extends BoundFragment {
         super.onContainerConnected(container);
         final AppDoorHandler handler = container.require(AppDoorHandler.KEY);
         handler.addListener(doorListener);
-        handler.refreshDoorStatus();
 
         byte[] image = handler.getPicture();
 
@@ -120,7 +123,17 @@ public class DoorFragment extends BoundFragment {
             return;
         }
 
-        handler.refreshImage();
+        handler.refreshImage().addListener(listenerOnUiThread(new FutureListener<CameraPayload>() {
+            @Override
+            public void operationComplete(Future<CameraPayload> future) throws Exception {
+                if (future.isSuccess()) {
+                    displayImage(future.get().getPicture());
+                } else {
+                    Log.e(TAG, "Could not load image", future.cause());
+                    Toast.makeText(getActivity(), "Could not load image", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }));
     }
 
     /**
