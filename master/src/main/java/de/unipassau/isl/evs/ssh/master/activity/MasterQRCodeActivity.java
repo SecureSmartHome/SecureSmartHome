@@ -104,6 +104,10 @@ public class MasterQRCodeActivity extends MasterStartUpActivity implements Messa
         super.onContainerDisconnected();
     }
 
+    /**
+     * Gets called in {@link #onContainerConnected(Container)}.
+     * Builds the view components that require the container.
+     */
     private void buildView() {
         ImageView imageview = ((ImageView) findViewById(R.id.qrcode_activity_qr_code));
         bitmap = createQRCodeBitmap();

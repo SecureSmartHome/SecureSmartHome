@@ -32,6 +32,16 @@ public class EditGroupFragment extends BoundFragment {
         return inflater.inflate(R.layout.fragment_editnewgroup, container, false);
     }
 
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        buildView();
+    }
+
+    /**
+     * Gets called in {@link #onContainerConnected(Container)}.
+     * Builds the view components that require the container.
+     */
     private void buildView() {
         final Group group = (Group) getArguments().getSerializable(EDIT_GROUP_DIALOG);
         String[] templateNames = getArguments().getStringArray(TEMPLATE_DIALOG);
@@ -77,11 +87,5 @@ public class EditGroupFragment extends BoundFragment {
                 toast.show();
             }
         });
-    }
-
-    @Override
-    public void onContainerConnected(Container container) {
-        super.onContainerConnected(container);
-        buildView();
     }
 }

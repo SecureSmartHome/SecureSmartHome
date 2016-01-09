@@ -73,6 +73,10 @@ public class EditUserDeviceFragment extends BoundFragment {
         return inflater.inflate(R.layout.fragment_edituserdevice, container, false);
     }
 
+    /**
+     * Gets called in {@link #onContainerConnected(Container)}.
+     * Builds the view components that require the container.
+     */
     private void buildView() {
         device = ((UserDevice) getArguments().getSerializable(USER_DEVICE_ARGUMENT_FRAGMENT));
 

@@ -59,7 +59,7 @@ public class MainActivity extends MasterStartUpActivity {
         if (isSwitching()) {
             return;
         }
-
+        buildView();
         List<Slave> slaves = new LinkedList<>();
         final SlaveController slaveController = getComponent(SlaveController.KEY);
         if (slaveController != null) {
@@ -100,7 +100,10 @@ public class MainActivity extends MasterStartUpActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // FIXME use me
+    /**
+     * Gets called in {@link #onContainerConnected(Container)}.
+     * Builds the view components that require the container.
+     */
     private void buildView() {
         TextView masterID = (TextView) findViewById(R.id.mainactivity_master_masterid);
         TextView address = (TextView) findViewById(R.id.mainactivity_master_address);
@@ -180,6 +183,9 @@ public class MainActivity extends MasterStartUpActivity {
         return activeChannels.size();
     }
 
+    /**
+     * Adapter used for {@link #slaveList}.
+     */
     private class SlaveAdapter extends BaseAdapter {
         List<Slave> slaves;
 
@@ -253,6 +259,9 @@ public class MainActivity extends MasterStartUpActivity {
         }
     }
 
+    /**
+     * Adapter used for {@link #userDeviceList}.
+     */
     private class UserDeviceAdapter extends BaseAdapter {
         List<UserDevice> userDevices;
 
