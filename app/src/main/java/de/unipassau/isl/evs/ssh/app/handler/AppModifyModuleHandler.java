@@ -28,19 +28,6 @@ public class AppModifyModuleHandler extends AbstractMessageHandler implements Co
     private List<NewModuleListener> listeners = new LinkedList<>();
 
     /**
-     * The listener interface to be notified, when the registration of a new ElectronicModule
-     * finished.
-     */
-    public interface NewModuleListener {
-        /**
-         * Invoked when the registration of a new ElectronicModule finished.
-         *
-         * @param wasSuccessful indicates whether the registration was successful or not
-         */
-        void registrationFinished(boolean wasSuccessful);
-    }
-
-    /**
      * Adds a new NewModuleListener to this handler.
      *
      * @param listener the listener to add
@@ -71,6 +58,7 @@ public class AppModifyModuleHandler extends AbstractMessageHandler implements Co
         } else if (MASTER_MODULE_ADD_ERROR.matches(message)) {
             fireRegistrationFinished(false);
         } else if (MASTER_MODULE_REMOVE_REPLY.matches(message)) {
+            // FIXME Wolfgang: Uncomment? (Phil, 8-1-16)
             // fireRegistrationFinished(false);
         } else {
             invalidMessage(message);
@@ -100,5 +88,18 @@ public class AppModifyModuleHandler extends AbstractMessageHandler implements Co
     public void removeModule(Module module){
         ModifyModulePayload payload = new ModifyModulePayload(module);
         sendMessageToMaster(MASTER_MODULE_REMOVE, new Message(payload));
+    }
+
+    /**
+     * The listener interface to be notified, when the registration of a new ElectronicModule
+     * finished.
+     */
+    public interface NewModuleListener {
+        /**
+         * Invoked when the registration of a new ElectronicModule finished.
+         *
+         * @param wasSuccessful indicates whether the registration was successful or not
+         */
+        void registrationFinished(boolean wasSuccessful);
     }
 }

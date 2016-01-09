@@ -31,6 +31,7 @@ import static de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation.encodeT
  */
 public class WelcomeScreenFragment extends ScanQRFragment {
     private static final String TAG = WelcomeScreenFragment.class.getSimpleName();
+
     private static final String LOCAL_MASTER_PACKAGE = "de.unipassau.isl.evs.ssh.master";
     private static final String LOCAL_MASTER_ACTIVITY = LOCAL_MASTER_PACKAGE + ".activity.RegisterLocalAppActivity";
     private DeviceConnectInformation info;

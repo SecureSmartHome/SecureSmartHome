@@ -50,10 +50,7 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
     public boolean isOn() {
         if (System.currentTimeMillis() - lastUpdate >= REFRESH_DELAY_MILLIS) {
             if (getContainer() != null && getContainer().require(NamingManager.KEY).isMasterKnown()) {
-                Message message = new Message(new HolidaySimulationPayload(false));
-                message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_HOLIDAY_GET.getKey());
-                sendMessageToMaster(MASTER_HOLIDAY_GET, new Message(
-                        new HolidaySimulationPayload(false)));
+                sendMessageToMaster(MASTER_HOLIDAY_GET, new Message(new HolidaySimulationPayload(false)));
             }
         }
         return isOn;
@@ -67,9 +64,7 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
      */
     public void switchHolidaySimulation(boolean on) {
         HolidaySimulationPayload payload = new HolidaySimulationPayload(on);
-        Message message = new Message(payload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_HOLIDAY_GET.getKey());
-        sendMessageToMaster(MASTER_HOLIDAY_SET, message);
+        sendMessageToMaster(MASTER_HOLIDAY_SET, new Message(payload));
     }
 
     /**

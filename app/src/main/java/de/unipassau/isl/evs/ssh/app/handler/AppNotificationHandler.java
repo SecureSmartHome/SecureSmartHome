@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.TaskStackBuilder;
@@ -101,7 +100,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
                         break;
                 }
             } else {
-                //HANDLE
+                //  HANDLE
                 Log.e(TAG, "ERROR! Received wrong Payload Type!");
             }
         } else {
@@ -242,7 +241,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
 
 
         //Send notification out to Device
-        if (context.getSystemService(Context.NOTIFICATION_SERVICE) != null) {
+        if (context != null && context.getSystemService(Context.NOTIFICATION_SERVICE) != null) {
             NotificationManager notificationManager =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.notify(notificationID, notificationBuilder.build());

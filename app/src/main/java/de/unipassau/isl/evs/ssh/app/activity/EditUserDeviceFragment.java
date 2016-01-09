@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -56,9 +55,20 @@ public class EditUserDeviceFragment extends BoundFragment {
      * The device the fragment is created for.
      */
     private UserDevice device;
+    private PermissionListAdapter permissionListAdapter;
 
-    @Nullable
-    @Override
+    private AppUserConfigurationHandler.UserInfoListener listener = new AppUserConfigurationHandler.UserInfoListener() {
+        @Override
+        public void userInfoUpdated() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    permissionListAdapter.notifyDataSetChanged();
+                }
+            });
+        }
+    };
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_edituserdevice, container, false);
     }
@@ -92,7 +102,7 @@ public class EditUserDeviceFragment extends BoundFragment {
         });
 
         ListView userPermissionList = (ListView) getActivity().findViewById(R.id.listUserPermissionContainer);
-        PermissionListAdapter permissionListAdapter = new PermissionListAdapter();
+        permissionListAdapter = new PermissionListAdapter();
         userPermissionList.setAdapter(permissionListAdapter);
     }
 
@@ -100,13 +110,23 @@ public class EditUserDeviceFragment extends BoundFragment {
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
         buildView();
+        container.require(AppUserConfigurationHandler.KEY).addUserInfoListener(listener);
+    }
+
+    @Override
+    public void onContainerDisconnected() {
+        AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        if (handler != null) {
+            handler.addUserInfoListener(listener);
+        }
+        super.onContainerDisconnected();
     }
 
     /**
      * @return A String Array of group names.
      */
     private String[] listGroups() {
-        AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
         String[] groupNames = new String[0];
         if (handler == null) {
             Log.i(TAG, "Container not yet connected!");
@@ -203,7 +223,7 @@ public class EditUserDeviceFragment extends BoundFragment {
         }
 
         private void updatePermissionList() {
-            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
                 return;
@@ -222,7 +242,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                     if (rhs.getPermission() == null) {
                         return -1;
                     }
-                    return lhs.getPermission().compareTo(rhs.getPermission());
+                    return lhs.getPermission().toLocalizedString(getActivity()).compareTo(rhs.getPermission().toLocalizedString(getActivity()));
                 }
             });
         }
@@ -295,7 +315,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                             Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
                                     + " revoked for user device " + device.getName());
                         }
-                        permissionSwitch.toggle();
+                        //permissionSwitch.toggle();
                     }
                 });
                 TextView textViewPermissionType = ((TextView) permissionLayout.findViewById(R.id.listpermission_permission_type));

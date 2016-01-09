@@ -65,8 +65,8 @@
     <string name="added_module_success">Added module successfully</string>
     <string name="added_module_fail">Adding new module failed</string>
     <string name="permission_dialog_title">Edit Permission</string>
-    <string name="is_in_group">"is in group %1$s."</string>
-    <string name="device_id">"Device ID: %1$s"</string>
+    <string name="is_in_group">"is in group %s."</string>
+    <string name="device_id">"Device ID: %s"</string>
     <string name="error_cannot_add_user">Cannot add new user. Missing information.</string>
     <string name="error_cannot_add_group">Cannot add new group. Missing information.</string>
     <string-array name="sensor_connection_types">
@@ -155,6 +155,7 @@
     <string name="holiday_mode_switched_off_title">Holiday Mode Inactive!</string>
     <string name="holiday_mode_switched_off_text">You have now the control over your home. Welcome back!</string>
     <string name="door_unlatched_title">Door is now open!</string>
+    <!--TODO maybe add text, otherwise delete? (Phil, 2016-01-09-->
     <string name="door_unlatched_text"></string>
     <string name="door_locked_title">Door is now locked!</string>
     <string name="door_locked_text">Unauthorised users can not open it anymore.</string>

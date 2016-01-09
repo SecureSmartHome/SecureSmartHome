@@ -462,7 +462,7 @@ public class PermissionController extends AbstractComponent {
                     + " join " + DatabaseContract.Group.TABLE_NAME + " g"
                     + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID
                     + " = g." + DatabaseContract.Group.COLUMN_ID
-                    + " join " + DatabaseContract.ElectronicModule.TABLE_NAME + "m"
+                    + " join " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
                     + " on p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
                     + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
                     + " where p." + DatabaseContract.Permission.COLUMN_NAME

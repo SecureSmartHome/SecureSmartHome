@@ -9,7 +9,6 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -29,19 +28,6 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
     public static final Key<AppRegisterNewDeviceHandler> KEY = new Key<>(AppRegisterNewDeviceHandler.class);
 
     private List<RegisterNewDeviceListener> listeners = new LinkedList<>();
-
-    /**
-     * The listener to receive registration events
-     */
-    public interface RegisterNewDeviceListener {
-        /**
-         * Called when the token for the new UserDevice was received and the QR Code can be
-         * displayed now.
-         *
-         * @param deviceConnectInformation the QR-Code information to display on the admin's screen
-         */
-        void tokenResponse(DeviceConnectInformation deviceConnectInformation);
-    }
 
     /**
      * Adds the given listener to this handler.
@@ -106,10 +92,20 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
      * @param user the user who is registered
      */
     public void requestToken(UserDevice user) {
-        final Message message = new Message(new GenerateNewRegisterTokenPayload(null, user));
-        final OutgoingRouter outgoingRouter = requireComponent(OutgoingRouter.KEY);
+        Message message = new Message(new GenerateNewRegisterTokenPayload(null, user));
+        sendMessageToMaster(MASTER_USER_REGISTER, message);
+    }
 
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_USER_REGISTER.getKey());
-        outgoingRouter.sendMessageToMaster(MASTER_USER_REGISTER, message);
+    /**
+     * The listener to receive registration events
+     */
+    public interface RegisterNewDeviceListener {
+        /**
+         * Called when the token for the new UserDevice was received and the QR Code can be
+         * displayed now.
+         *
+         * @param deviceConnectInformation the QR-Code information to display on the admin's screen
+         */
+        void tokenResponse(DeviceConnectInformation deviceConnectInformation);
     }
 }

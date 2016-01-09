@@ -127,7 +127,7 @@ public class StatusFragment extends BoundFragment {
     }
 
     private void update() {
-        AppModuleHandler handler = getComponent(AppModuleHandler.KEY);
+        final AppModuleHandler handler = getComponent(AppModuleHandler.KEY);
         if (handler == null) {
             Log.e(TAG, "update(): Container is not connected");
             return;
