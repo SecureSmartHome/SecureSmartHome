@@ -13,15 +13,13 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_LIGHT_UPDATE;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_REPLY;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET_REPLY;
 
 /**
@@ -155,12 +153,8 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
      */
     private void requestLightStatus(Module m) {
         LightPayload lightPayload = new LightPayload(false, m);
-
         Message message = new Message(lightPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_LIGHT_UPDATE.getKey());
-
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(RoutingKeys.MASTER_LIGHT_GET, message);
+        sendMessageToMaster(MASTER_LIGHT_GET, message);
     }
 
     /**
@@ -171,13 +165,8 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
      */
     public void setLight(Module module, boolean status) {
         LightPayload lightPayload = new LightPayload(status, module);
-
-        Message message;
-        message = new Message(lightPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_LIGHT_UPDATE.getKey());
-
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(RoutingKeys.MASTER_LIGHT_SET, message);
+        Message message = new Message(lightPayload);
+        sendMessageToMaster(MASTER_LIGHT_SET, message);
     }
 
     /**

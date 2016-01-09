@@ -10,20 +10,17 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_CAMERA_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_BLOCK;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_SET;
@@ -146,23 +143,13 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
 
     private void refreshOpenStatus(String door) {
         DoorStatusPayload doorPayload = new DoorStatusPayload(false, door);
-
-        Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET.getKey());
-
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(MASTER_DOOR_STATUS_GET, message);
+        sendMessageToMaster(MASTER_DOOR_STATUS_GET, new Message(doorPayload));
 
     }
 
     private void refreshBlockStatus(String door) {
         DoorUnlatchPayload doorPayload = new DoorUnlatchPayload(door);
-
-        Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_BLOCK.getKey());
-
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(MASTER_DOOR_LOCK_GET, message);
+        sendMessageToMaster(MASTER_DOOR_LOCK_GET, new Message(doorPayload));
     }
 
     /**
@@ -175,12 +162,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
             return;
         }
         DoorUnlatchPayload doorPayload = new DoorUnlatchPayload(doors.get(0).getName());
-
-        Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET.getKey());
-
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(MASTER_DOOR_UNLATCH, message);
+        sendMessageToMaster(MASTER_DOOR_UNLATCH, new Message(doorPayload));
         isDoorOpen = true;
     }
 
@@ -191,12 +173,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
             return;
         }
         DoorLockPayload doorPayload = new DoorLockPayload(isBlocked, doors.get(0).getName());
-
-        Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_BLOCK.getKey());
-
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(MASTER_DOOR_LOCK_SET, message);
+        sendMessageToMaster(MASTER_DOOR_LOCK_SET, new Message(doorPayload));
         isDoorBlocked = isBlocked;
     }
 
@@ -233,12 +210,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
             return;
         }
         CameraPayload payload = new CameraPayload(0, cameras.get(0).getName());
-
-        Message message = new Message(payload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_CAMERA_GET.getKey());
-
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(MASTER_CAMERA_GET, message);
+        sendMessageToMaster(MASTER_CAMERA_GET, new Message(payload));
     }
 
     /**
