@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -78,9 +77,7 @@ public class Client extends AbstractComponent {
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ConnectivityManager conMan = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo netInfo = conMan.getActiveNetworkInfo();
-            if (netInfo.isConnected() && !isConnectionLocal()) {
+            if (!isConnectionLocal()) {
                 final boolean connectionEstablished = isConnectionEstablished();
                 final long timeout;
                 // only search for 30 seconds if a connection is already established
@@ -89,7 +86,7 @@ public class Client extends AbstractComponent {
                 } else {
                     timeout = 0;
                 }
-                Log.d(TAG, (connectionEstablished ? "Rescanning" : "Scanning") + " network for possible local connections after NetworkInfo change: " + netInfo);
+                Log.d(TAG, (connectionEstablished ? "Rescanning" : "Scanning") + " network for possible local connections after NetworkInfo change: " + intent);
                 requireComponent(UDPDiscoveryClient.KEY).startDiscovery(timeout);
             }
         }

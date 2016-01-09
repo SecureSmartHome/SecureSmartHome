@@ -243,6 +243,15 @@ public class Message implements Serializable {
 
         private AddressedMessage(TypedMap headers, MessagePayload payload, DeviceID fromID, DeviceID toID, String routingKey) {
             super(headers.unmodifiableView(), payload);
+            if (fromID == null) {
+                throw new NullPointerException("fromID");
+            }
+            if (toID == null) {
+                throw new NullPointerException("toID");
+            }
+            if (routingKey == null) {
+                throw new NullPointerException("routingKey");
+            }
             this.fromID = fromID;
             this.toID = toID;
             this.routingKey = routingKey;
