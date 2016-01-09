@@ -16,13 +16,13 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
-import de.unipassau.isl.evs.ssh.core.network.ClientIncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.network.handler.Decrypter;
 import de.unipassau.isl.evs.ssh.core.network.handler.Encrypter;
 import de.unipassau.isl.evs.ssh.core.network.handler.PipelinePlug;
@@ -78,7 +78,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
      * Configures the per-connection pipeline that is responsible for handling incoming and outgoing data.
      * After an incoming packet is decrypted, decoded and verified,
      * it will be sent to its target {@link MessageHandler}
-     * by the {@link ClientIncomingDispatcher}.
+     * by the {@link IncomingDispatcher}.
      */
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -250,7 +250,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         // allow pings
         TimeoutHandler.setPingEnabled(ctx.channel(), true);
         // add Dispatcher
-        ctx.pipeline().addBefore(ctx.name(), ClientIncomingDispatcher.class.getSimpleName(), server.getIncomingDispatcher());
+        ctx.pipeline().addBefore(ctx.name(), IncomingDispatcher.class.getSimpleName(), server.getIncomingDispatcher());
         // Logging is handled by IncomingDispatcher and OutgoingRouter
         ctx.pipeline().remove(LoggingHandler.class.getSimpleName());
         // remove HandshakeHandler

@@ -13,6 +13,7 @@ import java.security.cert.CertificateException;
 import java.util.Arrays;
 
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.handler.Decrypter;
@@ -53,14 +54,12 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.WRITER_
 public class ClientHandshakeHandler extends ChannelHandlerAdapter {
     private static final String TAG = ClientHandshakeHandler.class.getSimpleName();
 
-    private final Client client;
     private final Container container;
     private final byte[] chapChallenge = new byte[HandshakePacket.CHAP.CHALLENGE_LENGTH];
     private State state;
     private boolean triedRegister;
 
-    public ClientHandshakeHandler(Client client, Container container) {
-        this.client = client;
+    public ClientHandshakeHandler(Container container) {
         this.container = container;
     }
 
@@ -69,7 +68,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
      * Configures the per-connection pipeline that is responsible for handling incoming and outgoing data.
      * After an incoming packet is decrypted, decoded and verified,
      * it will be sent to its target {@link de.unipassau.isl.evs.ssh.core.handler.MessageHandler}
-     * by the {@link ClientIncomingDispatcher}.
+     * by the {@link IncomingDispatcher}.
      */
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -207,7 +206,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
             Log.i(TAG, "Got State: authenticated, handshake successful");
             handshakeSuccessful(ctx);
         } else {
-            final byte[] token = client.getActiveRegistrationTokenBytes();
+            final byte[] token = container.require(Client.KEY).getActiveRegistrationTokenBytes();
             final boolean canRegister = !triedRegister && token.length == DeviceConnectInformation.TOKEN_LENGTH;
             if (canRegister) {
                 triedRegister = true;
@@ -224,7 +223,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
     }
 
     private boolean checkSentPassiveRegistrationToken(HandshakePacket.ServerAuthenticationResponse msg) {
-        final byte[] expectedToken = client.getPassiveRegistrationTokenBytes();
+        final byte[] expectedToken = container.require(Client.KEY).getPassiveRegistrationTokenBytes();
         final byte[] actualToken = msg.passiveRegistrationToken;
         return actualToken != null && expectedToken != null
                 && actualToken.length == DeviceConnectInformation.TOKEN_LENGTH
@@ -239,14 +238,14 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         // allow pings
         TimeoutHandler.setPingEnabled(ctx.channel(), true);
         // add Dispatcher
-        ctx.pipeline().addBefore(ctx.name(), ClientIncomingDispatcher.class.getSimpleName(), client.getIncomingDispatcher());
+        ctx.pipeline().addBefore(ctx.name(), IncomingDispatcher.class.getSimpleName(), container.require(IncomingDispatcher.KEY));
         // Logging is handled by IncomingDispatcher and OutgoingRouter
         ctx.pipeline().remove(LoggingHandler.class.getSimpleName());
         // remove HandshakeHandler
         ctx.pipeline().remove(this);
 
         Log.v(TAG, "Handshake successful, current Pipeline: " + ctx.pipeline());
-        client.notifyClientConnected();
+        container.require(Client.KEY).notifyClientConnected();
     }
 
     protected void handshakeFailed(ChannelHandlerContext ctx, String message) {
@@ -255,7 +254,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         }
 
         Log.e(TAG, "Could not establish secure connection to master: " + message);
-        client.notifyClientRejected(message);
+        container.require(Client.KEY).notifyClientRejected(message);
         ctx.close();
     }
 
