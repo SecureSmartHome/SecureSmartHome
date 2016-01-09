@@ -73,6 +73,10 @@ public class EditUserDeviceFragment extends BoundFragment {
         return inflater.inflate(R.layout.fragment_edituserdevice, container, false);
     }
 
+    /**
+     * Gets called in {@link #onContainerConnected(Container)}.
+     * Builds the view components that require the container.
+     */
     private void buildView() {
         device = ((UserDevice) getArguments().getSerializable(USER_DEVICE_ARGUMENT_FRAGMENT));
 
@@ -126,7 +130,7 @@ public class EditUserDeviceFragment extends BoundFragment {
      * @return A String Array of group names.
      */
     private String[] listGroups() {
-        AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
         String[] groupNames = new String[0];
         if (handler == null) {
             Log.i(TAG, "Container not yet connected!");
@@ -223,7 +227,7 @@ public class EditUserDeviceFragment extends BoundFragment {
         }
 
         private void updatePermissionList() {
-            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
                 return;

@@ -17,9 +17,22 @@
     <string name="master_local_port">MasterLocalPort</string>
     <string name="master_port_intern">MasterPortIntern</string>
     <string name="master_port_extern">MasterPortExtern</string>
+
+    <!--Used in the MainActivity-->
     <string name="connected_user_devices">Connected User Devices</string>
     <string name="connected_slaves">Connected Slaves</string>
     <string name="master">Master</string>
     <string name="address">Address</string>
     <string name="restart">Restart</string>
+    <string name="slave_name">Slave: %s</string>
+    <string name="userdevice_name">User Device: %s</string>
+    <string name="address_format">Address: %s</string>
+    <string name="id_format">ID: %s</string>
+
+    <!--others-->
+
+    <string name="master_city_name_summary">Name of the city for weather forecast</string>
+    <string name="master_port_extern_summary">Opened to connect to master from extern</string>
+    <string name="master_port_intern_summary">Opened on Master to accept connections from extern</string>
+    <string name="master_port_local_summary">Local port to connect to master</string>
 </resources>

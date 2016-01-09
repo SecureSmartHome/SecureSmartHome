@@ -32,6 +32,16 @@ public class EditGroupFragment extends BoundFragment {
         return inflater.inflate(R.layout.fragment_editnewgroup, container, false);
     }
 
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        buildView();
+    }
+
+    /**
+     * Gets called in {@link #onContainerConnected(Container)}.
+     * Builds the view components that require the container.
+     */
     private void buildView() {
         final Group group = (Group) getArguments().getSerializable(EDIT_GROUP_DIALOG);
         String[] templateNames = getArguments().getStringArray(TEMPLATE_DIALOG);
@@ -46,6 +56,10 @@ public class EditGroupFragment extends BoundFragment {
         final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
         if (handler == null) {
             Log.i(TAG, "Container not yet connected!");
+            return;
+        }
+        if (group == null) {
+            Log.i(TAG, "Can't build View. Missing group.");
             return;
         }
         Button editButton = (Button) getActivity().findViewById(R.id.editgroupfragment_button_edit);
@@ -73,17 +87,5 @@ public class EditGroupFragment extends BoundFragment {
                 toast.show();
             }
         });
-    }
-
-    @Override
-    public void onContainerConnected(Container container) {
-        super.onContainerConnected(container);
-        buildView();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        // TODO Phil Save state of spinner. but I can't restore it in onCreateView as it is called after onContainerConnected
-        super.onSaveInstanceState(outState);
     }
 }

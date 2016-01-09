@@ -15,8 +15,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBlockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
-import de.unipassau.isl.evs.ssh.core.network.Client;
-import io.netty.util.concurrent.FailedFuture;
 import io.netty.util.concurrent.Future;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
@@ -189,9 +187,7 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
         List<Module> cameras = requireComponent(AppModuleHandler.KEY).getCameras();
         if (cameras.size() < 1) {
             Log.e(TAG, "Could not refresh the door image. No camera available");
-            //TODO Niko: move to method "newFailedFuture" (Wolfi, 2016-01-09)
-            return new FailedFuture<>(requireComponent(Client.KEY).getAliveExecutor().next(),
-                    new IllegalStateException("Could not refresh the door image. No camera available"));
+            return newFailedFuture(new IllegalStateException("Could not refresh the door image. No camera available"));
         }
         CameraPayload payload = new CameraPayload(0, cameras.get(0).getName());
         return newResponseFuture(

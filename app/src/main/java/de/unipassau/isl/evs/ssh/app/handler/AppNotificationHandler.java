@@ -136,7 +136,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
 
     private void issueWeatherWarning(int notificationID, Serializable[] args) {
         String title = Resources.getSystem().getString(R.string.weather_warning_title);
-        String text = (String) args[0]; //TODO string hardcoded in MasterWeatherCheckHandler
+        String text = Resources.getSystem().getString(R.string.weather_warning_text);
         displayNotification(title, text, CLIMATE_FRAGMENT, notificationID);
     }
 

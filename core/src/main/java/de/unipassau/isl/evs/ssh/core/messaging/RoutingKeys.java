@@ -32,8 +32,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayl
  * @author Team
  */
 public class RoutingKeys {
-    private RoutingKeys() {
-    }
+    private RoutingKeys() {}
 
     private static final String PREFIX_MASTER = "/master";
     private static final String PREFIX_SLAVE = "/slave";
@@ -54,6 +53,7 @@ public class RoutingKeys {
     public static final RoutingKey<CameraPayload> MASTER_CAMERA_GET_REPLY = MASTER_CAMERA_GET.getReply(CameraPayload.class);
 
     public static final RoutingKey<MessagePayload> MASTER_REQUEST_WEATHER_INFO = new RoutingKey<>(PREFIX_MASTER + "/weatherinfo/request", MessagePayload.class);
+    public static final RoutingKey<ClimatePayload> MASTER_REQUEST_WEATHER_INFO_REPLY = MASTER_REQUEST_WEATHER_INFO.getReply(ClimatePayload.class);
     public static final RoutingKey<ClimatePayload> MASTER_PUSH_WEATHER_INFO = new RoutingKey<>(PREFIX_MASTER + "/weatherinfo/push", ClimatePayload.class);
 
     public static final RoutingKey<NotificationPayload> MASTER_NOTIFICATION_SEND = new RoutingKey<>(PREFIX_MASTER + "/notification/send", NotificationPayload.class);
@@ -105,7 +105,9 @@ public class RoutingKeys {
     // END: MasterModuleHandler
 
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_SET = new RoutingKey<>(PREFIX_MASTER + "/holiday/set", HolidaySimulationPayload.class);
+    public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_SET_REPLY = MASTER_HOLIDAY_SET.getReply(HolidaySimulationPayload.class);
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_GET = new RoutingKey<>(PREFIX_MASTER + "/holiday/get", HolidaySimulationPayload.class);
+    public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_GET_REPLY = MASTER_HOLIDAY_GET.getReply(HolidaySimulationPayload.class);
 
     // BEGIN: MasterSlaveManagementHandler
     public static final RoutingKey<RegisterSlavePayload> MASTER_SLAVE_REGISTER = new RoutingKey<>(PREFIX_MASTER + "/slave/register", RegisterSlavePayload.class);
@@ -157,9 +159,6 @@ public class RoutingKeys {
     // end door
 
     // App
-    public static final RoutingKey<MessagePayload> APP_MODULES_GET = new RoutingKey<>(PREFIX_APP + "/module/get", MessagePayload.class);
-    public static final RoutingKey<LightPayload> APP_LIGHT_UPDATE = new RoutingKey<>(PREFIX_APP + "/light/update", LightPayload.class);
-    public static final RoutingKey<ClimatePayload> APP_CLIMATE_UPDATE = new RoutingKey<>(PREFIX_APP + "/climate/update", ClimatePayload.class);
     public static final RoutingKey<NotificationPayload> APP_NOTIFICATION_RECEIVE = new RoutingKey<>(PREFIX_APP + "/notification/receive", NotificationPayload.class);
     public static final RoutingKey<CameraPayload> APP_CAMERA_GET = new RoutingKey<>(PREFIX_APP + "/camera/get", CameraPayload.class);
     public static final RoutingKey<UserDeviceInformationPayload> APP_USERINFO_UPDATE = new RoutingKey<>(PREFIX_APP + "/userdevice/update", UserDeviceInformationPayload.class);

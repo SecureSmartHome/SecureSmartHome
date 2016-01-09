@@ -20,7 +20,7 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 
 /**
  * The NamingManager class maps certificates to IDs that are unique within the SecureSmartHome
- * System. The IDs are assigned to the master, slaves and smarphones.
+ * System. The IDs are assigned to the master, slaves and smartphones.
  *
  * @author Wolfgang Popp
  */
@@ -69,6 +69,19 @@ public class NamingManager extends AbstractComponent {
         return masterID;
     }
 
+    public void setMasterID(DeviceID masterID) {
+        if (masterID == null) throw new NullPointerException("masterID");
+        if (this.masterID != null) throw new IllegalStateException("masterID already known");
+
+        requireComponent(ContainerService.KEY_CONTEXT)
+                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE)
+                .edit()
+                .putString(PREF_MASTER_ID, masterID.getIDString())
+                .commit();
+
+        this.masterID = masterID;
+    }
+
     /**
      * Gets the master's certificate.
      *
@@ -88,6 +101,24 @@ public class NamingManager extends AbstractComponent {
             throw new IllegalStateException("Master ID not known");
         }
         return masterCert;
+    }
+
+    public void setMasterCertificate(X509Certificate masterCert) throws CertificateException, NoSuchAlgorithmException, KeyStoreException {
+        if (masterCert == null) throw new NullPointerException("masterCert");
+        if (this.masterCert != null) throw new IllegalStateException("masterCert already known");
+        final DeviceID certID = DeviceID.fromCertificate(masterCert);
+        if (masterID != null && !masterID.equals(certID)) {
+            throw new CertificateException("MasterID generated from Certificate " + certID + " does not match " +
+                    "already known MasterID " + masterID);
+        }
+
+        if (masterID == null) {
+            setMasterID(certID);
+        }
+
+        requireComponent(KeyStoreController.KEY).saveCertificate(masterCert, masterID.getIDString());
+
+        this.masterCert = masterCert;
     }
 
     /**
@@ -214,37 +245,6 @@ public class NamingManager extends AbstractComponent {
             masterID = new DeviceID(masterIDStr);
             masterCert = getCertificate(masterID);
         }
-    }
-
-    public void setMasterID(DeviceID masterID) {
-        if (masterID == null) throw new NullPointerException("masterID");
-        if (this.masterID != null) throw new IllegalStateException("masterID already known");
-
-        requireComponent(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE)
-                .edit()
-                .putString(PREF_MASTER_ID, masterID.getIDString())
-                .commit();
-
-        this.masterID = masterID;
-    }
-
-    public void setMasterCertificate(X509Certificate masterCert) throws CertificateException, NoSuchAlgorithmException, KeyStoreException {
-        if (masterCert == null) throw new NullPointerException("masterCert");
-        if (this.masterCert != null) throw new IllegalStateException("masterCert already known");
-        final DeviceID certID = DeviceID.fromCertificate(masterCert);
-        if (masterID != null && !masterID.equals(certID)) {
-            throw new CertificateException("MasterID generated from Certificate " + certID + " does not match " +
-                    "already known MasterID " + masterID);
-        }
-
-        if (masterID == null) {
-            setMasterID(certID);
-        }
-
-        requireComponent(KeyStoreController.KEY).saveCertificate(masterCert, masterID.getIDString());
-
-        this.masterCert = masterCert;
     }
 
     @Override

@@ -1,17 +1,19 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
-import de.unipassau.isl.evs.ssh.core.network.Client;
-import io.netty.util.concurrent.DefaultPromise;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
+import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 
 /**
@@ -37,22 +39,41 @@ public abstract class AbstractAppHandler extends AbstractMessageHandler {
      * (except for the ErrorPayload, which is always handled as described above and doesn't count here),
      * the most common supertype of both payloads (i.e. MessagePayload) must be declared as generic type for the Future.</i>
      */
-    protected <T extends MessagePayload> Future<T> newResponseFuture(Message.AddressedMessage message) {
+    protected <T extends MessagePayload> Future<T> newResponseFuture(final Message.AddressedMessage message) {
         if (!message.getFromID().equals(requireComponent(NamingManager.KEY).getMasterID())) {
             throw new IllegalArgumentException("Can only track messages sent by me");
         }
-        final DefaultPromise<T> promise = new DefaultPromise<>(requireComponent(Client.KEY).getAliveExecutor().next());
-        message.getSendFuture().addListener(new GenericFutureListener<Future<? super Void>>() {
+        final Promise<T> promise = requireComponent(ExecutionServiceComponent.KEY).newPromise();
+        final MessageMetrics metrics = new MessageMetrics(message);
+        promise.addListener(new FutureListener<T>() {
             @Override
-            public void operationComplete(Future<? super Void> future) throws Exception {
+            public void operationComplete(Future<T> future) throws Exception {
+                metrics.finished(future);
+                Log.v(AbstractAppHandler.this.getClass().getSimpleName() + "-Metrics", metrics.toString());
+            }
+        });
+        message.getSendFuture().addListener(new FutureListener<Void>() {
+            @Override
+            public void operationComplete(Future<Void> future) throws Exception {
                 if (!future.isSuccess()) {
                     promise.setFailure(future.cause());
+                } else {
+                    metrics.sent(future);
                 }
             }
         });
         promise.setUncancellable();
         mappings.put(message.getSequenceNr(), promise);
         return promise;
+    }
+
+    /**
+     * Generate a new FailedFuture for requests that couldn't even be sent.
+     * {@link Future#isDone()} will return {@code true} and {@link Future#isSuccess()} {@code false},
+     * {@link Future#cause()} is set to the given Throwable.
+     */
+    protected <T extends MessagePayload> Future<T> newFailedFuture(Throwable cause) {
+        return requireComponent(ExecutionServiceComponent.KEY).newFailedFuture(cause);
     }
 
     /**
@@ -100,6 +121,49 @@ public abstract class AbstractAppHandler extends AbstractMessageHandler {
             return promise.tryFailure((ErrorPayload) payload);
         } else {
             return promise.trySuccess(payload);
+        }
+    }
+
+    private static class MessageMetrics {
+        private String key;
+        private String status;
+        private long queued, sent, finished;
+
+        public MessageMetrics(Message.AddressedMessage message) {
+            this.key = message.getRoutingKey();
+            queued = System.nanoTime();
+            status = message.getSendFuture().toString();
+        }
+
+        public void sent(Future<?> future) {
+            sent = System.nanoTime();
+            status = future.toString();
+        }
+
+        public void finished(Future<?> future) {
+            finished = System.nanoTime();
+            status = future.toString();
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder bob = new StringBuilder();
+            bob.append(key).append(" ");
+            if (sent > 0) {
+                bob.append("sent after ").append(TimeUnit.NANOSECONDS.toMillis(sent - queued)).append("ms ");
+                if (finished > 0) {
+                    bob.append("and ");
+                } else {
+                    bob.append("and response still pending ");
+                }
+            } else {
+                bob.append("not sent ");
+            }
+            if (finished > 0) {
+                bob.append("finished after ").append(TimeUnit.NANOSECONDS.toMillis(finished - queued)).append("ms ");
+            }
+            bob.append("with Future ").append(status);
+            return bob.toString();
         }
     }
 }

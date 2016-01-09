@@ -13,7 +13,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
@@ -181,14 +181,10 @@ public abstract class AbstractMessageHandler implements MessageHandler {
      */
     @Deprecated
     protected Message.AddressedMessage sendErrorMessage(Message.AddressedMessage original) {
-        //FIXME logging, reasons??
-        Message reply = new Message(new MessageErrorPayload(original.getPayload()));
-        reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
-        return sendMessage(
-                original.getFromID(),
-                original.getHeader(Message.HEADER_REPLY_TO_KEY),
-                reply
-        );
+        final RuntimeException exception = new RuntimeException("Unknown error while handling Message " + original);
+        exception.fillInStackTrace();
+        Message reply = new Message(new ErrorPayload(exception));
+        return sendReply(original, reply);
     }
 
     /**

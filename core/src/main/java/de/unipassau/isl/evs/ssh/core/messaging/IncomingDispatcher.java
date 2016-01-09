@@ -16,6 +16,8 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoop;
@@ -27,7 +29,8 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PE
  *
  * @author Niko Fink
  */
-public abstract class IncomingDispatcher extends ChannelHandlerAdapter implements Component {
+@ChannelHandler.Sharable
+public class IncomingDispatcher extends ChannelHandlerAdapter implements Component {
     private static final String TAG = IncomingDispatcher.class.getSimpleName();
     public static final Key<IncomingDispatcher> KEY = new Key<>(IncomingDispatcher.class);
 
@@ -58,11 +61,10 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
      *
      * @param msg AddressedMessage to dispatch.
      * @return {@code true} if the Message was forwarded to at least one MessageHandler.
-     * @see #getExecutor()
      */
     public boolean dispatch(final Message.AddressedMessage msg) {
         Set<MessageHandler> handlers = mappings.get(RoutingKey.forMessage(msg));
-        final EventLoop executor = getExecutor();
+        final EventLoop executor = getEventLoop();
         Log.v(TAG, "DISPATCH " + msg + " to " + handlers + " using " + executor);
         for (final MessageHandler handler : handlers) {
             executor.submit(new Runnable() {
@@ -80,11 +82,19 @@ public abstract class IncomingDispatcher extends ChannelHandlerAdapter implement
         return !handlers.isEmpty();
     }
 
-    /**
-     * @return the EventLoop used for dispatching all incoming messages
-     */
+    private EventLoop eventLoop;
+
     @NonNull
-    protected abstract EventLoop getExecutor();
+    private EventLoop getEventLoop() {
+        if (eventLoop == null || eventLoop.isShuttingDown() || eventLoop.isShutdown()) {
+            Log.v(TAG, "EventLoop unavailable (" + eventLoop + "), getting new one");
+            eventLoop = getContainer().require(ExecutionServiceComponent.KEY).next();
+        }
+        if (eventLoop == null) {
+            throw new IllegalStateException("Could not dispatch message as Executor was shut down");
+        }
+        return eventLoop;
+    }
 
     @Override
     public void init(Container container) {

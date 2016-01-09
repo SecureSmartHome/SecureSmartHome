@@ -24,6 +24,25 @@ public abstract class OutgoingRouter extends AbstractComponent {
      */
     protected abstract Future<Void> doSendMessage(Message.AddressedMessage message);
 
+    private Message.AddressedMessage sendMessage(DeviceID toID, String routingKey, Message msg, boolean log) {
+        final Message.AddressedMessage amsg = msg.setDestination(getOwnID(), toID, routingKey);
+        final Future<Void> future = doSendMessage(amsg);
+        amsg.setSendFuture(future);
+        if (log) {
+            future.addListener(new GenericFutureListener<Future<Void>>() {
+                @Override
+                public void operationComplete(Future<Void> future) throws Exception {
+                    if (future.isSuccess()) {
+                        Log.v(TAG, "SENT " + amsg);
+                    } else {
+                        Log.w(TAG, "Could not send Message " + amsg + " because of " + Log.getStackTraceString(future.cause()));
+                    }
+                }
+            });
+        }
+        return amsg;
+    }
+
     /**
      * Adds the Address Information to the message by wrapping it in an immutable
      * {@link de.unipassau.isl.evs.ssh.core.messaging.Message.AddressedMessage} an sending to the corresponding
@@ -34,19 +53,7 @@ public abstract class OutgoingRouter extends AbstractComponent {
      * @param msg        AddressedMessage to forward.
      */
     public Message.AddressedMessage sendMessage(DeviceID toID, String routingKey, Message msg) {
-        final Message.AddressedMessage amsg = msg.setDestination(getOwnID(), toID, routingKey);
-        final Future<Void> future = doSendMessage(amsg);
-        amsg.setSendFuture(future);
-        future.addListener(new GenericFutureListener<Future<Void>>() {
-            @Override
-            public void operationComplete(Future<Void> future) throws Exception {
-                Log.v(TAG, "SENT " + amsg);
-                if (!future.isSuccess()) {
-                    Log.w(TAG, "Could not send Message " + amsg + " because of " + Log.getStackTraceString(future.cause()));
-                }
-            }
-        });
-        return amsg;
+        return sendMessage(toID, routingKey, msg, true);
     }
 
     /**
@@ -108,7 +115,28 @@ public abstract class OutgoingRouter extends AbstractComponent {
      */
     public Message.AddressedMessage sendReply(Message.AddressedMessage original, Message reply) {
         reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
-        return sendMessage(original.getFromID(), RoutingKey.getReplyKey(original.getRoutingKey()), reply);
+        final Message.AddressedMessage amsg = sendMessage(
+                original.getFromID(),
+                RoutingKey.getReplyKey(original.getRoutingKey()),
+                reply,
+                false
+        );
+        final long originalTimestamp = original.getHeader(Message.HEADER_TIMESTAMP);
+        amsg.getSendFuture().addListener(new GenericFutureListener<Future<Void>>() {
+            @Override
+            public void operationComplete(Future<Void> future) throws Exception {
+                final long replyTimestamp = amsg.getHeader(Message.HEADER_TIMESTAMP);
+                final long replyTime = replyTimestamp - originalTimestamp;
+                final long sendTime = System.currentTimeMillis() - replyTimestamp;
+                final long overallTime = replyTime + sendTime;
+                if (future.isSuccess()) {
+                    Log.v(TAG, "SENT " + amsg + " after " + replyTime + "+" + sendTime + "=" + overallTime + "ms");
+                } else {
+                    Log.w(TAG, "Could not send Message " + amsg + " because of " + Log.getStackTraceString(future.cause()));
+                }
+            }
+        });
+        return amsg;
     }
 
     protected DeviceID getMasterID() {

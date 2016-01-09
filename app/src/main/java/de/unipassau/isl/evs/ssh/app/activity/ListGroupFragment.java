@@ -41,7 +41,9 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.TEMPLAT
  */
 public class ListGroupFragment extends BoundFragment {
     private static final String TAG = ListGroupFragment.class.getSimpleName();
+
     private GroupListAdapter adapter;
+    private ListView groupList;
 
     @Nullable
     @Override
@@ -55,9 +57,13 @@ public class ListGroupFragment extends BoundFragment {
         buildView();
     }
 
+    /**
+     * Gets called in {@link #onContainerConnected(Container)}.
+     * Builds the view components that require the container.
+     */
     private void buildView() {
-        ListView list = (ListView) getActivity().findViewById(R.id.listGroupContainer);
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        groupList = (ListView) getActivity().findViewById(R.id.listGroupContainer);
+        groupList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                             Group item = adapter.getItem(position);
@@ -67,7 +73,7 @@ public class ListGroupFragment extends BoundFragment {
                                         }
                                     }
         );
-        list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        groupList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Group item = adapter.getItem(position);
@@ -94,7 +100,7 @@ public class ListGroupFragment extends BoundFragment {
             }
         });
         adapter = new GroupListAdapter();
-        list.setAdapter(adapter);
+        groupList.setAdapter(adapter);
     }
 
     /**
@@ -102,7 +108,7 @@ public class ListGroupFragment extends BoundFragment {
      */
     private String[] buildTemplatesFromGroups() {
         String[] templateArray = new String[0];
-        AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
         if (handler == null) {
             Log.i(TAG, "Container not yet connected!");
         } else {
@@ -123,6 +129,9 @@ public class ListGroupFragment extends BoundFragment {
         return templateArray;
     }
 
+    /**
+     * Adapter used for {@link #groupList}.
+     */
     private class GroupListAdapter extends BaseAdapter {
         private List<Group> groups;
 
@@ -137,7 +146,7 @@ public class ListGroupFragment extends BoundFragment {
         }
 
         private void updateGroupList() {
-            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
 
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
@@ -225,7 +234,7 @@ public class ListGroupFragment extends BoundFragment {
          */
         private String createGroupMemberText(Group group) {
             String groupMemberText = "This group has no members.";
-            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
             } else {

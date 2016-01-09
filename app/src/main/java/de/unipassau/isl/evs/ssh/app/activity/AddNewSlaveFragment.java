@@ -70,7 +70,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         outState.putString(KEY_SLAVE_NAME, slaveNameInput.getText().toString());
+        super.onSaveInstanceState(outState);
     }
 }

@@ -32,6 +32,8 @@ import de.unipassau.isl.evs.ssh.master.network.Server;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION;
 
 /**
+ * TODO Niko add Javadoc for whole class. (Phil, 2016-01-09)
+ *
  * @author Niko Fink
  */
 public class MasterStartUpActivity extends BoundActivity {
@@ -40,6 +42,8 @@ public class MasterStartUpActivity extends BoundActivity {
     protected static final String PREF_PORT_EXTERN = "master_port_extern";
     protected static final String PREF_CITY_NAME = "master_city_name";
     protected static final String PREF_PREFERENCES_SET = "master_preferences_set";
+    private static final String TAG = MasterStartUpActivity.class.getSimpleName();
+    private boolean switching = false;
 
     public MasterStartUpActivity() {
         super(MasterContainer.class);
@@ -48,8 +52,6 @@ public class MasterStartUpActivity extends BoundActivity {
     public MasterStartUpActivity(boolean bindOnStart) {
         super(MasterContainer.class, bindOnStart);
     }
-
-    private boolean switching = false;
 
     public boolean isSwitching() {
         return isFinishing() || switching;
@@ -74,9 +76,6 @@ public class MasterStartUpActivity extends BoundActivity {
         }
         switching = true;
     }
-
-
-    private static final String TAG = MasterStartUpActivity.class.getSimpleName();
 
     public boolean checkSwitchActivity() {
         if (isSwitching()) {

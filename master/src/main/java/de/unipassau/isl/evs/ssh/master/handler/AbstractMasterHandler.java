@@ -18,8 +18,6 @@ import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
-
 /**
  * This is a MasterHandler providing functionality all MasterHandlers need. This will avoid needing to implement the
  * same functionality over and over again.
@@ -101,16 +99,12 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
         return hasPermission(userDeviceID, permission, null);
     }
 
+    /**
+     * @deprecated this can''t provide any error handling, so it now throws an UnsupportedOperationException
+     */
     @Deprecated
     protected void handleErrorMessage(Message.AddressedMessage message) {
-        if (message.getHeader(HEADER_REFERENCES_ID) != null) {
-            final Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
-            sendMessage(
-                    correspondingMessage.getFromID(),
-                    correspondingMessage.getHeader(Message.HEADER_REPLY_TO_KEY),
-                    new Message(message.getPayload())
-            );
-        } //else ignore
+        throw new UnsupportedOperationException("Could not handle error message " + message);
     }
 
     /**

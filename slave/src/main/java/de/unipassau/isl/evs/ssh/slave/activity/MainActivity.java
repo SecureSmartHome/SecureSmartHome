@@ -179,8 +179,7 @@ public class MainActivity extends BoundActivity {
             status = "disconnected";
         } else {
             status = "connected to " + client.getAddress() + " "
-                    + "[" + (client.isChannelOpen() ? "open" : "closed") + ", "
-                    + (client.isExecutorAlive() ? "alive" : "dead") + "]";
+                    + "[" + (client.isChannelOpen() ? "open" : "closed") + "]";
         }
         ((TextView) findViewById(R.id.textViewConnectionStatus)).setText(status);
     }

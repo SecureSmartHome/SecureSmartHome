@@ -91,7 +91,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
     private void replyStatus(Message.AddressedMessage message) {
         HolidaySimulationPayload payload = new HolidaySimulationPayload(runHolidaySimulation);
         Message reply = new Message(payload);
-        sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
+        sendReply(message, reply);
     }
 
     @Override

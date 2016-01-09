@@ -5,8 +5,12 @@ import android.util.Log;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
+import de.unipassau.isl.evs.ssh.core.network.ClientOutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.network.UDPDiscoveryClient;
+import de.unipassau.isl.evs.ssh.core.schedule.DefaultExecutionServiceComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveCameraHandler;
@@ -25,8 +29,11 @@ public class SlaveContainer extends ContainerService {
     protected void init() {
         register(KeyStoreController.KEY, new KeyStoreController());
         register(NamingManager.KEY, new NamingManager(false));
+        register(IncomingDispatcher.KEY, new IncomingDispatcher());
+        register(OutgoingRouter.KEY, new ClientOutgoingRouter());
+        register(ExecutionServiceComponent.KEY, new DefaultExecutionServiceComponent(getClass().getSimpleName()));
+        register(UDPDiscoveryClient.KEY, new UDPDiscoveryClient());
         register(Client.KEY, new Client());
-        register(ExecutionServiceComponent.KEY, new ExecutionServiceComponent());
 
         register(SlaveModuleHandler.KEY, new SlaveModuleHandler());
         register(SlaveSystemHealthHandler.KEY, new SlaveSystemHealthHandler());

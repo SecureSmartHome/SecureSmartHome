@@ -44,12 +44,9 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     private boolean windowClosed;
 
     private void sendWarningNotification() {
-        //TODO chris: should warntext always be the same? (It will snow today)
         //No hardcoded strings, only in strings.xml
-        WeatherPayload payload = new WeatherPayload(true, "Please close all doors and windows. It will rain today.");
-        Serializable serializableWeather = payload.getWarnText();
         NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
-        notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.WEATHER_WARNING, serializableWeather);
+        notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.WEATHER_WARNING);
     }
 
     @Override

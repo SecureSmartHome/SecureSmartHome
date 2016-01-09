@@ -16,7 +16,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_LIGHT_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET;
@@ -47,7 +46,6 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
     @Override
     public RoutingKey[] getRoutingKeys() {
         return new RoutingKey[]{
-                APP_LIGHT_UPDATE,
                 //MASTER_LIGHT_SET_ERROR,
                 MASTER_LIGHT_SET_REPLY,
                 //MASTER_LIGHT_GET_ERROR,
@@ -57,10 +55,7 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (APP_LIGHT_UPDATE.matches(message)) {
-            LightPayload payload = APP_LIGHT_UPDATE.getPayload(message);
-            setCachedStatus(payload.getModule(), payload.getOn());
-        } else if (MASTER_LIGHT_SET_REPLY.matches(message)) {
+        if (MASTER_LIGHT_SET_REPLY.matches(message)) {
             LightPayload payload = MASTER_LIGHT_SET_REPLY.getPayload(message);
             setCachedStatus(payload.getModule(), payload.getOn());
         } else if (MASTER_LIGHT_GET_REPLY.matches(message)) {

@@ -3,12 +3,14 @@ package de.unipassau.isl.evs.ssh.master.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -33,11 +35,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 
 /**
- * MainActivity for the Master App
- * <p>
- * TODO Phil: build MainActivity for Master. Connection Status, own ID, connected modules and connection information.
+ * MainActivity for the Master App.
+ * Displays connection information as well as a list of all connected slaves and user devices.
  *
- * @author Team
+ * @author Phil Werli
  */
 public class MainActivity extends MasterStartUpActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -59,7 +60,7 @@ public class MainActivity extends MasterStartUpActivity {
         if (isSwitching()) {
             return;
         }
-
+        buildView();
         List<Slave> slaves = new LinkedList<>();
         final SlaveController slaveController = getComponent(SlaveController.KEY);
         if (slaveController != null) {
@@ -100,7 +101,10 @@ public class MainActivity extends MasterStartUpActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // FIXME use me
+    /**
+     * Gets called in {@link #onContainerConnected(Container)}.
+     * Builds the view components that require the container.
+     */
     private void buildView() {
         TextView masterID = (TextView) findViewById(R.id.mainactivity_master_masterid);
         TextView address = (TextView) findViewById(R.id.mainactivity_master_address);
@@ -112,7 +116,7 @@ public class MainActivity extends MasterStartUpActivity {
         }
 
         TextView connected = (TextView) findViewById(R.id.mainactivity_master_connected);
-        connected.setText(getNumberOfConnectedClients());
+        connected.setText(String.valueOf(getNumberOfConnectedClients()));
 
         slaveList = (ListView) findViewById(R.id.mainactivity_master_listview_slaves);
         slaveList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -156,16 +160,20 @@ public class MainActivity extends MasterStartUpActivity {
         return component.getMasterID();
     }
 
+    /**
+     * @param id The device the address is returned for.
+     * @return The devices network address.
+     */
     private String getAddress(DeviceID id) {
-        String address = "";
-        final Server server = getComponent(Server.KEY);
+        String address = "Currently not connected";
+        Server server = getComponent(Server.KEY);
         if (server == null) {
             Log.i(TAG, "Container not yet connected.");
-            return address;
-        }
-        Channel channelMaster = server.findChannel(id);
-        if (channelMaster != null) {
-            address = channelMaster.localAddress().toString();
+        } else {
+            Channel ch = server.findChannel(id);
+            if (ch != null) {
+                address = ch.localAddress().toString();
+            }
         }
         return address;
     }
@@ -180,6 +188,9 @@ public class MainActivity extends MasterStartUpActivity {
         return activeChannels.size();
     }
 
+    /**
+     * Adapter used for {@link #slaveList}.
+     */
     private class SlaveAdapter extends BaseAdapter {
         List<Slave> slaves;
 
@@ -248,11 +259,37 @@ public class MainActivity extends MasterStartUpActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            // TODO Phil
-            return null;
+            // the slave the view is created for
+            final Slave item = getItem(position);
+
+            LinearLayout layout;
+            LayoutInflater inflater = getLayoutInflater();
+            if (convertView == null) {
+                layout = (LinearLayout) inflater.inflate(R.layout.slavelayout, parent, false);
+            } else {
+                layout = (LinearLayout) convertView;
+            }
+
+            if (item != null) {
+                TextView name = (TextView) layout.findViewById(R.id.slavelayout_slave_name);
+                String formattedName = String.format(getResources().getString(R.string.slave_name), item.getName());
+                name.setText(formattedName);
+
+                DeviceID slaveID = item.getSlaveID();
+
+                TextView address = (TextView) layout.findViewById(R.id.slavelayout_slave_address);
+                address.setText(getAddress(slaveID));
+
+                TextView id = (TextView) layout.findViewById(R.id.slavelayout_slave_id);
+                id.setText(slaveID.toShortString());
+            }
+            return layout;
         }
     }
 
+    /**
+     * Adapter used for {@link #userDeviceList}.
+     */
     private class UserDeviceAdapter extends BaseAdapter {
         List<UserDevice> userDevices;
 
@@ -321,8 +358,33 @@ public class MainActivity extends MasterStartUpActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            //TODO Phil
-            return null;
+            // the user device the view is created for
+            UserDevice item = getItem(position);
+
+            LinearLayout layout;
+            LayoutInflater inflater = getLayoutInflater();
+            if (convertView == null) {
+                layout = (LinearLayout) inflater.inflate(R.layout.userdevicelayout, parent, false);
+            } else {
+                layout = (LinearLayout) convertView;
+            }
+
+            if (item != null) {
+                DeviceID userDeviceID = item.getUserDeviceID();
+
+                TextView name = (TextView) layout.findViewById(R.id.userdevicelayout_device_name);
+                name.setText(String.format(
+                        getResources().getString(R.string.userdevice_name), item.getName()));
+
+                TextView address = (TextView) layout.findViewById(R.id.userdevicelayout_device_address);
+                address.setText(String.format(
+                        getResources().getString(R.string.address_format), getAddress(userDeviceID)));
+
+                TextView id = (TextView) layout.findViewById(R.id.userdevicelayout_device_id);
+                id.setText(String.format(
+                        getResources().getString(R.string.id_format), userDeviceID.toShortString()));
+            }
+            return layout;
         }
     }
 }
