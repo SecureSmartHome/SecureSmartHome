@@ -17,6 +17,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.handler.MessageHandler;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoop;
@@ -28,6 +29,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_PE
  *
  * @author Niko Fink
  */
+@ChannelHandler.Sharable
 public class IncomingDispatcher extends ChannelHandlerAdapter implements Component {
     private static final String TAG = IncomingDispatcher.class.getSimpleName();
     public static final Key<IncomingDispatcher> KEY = new Key<>(IncomingDispatcher.class);
