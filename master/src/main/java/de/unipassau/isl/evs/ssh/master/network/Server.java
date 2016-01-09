@@ -18,22 +18,17 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.StartupException;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.network.NettyInternalLogger;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.ResourceLeakDetector;
-import io.netty.util.concurrent.DefaultExecutorServiceFactory;
-import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
@@ -57,22 +52,6 @@ public class Server extends AbstractComponent {
     public static final String PREF_SERVER_LOCAL_PORT = Server.class.getName() + ".PREF_SERVER_LOCAL_PORT";
     public static final String PREF_SERVER_PUBLIC_PORT = Server.class.getName() + ".PREF_SERVER_PUBLIC_PORT";
 
-    /**
-     * Distributes incoming messages to the responsible handlers.
-     */
-    private final ServerIncomingDispatcher incomingDispatcher = new ServerIncomingDispatcher();
-    /**
-     * Receives messages from system components and decides how to route them to the targets.
-     */
-    private final ServerOutgoingRouter outgoingRouter = new ServerOutgoingRouter();
-    /**
-     * Reply to UDP Broadcasts from Clients that don't know my IP yet
-     */
-    private final UDPDiscoveryServer udpDiscovery = new UDPDiscoveryServer();
-    /**
-     * The EventLoopGroup used for accepting connections
-     */
-    private EventLoopGroup serverExecutor;
     /**
      * The channel listening for incoming local connections on the port of the server.
      * Use {@link ChannelFuture#sync()} to wait for server startup.
@@ -106,10 +85,6 @@ public class Server extends AbstractComponent {
             ResourceLeakDetector.setLevel(CoreConstants.NettyConstants.RESOURCE_LEAK_DETECTION);
             // Start server
             startServer();
-            // Add related components
-            container.register(IncomingDispatcher.KEY, incomingDispatcher);
-            container.register(OutgoingRouter.KEY, outgoingRouter);
-            container.register(UDPDiscoveryServer.KEY, udpDiscovery);
         } catch (InterruptedException e) {
             throw new StartupException("Could not start netty server", e);
         }
@@ -123,16 +98,16 @@ public class Server extends AbstractComponent {
      * @throws IllegalArgumentException is the Server is already running
      */
     private void startServer() throws InterruptedException {
-        if (isChannelOpen() && isExecutorAlive()) {
+        if (isChannelOpen()) {
             throw new IllegalStateException("Server already running");
         }
 
         //Setup the Executor and Connection Pool
-        serverExecutor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("server"));
-        connections = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+        final ExecutionServiceComponent eventLoop = requireComponent(ExecutionServiceComponent.KEY);
+        connections = new DefaultChannelGroup(eventLoop.next());
 
         ServerBootstrap b = new ServerBootstrap()
-                .group(serverExecutor)
+                .group(eventLoop)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(getHandshakeHandler())
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -176,12 +151,6 @@ public class Server extends AbstractComponent {
         if (publicChannel != null && publicChannel.channel() != null) {
             publicChannel.channel().close();
         }
-        if (serverExecutor != null) {
-            serverExecutor.shutdownGracefully();
-        }
-        getContainer().unregister(udpDiscovery);
-        getContainer().unregister(outgoingRouter);
-        getContainer().unregister(incomingDispatcher);
         super.destroy();
     }
 
@@ -198,20 +167,6 @@ public class Server extends AbstractComponent {
             }
         }
         return null;
-    }
-
-    /**
-     * EventLoopGroup for the {@link ServerIncomingDispatcher} and the {@link ServerOutgoingRouter}
-     */
-    EventLoopGroup getExecutor() {
-        return serverExecutor;
-    }
-
-    /**
-     * {@link IncomingDispatcher} that will be registered to the Pipeline by the {@link ServerHandshakeHandler}
-     */
-    ServerIncomingDispatcher getIncomingDispatcher() {
-        return incomingDispatcher;
     }
 
     /**
@@ -280,14 +235,6 @@ public class Server extends AbstractComponent {
     }
 
     /**
-     * @return {@code true}, if the Executor that is used for accepting incoming connections and processing data
-     * has been shut down
-     */
-    public boolean isExecutorAlive() {
-        return serverExecutor != null && !serverExecutor.isTerminated() && !serverExecutor.isShutdown();
-    }
-
-    /**
      * Blocks until the Server channel has been closed.
      *
      * @throws InterruptedException
@@ -295,7 +242,11 @@ public class Server extends AbstractComponent {
      * @see Channel#closeFuture()
      */
     public void awaitShutdown() throws InterruptedException {
-        localChannel.channel().closeFuture().await();
-        serverExecutor.terminationFuture().await();
+        if (localChannel != null && localChannel.channel() != null) {
+            localChannel.channel().closeFuture().await();
+        }
+        if (publicChannel != null && publicChannel.channel() != null) {
+            publicChannel.channel().closeFuture().await();
+        }
     }
 }

@@ -74,7 +74,6 @@ public class ServerTest extends InstrumentationTestCase {
 
             Client client = clientContainer.get(Client.KEY);
             assertTrue(client.isChannelOpen());
-            assertTrue(client.isExecutorAlive());
             assertEquals(1, server.getActiveChannels().size());
 
             clientContainer.unregister(Client.KEY);
@@ -82,7 +81,6 @@ public class ServerTest extends InstrumentationTestCase {
 
             assertFalse(client.isChannelOpen());
             assertNotNull(client.getAddress());
-            assertFalse(client.isExecutorAlive());
             assertEquals(0, server.getActiveChannels().size());
         } finally {
             shutdownServer(serverContainer);
@@ -158,7 +156,6 @@ public class ServerTest extends InstrumentationTestCase {
         Server server = container.get(Server.KEY);
         assertNotNull(server.getAddress());
         assertTrue(server.isChannelOpen());
-        assertTrue(server.isExecutorAlive());
         return server;
     }
 
@@ -168,7 +165,6 @@ public class ServerTest extends InstrumentationTestCase {
         if (server != null) {
             server.awaitShutdown();
             assertFalse(server.isChannelOpen());
-            assertFalse(server.isExecutorAlive());
         }
     }
 
@@ -213,7 +209,7 @@ public class ServerTest extends InstrumentationTestCase {
         @NonNull
         @Override
         protected ClientHandshakeHandler getHandshakeHandler() {
-            return new ClientHandshakeHandler(this, getContainer()) {
+            return new ClientHandshakeHandler(getContainer()) {
                 @Override
                 public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
                     super.channelRegistered(ctx);

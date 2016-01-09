@@ -22,7 +22,7 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -31,11 +31,8 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.ResourceLeakDetector;
-import io.netty.util.concurrent.DefaultExecutorServiceFactory;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.internal.logging.InternalLogger;
@@ -76,32 +73,7 @@ public class Client extends AbstractComponent {
     static final String PREF_PORT = Client.class.getName() + ".PREF_PORT";
 
     /**
-     * Receives messages from system components and decides how to route them to the targets.
-     */
-    private final ClientOutgoingRouter outgoingRouter = new ClientOutgoingRouter();
-    /**
-     * Boolean if the client connection is active.
-     */
-    private boolean isActive;
-    /**
-     * The EventLoopGroup used for accepting connections
-     */
-    private EventLoopGroup executor;
-    /**
-     * The channel listening for incoming TCP connections on the port of the client.
-     * Use {@link ChannelFuture#sync()} to wait for client startup.
-     */
-    private ChannelFuture channelFuture;
-    /**
-     * Distributes incoming messages to the responsible handlers.
-     */
-    private final ClientIncomingDispatcher incomingDispatcher = new ClientIncomingDispatcher();
-    /**
-     * Send UDP Broadcasts when the Server can't be reached
-     */
-    private final UDPDiscoveryClient udpDiscovery = new UDPDiscoveryClient();
-    /**
-     * An android BroadcastReceiver that is notified once the Phone connects to or is disconnected from a WiFi network.
+     * An Android BroadcastReceiver that is notified once the Phone connects to or is disconnected from a WiFi network.
      */
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -118,10 +90,19 @@ public class Client extends AbstractComponent {
                     timeout = 0;
                 }
                 Log.d(TAG, (connectionEstablished ? "Rescanning" : "Scanning") + " network for possible local connections after NetworkInfo change: " + netInfo);
-                udpDiscovery.startDiscovery(timeout);
+                requireComponent(UDPDiscoveryClient.KEY).startDiscovery(timeout);
             }
         }
     };
+    /**
+     * The channel listening for incoming TCP connections on the port of the client.
+     * Use {@link ChannelFuture#sync()} to wait for client startup.
+     */
+    private ChannelFuture channelFuture;
+    /**
+     * Boolean if the client connection is active.
+     */
+    private boolean isActive;
     /**
      * Int used to calculate the time between the last and the current timeout.
      */
@@ -146,10 +127,6 @@ public class Client extends AbstractComponent {
             }
         });
         ResourceLeakDetector.setLevel(CoreConstants.NettyConstants.RESOURCE_LEAK_DETECTION);
-        // Add related components
-        container.register(IncomingDispatcher.KEY, incomingDispatcher);
-        container.register(OutgoingRouter.KEY, outgoingRouter);
-        container.register(UDPDiscoveryClient.KEY, udpDiscovery);
         // And try to connect
         isActive = true;
         initClient();
@@ -167,7 +144,7 @@ public class Client extends AbstractComponent {
             Log.w(TAG, "Not starting Client that has been explicitly shut-down");
             return;
         }
-        if (isChannelOpen() && isExecutorAlive()) {
+        if (isChannelOpen()) {
             Log.w(TAG, "Not starting Client that is already connected");
             return;
         } else {
@@ -182,36 +159,10 @@ public class Client extends AbstractComponent {
         }
 
         // And queue the (re-)connect
-        final Future<?> future = getAliveExecutor().submit(new Runnable() {
+        final Future<?> future = requireComponent(ExecutionServiceComponent.KEY).submit(new Runnable() {
             @Override
             public void run() {
-                // Read the previous host and port from the shared preferences
-                InetSocketAddress address = getLastAddress();
-
-                // Connect to TCP if the address of the Server/Master is known and not too many connection attempts have failed
-                boolean shouldReconnectTCP = shouldReconnectTCP();
-                if (address != null && !shouldReconnectTCP) {
-                    // if too many attempts failed with the last address, retry with the configured address
-                    editPrefs().setLastAddress(null).commit();
-                    lastDisconnect = 0;
-                    disconnectsInARow = 0;
-                    shouldReconnectTCP = true;
-                    address = getConfiguredAddress();
-                } else if (address == null) {
-                    // if no previous address is found, use the configured address
-                    address = getConfiguredAddress();
-                }
-
-                if (address != null && shouldReconnectTCP) {
-                    connectClient(address);
-                } else {
-                    if (address == null) {
-                        Log.w(TAG, "No master known, starting UDP discovery");
-                    } else {
-                        Log.w(TAG, "Too many disconnects from " + address + ", trying UDP discovery");
-                    }
-                    requireComponent(UDPDiscoveryClient.KEY).startDiscovery(0);
-                }
+                attemptConnectClient();
             }
         });
         future.addListener(new FutureListener<Object>() {
@@ -222,6 +173,40 @@ public class Client extends AbstractComponent {
                 }
             }
         });
+    }
+
+    /**
+     * Checks if the address of the master is known and not to many connections attempts have been made and
+     * connects to the found address or starts UDP discovery.
+     */
+    private void attemptConnectClient() {
+        // Read the previous host and port from the shared preferences
+        InetSocketAddress address = getLastAddress();
+
+        // Connect to TCP if the address of the Server/Master is known and not too many connection attempts have failed
+        boolean shouldReconnectTCP = shouldReconnectTCP();
+        if (address != null && !shouldReconnectTCP) {
+            // if too many attempts failed with the last address, retry with the configured address
+            editPrefs().setLastAddress(null).commit();
+            lastDisconnect = 0;
+            disconnectsInARow = 0;
+            shouldReconnectTCP = true;
+            address = getConfiguredAddress();
+        } else if (address == null) {
+            // if no previous address is found, use the configured address
+            address = getConfiguredAddress();
+        }
+
+        if (address != null && shouldReconnectTCP) {
+            connectClient(address);
+        } else {
+            if (address == null) {
+                Log.w(TAG, "No master known, starting UDP discovery");
+            } else {
+                Log.w(TAG, "Too many disconnects from " + address + ", trying UDP discovery");
+            }
+            requireComponent(UDPDiscoveryClient.KEY).startDiscovery(0);
+        }
     }
 
     /**
@@ -240,13 +225,13 @@ public class Client extends AbstractComponent {
      * If the connection fails, {@link #channelClosed(Channel)} is called until to many retries are made and the Client
      * switches to searching the master via UDP discovery using the {@link UDPDiscoveryClient}.
      */
-    protected void connectClient(InetSocketAddress address) {
+    private void connectClient(InetSocketAddress address) {
         Log.i(TAG, "Client connecting to " + address);
         notifyClientConnecting(address.getHostString(), address.getPort());
 
         // TCP Connection
         Bootstrap b = new Bootstrap()
-                .group(executor)
+                .group(requireComponent(ExecutionServiceComponent.KEY))
                 .channel(NioSocketChannel.class)
                 .handler(getHandshakeHandler())
                 .option(ChannelOption.SO_KEEPALIVE, true)
@@ -288,7 +273,7 @@ public class Client extends AbstractComponent {
      */
     @NonNull
     protected ChannelHandler getHandshakeHandler() {
-        return new ClientHandshakeHandler(this, getContainer());
+        return new ClientHandshakeHandler(getContainer());
     }
 
     /**
@@ -297,6 +282,9 @@ public class Client extends AbstractComponent {
      * @see ClientHandshakeHandler#channelActive(ChannelHandlerContext) triggers the Handshake after this method is complete
      */
     protected void channelOpen(Channel channel) {
+        if (channel != this.channelFuture.channel()) {
+            return; //channel has already been exchanged by new one, don't stop discovery
+        }
         requireComponent(UDPDiscoveryClient.KEY).stopDiscovery();
     }
 
@@ -309,7 +297,7 @@ public class Client extends AbstractComponent {
             return; //channel has already been exchanged by new one, don't start another client
         }
         notifyClientDisconnected();
-        if (isActive && isExecutorAlive() && !executor.isShuttingDown()) {
+        if (isActive) {
             long time = System.currentTimeMillis();
             final long diff = time - lastDisconnect;
             if (lastDisconnect <= 0 || diff <= CLIENT_MILLIS_BETWEEN_DISCONNECTS) {
@@ -358,12 +346,6 @@ public class Client extends AbstractComponent {
         if (channelFuture != null && channelFuture.channel() != null) {
             channelFuture.channel().close();
         }
-        if (executor != null) {
-            executor.shutdownGracefully();
-        }
-        getContainer().unregister(udpDiscovery);
-        getContainer().unregister(outgoingRouter);
-        getContainer().unregister(incomingDispatcher);
         requireComponent(ContainerService.KEY_CONTEXT).unregisterReceiver(broadcastReceiver);
         super.destroy();
     }
@@ -371,40 +353,11 @@ public class Client extends AbstractComponent {
     //Internal Getters//////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * EventLoopGroup for the {@link ClientIncomingDispatcher} and the {@link ClientOutgoingRouter}
-     */
-    @Nullable
-    EventLoopGroup getExecutor() {
-        return executor;
-    }
-
-    /**
-     * EventLoopGroup for the {@link ClientIncomingDispatcher} and the {@link ClientOutgoingRouter}
-     * //TODO Niko: move to interface (Niko, 2016-01-07)
-     */
-    @NonNull
-    public EventLoopGroup getAliveExecutor() {
-        if (!isExecutorAlive()) {
-            // Setup the Executor and Connection Pool
-            executor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("client"));
-        }
-        return executor;
-    }
-
-    /**
-     * Channel for the {@link ClientIncomingDispatcher} and the {@link ClientOutgoingRouter}
+     * Channel for the {@link IncomingDispatcher} and the {@link ClientOutgoingRouter}
      */
     @Nullable
     Channel getChannel() {
         return channelFuture != null ? channelFuture.channel() : null;
-    }
-
-    /**
-     * {@link IncomingDispatcher} that will be registered to the Pipeline by the {@link ClientHandshakeHandler}
-     */
-    @NonNull
-    ClientIncomingDispatcher getIncomingDispatcher() {
-        return incomingDispatcher;
     }
 
     //Public Getters////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -429,13 +382,6 @@ public class Client extends AbstractComponent {
     }
 
     /**
-     * @return {@code true}, if the Executor that is used for processing data has not been shut down
-     */
-    public boolean isExecutorAlive() {
-        return executor != null && !executor.isTerminated() && !executor.isShutdown();
-    }
-
-    /**
      * @return {@code true}, if the Client TCP channel is currently open and the handshake and authentication were successful
      */
     public boolean isConnectionEstablished() {
@@ -457,9 +403,6 @@ public class Client extends AbstractComponent {
     public void awaitShutdown() throws InterruptedException {
         if (channelFuture != null && channelFuture.channel() != null) {
             channelFuture.channel().closeFuture().await();
-        }
-        if (executor != null) {
-            executor.terminationFuture().await();
         }
     }
 
