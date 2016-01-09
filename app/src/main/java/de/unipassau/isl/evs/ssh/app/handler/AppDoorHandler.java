@@ -17,11 +17,11 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_CAMERA_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_BLOCK;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
@@ -78,16 +78,18 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{APP_CAMERA_GET,
+        return new RoutingKey[]{
+                MASTER_CAMERA_GET_REPLY,
                 APP_DOOR_BLOCK,
                 APP_DOOR_GET,
-                APP_DOOR_RING};
+                APP_DOOR_RING
+        };
     }
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (APP_CAMERA_GET.matches(message)) {
-            CameraPayload payload = APP_CAMERA_GET.getPayload(message);
+        if (MASTER_CAMERA_GET_REPLY.matches(message)) {
+            CameraPayload payload = MASTER_CAMERA_GET_REPLY.getPayload(message);
             picture = payload.getPicture();
             fireImageUpdated(picture);
         } else if (APP_DOOR_BLOCK.matches(message)) {
