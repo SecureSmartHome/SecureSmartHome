@@ -17,12 +17,17 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
 /**
  * Class to control EDIMAX WiFi Smart Plug Switch
@@ -77,6 +82,23 @@ public class EdimaxPlugSwitch extends AbstractComponent {
         this(address, 10000, "admin", "1234");
     }
 
+
+    /**
+     * Switches the Smart Plug on
+     *
+     * @see #setOn(boolean)
+     */
+    public Future<Boolean> setOnAsync(final boolean on) {
+        final Future<Boolean> future = requireComponent(ExecutionServiceComponent.KEY).submit(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return setOn(on);
+            }
+        });
+        future.addListener(new TimingListener());
+        return future;
+    }
+
     /**
      * Switches the Smart Plug on
      *
@@ -88,6 +110,22 @@ public class EdimaxPlugSwitch extends AbstractComponent {
         String response = executePost(url, command);
         Log.d(TAG, "Response: " + response);
         return parseResponseSet(response);
+    }
+
+    /**
+     * Checks the current status of the Smart Plug
+     *
+     * @see #isOn()
+     */
+    public Future<Boolean> isOnAsync() {
+        final Future<Boolean> future = requireComponent(ExecutionServiceComponent.KEY).submit(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return isOn();
+            }
+        });
+        future.addListener(new TimingListener());
+        return future;
     }
 
     /**
@@ -164,8 +202,7 @@ public class EdimaxPlugSwitch extends AbstractComponent {
             String status = setup.getTextContent();
             Log.d(TAG, "Status of set: " + status);
             return status.toLowerCase().equals("ok");
-        }
-        else {
+        } else {
             throw new IOException("Response missing id 'setup'");
         }
     }
@@ -188,6 +225,15 @@ public class EdimaxPlugSwitch extends AbstractComponent {
             return state != null && state.toLowerCase().equals("on");
         } else {
             throw new IOException("Response missing Element with tag 'Device.System.Power.State'");
+        }
+    }
+
+    private static class TimingListener implements FutureListener<Boolean> {
+        private final long started = System.nanoTime();
+
+        @Override
+        public void operationComplete(Future<Boolean> future) throws Exception {
+            Log.v(TAG, "Network operation complete after " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started) + "ms");
         }
     }
 }
