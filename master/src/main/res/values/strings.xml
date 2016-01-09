@@ -17,11 +17,30 @@
     <string name="master_local_port">MasterLocalPort</string>
     <string name="master_port_intern">MasterPortIntern</string>
     <string name="master_port_extern">MasterPortExtern</string>
+
+    <!--Used in the MainActivity-->
     <string name="connected_user_devices">Connected User Devices</string>
     <string name="connected_slaves">Connected Slaves</string>
     <string name="master">Master</string>
     <string name="address">Address</string>
     <string name="restart">Restart</string>
+    <string name="slave_name">Slave: %s</string>
+    <string name="userdevice_name">User Device: %s</string>
+    <string name="address_format">Address: %s</string>
+    <string name="id_format">ID: %s</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="please_scan_device">Scan the QR-Code with your Android device to register it as first admin device.</string>
+    <string name="qr_code_description">This is a QR-Code.</string>
+    <string name="add_initial_device">Add Initial Device</string>
+    <string name="title_activity_register_local_app">RegisterLocalAppActivity</string>
+    <string name="title_activity_register_local_slave">RegisterLocalSlaveActivity</string>
+    <string name="title_activity_preferences">Preferences</string>
+    <string name="preferences">Preferences</string>
+
+    <!--others-->
+
     <string name="master_city_name_summary">Name of the city for weather forecast</string>
     <string name="master_port_extern_summary">Opened to connect to master from extern</string>
     <string name="master_port_intern_summary">Opened on Master to accept connections from extern</string>
