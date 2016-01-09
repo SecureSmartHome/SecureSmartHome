@@ -50,7 +50,7 @@ public class AddGroupFragment extends BoundFragment {
     }
 
     private void buildView() {
-        String[] templateNames = getArguments().getStringArray(TEMPLATE_DIALOG);
+        final String[] templateNames = getArguments().getStringArray(TEMPLATE_DIALOG);
 
         inputGroupName = (EditText) getActivity().findViewById(R.id.addgroupfragment_group_name);
 
@@ -66,8 +66,13 @@ public class AddGroupFragment extends BoundFragment {
                 if (checkInputFields() && isContainerConnected()) {
                     String name = inputGroupName.getText().toString();
                     String template = ((String) spinner.getSelectedItem());
-                    getComponent(AppUserConfigurationHandler.KEY).addGroup(new Group(name, template));
-                    Log.i(TAG, "Group " + name + " added.");
+                    final AppUserConfigurationHandler component = getComponent(AppUserConfigurationHandler.KEY);
+                    if (component == null) {
+                        Log.i(TAG, "Can't add group, Container not yet connected!");
+                    } else {
+                        component.addGroup(new Group(name, template));
+                        Log.i(TAG, "Group " + name + " added.");
+                    }
                 } else {
                     ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_cannot_add_group));
                 }
@@ -77,18 +82,17 @@ public class AddGroupFragment extends BoundFragment {
 
     @Override
     public void onContainerDisconnected() {
-        getComponent(AppUserConfigurationHandler.KEY).removeUserInfoListener(userInfoListener);
+        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        if (handler == null) {
+            Log.i(TAG, "Container not yet connected!");
+        } else {
+            handler.removeUserInfoListener(userInfoListener);
+        }
         super.onContainerDisconnected();
     }
 
     // returns true if all input fields are filled in correctly
     private boolean checkInputFields() {
         return spinner.isEnabled() && !inputGroupName.getText().toString().equals("");
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        // TODO Phil Save state of spinner. but I can't restore it in onCreateView as it is called after onContainerConnected
-        super.onSaveInstanceState(outState);
     }
 }

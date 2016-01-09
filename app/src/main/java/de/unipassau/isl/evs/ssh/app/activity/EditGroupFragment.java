@@ -48,6 +48,10 @@ public class EditGroupFragment extends BoundFragment {
             Log.i(TAG, "Container not yet connected!");
             return;
         }
+        if (group == null) {
+            Log.i(TAG, "Can't build View. Missing group.");
+            return;
+        }
         Button editButton = (Button) getActivity().findViewById(R.id.editgroupfragment_button_edit);
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,11 +83,5 @@ public class EditGroupFragment extends BoundFragment {
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
         buildView();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        // TODO Phil Save state of spinner. but I can't restore it in onCreateView as it is called after onContainerConnected
-        super.onSaveInstanceState(outState);
     }
 }

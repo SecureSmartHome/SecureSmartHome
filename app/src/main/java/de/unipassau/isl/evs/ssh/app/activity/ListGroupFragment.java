@@ -102,7 +102,7 @@ public class ListGroupFragment extends BoundFragment {
      */
     private String[] buildTemplatesFromGroups() {
         String[] templateArray = new String[0];
-        AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
         if (handler == null) {
             Log.i(TAG, "Container not yet connected!");
         } else {
@@ -137,7 +137,7 @@ public class ListGroupFragment extends BoundFragment {
         }
 
         private void updateGroupList() {
-            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
 
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
@@ -225,7 +225,7 @@ public class ListGroupFragment extends BoundFragment {
          */
         private String createGroupMemberText(Group group) {
             String groupMemberText = "This group has no members.";
-            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
             } else {

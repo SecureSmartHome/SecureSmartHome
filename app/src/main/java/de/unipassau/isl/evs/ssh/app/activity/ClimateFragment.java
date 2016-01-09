@@ -55,7 +55,12 @@ public class ClimateFragment extends BoundFragment {
 
     @Override
     public void onContainerDisconnected() {
-        getComponent(AppClimateHandler.KEY).removeListener(listener);
+        AppClimateHandler handler = getComponent(AppClimateHandler.KEY);
+        if (handler == null) {
+            Log.i(TAG, "Container not yet connected!");
+        } else {
+            handler.removeListener(listener);
+        }
         super.onContainerDisconnected();
     }
 
@@ -170,7 +175,7 @@ public class ClimateFragment extends BoundFragment {
             If there is more than one ClimateSensor, then a line between two blocks of SensorData
             should be drawn, to separate them visually.
             */
-            if (counter > 2) {
+            if (counter > 1) {
                 View divider = climateSensorLayout.findViewById(R.id.climatesensor_divider);
                 divider.setVisibility(View.VISIBLE);
             }
@@ -182,38 +187,44 @@ public class ClimateFragment extends BoundFragment {
             String name = m.getName();
             climateSensorView.setText(name);
 
-            TextView temp1View = (TextView) climateSensorLayout.findViewById(R.id.temp1);
-            double temp1 = getContainer().require(AppClimateHandler.KEY).getTemp1(m);
-            temp1View.setText(String.format(getResources().getString(R.string.si_degree), temp1));
+            AppClimateHandler handler = getComponent(AppClimateHandler.KEY);
 
-            TextView temp2View = (TextView) climateSensorLayout.findViewById(R.id.temp2);
-            double temp2 = getContainer().require(AppClimateHandler.KEY).getTemp2(m);
-            temp2View.setText(String.format(getResources().getString(R.string.si_degree), temp2));
+            if (handler == null) {
+                Log.i(TAG, "Container not yet connected!");
+            } else {
+                TextView temp1View = (TextView) climateSensorLayout.findViewById(R.id.temp1);
+                double temp1 = handler.getTemp1(m);
+                temp1View.setText(String.format(getResources().getString(R.string.si_degree), temp1));
 
-            TextView pressureView = (TextView) climateSensorLayout.findViewById(R.id.pressure);
-            double pressure = getContainer().require(AppClimateHandler.KEY).getPressure(m);
-            pressureView.setText(String.format(getResources().getString(R.string.si_pressure), pressure));
+                TextView temp2View = (TextView) climateSensorLayout.findViewById(R.id.temp2);
+                double temp2 = handler.getTemp2(m);
+                temp2View.setText(String.format(getResources().getString(R.string.si_degree), temp2));
 
-            TextView altitudeView = (TextView) climateSensorLayout.findViewById(R.id.altitude);
-            double altitude = getContainer().require(AppClimateHandler.KEY).getAltitude(m);
-            altitudeView.setText(String.format(getResources().getString(R.string.si_altitude), altitude));
+                TextView pressureView = (TextView) climateSensorLayout.findViewById(R.id.pressure);
+                double pressure = handler.getPressure(m);
+                pressureView.setText(String.format(getResources().getString(R.string.si_pressure), pressure));
 
-            TextView humidityView = (TextView) climateSensorLayout.findViewById(R.id.humidity);
-            double humidity = getContainer().require(AppClimateHandler.KEY).getHumidity(m);
-            humidityView.setText(String.format(getResources().getString(R.string.si_humidity), humidity));
+                TextView altitudeView = (TextView) climateSensorLayout.findViewById(R.id.altitude);
+                double altitude = handler.getAltitude(m);
+                altitudeView.setText(String.format(getResources().getString(R.string.si_altitude), altitude));
 
-            TextView uvView = (TextView) climateSensorLayout.findViewById(R.id.uv);
-            double uv = getContainer().require(AppClimateHandler.KEY).getUv(m);
-            uvView.setText(String.format("%2.2f", uv));
+                TextView humidityView = (TextView) climateSensorLayout.findViewById(R.id.humidity);
+                double humidity = handler.getHumidity(m);
+                humidityView.setText(String.format(getResources().getString(R.string.si_humidity), humidity));
 
-            TextView visibleView = (TextView) climateSensorLayout.findViewById(R.id.visible);
-            int visible = getContainer().require(AppClimateHandler.KEY).getVisible(m);
-            visibleView.setText(String.format(getResources().getString(R.string.si_visible), visible));
+                TextView uvView = (TextView) climateSensorLayout.findViewById(R.id.uv);
+                double uv = handler.getUv(m);
+                uvView.setText(String.format("%2.2f", uv));
 
-            TextView irView = (TextView) climateSensorLayout.findViewById(R.id.ir);
-            int ir = getContainer().require(AppClimateHandler.KEY).getIr(m);
-            irView.setText(String.format(getResources().getString(R.string.si_visible), ir));
+                TextView visibleView = (TextView) climateSensorLayout.findViewById(R.id.visible);
+                int visible = handler.getVisible(m);
+                visibleView.setText(String.format(getResources().getString(R.string.si_visible), visible));
 
+                TextView irView = (TextView) climateSensorLayout.findViewById(R.id.ir);
+                int ir = handler.getIr(m);
+                irView.setText(String.format(getResources().getString(R.string.si_visible), ir));
+
+            }
             counter++;
             return climateSensorLayout;
         }

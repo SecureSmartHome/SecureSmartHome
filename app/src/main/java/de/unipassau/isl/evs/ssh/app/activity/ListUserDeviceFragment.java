@@ -121,7 +121,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                     .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int id) {
-                            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+                            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
                             if (handler == null) {
                                 Log.i(TAG, "Container not yet connected!");
                             } else {
@@ -154,7 +154,7 @@ public class ListUserDeviceFragment extends BoundFragment {
         }
 
         private void updateUserDeviceList() {
-            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
 
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");

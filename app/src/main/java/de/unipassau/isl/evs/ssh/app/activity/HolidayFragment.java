@@ -59,8 +59,9 @@ public class HolidayFragment extends BoundFragment {
 
     @Override
     public void onContainerDisconnected() {
-        if (getHolidaySimulationHandler() != null) {
-            getHolidaySimulationHandler().removeListener(holidaySimulationListener);
+        final AppHolidaySimulationHandler handler = getHolidaySimulationHandler();
+        if (handler != null) {
+            handler.removeListener(holidaySimulationListener);
         }
 
         super.onContainerDisconnected();
@@ -75,7 +76,7 @@ public class HolidayFragment extends BoundFragment {
      * Updates the buttons in this fragment's to represent the current holiday status.
      */
     private void updateView() {
-        AppHolidaySimulationHandler handler = getHolidaySimulationHandler();
+        final AppHolidaySimulationHandler handler = getHolidaySimulationHandler();
         if (handler == null) {
             Log.i(TAG, "Container not bound.");
             return;
@@ -94,7 +95,7 @@ public class HolidayFragment extends BoundFragment {
      * executed, when the "Switch" button was pressed.
      */
     private void switchButtonAction() {
-        AppHolidaySimulationHandler handler = getHolidaySimulationHandler();
+        final AppHolidaySimulationHandler handler = getHolidaySimulationHandler();
 
         if (handler == null) {
             Log.i(TAG, "Container not bound.");

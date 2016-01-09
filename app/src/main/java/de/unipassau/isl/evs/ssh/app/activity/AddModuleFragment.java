@@ -56,12 +56,6 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     private Button addMockButton;
     private Button addUSBButton;
     private Button addGPIOButton;
-
-    private Spinner slaveSpinner;
-    private Spinner sensorTypeSpinner;
-    private Spinner connectionTypeSpinner;
-    private EditText nameInput;
-
     private final AppModifyModuleHandler.NewModuleListener listener = new AppModifyModuleHandler.NewModuleListener() {
         @Override
         public void registrationFinished(final boolean wasSuccessful) {
@@ -86,6 +80,10 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             });
         }
     };
+    private Spinner slaveSpinner;
+    private Spinner sensorTypeSpinner;
+    private Spinner connectionTypeSpinner;
+    private EditText nameInput;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -161,14 +159,14 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        AppModifyModuleHandler newModuleHandler = container.require(AppModifyModuleHandler.KEY);
+        final AppModifyModuleHandler newModuleHandler = container.require(AppModifyModuleHandler.KEY);
         newModuleHandler.addNewModuleListener(listener);
         populateSlaveSpinner(container);
     }
 
     @Override
     public void onContainerDisconnected() {
-        AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
+        final AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
         if (handler != null) {
             handler.removeNewModuleListener(listener);
         }
@@ -297,14 +295,13 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        // TODO Save state of all spinners in this fragment. This lifecycle is currently broken (Wolfgang, 2016-03-01)
+        // TODO Wolfgang Save state of all spinners in this fragment. This lifecycle is currently broken (Wolfgang, 2016-03-01)
         outState.putInt(KEY_CONNECTION_TYPE_SPINNER_POSITION, connectionTypeSpinner.getSelectedItemPosition());
         super.onSaveInstanceState(outState);
     }
 
     private void addNewModule(ModuleAccessPoint accessPoint) {
-        AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
-
+        final AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
         if (handler == null) {
             Log.e(TAG, "Container not connected");
             return;
@@ -315,7 +312,6 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         int position = sensorTypeSpinner.getSelectedItemPosition();
         ModuleType moduleType = ModuleType.values()[position];
         Module module = new Module(name, atSlave, moduleType, accessPoint);
-
         handler.addNewModule(module);
     }
 }
