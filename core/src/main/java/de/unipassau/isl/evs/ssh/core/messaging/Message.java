@@ -129,6 +129,8 @@ public class Message implements Serializable {
         //Payload
         if (payload == null) {
             bob.append("null");
+        } else if (payload instanceof Throwable) {
+            bob.append(Log.getStackTraceString((Throwable) payload));
         } else {
             payloadToString(bob);
         }
