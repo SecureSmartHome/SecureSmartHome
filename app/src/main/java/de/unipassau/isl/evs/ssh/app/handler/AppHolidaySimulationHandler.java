@@ -12,9 +12,10 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_HOLIDAY_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_SET_REPLY;
 
 /**
  * AppHolidaySimulationHandler class handles messages for the holiday simulation
@@ -31,8 +32,8 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (APP_HOLIDAY_GET.matches(message)) {
-            this.isOn = APP_HOLIDAY_GET.getPayload(message).switchOn();
+        if (MASTER_HOLIDAY_GET_REPLY.matches(message) || MASTER_HOLIDAY_SET_REPLY.matches(message)) {
+            this.isOn = message.getPayloadChecked(HolidaySimulationPayload.class).switchOn();
             fireStatusChanged();
         } else {
             invalidMessage(message);
@@ -41,7 +42,7 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_HOLIDAY_SET};
+        return new RoutingKey[]{MASTER_HOLIDAY_GET_REPLY, MASTER_HOLIDAY_SET_REPLY};
     }
 
     /**

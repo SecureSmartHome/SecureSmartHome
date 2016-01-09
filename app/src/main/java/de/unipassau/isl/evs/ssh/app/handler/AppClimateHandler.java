@@ -16,7 +16,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_CLIMATE_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_REQUEST_WEATHER_INFO_REPLY;
 
 /**
  * AppClimateHandler class handles message from and to the
@@ -214,8 +214,8 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      */
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (APP_CLIMATE_UPDATE.matches(message)) {
-            ClimatePayload climatePayload = APP_CLIMATE_UPDATE.getPayload(message);
+        if (MASTER_REQUEST_WEATHER_INFO_REPLY.matches(message)) {
+            ClimatePayload climatePayload = MASTER_REQUEST_WEATHER_INFO_REPLY.getPayload(message);
             setCachedStatus(climatePayload.getModule(), climatePayload.getTemp1(), climatePayload.getTemp2(),
                     climatePayload.getPressure(), climatePayload.getAltitude(), climatePayload.getHumidity(),
                     climatePayload.getUv(), climatePayload.getIr(), climatePayload.getVisible());
@@ -226,7 +226,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{APP_CLIMATE_UPDATE};
+        return new RoutingKey[]{MASTER_REQUEST_WEATHER_INFO_REPLY};
     }
 
     /**

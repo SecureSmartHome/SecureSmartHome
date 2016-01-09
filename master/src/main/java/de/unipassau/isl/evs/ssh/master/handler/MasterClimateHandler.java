@@ -17,6 +17,7 @@ import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PUSH_WEATHER_INFO;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_REQUEST_WEATHER_INFO;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_REQUEST_WEATHER_INFO_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET_REPLY;
 
 /**
@@ -43,7 +44,7 @@ public class MasterClimateHandler extends AbstractMasterHandler implements Compo
             latestLightStatus.put(payload.getModule(), payload.getOn());
         } else if (MASTER_REQUEST_WEATHER_INFO.matches(message)) {
             for(ClimatePayload payload : latestWeatherData.values()) {
-                sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY),
+                sendMessage(message.getFromID(), MASTER_REQUEST_WEATHER_INFO_REPLY,
                         new Message(payload));
             }
         } else {
