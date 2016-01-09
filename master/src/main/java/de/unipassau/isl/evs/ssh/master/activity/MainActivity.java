@@ -132,7 +132,7 @@ public class MainActivity extends MasterStartUpActivity {
                     final Channel channel = server.findChannel(item.getSlaveID());
                     if (channel != null) {
                         channel.close();
-                        String text = String.format(getResources().getString(R.string.closed_connection_with, item.getName()));
+                        String text = String.format(getResources().getString(R.string.closed_connection_with), item.getName());
                         Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
                     }
                 }
