@@ -22,12 +22,9 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_MODULES_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
 
 /**
@@ -154,8 +151,8 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (APP_MODULES_GET.matches(message) || GLOBAL_MODULES_UPDATE.matches(message)) {
-            ModulesPayload payload = message.getPayloadChecked(ModulesPayload.class);
+        if (GLOBAL_MODULES_UPDATE.matches(message)) {
+            ModulesPayload payload = GLOBAL_MODULES_UPDATE.getPayload(message);
             Set<Module> modules = payload.getModules();
             List<Slave> slaves = payload.getSlaves();
             ListMultimap<Slave, Module> modulesAtSlave = payload.getModulesAtSlaves();
