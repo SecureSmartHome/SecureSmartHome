@@ -22,4 +22,8 @@
     <string name="master">Master</string>
     <string name="address">Address</string>
     <string name="restart">Restart</string>
+    <string name="master_city_name_summary">Name of the city for weather forecast</string>
+    <string name="master_port_extern_summary">Opened to connect to master from extern</string>
+    <string name="master_port_intern_summary">Opened on Master to accept connections from extern</string>
+    <string name="master_port_local_summary">Local port to connect to master</string>
 </resources>
