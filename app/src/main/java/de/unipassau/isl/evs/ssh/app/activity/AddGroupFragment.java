@@ -49,6 +49,10 @@ public class AddGroupFragment extends BoundFragment {
         buildView();
     }
 
+    /**
+     * Gets called in {@link #onContainerConnected(Container)}.
+     * Builds the view components that require the container.
+     */
     private void buildView() {
         final String[] templateNames = getArguments().getStringArray(TEMPLATE_DIALOG);
 

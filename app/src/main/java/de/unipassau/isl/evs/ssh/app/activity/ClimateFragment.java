@@ -26,6 +26,8 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 
 /**
+ * FIXME Andi: new class javadoc as information is received though the {@link AppClimateHandler}. Also use {@link } to link classes. (Phil, 2016-01-09)
+ *
  * This activity allows to display information contained in climate messages which are received from
  * the IncomingDispatcher.
  * Furthermore it generates a climate messages as instructed by the UI and passes it to the OutgoingRouter.
@@ -35,6 +37,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  */
 public class ClimateFragment extends BoundFragment {
     private static final String TAG = ClimateFragment.class.getSimpleName();
+
     private ClimateListAdapter adapter;
     private final AppClimateHandler.ClimateHandlerListener listener = new AppClimateHandler.ClimateHandlerListener() {
         @Override
@@ -42,7 +45,8 @@ public class ClimateFragment extends BoundFragment {
             adapter.notifyDataSetChanged();
         }
     };
-    private ListView listView;
+
+    private ListView climateSensorList;
     private int counter = 0;
 
     @Override
@@ -50,7 +54,7 @@ public class ClimateFragment extends BoundFragment {
         super.onContainerConnected(container);
         container.require(AppClimateHandler.KEY).addListener(listener);
         adapter = new ClimateListAdapter();
-        listView.setAdapter(adapter);
+        climateSensorList.setAdapter(adapter);
     }
 
     @Override
@@ -69,10 +73,13 @@ public class ClimateFragment extends BoundFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_climate, container, false);
-        listView = (ListView) root.findViewById(R.id.climateSensorContainer);
+        climateSensorList = (ListView) root.findViewById(R.id.climateSensorContainer);
         return root;
     }
 
+    /**
+     * Adapter used for {@link #climateSensorList}
+     */
     private class ClimateListAdapter extends BaseAdapter {
         private final LayoutInflater inflater;
         private List<Module> climateSensorModules;
