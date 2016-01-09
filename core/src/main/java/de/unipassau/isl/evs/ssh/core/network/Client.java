@@ -53,7 +53,13 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LO
  */
 public class Client extends AbstractComponent {
     public static final Key<Client> KEY = new Key<>(Client.class);
-
+    static final String PREF_TOKEN_ACTIVE = Client.class.getName() + ".PREF_TOKEN_ACTIVE";
+    static final String PREF_TOKEN_PASSIVE = Client.class.getName() + ".PREF_TOKEN_PASSIVE";
+    static final String LAST_HOST = Client.class.getName() + ".LAST_HOST";
+    static final String LAST_PORT = Client.class.getName() + ".LAST_PORT";
+    static final String PREF_HOST = Client.class.getName() + ".PREF_HOST";
+    static final String PREF_PORT = Client.class.getName() + ".PREF_PORT";
+    private static final String TAG = Client.class.getSimpleName();
     /**
      * The minimum number of seconds between
      */
@@ -62,15 +68,12 @@ public class Client extends AbstractComponent {
      * Default value for maximum timeouts.
      */
     private static final int CLIENT_MAX_DISCONNECTS = 3;
-
-    private static final String TAG = Client.class.getSimpleName();
-    static final String PREF_TOKEN_ACTIVE = Client.class.getName() + ".PREF_TOKEN_ACTIVE";
-    static final String PREF_TOKEN_PASSIVE = Client.class.getName() + ".PREF_TOKEN_PASSIVE";
-    static final String LAST_HOST = Client.class.getName() + ".LAST_HOST";
-    static final String LAST_PORT = Client.class.getName() + ".LAST_PORT";
-    static final String PREF_HOST = Client.class.getName() + ".PREF_HOST";
-    static final String PREF_PORT = Client.class.getName() + ".PREF_PORT";
-
+    private final List<ClientConnectionListener> listeners = new ArrayList<>();
+    /**
+     * The channel listening for incoming TCP connections on the port of the client.
+     * Use {@link ChannelFuture#sync()} to wait for client startup.
+     */
+    private ChannelFuture channelFuture;
     /**
      * An Android BroadcastReceiver that is notified once the Phone connects to or is disconnected from a WiFi network.
      */
@@ -91,11 +94,6 @@ public class Client extends AbstractComponent {
             }
         }
     };
-    /**
-     * The channel listening for incoming TCP connections on the port of the client.
-     * Use {@link ChannelFuture#sync()} to wait for client startup.
-     */
-    private ChannelFuture channelFuture;
     /**
      * Boolean if the client connection is active.
      */
@@ -334,6 +332,8 @@ public class Client extends AbstractComponent {
         initClient();
     }
 
+    //Internal Getters//////////////////////////////////////////////////////////////////////////////////////////////////
+
     /**
      * Stop listening, close all connections and shut down the executors.
      */
@@ -347,7 +347,7 @@ public class Client extends AbstractComponent {
         super.destroy();
     }
 
-    //Internal Getters//////////////////////////////////////////////////////////////////////////////////////////////////
+    //Public Getters////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Channel for the {@link IncomingDispatcher} and the {@link ClientOutgoingRouter}
@@ -356,8 +356,6 @@ public class Client extends AbstractComponent {
     Channel getChannel() {
         return channelFuture != null ? channelFuture.channel() : null;
     }
-
-    //Public Getters////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * @return the local Address this client is listening on
@@ -392,6 +390,8 @@ public class Client extends AbstractComponent {
         return isConnectionEstablished() && channelFuture.channel().attr(ATTR_LOCAL_CONNECTION).get() == Boolean.TRUE;
     }
 
+    //Shared Preferences////////////////////////////////////////////////////////////////////////////////////////////////
+
     /**
      * Blocks until the Client has been completely shut down.
      *
@@ -402,8 +402,6 @@ public class Client extends AbstractComponent {
             channelFuture.channel().closeFuture().await();
         }
     }
-
-    //Shared Preferences////////////////////////////////////////////////////////////////////////////////////////////////
 
     private SharedPreferences getSharedPrefs() {
         return requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
@@ -457,6 +455,46 @@ public class Client extends AbstractComponent {
         return new PrefEditor(getSharedPrefs().edit());
     }
 
+    //Listeners/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void addListener(ClientConnectionListener object) {
+        listeners.add(object);
+    }
+
+    public void removeListener(ClientConnectionListener object) {
+        listeners.remove(object);
+    }
+
+    private void notifyMasterFound() {
+        for (ClientConnectionListener listener : listeners) {
+            listener.onMasterFound();
+        }
+    }
+
+    private void notifyClientConnecting(String host, int port) {
+        for (ClientConnectionListener listener : listeners) {
+            listener.onClientConnecting(host, port);
+        }
+    }
+
+    void notifyClientConnected() {
+        for (ClientConnectionListener listener : listeners) {
+            listener.onClientConnected();
+        }
+    }
+
+    private void notifyClientDisconnected() {
+        for (ClientConnectionListener listener : listeners) {
+            listener.onClientDisconnected();
+        }
+    }
+
+    void notifyClientRejected(String message) {
+        for (ClientConnectionListener listener : listeners) {
+            listener.onClientRejected(message);
+        }
+    }
+
     public static class PrefEditor {
         private final SharedPreferences.Editor editor;
 
@@ -508,48 +546,6 @@ public class Client extends AbstractComponent {
 
         public void apply() {
             editor.apply();
-        }
-    }
-
-    //Listeners/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private final List<ClientConnectionListener> listeners = new ArrayList<>();
-
-    public void addListener(ClientConnectionListener object) {
-        listeners.add(object);
-    }
-
-    public void removeListener(ClientConnectionListener object) {
-        listeners.remove(object);
-    }
-
-    private void notifyMasterFound() {
-        for (ClientConnectionListener listener : listeners) {
-            listener.onMasterFound();
-        }
-    }
-
-    private void notifyClientConnecting(String host, int port) {
-        for (ClientConnectionListener listener : listeners) {
-            listener.onClientConnecting(host, port);
-        }
-    }
-
-    void notifyClientConnected() {
-        for (ClientConnectionListener listener : listeners) {
-            listener.onClientConnected();
-        }
-    }
-
-    private void notifyClientDisconnected() {
-        for (ClientConnectionListener listener : listeners) {
-            listener.onClientDisconnected();
-        }
-    }
-
-    void notifyClientRejected(String message) {
-        for (ClientConnectionListener listener : listeners) {
-            listener.onClientRejected(message);
         }
     }
 }
