@@ -16,6 +16,7 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
@@ -66,7 +67,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
         // Setup UDP Channel
         Bootstrap b = new Bootstrap()
                 .channel(NioDatagramChannel.class)
-                .group(requireComponent(Server.KEY).getExecutor())
+                .group(requireComponent(ExecutionServiceComponent.KEY))
                 .handler(new RequestHandler())
                 .option(ChannelOption.SO_BROADCAST, true);
         channel = b.bind(CoreConstants.NettyConstants.DISCOVERY_SERVER_PORT);

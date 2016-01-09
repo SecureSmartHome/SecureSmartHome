@@ -156,7 +156,6 @@ public class ServerTest extends InstrumentationTestCase {
         Server server = container.get(Server.KEY);
         assertNotNull(server.getAddress());
         assertTrue(server.isChannelOpen());
-        assertTrue(server.isExecutorAlive());
         return server;
     }
 
@@ -166,7 +165,6 @@ public class ServerTest extends InstrumentationTestCase {
         if (server != null) {
             server.awaitShutdown();
             assertFalse(server.isChannelOpen());
-            assertFalse(server.isExecutorAlive());
         }
     }
 
