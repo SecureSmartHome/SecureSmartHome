@@ -5,6 +5,11 @@
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings" />
+    <item
+        android:id="@+id/action_refresh"
+        android:orderInCategory="100"
+        android:title="@string/refresh_page"
+        />
     <!--FIXME this is only for testing-->
     <item
         android:id="@+id/action_restart"

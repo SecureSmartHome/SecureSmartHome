@@ -25,7 +25,7 @@
         </activity>
         <activity
             android:name=".activity.MasterQRCodeActivity"
-            android:label="@string/add_initial_device">
+            android:label="@string/title_qrcode_activity">
             <intent-filter>
                 <action android:name="android.intent.action.QRCODE"/>
             </intent-filter>

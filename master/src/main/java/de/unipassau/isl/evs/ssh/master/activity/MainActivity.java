@@ -13,6 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
@@ -96,6 +97,9 @@ public class MainActivity extends MasterStartUpActivity {
             stopService(new Intent(this, MasterContainer.class));
             doBind();
             return true;
+        } else if (id == R.id.action_refresh) {
+            buildView();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -128,6 +132,8 @@ public class MainActivity extends MasterStartUpActivity {
                     final Channel channel = server.findChannel(item.getSlaveID());
                     if (channel != null) {
                         channel.close();
+                        String text = String.format(getResources().getString(R.string.closed_connection_with, item.getName()));
+                        Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
                     }
                 }
                 return true;
