@@ -168,7 +168,9 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
         for (Module module : componentsToRemove) {
             Key<? extends Component> key = new Key<>(getDriverClass(module), module.getName());
             assert getContainer() != null;
-            getContainer().unregister(key);
+            if (getContainer().isRegistered(key)) {
+                getContainer().unregister(key);
+            }
         }
     }
 
