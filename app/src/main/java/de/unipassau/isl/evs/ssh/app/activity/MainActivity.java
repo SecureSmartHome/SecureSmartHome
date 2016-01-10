@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -18,6 +19,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.io.BufferedReader;
 
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
@@ -38,6 +41,8 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String KEY_LAST_FRAGMENT = "LAST_FRAGMENT";
+    public static final String KEY_NOTIFICATION_FRAGMENT = "NOTIFICATION_FRAGMENT";
+
     private LinearLayout overlayDisconnected;
     private NotificationCompat.Builder notificationBuilder;
 
@@ -166,25 +171,16 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         if (!manager.isMasterIDKnown()) {
             return WelcomeScreenFragment.class;
         }
-        if (getIntent() != null && getIntent().getAction() != null) {
-            switch (getIntent().getAction()) {
-                case "ClimateFragment":
-                    return ClimateFragment.class;
-                case "StatusFragment":
-                    return StatusFragment.class;
-                case "LightFragment":
-                    return LightFragment.class;
-                case "DoorFragment":
-                    return DoorFragment.class;
-                case "MainFragment":
-                    return MainFragment.class;
-                case "HolidayFragment":
-                    return HolidayFragment.class;
-            }
+
+        Class clazz;
+        if (getIntent() != null && (clazz = (Class) getIntent().getSerializableExtra(KEY_NOTIFICATION_FRAGMENT)) != null) {
+            return clazz;
         }
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_LAST_FRAGMENT)) {
-            return null; //fragment will be added automatically by fragment manager
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(KEY_LAST_FRAGMENT)) {
+                return null; //fragment will be added automatically by fragment manager
+            }
         }
         return MainFragment.class;
     }

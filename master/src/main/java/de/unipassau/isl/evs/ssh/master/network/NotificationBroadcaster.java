@@ -5,7 +5,6 @@ import java.util.List;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -22,12 +21,12 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LO
  */
 public class NotificationBroadcaster extends AbstractComponent {
 
-    public static Key<NotificationBroadcaster> KEY = new Key<>(NotificationBroadcaster.class);
+    public static final Key<NotificationBroadcaster> KEY = new Key<>(NotificationBroadcaster.class);
 
     //TODO Check if everything's fine
     public void sendMessageToAllReceivers(NotificationPayload.NotificationType type, Serializable... args) {
         final List<UserDevice> allUserDevicesWithPermission = requireComponent(PermissionController.KEY)
-                .getAllUserDevicesWithPermission(type.getReceivePermission(),null);
+                .getAllUserDevicesWithPermission(type.getReceivePermission(), null);
         NotificationPayload payload = new NotificationPayload(type, args);
         Message messageToSend = new Message(payload);
         boolean userAtHome = false;
