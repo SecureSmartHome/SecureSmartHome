@@ -48,10 +48,16 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
             return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.Light);
         }
     };
-    private static final Predicate<Module> PREDICATE_DOOR = new Predicate<Module>() {
+    private static final Predicate<Module> PREDICATE_DOOR_SENSOR = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
             return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.DoorSensor);
+        }
+    };
+    private static final Predicate<Module> PREDICATE_DOOR_BUZZER = new Predicate<Module>() {
+        @Override
+        public boolean apply(Module input) {
+            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.DoorBuzzer);
         }
     };
     private static final Predicate<Module> PREDICATE_WEATHER = new Predicate<Module>() {
@@ -116,8 +122,14 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
     }
 
     @NonNull
-    public List<Module> getDoors() {
-        Iterable<Module> filtered = Iterables.filter(components, PREDICATE_DOOR);
+    public List<Module> getDoorSensors() {
+        Iterable<Module> filtered = Iterables.filter(components, PREDICATE_DOOR_SENSOR);
+        return Lists.newArrayList(filtered);
+    }
+
+    @NonNull
+    public List<Module> getDoorBuzzers() {
+        Iterable<Module> filtered = Iterables.filter(components, PREDICATE_DOOR_BUZZER);
         return Lists.newArrayList(filtered);
     }
 

@@ -92,7 +92,7 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
     public void handle(Message.AddressedMessage message) {
 
         if (MASTER_DOOR_BLOCK_REPLY.matches(message)) {
-            isDoorBlocked = MASTER_DOOR_BLOCK_REPLY.getPayload(message).isLock();
+            isDoorBlocked = MASTER_DOOR_BLOCK_REPLY.getPayload(message).isBlock();
             handleResponse(message);
         } else if (MASTER_DOOR_UNLATCH_REPLY.matches(message)) {
             handleResponse(message);
@@ -135,26 +135,24 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
     /**
      * Sends a "OpenDoor" message to the master.
      */
-    public void openDoor() {
-        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoors();
+    public void unlatchDoor() {
+        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorBuzzers();
         if (doors.size() < 1) {
-            Log.e(TAG, "Could not open the door. No door installed");
+            Log.e(TAG, "Could not open the door. No door buzzer installed");
             return;
         }
         DoorPayload doorPayload = new DoorPayload(doors.get(0).getName());
         sendMessageToMaster(MASTER_DOOR_UNLATCH, new Message(doorPayload));
-        isDoorOpen = true;
     }
 
     private void blockDoor(boolean isBlocked) {
-        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoors();
+        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorSensors();
         if (doors.size() < 1) {
-            Log.e(TAG, "Could not (un)block the door. No door installed");
+            Log.e(TAG, "Could not (un)block the door. No door sensor installed");
             return;
         }
         DoorBlockPayload doorPayload = new DoorBlockPayload(isBlocked, doors.get(0).getName());
         sendMessageToMaster(MASTER_DOOR_BLOCK, new Message(doorPayload));
-        isDoorBlocked = isBlocked;
     }
 
     /**
@@ -177,7 +175,7 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
      * Sends a "UnblockDoor" message to the master.
      */
     public void unblockDoor() {
-        blockDoor(true);
+        blockDoor(false);
     }
 
     /**

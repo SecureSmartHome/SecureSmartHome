@@ -4,14 +4,14 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
  * @author Leon Sell
  */
 public class DoorBlockPayload extends DoorPayload {
-    private boolean lock;
+    private boolean block;
 
-    public DoorBlockPayload(boolean lock, String moduleName) {
+    public DoorBlockPayload(boolean block, String moduleName) {
         super(moduleName);
-        this.lock = lock;
+        this.block = block;
     }
 
-    public boolean isLock() {
-        return lock;
+    public boolean isBlock() {
+        return block;
     }
 }

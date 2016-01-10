@@ -139,6 +139,7 @@ public class RoutingKeys {
     // begin: door
     public static final RoutingKey<DoorPayload> MASTER_DOOR_STATUS_GET = new RoutingKey<>(PREFIX_MASTER + "/door/status_get", DoorPayload.class);
     public static final RoutingKey<DoorStatusPayload> MASTER_DOOR_STATUS_GET_REPLY = MASTER_DOOR_STATUS_GET.getReply(DoorStatusPayload.class);
+
     public static final RoutingKey<DoorStatusPayload> MASTER_DOOR_STATUS_UPDATE = new RoutingKey<>(PREFIX_MASTER + "/door/update", DoorStatusPayload.class);
 
     public static final RoutingKey<DoorPayload> MASTER_DOOR_UNLATCH = new RoutingKey<>(PREFIX_MASTER + "/door/unlatch", DoorPayload.class);
@@ -150,9 +151,11 @@ public class RoutingKeys {
 
     public static final RoutingKey<DoorPayload> SLAVE_DOOR_UNLATCH = new RoutingKey<>(PREFIX_SLAVE + "/door/unlatch", DoorPayload.class);
     public static final RoutingKey<Void> SLAVE_DOOR_UNLATCH_REPLY = SLAVE_DOOR_UNLATCH.getReply(Void.class);
+    public static final RoutingKey<ErrorPayload> SLAVE_DOOR_UNLATCH_ERROR = SLAVE_DOOR_UNLATCH.getReply(ErrorPayload.class);
 
     public static final RoutingKey<DoorStatusPayload> SLAVE_DOOR_STATUS_GET = new RoutingKey<>(PREFIX_SLAVE + "/door/status_get", DoorStatusPayload.class);
     public static final RoutingKey<DoorStatusPayload> SLAVE_DOOR_STATUS_GET_REPLY = SLAVE_DOOR_STATUS_GET.getReply(DoorStatusPayload.class);
+    public static final RoutingKey<ErrorPayload> SLAVE_DOOR_STATUS_GET_ERROR = SLAVE_DOOR_STATUS_GET.getReply(ErrorPayload.class);
 
     public static final RoutingKey<DoorStatusPayload> APP_DOOR_STATUS_UPDATE = new RoutingKey<>(PREFIX_APP + "/door/update", DoorStatusPayload.class);
     public static final RoutingKey<DoorBellPayload> APP_DOOR_RING = new RoutingKey<>(PREFIX_APP + "/door/ring", DoorBellPayload.class);
