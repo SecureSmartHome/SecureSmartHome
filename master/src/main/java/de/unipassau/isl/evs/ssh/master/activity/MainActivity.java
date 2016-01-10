@@ -52,6 +52,8 @@ public class MainActivity extends MasterStartUpActivity {
 
     private ListView slaveList;
     private ListView userDeviceList;
+    private UserDeviceAdapter userDeviceAdapter;
+    private SlaveAdapter slaveAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,19 +70,6 @@ public class MainActivity extends MasterStartUpActivity {
             return;
         }
         buildView();
-        List<Slave> slaves = new LinkedList<>();
-        final SlaveController slaveController = getComponent(SlaveController.KEY);
-        if (slaveController != null) {
-            slaves = slaveController.getSlaves();
-        }
-        slaveList.setAdapter(new SlaveAdapter(slaves));
-
-        List<UserDevice> userDevices = new LinkedList<>();
-        final UserManagementController userController = getComponent(UserManagementController.KEY);
-        if (userController != null) {
-            userDevices = userController.getUserDevices();
-        }
-        userDeviceList.setAdapter(new UserDeviceAdapter(userDevices));
     }
 
     @Override
@@ -104,7 +93,8 @@ public class MainActivity extends MasterStartUpActivity {
             doBind();
             return true;
         } else if (id == R.id.action_refresh) {
-            buildView();
+            userDeviceAdapter.notifyDataSetChanged();
+            slaveAdapter.notifyDataSetChanged();
             return true;
         }
 
@@ -161,6 +151,11 @@ public class MainActivity extends MasterStartUpActivity {
                 return true;
             }
         });
+
+        slaveAdapter = new SlaveAdapter();
+        userDeviceAdapter = new UserDeviceAdapter();
+        slaveList.setAdapter(slaveAdapter);
+        userDeviceList.setAdapter(userDeviceAdapter);
     }
 
     private DeviceID getMasterID() {
@@ -231,10 +226,9 @@ public class MainActivity extends MasterStartUpActivity {
      * Adapter used for {@link #slaveList}.
      */
     private class SlaveAdapter extends BaseAdapter {
-        List<Slave> slaves;
+        List<Slave> slaves = new LinkedList<>();
 
-        public SlaveAdapter(List<Slave> slaves) {
-            this.slaves = slaves;
+        public SlaveAdapter() {
         }
 
         private void updateSlaveList() {
@@ -330,10 +324,9 @@ public class MainActivity extends MasterStartUpActivity {
      * Adapter used for {@link #userDeviceList}.
      */
     private class UserDeviceAdapter extends BaseAdapter {
-        List<UserDevice> userDevices;
+        List<UserDevice> userDevices = new LinkedList<>();
 
-        public UserDeviceAdapter(List<UserDevice> userDevices) {
-            this.userDevices = userDevices;
+        public UserDeviceAdapter() {
         }
 
         private void updateUserDeviceList() {
