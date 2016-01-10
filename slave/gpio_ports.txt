@@ -1,0 +1,7 @@
+// Plugged in
+DoorBuzzer = 28
+DoorBell = 192
+DoorSensor = 21
+
+// Not yet plugged in
+WindowSensor 191
