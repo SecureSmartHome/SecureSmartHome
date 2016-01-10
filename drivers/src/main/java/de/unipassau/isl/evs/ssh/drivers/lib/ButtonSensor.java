@@ -69,7 +69,7 @@ public class ButtonSensor extends AbstractComponent {
         private final String TAG = DoorPollingRunnable.class.getSimpleName();
 
         private ButtonSensor sensor;
-        private boolean isPressedFilter = false;
+        private boolean isPressedFilter = true;
 
         public DoorPollingRunnable(ButtonSensor sensor) {
             this.sensor = sensor;
