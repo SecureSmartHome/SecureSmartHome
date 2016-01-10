@@ -47,7 +47,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
             Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
             DoorBellPayload doorBellPayload = MASTER_DOOR_BELL_RING.getPayload(correspondingMessage);
             doorBellPayload.setCameraPayload(cameraPayload);
-            NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
+            NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
             notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.BELL_RANG, doorBellPayload);
 
             Message messageToSend = new Message(doorBellPayload);

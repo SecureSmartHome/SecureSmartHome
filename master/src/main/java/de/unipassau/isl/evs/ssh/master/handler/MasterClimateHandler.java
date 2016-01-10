@@ -62,7 +62,7 @@ public class MasterClimateHandler extends AbstractMasterHandler implements Compo
     }
 
     private void evaluateWeatherData(ClimatePayload payload) {
-        NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
+        NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
         //The following values will not be checked as they are not of interest: Altitude, Pressure, Temp1, Temp2
         if (payload.getHumidity() > MasterConstants.ClimateThreshold.HUMIDITY) {
             Serializable serializableHumidity = payload.getHumidity();

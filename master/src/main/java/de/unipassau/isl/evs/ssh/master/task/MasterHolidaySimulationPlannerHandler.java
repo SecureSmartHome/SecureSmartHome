@@ -47,7 +47,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
+        NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
 
         if (MASTER_HOLIDAY_GET.matches(message)) {
             replyStatus(message);

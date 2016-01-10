@@ -43,7 +43,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
 
     private void sendWarningNotification() {
         //No hardcoded strings, only in strings.xml
-        NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
+        NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
         notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.WEATHER_WARNING);
     }
 
