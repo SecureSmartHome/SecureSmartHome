@@ -1,68 +1,38 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context=".activity.MainActivity">
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Phil Werli-->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin">
+        android:padding="@dimen/activity_vertical_margin">
 
-        <TextView
+        <TableLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Device ID:"
-            android:id="@+id/textView"
-            android:textStyle="bold"/>
+            android:stretchColumns="1">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ABC"
-            android:id="@+id/textViewDeviceID"/>
+            <TableRow>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Master ID:"
-            android:id="@+id/textView3"
-            android:textStyle="bold"/>
+                <TextView
+                    android:layout_column="1"
+                    android:text="@string/master"
+                    android:textSize="@dimen/typography_subheadline"
+                    android:textStyle="bold"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DEF"
-            android:id="@+id/textViewMasterID"/>
+                <TextView
+                    android:id="@+id/mainactivity_master_masterid"
+                    android:textSize="@dimen/typography_subheadline"/>
+            </TableRow>
 
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Connection:"
-            android:textStyle="bold"/>
 
-        <TextView
-            android:id="@+id/textViewConnectionStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="disconnected"/>
+        </TableLayout>
 
-        <Button
-            android:id="@+id/buttonSend"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Send Message"/>
-
-        <TextView
-            android:id="@+id/textViewLog"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Log\n"/>
     </LinearLayout>
 </ScrollView>
