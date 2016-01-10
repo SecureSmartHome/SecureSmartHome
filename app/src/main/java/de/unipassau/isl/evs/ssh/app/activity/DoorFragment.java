@@ -42,13 +42,23 @@ public class DoorFragment extends BoundFragment {
 
     private final AppDoorHandler.DoorListener doorListener = new AppDoorHandler.DoorListener() {
         @Override
-        public void onPictureChanged(byte[] image) {
-            displayImage(image);
+        public void onPictureChanged(final byte[] image) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    displayImage(image);
+                }
+            });
         }
 
         @Override
         public void onDoorStatusChanged() {
-            updateButtons();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    updateButtons();
+                }
+            });
         }
     };
 

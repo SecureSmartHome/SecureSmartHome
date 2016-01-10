@@ -37,7 +37,6 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR_ON_HOLID
  * @author Leon Sell
  */
 public class MasterDoorHandler extends AbstractMasterHandler {
-    NotificationBroadcaster notificationBroadcaster = new NotificationBroadcaster();
     private final Map<Integer, Boolean> blockedFor = new HashMap<>();
     private final Map<Integer, Boolean> openFor = new HashMap<>();
 
@@ -106,7 +105,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorUnlatchResponse(Message.AddressedMessage message) {
-        notificationBroadcaster.sendMessageToAllReceivers(
+        requireComponent(NotificationBroadcaster.KEY).sendMessageToAllReceivers(
                 NotificationPayload.NotificationType.DOOR_UNLATCHED, message
         );
 
@@ -140,9 +139,10 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
     private void handleDoorBlockSet(DoorBlockPayload payload, Message.AddressedMessage message) {
         final Module atModule = requireComponent(SlaveController.KEY).getModule(payload.getModuleName());
+        NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
 
         if (hasPermission(message.getFromID(), LOCK_DOOR, null)) {
-            setLocked(atModule.getName(), payload.isLock());
+            setBlocked(atModule.getName(), payload.isLock());
 
             if (payload.isLock()) {
                 notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.DOOR_LOCKED);
@@ -173,7 +173,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         return openFor.get(requireComponent(SlaveController.KEY).getModuleID(moduleName));
     }
 
-    private synchronized void setLocked(String moduleName, boolean locked) {
+    private synchronized void setBlocked(String moduleName, boolean locked) {
         if (moduleName != null) {
             blockedFor.put(requireComponent(SlaveController.KEY).getModuleID(moduleName), locked);
         } else {

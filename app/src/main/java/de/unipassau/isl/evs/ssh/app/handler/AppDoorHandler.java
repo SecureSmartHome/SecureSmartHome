@@ -105,7 +105,7 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
             fireStatusUpdated();
         } else if (MASTER_CAMERA_GET_REPLY.matches(message)) {
             picture = MASTER_CAMERA_GET_REPLY.getPayload(message).getPicture();
-            handleResponse(message);
+            tryHandleResponse(message);
         } else if (APP_DOOR_RING.matches(message)) {
             DoorBellPayload doorBellPayload = APP_DOOR_RING.getPayload(message);
             fireImageUpdated(doorBellPayload.getCameraPayload().getPicture());
