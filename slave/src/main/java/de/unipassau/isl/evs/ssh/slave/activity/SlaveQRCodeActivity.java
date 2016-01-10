@@ -159,22 +159,37 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
 
     @Override
     public void onMasterFound() {
-        showConnectingDialog();
-        dialog.setMessage("Address of Master found, connecting");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showConnectingDialog();
+                dialog.setMessage("Address of Master found, connecting");
+            }
+        });
     }
 
     @Override
-    public void onClientConnecting(String host, int port) {
-        showConnectingDialog();
-        dialog.setMessage("Address of Master found, connecting to " + host + ":" + port);
+    public void onClientConnecting(final String host, final int port) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showConnectingDialog();
+                dialog.setMessage("Address of Master found, connecting to " + host + ":" + port);
+            }
+        });
     }
 
     @Override
     public void onClientConnected() {
-        if (dialog != null && dialog.isShowing()) {
-            dialog.setMessage("Successfully connected to Master");
-        }
-        checkSwitchActivity();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (dialog != null && dialog.isShowing()) {
+                    dialog.setMessage("Successfully connected to Master");
+                }
+                checkSwitchActivity();
+            }
+        });
     }
 
     @Override
@@ -182,10 +197,15 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
     }
 
     @Override
-    public void onClientRejected(String message) {
-        showConnectingDialog();
-        dialog.setMessage("Master rejected connection with message: " + message + "\nPlease rescan the QR-Code.");
-        dialog.setIndeterminate(false);
-        dialog.setCancelable(true);
+    public void onClientRejected(final String message) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showConnectingDialog();
+                dialog.setMessage("Master rejected connection with message: " + message + "\nPlease rescan the QR-Code.");
+                dialog.setIndeterminate(false);
+                dialog.setCancelable(true);
+            }
+        });
     }
 }
