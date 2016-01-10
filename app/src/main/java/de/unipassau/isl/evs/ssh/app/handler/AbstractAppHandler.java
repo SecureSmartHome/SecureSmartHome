@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
@@ -44,21 +45,28 @@ public abstract class AbstractAppHandler extends AbstractMessageHandler {
             throw new IllegalArgumentException("Can only track messages sent by me");
         }
         final Promise<T> promise = requireComponent(ExecutionServiceComponent.KEY).newPromise();
-        final MessageMetrics metrics = new MessageMetrics(message);
-        promise.addListener(new FutureListener<T>() {
-            @Override
-            public void operationComplete(Future<T> future) throws Exception {
-                metrics.finished(future);
-                Log.v(AbstractAppHandler.this.getClass().getSimpleName() + "-Metrics", metrics.toString());
-            }
-        });
+        final MessageMetrics metrics;
+        if (CoreConstants.TRACK_STATISTICS) {
+            metrics = new MessageMetrics(message);
+            promise.addListener(new FutureListener<T>() {
+                @Override
+                public void operationComplete(Future<T> future) throws Exception {
+                    metrics.finished(future);
+                    Log.v(AbstractAppHandler.this.getClass().getSimpleName() + "-Metrics", metrics.toString());
+                }
+            });
+        } else {
+            metrics = null;
+        }
         message.getSendFuture().addListener(new FutureListener<Void>() {
             @Override
             public void operationComplete(Future<Void> future) throws Exception {
                 if (!future.isSuccess()) {
                     promise.setFailure(future.cause());
                 } else {
-                    metrics.sent(future);
+                    if (metrics != null) {
+                        metrics.sent(future);
+                    }
                 }
             }
         });

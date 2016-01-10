@@ -5,8 +5,6 @@ import android.content.Intent;
 
 import java.security.cert.X509Certificate;
 
-import de.unipassau.isl.evs.ssh.core.container.Component;
-import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.MockAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccessPoint;
@@ -31,6 +29,8 @@ public class CoreConstants {
      * API Key to Access Open Weather Map
      */
     public static final String OPENWEATHERMAP_API_KEY = "f5301a474451c6e1394268314b72a358";
+
+    public static final boolean TRACK_STATISTICS = Boolean.parseBoolean("true");
 
     /**
      * The class contains constants for the Netty Framework

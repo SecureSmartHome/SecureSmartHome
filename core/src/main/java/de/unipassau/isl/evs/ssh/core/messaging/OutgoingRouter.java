@@ -3,6 +3,7 @@ package de.unipassau.isl.evs.ssh.core.messaging;
 import android.util.Log;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -119,23 +120,25 @@ public abstract class OutgoingRouter extends AbstractComponent {
                 original.getFromID(),
                 RoutingKey.getReplyKey(original.getRoutingKey()),
                 reply,
-                false
+                !CoreConstants.TRACK_STATISTICS // don't use the default logger if TRACK_STATISTICS is set
         );
-        final long originalTimestamp = original.getHeader(Message.HEADER_TIMESTAMP);
-        amsg.getSendFuture().addListener(new GenericFutureListener<Future<Void>>() {
-            @Override
-            public void operationComplete(Future<Void> future) throws Exception {
-                final long replyTimestamp = amsg.getHeader(Message.HEADER_TIMESTAMP);
-                final long replyTime = replyTimestamp - originalTimestamp;
-                final long sendTime = System.currentTimeMillis() - replyTimestamp;
-                final long overallTime = replyTime + sendTime;
-                if (future.isSuccess()) {
-                    Log.v(TAG, "SENT " + amsg + " after " + replyTime + "+" + sendTime + "=" + overallTime + "ms");
-                } else {
-                    Log.w(TAG, "Could not send Message " + amsg + " because of " + Log.getStackTraceString(future.cause()));
+        if (CoreConstants.TRACK_STATISTICS) {
+            final long originalTimestamp = original.getHeader(Message.HEADER_TIMESTAMP);
+            amsg.getSendFuture().addListener(new GenericFutureListener<Future<Void>>() {
+                @Override
+                public void operationComplete(Future<Void> future) throws Exception {
+                    final long replyTimestamp = amsg.getHeader(Message.HEADER_TIMESTAMP);
+                    final long replyTime = replyTimestamp - originalTimestamp;
+                    final long sendTime = System.currentTimeMillis() - replyTimestamp;
+                    final long overallTime = replyTime + sendTime;
+                    if (future.isSuccess()) {
+                        Log.v(TAG, "SENT " + amsg + " after " + replyTime + "+" + sendTime + "=" + overallTime + "ms");
+                    } else {
+                        Log.w(TAG, "Could not send Message " + amsg + " because of " + Log.getStackTraceString(future.cause()));
+                    }
                 }
-            }
-        });
+            });
+        }
         return amsg;
     }
 

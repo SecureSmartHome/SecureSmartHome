@@ -24,6 +24,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import io.netty.util.concurrent.Future;
@@ -95,7 +96,9 @@ public class EdimaxPlugSwitch extends AbstractComponent {
                 return setOn(on);
             }
         });
-        future.addListener(new TimingListener());
+        if (CoreConstants.TRACK_STATISTICS) {
+            future.addListener(new TimingListener());
+        }
         return future;
     }
 
@@ -124,7 +127,9 @@ public class EdimaxPlugSwitch extends AbstractComponent {
                 return isOn();
             }
         });
-        future.addListener(new TimingListener());
+        if (CoreConstants.TRACK_STATISTICS) {
+            future.addListener(new TimingListener());
+        }
         return future;
     }
 
