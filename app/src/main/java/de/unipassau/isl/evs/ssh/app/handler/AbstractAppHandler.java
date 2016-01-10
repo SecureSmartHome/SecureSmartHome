@@ -41,7 +41,7 @@ public abstract class AbstractAppHandler extends AbstractMessageHandler {
      * the most common supertype of both payloads (i.e. MessagePayload) must be declared as generic type for the Future.</i>
      */
     protected <T extends MessagePayload> Future<T> newResponseFuture(final Message.AddressedMessage message) {
-        if (!message.getFromID().equals(requireComponent(NamingManager.KEY).getMasterID())) {
+        if (!message.getFromID().equals(requireComponent(NamingManager.KEY).getOwnID())) {
             throw new IllegalArgumentException("Can only track messages sent by me");
         }
         final Promise<T> promise = requireComponent(ExecutionServiceComponent.KEY).newPromise();
