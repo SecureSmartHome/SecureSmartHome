@@ -21,8 +21,6 @@
     <!--Used in the MainActivity-->
     <string name="connected_user_devices">Connected User Devices</string>
     <string name="connected_slaves">Connected Slaves</string>
-    <string name="restart">Restart</string>
-    <string name="refresh_page">Refresh Page</string>
     <string name="slave_name">Slave: %s</string>
     <string name="userdevice_name">User Device: %s</string>
     <string name="address_format">Address: %s</string>

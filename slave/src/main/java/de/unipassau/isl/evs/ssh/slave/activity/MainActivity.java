@@ -1,8 +1,11 @@
 package de.unipassau.isl.evs.ssh.slave.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -24,6 +27,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.slave.R;
+import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveModuleHandler;
 
 /**
@@ -43,6 +47,28 @@ public class MainActivity extends SlaveStartUpActivity {
         if (!isSwitching()) {
             setContentView(R.layout.activity_main);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_restart) {
+            doUnbind();
+            stopService(new Intent(this, SlaveContainer.class));
+            doBind();
+            return true;
+        } else if (id == R.id.action_refresh) {
+            buildView();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
