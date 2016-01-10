@@ -6,8 +6,8 @@ import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.drivers.lib.DoorBuzzer;
 import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
@@ -28,10 +28,9 @@ public class SlaveDoorHandler extends AbstractMessageHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         if (SLAVE_DOOR_STATUS_GET.matches(message)) {
-            handleDoorStatus(message);
+            handleDoorStatus(SLAVE_DOOR_STATUS_GET.getPayload(message), message);
         } else if (SLAVE_DOOR_UNLATCH.matches(message)) {
-            handleUnlatchDoor(message);
-            handleDoorStatus(message);
+            handleUnlatchDoor(SLAVE_DOOR_UNLATCH.getPayload(message), message);
         } else {
             invalidMessage(message);
         }
@@ -42,9 +41,8 @@ public class SlaveDoorHandler extends AbstractMessageHandler {
         return new RoutingKey[]{SLAVE_DOOR_STATUS_GET, SLAVE_DOOR_UNLATCH};
     }
 
-    private void handleDoorStatus(Message.AddressedMessage original) {
-        DoorStatusPayload incomingPayload = SLAVE_DOOR_STATUS_GET.getPayload(original);
-        String moduleName = incomingPayload.getModuleName();
+    private void handleDoorStatus(DoorStatusPayload payload, Message.AddressedMessage original) {
+        String moduleName = payload.getModuleName();
         Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
         ReedSensor doorSensor = requireComponent(key);
 
@@ -57,8 +55,7 @@ public class SlaveDoorHandler extends AbstractMessageHandler {
         }
     }
 
-    private void handleUnlatchDoor(Message.AddressedMessage message) {
-        DoorPayload payload = SLAVE_DOOR_UNLATCH.getPayload(message);
+    private void handleUnlatchDoor(DoorPayload payload, Message.AddressedMessage message) {
         Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, payload.getModuleName());
         DoorBuzzer doorBuzzer = requireComponent(key);
         try {
