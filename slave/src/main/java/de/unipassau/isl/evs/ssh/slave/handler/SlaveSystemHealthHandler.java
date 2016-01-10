@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.slave.handler;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -12,10 +11,8 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
-import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
@@ -32,9 +29,8 @@ import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
  */
 public class SlaveSystemHealthHandler extends AbstractComponent {
     public static final Key<SlaveSystemHealthHandler> KEY = new Key<>(SlaveSystemHealthHandler.class);
-
+    private final ArrayList<Module> failedModules = new ArrayList<>();
     private ScheduledFuture future;
-    private final ArrayList<Module> failedModules = new ArrayList();
 
     @Override
     public void init(Container container) {
@@ -53,11 +49,11 @@ public class SlaveSystemHealthHandler extends AbstractComponent {
     private class SystemHealthRunnable implements Runnable {
         @Override
         public void run() {
-            SlaveModuleHandler handler = getContainer().require(SlaveModuleHandler.KEY);
+            SlaveModuleHandler handler = requireComponent(SlaveModuleHandler.KEY);
             List<Module> modules = handler.getModules();
             for (Module module : modules) {
                 Key<? extends Component> key = new Key<>(handler.getDriverClass(module), module.getName());
-                checkStatus(handler.getDriverClass(module), getContainer().require(key), module);
+                checkStatus(handler.getDriverClass(module), requireComponent(key), module);
             }
         }
 
@@ -89,7 +85,7 @@ public class SlaveSystemHealthHandler extends AbstractComponent {
                     failedModules.remove(module);
                 }
             } else {
-                //Check for availabiltiy failed, send error message
+                //Check for availability failed, send error message
                 failedModules.add(module);
                 Message message = new Message(new SystemHealthPayload(true, module));
                 requireComponent(OutgoingRouter.KEY).sendMessageToMaster(

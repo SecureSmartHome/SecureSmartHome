@@ -41,9 +41,9 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES
  * @author Wolfgang Popp
  */
 public class SlaveModuleHandler extends AbstractMessageHandler implements Component {
-    private static final String TAG = SlaveModuleHandler.class.getSimpleName();
     public static final Key<SlaveModuleHandler> KEY = new Key<>(SlaveModuleHandler.class);
-
+    private static final String TAG = SlaveModuleHandler.class.getSimpleName();
+    // TODO Wolfi: Collections should be final and correctly initialised. (Phil, 2016-01-09)
     private List<Module> components = null;
 
     /**
