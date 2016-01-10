@@ -32,10 +32,10 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
      * The originally received message will be mapped to the sequence number of the proxy message,
      * so that it can be later retrieved using the {@link Message#HEADER_REFERENCES_ID} of the reply for the proxy message.
      *
-     * @see #takeProxiedReceivedMessage(int)
      * @param receivedMessage the Message with a Request from the App or the Slave that was received.
      * @param proxyMessage    the Message that was sent by me (the Master) in order to get data required for responding
      *                        to the original request.
+     * @see #takeProxiedReceivedMessage(int)
      */
     protected void recordReceivedMessageProxy(Message.AddressedMessage receivedMessage, Message.AddressedMessage proxyMessage) {
         final DeviceID masterID = requireComponent(NamingManager.KEY).getMasterID();
@@ -79,9 +79,10 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
 
     /**
      * Check if a given Device has a given Permission. Master has all Permission.
+     *
      * @param userDeviceID DeviceID of the Device.
-     * @param permission Permission to check for.
-     * @param moduleName Module the Permission applies for.
+     * @param permission   Permission to check for.
+     * @param moduleName   Module the Permission applies for.
      * @return true if has permissions otherwise false.
      */
     protected boolean hasPermission(DeviceID userDeviceID, Permission permission, String moduleName) {
@@ -91,8 +92,9 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
 
     /**
      * Has Permission for Permissions that are independent of a Module.
+     *
      * @param userDeviceID DeviceID of the Device.
-     * @param permission Permission to check for.
+     * @param permission   Permission to check for.
      * @return true if has permissions otherwise false.
      */
     protected boolean hasPermission(DeviceID userDeviceID, Permission permission) {
@@ -109,10 +111,11 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
 
     /**
      * Send a message to all Devices that have a given Permission.
+     *
      * @param messageToSend Message to send to the devices.
-     * @param permission Permission the Device has to have.
-     * @param moduleName Module to Permission applies for.
-     * @param routingKey RoutingKey to send the message with.
+     * @param permission    Permission the Device has to have.
+     * @param moduleName    Module to Permission applies for.
+     * @param routingKey    RoutingKey to send the message with.
      */
     protected void sendMessageToAllDevicesWithPermission(
             Message messageToSend,
@@ -129,10 +132,11 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
 
     /**
      * Send a reply containing a no permission error.
-     * @param original Message to reply to
+     *
+     * @param original   Message to reply to
      * @param permission Permission the author of the original Message doesn't have.
      */
-    protected void sendNoPermissionReply(Message.AddressedMessage original, de.unipassau.isl.evs.ssh.core.sec.Permission permission){
+    protected void sendNoPermissionReply(Message.AddressedMessage original, de.unipassau.isl.evs.ssh.core.sec.Permission permission) {
         Message message = new Message(new ErrorPayload(new NoPermissionException(permission)));
         sendReply(original, message);
     }
