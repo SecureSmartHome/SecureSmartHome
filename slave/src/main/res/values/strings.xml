@@ -6,4 +6,5 @@
     <string name="action_settings">Settings</string>
     <string name="please_scan_device">Scan this QR-Code to register this Slave Odroid</string>
     <string name="qr_code_description">QR-Code</string>
+    <string name="master">Master</string>
 </resources>
