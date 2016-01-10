@@ -17,8 +17,6 @@ import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -29,7 +27,6 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
-import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
@@ -37,9 +34,6 @@ import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
-
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PUBLIC_PORT;
 
 /**
  * MainActivity for the Master App.
@@ -112,7 +106,7 @@ public class MainActivity extends MasterStartUpActivity {
         DeviceID id = getMasterID();
         if (id != null) {
             masterID.setText(id.toShortString());
-            address.setText(getMasterAddress());
+            address.setText(getMasterAddress(id));
         }
 
         TextView connected = (TextView) findViewById(R.id.mainactivity_master_connected);
@@ -122,7 +116,7 @@ public class MainActivity extends MasterStartUpActivity {
         slaveList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Slave item = (Slave) slaveList.getAdapter().getItem(position);
+                final Slave item = (Slave) slaveList.getAdapter().getItem(position);
                 final Server server = getComponent(Server.KEY);
                 if (server != null) {
                     final Channel channel = server.findChannel(item.getSlaveID());
@@ -140,7 +134,7 @@ public class MainActivity extends MasterStartUpActivity {
         userDeviceList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                UserDevice item = (UserDevice) userDeviceList.getAdapter().getItem(position);
+                final UserDevice item = (UserDevice) userDeviceList.getAdapter().getItem(position);
                 final Server server = getComponent(Server.KEY);
                 if (server != null) {
                     final Channel channel = server.findChannel(item.getUserDeviceID());
@@ -167,38 +161,7 @@ public class MainActivity extends MasterStartUpActivity {
         return component.getMasterID();
     }
 
-    private String getMasterAddress() {
-        final InetAddress ipAddress = DeviceConnectInformation.findIPAddress(this);
-        StringBuilder bob = new StringBuilder();
-        final Server server = getComponent(Server.KEY);
-        if (server == null) {
-            Log.i(TAG, "Container not yet connected.");
-            bob.append(ipAddress.getHostAddress());
-            bob.append(":" + DEFAULT_LOCAL_PORT);
-            if (DEFAULT_PUBLIC_PORT != DEFAULT_LOCAL_PORT) {
-                bob.append("/" + DEFAULT_PUBLIC_PORT);
-            }
-        } else {
-            final InetSocketAddress localAddress = server.getAddress();
-            final InetSocketAddress publicAddress = server.getPublicAddress();
-            if (!localAddress.getAddress().isAnyLocalAddress()) {
-                bob.append(localAddress.getAddress().getHostAddress());
-            } else {
-                bob.append(ipAddress.getHostAddress());
-            }
-            bob.append(":").append(localAddress.getPort());
-            if (publicAddress != null && publicAddress.getPort() != localAddress.getPort()) {
-                bob.append("/").append(publicAddress.getPort());
-            }
-        }
-        return bob.toString();
-    }
-
-    /**
-     * @param id The device the address is returned for.
-     * @return The devices network address.
-     */
-    private String getAddress(DeviceID id) {
+    private String getMasterAddress(DeviceID id) {
         String address = "Currently not connected";
         Server server = getComponent(Server.KEY);
         if (server == null) {
@@ -206,7 +169,26 @@ public class MainActivity extends MasterStartUpActivity {
         } else {
             Channel ch = server.findChannel(id);
             if (ch != null) {
-                address = ch.localAddress().toString();
+                address = ch.remoteAddress().toString();
+            }
+        }
+        return address;
+    }
+
+    /**
+     * @param id The device the address is returned for.
+     * @return The devices network address.
+     */
+    private String getAddress(DeviceID id) {
+        // TODO Phil only returns master address (Phil, 2016-01-10)
+        String address = "Currently not connected";
+        Server server = getComponent(Server.KEY);
+        if (server == null) {
+            Log.i(TAG, "Container not yet connected.");
+        } else {
+            Channel ch = server.findChannel(id);
+            if (ch != null) {
+                address = ch.remoteAddress().toString();
             }
         }
         return address;
@@ -409,8 +391,7 @@ public class MainActivity extends MasterStartUpActivity {
                         getResources().getString(R.string.userdevice_name), item.getName()));
 
                 TextView address = (TextView) layout.findViewById(R.id.userdevicelayout_device_address);
-                address.setText(String.format(
-                        getResources().getString(R.string.address_format), getAddress(userDeviceID)));
+                address.setText(getAddress(userDeviceID));
 
                 TextView id = (TextView) layout.findViewById(R.id.userdevicelayout_device_id);
                 id.setText(String.format(
