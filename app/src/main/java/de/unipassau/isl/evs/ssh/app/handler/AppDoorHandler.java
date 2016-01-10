@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.LinkedList;
@@ -108,7 +109,8 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
             tryHandleResponse(message);
         } else if (APP_DOOR_RING.matches(message)) {
             DoorBellPayload doorBellPayload = APP_DOOR_RING.getPayload(message);
-            fireImageUpdated(doorBellPayload.getCameraPayload().getPicture());
+            picture = doorBellPayload.getCameraPayload().getPicture();
+            fireImageUpdated(picture);
         } else {
             invalidMessage(message);
         }
@@ -160,6 +162,7 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
      *
      * @return the last taken picture or null if no picture has been taken yet.
      */
+    @Nullable
     public byte[] getPicture() {
         return picture;
     }
