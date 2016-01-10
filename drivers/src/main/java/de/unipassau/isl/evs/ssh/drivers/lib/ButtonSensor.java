@@ -25,20 +25,19 @@ import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 public class ButtonSensor extends AbstractComponent {
     public static final Key<ButtonSensor> KEY = new Key<>(ButtonSensor.class);
     private final String moduleName;
-    int address;
-    int dummyCount;
+    private int ioAddress;
     private Container container;
     private ScheduledFuture future;
 
     /**
      * Constructor of the class representing a push button
      *
-     * @param IoAdress where the button is connected to the odroid
+     * @param ioAdress where the button is connected to the odroid
      */
-    public ButtonSensor(int IoAdress, String moduleName) throws EvsIoException {
+    public ButtonSensor(int ioAdress, String moduleName) throws EvsIoException {
         this.moduleName = moduleName;
-        address = IoAdress;
-        EvsIo.registerPin(IoAdress, "in");
+        this.ioAddress = ioAdress;
+        EvsIo.registerPin(ioAdress, "in");
     }
 
     /**
@@ -47,19 +46,7 @@ public class ButtonSensor extends AbstractComponent {
      * @return true if the push button is currently pressed
      */
     public boolean isPressed() throws EvsIoException {
-        boolean ret = true;
-        String result = "";
-        result = EvsIo.readValue(address);
-        //Log.v(TAG, "EVS-Button:" + result + ":");
-
-
-        if (result.startsWith("1")) {
-            ret = false;
-        } else {
-            ret = true;
-        }
-
-        return ret;
+        return  EvsIo.readValue(ioAddress).startsWith("1");
     }
 
     @Override

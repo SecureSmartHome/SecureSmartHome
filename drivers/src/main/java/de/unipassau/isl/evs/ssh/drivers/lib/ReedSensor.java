@@ -27,18 +27,19 @@ import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 public class ReedSensor extends AbstractComponent {
     public static final Key<ReedSensor> KEY = new Key<>(ReedSensor.class);
     private final String moduleName;
-    int address;
+    private int ioAddress;
     private Container container;
     private ScheduledFuture future;
 
     /**
      * Constructor of the class representing door and window sensors
      *
-     * @param IoAdress where the sensor is connected to the odroid
+     * @param ioAdress where the sensor is connected to the odroid
      */
-    public ReedSensor(int IoAdress, String moduleName) throws EvsIoException {
+    public ReedSensor(int ioAdress, String moduleName) throws EvsIoException {
         this.moduleName = moduleName;
-        EvsIo.registerPin(IoAdress, "in");
+        this.ioAddress = ioAdress;
+        EvsIo.registerPin(ioAdress, "in");
     }
 
     /**
@@ -47,23 +48,7 @@ public class ReedSensor extends AbstractComponent {
      * @return true if the window is currently open
      */
     public boolean isOpen() throws EvsIoException {
-        boolean ret = true;
-        String result = "";
-        result = EvsIo.readValue(address);
-        //Log.w("EVS-IO", "EVS-REED:" + result + ":");
-
-
-        if (result.startsWith("1")) {
-            ret = true;
-        } else {
-            ret = false;
-        }
-
-        return ret;
-
-        // TODO simplify this method (probably not our job) (Wolfgang, 2015-12-31)
-        // Here is an alternative implementation of this method:
-        //return EvsIo.readValue(address).startsWith("1");
+        return EvsIo.readValue(ioAddress).startsWith("1");
     }
 
     @Override
