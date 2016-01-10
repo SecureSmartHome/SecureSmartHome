@@ -77,8 +77,6 @@
                     android:id="@+id/mainactivity_slave_masteraddress"
                     android:textSize="@dimen/typography_subheadline"/>
             </TableRow>
-
-
         </TableLayout>
 
 
@@ -94,7 +92,6 @@
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"
             />
-
 
         <ListView
             android:id="@+id/mainactivity_slave_listview_slaves"

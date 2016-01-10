@@ -40,6 +40,7 @@ public class MainActivity extends SlaveStartUpActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private ListView moduleList;
+    private ModuleAdapter moduleListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +66,7 @@ public class MainActivity extends SlaveStartUpActivity {
             doBind();
             return true;
         } else if (id == R.id.action_refresh) {
-            buildView();
+            moduleListAdapter.notifyDataSetChanged();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -84,7 +85,8 @@ public class MainActivity extends SlaveStartUpActivity {
         if (handler != null) {
             modules = handler.getModules();
         }
-        moduleList.setAdapter(new ModuleAdapter(modules));
+        moduleListAdapter = new ModuleAdapter(modules);
+        moduleList.setAdapter(moduleListAdapter);
     }
 
     /**
@@ -274,9 +276,22 @@ public class MainActivity extends SlaveStartUpActivity {
                 name.setText(formattedName);
 
                 TextView information = (TextView) layout.findViewById(R.id.modulelayout_module_information);
-                information.setText(item.toString());
+                information.setText(buildLocalizedModuleInformation(item));
             }
             return layout;
+        }
+
+        /**
+         * @param module A module which representation will be returned.
+         * @return A localized String representation of a module.
+         */
+        private String buildLocalizedModuleInformation(Module module) {
+            String moduleType = module.getModuleType().toLocalizedString(MainActivity.this);
+            String atSlave = module.getAtSlave().toShortString();
+            String moduleAccessPoint = module.getModuleAccessPoint().toString();
+
+            return String.format(getResources().getString(R.string.module_information),
+                    moduleType, atSlave, moduleAccessPoint);
         }
     }
 }
