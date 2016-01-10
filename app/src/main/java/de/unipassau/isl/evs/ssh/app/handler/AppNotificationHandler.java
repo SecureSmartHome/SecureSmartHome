@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -15,19 +16,22 @@ import java.io.Serializable;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.app.activity.ClimateFragment;
+import de.unipassau.isl.evs.ssh.app.activity.DoorFragment;
+import de.unipassau.isl.evs.ssh.app.activity.HolidayFragment;
+import de.unipassau.isl.evs.ssh.app.activity.LightFragment;
+import de.unipassau.isl.evs.ssh.app.activity.MainActivity;
+import de.unipassau.isl.evs.ssh.app.activity.MainFragment;
+import de.unipassau.isl.evs.ssh.app.activity.StatusFragment;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.CLIMATE_FRAGMENT;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.DOOR_FRAGMENT;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.HOLIDAY_FRAGMENT;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.LIGHT_FRAGMENT;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.MAIN_FRAGMENT;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.NotificationOpenThisFragment.STATUS_FRAGMENT;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
 
 /**
@@ -51,6 +55,8 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     private static final int DOOR_UNLOCKED = 10;
     private static final String TAG = AppNotificationHandler.class.getSimpleName();
 
+    private Resources resources;
+
     /**
      * Handles different Notification types.
      *
@@ -58,59 +64,66 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
      */
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (APP_NOTIFICATION_RECEIVE.getPayload(message) != null) {
-            if (APP_NOTIFICATION_RECEIVE.getPayload(message) instanceof NotificationPayload) {
-                NotificationPayload notificationPayload = (APP_NOTIFICATION_RECEIVE.getPayload(message));
-                NotificationPayload.NotificationType type = notificationPayload.getType();
-                Serializable[] args = notificationPayload.getArgs();
+        if (APP_NOTIFICATION_RECEIVE.matches(message)) {
+            NotificationPayload notificationPayload = (APP_NOTIFICATION_RECEIVE.getPayload(message));
+            NotificationPayload.NotificationType type = notificationPayload.getType();
+            Serializable[] args = notificationPayload.getArgs();
 
-                switch (type) {
-                    case WEATHER_WARNING:
-                        issueWeatherWarning(WEATHER_WARNING_ID, args);
-                        break;
-                    case BRIGHTNESS_WARNING:
-                        issueBrightnessWarning(BRIGHTNESS_WARNING_ID, args);
-                        break;
-                    case HUMIDITY_WARNING:
-                        issueClimateNotification(HUMIDITY_WARNING_ID, args);
-                        break;
-                    case SYSTEM_HEALTH_WARNING:
-                        issueSystemHealthWarning(SYSTEM_HEALTH_WARNING_ID, args);
-                        break;
-                    case HOLIDAY_MODE_SWITCHED_ON:
-                        issueHolidayModeSwitchedOn(HOLIDAY_MODE_SWITCHED_ON_ID);
-                        break;
-                    case HOLIDAY_MODE_SWITCHED_OFF:
-                        issueHolidayModeSwitchedOff(HOLIDAY_MODE_SWITCHED_OFF_ID);
-                        break;
-                    case BELL_RANG:
-                        issueDoorBellNotification(DOOR_BELL_NOTIFICATION_ID);
-                        break;
-                    case DOOR_UNLATCHED:
-                        issueDoorUnlatched(DOOR_UNLATCHED_ID);
-                        break;
-                    case DOOR_LOCKED:
-                        issueDoorLocked(DOOR_LOCKED);
-                        break;
-                    case DOOR_UNLOCKED:
-                        issueDoorUnlocked(DOOR_UNLOCKED);
-                        break;
-                    default:
-                        //HANDLE
-                        break;
-                }
-            } else {
-                //  HANDLE
-                Log.e(TAG, "ERROR! Received wrong Payload Type!");
+            switch (type) {
+                case WEATHER_WARNING:
+                    issueWeatherWarning(WEATHER_WARNING_ID, args);
+                    break;
+                case BRIGHTNESS_WARNING:
+                    issueBrightnessWarning(BRIGHTNESS_WARNING_ID, args);
+                    break;
+                case HUMIDITY_WARNING:
+                    issueClimateNotification(HUMIDITY_WARNING_ID, args);
+                    break;
+                case SYSTEM_HEALTH_WARNING:
+                    issueSystemHealthWarning(SYSTEM_HEALTH_WARNING_ID, args);
+                    break;
+                case HOLIDAY_MODE_SWITCHED_ON:
+                    issueHolidayModeSwitchedOn(HOLIDAY_MODE_SWITCHED_ON_ID);
+                    break;
+                case HOLIDAY_MODE_SWITCHED_OFF:
+                    issueHolidayModeSwitchedOff(HOLIDAY_MODE_SWITCHED_OFF_ID);
+                    break;
+                case BELL_RANG:
+                    issueDoorBellNotification(DOOR_BELL_NOTIFICATION_ID);
+                    break;
+                case DOOR_UNLATCHED:
+                    issueDoorUnlatched(DOOR_UNLATCHED_ID);
+                    break;
+                case DOOR_LOCKED:
+                    issueDoorLocked(DOOR_LOCKED);
+                    break;
+                case DOOR_UNLOCKED:
+                    issueDoorUnlocked(DOOR_UNLOCKED);
+                    break;
+                default:
+                    //HANDLE
+                    break;
             }
         } else {
             invalidMessage(message);
         }
+
     }
 
     @Override
     public RoutingKey[] getRoutingKeys() {
         return new RoutingKey[]{APP_NOTIFICATION_RECEIVE};
+    }
+
+    @Override
+    public void handlerAdded(IncomingDispatcher dispatcher, RoutingKey routingKey) {
+        super.handlerAdded(dispatcher, routingKey);
+        resources = requireComponent(ContainerService.KEY_CONTEXT).getResources();
+    }
+
+    @Override
+    public void handlerRemoved(RoutingKey routingKey) {
+        super.handlerRemoved(routingKey);
     }
 
     /**
@@ -122,22 +135,22 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     //TODO edit text and text formatting
     private void issueClimateNotification(int notificationID, Serializable[] args) {
         double humidity = (Double) args[0];
-        String title = Resources.getSystem().getString(R.string.climate_notification_title);
-        String text = String.format(Resources.getSystem().getString(R.string.climate_notification_text), humidity);
-        displayNotification(title, text, CLIMATE_FRAGMENT, notificationID);
+        String title = resources.getString(R.string.climate_notification_title);
+        String text = String.format(resources.getString(R.string.climate_notification_text), humidity);
+        displayNotification(title, text, ClimateFragment.class, notificationID);
     }
 
     private void issueBrightnessWarning(int notificationID, Serializable[] args) {
         double visibleLight = (Double) args[0];
-        String title = Resources.getSystem().getString(R.string.brightness_warning_title);
-        String text = String.format(Resources.getSystem().getString(R.string.brightness_warning_text), visibleLight);
-        displayNotification(title, text, LIGHT_FRAGMENT, notificationID);
+        String title = resources.getString(R.string.brightness_warning_title);
+        String text = String.format(resources.getString(R.string.brightness_warning_text), visibleLight);
+        displayNotification(title, text, LightFragment.class, notificationID);
     }
 
     private void issueWeatherWarning(int notificationID, Serializable[] args) {
-        String title = Resources.getSystem().getString(R.string.weather_warning_title);
-        String text = Resources.getSystem().getString(R.string.weather_warning_text);
-        displayNotification(title, text, CLIMATE_FRAGMENT, notificationID);
+        String title = resources.getString(R.string.weather_warning_title);
+        String text = resources.getString(R.string.weather_warning_text);
+        displayNotification(title, text, ClimateFragment.class, notificationID);
     }
 
     private void issueSystemHealthWarning(int notificationID, Serializable[] args) {
@@ -147,51 +160,51 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         String title;
         String text;
         if (((boolean) args[0])) {
-            title = Resources.getSystem().getString(R.string.system_health_warning_title_failed);
-            text = String.format(Resources.getSystem().getString(R.string.system_health_warning_text_failure), moduleName);
+            title = resources.getString(R.string.system_health_warning_title_failed);
+            text = String.format(resources.getString(R.string.system_health_warning_text_failure), moduleName);
         } else {
-            title = Resources.getSystem().getString(R.string.system_health_warning_title_fixed);
-            text = String.format(Resources.getSystem().getString(R.string.system_health_warning_text_fixed), moduleName);
+            title = resources.getString(R.string.system_health_warning_title_fixed);
+            text = String.format(resources.getString(R.string.system_health_warning_text_fixed), moduleName);
         }
 
-        displayNotification(title, text, STATUS_FRAGMENT, notificationID);
+        displayNotification(title, text, StatusFragment.class, notificationID);
     }
 
     //TODO add picture to notification?
     private void issueDoorBellNotification(int notificationID) {
-        String title = Resources.getSystem().getString(R.string.door_bell_notification_title);
-        String text = Resources.getSystem().getString(R.string.door_bell_notification_text);
-        displayNotification(title, text, DOOR_FRAGMENT, notificationID);
+        String title = resources.getString(R.string.door_bell_notification_title);
+        String text = resources.getString(R.string.door_bell_notification_text);
+        displayNotification(title, text, DoorFragment.class, notificationID);
     }
 
     private void issueHolidayModeSwitchedOn(int notificationID) {
-        String title = Resources.getSystem().getString(R.string.holiday_mode_switched_on_title);
-        String text = Resources.getSystem().getString(R.string.holiday_mode_switched_on_text);
-        displayNotification(title, text, HOLIDAY_FRAGMENT, notificationID);
+        String title = resources.getString(R.string.holiday_mode_switched_on_title);
+        String text = resources.getString(R.string.holiday_mode_switched_on_text);
+        displayNotification(title, text, HolidayFragment.class, notificationID);
     }
 
     private void issueHolidayModeSwitchedOff(int notificationID) {
-        String title = Resources.getSystem().getString(R.string.holiday_mode_switched_off_title);
-        String text = Resources.getSystem().getString(R.string.holiday_mode_switched_off_text);
-        displayNotification(title, text, HOLIDAY_FRAGMENT, notificationID);
+        String title = resources.getString(R.string.holiday_mode_switched_off_title);
+        String text = resources.getString(R.string.holiday_mode_switched_off_text);
+        displayNotification(title, text, HolidayFragment.class, notificationID);
     }
 
     private void issueDoorUnlatched(int notificationID) {
-        String title = Resources.getSystem().getString(R.string.door_unlatched_title);
-        String text = Resources.getSystem().getString(R.string.door_unlatched_text);
-        displayNotification(title, text, MAIN_FRAGMENT, notificationID);
+        String title = resources.getString(R.string.door_unlatched_title);
+        String text = resources.getString(R.string.door_unlatched_text);
+        displayNotification(title, text, DoorFragment.class, notificationID);
     }
 
     private void issueDoorLocked(int notificationID) {
-        String title = Resources.getSystem().getString(R.string.door_locked_title);
-        String text = Resources.getSystem().getString(R.string.door_locked_text);
-        displayNotification(title, text, MAIN_FRAGMENT, notificationID);
+        String title = resources.getString(R.string.door_locked_title);
+        String text = resources.getString(R.string.door_locked_text);
+        displayNotification(title, text, DoorFragment.class, notificationID);
     }
 
     private void issueDoorUnlocked(int notificationID) {
-        String title = Resources.getSystem().getString(R.string.door_unlocked_title);
-        String text = Resources.getSystem().getString(R.string.door_unlocked_text);
-        displayNotification(title, text, MAIN_FRAGMENT, notificationID);
+        String title = resources.getString(R.string.door_unlocked_title);
+        String text = resources.getString(R.string.door_unlocked_text);
+        displayNotification(title, text, DoorFragment.class, notificationID);
     }
 
     /**
@@ -204,46 +217,39 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
      *                         Add string to MainActivity (onCreate) if not already declared.
      * @param notificationID   unique ID for this type of Notification
      */
-    private void displayNotification(String title, String text, String openThisFragment, int notificationID) {
+    private void displayNotification(String title, String text, Class openThisFragment, int notificationID) {
 
         //If Notification is clicked send to this Page
-        Context context = getContainer().get(ContainerService.KEY_CONTEXT);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
+        Context context = requireComponent(ContainerService.KEY_CONTEXT);
 
        /* Intent intent = new Intent(context, MainActivity.class);
         intent.setAction(openThisFragment);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notificationBuilder.setContentIntent(pendingIntent);
        */
-        Intent resultIntent = new Intent(openThisFragment);
+        Intent resultIntent = new Intent(context, MainActivity.class);
+        resultIntent.putExtra(MainActivity.KEY_NOTIFICATION_FRAGMENT, openThisFragment);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addParentStack(openThisFragment.getClass());
+        stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        notificationBuilder.setContentIntent(resultPendingIntent);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        //Build notification
-        notificationBuilder.setSmallIcon(R.drawable.ic_home_light);
-        notificationBuilder.setColor(R.color.colorPrimary);
-        notificationBuilder.setWhen(System.currentTimeMillis());
-        notificationBuilder.setContentTitle(title);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
+
+        notificationBuilder.setContentIntent(resultPendingIntent)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setSmallIcon(R.drawable.ic_home_light)
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle(title)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+                .setLights(R.color.colorPrimary, 3000, 3000);
         //notificationBuilder.setContentText(text);//maybe obsolete because of bigText style.
-        notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
-        notificationBuilder.setVibrate(new long[]{0, 500, 110, 500, 110, 450, 110, 200, 110,
-                170, 40, 450, 110, 200, 110, 170, 40, 500});
-        notificationBuilder.setLights(R.color.colorPrimary, 3000, 3000);
-        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        notificationBuilder.setSound(alarmSound);
 
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         //Send notification out to Device
-        if (context != null && context.getSystemService(Context.NOTIFICATION_SERVICE) != null) {
-            NotificationManager notificationManager =
-                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
             notificationManager.notify(notificationID, notificationBuilder.build());
         } else {
             Log.e(TAG, "ERROR! context.getSystemService(Context.NOTIFICATION_SERVICE) was null (AppNotificationHandler)");

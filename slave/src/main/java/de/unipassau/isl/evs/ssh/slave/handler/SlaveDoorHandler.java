@@ -7,7 +7,8 @@ import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.drivers.lib.DoorBuzzer;
 import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
@@ -48,26 +49,23 @@ public class SlaveDoorHandler extends AbstractMessageHandler {
         ReedSensor doorSensor = requireComponent(key);
 
         try {
-            final Message reply = new Message(new DoorStatusPayload(doorSensor.isOpen(), moduleName));
-            reply.putHeader(Message.HEADER_REFERENCES_ID, original.getSequenceNr());
-            sendMessage(original.getFromID(), original.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
+            final Message reply = new Message(new DoorStatusPayload(doorSensor.isOpen(), false, moduleName));
+            sendReply(original, reply);
         } catch (EvsIoException e) {
             Log.e(TAG, "Cannot get door status", e);
-            sendErrorMessage(original);
-            // HANDLE (Wolfgang, 2016-02-01)
+            sendReply(original, new Message(new ErrorPayload(e)));
         }
     }
 
     private void handleUnlatchDoor(Message.AddressedMessage message) {
-        DoorUnlatchPayload payload = SLAVE_DOOR_UNLATCH.getPayload(message);
+        DoorPayload payload = SLAVE_DOOR_UNLATCH.getPayload(message);
         Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, payload.getModuleName());
         DoorBuzzer doorBuzzer = requireComponent(key);
         try {
             doorBuzzer.unlock(3000);
+            sendReply(message, new Message());
         } catch (EvsIoException e) {
-            Log.e(TAG, "Cannot unlock door", e);
-            // HANDLE
-            sendErrorMessage(message);
+            sendReply(message, new Message(new ErrorPayload(e)));
         }
     }
 }
