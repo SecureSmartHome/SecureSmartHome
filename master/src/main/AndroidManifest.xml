@@ -38,12 +38,14 @@
         <activity
             android:name=".activity.RegisterLocalAppActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:label="@string/title_activity_register_local_app"
             android:theme="@style/Theme.AppCompat.Dialog">
         </activity>
         <activity
             android:name=".activity.RegisterLocalSlaveActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:label="@string/title_activity_register_local_slave"
             android:theme="@style/Theme.AppCompat.Dialog">
         </activity>

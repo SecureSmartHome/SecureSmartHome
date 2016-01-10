@@ -7,8 +7,8 @@
     <string name="action_settings">Settings</string>
     <string name="please_scan_device">Scan the QR-Code with your Android device to register it as first admin device.</string>
     <string name="qr_code_description">This is a QR-Code.</string>
-    <string name="title_activity_register_local_app">RegisterLocalAppActivity</string>
-    <string name="title_activity_register_local_slave">RegisterLocalSlaveActivity</string>
+    <string name="title_activity_register_local_app">Register Local App </string>
+    <string name="title_activity_register_local_slave">Register Local Slave</string>
     <string name="title_activity_preferences">Preferences</string>
     <string name="preferences">Preferences</string>
 

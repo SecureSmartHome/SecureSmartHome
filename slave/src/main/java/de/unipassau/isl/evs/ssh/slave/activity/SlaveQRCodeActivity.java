@@ -34,10 +34,10 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
     private static final int LOCAL_MASTER_REQUEST_CODE = 2;
     private static final String LOCAL_MASTER_PACKAGE = "de.unipassau.isl.evs.ssh.master";
     private static final String LOCAL_MASTER_ACTIVITY = LOCAL_MASTER_PACKAGE + ".activity.RegisterLocalSlaveActivity";
-    private static final String EXTRA_DENIED_LOCAL_CONNECTION = "deniedLocalConnection";
+    private static final String EXTRA_TRIED_LOCAL_CONNECTION = "triedLocalConnection";
 
     private ProgressDialog dialog;
-    private boolean deniedLocalConnection = false;
+    private boolean triedLocalConnection = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,10 +66,10 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
         }
 
         if (savedInstanceState != null) {
-            deniedLocalConnection = savedInstanceState.getBoolean(EXTRA_DENIED_LOCAL_CONNECTION, deniedLocalConnection);
+            triedLocalConnection = savedInstanceState.getBoolean(EXTRA_TRIED_LOCAL_CONNECTION, triedLocalConnection);
         }
 
-        if (!deniedLocalConnection) {
+        if (!triedLocalConnection) {
             tryLocalConnection();
         }
     }
@@ -104,20 +104,15 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == LOCAL_MASTER_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                showConnectingDialog();
-                deniedLocalConnection = false;
-            } else {
-                deniedLocalConnection = true;
-            }
+        if (requestCode == LOCAL_MASTER_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            showConnectingDialog();
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(EXTRA_DENIED_LOCAL_CONNECTION, deniedLocalConnection);
+        outState.putBoolean(EXTRA_TRIED_LOCAL_CONNECTION, triedLocalConnection);
     }
 
     /**
@@ -129,6 +124,7 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
             intent.setComponent(new ComponentName(LOCAL_MASTER_PACKAGE, LOCAL_MASTER_ACTIVITY));
             intent.putExtra(EXTRA_QR_DEVICE_INFORMATION, getDeviceInformation());
             startActivityForResult(intent, LOCAL_MASTER_REQUEST_CODE);
+            triedLocalConnection = true;
             return true;
         } catch (ActivityNotFoundException ignore) {
             return false;
@@ -162,6 +158,7 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if (isFinishing()) return;
                 showConnectingDialog();
                 dialog.setMessage("Address of Master found, connecting");
             }
@@ -173,6 +170,7 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if (isFinishing()) return;
                 showConnectingDialog();
                 dialog.setMessage("Address of Master found, connecting to " + host + ":" + port);
             }
@@ -184,6 +182,7 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if (isFinishing()) return;
                 if (dialog != null && dialog.isShowing()) {
                     dialog.setMessage("Successfully connected to Master");
                 }
@@ -201,6 +200,7 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if (isFinishing()) return;
                 showConnectingDialog();
                 dialog.setMessage("Master rejected connection with message: " + message + "\nPlease rescan the QR-Code.");
                 dialog.setIndeterminate(false);
