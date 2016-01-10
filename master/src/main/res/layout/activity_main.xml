@@ -53,7 +53,7 @@
                     android:textSize="@dimen/typography_subheadline"
                     android:textStyle="bold"
                     />
-                <!--FIXME extract in string recourse-->
+                <!--TODO Phil extract in string resource-->
                 <TextView
                     android:id="@+id/mainactivity_master_connected"
                     android:textSize="@dimen/typography_subheadline"
@@ -84,6 +84,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/connected_user_devices"
+            android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"
             />
 

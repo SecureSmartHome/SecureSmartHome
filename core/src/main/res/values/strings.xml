@@ -11,6 +11,9 @@
 
     <!--Strings that can easily be used anywhere-->
     <string name="secure_smart_home">Secure Smart Home</string>
+    <string name="master">Master</string>
+    <string name="slave">Slave</string>
+    <string name="address">Address</string>
     <string name="name">Name</string>
     <string name="cancel">Cancel</string>
     <string name="action_settings">Settings</string>
