@@ -60,6 +60,7 @@ public class MainActivity extends SlaveStartUpActivity {
         }
         moduleList.setAdapter(new ModuleAdapter(modules));
     }
+
     /**
      * Gets called in {@link #onContainerConnected(Container)}.
      * Builds the view components that require the container.
@@ -103,15 +104,9 @@ public class MainActivity extends SlaveStartUpActivity {
         return address;
     }
 
-    private DeviceID getMasterID() {
-        final NamingManager namingManager = getComponent(NamingManager.KEY);
-        if (namingManager == null) {
-            Log.i(TAG, "Container no yet connected!");
-            return null;
-        }
-        return namingManager.getMasterID();
-    }
-
+    /**
+     * @return The slaves DeviceID
+     */
     private DeviceID getSlaveID() {
         final NamingManager namingManager = getComponent(NamingManager.KEY);
         if (namingManager == null) {
@@ -145,6 +140,18 @@ public class MainActivity extends SlaveStartUpActivity {
             findViewById(R.id.mainactivity_slave_mastercontainer_address).setVisibility(View.GONE);
         }
         ((TextView) findViewById(R.id.mainactivity_slave_connected)).setText(status);
+    }
+
+    /**
+     * @return The masters DeviceID
+     */
+    private DeviceID getMasterID() {
+        final NamingManager namingManager = getComponent(NamingManager.KEY);
+        if (namingManager == null) {
+            Log.i(TAG, "Container no yet connected!");
+            return null;
+        }
+        return namingManager.getMasterID();
     }
 
     @Override
@@ -221,7 +228,6 @@ public class MainActivity extends SlaveStartUpActivity {
                 return 0;
             }
         }
-
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
