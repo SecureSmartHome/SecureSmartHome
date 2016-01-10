@@ -1,40 +1,36 @@
 package de.unipassau.isl.evs.ssh.slave.activity;
 
 import android.os.Bundle;
-import android.text.format.Formatter;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.google.common.collect.Lists;
 
-import java.net.Inet4Address;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.slave.R;
-import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveModuleHandler;
 
 /**
  * MainActivity for the Slave App.
  * Displays connection information as well as a list of all connected modules.
  *
- * @author Team
+ * @author Phil Werli
  */
 public class MainActivity extends SlaveStartUpActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -56,21 +52,6 @@ public class MainActivity extends SlaveStartUpActivity {
             return;
         }
 
-        final NamingManager namingManager = getComponent(NamingManager.KEY);
-        if (namingManager == null) {
-            ((TextView) findViewById(R.id.textViewDeviceID)).setText("???");
-            ((TextView) findViewById(R.id.textViewMasterID)).setText("???");
-        } else {
-            ((TextView) findViewById(R.id.textViewDeviceID)).setText(
-                    namingManager.getOwnID().getId()
-            );
-            if (namingManager.isMasterKnown()) {
-                ((TextView) findViewById(R.id.textViewMasterID)).setText(
-                        namingManager.getMasterID().getId()
-                );
-            }
-        }
-
         buildView();
         List<Module> modules = new LinkedList<>();
         final SlaveModuleHandler handler = getComponent(SlaveModuleHandler.KEY);
@@ -79,33 +60,22 @@ public class MainActivity extends SlaveStartUpActivity {
         }
         moduleList.setAdapter(new ModuleAdapter(modules));
     }
-
-        updateConnectionStatus();
     /**
      * Gets called in {@link #onContainerConnected(Container)}.
      * Builds the view components that require the container.
      */
     private void buildView() {
-//        TextView slaveIDText = (TextView) findViewById(R.id.mainactivity_slave_slaveid);
-//        TextView slaveAddress = (TextView) findViewById(R.id.mainactivity_slave_slaveaddress);
-//        TextView masterIDText = (TextView) findViewById(R.id.mainactivity_slave_slaveid);
-//        TextView masterAddress = (TextView) findViewById(R.id.mainactivity_slave_slaveaddress);
-//
-//        DeviceID slaveID = getSlaveID();
-//        if (slaveID != null) {
-//            slaveIDText.setText(slaveID.toShortString());
-//            slaveAddress.setText(getAddress(false));
-//        }
-//
-//        DeviceID masterID = getMasterID();
-//        if (masterID != null) {
-//            masterIDText.setText(masterID.toShortString());
-//            masterAddress.setText(getAddress(true));
-//        }
-//        TextView connected = (TextView) findViewById(R.id.mainactivity_slave_connected);
-//        connected.setText(String.valueOf(getNumberOfConnectedClients()));
-//
-//        moduleList = (ListView) findViewById(R.id.mainactivity_slave_listview_slaves);
+        TextView slaveIDText = (TextView) findViewById(R.id.mainactivity_slave_slaveid);
+        TextView slaveAddress = (TextView) findViewById(R.id.mainactivity_slave_slaveaddress);
+
+        DeviceID slaveID = getSlaveID();
+        if (slaveID != null) {
+            slaveIDText.setText(slaveID.toShortString());
+            slaveAddress.setText(getAddress(false));
+        }
+        moduleList = (ListView) findViewById(R.id.mainactivity_slave_listview_slaves);
+
+        updateConnectionStatus();
     }
 
     /**
@@ -122,7 +92,6 @@ public class MainActivity extends SlaveStartUpActivity {
                 InetSocketAddress masterAddress = client.getConnectAddress();
                 if (masterAddress != null) {
                     address = masterAddress.toString();
-                    address += ":" + masterAddress.getPort();
                 }
             } else {
                 InetSocketAddress slaveAddress = client.getAddress();
@@ -135,112 +104,47 @@ public class MainActivity extends SlaveStartUpActivity {
     }
 
     private DeviceID getMasterID() {
-        final NamingManager component = getComponent(NamingManager.KEY);
-        if (component == null) {
+        final NamingManager namingManager = getComponent(NamingManager.KEY);
+        if (namingManager == null) {
             Log.i(TAG, "Container no yet connected!");
             return null;
         }
-        return component.getMasterID();
+        return namingManager.getMasterID();
     }
 
     private DeviceID getSlaveID() {
-        final NamingManager component = getComponent(NamingManager.KEY);
-        if (component == null) {
+        final NamingManager namingManager = getComponent(NamingManager.KEY);
+        if (namingManager == null) {
             Log.i(TAG, "Container not yet connected.");
             return null;
         }
-        return component.getOwnID();
+        return namingManager.getOwnID();
     }
 
-    private void showQRCodeActivity(boolean tryLocal) {
-        DeviceConnectInformation deviceInformation = getDeviceConnectInformation();
-        if (deviceInformation == null) {
-            Log.i(TAG, "Could not create DeviceConnectInformation. Missing Container!");
-            Toast.makeText(MainActivity.this, "Fatal error. Couldn't create QR-Code. Please reboot.", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        if (tryLocal) {
-            try {
-                //Try to open the Master Activity for adding a local slave
-                Intent intent = new Intent();
-                intent.setComponent(new ComponentName(LOCAL_MASTER_PACKAGE, LOCAL_MASTER_ACTIVITY));
-                intent.putExtra(EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
-                startActivityForResult(intent, LOCAL_MASTER_REQUEST_CODE);
-            } catch (ActivityNotFoundException ignore) {
-                //Or open the QR Code scanner
-                tryLocal = false;
-            }
-        }
-
-        if (!tryLocal) {
-            Intent intent = new Intent(this, SlaveQRCodeActivity.class);
-            intent.putExtra(EXTRA_QR_DEVICE_INFORMATION, deviceInformation);
-            startActivity(intent);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == LOCAL_MASTER_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                //TODO Niko: Show intermediate "waiting for connection" screen and don't show RegisterLocal dialogue again (Niko, 2015-12-24)
-            } else {
-                showQRCodeActivity(false);
-            }
-        }
-    }
-
-    private DeviceConnectInformation getDeviceConnectInformation() {
-        DeviceConnectInformation deviceInformation = null;
-        WifiManager wifiManager = ((WifiManager) getSystemService(Context.WIFI_SERVICE));
-        String ipAddress = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
-        final byte[] token = DeviceConnectInformation.getRandomToken();
-        Client client = getComponent(Client.KEY);
-        if (client == null) {
-            Log.i(TAG, "Container not yet connected!");
-        } else {
-            client.editPrefs()
-                    .setPassiveRegistrationToken(token)
-                    .commit();
-        }
-        NamingManager namingManager = getComponent(NamingManager.KEY);
-        if (namingManager == null) {
-            Log.i(TAG, "Container not yet connected!");
-        } else {
-            try {
-                deviceInformation = new DeviceConnectInformation(
-                        (Inet4Address) Inet4Address.getByName(ipAddress),
-                        CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT,
-                        namingManager.getOwnID(),
-                        token
-                );
-            } catch (UnknownHostException e) {
-                Log.e(TAG, "Cannot show QRCode: " + e.getMessage());
-            }
-            if (deviceInformation != null) {
-                Log.v(TAG, "HostNAME: " + deviceInformation.getAddress().getHostAddress());
-                Log.v(TAG, "ID: " + deviceInformation.getID());
-                Log.v(TAG, "Port: " + deviceInformation.getPort());
-                Log.v(TAG, "Token: " + encodeToken(deviceInformation.getToken()));
-            }
-        }
-        //NoDevice will allow any device to use this token
-        return deviceInformation;
-    }
-
+    /**
+     * Update connection status and en/disables the visibility of the master connection
+     */
     private void updateConnectionStatus() {
-//        Client client = getComponent(Client.KEY);
-//        String status;
-//        if (client == null) {
-//            status = "disconnected";
-//        } else {
-//            status = "connected to " + client.getAddress() + " "
-//                    + "[" + (client.isChannelOpen() ? "open" : "closed") + "]";
-//        }
-//        ((TextView) findViewById(R.id.textViewConnectionStatus)).setText(status);
+        Client client = getComponent(Client.KEY);
+        String status;
+        if (client == null) {
+            status = "not connected.";
+
+            DeviceID masterID = getMasterID();
+            if (masterID != null) {
+                TextView masterIDText = (TextView) findViewById(R.id.mainactivity_slave_masterid);
+                TextView masterAddress = (TextView) findViewById(R.id.mainactivity_slave_masteraddress);
+                masterIDText.setText(masterID.toShortString());
+                masterAddress.setText(getAddress(true));
+            }
+            findViewById(R.id.mainactivity_slave_mastercontainer_id).setVisibility(View.VISIBLE);
+            findViewById(R.id.mainactivity_slave_mastercontainer_address).setVisibility(View.VISIBLE);
+        } else {
+            status = "connected to";
+            findViewById(R.id.mainactivity_slave_mastercontainer_id).setVisibility(View.GONE);
+            findViewById(R.id.mainactivity_slave_mastercontainer_address).setVisibility(View.GONE);
+        }
+        ((TextView) findViewById(R.id.mainactivity_slave_connected)).setText(status);
     }
 
     @Override
@@ -321,9 +225,26 @@ public class MainActivity extends SlaveStartUpActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            Module item = getItem(position);
+            // the module the view is created for
+            final Module item = getItem(position);
 
-            return null;
+            LinearLayout layout;
+            LayoutInflater inflater = getLayoutInflater();
+            if (convertView == null) {
+                layout = (LinearLayout) inflater.inflate(R.layout.modulelayout, parent, false);
+            } else {
+                layout = (LinearLayout) convertView;
+            }
+
+            if (item != null) {
+                TextView name = (TextView) layout.findViewById(R.id.modulelayout_module_name);
+                String formattedName = String.format(getResources().getString(R.string.module_name), item.getModuleType(), item.getName());
+                name.setText(formattedName);
+
+                TextView information = (TextView) layout.findViewById(R.id.modulelayout_module_information);
+                information.setText(item.toString());
+            }
+            return layout;
         }
     }
 }
