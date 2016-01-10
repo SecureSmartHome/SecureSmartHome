@@ -49,6 +49,27 @@ public class UserDevice implements Serializable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserDevice that = (UserDevice) o;
+
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (inGroup != null ? !inGroup.equals(that.inGroup) : that.inGroup != null) return false;
+        return !(userDeviceID != null ? !userDeviceID.equals(that.userDeviceID) : that.userDeviceID != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (inGroup != null ? inGroup.hashCode() : 0);
+        result = 31 * result + (userDeviceID != null ? userDeviceID.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return name;
     }
