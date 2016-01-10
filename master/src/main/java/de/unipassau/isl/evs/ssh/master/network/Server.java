@@ -9,7 +9,7 @@ import android.support.annotation.Nullable;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 import java.util.Objects;
 
 import de.ncoder.typedmap.Key;
@@ -200,15 +200,23 @@ public class Server extends AbstractComponent {
     /**
      * @return the local Address this server is listening on
      */
-    public SocketAddress getAddress() {
-        return localChannel.channel().localAddress();
+    public InetSocketAddress getAddress() {
+        if (localChannel != null && localChannel.channel() != null) {
+            return (InetSocketAddress) localChannel.channel().localAddress();
+        } else {
+            return null;
+        }
     }
 
     /**
      * @return the public Address this server is listening on
      */
-    public SocketAddress getPublicAddress() {
-        return publicChannel.channel().localAddress();
+    public InetSocketAddress getPublicAddress() {
+        if (publicChannel != null && publicChannel.channel() != null) {
+            return (InetSocketAddress) publicChannel.channel().localAddress();
+        } else {
+            return null;
+        }
     }
 
     /**
