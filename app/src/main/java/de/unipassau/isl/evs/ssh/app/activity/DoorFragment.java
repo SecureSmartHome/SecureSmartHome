@@ -158,9 +158,8 @@ public class DoorFragment extends BoundFragment {
         }
 
         if (!handler.isOpen() && !handler.isBlocked()) {
-            handler.openDoor();
+            handler.unlatchDoor();
         }
-        updateButtons();
     }
 
     /**
@@ -179,7 +178,6 @@ public class DoorFragment extends BoundFragment {
         } else {
             handler.blockDoor();
         }
-        updateButtons();
     }
 
     /**

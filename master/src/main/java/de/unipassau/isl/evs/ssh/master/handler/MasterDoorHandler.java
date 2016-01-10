@@ -10,7 +10,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBlockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
@@ -23,8 +22,10 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_ST
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH_REPLY;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.LOCK_DOOR;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_DOOR_STATUS;
@@ -35,6 +36,7 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR_ON_HOLID
  * Handles door messages and generates messages for each target and passes them to the OutgoingRouter.
  *
  * @author Leon Sell
+ * @author Wolfgang Popp
  */
 public class MasterDoorHandler extends AbstractMasterHandler {
     private final Map<Integer, Boolean> blockedFor = new HashMap<>();
@@ -45,10 +47,12 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         return new RoutingKey[]{
                 MASTER_DOOR_STATUS_UPDATE,
                 MASTER_DOOR_UNLATCH,
-                SLAVE_DOOR_UNLATCH_REPLY,
                 MASTER_DOOR_BLOCK,
                 MASTER_DOOR_STATUS_GET,
-                SLAVE_DOOR_STATUS_GET_REPLY
+                SLAVE_DOOR_UNLATCH_REPLY,
+                SLAVE_DOOR_UNLATCH_ERROR,
+                SLAVE_DOOR_STATUS_GET_REPLY,
+                SLAVE_DOOR_STATUS_GET_ERROR
         };
     }
 
@@ -66,8 +70,10 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             handleDoorStatusGet(message);
         } else if (SLAVE_DOOR_STATUS_GET_REPLY.matches(message)) {
             handleDoorStatusGetResponse(SLAVE_DOOR_STATUS_GET_REPLY.getPayload(message), message);
-        } else if (message.getPayload() instanceof MessageErrorPayload) {
-            handleErrorMessage(message);
+        } else if (SLAVE_DOOR_STATUS_GET_ERROR.matches(message)) {
+            //TODO
+        } else if (SLAVE_DOOR_UNLATCH_ERROR.matches(message)) {
+            //TODO
         } else {
             invalidMessage(message);
         }
@@ -142,13 +148,14 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
 
         if (hasPermission(message.getFromID(), LOCK_DOOR, null)) {
-            setBlocked(atModule.getName(), payload.isLock());
+            setBlocked(atModule.getName(), payload.isBlock());
 
-            if (payload.isLock()) {
+            if (payload.isBlock()) {
                 notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.DOOR_LOCKED);
             } else {
                 notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.DOOR_UNLOCKED);
             }
+            broadcastDoorStatus(atModule.getName());
         } else {
             sendNoPermissionReply(message, LOCK_DOOR);
         }
@@ -170,7 +177,12 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private Boolean getOpen(String moduleName) {
-        return openFor.get(requireComponent(SlaveController.KEY).getModuleID(moduleName));
+        Boolean isOpen = openFor.get(requireComponent(SlaveController.KEY).getModuleID(moduleName));
+        if (isOpen != null) {
+            return isOpen;
+        } else {
+            return false;
+        }
     }
 
     private synchronized void setBlocked(String moduleName, boolean locked) {
@@ -182,6 +194,11 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private synchronized boolean getBlocked(String moduleName) {
-        return blockedFor.get(requireComponent(SlaveController.KEY).getModuleID(moduleName));
+        Boolean isBlocked = blockedFor.get(requireComponent(SlaveController.KEY).getModuleID(moduleName));
+        if (isBlocked != null) {
+            return isBlocked;
+        } else {
+            return false;
+        }
     }
 }

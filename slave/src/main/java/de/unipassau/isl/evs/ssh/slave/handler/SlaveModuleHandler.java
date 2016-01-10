@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.common.collect.Sets;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -43,8 +44,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES
 public class SlaveModuleHandler extends AbstractMessageHandler implements Component {
     public static final Key<SlaveModuleHandler> KEY = new Key<>(SlaveModuleHandler.class);
     private static final String TAG = SlaveModuleHandler.class.getSimpleName();
-    // TODO Wolfi: Collections should be final and correctly initialised. (Phil, 2016-01-09)
-    private List<Module> components = null;
+    private final List<Module> components = new LinkedList<>();
 
     /**
      * Updates the SlaveContainer. Registers new modules and unregisters unused modules.
@@ -54,7 +54,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
      *                   list are unregistered.
      */
     public void updateModule(List<Module> components) throws WrongAccessPointException, EvsIoException {
-        if (this.components == null) {
+        if (this.components.size() < 1) {
             Set<Module> newComponents = Sets.newHashSet(components);
             registerModules(newComponents);
         } else {
@@ -66,7 +66,8 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
             unregisterModule(componentsToRemove);
             registerModules(componentsToAdd);
         }
-        this.components = components;
+        this.components.clear();
+        this.components.addAll(components);
     }
 
     private void registerModules(Set<Module> componentsToAdd) throws WrongAccessPointException, EvsIoException {
