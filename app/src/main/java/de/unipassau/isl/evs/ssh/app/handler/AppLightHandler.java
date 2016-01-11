@@ -30,13 +30,11 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_S
 public class AppLightHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppLightHandler> KEY = new Key<>(AppLightHandler.class);
 
-    private static final String TAG = AppLightHandler.class.getSimpleName();
-
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.MINUTES.toMillis(2);
     private final List<LightHandlerListener> listeners = new ArrayList<>();
     private final Map<Module, LightStatus> lightStatusMapping = new HashMap<>();
 
-    private AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
+    final private AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
         @Override
         public void onModulesRefreshed() {
             update();

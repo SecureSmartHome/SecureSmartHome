@@ -57,7 +57,7 @@ public class EditUserDeviceFragment extends BoundFragment {
     private UserDevice device;
     private PermissionListAdapter permissionListAdapter;
 
-    private AppUserConfigurationHandler.UserInfoListener listener = new AppUserConfigurationHandler.UserInfoListener() {
+    final private AppUserConfigurationHandler.UserInfoListener listener = new AppUserConfigurationHandler.UserInfoListener() {
         @Override
         public void userInfoUpdated() {
             getActivity().runOnUiThread(new Runnable() {
