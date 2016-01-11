@@ -13,7 +13,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
@@ -74,7 +73,7 @@ public abstract class AbstractMessageHandler implements MessageHandler {
 
     @Nullable
     protected IncomingDispatcher getDispatcher() {
-        return dispatcher == null ? container.get(IncomingDispatcher.KEY) : dispatcher;
+        return container == null ? dispatcher : container.get(IncomingDispatcher.KEY);
     }
 
     @Nullable
