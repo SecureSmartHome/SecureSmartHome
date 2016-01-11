@@ -19,7 +19,7 @@ public class MasterConstants extends CoreConstants {
         public static final double PRESSURE = 101325;
         public static final double TEMP1 = 21;
         public static final double TEMP2 = 25;
-        //Bright Day 100.000 Lux. Cloudy Day 20.000 Lux. -> Threshold 60.000 Lux
-        public static final int VISIBLE_LIGHT = 60000;
+        //Bright Day 100 Lux. Cloudy Day 20 Lux. -> Threshold 60 Lux
+        public static final int VISIBLE_LIGHT = 60;
     }
 }

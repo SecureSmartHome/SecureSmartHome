@@ -6,8 +6,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
@@ -21,7 +19,6 @@ import de.unipassau.isl.evs.ssh.app.activity.DoorFragment;
 import de.unipassau.isl.evs.ssh.app.activity.HolidayFragment;
 import de.unipassau.isl.evs.ssh.app.activity.LightFragment;
 import de.unipassau.isl.evs.ssh.app.activity.MainActivity;
-import de.unipassau.isl.evs.ssh.app.activity.MainFragment;
 import de.unipassau.isl.evs.ssh.app.activity.StatusFragment;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
@@ -29,7 +26,6 @@ import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
@@ -71,7 +67,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
 
             switch (type) {
                 case WEATHER_WARNING:
-                    issueWeatherWarning(WEATHER_WARNING_ID, args);
+                    issueWeatherWarning(WEATHER_WARNING_ID);
                     break;
                 case BRIGHTNESS_WARNING:
                     issueBrightnessWarning(BRIGHTNESS_WARNING_ID, args);
@@ -107,7 +103,6 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         } else {
             invalidMessage(message);
         }
-
     }
 
     @Override
@@ -147,7 +142,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         displayNotification(title, text, LightFragment.class, notificationID);
     }
 
-    private void issueWeatherWarning(int notificationID, Serializable[] args) {
+    private void issueWeatherWarning(int notificationID) {
         String title = resources.getString(R.string.weather_warning_title);
         String text = resources.getString(R.string.weather_warning_text);
         displayNotification(title, text, ClimateFragment.class, notificationID);
@@ -222,11 +217,6 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         //If Notification is clicked send to this Page
         Context context = requireComponent(ContainerService.KEY_CONTEXT);
 
-       /* Intent intent = new Intent(context, MainActivity.class);
-        intent.setAction(openThisFragment);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        notificationBuilder.setContentIntent(pendingIntent);
-       */
         Intent resultIntent = new Intent(context, MainActivity.class);
         resultIntent.putExtra(MainActivity.KEY_NOTIFICATION_FRAGMENT, openThisFragment);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
@@ -243,8 +233,6 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
                 .setContentTitle(title)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
                 .setLights(R.color.colorPrimary, 3000, 3000);
-        //notificationBuilder.setContentText(text);//maybe obsolete because of bigText style.
-
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 

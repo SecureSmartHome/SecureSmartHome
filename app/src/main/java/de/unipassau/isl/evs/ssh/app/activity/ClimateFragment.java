@@ -26,11 +26,8 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 
 /**
- * FIXME Andi: new class javadoc as information is received though the {@link AppClimateHandler}. Also use {@link } to link classes. (Phil, 2016-01-09)
- *
- * This activity allows to display information contained in climate messages which are received from
- * the IncomingDispatcher.
- * Furthermore it generates a climate messages as instructed by the UI and passes it to the OutgoingRouter.
+ * This Fragment displays current data of the WeatherSensor. {@link AppClimateHandler} delivers this data.
+ * It is also possible to show data from more than one WeatherSensor.
  *
  * @author Andreas Bucher
  * @see AppClimateHandler
