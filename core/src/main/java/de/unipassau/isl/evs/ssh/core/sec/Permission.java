@@ -44,12 +44,11 @@ public enum Permission {
     REQUEST_CAMERA_STATUS,
     TAKE_CAMERA_PICTURE,
 
-    //WeaterStation
+    //WeatherStation
     REQUEST_WEATHER_STATUS,
 
     //HolidaySimulation
-    START_HOLIDAY_SIMULATION,
-    STOP_HOLIDAY_SIMULATION,
+    TOGGLE_HOLIDAY_SIMULATION,
 
     //User
     ADD_USER,

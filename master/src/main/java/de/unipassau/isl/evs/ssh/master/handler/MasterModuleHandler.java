@@ -46,7 +46,7 @@ public class MasterModuleHandler extends ModuleBroadcastHandler {
     private void removeModule(ModifyModulePayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, Permission.DELETE_SENSOR, null)) {
+        if (!hasPermission(fromID, Permission.DELETE_SENSOR)) {
             sendNoPermissionReply(original, Permission.DELETE_SENSOR);
             return;
         }
@@ -58,7 +58,7 @@ public class MasterModuleHandler extends ModuleBroadcastHandler {
     private void addModule(ModifyModulePayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, Permission.ADD_SENSOR, null)) {
+        if (!hasPermission(fromID, Permission.ADD_SENSOR)) {
             sendNoPermissionReply(original, Permission.ADD_SENSOR);
             return;
         }

@@ -29,9 +29,9 @@ public abstract class ModuleBroadcastHandler extends AbstractMasterHandler {
 
 
     private Message createUpdateMessage() {
-        SlaveController slaveController = requireComponent(SlaveController.KEY);
-        List<Slave> slaves = slaveController.getSlaves();
-        ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
+        final SlaveController slaveController = requireComponent(SlaveController.KEY);
+        final List<Slave> slaves = slaveController.getSlaves();
+        final ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
 
         for (Slave slave : slaves) {
             modulesAtSlave.putAll(slave, slaveController.getModulesOfSlave(slave.getSlaveID()));
@@ -41,16 +41,14 @@ public abstract class ModuleBroadcastHandler extends AbstractMasterHandler {
     }
 
     protected void updateAllClients() {
-        Iterable<DeviceID> connectedClients = requireComponent(Server.KEY).getActiveDevices();
+        final Iterable<DeviceID> connectedClients = requireComponent(Server.KEY).getActiveDevices();
         for (DeviceID connectedClient : connectedClients) {
             updateClient(connectedClient);
         }
     }
 
     protected void updateClient(DeviceID id) {
-        Message message = createUpdateMessage();
+        final Message message = createUpdateMessage();
         sendMessage(id, RoutingKeys.GLOBAL_MODULES_UPDATE, message);
     }
-
-
 }

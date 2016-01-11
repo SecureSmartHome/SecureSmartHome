@@ -97,7 +97,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             } else {
                 sendReply(message, new Message(new ErrorPayload("Cannot unlatch door. Door is blocked.")));
             }
-        } else if (hasPermission(message.getFromID(), UNLATCH_DOOR_ON_HOLIDAY, null)) {
+        } else if (hasPermission(message.getFromID(), UNLATCH_DOOR_ON_HOLIDAY)) {
             if (requireComponent(MasterHolidaySimulationPlannerHandler.KEY).isRunHolidaySimulation()) {
                 if (!getBlocked(atModule.getName())) {
                     final Message.AddressedMessage sentMessage =
