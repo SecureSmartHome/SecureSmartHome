@@ -10,6 +10,9 @@ import android.util.Log;
 import net.aksingh.owmjapis.CurrentWeather;
 import net.aksingh.owmjapis.OpenWeatherMap;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
@@ -39,6 +42,9 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     private static final long CHECK_INTERVAL_MILLIS = TimeUnit.MINUTES.toMillis(5);
     private static final Key<MasterWeatherCheckHandler> KEY = new Key<>(MasterWeatherCheckHandler.class);
     private static final String TAG = MasterWeatherCheckHandler.class.getSimpleName();
+    private static final long FAILURE_UPDATE_TIMER = 45;
+
+    private long timeStamp;
     private boolean windowOpen;
 
     private void sendWarningNotification() {
@@ -79,14 +85,20 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     @Override
     public void onReceive(Intent intent) {
         OpenWeatherMap owm = new OpenWeatherMap(CoreConstants.OPENWEATHERMAP_API_KEY);
+        SharedPreferences sharedPreferences = requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        String city = sharedPreferences.getString(String.valueOf(R.string.master_city_name), null);
         try {
-            SharedPreferences sharedPreferences = requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-            String city = sharedPreferences.getString(String.valueOf(R.string.master_city_name), null);
             if (city != null) {
                 CurrentWeather cw = owm.currentWeatherByCityName(city);
                 if (windowOpen && cw.getRainInstance().hasRain()) {
                     sendWarningNotification();
                 }
+            }
+        } catch (IOException e) {
+            if (timeStamp - System.currentTimeMillis() > TimeUnit.MINUTES.toMillis(FAILURE_UPDATE_TIMER)) {
+                requireComponent(NotificationBroadcaster.KEY).sendMessageToAllReceivers(
+                        NotificationPayload.NotificationType.WEATHER_SERVICE_FAILED, city);
+                timeStamp = System.currentTimeMillis();
             }
         } catch (Exception e) {
             Log.wtf(TAG, e);
