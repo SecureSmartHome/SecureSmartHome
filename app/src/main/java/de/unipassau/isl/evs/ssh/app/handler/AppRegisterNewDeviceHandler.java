@@ -15,8 +15,8 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USER_REGISTER;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER_REPLY;
 
 /**
  * The AppRegisterNewDeviceHandler handles the messaging to register a new UserDevice.
@@ -55,8 +55,8 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (APP_USER_REGISTER.matches(message)) {
-            handleUserRegisterResponse(APP_USER_REGISTER.getPayload(message));
+        if (MASTER_USER_REGISTER_REPLY.matches(message)) {
+            handleUserRegisterResponse(MASTER_USER_REGISTER_REPLY.getPayload(message));
         } else {
             invalidMessage(message);
         }
@@ -64,7 +64,7 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{APP_USER_REGISTER};
+        return new RoutingKey[]{MASTER_USER_REGISTER_REPLY};
     }
 
     private void handleUserRegisterResponse(GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload) {
