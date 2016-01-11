@@ -23,9 +23,14 @@ import java.lang.ref.WeakReference;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.handler.NoPermissionException;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
+import io.netty.util.concurrent.GenericFutureListener;
 
 /**
  * This fragment allows to display information contained in door messages
@@ -158,7 +163,17 @@ public class DoorFragment extends BoundFragment {
         }
 
         if (!handler.isOpen() && !handler.isBlocked()) {
-            handler.unlatchDoor();
+            handler.unlatchDoor().addListener(listenerOnUiThread(new FutureListener<MessagePayload>() {
+                @Override
+                public void operationComplete(Future<MessagePayload> future) throws Exception {
+                    if (future.isSuccess()) {
+                        updateButtons();
+                    } else {
+                        Log.e(TAG, "Could not open door", future.cause());
+                        Toast.makeText(getActivity(), "Could not open door", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }));
         }
     }
 
@@ -173,10 +188,34 @@ public class DoorFragment extends BoundFragment {
             return;
         }
 
+        GenericFutureListener<Future<MessagePayload>> listener = listenerOnUiThread(new FutureListener<MessagePayload>() {
+            @Override
+            public void operationComplete(Future<MessagePayload> future) throws Exception {
+                if (future.isSuccess()) {
+                    updateButtons();
+                } else {
+                    Throwable cause = future.cause();
+                    String text = getResources().getString(R.string.could_not_block_door);
+
+                    if (cause.getCause() instanceof NoPermissionException) {
+                        Permission missingPermission = ((NoPermissionException) cause.getCause()).getMissingPermission();
+                        text += " " + getResources().getString(R.string.access_denied);
+                        if (missingPermission != null) {
+                            text += " " + getResources().getString(R.string.missing_permission);
+                            text += " " + missingPermission.toLocalizedString(getActivity());
+                        }
+                    }
+
+                    Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Could not (un)block door.", cause);
+                }
+            }
+        });
+
         if (handler.isBlocked()) {
-            handler.unblockDoor();
+            handler.unblockDoor().addListener(listener);
         } else {
-            handler.blockDoor();
+            handler.blockDoor().addListener(listener);
         }
     }
 
