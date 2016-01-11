@@ -102,7 +102,7 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
     }
 
     /**
-     * @deprecated this can''t provide any error handling, so it now throws an UnsupportedOperationException
+     * @deprecated this can't provide any error handling, so it now throws an UnsupportedOperationException
      */
     @Deprecated
     protected void handleErrorMessage(Message.AddressedMessage message) {
@@ -136,7 +136,7 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
      * @param original   Message to reply to
      * @param permission Permission the author of the original Message doesn't have.
      */
-    protected void sendNoPermissionReply(Message.AddressedMessage original, de.unipassau.isl.evs.ssh.core.sec.Permission permission) {
+    protected void sendNoPermissionReply(Message.AddressedMessage original, Permission permission) {
         Message message = new Message(new ErrorPayload(new NoPermissionException(permission)));
         sendReply(original, message);
     }

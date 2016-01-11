@@ -1,6 +1,11 @@
 package de.unipassau.isl.evs.ssh.drivers.lib;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
+import io.netty.util.concurrent.Future;
 
 /**
  * Class to get the state of the door buzzer actuator
@@ -9,40 +14,45 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
  * @version 0.1
  */
 public class DoorBuzzer extends AbstractComponent {
-    int address;
+    private final int address;
 
     /**
      * Constructor of the class representing the door buzzer actuator
      *
-     * @param IoAddress where the door buzzer is connected to the odroid
+     * @param pin where the door buzzer is connected to the odroid
      */
-    public DoorBuzzer(int IoAddress) throws EvsIoException {
-        address = IoAddress;
-        EvsIo.registerPin(IoAddress, "out");
+    public DoorBuzzer(int pin) throws EvsIoException {
+        address = pin;
+        EvsIo.registerPin(pin, "out");
         EvsIo.setValue(address, false);
     }
 
     /**
-     * Looks the door
+     * Stops the door buzzer
      */
     public void lock() throws EvsIoException {
         EvsIo.setValue(address, false);
     }
 
     /**
-     * Looks the door
+     * Activates the door buzzer for the given time in milliseconds.
+     * This method doesn't throw an EvsIoException, but returns a failed Future instead.
      *
-     * @param ms time in milli seconds for which the door is unlocked
+     * @param ms time in milliseconds for which the door is unlocked
      */
-    public void unlock(int ms) throws EvsIoException {
-        EvsIo.setValue(address, true);
+    public Future<Void> unlock(int ms) {
+        ExecutionServiceComponent exec = requireComponent(ExecutionServiceComponent.KEY);
         try {
-            Thread.sleep(ms);
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
+            EvsIo.setValue(address, true);
+        } catch (EvsIoException e) {
+            return exec.newFailedFuture(e);
         }
-        EvsIo.setValue(address, false);
-
+        return exec.schedule(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                EvsIo.setValue(address, false);
+                return null;
+            }
+        }, ms, TimeUnit.MILLISECONDS);
     }
-
 }

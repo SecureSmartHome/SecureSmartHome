@@ -7,12 +7,14 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterSlavePayload;
 import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_REGISTER;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID;
 
 /**
  * Handles messages indicating that information of a device needs to be updated and writes these changes to the routing table.
@@ -26,11 +28,14 @@ public class MasterSlaveManagementHandler extends ModuleBroadcastHandler impleme
     private static final String TAG = MasterSlaveManagementHandler.class.getSimpleName();
 
     @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_SLAVE_REGISTER};
+    }
+
+    @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_SLAVE_REGISTER.matches(message)) {
             handleSlaveRegister(message);
-        } else if (message.getPayload() instanceof MessageErrorPayload) {
-            handleErrorMessage(message);
             //TODO Leon handle MASTER_SLAVE_DELETE
         } else {
             invalidMessage(message);
@@ -38,12 +43,8 @@ public class MasterSlaveManagementHandler extends ModuleBroadcastHandler impleme
     }
 
     private void handleSlaveRegister(Message.AddressedMessage message) {
-        if (hasPermission(
-                message.getFromID(),
-                de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID,
-                null
-        )) {
-            RegisterSlavePayload registerSlavePayload = MASTER_SLAVE_REGISTER.getPayload(message);
+        if (hasPermission(message.getFromID(), ADD_ODROID)) {
+            final RegisterSlavePayload registerSlavePayload = MASTER_SLAVE_REGISTER.getPayload(message);
             try {
                 registerSlave(new Slave(
                         registerSlavePayload.getName(),
@@ -53,16 +54,12 @@ public class MasterSlaveManagementHandler extends ModuleBroadcastHandler impleme
             } catch (AlreadyInUseException e) {
                 Log.i(TAG, "Failed adding a new Slave because the given name (" + registerSlavePayload.getName()
                         + ") is already in use.");
-                sendErrorMessage(message);
+                sendReply(message, new Message(new ErrorPayload("Failed adding a new Slave because the given name ("
+                        + registerSlavePayload.getName() + ") is already in use.")));
             }
         } else {
-            //TODO handle (Niko, 2015-12-17)
+            sendNoPermissionReply(message, ADD_ODROID);
         }
-    }
-
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_SLAVE_REGISTER};
     }
 
     public void registerSlave(Slave slave) throws AlreadyInUseException {

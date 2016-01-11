@@ -29,6 +29,9 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.*;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.*;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.DOOR_LOCKED;
 
 /**
  * Notification Handler for the App that receives Messages from the MasterNotificationHandler
@@ -39,16 +42,6 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATI
 public class AppNotificationHandler extends AbstractMessageHandler implements Component {
     public static final Key<AppNotificationHandler> KEY = new Key<>(AppNotificationHandler.class);
 
-    private static final int HUMIDITY_WARNING_ID = 1;
-    private static final int BRIGHTNESS_WARNING_ID = 2;
-    private static final int WEATHER_WARNING_ID = 3;
-    private static final int SYSTEM_HEALTH_WARNING_ID = 4;
-    private static final int DOOR_BELL_NOTIFICATION_ID = 5;
-    private static final int HOLIDAY_MODE_SWITCHED_ON_ID = 6;
-    private static final int HOLIDAY_MODE_SWITCHED_OFF_ID = 7;
-    private static final int DOOR_UNLATCHED_ID = 8;
-    private static final int DOOR_LOCKED = 9;
-    private static final int DOOR_UNLOCKED = 10;
     private static final String TAG = AppNotificationHandler.class.getSimpleName();
 
     private Resources resources;
@@ -62,39 +55,41 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     public void handle(Message.AddressedMessage message) {
         if (APP_NOTIFICATION_RECEIVE.matches(message)) {
             NotificationPayload notificationPayload = (APP_NOTIFICATION_RECEIVE.getPayload(message));
-            NotificationPayload.NotificationType type = notificationPayload.getType();
+            NotificationType type = notificationPayload.getType();
             Serializable[] args = notificationPayload.getArgs();
 
             switch (type) {
+                case UNKNOWN:
+                    break;
                 case WEATHER_WARNING:
-                    issueWeatherWarning(WEATHER_WARNING_ID);
+                    issueWeatherWarning(WEATHER_WARNING.ordinal());
                     break;
                 case BRIGHTNESS_WARNING:
-                    issueBrightnessWarning(BRIGHTNESS_WARNING_ID, args);
+                    issueBrightnessWarning(BRIGHTNESS_WARNING.ordinal(), args);
                     break;
                 case HUMIDITY_WARNING:
-                    issueClimateNotification(HUMIDITY_WARNING_ID, args);
+                    issueClimateNotification(HUMIDITY_WARNING.ordinal(), args);
                     break;
                 case SYSTEM_HEALTH_WARNING:
-                    issueSystemHealthWarning(SYSTEM_HEALTH_WARNING_ID, args);
+                    issueSystemHealthWarning(SYSTEM_HEALTH_WARNING.ordinal(), args);
                     break;
                 case HOLIDAY_MODE_SWITCHED_ON:
-                    issueHolidayModeSwitchedOn(HOLIDAY_MODE_SWITCHED_ON_ID);
+                    issueHolidayModeSwitchedOn(HOLIDAY_MODE_SWITCHED_ON.ordinal());
                     break;
                 case HOLIDAY_MODE_SWITCHED_OFF:
-                    issueHolidayModeSwitchedOff(HOLIDAY_MODE_SWITCHED_OFF_ID);
+                    issueHolidayModeSwitchedOff(HOLIDAY_MODE_SWITCHED_OFF.ordinal());
                     break;
                 case BELL_RANG:
-                    issueDoorBellNotification(DOOR_BELL_NOTIFICATION_ID);
+                    issueDoorBellNotification(BELL_RANG.ordinal());
                     break;
                 case DOOR_UNLATCHED:
-                    issueDoorUnlatched(DOOR_UNLATCHED_ID);
+                    issueDoorUnlatched(DOOR_UNLATCHED.ordinal());
                     break;
                 case DOOR_LOCKED:
-                    issueDoorLocked(DOOR_LOCKED);
+                    issueDoorLocked(DOOR_LOCKED.ordinal());
                     break;
                 case DOOR_UNLOCKED:
-                    issueDoorUnlocked(DOOR_UNLOCKED);
+                    issueDoorUnlocked(DOOR_UNLOCKED.ordinal());
                     break;
                 default:
                     //HANDLE
@@ -165,7 +160,6 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         displayNotification(title, text, StatusFragment.class, notificationID);
     }
 
-    //TODO add picture to notification?
     private void issueDoorBellNotification(int notificationID) {
         String title = resources.getString(R.string.door_bell_notification_title);
         String text = resources.getString(R.string.door_bell_notification_text);

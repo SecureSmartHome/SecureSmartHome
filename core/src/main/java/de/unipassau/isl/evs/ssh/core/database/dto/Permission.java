@@ -47,14 +47,14 @@ public class Permission implements Serializable {
 
         Permission that = (Permission) o;
 
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (permission != that.permission) return false;
         return !(moduleName != null ? !moduleName.equals(that.moduleName) : that.moduleName != null);
 
     }
 
     @Override
     public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
+        int result = permission != null ? permission.hashCode() : 0;
         result = 31 * result + (moduleName != null ? moduleName.hashCode() : 0);
         return result;
     }

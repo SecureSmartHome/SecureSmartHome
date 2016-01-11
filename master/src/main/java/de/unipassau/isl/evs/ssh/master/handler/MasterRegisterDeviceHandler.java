@@ -15,6 +15,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
@@ -27,6 +28,7 @@ import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER_REPLY;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER;
 
 /**
  * Handles messages indicating that a device wants to register itself at the system and also generates
@@ -43,19 +45,18 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     private final Map<String, UserDevice> userDeviceForToken = new HashMap<>();
 
     @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[] { MASTER_USER_REGISTER };
+    }
+
+
+    @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_USER_REGISTER.matches(message)) {
             handleInitRequest(message);
-        } else if (message.getPayload() instanceof MessageErrorPayload) {
-            handleErrorMessage(message);
         } else {
             invalidMessage(message);
         }
-    }
-
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[] { MASTER_USER_REGISTER };
     }
 
     /**
@@ -77,7 +78,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
         final String base64Token = Base64.encodeToString(token, Base64.NO_WRAP);
         final DeviceID deviceID = DeviceID.fromCertificate(certificate);
         if (userDeviceForToken.containsKey(base64Token)) {
-            UserDevice newDevice = userDeviceForToken.get(base64Token);
+            final UserDevice newDevice = userDeviceForToken.get(base64Token);
             newDevice.setUserDeviceID(deviceID);
             //Save certificate to KeyStore
             try {
@@ -104,7 +105,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
         }
         //Add permissions. First device gets all permissions. Others get the permissions of the group they belong to.
         if (requireComponent(UserManagementController.KEY).getUserDevices().size() == 1) {
-            List<Permission> permissions = requireComponent(PermissionController.KEY).getPermissions();
+            final List<Permission> permissions = requireComponent(PermissionController.KEY).getPermissions();
             for (Permission permission : permissions) {
                 try {
                     requireComponent(PermissionController.KEY).addUserPermission(
@@ -118,9 +119,9 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                 }
             }
         } else {
-            String templateName = requireComponent(UserManagementController.KEY)
+            final String templateName = requireComponent(UserManagementController.KEY)
                     .getGroup(newDevice.getInGroup()).getTemplateName();
-            List<Permission> permissions = requireComponent(PermissionController.KEY)
+            final List<Permission> permissions = requireComponent(PermissionController.KEY)
                     .getPermissionsOfTemplate(templateName);
             for (Permission permission : permissions) {
                 try {
@@ -138,19 +139,19 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     }
 
     private void handleInitRequest(Message.AddressedMessage message) {
-        if (hasPermission(
-                message.getFromID(),
-                de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER,
-                null
-        )) {
-            GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload = MASTER_USER_REGISTER.getPayload(message);
-            byte[] newToken = generateNewRegisterToken(generateNewRegisterTokenPayload.getUserDevice());
-            String base64Token = Base64.encodeToString(newToken, Base64.NO_WRAP);
+        if (hasPermission(message.getFromID(), ADD_USER)) {
+            final GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload =
+                    MASTER_USER_REGISTER.getPayload(message);
+            final byte[] newToken = generateNewRegisterToken(generateNewRegisterTokenPayload.getUserDevice());
+            final String base64Token = Base64.encodeToString(newToken, Base64.NO_WRAP);
             userDeviceForToken.put(base64Token, generateNewRegisterTokenPayload.getUserDevice());
-            Message reply = new Message(new GenerateNewRegisterTokenPayload(newToken,
-                    generateNewRegisterTokenPayload.getUserDevice()));
+            final Message reply = new Message(new GenerateNewRegisterTokenPayload(
+                    newToken,
+                    generateNewRegisterTokenPayload.getUserDevice()
+            ));
             sendMessage(message.getFromID(), MASTER_USER_REGISTER_REPLY, reply);
+        } else {
+            sendNoPermissionReply(message, ADD_USER);
         }
-        //TODO Leon: else error message (Leon, 07.01.16)
     }
 }
