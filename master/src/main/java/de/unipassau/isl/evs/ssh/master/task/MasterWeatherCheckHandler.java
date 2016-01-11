@@ -30,6 +30,7 @@ import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET_REPLY;
 
 /**
@@ -57,12 +58,16 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     public void handle(Message.AddressedMessage message) {
         if (MASTER_DOOR_STATUS_GET_REPLY.matches(message)) {
             windowOpen = MASTER_DOOR_STATUS_GET_REPLY.getPayload(message).isOpen();
+        } else if (MASTER_DOOR_STATUS_GET_ERROR.matches(message)) {
+            //TODO Leon: handle (Leon, 11.01.16)
+        } else {
+            invalidMessage(message);
         }
     }
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_DOOR_STATUS_GET};
+        return new RoutingKey[]{MASTER_DOOR_STATUS_GET_REPLY, MASTER_DOOR_STATUS_GET_ERROR};
     }
 
     @Override
