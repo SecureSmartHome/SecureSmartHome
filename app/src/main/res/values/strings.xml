@@ -57,7 +57,7 @@
     <string name="added_module_success">Added module successfully</string>
     <string name="added_module_fail">Adding new module failed</string>
     <string name="permission_dialog_title">Edit Permission</string>
-    <string name="is_in_group">"is in group %s."</string>
+    <string name="is_in_group">"is in group %s\."</string>
     <string name="device_id">"Device ID: %s"</string>
     <string name="error_cannot_add_user">Cannot add new user. Missing information.</string>
     <string name="error_cannot_add_group">Cannot add new group. Missing information.</string>
@@ -74,7 +74,7 @@
     <string name="holidaySimulationStatus">Status: </string>
     <string name="holidaySimulationOn">On</string>
     <string name="holidaySimulationOff">Off</string>
-    <string name="deleteuserdevice_dialog_title">Want to remove %s?</string>
+    <string name="deleteuserdevice_dialog_title">Want to remove %s\?</string>
     <string name="denied">Denied</string>
     <string name="granted">Granted</string>
     <string name="nav_add_odroid_string">Add Odroid</string>
@@ -135,8 +135,8 @@
     <string name="weather_warning_text">Please close all doors and windows. It will rain today.</string>
     <string name="system_health_warning_title_failed">Component failed!</string>
     <string name="system_health_warning_title_fixed">Component failure resolved!</string>
-    <string name="system_health_warning_text_failure" formatted="false">The module %s is not responding anymore.</string>
-    <string name="system_health_warning_text_fixed" formatted="false">The module %s is not responding again.</string>
+    <string name="system_health_warning_text_failure">The module %s is not responding anymore.</string>
+    <string name="system_health_warning_text_fixed">The module %s is not responding again.</string>
     <string name="door_bell_notification_title">The Doorbell rang!</string>
     <string name="door_bell_notification_text">You have visitors at your door.</string>
     <string name="holiday_mode_switched_on_title">Holiday Mode Active!</string>
@@ -150,15 +150,15 @@
     <string name="door_locked_text">Unauthorised users can not open it anymore.</string>
     <string name="door_unlocked_title">Door is now unlocked!</string>
     <string name="door_unlocked_text">Others users can now open it.</string>
-    <string name="delete_confirmation">Are you sure you want to delete \'%s\'</string>
+    <string name="delete_confirmation">Are you sure you want to delete %s\?</string>
     <string name="edit_userdevice">Edit a user device</string>
     <string name="missing_permission">Missing Permission.</string>
     <string name="permission_connected_to">This permission is connected to %s</string>
     <string name="permission_not_conneted_to">This permission is not connected to any module.</string>
     <string name="group_has_no_members">This group has no members.</string>
     <string name="group_one_member">%s is the only member.</string>
-    <string name="group_many_members">%s and %s and more are members.</string>
-    <string name="group_two_member">%s and %s are members.</string>
+    <string name="group_many_members">%1$s and %2$s and more are members.</string>
+    <string name="group_two_member">%1$s and %2$s are members.</string>
     <string name="group_created">Group created.</string>
     <string name="missingTemplates">Missing templates</string>
     <string name="group_edited">Group %s edited.</string>
