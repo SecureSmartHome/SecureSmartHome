@@ -39,6 +39,7 @@ public class NotificationPayload implements MessagePayload {
      */
     public enum NotificationType {
         UNKNOWN(null),
+        WEATHER_SERVICE_FAILED(Permission.WEATHER_WARNING),
         WEATHER_WARNING(Permission.WEATHER_WARNING),
         BRIGHTNESS_WARNING(Permission.BRIGHTNESS_WARNING),
         HUMIDITY_WARNING(Permission.HUMIDITY_WARNING),
