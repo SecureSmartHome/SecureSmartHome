@@ -16,7 +16,6 @@ import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +28,8 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Christoph Fraedrich
  */
-public class SlaveSystemHealthHandler extends AbstractComponent {
-    public static final Key<SlaveSystemHealthHandler> KEY = new Key<>(SlaveSystemHealthHandler.class);
+public class SlaveSystemHealthChecker extends AbstractComponent {
+    public static final Key<SlaveSystemHealthChecker> KEY = new Key<>(SlaveSystemHealthChecker.class);
     private static final long UPDATE_TIMER = 45;
     private final Map<Module, Long> failedModules = new HashMap<>();
     private ScheduledFuture future;
