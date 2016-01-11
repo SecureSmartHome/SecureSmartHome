@@ -324,9 +324,9 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         int position = sensorTypeSpinner.getSelectedItemPosition();
         ModuleType moduleType = ModuleType.values()[position];
         Module module = new Module(name, atSlave, moduleType, accessPoint);
-        handler.addNewModule(module).addListener(new GenericFutureListener<Future<? super MessagePayload>>() {
+        handler.addNewModule(module).addListener(new GenericFutureListener<Future<? super Void>>() {
             @Override
-            public void operationComplete(Future<? super MessagePayload> future) throws Exception {
+            public void operationComplete(Future<? super Void> future) throws Exception {
                 onRegistrationFinished(future.isSuccess());
             }
         });

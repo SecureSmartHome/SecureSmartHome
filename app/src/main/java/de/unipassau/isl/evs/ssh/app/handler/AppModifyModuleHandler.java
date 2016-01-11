@@ -29,6 +29,33 @@ public class AppModifyModuleHandler extends AbstractAppHandler implements Compon
 
     private List<NewModuleListener> listeners = new LinkedList<>();
 
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{
+                MASTER_MODULE_ADD_REPLY,
+                MASTER_MODULE_ADD_ERROR,
+                MASTER_MODULE_REMOVE_REPLY,
+                MASTER_MODULE_REMOVE_ERROR
+        };
+    }
+
+    @Override
+    public void handle(Message.AddressedMessage message) {
+        if (!tryHandleResponse(message)) {
+            if (MASTER_MODULE_ADD_REPLY.matches(message)) {
+                fireRegistrationFinished(true);
+            } else if (MASTER_MODULE_ADD_ERROR.matches(message)) {
+                fireRegistrationFinished(false);
+            } else if (MASTER_MODULE_REMOVE_REPLY.matches(message)) {
+                fireUnregistrationFinished(true);
+            } else if (MASTER_MODULE_REMOVE_ERROR.matches(message)) {
+                fireUnregistrationFinished(false);
+            } else {
+                invalidMessage(message);
+            }
+        }
+    }
+
     /**
      * Adds a new NewModuleListener to this handler.
      *
@@ -59,45 +86,18 @@ public class AppModifyModuleHandler extends AbstractAppHandler implements Compon
         }
     }
 
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{
-                MASTER_MODULE_ADD_REPLY,
-                MASTER_MODULE_ADD_ERROR,
-                MASTER_MODULE_REMOVE_REPLY,
-                MASTER_MODULE_REMOVE_ERROR
-        };
-    }
-
-    @Override
-    public void handle(Message.AddressedMessage message) {
-        if (!tryHandleResponse(message)) {
-            if (MASTER_MODULE_ADD_REPLY.matches(message)) {
-                fireRegistrationFinished(true);
-            } else if (MASTER_MODULE_ADD_ERROR.matches(message)) {
-                fireRegistrationFinished(false);
-            } else if (MASTER_MODULE_REMOVE_REPLY.matches(message)) {
-                fireUnregistrationFinished(true);
-            } else if (MASTER_MODULE_REMOVE_ERROR.matches(message)) {
-                fireUnregistrationFinished(false);
-            } else {
-                invalidMessage(message);
-            }
-        }
-    }
-
     /**
      * Registers the given module. Invoker of this method can be notified with a NewModuleListener
      * when the registration is finished.
      *
      * @param module the module to register
      */
-    public Future<MessagePayload> addNewModule(Module module) {
+    public Future<Void> addNewModule(Module module) {
         ModifyModulePayload payload = new ModifyModulePayload(module);
         return newResponseFuture(sendMessageToMaster(MASTER_MODULE_ADD, new Message(payload)));
     }
 
-    public Future<MessagePayload> removeModule(Module module) {
+    public Future<Void> removeModule(Module module) {
         ModifyModulePayload payload = new ModifyModulePayload(module);
         return newResponseFuture(sendMessageToMaster(MASTER_MODULE_REMOVE, new Message(payload)));
     }

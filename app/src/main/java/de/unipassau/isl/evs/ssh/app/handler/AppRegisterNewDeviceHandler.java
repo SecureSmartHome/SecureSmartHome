@@ -30,6 +30,25 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
 
     private List<RegisterNewDeviceListener> listeners = new LinkedList<>();
 
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{
+                MASTER_USER_REGISTER_REPLY,
+                MASTER_USER_REGISTER_ERROR
+        };
+    }
+
+    @Override
+    public void handle(Message.AddressedMessage message) {
+        if (MASTER_USER_REGISTER_REPLY.matches(message)) {
+            handleUserRegisterResponse(MASTER_USER_REGISTER_REPLY.getPayload(message));
+        } else if (MASTER_USER_REGISTER_ERROR.matches(message)) {
+            fireTokenError();
+        } else {
+            invalidMessage(message);
+        }
+    }
+
     /**
      * Adds the given listener to this handler.
      *
@@ -54,20 +73,10 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
         }
     }
 
-    @Override
-    public void handle(Message.AddressedMessage message) {
-        if (MASTER_USER_REGISTER_REPLY.matches(message)) {
-            handleUserRegisterResponse(MASTER_USER_REGISTER_REPLY.getPayload(message));
-        } else if (MASTER_USER_REGISTER_ERROR.matches(message)) {
-            //TODO Leon: handle (Leon, 11.01.16)
-        } else {
-            invalidMessage(message);
+    private void fireTokenError() {
+        for (RegisterNewDeviceListener listener : listeners) {
+            listener.tokenError();
         }
-    }
-
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_USER_REGISTER_REPLY, MASTER_USER_REGISTER_ERROR};
     }
 
     private void handleUserRegisterResponse(GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload) {
@@ -90,7 +99,9 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
     }
 
     /**
-     * Sends a request message for a token to the master.
+     * Sends a request message for a token to the master. {@code requestToken()} does not return a Future like other
+     * functions that are sending messages. Use the {@code RegisterNewDeviceListener} to get notified when a reply
+     * message is handled by this handler.
      *
      * @param user the user who is registered
      */
@@ -110,5 +121,7 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
          * @param deviceConnectInformation the QR-Code information to display on the admin's screen
          */
         void tokenResponse(DeviceConnectInformation deviceConnectInformation);
+
+        void tokenError();
     }
 }

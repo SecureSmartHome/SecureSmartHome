@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -23,6 +25,8 @@ import de.unipassau.isl.evs.ssh.app.handler.AppSlaveManagementHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 /**
  * This activity allows to visualize connected Modules and slaves. If this functionality is used a
@@ -75,19 +79,22 @@ public class StatusFragment extends BoundFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Module module = (Module) moduleListView.getItemAtPosition(position);
-                String message = String.format(getResources().getString(R.string.delete_confirmation), module.getName());
+                final String message = String.format(getResources().getString(R.string.delete_confirmation), module.getName());
+
+                final DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
+                        if (handler != null) {
+                            final Future<Void> future = handler.removeModule(module);
+                            future.addListener(newFutureListener(R.string.module_removed, R.string.cannot_remove_module));
+                        }
+                    }
+                };
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage(message)
-                        .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (getContainer() != null) {
-                                    getContainer().require(AppModifyModuleHandler.KEY).removeModule(module);
-                                }
-
-                            }
-                        })
+                        .setPositiveButton(R.string.delete, onClickListener)
                         .setNegativeButton(R.string.cancel, null).create().show();
             }
         });
@@ -96,18 +103,22 @@ public class StatusFragment extends BoundFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Slave slave = (Slave) slaveListView.getItemAtPosition(position);
-                String message = String.format(getResources().getString(R.string.delete_confirmation), slave.getName());
+                final String message = String.format(getResources().getString(R.string.delete_confirmation), slave.getName());
+
+                final DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AppSlaveManagementHandler handler = getComponent(AppSlaveManagementHandler.KEY);
+                        if (handler != null) {
+                            final Future<Void> future = handler.deleteSlave(slave.getSlaveID());
+                            future.addListener(newFutureListener(R.string.slave_removed, R.string.cannot_remove_slave));
+                        }
+                    }
+                };
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage(message)
-                        .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (getContainer() != null) {
-                                    getContainer().require(AppSlaveManagementHandler.KEY).deleteSlave(slave.getSlaveID());
-                                }
-                            }
-                        })
+                        .setPositiveButton(R.string.delete, onClickListener)
                         .setNegativeButton(R.string.cancel, null).create().show();
 
             }
@@ -124,6 +135,20 @@ public class StatusFragment extends BoundFragment {
         if (handler != null) {
             handler.removeAppModuleListener(listener);
         }
+    }
+
+    private GenericFutureListener<Future<? super Void>> newFutureListener(@StringRes final int textOnSuccess, @StringRes final int textOnFail){
+        return listenerOnUiThread(new GenericFutureListener<Future<? super Void>>() {
+            @Override
+            public void operationComplete(Future<? super Void> future) throws Exception {
+                if (future.isSuccess()) {
+                    Toast.makeText(getActivity(), textOnSuccess, Toast.LENGTH_SHORT).show();
+                    update();
+                } else {
+                    Toast.makeText(getActivity(), textOnFail, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void update() {

@@ -104,7 +104,7 @@
     <string name="warn_no_slave_connected">No Slaves Connected</string>
     <string name="addmodule_sensor_type">Sensor Type:</string>
     <string name="querying_groups">Querying groups</string>
-    <string name="cannot_add_slave">Cannot add the new Slave.</string>
+    <string name="cannot_add_slave">Could not add the new Slave.</string>
     <string name="warn_client_rejected">Connection refused. Maybe the system has been reset?</string>
     <string name="warn_no_connection_to_master">No Connection to Secure Smart Home Server.</string>
     <string name="malformed_qr_code">Malformed QR-Code</string>
@@ -156,4 +156,10 @@
     <string name="could_not_block_door">Could not (un)block door.</string>
     <string name="access_denied">Access denied!</string>
     <string name="missing_permission">Missing Permission:</string>
+    <string name="slave_registration_success">Successfully registered slave</string>
+    <string name="cannot_remove_slave">Cannot remove slave</string>
+    <string name="slave_removed">Slave Removed</string>
+    <string name="module_removed">Module removed</string>
+    <string name="cannot_remove_module">err_remove_module</string>
+    <string name="add_new_user_fail">An error occured while adding the new user!</string>
 </resources>

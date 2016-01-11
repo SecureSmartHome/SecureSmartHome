@@ -70,30 +70,6 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
 
     private final List<UserInfoListener> listeners = new LinkedList<>();
 
-    /**
-     * Adds the given listener to this handler.
-     *
-     * @param listener the listener to add
-     */
-    public void addUserInfoListener(AppUserConfigurationHandler.UserInfoListener listener) {
-        listeners.add(listener);
-    }
-
-    /**
-     * Removes the given listener from this handler.
-     *
-     * @param listener the listener to remove
-     */
-    public void removeUserInfoListener(AppUserConfigurationHandler.UserInfoListener listener) {
-        listeners.remove(listener);
-    }
-
-    private void fireUserInfoUpdated() {
-        for (UserInfoListener listener : listeners) {
-            listener.userInfoUpdated();
-        }
-    }
-
     @Override
     public RoutingKey[] getRoutingKeys() {
         return new RoutingKey[]{
@@ -151,6 +127,30 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
             tryHandleResponse(message);
         }
         // invalidMessage is not called because handled by tryHandleResponse()
+    }
+
+    /**
+     * Adds the given listener to this handler.
+     *
+     * @param listener the listener to add
+     */
+    public void addUserInfoListener(AppUserConfigurationHandler.UserInfoListener listener) {
+        listeners.add(listener);
+    }
+
+    /**
+     * Removes the given listener from this handler.
+     *
+     * @param listener the listener to remove
+     */
+    public void removeUserInfoListener(AppUserConfigurationHandler.UserInfoListener listener) {
+        listeners.remove(listener);
+    }
+
+    private void fireUserInfoUpdated() {
+        for (UserInfoListener listener : listeners) {
+            listener.userInfoUpdated();
+        }
     }
 
     /**

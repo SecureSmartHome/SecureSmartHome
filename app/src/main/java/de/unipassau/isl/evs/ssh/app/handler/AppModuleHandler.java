@@ -77,6 +77,26 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
     private final ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
     private List<AppModuleListener> listeners = new LinkedList<>();
 
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{
+                GLOBAL_MODULES_UPDATE
+        };
+    }
+
+    @Override
+    public void handle(Message.AddressedMessage message) {
+        if (GLOBAL_MODULES_UPDATE.matches(message)) {
+            ModulesPayload payload = GLOBAL_MODULES_UPDATE.getPayload(message);
+            Set<Module> modules = payload.getModules();
+            List<Slave> slaves = payload.getSlaves();
+            ListMultimap<Slave, Module> modulesAtSlave = payload.getModulesAtSlaves();
+            updateList(modules, slaves, modulesAtSlave);
+        } else {
+            invalidMessage(message);
+        }
+    }
+
     public void addAppModuleListener(AppModuleListener listener) {
         listeners.add(listener);
     }
@@ -159,26 +179,6 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
     @NonNull
     public List<Module> getModulesAtSlave(Slave slave) {
         return modulesAtSlave.get(slave);
-    }
-
-    @Override
-    public void handle(Message.AddressedMessage message) {
-        if (GLOBAL_MODULES_UPDATE.matches(message)) {
-            ModulesPayload payload = GLOBAL_MODULES_UPDATE.getPayload(message);
-            Set<Module> modules = payload.getModules();
-            List<Slave> slaves = payload.getSlaves();
-            ListMultimap<Slave, Module> modulesAtSlave = payload.getModulesAtSlaves();
-            updateList(modules, slaves, modulesAtSlave);
-        } else {
-            invalidMessage(message);
-        }
-    }
-
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{
-                GLOBAL_MODULES_UPDATE
-        };
     }
 
     public interface AppModuleListener {

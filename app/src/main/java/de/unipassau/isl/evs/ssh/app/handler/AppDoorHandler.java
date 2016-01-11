@@ -45,6 +45,51 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
     private List<DoorListener> listeners = new LinkedList<>();
     private byte[] picture = null;
 
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{
+                APP_DOOR_RING,
+                APP_DOOR_STATUS_UPDATE,
+                MASTER_DOOR_BLOCK_REPLY,
+                MASTER_DOOR_BLOCK_ERROR,
+                MASTER_DOOR_UNLATCH_REPLY,
+                MASTER_DOOR_UNLATCH_ERROR,
+                MASTER_CAMERA_GET_REPLY,
+                MASTER_CAMERA_GET_ERROR,
+        };
+    }
+
+    @Override
+    public void handle(Message.AddressedMessage message) {
+
+        if (MASTER_DOOR_BLOCK_REPLY.matches(message)) {
+            isDoorBlocked = MASTER_DOOR_BLOCK_REPLY.getPayload(message).isBlock();
+            tryHandleResponse(message);
+        } else if (MASTER_DOOR_BLOCK_ERROR.matches(message)) {
+            tryHandleResponse(message);
+        } else if (MASTER_DOOR_UNLATCH_REPLY.matches(message)) {
+            tryHandleResponse(message);
+        } else if (MASTER_DOOR_UNLATCH_ERROR.matches(message)) {
+            tryHandleResponse(message);
+        } else if (MASTER_CAMERA_GET_REPLY.matches(message)) {
+            picture = MASTER_CAMERA_GET_REPLY.getPayload(message).getPicture();
+            tryHandleResponse(message);
+        } else if (MASTER_CAMERA_GET_ERROR.matches(message)) {
+            tryHandleResponse(message);
+        } else if (APP_DOOR_STATUS_UPDATE.matches(message)) {
+            DoorStatusPayload payload = APP_DOOR_STATUS_UPDATE.getPayload(message);
+            isDoorOpen = payload.isOpen();
+            isDoorBlocked = payload.isBlocked();
+            fireStatusUpdated();
+        } else if (APP_DOOR_RING.matches(message)) {
+            DoorBellPayload doorBellPayload = APP_DOOR_RING.getPayload(message);
+            picture = doorBellPayload.getCameraPayload().getPicture();
+            fireImageUpdated(picture);
+        } else {
+            invalidMessage(message);
+        }
+    }
+
     /**
      * Adds a DoorListener to this handler.
      *
@@ -77,53 +122,6 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
     private void fireStatusUpdated() {
         for (DoorListener listener : listeners) {
             listener.onDoorStatusChanged();
-        }
-    }
-
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{
-                APP_DOOR_RING,
-                APP_DOOR_STATUS_UPDATE,
-                MASTER_DOOR_BLOCK_REPLY,
-                MASTER_DOOR_BLOCK_ERROR,
-                MASTER_DOOR_UNLATCH_REPLY,
-                MASTER_DOOR_UNLATCH_ERROR,
-                MASTER_CAMERA_GET_REPLY,
-                MASTER_CAMERA_GET_ERROR,
-        };
-    }
-
-    @Override
-    public void handle(Message.AddressedMessage message) {
-
-        if (MASTER_DOOR_BLOCK_REPLY.matches(message)) {
-            isDoorBlocked = MASTER_DOOR_BLOCK_REPLY.getPayload(message).isBlock();
-            handleResponse(message);
-        } else if (MASTER_DOOR_BLOCK_ERROR.matches(message)) {
-            handleResponse(message);
-        } else if (MASTER_DOOR_UNLATCH_REPLY.matches(message)) {
-            handleResponse(message);
-        } else if (MASTER_DOOR_UNLATCH_ERROR.matches(message)) {
-            handleResponse(message);
-        } else if (MASTER_CAMERA_GET_REPLY.matches(message)) {
-            picture = MASTER_CAMERA_GET_REPLY.getPayload(message).getPicture();
-            handleResponse(message);
-        } else if (APP_DOOR_STATUS_UPDATE.matches(message)) {
-            DoorStatusPayload payload = APP_DOOR_STATUS_UPDATE.getPayload(message);
-            isDoorOpen = payload.isOpen();
-            isDoorBlocked = payload.isBlocked();
-            fireStatusUpdated();
-        } else if (APP_DOOR_RING.matches(message)) {
-            DoorBellPayload doorBellPayload = APP_DOOR_RING.getPayload(message);
-            picture = doorBellPayload.getCameraPayload().getPicture();
-            fireImageUpdated(picture);
-        } else if (MASTER_CAMERA_GET_ERROR.matches(message)) {
-            //TODO Leon: handle (Leon, 11.01.16)
-        } else if (MASTER_DOOR_BLOCK_ERROR.matches(message)) {
-            //TODO Leon: handle (Leon, 11.01.16)
-        } else {
-            invalidMessage(message);
         }
     }
 

@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
+import android.widget.Toast;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -54,6 +55,16 @@ public class AddNewUserDeviceFragment extends BoundFragment {
             Bundle bundle = new Bundle();
             bundle.putSerializable(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceConnectInformation);
             ((MainActivity) getActivity()).showFragmentByClass(QRCodeFragment.class, bundle);
+        }
+
+        @Override
+        public void tokenError() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getActivity(), R.string.add_new_user_fail, Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     };
 
@@ -135,12 +146,14 @@ public class AddNewUserDeviceFragment extends BoundFragment {
     public void onContainerDisconnected() {
         groups = null;
         AppUserConfigurationHandler configHandler = getComponent(AppUserConfigurationHandler.KEY);
-        assert configHandler != null;
-        configHandler.removeUserInfoListener(userConfigListener);
+        if (configHandler != null) {
+            configHandler.removeUserInfoListener(userConfigListener);
+        }
 
         AppRegisterNewDeviceHandler registerHandler = getComponent(AppRegisterNewDeviceHandler.KEY);
-        assert registerHandler != null;
-        registerHandler.removeRegisterDeviceListener(registerNewDeviceListener);
+        if (registerHandler != null) {
+            registerHandler.removeRegisterDeviceListener(registerNewDeviceListener);
+        }
         super.onContainerDisconnected();
     }
 }
