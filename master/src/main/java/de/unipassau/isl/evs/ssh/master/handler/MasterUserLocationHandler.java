@@ -1,7 +1,5 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
-import android.support.annotation.NonNull;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +35,7 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[] {
+        return new RoutingKey[]{
                 MASTER_DEVICE_CONNECTED
         };
     }
@@ -45,13 +43,13 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
     @Override
     public void handle(Message.AddressedMessage message) {
         if (RoutingKeys.MASTER_DEVICE_CONNECTED.matches(message)) {
-            DeviceConnectedPayload payload = RoutingKeys.MASTER_DEVICE_CONNECTED.getPayload(message);
+            final DeviceConnectedPayload payload = RoutingKeys.MASTER_DEVICE_CONNECTED.getPayload(message);
 
             if (!positionMap.containsKey(payload.deviceID)) {
                 positionMap.put(payload.deviceID, new LinkedList<Message.AddressedMessage>());
             }
 
-            List<Message.AddressedMessage> list = positionMap.get(payload.deviceID);
+            final List<Message.AddressedMessage> list = positionMap.get(payload.deviceID);
             list.add(0, message);
 
             if (list.size() > MAX_POSITION_COUNT) {
@@ -61,25 +59,24 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
     }
 
     /**
-     * Checks if the given Device switched from extern to local within the last 'intervall' minutes
+     * Checks if the given Device switched from extern to local within the last 'interval' minutes
      *
-     * @param deviceID of the device to be checked
-     * @param intervall in which the change has happened in min
-     *
-     * @return true if change to local happened in the last 'intervall' min.
+     * @param deviceID  of the device to be checked
+     * @param interval in which the change has happened in min
+     * @return true if change to local happened in the last 'interval' min.
      */
-    public boolean switchedPositionToLocal(DeviceID deviceID, int intervall) {
+    public boolean switchedPositionToLocal(DeviceID deviceID, int interval) {
         if (positionMap.get(deviceID) == null || positionMap.get(deviceID).size() >= 2) {
             return false;
         }
 
-        Message.AddressedMessage lastMessage = positionMap.get(deviceID).get(0);
-        Message.AddressedMessage preLastMessage = positionMap.get(deviceID).get(1);
+        final Message.AddressedMessage lastMessage = positionMap.get(deviceID).get(0);
+        final Message.AddressedMessage preLastMessage = positionMap.get(deviceID).get(1);
 
         //Is last location local and was last outside of home network and was that change in the last 2 min?
         if (MASTER_DEVICE_CONNECTED.getPayload(lastMessage).isLocal
                 && !MASTER_DEVICE_CONNECTED.getPayload(preLastMessage).isLocal
-                && lastMessage.getHeaders().get(Message.HEADER_TIMESTAMP) - System.currentTimeMillis() > TimeUnit.MINUTES.toMillis(intervall)) {
+                && lastMessage.getHeaders().get(Message.HEADER_TIMESTAMP) - System.currentTimeMillis() > TimeUnit.MINUTES.toMillis(interval)) {
             return true;
         }
 
@@ -87,7 +84,6 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
     }
 
     /**
-     *
      * Returns if a device is currently in local network
      *
      * @param deviceID of the device that is to be checked

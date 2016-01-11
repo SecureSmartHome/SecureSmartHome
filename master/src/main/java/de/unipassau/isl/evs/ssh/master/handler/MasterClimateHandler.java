@@ -11,7 +11,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.master.MasterConstants;
 import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
@@ -19,6 +18,8 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PUSH_WE
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_REQUEST_WEATHER_INFO;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_REQUEST_WEATHER_INFO_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.BRIGHTNESS_WARNING;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.HUMIDITY_WARNING;
 
 /**
  * Handles climate messages and generates messages for each target and passes them to the OutgoingRouter.
@@ -32,29 +33,27 @@ public class MasterClimateHandler extends AbstractMasterHandler implements Compo
     private final Map<Module, Boolean> latestLightStatus = new HashMap<>();
 
     @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_PUSH_WEATHER_INFO, SLAVE_LIGHT_GET_REPLY, MASTER_REQUEST_WEATHER_INFO};
+    }
+
+    @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_PUSH_WEATHER_INFO.matches(message)) {
             ClimatePayload payload = MASTER_PUSH_WEATHER_INFO.getPayload(message);
-            latestWeatherData.put(payload.getModule(), payload) ;
+            latestWeatherData.put(payload.getModule(), payload);
             evaluateWeatherData(payload);
         } else if (SLAVE_LIGHT_GET_REPLY.matches(message)) {
             //Reply to get request, this means this message actually contains an updated lamp value
             LightPayload payload = SLAVE_LIGHT_GET_REPLY.getPayload(message);
-
             latestLightStatus.put(payload.getModule(), payload.getOn());
         } else if (MASTER_REQUEST_WEATHER_INFO.matches(message)) {
-            for(ClimatePayload payload : latestWeatherData.values()) {
-                sendMessage(message.getFromID(), MASTER_REQUEST_WEATHER_INFO_REPLY,
-                        new Message(payload));
+            for (ClimatePayload payload : latestWeatherData.values()) {
+                sendMessage(message.getFromID(), MASTER_REQUEST_WEATHER_INFO_REPLY, new Message(payload));
             }
         } else {
             invalidMessage(message);
         }
-    }
-
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_PUSH_WEATHER_INFO, SLAVE_LIGHT_GET_REPLY, MASTER_REQUEST_WEATHER_INFO};
     }
 
     public Map<Module, ClimatePayload> getLatestWeatherData() {
@@ -66,14 +65,14 @@ public class MasterClimateHandler extends AbstractMasterHandler implements Compo
         //The following values will not be checked as they are not of interest: Altitude, Pressure, Temp1, Temp2
         if (payload.getHumidity() > MasterConstants.ClimateThreshold.HUMIDITY) {
             Serializable serializableHumidity = payload.getHumidity();
-            notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.HUMIDITY_WARNING, serializableHumidity);
+            notificationBroadcaster.sendMessageToAllReceivers(HUMIDITY_WARNING, serializableHumidity);
         }
         //TODO Schwellwert puffer hinzufügen. Wenn lampe eingeschaltet und über Schwellwert keine warnung.
         if (payload.getVisible() > MasterConstants.ClimateThreshold.VISIBLE_LIGHT) {
             for (Module module : latestLightStatus.keySet()) {
                 if (latestLightStatus.get(module)) {
                     Serializable serializableLight = payload.getVisible();
-                    notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.BRIGHTNESS_WARNING, serializableLight);
+                    notificationBroadcaster.sendMessageToAllReceivers(BRIGHTNESS_WARNING, serializableLight);
                 }
             }
         }

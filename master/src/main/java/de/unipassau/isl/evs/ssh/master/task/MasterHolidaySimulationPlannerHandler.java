@@ -16,6 +16,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
@@ -31,6 +32,8 @@ import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.HOLIDAY_MODE_SWITCHED_OFF;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.TOGGLE_HOLIDAY_SIMULATION;
 
 /**
  * This handler calculates what actions need to take place in order to execute the holiday simulation.
@@ -46,46 +49,31 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
     private boolean runHolidaySimulation = false;
 
     @Override
-    public void handle(Message.AddressedMessage message) {
-        NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_HOLIDAY_GET, MASTER_HOLIDAY_SET};
+    }
 
+    @Override
+    public void handle(Message.AddressedMessage message) {
         if (MASTER_HOLIDAY_GET.matches(message)) {
             replyStatus(message);
         } else if (MASTER_HOLIDAY_SET.matches(message)) {
-            HolidaySimulationPayload payload = MASTER_HOLIDAY_SET.getPayload(message);
-
-            //TODO Refactor if we eliminate one permission
-            if (payload.switchOn() && hasPermission(
-                    message.getFromID(),
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.START_HOLIDAY_SIMULATION,
-                    null
-            )) {
-
-                runHolidaySimulation = payload.switchOn();
-                replyStatus(message);
-
-            } else if (!payload.switchOn() && hasPermission(
-                    message.getFromID(),
-                    de.unipassau.isl.evs.ssh.core.sec.Permission.STOP_HOLIDAY_SIMULATION,
-                    null
-            )) {
-
-                runHolidaySimulation = payload.switchOn();
-                replyStatus(message);
-                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.HOLIDAY_MODE_SWITCHED_OFF, payload.switchOn());
-
-            } else {
-                //Handle
-                sendErrorMessage(message);
-            }
+            MASTER_HOLIDAY_SET.getPayload(message);
+            handleHolidaySet(message, MASTER_HOLIDAY_SET.getPayload(message));
         } else {
             invalidMessage(message);
         }
     }
 
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_HOLIDAY_GET, MASTER_HOLIDAY_SET};
+    private void handleHolidaySet(Message.AddressedMessage message, HolidaySimulationPayload holidaySimulationPayload) {
+        if (hasPermission(message.getFromID(), TOGGLE_HOLIDAY_SIMULATION)) {
+            runHolidaySimulation = holidaySimulationPayload.switchOn();
+            replyStatus(message);
+            final NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
+            notificationBroadcaster.sendMessageToAllReceivers(HOLIDAY_MODE_SWITCHED_OFF);
+        } else {
+            sendNoPermissionReply(message, TOGGLE_HOLIDAY_SIMULATION);
+        }
     }
 
     private void replyStatus(Message.AddressedMessage message) {

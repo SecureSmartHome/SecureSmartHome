@@ -106,7 +106,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     private void addGroup(GroupPayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, ADD_GROUP, null)) {
+        if (!hasPermission(fromID, ADD_GROUP)) {
             sendNoPermissionReply(original, ADD_GROUP);
             return;
         }
@@ -122,7 +122,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     private void deleteGroup(GroupPayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, DELETE_GROUP, null)) {
+        if (!hasPermission(fromID, DELETE_GROUP)) {
             sendNoPermissionReply(original, DELETE_GROUP);
             return;
         }
@@ -138,7 +138,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     private void setGroupName(SetGroupNamePayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, CHANGE_GROUP_NAME, null)) {
+        if (!hasPermission(fromID, CHANGE_GROUP_NAME)) {
             sendNoPermissionReply(original, CHANGE_GROUP_NAME);
             return;
         }
@@ -154,7 +154,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     private void setGroupTemplate(SetGroupTemplatePayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, CHANGE_GROUP_TEMPLATE, null)) {
+        if (!hasPermission(fromID, CHANGE_GROUP_TEMPLATE)) {
             sendNoPermissionReply(original, CHANGE_GROUP_TEMPLATE);
             return;
         }
@@ -170,7 +170,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     private void setUserName(SetUserNamePayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, CHANGE_USER_NAME, null)) {
+        if (!hasPermission(fromID, CHANGE_USER_NAME)) {
             sendNoPermissionReply(original, CHANGE_USER_NAME);
             return;
         }
@@ -186,7 +186,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     private void deleteUser(DeleteDevicePayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, DELETE_USER, null)) {
+        if (!hasPermission(fromID, DELETE_USER)) {
             sendNoPermissionReply(original, DELETE_USER);
             return;
         }
@@ -198,7 +198,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     private void setUserGroup(SetUserGroupPayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, CHANGE_USER_GROUP, null)) {
+        if (!hasPermission(fromID, CHANGE_USER_GROUP)) {
             sendNoPermissionReply(original, CHANGE_USER_GROUP);
             return;
         }
@@ -215,7 +215,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         PermissionController controller = requireComponent(PermissionController.KEY);
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, GRANT_USER_PERMISSION, null)) {
+        if (!hasPermission(fromID, GRANT_USER_PERMISSION)) {
             sendNoPermissionReply(original, GRANT_USER_PERMISSION);
             return;
         }

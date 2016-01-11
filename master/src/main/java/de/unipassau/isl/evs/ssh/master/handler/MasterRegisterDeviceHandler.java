@@ -15,9 +15,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
@@ -46,7 +44,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[] { MASTER_USER_REGISTER };
+        return new RoutingKey[]{MASTER_USER_REGISTER};
     }
 
 
@@ -61,6 +59,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
 
     /**
      * Generates a new token which devices can use to register at the system.
+     *
      * @param device information which will be associated with the device using this token to register.
      * @return the generated token.
      */
@@ -72,6 +71,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
 
     /**
      * Uses the information saved for the given token to register the new device.
+     *
      * @return {@code true} if the registration was successful
      */
     public boolean registerDevice(X509Certificate certificate, byte[] token) {
