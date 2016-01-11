@@ -40,45 +40,48 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_DOOR_BELL_RING.matches(message)) {
-            handleDoorBellRing(message);
+            handleDoorBellRing(message, MASTER_DOOR_BELL_RING.getPayload(message));
         } else if (MASTER_CAMERA_GET_REPLY.matches(message)) {
-            handleCameraResponse(message);
+            handleCameraResponse(message, MASTER_CAMERA_GET_REPLY.getPayload(message));
         } else {
             invalidMessage(message);
         }
     }
 
-    private void handleCameraResponse(Message.AddressedMessage message) {
+    private void handleCameraResponse(Message.AddressedMessage message, CameraPayload cameraPayload) {
         //Check if message comes from master
         if (isMaster(message.getFromID())) {
-            CameraPayload cameraPayload = MASTER_CAMERA_GET_REPLY.getPayload(message);
-            Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
-            DoorBellPayload doorBellPayload = MASTER_DOOR_BELL_RING.getPayload(correspondingMessage);
+            final Message.AddressedMessage correspondingMessage =
+                    takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
+            final DoorBellPayload doorBellPayload = MASTER_DOOR_BELL_RING.getPayload(correspondingMessage);
             doorBellPayload.setCameraPayload(cameraPayload);
-            NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
-            notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.BELL_RANG, doorBellPayload);
 
-            Message messageToSend = new Message(doorBellPayload);
-            final PermissionController permissionController = requireComponent(PermissionController.KEY);
-            final List<UserDevice> userDevices = permissionController.getAllUserDevicesWithPermission(BELL_RANG, null);
+            final Message messageToSend = new Message(doorBellPayload);
 
-            for (UserDevice userDevice : userDevices) {
-                sendMessage(userDevice.getUserDeviceID(), APP_DOOR_RING, messageToSend);
-            }
+            sendMessageToAllDevicesWithPermission(messageToSend, BELL_RANG, null, APP_DOOR_RING);
         } else {
             //no permission
             sendReply(message, new Message(new ErrorPayload("Camera replies can only be sent from the master.")));
         }
     }
 
-    private void handleDoorBellRing(Message.AddressedMessage message) {
+    private void handleDoorBellRing(Message.AddressedMessage message, DoorBellPayload doorBellPayload) {
         //Check if message comes from a slave.
         if (isSlave(message.getFromID())) {
-            //Camera has always to be the first camera of all added cameras. (database and id)
-            Module camera = requireComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.Webcam).get(0);
-            Message messageToSend = new Message(new CameraPayload(0, camera.getName()));
+            //Notify clients
+            final NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
+            notificationBroadcaster.sendMessageToAllReceivers(
+                    NotificationPayload.NotificationType.BELL_RANG,
+                    doorBellPayload
+            );
 
-            Message.AddressedMessage sentMessage = sendMessageLocal(MASTER_CAMERA_GET, messageToSend);
+            //Get picture
+            //Camera has to be the first camera of all added cameras. (database and android camera id)
+            SlaveController slaveController = requireComponent(SlaveController.KEY);
+            final Module camera = slaveController.getModulesByType(CoreConstants.ModuleType.Webcam).get(0);
+            final Message messageToSend = new Message(new CameraPayload(0, camera.getName()));
+
+            final Message.AddressedMessage sentMessage = sendMessageLocal(MASTER_CAMERA_GET, messageToSend);
             recordReceivedMessageProxy(message, sentMessage);
         } else {
             //no permission
