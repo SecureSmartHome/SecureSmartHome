@@ -12,6 +12,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterSlavePayload;
 import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_DELETE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_REGISTER;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID;
 
@@ -34,16 +35,16 @@ public class MasterSlaveManagementHandler extends ModuleBroadcastHandler impleme
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_SLAVE_REGISTER.matches(message)) {
-            handleSlaveRegister(message);
-            //TODO Leon handle MASTER_SLAVE_DELETE
+            handleSlaveRegister(message, MASTER_SLAVE_REGISTER.getPayload(message));
+        } else if (MASTER_SLAVE_DELETE.matches(message)) {
+            //TODO Leon: handle (Leon, 11.01.16)
         } else {
             invalidMessage(message);
         }
     }
 
-    private void handleSlaveRegister(Message.AddressedMessage message) {
+    private void handleSlaveRegister(Message.AddressedMessage message, RegisterSlavePayload registerSlavePayload) {
         if (hasPermission(message.getFromID(), ADD_ODROID)) {
-            final RegisterSlavePayload registerSlavePayload = MASTER_SLAVE_REGISTER.getPayload(message);
             try {
                 registerSlave(new Slave(
                         registerSlavePayload.getName(),

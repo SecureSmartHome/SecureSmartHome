@@ -22,6 +22,7 @@ import io.netty.util.concurrent.Future;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_STATUS_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BLOCK;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BLOCK_ERROR;
@@ -88,7 +89,8 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
                 MASTER_DOOR_BLOCK_ERROR,
                 MASTER_DOOR_UNLATCH_REPLY,
                 MASTER_DOOR_UNLATCH_ERROR,
-                MASTER_CAMERA_GET_REPLY
+                MASTER_CAMERA_GET_REPLY,
+                MASTER_CAMERA_GET_ERROR,
         };
     }
 
@@ -116,6 +118,10 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
             DoorBellPayload doorBellPayload = APP_DOOR_RING.getPayload(message);
             picture = doorBellPayload.getCameraPayload().getPicture();
             fireImageUpdated(picture);
+        } else if (MASTER_CAMERA_GET_ERROR.matches(message)) {
+            //TODO Leon: handle (Leon, 11.01.16)
+        } else if (MASTER_DOOR_BLOCK_ERROR.matches(message)) {
+            //TODO Leon: handle (Leon, 11.01.16)
         } else {
             invalidMessage(message);
         }

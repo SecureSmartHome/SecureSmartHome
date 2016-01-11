@@ -15,6 +15,7 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_SET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_SET_REPLY;
 
 /**
@@ -35,6 +36,8 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
         if (MASTER_HOLIDAY_GET_REPLY.matches(message) || MASTER_HOLIDAY_SET_REPLY.matches(message)) {
             this.isOn = message.getPayloadChecked(HolidaySimulationPayload.class).switchOn();
             fireStatusChanged();
+        } else if (MASTER_HOLIDAY_SET_ERROR.matches(message)) {
+            //TODO Leon: handle (Leon, 11.01.16)
         } else {
             invalidMessage(message);
         }
@@ -42,7 +45,7 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_HOLIDAY_GET_REPLY, MASTER_HOLIDAY_SET_REPLY};
+        return new RoutingKey[]{MASTER_HOLIDAY_GET_REPLY, MASTER_HOLIDAY_SET_REPLY, MASTER_HOLIDAY_SET_ERROR};
     }
 
     /**

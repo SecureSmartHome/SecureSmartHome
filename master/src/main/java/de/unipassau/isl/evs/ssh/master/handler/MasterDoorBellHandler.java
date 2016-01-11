@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import android.util.Log;
+
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -26,6 +28,8 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.BELL_RANG;
  * @author Leon Sell
  */
 public class MasterDoorBellHandler extends AbstractMasterHandler {
+    private static final String TAG = MasterDoorBellHandler.class.getSimpleName();
+
     @Override
     public RoutingKey[] getRoutingKeys() {
         return new RoutingKey[]{MASTER_DOOR_BELL_RING, MASTER_CAMERA_GET_REPLY};
@@ -54,8 +58,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
 
             sendMessageToAllDevicesWithPermission(messageToSend, BELL_RANG, null, APP_DOOR_RING);
         } else {
-            //no permission
-            sendReply(message, new Message(new ErrorPayload("Camera replies can only be sent from the master.")));
+            Log.e(TAG, "A non master device tried to send a master only message.");
         }
     }
 
@@ -78,8 +81,7 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
             final Message.AddressedMessage sentMessage = sendMessageLocal(MASTER_CAMERA_GET, messageToSend);
             recordReceivedMessageProxy(message, sentMessage);
         } else {
-            //no permission
-            sendReply(message, new Message(new ErrorPayload("Door bell ring message can only be sent from a slave.")));
+            Log.e(TAG, "A non slave device tried to send a slave only message.");
         }
     }
 }

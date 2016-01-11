@@ -19,6 +19,7 @@ import de.unipassau.isl.evs.ssh.app.activity.DoorFragment;
 import de.unipassau.isl.evs.ssh.app.activity.HolidayFragment;
 import de.unipassau.isl.evs.ssh.app.activity.LightFragment;
 import de.unipassau.isl.evs.ssh.app.activity.MainActivity;
+import de.unipassau.isl.evs.ssh.app.activity.MainFragment;
 import de.unipassau.isl.evs.ssh.app.activity.StatusFragment;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
@@ -90,6 +91,9 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
                     break;
                 case DOOR_UNLOCKED:
                     issueDoorUnlocked(DOOR_UNLOCKED.ordinal());
+                    break;
+                case WEATHER_SERVICE_FAILED:
+                    issueWeatherServiceFailed(WEATHER_SERVICE_FAILED.ordinal(), args);
                     break;
                 default:
                     //HANDLE
@@ -194,6 +198,15 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         String title = resources.getString(R.string.door_unlocked_title);
         String text = resources.getString(R.string.door_unlocked_text);
         displayNotification(title, text, DoorFragment.class, notificationID);
+    }
+
+    private void issueWeatherServiceFailed(int notificationID, Serializable[] args) {
+        String cityName = (String) args[0];
+
+        String title = resources.getString(R.string.weather_service_failed_title);
+        String text = String.format(resources.getString(R.string.weather_service_failed_text), cityName);
+
+        displayNotification(title, text, MainFragment.class, notificationID);
     }
 
     /**

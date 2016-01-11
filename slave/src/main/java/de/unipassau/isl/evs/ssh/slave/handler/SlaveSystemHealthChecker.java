@@ -16,8 +16,9 @@ import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -27,9 +28,10 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Christoph Fraedrich
  */
-public class SlaveSystemHealthHandler extends AbstractComponent {
-    public static final Key<SlaveSystemHealthHandler> KEY = new Key<>(SlaveSystemHealthHandler.class);
-    private final ArrayList<Module> failedModules = new ArrayList<>();
+public class SlaveSystemHealthChecker extends AbstractComponent {
+    public static final Key<SlaveSystemHealthChecker> KEY = new Key<>(SlaveSystemHealthChecker.class);
+    private static final long UPDATE_TIMER = 45;
+    private final Map<Module, Long> failedModules = new HashMap<>();
     private ScheduledFuture future;
 
     @Override
@@ -81,16 +83,26 @@ public class SlaveSystemHealthHandler extends AbstractComponent {
             }//TODO Camera
 
             if (success) {
-                if (failedModules.contains(module)) {
+                if (failedModules.containsKey(module)) {
                     failedModules.remove(module);
+                    sendUpdateMessage(false, module);
                 }
             } else {
                 //Check for availability failed, send error message
-                failedModules.add(module);
-                Message message = new Message(new SystemHealthPayload(true, module));
-                requireComponent(OutgoingRouter.KEY).sendMessageToMaster(
-                        RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
+                if (!failedModules.containsKey(module) ||
+                        failedModules.get(module) - System.currentTimeMillis() > TimeUnit.MINUTES.toMillis(UPDATE_TIMER)) {
+
+                    sendUpdateMessage(true, module);
+                    failedModules.put(module, System.currentTimeMillis());
+                }
             }
+
+        }
+
+        private void sendUpdateMessage(boolean failure, Module module) {
+            Message message = new Message(new SystemHealthPayload(failure, module));
+            requireComponent(OutgoingRouter.KEY).sendMessageToMaster(
+                    RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK, message);
         }
     }
 }

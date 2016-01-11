@@ -23,8 +23,10 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_G
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT;
@@ -50,6 +52,10 @@ public class MasterLightHandler extends AbstractMasterHandler {
             handleGetResponse(message);
         } else if (SLAVE_LIGHT_SET_REPLY.matches(message)) {
             handleSetResponse(message);
+        } else if (SLAVE_LIGHT_GET_ERROR.matches(message)) {
+            //TODO Leon: handle (Leon, 11.01.16)
+        } else if (SLAVE_LIGHT_SET_ERROR.matches(message)) {
+            //TODO Leon: handle (Leon, 11.01.16)
         } else if (MASTER_DOOR_UNLATCH.matches(message)) {
             handleDoorUnlatched(message);
         } else {

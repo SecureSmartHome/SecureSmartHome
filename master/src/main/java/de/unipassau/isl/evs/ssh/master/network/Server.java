@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -114,7 +115,7 @@ public class Server extends AbstractComponent {
 
         //Wait for the start of the server
         final int localPort = getLocalPort();
-        if (localPort <= 0) {
+        if (localPort < 0 || localPort > 65535) {
             throw new StartupException("Illegal localPort " + localPort);
         }
         localChannel = b.bind(localPort).sync();
@@ -123,12 +124,13 @@ public class Server extends AbstractComponent {
         }
 
         final int publicPort = getPublicPort();
-        if (publicPort > 0 && localPort != publicPort) {
+        if (publicPort >= 0 && publicPort <= 65535 && localPort != publicPort) {
             publicChannel = b.bind(publicPort).sync();
             if (publicChannel == null) {
                 throw new StartupException("Could not open server channel");
             }
         }
+        Log.i(getClass().getSimpleName(), "Server bound to port " + localChannel + (publicChannel != null ? " and " + publicChannel : ""));
     }
 
     /**

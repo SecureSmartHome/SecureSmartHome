@@ -149,7 +149,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
                     newToken,
                     generateNewRegisterTokenPayload.getUserDevice()
             ));
-            sendMessage(message.getFromID(), MASTER_USER_REGISTER_REPLY, reply);
+            sendReply(message, reply);
         } else {
             sendNoPermissionReply(message, ADD_USER);
         }

@@ -12,7 +12,7 @@ import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
 /**
- *  Preferences Activity for the Master Odroid
+ * Preferences Activity for the Master Odroid
  *
  * @author Niko Fink
  */
@@ -83,6 +83,6 @@ public class MasterPreferenceActivity extends MasterStartUpActivity {
         if (intPref != null) {
             edit.putInt(intPref, value);
         }
-        return value > 0;
+        return value >= 0 && value <= 65535;
     }
 }

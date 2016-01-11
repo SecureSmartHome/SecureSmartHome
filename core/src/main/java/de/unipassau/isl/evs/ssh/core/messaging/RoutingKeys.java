@@ -75,6 +75,7 @@ public class RoutingKeys {
 
     public static final RoutingKey<GenerateNewRegisterTokenPayload> MASTER_USER_REGISTER = new RoutingKey<>(PREFIX_MASTER + "/user/register", GenerateNewRegisterTokenPayload.class);
     public static final RoutingKey<GenerateNewRegisterTokenPayload> MASTER_USER_REGISTER_REPLY = MASTER_USER_REGISTER.getReply(GenerateNewRegisterTokenPayload.class);
+    public static final RoutingKey<ErrorPayload> MASTER_USER_REGISTER_ERROR = MASTER_USER_REGISTER.getReply(ErrorPayload.class);
 
     public static final RoutingKey<UserDeviceInformationPayload> APP_USERINFO_UPDATE = new RoutingKey<>(PREFIX_APP + "/userdevice/update", UserDeviceInformationPayload.class);
     // END: UserConfiguration
@@ -120,8 +121,10 @@ public class RoutingKeys {
     // BEGIN: Door
     public static final RoutingKey<DoorBellPayload> MASTER_DOOR_BELL_RING = new RoutingKey<>(PREFIX_MASTER + "/doorbell/ring", DoorBellPayload.class);
 
+    //TODO Leon: what when where how does this occur/work? (Leon, 11.01.16)
     public static final RoutingKey<DoorPayload> MASTER_DOOR_STATUS_GET = new RoutingKey<>(PREFIX_MASTER + "/door/status_get", DoorPayload.class);
     public static final RoutingKey<DoorStatusPayload> MASTER_DOOR_STATUS_GET_REPLY = MASTER_DOOR_STATUS_GET.getReply(DoorStatusPayload.class);
+    public static final RoutingKey<ErrorPayload> MASTER_DOOR_STATUS_GET_ERROR = MASTER_DOOR_STATUS_GET.getReply(ErrorPayload.class);
 
     public static final RoutingKey<DoorStatusPayload> MASTER_DOOR_STATUS_UPDATE = new RoutingKey<>(PREFIX_MASTER + "/door/update", DoorStatusPayload.class);
 
@@ -148,19 +151,20 @@ public class RoutingKeys {
     // BEGIN: Camera
     public static final RoutingKey<CameraPayload> MASTER_CAMERA_GET = new RoutingKey<>(PREFIX_MASTER + "/camera/get", CameraPayload.class);
     public static final RoutingKey<CameraPayload> MASTER_CAMERA_GET_REPLY = MASTER_CAMERA_GET.getReply(CameraPayload.class);
+    public static final RoutingKey<ErrorPayload> MASTER_CAMERA_GET_ERROR = MASTER_CAMERA_GET.getReply(ErrorPayload.class);
 
     public static final RoutingKey<CameraPayload> SLAVE_CAMERA_GET = new RoutingKey<>(PREFIX_SLAVE + "/camera/get", CameraPayload.class);
     public static final RoutingKey<CameraPayload> SLAVE_CAMERA_GET_REPLY = SLAVE_CAMERA_GET.getReply(CameraPayload.class);
     // END: Camera
 
     // BEGIN: Notification
-    public static final RoutingKey<NotificationPayload> MASTER_NOTIFICATION_SEND = new RoutingKey<>(PREFIX_MASTER + "/notification/send", NotificationPayload.class);
     public static final RoutingKey<NotificationPayload> APP_NOTIFICATION_RECEIVE = new RoutingKey<>(PREFIX_APP + "/notification/receive", NotificationPayload.class);
     // END: Notification
 
     // BEGIN: HolidaySimulation
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_SET = new RoutingKey<>(PREFIX_MASTER + "/holiday/set", HolidaySimulationPayload.class);
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_SET_REPLY = MASTER_HOLIDAY_SET.getReply(HolidaySimulationPayload.class);
+    public static final RoutingKey<ErrorPayload> MASTER_HOLIDAY_SET_ERROR = MASTER_HOLIDAY_SET.getReply(ErrorPayload.class);
 
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_GET = new RoutingKey<>(PREFIX_MASTER + "/holiday/get", HolidaySimulationPayload.class);
     public static final RoutingKey<HolidaySimulationPayload> MASTER_HOLIDAY_GET_REPLY = MASTER_HOLIDAY_GET.getReply(HolidaySimulationPayload.class);
