@@ -151,4 +151,6 @@
     <string name="door_unlocked_title">Door is now unlocked!</string>
     <string name="door_unlocked_text">Others users can now open it.</string>
     <string name="delete_confirmation">Are you sure you want to delete \'%s\'</string>
+    <string name="weather_service_failed_title">Weather Service failed.</string>
+    <string name="weather_service_failed_text">Weather Service was not able to retrieve data for %s</string>
 </resources>
