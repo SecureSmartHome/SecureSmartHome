@@ -174,20 +174,6 @@ public abstract class AbstractMessageHandler implements MessageHandler {
     }
 
     /**
-     * Respond with an error message to a given AddressedMessage.
-     *
-     * @param original Original Message.
-     * @deprecated only provides very vague error handling
-     */
-    @Deprecated
-    protected Message.AddressedMessage sendErrorMessage(Message.AddressedMessage original) {
-        final RuntimeException exception = new RuntimeException("Unknown error while handling Message " + original);
-        exception.fillInStackTrace();
-        Message reply = new Message(new ErrorPayload(exception));
-        return sendReply(original, reply);
-    }
-
-    /**
      * Called if this Handler received a Message it can't handle.
      */
     protected void invalidMessage(Message.AddressedMessage message) {

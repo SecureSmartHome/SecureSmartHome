@@ -102,14 +102,6 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
     }
 
     /**
-     * @deprecated this can't provide any error handling, so it now throws an UnsupportedOperationException
-     */
-    @Deprecated
-    protected void handleErrorMessage(Message.AddressedMessage message) {
-        throw new UnsupportedOperationException("Could not handle error message " + message);
-    }
-
-    /**
      * Send a message to all Devices that have a given Permission.
      *
      * @param messageToSend Message to send to the devices.
