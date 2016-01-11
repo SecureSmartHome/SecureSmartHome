@@ -222,8 +222,7 @@ public class PermissionController extends AbstractComponent {
      * @param moduleName Module the permission applies for.
      */
     public void addUserPermission(DeviceID userDeviceID, de.unipassau.isl.evs.ssh.core.sec.Permission permission,
-                                  String moduleName)
-            throws UnknownReferenceException {
+                                  String moduleName) throws UnknownReferenceException {
         try {
             if (Strings.isNullOrEmpty(moduleName)) {
                 databaseConnector.executeSql("insert into "

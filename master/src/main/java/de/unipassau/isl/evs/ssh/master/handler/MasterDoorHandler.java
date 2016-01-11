@@ -27,6 +27,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STA
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.DOOR_UNLATCHED;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.LOCK_DOOR;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_DOOR_STATUS;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR;
@@ -88,18 +89,19 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         final Module atModule = requireComponent(SlaveController.KEY).getModule(payload.getModuleName());
         final Message messageToSend = new Message(payload);
 
-        if (hasPermission(message.getFromID(), UNLATCH_DOOR, null)) {
+        if (hasPermission(message.getFromID(), UNLATCH_DOOR)) {
             if (!getBlocked(atModule.getName())) {
-                Message.AddressedMessage sentMessage = sendMessage(atModule.getAtSlave(), SLAVE_DOOR_UNLATCH, messageToSend);
+                Message.AddressedMessage sentMessage =
+                        sendMessage(atModule.getAtSlave(), SLAVE_DOOR_UNLATCH, messageToSend);
                 recordReceivedMessageProxy(message, sentMessage);
             } else {
                 sendReply(message, new Message(new ErrorPayload("Cannot unlatch door. Door is blocked.")));
             }
         } else if (hasPermission(message.getFromID(), UNLATCH_DOOR_ON_HOLIDAY, null)) {
             if (requireComponent(MasterHolidaySimulationPlannerHandler.KEY).isRunHolidaySimulation()) {
-
                 if (!getBlocked(atModule.getName())) {
-                    Message.AddressedMessage sentMessage = sendMessage(atModule.getAtSlave(), SLAVE_DOOR_UNLATCH, messageToSend);
+                    Message.AddressedMessage sentMessage =
+                            sendMessage(atModule.getAtSlave(), SLAVE_DOOR_UNLATCH, messageToSend);
                     recordReceivedMessageProxy(message, sentMessage);
                 } else {
                     sendReply(message, new Message(new ErrorPayload("Cannot unlatch door. Door is blocked.")));
@@ -111,17 +113,17 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     }
 
     private void handleDoorUnlatchResponse(Message.AddressedMessage message) {
-        requireComponent(NotificationBroadcaster.KEY).sendMessageToAllReceivers(
-                NotificationPayload.NotificationType.DOOR_UNLATCHED, message
-        );
+        requireComponent(NotificationBroadcaster.KEY).sendMessageToAllReceivers(DOOR_UNLATCHED, message);
 
-        final Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
+        final Message.AddressedMessage correspondingMessage =
+                takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
         sendReply(correspondingMessage, new Message());
     }
 
 
     private void handleDoorStatusGetResponse(DoorStatusPayload payload, Message.AddressedMessage message) {
-        final Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
+        final Message.AddressedMessage correspondingMessage =
+                takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
         final Message messageToSend = new Message(payload);
         setOpen(payload.getModuleName(), payload.isOpen());
         sendReply(correspondingMessage, messageToSend);
@@ -130,7 +132,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     private void handleDoorStatusGet(Message.AddressedMessage message) {
         final DoorPayload payload = MASTER_DOOR_STATUS_GET.getPayload(message);
         final Module atModule = requireComponent(SlaveController.KEY).getModule(payload.getModuleName());
-        if (hasPermission(message.getFromID(), REQUEST_DOOR_STATUS, null)) {
+        if (hasPermission(message.getFromID(), REQUEST_DOOR_STATUS)) {
             final Message messageToSlave = new Message(payload);
             final Message.AddressedMessage sendMessage = sendMessage(
                     atModule.getAtSlave(),
@@ -147,7 +149,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         final Module atModule = requireComponent(SlaveController.KEY).getModule(payload.getModuleName());
         NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
 
-        if (hasPermission(message.getFromID(), LOCK_DOOR, null)) {
+        if (hasPermission(message.getFromID(), LOCK_DOOR)) {
             setBlocked(atModule.getName(), payload.isBlock());
 
             if (payload.isBlock()) {

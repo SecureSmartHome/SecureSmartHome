@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import java.util.List;
+
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
@@ -7,6 +9,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessageErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -19,6 +22,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BELL_RING;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.BELL_RANG;
 
 /**
  * Handles messages received when the doorbell is used, requests a picture from the camera
@@ -29,20 +33,24 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BE
  */
 public class MasterDoorBellHandler extends AbstractMasterHandler {
     @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{MASTER_DOOR_BELL_RING, MASTER_CAMERA_GET_REPLY};
+    }
+
+    @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_DOOR_BELL_RING.matches(message)) {
             handleDoorBellRing(message);
         } else if (MASTER_CAMERA_GET_REPLY.matches(message)) {
             handleCameraResponse(message);
-        } else if (message.getPayload() instanceof MessageErrorPayload) {
-            handleErrorMessage(message);
         } else {
-            sendErrorMessage(message);
+            invalidMessage(message);
         }
     }
 
-    private void handleCameraResponse(Message.AddressedMessage message) {//Check if message comes from master
-        if (requireComponent(NamingManager.KEY).getMasterID().equals(message.getFromID())) {
+    private void handleCameraResponse(Message.AddressedMessage message) {
+        //Check if message comes from master
+        if (isMaster(message.getFromID())) {
             CameraPayload cameraPayload = MASTER_CAMERA_GET_REPLY.getPayload(message);
             Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
             DoorBellPayload doorBellPayload = MASTER_DOOR_BELL_RING.getPayload(correspondingMessage);
@@ -51,17 +59,15 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
             notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.BELL_RANG, doorBellPayload);
 
             Message messageToSend = new Message(doorBellPayload);
+            final PermissionController permissionController = requireComponent(PermissionController.KEY);
+            final List<UserDevice> userDevices = permissionController.getAllUserDevicesWithPermission(BELL_RANG, null);
 
-            for (UserDevice userDevice :
-                    requireComponent(PermissionController.KEY).getAllUserDevicesWithPermission(
-                            de.unipassau.isl.evs.ssh.core.sec.Permission.BELL_RANG,
-                            null
-                    )) {
+            for (UserDevice userDevice : userDevices) {
                 sendMessage(userDevice.getUserDeviceID(), APP_DOOR_RING, messageToSend);
             }
         } else {
             //no permission
-            sendErrorMessage(message);
+            sendReply(message, new Message(new ErrorPayload("Camera replies can only be sent from the master.")));
         }
     }
 
@@ -72,21 +78,11 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
             Module camera = requireComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.Webcam).get(0);
             Message messageToSend = new Message(new CameraPayload(0, camera.getName()));
 
-            Message.AddressedMessage sendMessage =
-                    sendMessageLocal(
-                            MASTER_CAMERA_GET,
-                            messageToSend
-                    );
-            recordReceivedMessageProxy(message, sendMessage);
+            Message.AddressedMessage sentMessage = sendMessageLocal(MASTER_CAMERA_GET, messageToSend);
+            recordReceivedMessageProxy(message, sentMessage);
         } else {
             //no permission
-            sendErrorMessage(message);
+            sendReply(message, new Message(new ErrorPayload("Door bell ring message can only be sent from a slave.")));
         }
     }
-
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_DOOR_BELL_RING, MASTER_CAMERA_GET_REPLY};
-    }
-
 }
