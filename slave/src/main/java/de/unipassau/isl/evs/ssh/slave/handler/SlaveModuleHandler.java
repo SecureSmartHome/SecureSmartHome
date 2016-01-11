@@ -20,7 +20,6 @@ import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.handler.WrongAccessPointException;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -55,13 +54,13 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
      */
     public void updateModule(List<Module> components) throws WrongAccessPointException, EvsIoException {
         if (this.components.size() < 1) {
-            Set<Module> newComponents = Sets.newHashSet(components);
+            final Set<Module> newComponents = Sets.newHashSet(components);
             registerModules(newComponents);
         } else {
-            Set<Module> oldComponents = Sets.newHashSet(this.components);
-            Set<Module> newComponents = Sets.newHashSet(components);
-            Set<Module> componentsToRemove = Sets.difference(oldComponents, newComponents);
-            Set<Module> componentsToAdd = Sets.difference(newComponents, oldComponents);
+            final Set<Module> oldComponents = Sets.newHashSet(this.components);
+            final Set<Module> newComponents = Sets.newHashSet(components);
+            final Set<Module> componentsToRemove = Sets.difference(oldComponents, newComponents);
+            final Set<Module> componentsToAdd = Sets.difference(newComponents, oldComponents);
 
             unregisterModule(componentsToRemove);
             registerModules(componentsToAdd);
@@ -72,7 +71,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
 
     private void registerModules(Set<Module> componentsToAdd) throws WrongAccessPointException, EvsIoException {
         for (Module module : componentsToAdd) {
-            Class<? extends Component> clazz = getDriverClass(module);
+            final Class<? extends Component> clazz = getDriverClass(module);
             if (clazz == null) {
                 Log.i(TAG, "Module has unknown type/accesspoint combination");
                 return;
@@ -93,80 +92,80 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
     }
 
     private void registerButtonSensor(Module buttonSensor) throws WrongAccessPointException, EvsIoException {
-        String moduleName = buttonSensor.getName();
-        GPIOAccessPoint accessPoint = (GPIOAccessPoint) buttonSensor.getModuleAccessPoint();
+        final String moduleName = buttonSensor.getName();
+        final GPIOAccessPoint accessPoint = (GPIOAccessPoint) buttonSensor.getModuleAccessPoint();
 
         if (!buttonSensor.getModuleType().isValidAccessPoint(accessPoint)) {
             throw new WrongAccessPointException();
         }
 
         assert getContainer() != null;
-        Key<ButtonSensor> key = new Key<>(ButtonSensor.class, moduleName);
+        final Key<ButtonSensor> key = new Key<>(ButtonSensor.class, moduleName);
         getContainer().register(key, new ButtonSensor(accessPoint.getPort(), moduleName));
     }
 
     private void registerDoorBuzzer(Module doorBuzzer) throws WrongAccessPointException, EvsIoException {
-        String moduleName = doorBuzzer.getName();
-        GPIOAccessPoint accessPoint = (GPIOAccessPoint) doorBuzzer.getModuleAccessPoint();
+        final String moduleName = doorBuzzer.getName();
+        final GPIOAccessPoint accessPoint = (GPIOAccessPoint) doorBuzzer.getModuleAccessPoint();
 
         if (!(doorBuzzer.getModuleType().isValidAccessPoint(accessPoint))) {
             throw new WrongAccessPointException();
         }
 
         assert getContainer() != null;
-        Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, moduleName);
+        final Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, moduleName);
         getContainer().register(key, new DoorBuzzer(accessPoint.getPort()));
     }
 
     private void registerReedSensor(Module reedSensor) throws WrongAccessPointException, EvsIoException {
-        String moduleName = reedSensor.getName();
-        GPIOAccessPoint accessPoint = (GPIOAccessPoint) reedSensor.getModuleAccessPoint();
+        final String moduleName = reedSensor.getName();
+        final GPIOAccessPoint accessPoint = (GPIOAccessPoint) reedSensor.getModuleAccessPoint();
 
         if (!(reedSensor.getModuleType().isValidAccessPoint(accessPoint))) {
             throw new WrongAccessPointException();
         }
 
-        Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
+        final Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
         assert getContainer() != null;
         getContainer().register(key, new ReedSensor(accessPoint.getPort(), moduleName));
     }
 
     private void registerWeatherSensor(Module weatherSensor) throws WrongAccessPointException {
-        String moduleName = weatherSensor.getName();
-        USBAccessPoint accessPoint = (USBAccessPoint) weatherSensor.getModuleAccessPoint();
+        final String moduleName = weatherSensor.getName();
+        final USBAccessPoint accessPoint = (USBAccessPoint) weatherSensor.getModuleAccessPoint();
 
         if (!weatherSensor.getModuleType().isValidAccessPoint(accessPoint)) {
             throw new WrongAccessPointException();
         }
 
         assert getContainer() != null;
-        Key<WeatherSensor> key = new Key<>(WeatherSensor.class, moduleName);
+        final Key<WeatherSensor> key = new Key<>(WeatherSensor.class, moduleName);
         getContainer().register(key, new WeatherSensor(weatherSensor));
     }
 
     private void registerEdimaxPlugSwitch(Module plugSwitch) throws WrongAccessPointException {
         assert getContainer() != null;
 
-        String moduleName = plugSwitch.getName();
+        final String moduleName = plugSwitch.getName();
 
         if (!plugSwitch.getModuleType().isValidAccessPoint(plugSwitch.getModuleAccessPoint())) {
             throw new WrongAccessPointException();
         }
 
         if ( plugSwitch.getModuleAccessPoint().getType().equals(WLANAccessPoint.TYPE)) {
-            Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, moduleName);
-            WLANAccessPoint accessPoint = (WLANAccessPoint) plugSwitch.getModuleAccessPoint();
+            final Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, moduleName);
+            final WLANAccessPoint accessPoint = (WLANAccessPoint) plugSwitch.getModuleAccessPoint();
             getContainer().register(key, new EdimaxPlugSwitch(accessPoint.getiPAddress(),
                     accessPoint.getPort(), accessPoint.getUsername(), accessPoint.getPassword()));
         } else if (plugSwitch.getModuleAccessPoint().getType().equals(MockAccessPoint.TYPE)) {
-            Key<EdimaxPlugSwitchMock> key = new Key<>(EdimaxPlugSwitchMock.class, moduleName);
+            final Key<EdimaxPlugSwitchMock> key = new Key<>(EdimaxPlugSwitchMock.class, moduleName);
             getContainer().register(key, new EdimaxPlugSwitchMock());
         }
     }
 
     private void unregisterModule(Set<Module> componentsToRemove) {
         for (Module module : componentsToRemove) {
-            Key<? extends Component> key = new Key<>(getDriverClass(module), module.getName());
+            final Key<? extends Component> key = new Key<>(getDriverClass(module), module.getName());
             assert getContainer() != null;
             if (getContainer().isRegistered(key)) {
                 getContainer().unregister(key);
@@ -175,7 +174,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
     }
 
     public Class<? extends Component> getDriverClass(Module module) {
-        Class<? extends Component> clazz = null;
+        final Class<? extends Component> clazz;
         switch (module.getModuleType()) {
             case WindowSensor:
             case DoorSensor:
@@ -193,6 +192,9 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
             case Light:
                 clazz = EdimaxPlugSwitch.class;
                 break;
+            default:
+                clazz = null;
+                break;
         }
         return clazz;
     }
@@ -209,13 +211,13 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
     @Override
     public void handle(Message.AddressedMessage message) {
         if (GLOBAL_MODULES_UPDATE.matches(message)) {
-            ModulesPayload payload = GLOBAL_MODULES_UPDATE.getPayload(message);
-            DeviceID myself = requireComponent(NamingManager.KEY).getOwnID();
-            List<Module> modules = payload.getModulesAtSlave(myself);
+            final ModulesPayload payload = GLOBAL_MODULES_UPDATE.getPayload(message);
+            final DeviceID myself = requireComponent(NamingManager.KEY).getOwnID();
+            final List<Module> modules = payload.getModulesAtSlave(myself);
             try {
                 updateModule(modules);
             } catch (WrongAccessPointException | EvsIoException e) {
-                sendReply(message, new Message(new ErrorPayload(e)));
+                Log.e(TAG, e.getLocalizedMessage());
             }
         } else {
             invalidMessage(message);

@@ -34,16 +34,15 @@ public class MasterSlaveManagementHandler extends ModuleBroadcastHandler impleme
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_SLAVE_REGISTER.matches(message)) {
-            handleSlaveRegister(message);
+            handleSlaveRegister(message, MASTER_SLAVE_REGISTER.getPayload(message));
             //TODO Leon handle MASTER_SLAVE_DELETE
         } else {
             invalidMessage(message);
         }
     }
 
-    private void handleSlaveRegister(Message.AddressedMessage message) {
+    private void handleSlaveRegister(Message.AddressedMessage message, RegisterSlavePayload registerSlavePayload) {
         if (hasPermission(message.getFromID(), ADD_ODROID)) {
-            final RegisterSlavePayload registerSlavePayload = MASTER_SLAVE_REGISTER.getPayload(message);
             try {
                 registerSlave(new Slave(
                         registerSlavePayload.getName(),
