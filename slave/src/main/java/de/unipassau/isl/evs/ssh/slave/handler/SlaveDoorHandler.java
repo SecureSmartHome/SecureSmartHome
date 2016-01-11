@@ -12,6 +12,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.drivers.lib.DoorBuzzer;
 import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH;
@@ -55,14 +57,17 @@ public class SlaveDoorHandler extends AbstractMessageHandler {
         }
     }
 
-    private void handleUnlatchDoor(DoorPayload payload, Message.AddressedMessage message) {
+    private void handleUnlatchDoor(DoorPayload payload, final Message.AddressedMessage message) {
         Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, payload.getModuleName());
-        DoorBuzzer doorBuzzer = requireComponent(key);
-        try {
-            doorBuzzer.unlock(3000);
-            sendReply(message, new Message());
-        } catch (EvsIoException e) {
-            sendReply(message, new Message(new ErrorPayload(e)));
-        }
+        requireComponent(key).unlock(3000).addListener(new FutureListener<Void>() {
+            @Override
+            public void operationComplete(Future<Void> future) throws Exception {
+                if (future.isSuccess()) {
+                    sendReply(message, new Message());
+                } else {
+                    sendReply(message, new Message(new ErrorPayload(future.cause())));
+                }
+            }
+        });
     }
 }
