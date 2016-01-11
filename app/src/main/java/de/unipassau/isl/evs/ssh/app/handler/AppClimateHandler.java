@@ -68,6 +68,17 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         }
     }
 
+    //TODO Andi: refactor all methods like getTemp1() (Wolfgang, 2016-01-11)
+    private ClimateStatus maybeRequestClimateStatus(Module module) {
+        final ClimateStatus status = climateStatusMapping.get(module);
+        final long now = System.currentTimeMillis();
+        if (now - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+            status.setTimestamp(now);
+            requestClimateStatus(module);
+        }
+        return status;
+    }
+
     /**
      * Return temperature that is measured in Temperature1 sensor.
      *
@@ -75,11 +86,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      * @return The temperature measured in Temperature1 sensor.
      */
     public double getTemp1(Module module) {
-        final ClimateStatus status = climateStatusMapping.get(module);
-        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
-            requestClimateStatus(module);
-        }
-        return status.getTemp1();
+        return maybeRequestClimateStatus(module).getTemp1();
     }
 
     /**
@@ -322,6 +329,10 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
 
         public long getTimestamp() {
             return timestamp;
+        }
+
+        public void setTimestamp(long timestamp) {
+            this.timestamp = timestamp;
         }
     }
 }
