@@ -15,7 +15,6 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
-import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteDevicePayload;
@@ -27,6 +26,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserGroupPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserNamePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import io.netty.util.concurrent.Future;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_ADD;
@@ -44,15 +44,15 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_S
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_NAME;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET_ERROR;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET_REPLY;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE;
 
 /**
  * The AppUserConfigurationHandler handles the messaging that is needed to provide user and group
@@ -60,7 +60,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DE
  *
  * @author Wolfgang Popp
  */
-public class AppUserConfigurationHandler extends AbstractMessageHandler implements Component {
+public class AppUserConfigurationHandler extends AbstractAppHandler implements Component {
     public static final Key<AppUserConfigurationHandler> KEY = new Key<>(AppUserConfigurationHandler.class);
 
     private final ListMultimap<UserDevice, Permission> usersToPermissions = ArrayListMultimap.create();
@@ -148,8 +148,9 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
 
             fireUserInfoUpdated();
         } else {
-            invalidMessage(message);
+            tryHandleResponse(message);
         }
+        // invalidMessage is not called because handled by tryHandleResponse()
     }
 
     /**
@@ -209,9 +210,9 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      *
      * @param group the group to add
      */
-    public void addGroup(Group group) {
+    public Future<Void> addGroup(Group group) {
         Message message = new Message(new GroupPayload(group, GroupPayload.ACTION.CREATE));
-        sendMessageToMaster(MASTER_GROUP_ADD, message);
+        return newResponseFuture(sendMessageToMaster(MASTER_GROUP_ADD, message));
     }
 
     /**
@@ -219,29 +220,29 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      *
      * @param group the group to remove
      */
-    public void removeGroup(Group group) {
+    public Future<Void> removeGroup(Group group) {
         Message message = new Message(new GroupPayload(group, GroupPayload.ACTION.DELETE));
-        sendMessageToMaster(MASTER_GROUP_DELETE, message);
+        return newResponseFuture(sendMessageToMaster(MASTER_GROUP_DELETE, message));
     }
 
-    public void setGroupName(Group group, String groupName) {
+    public Future<Void> setGroupName(Group group, String groupName) {
         Message message = new Message(new SetGroupNamePayload(group, groupName));
-        sendMessageToMaster(MASTER_GROUP_SET_NAME, message);
+        return newResponseFuture(sendMessageToMaster(MASTER_GROUP_SET_NAME, message));
     }
 
-    public void setGroupTemplate(Group group, String templateName) {
+    public Future<Void> setGroupTemplate(Group group, String templateName) {
         Message message = new Message(new SetGroupTemplatePayload(group, templateName));
-        sendMessageToMaster(MASTER_GROUP_SET_TEMPLATE, message);
+        return newResponseFuture(sendMessageToMaster(MASTER_GROUP_SET_TEMPLATE, message));
     }
 
-    public void setUserName(DeviceID user, String username) {
+    public Future<Void> setUserName(DeviceID user, String username) {
         SetUserNamePayload payload = new SetUserNamePayload(user, username);
-        sendMessageToMaster(MASTER_USER_SET_NAME, new Message(payload));
+        return newResponseFuture(sendMessageToMaster(MASTER_USER_SET_NAME, new Message(payload)));
     }
 
-    public void setUserGroup(DeviceID user, String groupName) {
+    public Future<Void> setUserGroup(DeviceID user, String groupName) {
         SetUserGroupPayload payload = new SetUserGroupPayload(user, groupName);
-        sendMessageToMaster(MASTER_USER_SET_GROUP, new Message(payload));
+        return newResponseFuture(sendMessageToMaster(MASTER_USER_SET_GROUP, new Message(payload)));
     }
 
     /**
@@ -250,9 +251,9 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      * @param user       the user to grant the permission
      * @param permission the permission to grant
      */
-    public void grantPermission(DeviceID user, Permission permission) {
+    public Future<Void> grantPermission(DeviceID user, Permission permission) {
         SetPermissionPayload payload = new SetPermissionPayload(user, permission, SetPermissionPayload.Action.GRANT);
-        sendMessageToMaster(MASTER_PERMISSION_SET, new Message(payload));
+        return newResponseFuture(sendMessageToMaster(MASTER_PERMISSION_SET, new Message(payload)));
     }
 
     /**
@@ -261,9 +262,9 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      * @param user       the user to remove the permission from
      * @param permission the permission to remove
      */
-    public void revokePermission(DeviceID user, Permission permission) {
+    public Future<Void> revokePermission(DeviceID user, Permission permission) {
         SetPermissionPayload payload = new SetPermissionPayload(user, permission, SetPermissionPayload.Action.REVOKE);
-        sendMessageToMaster(MASTER_PERMISSION_SET, new Message(payload));
+        return newResponseFuture(sendMessageToMaster(MASTER_PERMISSION_SET, new Message(payload)));
     }
 
     /**
@@ -271,9 +272,9 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      *
      * @param user the user to remove
      */
-    public void removeUserDevice(DeviceID user) {
+    public Future<Void> removeUserDevice(DeviceID user) {
         DeleteDevicePayload payload = new DeleteDevicePayload(user);
-        sendMessageToMaster(MASTER_USER_DELETE, new Message(payload));
+        return newResponseFuture(sendMessageToMaster(MASTER_USER_DELETE, new Message(payload)));
     }
 
     /**
