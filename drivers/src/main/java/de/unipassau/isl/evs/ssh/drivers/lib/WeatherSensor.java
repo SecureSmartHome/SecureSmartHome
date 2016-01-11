@@ -29,9 +29,13 @@ public class WeatherSensor extends AbstractComponent {
 
     private double temp1, temp2, pressure, altitude, humidity, uv;
     private int visible, ir;
-    private Module module;
+    private final Module module;
 
     private ScheduledFuture future;
+
+    public WeatherSensor(Module module) {
+        this.module = module;
+    }
 
     @Override
     public void init(Container container) {
@@ -131,7 +135,7 @@ public class WeatherSensor extends AbstractComponent {
     }
 
     public Module getModule() {
-        return module; //FIXME always returns null (Niko, 2016-01-03)
+        return module;
     }
 
     private class WeatherPollingRunnable implements Runnable {

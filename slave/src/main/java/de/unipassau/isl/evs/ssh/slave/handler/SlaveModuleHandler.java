@@ -141,7 +141,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
 
         assert getContainer() != null;
         Key<WeatherSensor> key = new Key<>(WeatherSensor.class, moduleName);
-        getContainer().register(key, new WeatherSensor());
+        getContainer().register(key, new WeatherSensor(weatherSensor));
     }
 
     private void registerEdimaxPlugSwitch(Module plugSwitch) throws WrongAccessPointException {
