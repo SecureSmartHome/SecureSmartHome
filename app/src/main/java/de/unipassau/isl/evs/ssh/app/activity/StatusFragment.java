@@ -1,11 +1,14 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TableLayout;
@@ -14,7 +17,9 @@ import android.widget.TextView;
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.app.handler.AppModifyModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppSlaveManagementHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
@@ -52,11 +57,12 @@ public class StatusFragment extends BoundFragment {
         moduleListView = (ListView) view.findViewById(R.id.deviceStatusModulesListView);
         connectedSlavesText = (TextView) view.findViewById(R.id.deviceStatusConnectedSlaves);
         connectedModulesText = (TextView) view.findViewById(R.id.deviceStatusConnectedModules);
+
         return view;
     }
 
     @Override
-    public void onContainerConnected(Container container) {
+    public void onContainerConnected(final Container container) {
         super.onContainerConnected(container);
 
         AppModuleHandler handler = container.require(AppModuleHandler.KEY);
@@ -64,6 +70,48 @@ public class StatusFragment extends BoundFragment {
 
         moduleListView.setAdapter(new ModuleAdapter(handler.getComponents()));
         slaveListView.setAdapter(new SlaveAdapter(handler.getSlaves()));
+
+        moduleListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final Module module = (Module) moduleListView.getItemAtPosition(position);
+                String message = String.format(getResources().getString(R.string.delete_confirmation), module.getName());
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(message)
+                        .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (getContainer() != null) {
+                                    getContainer().require(AppModifyModuleHandler.KEY).removeModule(module);
+                                }
+
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, null).create().show();
+            }
+        });
+
+        slaveListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final Slave slave = (Slave) slaveListView.getItemAtPosition(position);
+                String message = String.format(getResources().getString(R.string.delete_confirmation), slave.getName());
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(message)
+                        .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (getContainer() != null) {
+                                    getContainer().require(AppSlaveManagementHandler.KEY).deleteSlave(slave.getSlaveID());
+                                }
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, null).create().show();
+
+            }
+        });
 
         update();
     }
@@ -79,7 +127,7 @@ public class StatusFragment extends BoundFragment {
     }
 
     private void update() {
-        AppModuleHandler handler = getComponent(AppModuleHandler.KEY);
+        final AppModuleHandler handler = getComponent(AppModuleHandler.KEY);
         if (handler == null) {
             Log.e(TAG, "update(): Container is not connected");
             return;
@@ -149,7 +197,7 @@ public class StatusFragment extends BoundFragment {
 
             Slave slave = getItem(position);
             slaveName.setText(slave.getName());
-            slaveId.setText(slave.getSlaveID().getIDString());
+            slaveId.setText(slave.getSlaveID().toShortString());
             return layout;
         }
     }

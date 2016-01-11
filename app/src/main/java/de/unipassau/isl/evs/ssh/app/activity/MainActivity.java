@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -11,6 +12,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,9 +20,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
-import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
@@ -35,10 +38,13 @@ import de.unipassau.isl.evs.ssh.core.network.ClientConnectionListener;
  * @author Wolfgang Popp
  */
 public class MainActivity extends BoundActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     private static final String KEY_LAST_FRAGMENT = "LAST_FRAGMENT";
+    public static final String KEY_NOTIFICATION_FRAGMENT = "NOTIFICATION_FRAGMENT";
+
     private LinearLayout overlayDisconnected;
     private NotificationCompat.Builder notificationBuilder;
-    private NotificationManager notificationManager;
 
     private boolean fragmentInitialized = false;
     private Bundle savedInstanceState;
@@ -85,6 +91,10 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         }
     };
 
+    public MainActivity() {
+        super(AppContainer.class);
+    }
+
     private void showConnectionOverlay(String text) {
         overlayDisconnected.setVisibility(View.VISIBLE);
         TextView textView = (TextView) overlayDisconnected.findViewById(R.id.overlay_text);
@@ -93,10 +103,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
 
     private void showDisconnectedOverlay() {
         showConnectionOverlay(getString(R.string.warn_no_connection_to_master));
-    }
-
-    public MainActivity() {
-        super(AppContainer.class);
     }
 
     @Override
@@ -114,7 +120,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         //Initialise Notifications
         notificationBuilder = new NotificationCompat.Builder(this);
         notificationBuilder.setAutoCancel(true);
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         //Initialise NavigationDrawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -135,8 +141,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         if (fragment instanceof BoundFragment) {
             ((BoundFragment) fragment).onContainerConnected(container);
         }
-        container.require(AppNotificationHandler.KEY).addNotificationObjects(notificationBuilder, notificationManager);
-
         showInitialFragment();
 
         Client client = container.require(Client.KEY);
@@ -159,24 +163,24 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
 
     @Nullable
     private Class getInitialFragment() {
-        if (!requireComponent(NamingManager.KEY).isMasterIDKnown()) {
+        NamingManager manager = getComponent(NamingManager.KEY);
+        if (manager == null) {
+            Log.i(TAG, "Container not yet connected.");
+            return null;
+        }
+        if (!manager.isMasterIDKnown()) {
             return WelcomeScreenFragment.class;
         }
-        if (getIntent() != null && getIntent().getAction() != null) {
-            switch (getIntent().getAction()) {
-                case "ClimateFragment":
-                    return ClimateFragment.class;
-                case "StatusFragment":
-                    return StatusFragment.class;
-                case "LightFragment":
-                    return LightFragment.class;
-                case "DoorFragment":
-                    return DoorFragment.class;
-            }
+
+        Class clazz;
+        if (getIntent() != null && (clazz = (Class) getIntent().getSerializableExtra(KEY_NOTIFICATION_FRAGMENT)) != null) {
+            return clazz;
         }
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_LAST_FRAGMENT)) {
-            return null; //fragment will be added automatically by fragment manager
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(KEY_LAST_FRAGMENT)) {
+                return null; //fragment will be added automatically by fragment manager
+            }
         }
         return MainFragment.class;
     }
@@ -187,8 +191,12 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         if (fragment instanceof BoundFragment) {
             ((BoundFragment) fragment).onContainerDisconnected();
         }
-
-        requireComponent(Client.KEY).removeListener(connectionListener);
+        Client client = getComponent(Client.KEY);
+        if (client == null) {
+            Log.i(TAG, "Container not yet connected.");
+            return;
+        }
+        client.removeListener(connectionListener);
     }
 
     @Override

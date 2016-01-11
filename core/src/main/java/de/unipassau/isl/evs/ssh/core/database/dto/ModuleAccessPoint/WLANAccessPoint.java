@@ -12,9 +12,6 @@ public class WLANAccessPoint extends ModuleAccessPoint {
     private String password;
     private String iPAddress;
 
-    public WLANAccessPoint() {
-    }
-
     public WLANAccessPoint(int port, String username, String password, String iPAddress) {
         this.port = port;
         this.username = username;

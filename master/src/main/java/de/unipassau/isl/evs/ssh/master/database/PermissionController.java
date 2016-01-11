@@ -17,42 +17,12 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
  * Offers high level methods to interact with the tables associated with permissions in the database.
- * //TODO avoid unnecessary and annoying object construction because all parameters have to be wrapped as {@link Permission}
  * and simply take ({@link de.unipassau.isl.evs.ssh.core.sec.Permission} permission, {@link String} moduleName) instead (Niko, 2015-12-20)
  *
  * @author Leon Sell
  */
 public class PermissionController extends AbstractComponent {
     public static final Key<PermissionController> KEY = new Key<>(PermissionController.class);
-    private static final String MODULE_ID_FROM_NAME_SQL_QUERY =
-            "select " + DatabaseContract.ElectronicModule.COLUMN_ID
-                    + " from " + DatabaseContract.ElectronicModule.TABLE_NAME
-                    + " where " + DatabaseContract.ElectronicModule.COLUMN_NAME
-                    + " = ?";
-    private static final String PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY =
-            "select p." + DatabaseContract.Permission.COLUMN_ID
-                    + " from " + DatabaseContract.Permission.TABLE_NAME + " p"
-                    + " join " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
-                    + " on p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
-                    + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
-                    + " where p." + DatabaseContract.Permission.COLUMN_NAME
-                    + " = ? and m." + DatabaseContract.ElectronicModule.COLUMN_NAME
-                    + " = ?";
-    private static final String PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY =
-            "select " + DatabaseContract.Permission.COLUMN_ID
-                    + " from " + DatabaseContract.Permission.TABLE_NAME
-                    + " where " + DatabaseContract.Permission.COLUMN_NAME
-                    + " = ? and " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL";
-    private static final String TEMPLATE_ID_FROM_NAME_SQL_QUERY =
-            "select " + DatabaseContract.PermissionTemplate.COLUMN_ID
-                    + " from " + DatabaseContract.PermissionTemplate.TABLE_NAME
-                    + " where " + DatabaseContract.PermissionTemplate.COLUMN_NAME
-                    + " = ?";
-    private static final String USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY =
-            "select " + DatabaseContract.UserDevice.COLUMN_ID
-                    + " from " + DatabaseContract.UserDevice.TABLE_NAME
-                    + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
-                    + " = ?";
     private DatabaseConnector databaseConnector;
 
     @Override
@@ -195,8 +165,8 @@ public class PermissionController extends AbstractComponent {
                                 + DatabaseContract.ComposedOfPermission.TABLE_NAME
                                 + " (" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
                                 + ", " + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
-                                + ") values ((" + PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY
-                                + "), (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
+                                + ") values ((" + DatabaseContract.SqlQueries.PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY
+                                + "), (" + DatabaseContract.SqlQueries.TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
                         new String[] { permission.toString(), templateName }
                 );
             } else {
@@ -204,8 +174,8 @@ public class PermissionController extends AbstractComponent {
                                 + DatabaseContract.ComposedOfPermission.TABLE_NAME
                                 + " (" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
                                 + ", " + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
-                                + ") values ((" + PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY
-                                + "), (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
+                                + ") values ((" + DatabaseContract.SqlQueries.PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY
+                                + "), (" + DatabaseContract.SqlQueries.TEMPLATE_ID_FROM_NAME_SQL_QUERY + "))",
                         new String[] { permission.toString(), moduleName, templateName }
                 );
             }
@@ -227,18 +197,18 @@ public class PermissionController extends AbstractComponent {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.ComposedOfPermission.TABLE_NAME
                             + " where " + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
-                            + " = (" + PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY + ") and "
+                            + " = (" + DatabaseContract.SqlQueries.PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY + ") and "
                             + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
-                            + " = (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + ")",
+                            + " = (" + DatabaseContract.SqlQueries.TEMPLATE_ID_FROM_NAME_SQL_QUERY + ")",
                     new String[] { permission.toString(), templateName }
             );
         } else {
             databaseConnector.executeSql("delete from "
                             + DatabaseContract.ComposedOfPermission.TABLE_NAME
                             + " where " + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID
-                            + " = (" + PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY + ") and "
+                            + " = (" + DatabaseContract.SqlQueries.PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY + ") and "
                             + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID
-                            + " = (" + TEMPLATE_ID_FROM_NAME_SQL_QUERY + ")",
+                            + " = (" + DatabaseContract.SqlQueries.TEMPLATE_ID_FROM_NAME_SQL_QUERY + ")",
                     new String[] { permission.toString(), moduleName, templateName }
             );
         }
@@ -260,8 +230,8 @@ public class PermissionController extends AbstractComponent {
                         + DatabaseContract.HasPermission.TABLE_NAME
                         + " (" + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
                         + ", " + DatabaseContract.HasPermission.COLUMN_USER_ID
-                        + ") values ((" + PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY
-                        + "), (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
+                        + ") values ((" + DatabaseContract.SqlQueries.PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY
+                        + "), (" + DatabaseContract.SqlQueries.USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
                         + "))", new String[] { permission.toString(), userDeviceID.getIDString() }
                 );
             } else {
@@ -269,8 +239,8 @@ public class PermissionController extends AbstractComponent {
                         + DatabaseContract.HasPermission.TABLE_NAME
                         + " (" + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
                         + ", " + DatabaseContract.HasPermission.COLUMN_USER_ID
-                        + ") values ((" + PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY
-                        + "), (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
+                        + ") values ((" + DatabaseContract.SqlQueries.PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY
+                        + "), (" + DatabaseContract.SqlQueries.USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
                         + "))", new String[] { permission.toString(), moduleName, userDeviceID.getIDString() }
                 );
             }
@@ -293,18 +263,18 @@ public class PermissionController extends AbstractComponent {
             databaseConnector.executeSql("delete from "
                     + DatabaseContract.HasPermission.TABLE_NAME
                     + " where " + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
-                    + " = (" + PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY
+                    + " = (" + DatabaseContract.SqlQueries.PERMISSION_ID_FROM_NAME_WITHOUT_MODULE_SQL_QUERY
                     + ") and " + DatabaseContract.HasPermission.COLUMN_USER_ID
-                    + " = (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
+                    + " = (" + DatabaseContract.SqlQueries.USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
                     + ")", new String[] { permission.toString(), userDeviceID.getIDString() }
             );
         } else {
             databaseConnector.executeSql("delete from "
                     + DatabaseContract.HasPermission.TABLE_NAME
                     + " where " + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID
-                    + " = (" + PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY
+                    + " = (" + DatabaseContract.SqlQueries.PERMISSION_ID_FROM_NAME_AND_MODULE_SQL_QUERY
                     + ") and " + DatabaseContract.HasPermission.COLUMN_USER_ID
-                    + " = (" + USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
+                    + " = (" + DatabaseContract.SqlQueries.USER_DEVICE_ID_FROM_FINGERPRINT_SQL_QUERY
                     + ")", new String[] { permission.toString(), moduleName, userDeviceID.getIDString() }
             );
         }
@@ -347,7 +317,7 @@ public class PermissionController extends AbstractComponent {
                                 + DatabaseContract.Permission.TABLE_NAME
                                 + " (" + DatabaseContract.Permission.COLUMN_NAME
                                 + ", " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + ")"
-                                + "values (?, (" + MODULE_ID_FROM_NAME_SQL_QUERY + "))",
+                                + "values (?, (" + DatabaseContract.SqlQueries.MODULE_ID_FROM_NAME_SQL_QUERY + "))",
                         new String[] { permission.toString(), moduleName }
                 );
             }
@@ -376,7 +346,7 @@ public class PermissionController extends AbstractComponent {
                             + DatabaseContract.Permission.TABLE_NAME
                             + " where " + DatabaseContract.Permission.COLUMN_NAME
                             + " = ? and " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
-                            + " = (" + MODULE_ID_FROM_NAME_SQL_QUERY + ")",
+                            + " = (" + DatabaseContract.SqlQueries.MODULE_ID_FROM_NAME_SQL_QUERY + ")",
                     new String[] { permission.toString(), moduleName }
             );
         }
@@ -449,7 +419,6 @@ public class PermissionController extends AbstractComponent {
         }
     }
 
-    //Todo unit test
     /**
      * Returns all UserDevices that have a given permission.
      *
@@ -493,7 +462,7 @@ public class PermissionController extends AbstractComponent {
                     + " join " + DatabaseContract.Group.TABLE_NAME + " g"
                     + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID
                     + " = g." + DatabaseContract.Group.COLUMN_ID
-                    + " join " + DatabaseContract.ElectronicModule.TABLE_NAME + "m"
+                    + " join " + DatabaseContract.ElectronicModule.TABLE_NAME + " m"
                     + " on p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
                     + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
                     + " where p." + DatabaseContract.Permission.COLUMN_NAME
@@ -509,6 +478,11 @@ public class PermissionController extends AbstractComponent {
         return userDevices;
     }
 
+    /**
+     * Get all permissions that a given user device has.
+     * @param userDeviceID The UserDevice which has the Permissions which will be returned.
+     * @return List of all Permissions that the given UserDevice has.
+     */
     public List<Permission> getPermissionsOfUserDevice(DeviceID userDeviceID) {
         List<Permission> permissions = new LinkedList<>();
         Cursor permissionCursor;

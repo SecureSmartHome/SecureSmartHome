@@ -31,21 +31,10 @@ import static de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation.encodeT
  */
 public class WelcomeScreenFragment extends ScanQRFragment {
     private static final String TAG = WelcomeScreenFragment.class.getSimpleName();
+
     private static final String LOCAL_MASTER_PACKAGE = "de.unipassau.isl.evs.ssh.master";
     private static final String LOCAL_MASTER_ACTIVITY = LOCAL_MASTER_PACKAGE + ".activity.RegisterLocalAppActivity";
     private DeviceConnectInformation info;
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        try {
-            //Try to open the Master Activity for adding a local device
-            Intent intent = new Intent();
-            intent.setComponent(new ComponentName(LOCAL_MASTER_PACKAGE, LOCAL_MASTER_ACTIVITY));
-            startActivityForResult(intent, CoreConstants.QRCodeInformation.REQUEST_CODE_SCAN_QR);
-        } catch (ActivityNotFoundException ignore) {
-        }
-    }
 
     @Nullable
     @Override
@@ -56,7 +45,15 @@ public class WelcomeScreenFragment extends ScanQRFragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                requestScanQRCode();
+                try {
+                    //Try to open the Master Activity for adding a local device
+                    Intent intent = new Intent();
+                    intent.setComponent(new ComponentName(LOCAL_MASTER_PACKAGE, LOCAL_MASTER_ACTIVITY));
+                    startActivityForResult(intent, CoreConstants.QRCodeInformation.REQUEST_CODE_SCAN_QR);
+                } catch (ActivityNotFoundException ignore) {
+                    //Or scan the QR Code
+                    requestScanQRCode();
+                }
             }
         });
         return root;
@@ -92,6 +89,8 @@ public class WelcomeScreenFragment extends ScanQRFragment {
             } else {
                 client.onMasterFound(new InetSocketAddress(info.getAddress(), info.getPort()), encodeToken(info.getToken()));
             }
+            //TODO do not immediately switch to MainFragment, but show progress indicator while connecting.
+            // see SlaveQRCodeActivity for the related ClientConnectionListener (Niko, 2016-01-10)
             ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         }
     }

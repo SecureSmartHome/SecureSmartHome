@@ -5,6 +5,11 @@ import android.content.Intent;
 
 import java.security.cert.X509Certificate;
 
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.MockAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
+import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import io.netty.util.AttributeKey;
 import io.netty.util.ResourceLeakDetector;
@@ -24,6 +29,8 @@ public class CoreConstants {
      * API Key to Access Open Weather Map
      */
     public static final String OPENWEATHERMAP_API_KEY = "f5301a474451c6e1394268314b72a358";
+
+    public static final boolean TRACK_STATISTICS = Boolean.parseBoolean("true");
 
     /**
      * The class contains constants for the Netty Framework
@@ -85,12 +92,34 @@ public class CoreConstants {
 
         private final int resID;
 
-        ModuleType(int resID){
+        ModuleType(int resID) {
             this.resID = resID;
         }
 
         public String toLocalizedString(Context ctx) {
             return ctx.getResources().getString(this.resID);
+        }
+
+        public boolean isValidAccessPoint(ModuleAccessPoint accessPoint){
+            switch (this) {
+                case Light:
+                    return accessPoint.getType().equals(WLANAccessPoint.TYPE);
+                case WeatherBoard:
+                    return accessPoint.getType().equals(USBAccessPoint.TYPE);
+                case DoorBuzzer:
+                    return accessPoint.getType().equals(GPIOAccessPoint.TYPE);
+                case DoorSensor:
+                    return accessPoint.getType().equals(GPIOAccessPoint.TYPE);
+                case WindowSensor:
+                    return accessPoint.getType().equals(GPIOAccessPoint.TYPE);
+                case Webcam:
+                    return accessPoint.getType().equals(USBAccessPoint.TYPE)
+                            || accessPoint.getType().equals(MockAccessPoint.TYPE);
+                case Doorbell:
+                    return accessPoint.getType().equals(GPIOAccessPoint.TYPE);
+                default:
+                    return false;
+            }
         }
     }
 
@@ -121,16 +150,4 @@ public class CoreConstants {
         }
     }
 
-    /**
-     * This class contains constants for different types of notifications.
-     *
-     * @author Christoph Frädrich
-     */
-    public enum NotificationType {
-        //TODO use when Notification System gets changed
-        UNKNOWN,
-        WEATHER_WARNING,
-        HUMIDITY_WARNING,
-        BRIGHTNESS_WARNING
-    }
 }

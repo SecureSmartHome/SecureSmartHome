@@ -18,8 +18,6 @@ import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
-
 /**
  * This is a MasterHandler providing functionality all MasterHandlers need. This will avoid needing to implement the
  * same functionality over and over again.
@@ -34,10 +32,10 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
      * The originally received message will be mapped to the sequence number of the proxy message,
      * so that it can be later retrieved using the {@link Message#HEADER_REFERENCES_ID} of the reply for the proxy message.
      *
-     * @see #takeProxiedReceivedMessage(int)
      * @param receivedMessage the Message with a Request from the App or the Slave that was received.
      * @param proxyMessage    the Message that was sent by me (the Master) in order to get data required for responding
      *                        to the original request.
+     * @see #takeProxiedReceivedMessage(int)
      */
     protected void recordReceivedMessageProxy(Message.AddressedMessage receivedMessage, Message.AddressedMessage proxyMessage) {
         final DeviceID masterID = requireComponent(NamingManager.KEY).getMasterID();
@@ -79,23 +77,46 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
         return userDeviceID.equals(requireComponent(NamingManager.KEY).getMasterID());
     }
 
+    /**
+     * Check if a given Device has a given Permission. Master has all Permission.
+     *
+     * @param userDeviceID DeviceID of the Device.
+     * @param permission   Permission to check for.
+     * @param moduleName   Module the Permission applies for.
+     * @return true if has permissions otherwise false.
+     */
     protected boolean hasPermission(DeviceID userDeviceID, Permission permission, String moduleName) {
         return isMaster(userDeviceID) || requireComponent(PermissionController.KEY)
                 .hasPermission(userDeviceID, permission, moduleName);
     }
 
-    @Deprecated
-    protected void handleErrorMessage(Message.AddressedMessage message) {
-        if (message.getHeader(HEADER_REFERENCES_ID) != null) {
-            final Message.AddressedMessage correspondingMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
-            sendMessage(
-                    correspondingMessage.getFromID(),
-                    correspondingMessage.getHeader(Message.HEADER_REPLY_TO_KEY),
-                    new Message(message.getPayload())
-            );
-        } //else ignore
+    /**
+     * Has Permission for Permissions that are independent of a Module.
+     *
+     * @param userDeviceID DeviceID of the Device.
+     * @param permission   Permission to check for.
+     * @return true if has permissions otherwise false.
+     */
+    protected boolean hasPermission(DeviceID userDeviceID, Permission permission) {
+        return hasPermission(userDeviceID, permission, null);
     }
 
+    /**
+     * @deprecated this can''t provide any error handling, so it now throws an UnsupportedOperationException
+     */
+    @Deprecated
+    protected void handleErrorMessage(Message.AddressedMessage message) {
+        throw new UnsupportedOperationException("Could not handle error message " + message);
+    }
+
+    /**
+     * Send a message to all Devices that have a given Permission.
+     *
+     * @param messageToSend Message to send to the devices.
+     * @param permission    Permission the Device has to have.
+     * @param moduleName    Module to Permission applies for.
+     * @param routingKey    RoutingKey to send the message with.
+     */
     protected void sendMessageToAllDevicesWithPermission(
             Message messageToSend,
             Permission permission,
@@ -109,7 +130,13 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
         }
     }
 
-    protected void sendNoPermissionReply(Message.AddressedMessage original, de.unipassau.isl.evs.ssh.core.sec.Permission permission){
+    /**
+     * Send a reply containing a no permission error.
+     *
+     * @param original   Message to reply to
+     * @param permission Permission the author of the original Message doesn't have.
+     */
+    protected void sendNoPermissionReply(Message.AddressedMessage original, de.unipassau.isl.evs.ssh.core.sec.Permission permission) {
         Message message = new Message(new ErrorPayload(new NoPermissionException(permission)));
         sendReply(original, message);
     }

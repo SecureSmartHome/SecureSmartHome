@@ -1,7 +1,12 @@
 package de.unipassau.isl.evs.ssh.core.sec;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.text.format.Formatter;
 import android.util.Base64;
+import android.util.Log;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
@@ -14,7 +19,12 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.List;
 
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import io.netty.buffer.ByteBuf;
@@ -30,8 +40,9 @@ import static io.netty.handler.codec.base64.Base64.encode;
  * @author Niko Fink
  */
 public class DeviceConnectInformation implements Serializable {
+    private static final String TAG = DeviceConnectInformation.class.getSimpleName();
     private static final QRCodeWriter writer = new QRCodeWriter();
-    private static final int ADDRESS_LENGTH = 4;
+    public static final int ADDRESS_LENGTH = 4;
     public static final int TOKEN_LENGTH = 35;
     public static final int TOKEN_BASE64_LENGTH = encodeToken(new byte[TOKEN_LENGTH]).length();
     private static final int DATA_LENGTH = 4 + 2 + TOKEN_BASE64_LENGTH + DeviceID.ID_LENGTH;
@@ -142,6 +153,43 @@ public class DeviceConnectInformation implements Serializable {
     public static byte[] decodeToken(String token) {
         if (Strings.isNullOrEmpty(token)) return new byte[0];
         return Base64.decode(token, BASE64_FLAGS);
+    }
+
+    /**
+     * Android has no uniform way of finding the IP address of the local device, so this first queries the WifiManager
+     * and afterwards tries to find a suitable NetworkInterface. If both fails, returns 0.0.0.0.
+     */
+    @SuppressWarnings({"unchecked", "deprecation"})
+    public static InetAddress findIPAddress(Context context) {
+        WifiManager wifiManager = ((WifiManager) context.getSystemService(Context.WIFI_SERVICE));
+        final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
+        if (connectionInfo != null) {
+            try {
+                return InetAddress.getByName(
+                        Formatter.formatIpAddress(connectionInfo.getIpAddress())
+                );
+            } catch (UnknownHostException e) {
+                Log.wtf(TAG, "Android API couldn't resolve the IP Address of the local device", e);
+            }
+        }
+        try {
+            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface intf : interfaces) {
+                List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
+                for (InetAddress addr : addrs) {
+                    if (!addr.isLoopbackAddress() && addr.getAddress().length == ADDRESS_LENGTH) {
+                        return addr;
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            Log.wtf(TAG, "Android API couldn't query own network interfaces", e);
+        }
+        try {
+            return InetAddress.getByAddress(new byte[ADDRESS_LENGTH]);
+        } catch (UnknownHostException e) {
+            throw new AssertionError("Could not resolve IP 0.0.0.0", e);
+        }
     }
 
     @Override

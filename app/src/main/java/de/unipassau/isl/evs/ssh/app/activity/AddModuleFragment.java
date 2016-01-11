@@ -21,8 +21,8 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
+import de.unipassau.isl.evs.ssh.app.handler.AppModifyModuleHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppModuleHandler;
-import de.unipassau.isl.evs.ssh.app.handler.AppNewModuleHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
@@ -56,13 +56,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     private Button addMockButton;
     private Button addUSBButton;
     private Button addGPIOButton;
-
-    private Spinner slaveSpinner;
-    private Spinner sensorTypeSpinner;
-    private Spinner connectionTypeSpinner;
-    private EditText nameInput;
-
-    private final AppNewModuleHandler.NewModuleListener listener = new AppNewModuleHandler.NewModuleListener() {
+    private final AppModifyModuleHandler.NewModuleListener listener = new AppModifyModuleHandler.NewModuleListener() {
         @Override
         public void registrationFinished(final boolean wasSuccessful) {
             getActivity().runOnUiThread(new Runnable() {
@@ -86,6 +80,10 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             });
         }
     };
+    private Spinner slaveSpinner;
+    private Spinner sensorTypeSpinner;
+    private Spinner connectionTypeSpinner;
+    private EditText nameInput;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -161,14 +159,14 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        AppNewModuleHandler newModuleHandler = container.require(AppNewModuleHandler.KEY);
+        final AppModifyModuleHandler newModuleHandler = container.require(AppModifyModuleHandler.KEY);
         newModuleHandler.addNewModuleListener(listener);
         populateSlaveSpinner(container);
     }
 
     @Override
     public void onContainerDisconnected() {
-        AppNewModuleHandler handler = getComponent(AppNewModuleHandler.KEY);
+        final AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
         if (handler != null) {
             handler.removeNewModuleListener(listener);
         }
@@ -297,14 +295,13 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        // TODO Save state of all spinners in this fragment. This lifecycle is currently broken (Wolfgang, 2016-03-01)
+        // TODO Wolfgang Save state of all spinners in this fragment. This lifecycle is currently broken (Wolfgang, 2016-03-01)
         outState.putInt(KEY_CONNECTION_TYPE_SPINNER_POSITION, connectionTypeSpinner.getSelectedItemPosition());
         super.onSaveInstanceState(outState);
     }
 
     private void addNewModule(ModuleAccessPoint accessPoint) {
-        AppNewModuleHandler handler = getComponent(AppNewModuleHandler.KEY);
-
+        final AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
         if (handler == null) {
             Log.e(TAG, "Container not connected");
             return;
@@ -315,7 +312,6 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         int position = sensorTypeSpinner.getSelectedItemPosition();
         ModuleType moduleType = ModuleType.values()[position];
         Module module = new Module(name, atSlave, moduleType, accessPoint);
-
         handler.addNewModule(module);
     }
 }

@@ -12,12 +12,11 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_CLIMATE_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_REQUEST_WEATHER_INFO_REPLY;
 
 /**
  * AppClimateHandler class handles message from and to the
@@ -190,8 +189,6 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         return Collections.unmodifiableMap(climateStatusMapping);
     }
 
-    ////Network/////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * Sends Message to MasterClimateHandler to request SensorData of Module m.
      *
@@ -202,27 +199,13 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         ClimatePayload climatePayload = new ClimatePayload(status.getTemp1(), status.getTemp2(),
                 status.getPressure(), status.getAltitude(), status.getHumidity(), status.getUv(),
                 status.getVisible(), status.getIr(), "", m);
-
-        Message message = new Message(climatePayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_CLIMATE_UPDATE.getKey());
-
-        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(RoutingKeys.MASTER_REQUEST_WEATHER_INFO, message);
+        sendMessageToMaster(RoutingKeys.MASTER_REQUEST_WEATHER_INFO, new Message(climatePayload));
     }
-
 
     private void setClimate(ClimatePayload payload, String s) {
         ClimatePayload climatePayload = new ClimatePayload(payload, s);
-
-        Message message;
-        message = new Message(climatePayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_CLIMATE_UPDATE.getKey());
-
-        OutgoingRouter router = getContainer().require(OutgoingRouter.KEY);
-        router.sendMessageToMaster(RoutingKeys.MASTER_REQUEST_WEATHER_INFO, message);
+        sendMessageToMaster(RoutingKeys.MASTER_REQUEST_WEATHER_INFO, new Message(climatePayload));
     }
-
-    //Lifecycle & Callbacks/////////////////////////////////////////////////////////////////////////
 
     /**
      * Handles received Message from MasterClimateHandler. Refreshes SensorData.
@@ -231,8 +214,8 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      */
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (APP_CLIMATE_UPDATE.matches(message)) {
-            ClimatePayload climatePayload = APP_CLIMATE_UPDATE.getPayload(message);
+        if (MASTER_REQUEST_WEATHER_INFO_REPLY.matches(message)) {
+            ClimatePayload climatePayload = MASTER_REQUEST_WEATHER_INFO_REPLY.getPayload(message);
             setCachedStatus(climatePayload.getModule(), climatePayload.getTemp1(), climatePayload.getTemp2(),
                     climatePayload.getPressure(), climatePayload.getAltitude(), climatePayload.getHumidity(),
                     climatePayload.getUv(), climatePayload.getIr(), climatePayload.getVisible());
@@ -243,7 +226,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{APP_CLIMATE_UPDATE};
+        return new RoutingKey[]{MASTER_REQUEST_WEATHER_INFO_REPLY};
     }
 
     /**
@@ -341,5 +324,4 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
             return timestamp;
         }
     }
-
 }

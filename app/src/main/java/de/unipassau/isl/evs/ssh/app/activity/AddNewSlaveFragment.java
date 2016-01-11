@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
-import de.unipassau.isl.evs.ssh.app.handler.AppAddSlaveHandler;
+import de.unipassau.isl.evs.ssh.app.handler.AppSlaveManagementHandler;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
@@ -55,7 +55,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
 
     @Override
     protected void onQRCodeScanned(DeviceConnectInformation info) {
-        AppAddSlaveHandler handler = getComponent(AppAddSlaveHandler.KEY);
+        AppSlaveManagementHandler handler = getComponent(AppSlaveManagementHandler.KEY);
 
         if (info != null && handler != null) {
             final DeviceID slaveID = info.getID();
@@ -70,7 +70,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         outState.putString(KEY_SLAVE_NAME, slaveNameInput.getText().toString());
+        super.onSaveInstanceState(outState);
     }
 }

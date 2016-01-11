@@ -9,7 +9,7 @@ import android.support.annotation.Nullable;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 import java.util.Objects;
 
 import de.ncoder.typedmap.Key;
@@ -18,22 +18,17 @@ import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.StartupException;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.network.NettyInternalLogger;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.ResourceLeakDetector;
-import io.netty.util.concurrent.DefaultExecutorServiceFactory;
-import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
@@ -54,25 +49,9 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT
 public class Server extends AbstractComponent {
     public static final Key<Server> KEY = new Key<>(Server.class);
 
-    private static final String PREF_SERVER_LOCAL_PORT = Server.class.getName() + ".PREF_SERVER_LOCAL_PORT";
-    private static final String PREF_SERVER_PUBLIC_PORT = Server.class.getName() + ".PREF_SERVER_PUBLIC_PORT";
+    public static final String PREF_SERVER_LOCAL_PORT = Server.class.getName() + ".PREF_SERVER_LOCAL_PORT";
+    public static final String PREF_SERVER_PUBLIC_PORT = Server.class.getName() + ".PREF_SERVER_PUBLIC_PORT";
 
-    /**
-     * Distributes incoming messages to the responsible handlers.
-     */
-    private final ServerIncomingDispatcher incomingDispatcher = new ServerIncomingDispatcher();
-    /**
-     * Receives messages from system components and decides how to route them to the targets.
-     */
-    private final ServerOutgoingRouter outgoingRouter = new ServerOutgoingRouter();
-    /**
-     * Reply to UDP Broadcasts from Clients that don't know my IP yet
-     */
-    private final UDPDiscoveryServer udpDiscovery = new UDPDiscoveryServer();
-    /**
-     * The EventLoopGroup used for accepting connections
-     */
-    private EventLoopGroup serverExecutor;
     /**
      * The channel listening for incoming local connections on the port of the server.
      * Use {@link ChannelFuture#sync()} to wait for server startup.
@@ -106,10 +85,6 @@ public class Server extends AbstractComponent {
             ResourceLeakDetector.setLevel(CoreConstants.NettyConstants.RESOURCE_LEAK_DETECTION);
             // Start server
             startServer();
-            // Add related components
-            container.register(IncomingDispatcher.KEY, incomingDispatcher);
-            container.register(OutgoingRouter.KEY, outgoingRouter);
-            container.register(UDPDiscoveryServer.KEY, udpDiscovery);
         } catch (InterruptedException e) {
             throw new StartupException("Could not start netty server", e);
         }
@@ -123,25 +98,36 @@ public class Server extends AbstractComponent {
      * @throws IllegalArgumentException is the Server is already running
      */
     private void startServer() throws InterruptedException {
-        if (isChannelOpen() && isExecutorAlive()) {
+        if (isChannelOpen()) {
             throw new IllegalStateException("Server already running");
         }
 
         //Setup the Executor and Connection Pool
-        serverExecutor = new NioEventLoopGroup(0, new DefaultExecutorServiceFactory("server"));
-        connections = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+        final ExecutionServiceComponent eventLoop = requireComponent(ExecutionServiceComponent.KEY);
+        connections = new DefaultChannelGroup(eventLoop.next());
 
         ServerBootstrap b = new ServerBootstrap()
-                .group(serverExecutor)
+                .group(eventLoop)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(getHandshakeHandler())
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
         //Wait for the start of the server
-        localChannel = b.bind(getLocalPort()).sync();
-        publicChannel = b.bind(getPublicPort()).sync();
-        if (localChannel == null || publicChannel == null) {
+        final int localPort = getLocalPort();
+        if (localPort <= 0) {
+            throw new StartupException("Illegal localPort " + localPort);
+        }
+        localChannel = b.bind(localPort).sync();
+        if (localChannel == null) {
             throw new StartupException("Could not open server channel");
+        }
+
+        final int publicPort = getPublicPort();
+        if (publicPort > 0 && localPort != publicPort) {
+            publicChannel = b.bind(publicPort).sync();
+            if (publicChannel == null) {
+                throw new StartupException("Could not open server channel");
+            }
         }
     }
 
@@ -165,12 +151,6 @@ public class Server extends AbstractComponent {
         if (publicChannel != null && publicChannel.channel() != null) {
             publicChannel.channel().close();
         }
-        if (serverExecutor != null) {
-            serverExecutor.shutdownGracefully();
-        }
-        getContainer().unregister(udpDiscovery);
-        getContainer().unregister(outgoingRouter);
-        getContainer().unregister(incomingDispatcher);
         super.destroy();
     }
 
@@ -190,25 +170,15 @@ public class Server extends AbstractComponent {
     }
 
     /**
-     * EventLoopGroup for the {@link ServerIncomingDispatcher} and the {@link ServerOutgoingRouter}
-     */
-    EventLoopGroup getExecutor() {
-        return serverExecutor;
-    }
-
-    /**
-     * {@link IncomingDispatcher} that will be registered to the Pipeline by the {@link ServerHandshakeHandler}
-     */
-    ServerIncomingDispatcher getIncomingDispatcher() {
-        return incomingDispatcher;
-    }
-
-    /**
      * @return the port of the Server for local connections set in the SharedPreferences or {@link CoreConstants.NettyConstants#DEFAULT_LOCAL_PORT}
      * @see #localChannel
      */
     int getLocalPort() {
-        return getSharedPreferences().getInt(PREF_SERVER_LOCAL_PORT, DEFAULT_LOCAL_PORT);
+        try {
+            return getSharedPreferences().getInt(PREF_SERVER_LOCAL_PORT, DEFAULT_LOCAL_PORT);
+        } catch (ClassCastException e) {
+            return DEFAULT_LOCAL_PORT;
+        }
     }
 
     /**
@@ -216,7 +186,11 @@ public class Server extends AbstractComponent {
      * @see #publicChannel
      */
     int getPublicPort() {
-        return getSharedPreferences().getInt(PREF_SERVER_PUBLIC_PORT, DEFAULT_PUBLIC_PORT);
+        try {
+            return getSharedPreferences().getInt(PREF_SERVER_PUBLIC_PORT, DEFAULT_PUBLIC_PORT);
+        } catch (ClassCastException e) {
+            return DEFAULT_LOCAL_PORT;
+        }
     }
 
     private SharedPreferences getSharedPreferences() {
@@ -226,15 +200,23 @@ public class Server extends AbstractComponent {
     /**
      * @return the local Address this server is listening on
      */
-    public SocketAddress getAddress() {
-        return localChannel.channel().localAddress();
+    public InetSocketAddress getAddress() {
+        if (localChannel != null && localChannel.channel() != null) {
+            return (InetSocketAddress) localChannel.channel().localAddress();
+        } else {
+            return null;
+        }
     }
 
     /**
      * @return the public Address this server is listening on
      */
-    public SocketAddress getPublicAddress() {
-        return publicChannel.channel().localAddress();
+    public InetSocketAddress getPublicAddress() {
+        if (publicChannel != null && publicChannel.channel() != null) {
+            return (InetSocketAddress) publicChannel.channel().localAddress();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -257,16 +239,7 @@ public class Server extends AbstractComponent {
      * @return {@code true}, if the Server TCP channel is currently open
      */
     public boolean isChannelOpen() {
-        return localChannel != null && localChannel.channel() != null && localChannel.channel().isOpen()
-                && publicChannel != null && publicChannel.channel() != null && publicChannel.channel().isOpen();
-    }
-
-    /**
-     * @return {@code true}, if the Executor that is used for accepting incoming connections and processing data
-     * has been shut down
-     */
-    public boolean isExecutorAlive() {
-        return serverExecutor != null && !serverExecutor.isTerminated() && !serverExecutor.isShutdown();
+        return localChannel != null && localChannel.channel() != null && localChannel.channel().isOpen();
     }
 
     /**
@@ -277,7 +250,11 @@ public class Server extends AbstractComponent {
      * @see Channel#closeFuture()
      */
     public void awaitShutdown() throws InterruptedException {
-        localChannel.channel().closeFuture().await();
-        serverExecutor.terminationFuture().await();
+        if (localChannel != null && localChannel.channel() != null) {
+            localChannel.channel().closeFuture().await();
+        }
+        if (publicChannel != null && publicChannel.channel() != null) {
+            publicChannel.channel().closeFuture().await();
+        }
     }
 }

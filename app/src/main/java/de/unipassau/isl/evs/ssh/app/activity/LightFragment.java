@@ -37,6 +37,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  */
 public class LightFragment extends BoundFragment {
     private static final String TAG = LightFragment.class.getSimpleName();
+
     private LightListAdapter adapter = new LightListAdapter();
     private final AppLightHandler.LightHandlerListener listener = new AppLightHandler.LightHandlerListener() {
         @Override

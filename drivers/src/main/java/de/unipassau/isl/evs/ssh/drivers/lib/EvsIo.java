@@ -7,7 +7,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -20,7 +20,8 @@ import java.io.PrintWriter;
 public class EvsIo {
     private static final String TAG = EvsIo.class.getSimpleName();
 
-    private EvsIo() {}
+    private EvsIo() {
+    }
 
     /**
      * Set-Up a GPIO pin
@@ -73,8 +74,8 @@ public class EvsIo {
      * @param value value to set
      */
     public static void setValue(int pin, boolean value) throws EvsIoException {
-        try (FileOutputStream os = new FileOutputStream(getValueFile(pin))) {
-            os.write(value ? 1 : 0);
+        try (FileWriter os = new FileWriter(getValueFile(pin))) {
+            os.write(value ? "1\n" : "0\n");
         } catch (IOException e) {
             throw new EvsIoException("Could not set value of pin " + pin + " to " + value, e);
         }

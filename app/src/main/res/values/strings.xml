@@ -1,17 +1,13 @@
 <resources>
     <string name="app_name">Secure Smart Home</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="secure_smart_home">Secure Smart Home</string>
 
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
     <string name="favourite_settings">Favourites</string>
 
     <string name="navigation_drawer_open">Navigation</string>
     <string name="navigation_drawer_close">Navigate</string>
     <string name="nav_edit">Edit</string>
 
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="nav_home">Home</string>
     <string name="nav_door_string">Door</string>
     <string name="nav_light_string">Light</string>
@@ -35,7 +31,6 @@
     <string name="NoModulesConnected">No modules connected</string>
     <string name="addUser">Add User</string>
     <string name="group">Group</string>
-    <string name="name">Name</string>
 
     <!--Strings used for QR-Codes-->
     <string name="qr_code_description">This is a QR-Code.</string>
@@ -55,18 +50,15 @@
     <string name="apply">Apply</string>
     <string name="revoke">Revoke</string>
     <string name="create">Create</string>
-    <string name="cancel">Cancel</string>
     <string name="group_name">Group Name</string>
     <string name="edit_group_dialog_title">Edit Group</string>
     <string name="set_permission_template">Set a permission template</string>
-    <string name="error">Error</string>
-    <string name="ok">OK</string>
     <string name="error_fill_all_fields">Cannot add module. Missing information.</string>
     <string name="added_module_success">Added module successfully</string>
     <string name="added_module_fail">Adding new module failed</string>
     <string name="permission_dialog_title">Edit Permission</string>
-    <string name="is_in_group">"is in group %1$s."</string>
-    <string name="device_id">"Device ID: %1$s"</string>
+    <string name="is_in_group">"is in group %s."</string>
+    <string name="device_id">"Device ID: %s"</string>
     <string name="error_cannot_add_user">Cannot add new user. Missing information.</string>
     <string name="error_cannot_add_group">Cannot add new group. Missing information.</string>
     <string-array name="sensor_connection_types">
@@ -82,9 +74,6 @@
     <string name="holidaySimulationStatus">Status: </string>
     <string name="holidaySimulationOn">On</string>
     <string name="holidaySimulationOff">Off</string>
-    <string name="edit">Edit</string>
-    <string name="remove">Remove</string>
-    <string name="grant">Grant</string>
     <string name="deleteuserdevice_dialog_title">Want to remove</string>
     <string name="denied">Denied</string>
     <string name="granted">Granted</string>
@@ -103,15 +92,6 @@
     <string name="port">Port:</string>
     <string name="add_wlan_module">Add WLAN module</string>
     <string name="add_mock_module">Add mocked module</string>
-    <string name="climate_sensor">Climate Sensor:</string>
-    <string name="temperature_1">Temperature 1:</string>
-    <string name="temperature2">Temperature 2:</string>
-    <string name="pressure">Pressure:</string>
-    <string name="altitude">Altitude:</string>
-    <string name="humidity">Humidity:</string>
-    <string name="uv">UV:</string>
-    <string name="visible_1">Visible:</string>
-    <string name="ir">IR:</string>
     <string name="status_name">Name:</string>
     <string name="status_id">ID:</string>
     <string name="statusmodule_name">Name:</string>
@@ -128,6 +108,49 @@
     <string name="warn_client_rejected">Connection refused. Maybe the system has been reset?</string>
     <string name="warn_no_connection_to_master">No Connection to Secure Smart Home Server.</string>
     <string name="malformed_qr_code">Malformed QR-Code</string>
+
+    <!--Strings used in ClimateFragment-->
+    <string name="climate_sensor">Climate Sensor:</string>
+    <string name="temperature_1">Temperature 1:</string>
+    <string name="temperature2">Temperature 2:</string>
+    <string name="pressure">Pressure:</string>
+    <string name="altitude">Altitude:</string>
+    <string name="humidity">Humidity:</string>
+    <string name="uv">UV Index:</string>
+    <string name="visible_1">Visible:</string>
+    <string name="ir">IR:</string>
+
+    <string name="si_degree" formatted="false">%3.1f C°</string>
+    <string name="si_pressure" formatted="false">%4.1f Pa</string>
+    <string name="si_altitude" formatted="false">%4.2f m</string>
+    <string name="si_humidity" formatted="false">%3.2f %</string>
+    <string name="si_visible" formatted="false">%d%n Lux</string>
+
+    <!--Strings used for Notifications-->
+    <string name="climate_notification_title">Climate Warning!</string>
+    <string name="climate_notification_text" formatted="false">Your indoor humidity is at %3.2f % please air your home.</string>
+    <string name="brightness_warning_title">Light Warning!</string>
+    <string name="brightness_warning_text" formatted="false">It has %d%n Lux in your room, which should be bright enough.</string>
+    <string name="weather_warning_title">Weather Warning!</string>
+    <string name="weather_warning_text">Please close all doors and windows. It will rain today.</string>
+    <string name="system_health_warning_title_failed">Component failed!</string>
+    <string name="system_health_warning_title_fixed">Component failure resolved!</string>
+    <string name="system_health_warning_text_failure" formatted="false">The module %s is not responding anymore.</string>
+    <string name="system_health_warning_text_fixed" formatted="false">The module %s is not responding again.</string>
+    <string name="door_bell_notification_title">The Doorbell rang!</string>
+    <string name="door_bell_notification_text">You have visitors at your door.</string>
+    <string name="holiday_mode_switched_on_title">Holiday Mode Active!</string>
+    <string name="holiday_mode_switched_on_text">Your home is now controlling itself.</string>
+    <string name="holiday_mode_switched_off_title">Holiday Mode Inactive!</string>
+    <string name="holiday_mode_switched_off_text">You have now the control over your home. Welcome back!</string>
+    <string name="door_unlatched_title">Door is now open!</string>
+    <!--TODO maybe add text, otherwise delete? (Phil, 2016-01-09-->
+    <string name="door_unlatched_text"></string>
+    <string name="door_locked_title">Door is now locked!</string>
+    <string name="door_locked_text">Unauthorised users can not open it anymore.</string>
+    <string name="door_unlocked_title">Door is now unlocked!</string>
+    <string name="door_unlocked_text">Others users can now open it.</string>
+    <string name="delete_confirmation">Are you sure you want to delete \'%s\'</string>
     <string name="edit_userdevice">Edit a user device</string>
     <string name="missing_permission">Missing Permission.</string>
 </resources>

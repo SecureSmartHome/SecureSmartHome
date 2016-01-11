@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Phil Werli-->
+<resources>
+    <!--Margins for typography from https://www.google.com/design/spec/style/typography.html#typography-line-height-->
+    <dimen name="typography_display2">45sp</dimen>
+    <dimen name="typography_display1">34sp</dimen>
+    <dimen name="typography_headline2">28sp</dimen>
+    <dimen name="typography_headline1">24sp</dimen>
+    <dimen name="typography_subheadline">16sp</dimen>
+    <dimen name="typography_body">13sp</dimen>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+</resources>

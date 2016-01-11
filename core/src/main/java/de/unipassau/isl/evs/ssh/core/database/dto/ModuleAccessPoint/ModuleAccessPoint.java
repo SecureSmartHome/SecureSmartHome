@@ -66,7 +66,6 @@ public abstract class ModuleAccessPoint implements Serializable {
 
         ModuleAccessPoint that = (ModuleAccessPoint) o;
 
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
         if (!Arrays.equals(getAccessInformation(), that.getAccessInformation())) return false;
         if (!Arrays.equals(getDatabaseIndices(), that.getDatabaseIndices())) return false;
         return !(getType() != null ? !getType().equals(that.getType()) : that.getType() != null);

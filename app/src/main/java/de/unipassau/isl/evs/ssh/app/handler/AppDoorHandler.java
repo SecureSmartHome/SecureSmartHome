@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.LinkedList;
@@ -8,32 +9,31 @@ import java.util.List;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBellPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorLockPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBlockPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorUnlatchPayload;
+import io.netty.util.concurrent.Future;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_CAMERA_GET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_BLOCK;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_STATUS_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_GET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_LOCK_SET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BLOCK;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BLOCK_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH_REPLY;
 
 /**
  * The AppDoorHandler class sends and receives messages for door events.
  *
  * @author Wolfgang Popp
  */
-public class AppDoorHandler extends AbstractMessageHandler implements Component {
+public class AppDoorHandler extends AbstractAppHandler implements Component {
     public static final Key<AppDoorHandler> KEY = new Key<>(AppDoorHandler.class);
     private static final String TAG = AppDoorHandler.class.getSimpleName();
 
@@ -79,33 +79,38 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{APP_CAMERA_GET,
-                APP_DOOR_BLOCK,
-                APP_DOOR_GET,
-                APP_DOOR_RING};
+        return new RoutingKey[]{
+                APP_DOOR_RING,
+                APP_DOOR_STATUS_UPDATE,
+                MASTER_DOOR_BLOCK_REPLY,
+                MASTER_DOOR_UNLATCH_REPLY,
+                MASTER_DOOR_UNLATCH_ERROR,
+                MASTER_CAMERA_GET_REPLY
+        };
     }
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (APP_CAMERA_GET.matches(message)) {
-            CameraPayload payload = APP_CAMERA_GET.getPayload(message);
-            picture = payload.getPicture();
-            fireImageUpdated(picture);
-        } else if (APP_DOOR_BLOCK.matches(message)) {
-            DoorLockPayload payload = APP_DOOR_BLOCK.getPayload(message);
-            isDoorBlocked = !payload.isUnlock();
+
+        if (MASTER_DOOR_BLOCK_REPLY.matches(message)) {
+            isDoorBlocked = MASTER_DOOR_BLOCK_REPLY.getPayload(message).isBlock();
+            handleResponse(message);
+        } else if (MASTER_DOOR_UNLATCH_REPLY.matches(message)) {
+            handleResponse(message);
+        } else if (MASTER_DOOR_UNLATCH_ERROR.matches(message)) {
+            handleResponse(message);
+        } else if (APP_DOOR_STATUS_UPDATE.matches(message)) {
+            DoorStatusPayload payload = APP_DOOR_STATUS_UPDATE.getPayload(message);
+            isDoorOpen = payload.isOpen();
+            isDoorBlocked = payload.isBlocked();
             fireStatusUpdated();
-        } else if (APP_DOOR_GET.matches(message)) {
-            DoorStatusPayload payload = APP_DOOR_GET.getPayload(message);
-            isDoorOpen = !payload.isClosed();
-            fireStatusUpdated();
+        } else if (MASTER_CAMERA_GET_REPLY.matches(message)) {
+            picture = MASTER_CAMERA_GET_REPLY.getPayload(message).getPicture();
+            tryHandleResponse(message);
         } else if (APP_DOOR_RING.matches(message)) {
             DoorBellPayload doorBellPayload = APP_DOOR_RING.getPayload(message);
-            fireImageUpdated(doorBellPayload.getCameraPayload().getPicture());
-
-            // TODO Notifications. Why does the doorhandler send notification messages?? (Wolfgang, 2016-01-05)
-            // Message messageToSend = new Message(doorBellPayload);
-            // requireComponent(OutgoingRouter.KEY).sendMessageLocal(APP_NOTIFICATION_RECEIVE, messageToSend);
+            picture = doorBellPayload.getCameraPayload().getPicture();
+            fireImageUpdated(picture);
         } else {
             invalidMessage(message);
         }
@@ -130,72 +135,26 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
     }
 
     /**
-     * Refreshs the door status by sending a status request message.
-     */
-    public void refreshDoorStatus() {
-        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoors();
-        if (doors.size() < 1) {
-            Log.e(TAG, "Could not get door status. No door installed");
-            return;
-        }
-        refreshBlockStatus(doors.get(0).getName());
-        refreshOpenStatus(doors.get(0).getName());
-    }
-
-    private void refreshOpenStatus(String door) {
-        DoorStatusPayload doorPayload = new DoorStatusPayload(false, door);
-
-        Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET.getKey());
-
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(MASTER_DOOR_STATUS_GET, message);
-
-    }
-
-    private void refreshBlockStatus(String door) {
-        DoorUnlatchPayload doorPayload = new DoorUnlatchPayload(door);
-
-        Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_BLOCK.getKey());
-
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(MASTER_DOOR_LOCK_GET, message);
-    }
-
-    /**
      * Sends a "OpenDoor" message to the master.
      */
-    public void openDoor() {
-        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoors();
+    public void unlatchDoor() {
+        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorBuzzers();
         if (doors.size() < 1) {
-            Log.e(TAG, "Could not open the door. No door installed");
+            Log.e(TAG, "Could not open the door. No door buzzer installed");
             return;
         }
-        DoorUnlatchPayload doorPayload = new DoorUnlatchPayload(doors.get(0).getName());
-
-        Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_GET.getKey());
-
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(MASTER_DOOR_UNLATCH, message);
-        isDoorOpen = true;
+        DoorPayload doorPayload = new DoorPayload(doors.get(0).getName());
+        sendMessageToMaster(MASTER_DOOR_UNLATCH, new Message(doorPayload));
     }
 
     private void blockDoor(boolean isBlocked) {
-        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoors();
+        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorSensors();
         if (doors.size() < 1) {
-            Log.e(TAG, "Could not (un)block the door. No door installed");
+            Log.e(TAG, "Could not (un)block the door. No door sensor installed");
             return;
         }
-        DoorLockPayload doorPayload = new DoorLockPayload(isBlocked, doors.get(0).getName());
-
-        Message message = new Message(doorPayload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_DOOR_BLOCK.getKey());
-
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(MASTER_DOOR_LOCK_SET, message);
-        isDoorBlocked = isBlocked;
+        DoorBlockPayload doorPayload = new DoorBlockPayload(isBlocked, doors.get(0).getName());
+        sendMessageToMaster(MASTER_DOOR_BLOCK, new Message(doorPayload));
     }
 
     /**
@@ -203,6 +162,7 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
      *
      * @return the last taken picture or null if no picture has been taken yet.
      */
+    @Nullable
     public byte[] getPicture() {
         return picture;
     }
@@ -218,25 +178,22 @@ public class AppDoorHandler extends AbstractMessageHandler implements Component 
      * Sends a "UnblockDoor" message to the master.
      */
     public void unblockDoor() {
-        blockDoor(true);
+        blockDoor(false);
     }
 
     /**
      * Refreshes the door photo by sending a message.
      */
-    public void refreshImage() {
+    public Future<CameraPayload> refreshImage() {
         List<Module> cameras = requireComponent(AppModuleHandler.KEY).getCameras();
         if (cameras.size() < 1) {
-            Log.e(TAG, "Could not refresh the door image. No camera avaliable");
-            return;
+            Log.e(TAG, "Could not refresh the door image. No camera available");
+            return newFailedFuture(new IllegalStateException("Could not refresh the door image. No camera available"));
         }
         CameraPayload payload = new CameraPayload(0, cameras.get(0).getName());
-
-        Message message = new Message(payload);
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_CAMERA_GET.getKey());
-
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-        router.sendMessageToMaster(MASTER_CAMERA_GET, message);
+        return newResponseFuture(
+                sendMessageToMaster(MASTER_CAMERA_GET, new Message(payload))
+        );
     }
 
     /**

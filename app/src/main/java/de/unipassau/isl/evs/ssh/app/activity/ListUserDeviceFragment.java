@@ -37,15 +37,17 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.Fragment_Arguments.USER_
 
 /**
  * This fragment lists all user devices from a single group.
- * Gets the group through the {@link ListGroupFragment ListGroupFragment} and receives with this information the
- * user devices from the {@link AppUserConfigurationHandler AppUserConfigurationHandler}.
+ * Gets the group through the {@link ListGroupFragment} and receives with this information the
+ * user devices from the {@link AppUserConfigurationHandler}.
  *
  * @author Phil Werli
  * @see EditUserDeviceFragment
  */
 public class ListUserDeviceFragment extends BoundFragment {
     private static final String TAG = ListUserDeviceFragment.class.getSimpleName();
+
     private UserDeviceListAdapter adapter;
+    private ListView userDeviceList;
     /**
      * The group the fragment is created for.
      */
@@ -57,12 +59,22 @@ public class ListUserDeviceFragment extends BoundFragment {
         return inflater.inflate(R.layout.fragment_listuserdevicefromgroup, container, false);
     }
 
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        buildView();
+    }
+
+    /**
+     * Gets called in {@link #onContainerConnected(Container)}.
+     * Builds the view components that require the container.
+     */
     private void buildView() {
         group = (Group) getArguments().getSerializable(GROUP_ARGUMENT_FRAGMENT);
         TextView groupName = (TextView) getActivity().findViewById(R.id.listuserdevice_groupname);
         groupName.setText(group.getName());
 
-        ListView userDeviceList = (ListView) getActivity().findViewById(R.id.listuserDeviceContainer);
+        userDeviceList = (ListView) getActivity().findViewById(R.id.listuserDeviceContainer);
         userDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                   // when a user clicks short on an item, he opens the ListUserDeviceFragment
                                                   @Override
@@ -98,12 +110,6 @@ public class ListUserDeviceFragment extends BoundFragment {
         userDeviceList.setAdapter(adapter);
     }
 
-    @Override
-    public void onContainerConnected(Container container) {
-        super.onContainerConnected(container);
-        buildView();
-    }
-
     /**
      * Creates and returns a dialogs that gives the user the option to delete a user device.
      */
@@ -121,7 +127,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                     .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int id) {
-                            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+                            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
                             if (handler == null) {
                                 Log.i(TAG, "Container not yet connected!");
                             } else {
@@ -139,7 +145,9 @@ public class ListUserDeviceFragment extends BoundFragment {
         return dialog;
     }
 
-
+    /**
+     * Adapter used for {@link #userDeviceList}.
+     */
     private class UserDeviceListAdapter extends BaseAdapter {
         private List<UserDevice> userDevices;
 
@@ -154,7 +162,7 @@ public class ListUserDeviceFragment extends BoundFragment {
         }
 
         private void updateUserDeviceList() {
-            AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
 
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");

@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.database.dto;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
@@ -44,6 +45,27 @@ public class Slave implements Serializable {
 
     public void setPassiveRegistrationToken(byte[] passiveRegistrationToken) {
         this.passiveRegistrationToken = passiveRegistrationToken;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Slave slave = (Slave) o;
+
+        if (name != null ? !name.equals(slave.name) : slave.name != null) return false;
+        if (slaveID != null ? !slaveID.equals(slave.slaveID) : slave.slaveID != null) return false;
+        return Arrays.equals(passiveRegistrationToken, slave.passiveRegistrationToken);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (slaveID != null ? slaveID.hashCode() : 0);
+        result = 31 * result + (passiveRegistrationToken != null ? Arrays.hashCode(passiveRegistrationToken) : 0);
+        return result;
     }
 
     @Override

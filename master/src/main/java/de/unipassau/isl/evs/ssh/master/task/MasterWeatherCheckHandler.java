@@ -18,15 +18,16 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.WeatherPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET_REPLY;
 
 /**
  * Task/Handler that periodically checks the records of weather data provider and issues notifications
@@ -38,18 +39,18 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     private static final long CHECK_INTERVAL_MILLIS = TimeUnit.MINUTES.toMillis(5);
     private static final Key<MasterWeatherCheckHandler> KEY = new Key<>(MasterWeatherCheckHandler.class);
     private static final String TAG = MasterWeatherCheckHandler.class.getSimpleName();
-    private boolean windowClosed;
+    private boolean windowOpen;
 
     private void sendWarningNotification() {
-        WeatherPayload payload = new WeatherPayload(true, "Please close all doors and windows. It will rain today.");
-        sendMessageLocal(RoutingKeys.MASTER_NOTIFICATION_SEND, new Message(payload));
+        //No hardcoded strings, only in strings.xml
+        NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
+        notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.WEATHER_WARNING);
     }
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (MASTER_DOOR_STATUS_GET.matches(message)
-                && message.getHeader(Message.HEADER_REFERENCES_ID) != null) {
-            windowClosed = MASTER_DOOR_STATUS_GET.getPayload(message).isClosed();
+        if (MASTER_DOOR_STATUS_GET_REPLY.matches(message)) {
+            windowOpen = MASTER_DOOR_STATUS_GET_REPLY.getPayload(message).isOpen();
         }
     }
 
@@ -69,7 +70,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
 
     @Override
     public void destroy() {
-        Scheduler scheduler = getContainer().require(Scheduler.KEY);
+        Scheduler scheduler = requireComponent(Scheduler.KEY);
         PendingIntent intent = scheduler.getPendingScheduleIntent(MasterWeatherCheckHandler.KEY, null,
                 PendingIntent.FLAG_CANCEL_CURRENT);
         scheduler.cancel(intent);
@@ -83,7 +84,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
             String city = sharedPreferences.getString(String.valueOf(R.string.master_city_name), null);
             if (city != null) {
                 CurrentWeather cw = owm.currentWeatherByCityName(city);
-                if (!windowClosed && cw.getRainInstance().hasRain()) {
+                if (windowOpen && cw.getRainInstance().hasRain()) {
                     sendWarningNotification();
                 }
             }

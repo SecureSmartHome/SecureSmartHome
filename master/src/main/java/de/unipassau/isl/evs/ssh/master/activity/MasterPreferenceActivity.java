@@ -1,53 +1,88 @@
 package de.unipassau.isl.evs.ssh.master.activity;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceFragment;
-import java.util.List;
+import android.view.View;
+import android.widget.Toast;
 
+import com.google.common.base.Strings;
+
+import de.unipassau.isl.evs.ssh.master.MasterConstants;
 import de.unipassau.isl.evs.ssh.master.R;
+import de.unipassau.isl.evs.ssh.master.network.Server;
 
 /**
- * Preferences Activity for the Master Odroid
+ *  Preferences Activity for the Master Odroid
  *
- * @author Christoph Frädrich
+ * @author Niko Fink
  */
-public class MasterPreferenceActivity extends PreferenceActivity {
+public class MasterPreferenceActivity extends MasterStartUpActivity {
+    public MasterPreferenceActivity() {
+        super(false);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
-
-    /**
-     * Populate the activity with the top-level headers.
-     */
-    @Override
-    public void onBuildHeaders(List<Header> target) {
-        loadHeadersFromResource(R.xml.preference_headers, target);
-    }
-
-    /**
-     * This fragment shows the preferences for the first header.
-     */
-    public static class PrefsFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            // Make sure default values are applied.  In a real app, you would
-            // want this in a shared function that is used to retrieve the
-            // SharedPreferences wherever they are needed.
-            //TODO add defaults
-            //PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences, false);
-
-            // Load the preferences from an XML resource
-            addPreferencesFromResource(R.xml.preferences);
+        if (!isSwitching()) {
+            setContentView(R.layout.activity_master_preference);
+            findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (allPreferencesSet()) {
+                        getSharedPreferences().edit()
+                                .putBoolean(PREF_PREFERENCES_SET, true)
+                                .commit();
+                        doBind();
+                    } else {
+                        Toast.makeText(MasterPreferenceActivity.this, "Please set all preferences before continuing", Toast.LENGTH_SHORT)
+                                .show();
+                    }
+                }
+            });
         }
     }
 
     @Override
-    protected boolean isValidFragment(String fragmentName) {
-        return fragmentName.equals(PrefsFragment.class.getName());
+    protected void onStop() {
+        doUnbind();
+        super.onStop();
+    }
+
+    private SharedPreferences getSharedPreferences() {
+        return getSharedPreferences(MasterConstants.FILE_SHARED_PREFS, MODE_PRIVATE);
+    }
+
+    public boolean allPreferencesSet() {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor edit = prefs.edit();
+
+        try {
+            return validatePort(prefs, edit, PREF_PORT_LOCAL, Server.PREF_SERVER_LOCAL_PORT) &&
+                    validatePort(prefs, edit, PREF_PORT_INTERN, Server.PREF_SERVER_LOCAL_PORT) &&
+                    validatePort(prefs, edit, PREF_PORT_EXTERN, null) &&
+                    !Strings.isNullOrEmpty(prefs.getString(PREF_CITY_NAME, null));
+        } catch (ClassCastException e) {
+            return false;
+        } finally {
+            edit.commit();
+        }
+    }
+
+    private boolean validatePort(SharedPreferences prefs, SharedPreferences.Editor edit, String stringPref, String intPref) {
+        int value;
+        try {
+            value = prefs.getInt(stringPref, -1);
+        } catch (ClassCastException e) {
+            try {
+                value = Integer.parseInt(prefs.getString(stringPref, "-1"));
+            } catch (NumberFormatException | ClassCastException e1) {
+                return false;
+            }
+        }
+        if (intPref != null) {
+            edit.putInt(intPref, value);
+        }
+        return value > 0;
     }
 }

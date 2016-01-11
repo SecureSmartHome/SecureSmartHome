@@ -3,20 +3,21 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
 /**
  * @author Leon Sell
  */
-public class DoorStatusPayload implements MessagePayload {
-    final boolean closed;
-    final String moduleName;
+public class DoorStatusPayload extends DoorPayload {
+    final boolean isOpen;
+    final boolean isBlocked;
 
-    public DoorStatusPayload(boolean closed, String moduleName) {
-        this.closed = closed;
-        this.moduleName = moduleName;
+    public DoorStatusPayload(boolean isOpen, boolean isBlocked, String moduleName) {
+        super(moduleName);
+        this.isOpen = isOpen;
+        this.isBlocked = isBlocked;
     }
 
-    public boolean isClosed() {
-        return closed;
+    public boolean isOpen() {
+        return isOpen;
     }
 
-    public String getModuleName() {
-        return moduleName;
+    public boolean isBlocked() {
+        return isBlocked;
     }
 }

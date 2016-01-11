@@ -22,12 +22,9 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
-import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_MODULES_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
 
 /**
@@ -51,10 +48,16 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
             return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.Light);
         }
     };
-    private static final Predicate<Module> PREDICATE_DOOR = new Predicate<Module>() {
+    private static final Predicate<Module> PREDICATE_DOOR_SENSOR = new Predicate<Module>() {
         @Override
         public boolean apply(Module input) {
             return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.DoorSensor);
+        }
+    };
+    private static final Predicate<Module> PREDICATE_DOOR_BUZZER = new Predicate<Module>() {
+        @Override
+        public boolean apply(Module input) {
+            return Objects.equals(input.getModuleType(), CoreConstants.ModuleType.DoorBuzzer);
         }
     };
     private static final Predicate<Module> PREDICATE_WEATHER = new Predicate<Module>() {
@@ -119,8 +122,14 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
     }
 
     @NonNull
-    public List<Module> getDoors() {
-        Iterable<Module> filtered = Iterables.filter(components, PREDICATE_DOOR);
+    public List<Module> getDoorSensors() {
+        Iterable<Module> filtered = Iterables.filter(components, PREDICATE_DOOR_SENSOR);
+        return Lists.newArrayList(filtered);
+    }
+
+    @NonNull
+    public List<Module> getDoorBuzzers() {
+        Iterable<Module> filtered = Iterables.filter(components, PREDICATE_DOOR_BUZZER);
         return Lists.newArrayList(filtered);
     }
 
@@ -154,8 +163,8 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (APP_MODULES_GET.matches(message) || GLOBAL_MODULES_UPDATE.matches(message)) {
-            ModulesPayload payload = message.getPayloadChecked(ModulesPayload.class);
+        if (GLOBAL_MODULES_UPDATE.matches(message)) {
+            ModulesPayload payload = GLOBAL_MODULES_UPDATE.getPayload(message);
             Set<Module> modules = payload.getModules();
             List<Slave> slaves = payload.getSlaves();
             ListMultimap<Slave, Module> modulesAtSlave = payload.getModulesAtSlaves();
@@ -165,19 +174,11 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
         }
     }
 
-    private void update() {
-        ModulesPayload payload = new ModulesPayload();
-        OutgoingRouter router = requireComponent(OutgoingRouter.KEY);
-
-        Message message = new Message(payload);
-
-        message.putHeader(Message.HEADER_REPLY_TO_KEY, APP_MODULES_GET.getKey());
-        router.sendMessageToMaster(RoutingKeys.MASTER_MODULE_GET, message);
-    }
-
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{APP_MODULES_GET, GLOBAL_MODULES_UPDATE};
+        return new RoutingKey[]{
+                GLOBAL_MODULES_UPDATE
+        };
     }
 
     public interface AppModuleListener {

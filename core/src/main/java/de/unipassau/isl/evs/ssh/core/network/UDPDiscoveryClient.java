@@ -16,6 +16,7 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
@@ -98,7 +99,7 @@ public class UDPDiscoveryClient extends AbstractComponent {
             if (channel == null) {
                 Bootstrap b = new Bootstrap()
                         .channel(NioDatagramChannel.class)
-                        .group(requireComponent(Client.KEY).getExecutor())
+                        .group(requireComponent(ExecutionServiceComponent.KEY))
                         .handler(new ResponseHandler())
                         .option(ChannelOption.SO_BROADCAST, true);
                 channel = b.bind(0);
@@ -122,10 +123,10 @@ public class UDPDiscoveryClient extends AbstractComponent {
             if (requireComponent(Client.KEY).isChannelOpen() && timeout == 0) {
                 Log.d(TAG, "scheduleDiscoveryRetry() running indefinitely, but Client Channel is open. Was stopDiscovery called?");
             }
-            retryFuture = requireComponent(Client.KEY).getAliveExecutor().schedule(new Runnable() {
+            retryFuture = requireComponent(ExecutionServiceComponent.KEY).schedule(new Runnable() {
                 @Override
                 public void run() {
-                    if (System.currentTimeMillis() > timeout) {
+                    if (timeout > 0 && System.currentTimeMillis() > timeout) {
                         Log.i(TAG, "Stopping discovery after timeout");
                         stopDiscovery();
                     }

@@ -19,12 +19,14 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
+import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_SET;
@@ -39,11 +41,14 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SE
  */
 public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler implements ScheduledComponent {
     private static final long SCHEDULE_LOOKAHEAD_MILLIS = TimeUnit.HOURS.toMillis(1);
-    private static final Key<MasterHolidaySimulationPlannerHandler> KEY = new Key<>(MasterHolidaySimulationPlannerHandler.class);
+    public static final Key<MasterHolidaySimulationPlannerHandler> KEY = new Key<>(MasterHolidaySimulationPlannerHandler.class);
+
     private boolean runHolidaySimulation = false;
 
     @Override
     public void handle(Message.AddressedMessage message) {
+        NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
+
         if (MASTER_HOLIDAY_GET.matches(message)) {
             replyStatus(message);
         } else if (MASTER_HOLIDAY_SET.matches(message)) {
@@ -67,6 +72,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
                 runHolidaySimulation = payload.switchOn();
                 replyStatus(message);
+                notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.HOLIDAY_MODE_SWITCHED_OFF, payload.switchOn());
 
             } else {
                 //Handle
@@ -85,7 +91,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
     private void replyStatus(Message.AddressedMessage message) {
         HolidaySimulationPayload payload = new HolidaySimulationPayload(runHolidaySimulation);
         Message reply = new Message(payload);
-        sendMessage(message.getFromID(), message.getHeader(Message.HEADER_REPLY_TO_KEY), reply);
+        sendReply(message, reply);
     }
 
     @Override
@@ -154,5 +160,9 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
                 sendMessage(module.getAtSlave(), SLAVE_LIGHT_SET, message);
             }
         }
+    }
+
+    public boolean isRunHolidaySimulation() {
+        return runHolidaySimulation;
     }
 }

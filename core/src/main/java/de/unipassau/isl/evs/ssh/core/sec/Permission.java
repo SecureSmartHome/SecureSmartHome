@@ -38,6 +38,7 @@ public enum Permission {
     REQUEST_DOOR_STATUS,
     LOCK_DOOR,
     UNLATCH_DOOR,
+    UNLATCH_DOOR_ON_HOLIDAY,
 
     //Camera
     REQUEST_CAMERA_STATUS,
@@ -72,7 +73,6 @@ public enum Permission {
     SHOW_TEMPLATE_PERMISSION,
 
     //Notification Types
-    ODROID_ADDED,
     HUMIDITY_WARNING,
     BRIGHTNESS_WARNING,
     HOLIDAY_MODE_SWITCHED_ON,
