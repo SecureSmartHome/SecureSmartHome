@@ -39,6 +39,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.ALL_GROUPS_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.EDIT_USERDEVICE_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.Fragment_Arguments.USER_DEVICE_ARGUMENT_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.GRANT_USER_PERMISSION;
 
 /**
  * This fragment lets the user view, edit and delete information regarding a single user device.
@@ -336,7 +337,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                     }
                 });
                 TextView textViewPermissionType = ((TextView) permissionLayout.findViewById(R.id.listpermission_permission_type));
-                textViewPermissionType.setText(createPermissionTypeText(permission));
+                textViewPermissionType.setText(createLocalizedPermissionTypeText(permission));
             }
 
             return permissionLayout;
@@ -348,33 +349,29 @@ public class EditUserDeviceFragment extends BoundFragment {
          * @param permission The permission the text is created for.
          * @return the text to display.
          */
-        private String createPermissionTypeText(Permission permission) {
+        private String createLocalizedPermissionTypeText(Permission permission) {
             String output;
             String moduleName = permission.getModuleName();
             if (moduleName != null) {
-                output = "This permission is connected to " + moduleName;
+                output = String.format(getResources().getString(R.string.permission_connected_to), moduleName);
             } else {
-                output = "This permission is not connected to any module.";
+                output = getResources().getString(R.string.permission_not_conneted_to);
             }
             return output;
         }
 
         /**
-         * @return {@code true} if
+         * @return {@code true} if the current user has the permission to grant other users permissions.
          */
         private boolean mayEdit() {
-            // FIXME finish him
-            Permission permission = new Permission(Permission.GRANT_USER_PERMISSION);
-            return userDeviceHasPermission(permission);
+            return userDeviceHasPermission(new Permission(GRANT_USER_PERMISSION));
         }
 
         /**
-         * @return If a user device is granted a certain permission.
+         * @return {@code true} if a user device is granted a certain permission.
          */
         private boolean userDeviceHasPermission(Permission permission) {
-
             return userPermissions.contains(permission);
         }
-
     }
 }
