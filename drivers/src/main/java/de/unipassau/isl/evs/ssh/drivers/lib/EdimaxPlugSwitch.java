@@ -193,13 +193,7 @@ public class EdimaxPlugSwitch extends AbstractComponent {
 
     private boolean parseResponseSet(String response) throws IOException {
         // Parse the response String
-        final Document document;
-        try {
-            final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            document = builder.parse(new InputSource(new StringReader(response)));
-        } catch (ParserConfigurationException | SAXException e) {
-            throw new IOException("Could not parse response", e);
-        }
+        final Document document = getDocument(response);
 
         // Extract response status
         Element setup = document.getElementById("setup");
@@ -214,13 +208,7 @@ public class EdimaxPlugSwitch extends AbstractComponent {
 
     private boolean parseResponseGet(String response) throws IOException {
         // Parse the response String
-        final Document document;
-        try {
-            final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            document = builder.parse(new InputSource(new StringReader(response)));
-        } catch (ParserConfigurationException | SAXException e) {
-            throw new IOException("Could not parse response", e);
-        }
+        final Document document = getDocument(response);
 
         // Extract the status
         final NodeList elements = document.getElementsByTagName("Device.System.Power.State");
@@ -230,6 +218,15 @@ public class EdimaxPlugSwitch extends AbstractComponent {
             return state != null && state.toLowerCase().equals("on");
         } else {
             throw new IOException("Response missing Element with tag 'Device.System.Power.State'");
+        }
+    }
+
+    private Document getDocument(String response) throws IOException {
+        try {
+            final DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            return builder.parse(new InputSource(new StringReader(response)));
+        } catch (ParserConfigurationException | SAXException e) {
+            throw new IOException("Could not parse response", e);
         }
     }
 
