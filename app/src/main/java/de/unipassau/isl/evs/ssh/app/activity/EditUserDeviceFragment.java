@@ -309,34 +309,38 @@ public class EditUserDeviceFragment extends BoundFragment {
             } else {
                 permissionLayout = (LinearLayout) convertView;
             }
+
             boolean userHasPermission = userDeviceHasPermission(permission);
             if (userHasPermission) {
-                // TODO Phil: gray all permissions if a user can't edit permissions at all
+                // TODO Phil: gray all permissions if a user can't edit permissions at all (Phil, 2016-01-04)
             }
 
-            final Switch permissionSwitch = (Switch) permissionLayout.findViewById(R.id.listpermission_permission_switch);
             final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
             } else {
+                final Switch permissionSwitch = (Switch) permissionLayout.findViewById(R.id.listpermission_permission_switch);
                 permissionSwitch.setText(permission.getPermission().toLocalizedString(getActivity()));
                 permissionSwitch.setChecked(userHasPermission);
                 permissionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (isChecked) {
-                            handler.grantPermission(device.getUserDeviceID(), permission);
-                            Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
-                                    + " granted for user device " + device.getName());
-                        } else {
-                            handler.revokePermission(device.getUserDeviceID(), permission);
-                            Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
-                                    + " revoked for user device " + device.getName());
+                        // TODO Phil: onCheckedChanged eventually gets called when setChecked is called (Phil, 2016-01-11)
+                        if (isChecked != userDeviceHasPermission(permission)) {
+                            if (isChecked) {
+                                handler.grantPermission(device.getUserDeviceID(), permission);
+                                Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
+                                        + " granted for user device " + device.getName());
+                            } else {
+                                handler.revokePermission(device.getUserDeviceID(), permission);
+                                Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
+                                        + " revoked for user device " + device.getName());
+                            }
                         }
-                        //permissionSwitch.toggle();
                     }
                 });
-                TextView textViewPermissionType = ((TextView) permissionLayout.findViewById(R.id.listpermission_permission_type));
+
+                final TextView textViewPermissionType = (TextView) permissionLayout.findViewById(R.id.listpermission_permission_type);
                 textViewPermissionType.setText(createLocalizedPermissionTypeText(permission));
             }
 
