@@ -86,6 +86,7 @@ public class RoutingKeys {
 
     public static final RoutingKey<ModifyModulePayload> MASTER_MODULE_REMOVE = new RoutingKey<>(PREFIX_MASTER + "/module/remove", ModifyModulePayload.class);
     public static final RoutingKey<Void> MASTER_MODULE_REMOVE_REPLY = MASTER_MODULE_REMOVE.getReply(Void.class);
+    public static final RoutingKey<ErrorPayload> MASTER_MODULE_REMOVE_ERROR = MASTER_MODULE_REMOVE.getReply(ErrorPayload.class);
     // END: ModuleHandler
 
     // BEGIN: SlaveManagementHandler

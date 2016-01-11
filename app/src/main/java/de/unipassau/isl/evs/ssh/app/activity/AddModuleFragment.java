@@ -31,7 +31,10 @@ import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccess
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.ModuleType;
 
@@ -56,34 +59,43 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     private Button addMockButton;
     private Button addUSBButton;
     private Button addGPIOButton;
+
+    private Spinner slaveSpinner;
+    private Spinner sensorTypeSpinner;
+    private Spinner connectionTypeSpinner;
+    private EditText nameInput;
+
     private final AppModifyModuleHandler.NewModuleListener listener = new AppModifyModuleHandler.NewModuleListener() {
         @Override
         public void registrationFinished(final boolean wasSuccessful) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    String text;
-                    if (wasSuccessful) {
-                        text = getResources().getString(R.string.added_module_success);
-                    } else {
-                        text = getResources().getString(R.string.added_module_fail);
-                    }
-
-                    addWLANButton.setEnabled(true);
-                    addMockButton.setEnabled(true);
-                    addUSBButton.setEnabled(true);
-                    addGPIOButton.setEnabled(true);
-
-                    Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
-                    ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+                    onRegistrationFinished(wasSuccessful);
                 }
             });
         }
+
+        @Override
+        public void unregistrationFinished(boolean wasSuccessful) {
+        }
     };
-    private Spinner slaveSpinner;
-    private Spinner sensorTypeSpinner;
-    private Spinner connectionTypeSpinner;
-    private EditText nameInput;
+
+    private void onRegistrationFinished(boolean wasSuccessful) {
+        if (!wasSuccessful) {
+            Toast.makeText(getActivity(), R.string.added_module_fail, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        addWLANButton.setEnabled(true);
+        addMockButton.setEnabled(true);
+        addUSBButton.setEnabled(true);
+        addGPIOButton.setEnabled(true);
+
+        Toast.makeText(getActivity(), R.string.added_module_success, Toast.LENGTH_LONG).show();
+        ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -312,6 +324,11 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         int position = sensorTypeSpinner.getSelectedItemPosition();
         ModuleType moduleType = ModuleType.values()[position];
         Module module = new Module(name, atSlave, moduleType, accessPoint);
-        handler.addNewModule(module);
+        handler.addNewModule(module).addListener(new GenericFutureListener<Future<? super MessagePayload>>() {
+            @Override
+            public void operationComplete(Future<? super MessagePayload> future) throws Exception {
+                onRegistrationFinished(future.isSuccess());
+            }
+        });
     }
 }
