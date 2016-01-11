@@ -11,16 +11,14 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.ImageView;
-
 import com.google.zxing.WriterException;
-
-import java.io.Serializable;
-
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.network.ClientConnectionListener;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.slave.R;
+
+import java.io.Serializable;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.QR_CODE_IMAGE_SCALE;
@@ -158,7 +156,7 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (isFinishing()) return;
+                if (isSwitching()) return;
                 showConnectingDialog();
                 dialog.setMessage("Address of Master found, connecting");
             }
@@ -170,7 +168,7 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (isFinishing()) return;
+                if (isSwitching()) return;
                 showConnectingDialog();
                 dialog.setMessage("Address of Master found, connecting to " + host + ":" + port);
             }
@@ -182,7 +180,7 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (isFinishing()) return;
+                if (isSwitching()) return;
                 if (dialog != null && dialog.isShowing()) {
                     dialog.setMessage("Successfully connected to Master");
                 }
@@ -200,7 +198,7 @@ public class SlaveQRCodeActivity extends SlaveStartUpActivity implements ClientC
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (isFinishing()) return;
+                if (isSwitching()) return;
                 showConnectingDialog();
                 dialog.setMessage("Master rejected connection with message: " + message + "\nPlease rescan the QR-Code.");
                 dialog.setIndeterminate(false);

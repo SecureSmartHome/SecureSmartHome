@@ -1,11 +1,5 @@
 package de.unipassau.isl.evs.ssh.slave.handler;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Component;
@@ -20,6 +14,12 @@ import de.unipassau.isl.evs.ssh.drivers.lib.ButtonSensor;
 import de.unipassau.isl.evs.ssh.drivers.lib.EdimaxPlugSwitch;
 import de.unipassau.isl.evs.ssh.drivers.lib.EvsIoException;
 import de.unipassau.isl.evs.ssh.drivers.lib.ReedSensor;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * SlaveHandler that checks periodically if ElectronicModules are still alive.
@@ -78,7 +78,7 @@ public class SlaveSystemHealthHandler extends AbstractComponent {
                 } catch (IOException e) {
                     success = false;
                 }
-            }
+            }//TODO Camera
 
             if (success) {
                 if (failedModules.contains(module)) {
