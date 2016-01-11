@@ -93,7 +93,7 @@ public interface Container {
             this.key = key;
         }
 
-        public ComponentException(Key<?> key, Component expected, Component actual) {
+        public ComponentException(Key<?> key, @Nullable Component expected, @Nullable Component actual) {
             this(key, String.valueOf(expected), String.valueOf(actual));
         }
 

@@ -18,18 +18,12 @@ import de.ncoder.typedmap.Key;
 public class AbstractComponent implements Component {
     private Container container;
 
-    /**
-     * @inheritDoc
-     */
     @Override
     public void init(Container container) {
         this.container = container;
         Log.v(getClass().getSimpleName(), "init");
     }
 
-    /**
-     * @inheritDoc
-     */
     @Override
     public void destroy() {
         container = null;

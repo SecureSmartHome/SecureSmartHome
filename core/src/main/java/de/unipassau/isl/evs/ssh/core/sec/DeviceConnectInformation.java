@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.network.Client;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.UnpooledByteBufAllocator;
@@ -35,16 +36,32 @@ import static io.netty.handler.codec.base64.Base64.decode;
 import static io.netty.handler.codec.base64.Base64.encode;
 
 /**
- * //TODO add javadoc
+ * Class encapsulating all Information that is required for connecting to a specific device:
+ * <ul>
+ * <li>IP Address and Port</li>
+ * <li>{@link DeviceID}</li>
+ * <li>{@link Client#getActiveRegistrationToken() Active} or {@link Client#getPassiveRegistrationToken() Passive} Registration Token</li>
+ * </ul>
+ * //TODO Niko: describe active and passive registration (NIko, 2016-01-11)
  *
  * @author Niko Fink
  */
 public class DeviceConnectInformation implements Serializable {
     private static final String TAG = DeviceConnectInformation.class.getSimpleName();
     private static final QRCodeWriter writer = new QRCodeWriter();
+
+    /**
+     * Length of the IP Address, which must be an IPv4 address
+     */
     public static final int ADDRESS_LENGTH = 4;
+    /**
+     * Length of the registration token
+     */
     public static final int TOKEN_LENGTH = 35;
     public static final int TOKEN_BASE64_LENGTH = encodeToken(new byte[TOKEN_LENGTH]).length();
+    /**
+     * Length of the byte array which will be encoded as String for the QR Code
+     */
     private static final int DATA_LENGTH = 4 + 2 + TOKEN_BASE64_LENGTH + DeviceID.ID_LENGTH;
     private static final int BASE64_FLAGS = android.util.Base64.NO_WRAP;
 
@@ -82,6 +99,9 @@ public class DeviceConnectInformation implements Serializable {
         return token;
     }
 
+    /**
+     * Read a DeviceConnectInformation from a Base64 encoded String, which was read from a QR Code.
+     */
     public static DeviceConnectInformation fromDataString(String data) throws IOException {
         final ByteBuf base64 = UnpooledByteBufAllocator.DEFAULT.heapBuffer(data.length());
         ByteBufUtil.writeAscii(base64, data);
@@ -104,6 +124,9 @@ public class DeviceConnectInformation implements Serializable {
         return new DeviceConnectInformation(address, port, id, token);
     }
 
+    /**
+     * Serialize this Object to a String which can be converted to a QR Code
+     */
     public String toDataString() {
         final ByteBuf byteBuf = UnpooledByteBufAllocator.DEFAULT.heapBuffer(DATA_LENGTH, DATA_LENGTH);
         byteBuf.writeBytes(address.getAddress());
@@ -113,10 +136,16 @@ public class DeviceConnectInformation implements Serializable {
         return encode(byteBuf).toString(Charsets.US_ASCII);
     }
 
+    /**
+     * Serialize this Object to a BitMatrix representing a QR Code
+     */
     public BitMatrix toQRBitMatrix() throws WriterException {
         return writer.encode(toDataString(), BarcodeFormat.QR_CODE, 0, 0);
     }
 
+    /**
+     * Display the data of this Object as a QR Code
+     */
     public Bitmap toQRBitmap(Bitmap.Config config, int onColor, int offColor) throws WriterException {
         BitMatrix matrix = toQRBitMatrix();
         final int width = matrix.getWidth();
@@ -137,6 +166,9 @@ public class DeviceConnectInformation implements Serializable {
 
     private static SecureRandom random = null;
 
+    /**
+     * Generate a random token that can be used for registration.
+     */
     public static byte[] getRandomToken() {
         byte[] token = new byte[TOKEN_LENGTH];
         if (random == null) {

@@ -36,9 +36,9 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
-import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.ALL_GROUPS_DIALOG;
-import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.EDIT_USERDEVICE_DIALOG;
-import static de.unipassau.isl.evs.ssh.app.AppConstants.Fragment_Arguments.USER_DEVICE_ARGUMENT_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.ALL_GROUPS_DIALOG;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_USERDEVICE_DIALOG;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.USER_DEVICE_ARGUMENT_FRAGMENT;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.GRANT_USER_PERMISSION;
 
 /**

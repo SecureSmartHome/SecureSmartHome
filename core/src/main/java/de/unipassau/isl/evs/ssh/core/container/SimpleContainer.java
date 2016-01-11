@@ -100,11 +100,11 @@ public class SimpleContainer implements Container {
         return t;
     }
 
+    @SuppressWarnings("SuspiciousMethodCalls")
     @Override
     public boolean isRegistered(Key<?> key) {
         return components.containsKey(key);
     }
-
 
     /**
      * {@inheritDoc}

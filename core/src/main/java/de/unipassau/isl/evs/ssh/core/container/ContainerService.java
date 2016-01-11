@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import de.ncoder.typedmap.Key;
 import de.ncoder.typedmap.TypedMap;
@@ -29,14 +30,22 @@ public class ContainerService extends Service implements Container {
     private static final String TAG = ContainerService.class.getSimpleName();
     private final Container container = new SimpleContainer();
     private final Binder theBinder = new Binder();
+    private StartupException startupException;
 
     @Override
     public void onCreate() {
         Log.v(TAG, "onCreate:called");
-        super.onCreate();
-        container.register(KEY_CONTEXT, new ContextComponent(this, getStartIntent()));
-        container.register(Scheduler.KEY, new Scheduler());
-        init();
+        try {
+            super.onCreate();
+            container.register(KEY_CONTEXT, new ContextComponent(this, getStartIntent()));
+            container.register(Scheduler.KEY, new Scheduler());
+            init();
+        } catch (StartupException e) {
+            startupException = e;
+            Log.e(TAG, "Could not start Service " + getClass().getSimpleName(), e);
+            Toast.makeText(this, "Service could not be started, please check your configuration.", Toast.LENGTH_LONG).show();
+            stopSelf();
+        }
         Log.d(TAG, "onCreate:finished");
     }
 
@@ -57,7 +66,12 @@ public class ContainerService extends Service implements Container {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return theBinder;
+        if (startupException != null) {
+            Log.w(TAG, "refusing onBind due to StartupException " + startupException);
+            return null;
+        } else {
+            return theBinder;
+        }
     }
 
     /**

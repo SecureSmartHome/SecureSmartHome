@@ -17,8 +17,10 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET_REPLY;
 
 /**
@@ -44,9 +46,9 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
     @Override
     public RoutingKey[] getRoutingKeys() {
         return new RoutingKey[]{
-                //MASTER_LIGHT_SET_ERROR,
+                MASTER_LIGHT_SET_ERROR,
                 MASTER_LIGHT_SET_REPLY,
-                //MASTER_LIGHT_GET_ERROR,
+                MASTER_LIGHT_GET_ERROR,
                 MASTER_LIGHT_GET_REPLY
         };
     }
@@ -59,6 +61,10 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
         } else if (MASTER_LIGHT_GET_REPLY.matches(message)) {
             LightPayload payload = MASTER_LIGHT_GET_REPLY.getPayload(message);
             setCachedStatus(payload.getModule(), payload.getOn());
+        } else if (MASTER_LIGHT_GET_ERROR.matches(message)) {
+            //TODO Leon: handle (Leon, 11.01.16)
+        } else if (MASTER_LIGHT_SET_ERROR.matches(message)) {
+            //TODO Leon: handle (Leon, 11.01.16)
         } else {
             invalidMessage(message);
         }

@@ -15,6 +15,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_REMOVE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_REMOVE_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_REMOVE_REPLY;
 
 /**
@@ -60,6 +61,8 @@ public class AppModifyModuleHandler extends AbstractMessageHandler implements Co
         } else if (MASTER_MODULE_REMOVE_REPLY.matches(message)) {
             // FIXME Wolfgang: Uncomment? (Phil, 8-1-16)
             // fireRegistrationFinished(false);
+        } else if (MASTER_MODULE_REMOVE_ERROR.matches(message)) {
+            //TODO Leon: handle (Leon, 11.01.16)
         } else {
             invalidMessage(message);
         }
@@ -70,7 +73,8 @@ public class AppModifyModuleHandler extends AbstractMessageHandler implements Co
         return new RoutingKey[]{
                 MASTER_MODULE_ADD_REPLY,
                 MASTER_MODULE_ADD_ERROR,
-                MASTER_MODULE_REMOVE_REPLY
+                MASTER_MODULE_REMOVE_REPLY,
+                MASTER_MODULE_REMOVE_ERROR
         };
     }
 

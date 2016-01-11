@@ -35,6 +35,7 @@ public class WelcomeScreenFragment extends ScanQRFragment {
     private static final String LOCAL_MASTER_PACKAGE = "de.unipassau.isl.evs.ssh.master";
     private static final String LOCAL_MASTER_ACTIVITY = LOCAL_MASTER_PACKAGE + ".activity.RegisterLocalAppActivity";
     private DeviceConnectInformation info;
+    private boolean triedLocal = false;
 
     @Nullable
     @Override
@@ -45,15 +46,19 @@ public class WelcomeScreenFragment extends ScanQRFragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    //Try to open the Master Activity for adding a local device
-                    Intent intent = new Intent();
-                    intent.setComponent(new ComponentName(LOCAL_MASTER_PACKAGE, LOCAL_MASTER_ACTIVITY));
-                    startActivityForResult(intent, CoreConstants.QRCodeInformation.REQUEST_CODE_SCAN_QR);
-                } catch (ActivityNotFoundException ignore) {
-                    //Or scan the QR Code
-                    requestScanQRCode();
+                if (!triedLocal) {
+                    try {
+                        //Try to open the Master Activity for adding a local device
+                        triedLocal = true;
+                        Intent intent = new Intent();
+                        intent.setComponent(new ComponentName(LOCAL_MASTER_PACKAGE, LOCAL_MASTER_ACTIVITY));
+                        startActivityForResult(intent, CoreConstants.QRCodeInformation.REQUEST_CODE_SCAN_QR);
+                        return;
+                    } catch (ActivityNotFoundException ignore) {
+                        //Or scan the QR Code
+                    }
                 }
+                requestScanQRCode();
             }
         });
         return root;

@@ -17,7 +17,7 @@ import de.unipassau.isl.evs.ssh.slave.handler.SlaveCameraHandler;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveDoorHandler;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveLightHandler;
 import de.unipassau.isl.evs.ssh.slave.handler.SlaveModuleHandler;
-import de.unipassau.isl.evs.ssh.slave.handler.SlaveSystemHealthHandler;
+import de.unipassau.isl.evs.ssh.slave.handler.SlaveSystemHealthChecker;
 
 /**
  * This Container class manages dependencies needed in the Slave part of the architecture.
@@ -36,7 +36,7 @@ public class SlaveContainer extends ContainerService {
         register(Client.KEY, new Client());
 
         register(SlaveModuleHandler.KEY, new SlaveModuleHandler());
-        register(SlaveSystemHealthHandler.KEY, new SlaveSystemHealthHandler());
+        register(SlaveSystemHealthChecker.KEY, new SlaveSystemHealthChecker());
 
         registerHandler(new SlaveLightHandler());
         registerHandler(new SlaveDoorHandler());

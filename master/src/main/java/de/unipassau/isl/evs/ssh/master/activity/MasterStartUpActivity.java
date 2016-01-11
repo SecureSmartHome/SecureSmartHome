@@ -7,13 +7,13 @@ import android.util.Log;
 
 import java.util.List;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.StartUpActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
-import de.unipassau.isl.evs.ssh.master.MasterConstants;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
@@ -47,7 +47,7 @@ public class MasterStartUpActivity extends StartUpActivity {
             return true;
         }
 
-        final SharedPreferences prefs = getSharedPreferences(MasterConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        final SharedPreferences prefs = getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         final boolean prefsSet = prefs.getBoolean(PREF_PREFERENCES_SET, false);
         if (!prefsSet) {
             return doSwitch(MasterPreferenceActivity.class, "prefs are not set yet");
@@ -74,14 +74,14 @@ public class MasterStartUpActivity extends StartUpActivity {
      * Build the {@link DeviceConnectInformation} and start the {@link MasterQRCodeActivity}.
      */
     private void startQRCodeActivity(Container container) {
-        final SharedPreferences prefs = getSharedPreferences(MasterConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        final SharedPreferences prefs = getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         final UserDevice userDevice = new UserDevice(
                 MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.NO_GROUP,
                 DeviceID.NO_DEVICE
         );
         final DeviceConnectInformation deviceInformation = new DeviceConnectInformation(
                 DeviceConnectInformation.findIPAddress(this),
-                prefs.getInt(Server.PREF_SERVER_LOCAL_PORT, MasterConstants.NettyConstants.DEFAULT_LOCAL_PORT),
+                prefs.getInt(Server.PREF_SERVER_LOCAL_PORT, CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT),
                 container.require(NamingManager.KEY).getMasterID(),
                 container.require(MasterRegisterDeviceHandler.KEY).generateNewRegisterToken(userDevice)
         );

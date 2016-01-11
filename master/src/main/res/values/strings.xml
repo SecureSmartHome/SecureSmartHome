@@ -14,7 +14,7 @@
 
     <!--                   SharedPreferencesKey                    -->
     <string name="master_city_name">MasterCityName</string>
-    <string name="master_local_port">MasterLocalPort</string>
+    <string name="master_port_local">MasterPortLocal</string>
     <string name="master_port_intern">MasterPortIntern</string>
     <string name="master_port_extern">MasterPortExtern</string>
 
@@ -33,4 +33,6 @@
     <string name="master_port_extern_summary">Opened to connect to master from extern</string>
     <string name="master_port_intern_summary">Opened on Master to accept connections from extern</string>
     <string name="master_port_local_summary">Local port to connect to master</string>
+    <string name="invalid_port">Invalid port entered. Please only enter Ports from 1024 to 65535</string>
+    <string name="invalid_city">Invalid city name.</string>
 </resources>

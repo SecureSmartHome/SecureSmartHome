@@ -16,6 +16,7 @@ import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER_REPLY;
 
 /**
@@ -57,6 +58,8 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
     public void handle(Message.AddressedMessage message) {
         if (MASTER_USER_REGISTER_REPLY.matches(message)) {
             handleUserRegisterResponse(MASTER_USER_REGISTER_REPLY.getPayload(message));
+        } else if (MASTER_USER_REGISTER_ERROR.matches(message)) {
+            //TODO Leon: handle (Leon, 11.01.16)
         } else {
             invalidMessage(message);
         }
@@ -64,7 +67,7 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_USER_REGISTER_REPLY};
+        return new RoutingKey[]{MASTER_USER_REGISTER_REPLY, MASTER_USER_REGISTER_ERROR};
     }
 
     private void handleUserRegisterResponse(GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload) {

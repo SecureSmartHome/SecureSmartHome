@@ -10,6 +10,9 @@ import android.util.Log;
 import net.aksingh.owmjapis.CurrentWeather;
 import net.aksingh.owmjapis.OpenWeatherMap;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
@@ -27,6 +30,7 @@ import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET_REPLY;
 
 /**
@@ -39,6 +43,9 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     private static final long CHECK_INTERVAL_MILLIS = TimeUnit.MINUTES.toMillis(5);
     private static final Key<MasterWeatherCheckHandler> KEY = new Key<>(MasterWeatherCheckHandler.class);
     private static final String TAG = MasterWeatherCheckHandler.class.getSimpleName();
+    private static final long FAILURE_UPDATE_TIMER = 45;
+
+    private long timeStamp;
     private boolean windowOpen;
 
     private void sendWarningNotification() {
@@ -51,12 +58,16 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     public void handle(Message.AddressedMessage message) {
         if (MASTER_DOOR_STATUS_GET_REPLY.matches(message)) {
             windowOpen = MASTER_DOOR_STATUS_GET_REPLY.getPayload(message).isOpen();
+        } else if (MASTER_DOOR_STATUS_GET_ERROR.matches(message)) {
+            //TODO Leon: handle (Leon, 11.01.16)
+        } else {
+            invalidMessage(message);
         }
     }
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_DOOR_STATUS_GET};
+        return new RoutingKey[]{MASTER_DOOR_STATUS_GET_REPLY, MASTER_DOOR_STATUS_GET_ERROR};
     }
 
     @Override
@@ -79,14 +90,20 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     @Override
     public void onReceive(Intent intent) {
         OpenWeatherMap owm = new OpenWeatherMap(CoreConstants.OPENWEATHERMAP_API_KEY);
+        SharedPreferences sharedPreferences = requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        String city = sharedPreferences.getString(String.valueOf(R.string.master_city_name), null);
         try {
-            SharedPreferences sharedPreferences = requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-            String city = sharedPreferences.getString(String.valueOf(R.string.master_city_name), null);
             if (city != null) {
                 CurrentWeather cw = owm.currentWeatherByCityName(city);
                 if (windowOpen && cw.getRainInstance().hasRain()) {
                     sendWarningNotification();
                 }
+            }
+        } catch (IOException e) {
+            if (timeStamp - System.currentTimeMillis() > TimeUnit.MINUTES.toMillis(FAILURE_UPDATE_TIMER)) {
+                requireComponent(NotificationBroadcaster.KEY).sendMessageToAllReceivers(
+                        NotificationPayload.NotificationType.WEATHER_SERVICE_FAILED, city);
+                timeStamp = System.currentTimeMillis();
             }
         } catch (Exception e) {
             Log.wtf(TAG, e);

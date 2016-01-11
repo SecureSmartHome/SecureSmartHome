@@ -3,6 +3,7 @@ package de.unipassau.isl.evs.ssh.core.sec;
 import android.content.Context;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -15,6 +16,9 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 
 /**
+ * All Permissions that can be granted to a UserDevice and which a required for executing certain actions,
+ * displaying certain information or receiving certain notifications.
+ *
  * @author Team
  */
 public enum Permission {
@@ -86,6 +90,9 @@ public enum Permission {
     //Ternary Permissions
     SWITCH_LIGHT(true);
 
+    /**
+     * A ternary Permission can selectively be granted for certain modules.
+     */
     private final boolean isTernary;
 
     Permission() {
@@ -100,14 +107,7 @@ public enum Permission {
         return isTernary;
     }
 
-    /**
-     * @deprecated use {@link #getPermissions(CoreConstants.ModuleType)} instead
-     */
-    @Deprecated
-    public static Permission[] getPermissions(String moduleType) {
-        return getPermissions(CoreConstants.ModuleType.valueOf(moduleType));
-    }
-
+    @Nullable
     public static Permission[] getPermissions(CoreConstants.ModuleType moduleType) {
         switch (moduleType) {
             case Light:

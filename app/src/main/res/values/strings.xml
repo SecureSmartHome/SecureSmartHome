@@ -163,4 +163,7 @@
     <string name="missingTemplates">Missing templates</string>
     <string name="group_edited">Group %s edited.</string>
     <string name="group_removed">Group %s removed.</string>
+    <string name="delete_confirmation">Are you sure you want to delete \'%s\'</string>
+    <string name="weather_service_failed_title">Weather Service failed.</string>
+    <string name="weather_service_failed_text">Weather Service was not able to retrieve data for %s</string>
 </resources>
