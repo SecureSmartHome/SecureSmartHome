@@ -27,10 +27,9 @@ public class WeatherSensor extends AbstractComponent {
         System.loadLibrary("ssh-drivers");
     }
 
+    private final Module module;
     private double temp1, temp2, pressure, altitude, humidity, uv;
     private int visible, ir;
-    private final Module module;
-
     private ScheduledFuture future;
 
     public WeatherSensor(Module module) {

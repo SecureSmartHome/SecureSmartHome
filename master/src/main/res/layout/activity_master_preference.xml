@@ -12,28 +12,28 @@
     tools:context="de.unipassau.isl.evs.ssh.master.activity.MasterPreferenceActivity">
 
     <TextView
-        android:layout_alignParentTop="true"
+        android:id="@+id/textViewInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:text="Please configure the Secure Smart Home Master before adding the first admin device."
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/textViewInfo"/>
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
 
     <fragment
         android:id="@+id/fragment"
         android:name="de.unipassau.isl.evs.ssh.master.activity.MasterPreferenceFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/textViewInfo"
         android:layout_above="@+id/button"
+        android:layout_below="@id/textViewInfo"
         android:layout_marginBottom="16dp"
         android:layout_marginTop="16dp"/>
 
     <Button
         android:id="@+id/button"
-        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:text="Proceed"/>
 
 </RelativeLayout>

@@ -8,15 +8,9 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.widget.Toast;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import com.google.common.base.Strings;
 
-import net.aksingh.owmjapis.OpenWeatherMap;
-
-import java.io.IOException;
-
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.master.MasterConstants;
 import de.unipassau.isl.evs.ssh.master.R;
 
 /**

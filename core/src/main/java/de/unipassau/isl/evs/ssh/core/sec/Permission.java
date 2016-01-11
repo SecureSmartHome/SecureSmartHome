@@ -94,6 +94,18 @@ public enum Permission {
      * A ternary Permission can selectively be granted for certain modules.
      */
     private final boolean isTernary;
+    public static final List<Permission> binaryPermissions = filter(new Predicate<Permission>() {
+        @Override
+        public boolean apply(Permission input) {
+            return !input.isTernary();
+        }
+    });
+    public static final List<Permission> ternaryPermissions = filter(new Predicate<Permission>() {
+        @Override
+        public boolean apply(Permission input) {
+            return input.isTernary();
+        }
+    });
 
     Permission() {
         this(false);
@@ -101,10 +113,6 @@ public enum Permission {
 
     Permission(boolean isTernary) {
         this.isTernary = isTernary;
-    }
-
-    public boolean isTernary() {
-        return isTernary;
     }
 
     @Nullable
@@ -117,25 +125,15 @@ public enum Permission {
         }
     }
 
-    public static final List<Permission> binaryPermissions = filter(new Predicate<Permission>() {
-        @Override
-        public boolean apply(Permission input) {
-            return !input.isTernary();
-        }
-    });
-
-    public static final List<Permission> ternaryPermissions = filter(new Predicate<Permission>() {
-        @Override
-        public boolean apply(Permission input) {
-            return input.isTernary();
-        }
-    });
-
     private static List<Permission> filter(Predicate<Permission> predicate) {
         final ArrayList<Permission> list = new ArrayList<>();
         final Iterable<Permission> iterable = Iterables.filter(Arrays.asList(values()), predicate);
         Iterables.addAll(list, iterable);
         return Collections.unmodifiableList(list);
+    }
+
+    public boolean isTernary() {
+        return isTernary;
     }
 
     /**
