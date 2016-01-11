@@ -19,7 +19,8 @@ import io.netty.util.ResourceLeakDetector;
  *
  * @author Team
  */
-public class CoreConstants {
+public enum CoreConstants {
+    ;
     /**
      * Name used for SharedPreferences file
      */
@@ -37,7 +38,8 @@ public class CoreConstants {
      *
      * @author Niko Fink & Phil Werli
      */
-    public static class NettyConstants {
+    public enum NettyConstants {
+        ;
         /**
          * Default port used by netty for Connections from local network
          */
@@ -126,7 +128,8 @@ public class CoreConstants {
     /**
      * @author Leon Sell
      */
-    public class LogActions {
+    public enum LogActions {
+        ;
         public static final String LIGHT_ON_ACTION = "LightOn";
         public static final String LIGHT_OFF_ACTION = "LightOff";
     }
@@ -136,7 +139,8 @@ public class CoreConstants {
      *
      * @author Phil Werli
      */
-    public static class QRCodeInformation {
+    public enum QRCodeInformation {
+        ;
         public static final String EXTRA_QR_DEVICE_INFORMATION = "EXTRA_QR_DEVICE_INFORMATION";
         public static final String EXTRA_QR_MESSAGE = "EXTRA_QR_MESSAGE";
         public static final int QR_CODE_IMAGE_SCALE = 35;
@@ -149,5 +153,4 @@ public class CoreConstants {
             ZXING_SCAN_INTENT.putExtra("SCAN_MODE", "QR_CODE_MODE");
         }
     }
-
 }

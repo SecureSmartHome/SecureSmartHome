@@ -47,6 +47,8 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.READER_
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.WRITER_IDLE_TIME;
 
 /**
+ * A ChannelHandlerAdapter that will execute the Handshake with the Master and add the IncomingDispatcher on success.
+ *
  * @author Niko Fink: Handshake Sequence
  * @author Christoph Fraedrich: Registration
  */

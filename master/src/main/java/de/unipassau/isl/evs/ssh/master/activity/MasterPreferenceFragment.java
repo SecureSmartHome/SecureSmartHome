@@ -8,6 +8,7 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.widget.Toast;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import com.google.common.base.Strings;
 
 import net.aksingh.owmjapis.OpenWeatherMap;
@@ -28,7 +29,7 @@ public class MasterPreferenceFragment extends PreferenceFragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getPreferenceManager().setSharedPreferencesName(MasterConstants.FILE_SHARED_PREFS);
+        getPreferenceManager().setSharedPreferencesName(CoreConstants.FILE_SHARED_PREFS);
 
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);

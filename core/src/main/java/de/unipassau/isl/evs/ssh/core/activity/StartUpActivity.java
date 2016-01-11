@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,10 +10,12 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 
 /**
- * TODO Niko add Javadoc for whole class. (Phil, 2016-01-09)
+ * A BoundActivity that provides utilities for switching between Activities if one or more of them are currently not
+ * available.
  *
  * @author Niko Fink
  */
+@SuppressLint("Registered")
 public abstract class StartUpActivity extends BoundActivity {
     protected final String TAG = getClass().getSimpleName();
     private boolean switching = false;
@@ -32,10 +35,16 @@ public abstract class StartUpActivity extends BoundActivity {
         checkSwitchActivity();
     }
 
+    /**
+     * @return {@code true}, if the current Activity is currently finishing and/or being replaced by another Activity.
+     */
     protected boolean isSwitching() {
         return isFinishing() || switching;
     }
 
+    /**
+     * Finish this activity as soon as it has been fully started.
+     */
     protected void finishLater() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             finishAfterTransition();
@@ -45,6 +54,13 @@ public abstract class StartUpActivity extends BoundActivity {
         switching = true;
     }
 
+    /**
+     * Switch to the given StartUpActivity due to the given reason String.
+     *
+     * @param toClass the class of the StartUpActivity to switch to
+     * @param reason  the reason for switching, only used for logging
+     * @return {@code true}, if the Activity will be switched. {@code false}, if the current Activity stays open
+     */
     protected boolean doSwitch(final Class<? extends StartUpActivity> toClass, String reason) {
         return doSwitch(toClass, reason, new Runnable() {
             public void run() {
@@ -53,6 +69,14 @@ public abstract class StartUpActivity extends BoundActivity {
         });
     }
 
+    /**
+     * Switch to the given StartUpActivity due to the given reason String by executing the given runnable.
+     *
+     * @param toClass        the class of the StartUpActivity to switch to
+     * @param reason         the reason for switching, only used for logging
+     * @param switchRunnable the runnable that should be called to switch the Activity
+     * @return {@code true}, if the Activity will be switched. {@code false}, if the current Activity stays open
+     */
     protected boolean doSwitch(final Class<? extends StartUpActivity> toClass, String reason, Runnable switchRunnable) {
         if (getClass().equals(toClass)) {
             Log.v(TAG, "Staying in " + toClass.getSimpleName() + " as " + reason);
@@ -65,5 +89,9 @@ public abstract class StartUpActivity extends BoundActivity {
         }
     }
 
+    /**
+     * Check if a switch to another Activity is required and call doSwitch if that is the case.
+     * Returns {@code true} if the Activity will be switched.s
+     */
     protected abstract boolean checkSwitchActivity();
 }

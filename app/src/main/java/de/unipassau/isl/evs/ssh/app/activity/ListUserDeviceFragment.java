@@ -30,9 +30,9 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
-import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.DELETE_USERDEVICE_DIALOG;
-import static de.unipassau.isl.evs.ssh.app.AppConstants.Fragment_Arguments.GROUP_ARGUMENT_FRAGMENT;
-import static de.unipassau.isl.evs.ssh.app.AppConstants.Fragment_Arguments.USER_DEVICE_ARGUMENT_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.DELETE_USERDEVICE_DIALOG;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.GROUP_ARGUMENT_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.USER_DEVICE_ARGUMENT_FRAGMENT;
 
 
 /**

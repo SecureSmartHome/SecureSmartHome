@@ -40,7 +40,7 @@ public abstract class AbstractAppHandler extends AbstractMessageHandler {
      * (except for the ErrorPayload, which is always handled as described above and doesn't count here),
      * the most common supertype of both payloads (i.e. MessagePayload) must be declared as generic type for the Future.</i>
      */
-    protected <T extends MessagePayload> Future<T> newResponseFuture(final Message.AddressedMessage message) {
+    protected <T> Future<T> newResponseFuture(final Message.AddressedMessage message) {
         if (!message.getFromID().equals(requireComponent(NamingManager.KEY).getOwnID())) {
             throw new IllegalArgumentException("Can only track messages sent by me");
         }
@@ -123,6 +123,7 @@ public abstract class AbstractAppHandler extends AbstractMessageHandler {
         return mappings.remove(message.getHeader(Message.HEADER_REFERENCES_ID));
     }
 
+    @SuppressWarnings("unchecked")
     private boolean setPromiseResult(Promise promise, Message.AddressedMessage message) {
         final MessagePayload payload = message.getPayloadChecked(MessagePayload.class);
         if (payload instanceof ErrorPayload) {
@@ -132,6 +133,10 @@ public abstract class AbstractAppHandler extends AbstractMessageHandler {
         }
     }
 
+    /**
+     * Class for measuring Message Response timing without holding a strong, non garbage-collected reference on the
+     * used Futures
+     */
     private static class MessageMetrics {
         private String key;
         private String status;

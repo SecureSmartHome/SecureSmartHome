@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 import java.net.InetSocketAddress;
@@ -229,12 +230,20 @@ public class Server extends AbstractComponent {
     }
 
     public Iterable<DeviceID> getActiveDevices() {
-        return Iterables.transform(getActiveChannels(), new Function<Channel, DeviceID>() {
+        final ChannelGroup input = getActiveChannels();
+        final Iterable<DeviceID> transformed = Iterables.transform(input, new Function<Channel, DeviceID>() {
             @Override
             public DeviceID apply(Channel input) {
                 return input.attr(ATTR_PEER_ID).get();
             }
         });
+        final Iterable<DeviceID> filtered = Iterables.filter(transformed, new Predicate<DeviceID>() {
+            @Override
+            public boolean apply(@Nullable DeviceID input) {
+                return input != null;
+            }
+        });
+        return filtered;
     }
 
     /**

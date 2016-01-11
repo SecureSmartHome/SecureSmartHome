@@ -28,8 +28,8 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
-import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.EDIT_GROUP_DIALOG;
-import static de.unipassau.isl.evs.ssh.app.AppConstants.Dialog_Arguments.TEMPLATE_DIALOG;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_GROUP_DIALOG;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.TEMPLATE_DIALOG;
 
 /**
  * This fragment shows a list of all groups of user devices registered in the system.
@@ -68,7 +68,7 @@ public class ListGroupFragment extends BoundFragment {
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                             Group item = adapter.getItem(position);
                                             Bundle bundle = new Bundle();
-                                            bundle.putSerializable(AppConstants.Fragment_Arguments.GROUP_ARGUMENT_FRAGMENT, item);
+                                            bundle.putSerializable(AppConstants.FragmentArguments.GROUP_ARGUMENT_FRAGMENT, item);
                                             ((MainActivity) getActivity()).showFragmentByClass(ListUserDeviceFragment.class, bundle);
                                         }
                                     }

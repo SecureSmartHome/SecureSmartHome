@@ -7,7 +7,7 @@ import android.widget.Toast;
 
 import com.google.common.base.Strings;
 
-import de.unipassau.isl.evs.ssh.master.MasterConstants;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
@@ -50,7 +50,7 @@ public class MasterPreferenceActivity extends MasterStartUpActivity {
     }
 
     private SharedPreferences getSharedPreferences() {
-        return getSharedPreferences(MasterConstants.FILE_SHARED_PREFS, MODE_PRIVATE);
+        return getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, MODE_PRIVATE);
     }
 
     public boolean allPreferencesSet() {
