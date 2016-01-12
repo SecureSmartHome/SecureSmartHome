@@ -151,7 +151,7 @@
     <string name="door_unlocked_title">Door is now unlocked!</string>
     <string name="door_unlocked_text">Others users can now open it.</string>
     <string name="edit_userdevice">Edit a user device</string>
-    <string name="missing_permission">Missing Permission.</string>
+    <string name="missing_permission">Missing Permission</string>
     <string name="permission_connected_to">This permission is connected to %s</string>
     <string name="permission_not_connected_to">This permission is not connected to any module.</string>
     <string name="group_has_no_members">This group has no members.</string>
@@ -167,13 +167,12 @@
     <string name="weather_service_failed_text">Weather Service was not able to retrieve data for %s</string>
     <string name="could_not_block_door">Could not (un)block door.</string>
     <string name="access_denied">Access denied!</string>
-    <string name="missing_permission">Missing Permission:</string>
     <string name="slave_registration_success">Successfully registered slave</string>
     <string name="cannot_remove_slave">Cannot remove slave</string>
     <string name="slave_removed">Slave Removed</string>
     <string name="module_removed">Module removed</string>
     <string name="cannot_remove_module">err_remove_module</string>
-    <string name="add_new_user_fail">An error occured while adding the new user!</string>
+    <string name="add_new_user_fail">An error occurred while adding the new user!</string>
     <string name="could_not_switch_holiday">Could not turn on holiday simulation</string>
     <string name="could_not_revoke">Could not revoke permission</string>
     <string name="could_not_grant">Could not grant permission</string>
