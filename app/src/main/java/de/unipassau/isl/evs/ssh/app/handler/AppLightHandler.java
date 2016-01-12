@@ -51,7 +51,8 @@ public class AppLightHandler extends AbstractAppHandler implements Component {
                 MASTER_LIGHT_SET_ERROR,
                 MASTER_LIGHT_SET_REPLY,
                 MASTER_LIGHT_GET_ERROR,
-                MASTER_LIGHT_GET_REPLY
+                MASTER_LIGHT_GET_REPLY,
+                APP_LIGHT_UPDATE
         };
     }
 
@@ -71,7 +72,7 @@ public class AppLightHandler extends AbstractAppHandler implements Component {
             } else if (MASTER_LIGHT_SET_ERROR.matches(message)) {
                 fireLightSetFinished(false);
             } else if (APP_LIGHT_UPDATE.matches(message)) {
-                LightPayload payload = MASTER_LIGHT_SET_REPLY.getPayload(message);
+                LightPayload payload = APP_LIGHT_UPDATE.getPayload(message);
                 final Module module = payload.getModule();
                 setCachedStatus(module, payload.getOn());
                 fireStatusChanged(module);
