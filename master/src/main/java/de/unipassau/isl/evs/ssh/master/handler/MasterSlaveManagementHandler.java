@@ -7,14 +7,18 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteDevicePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterSlavePayload;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
+import de.unipassau.isl.evs.ssh.master.database.IsReferencedException;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_DELETE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_REGISTER;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID;
 
 /**
  * Handles messages indicating that information of a device needs to be updated and writes these changes to the routing table.
@@ -37,9 +41,22 @@ public class MasterSlaveManagementHandler extends ModuleBroadcastHandler impleme
         if (MASTER_SLAVE_REGISTER.matches(message)) {
             handleSlaveRegister(message, MASTER_SLAVE_REGISTER.getPayload(message));
         } else if (MASTER_SLAVE_DELETE.matches(message)) {
-            //TODO Leon: handle (Leon, 11.01.16)
+            handleSlaveDelete(message, MASTER_SLAVE_DELETE.getPayload(message));
         } else {
             invalidMessage(message);
+        }
+    }
+
+    private void handleSlaveDelete(Message.AddressedMessage message, DeleteDevicePayload deleteDevicePayload) {
+        if (hasPermission(message.getFromID(), DELETE_ODROID)) {
+            try {
+                deleteSlave(deleteDevicePayload.getUser());
+            } catch (IsReferencedException e) {
+                Log.i(TAG, e.getLocalizedMessage());
+                sendReply(message, new Message(new ErrorPayload(e)));
+            }
+        } else {
+            sendNoPermissionReply(message, DELETE_ODROID);
         }
     }
 
@@ -52,10 +69,8 @@ public class MasterSlaveManagementHandler extends ModuleBroadcastHandler impleme
                         registerSlavePayload.getPassiveRegistrationToken()
                 ));
             } catch (AlreadyInUseException e) {
-                Log.i(TAG, "Failed adding a new Slave because the given name (" + registerSlavePayload.getName()
-                        + ") is already in use.");
-                sendReply(message, new Message(new ErrorPayload("Failed adding a new Slave because the given name ("
-                        + registerSlavePayload.getName() + ") is already in use.")));
+                Log.i(TAG, e.getLocalizedMessage());
+                sendReply(message, new Message(new ErrorPayload(e)));
             }
         } else {
             sendNoPermissionReply(message, ADD_ODROID);
@@ -64,6 +79,11 @@ public class MasterSlaveManagementHandler extends ModuleBroadcastHandler impleme
 
     public void registerSlave(Slave slave) throws AlreadyInUseException {
         requireComponent(SlaveController.KEY).addSlave(slave);
+        updateAllClients();
+    }
+
+    public void deleteSlave(DeviceID slaveID) throws IsReferencedException {
+        requireComponent(SlaveController.KEY).removeSlave(slaveID);
         updateAllClients();
     }
 }
