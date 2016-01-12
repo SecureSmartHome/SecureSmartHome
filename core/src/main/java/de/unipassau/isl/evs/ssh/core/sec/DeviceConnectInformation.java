@@ -60,9 +60,9 @@ public class DeviceConnectInformation implements Serializable {
     /**
      * Length of the byte array which will be encoded as String for the QR Code
      */
+    public static final int TOKEN_BASE64_LENGTH = encodeToken(new byte[TOKEN_LENGTH]).length();
     private static final int DATA_LENGTH = 4 + 2 + TOKEN_BASE64_LENGTH + DeviceID.ID_LENGTH;
     private static final int BASE64_FLAGS = android.util.Base64.NO_WRAP;
-    public static final int TOKEN_BASE64_LENGTH = encodeToken(new byte[TOKEN_LENGTH]).length();
     private static SecureRandom random = null;
     private final InetAddress address;
     private final int port;
