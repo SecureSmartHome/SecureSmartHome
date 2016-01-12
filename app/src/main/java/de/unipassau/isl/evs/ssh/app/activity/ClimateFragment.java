@@ -227,7 +227,6 @@ public class ClimateFragment extends BoundFragment {
                 TextView irView = (TextView) climateSensorLayout.findViewById(R.id.ir);
                 int ir = handler.getIr(m);
                 irView.setText(String.format(getResources().getString(R.string.si_visible), ir));
-
             }
             counter++;
             return climateSensorLayout;

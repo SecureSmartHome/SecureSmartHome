@@ -24,7 +24,5 @@
         android:elevation="16dp"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer">
-
     </android.support.design.widget.NavigationView>
-
 </android.support.v4.widget.DrawerLayout>

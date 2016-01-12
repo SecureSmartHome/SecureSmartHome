@@ -38,7 +38,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String KEY_LAST_FRAGMENT = "LAST_FRAGMENT";
     private LinearLayout overlayDisconnected;
-    private NotificationCompat.Builder notificationBuilder;
 
     private boolean fragmentInitialized = false;
     private Bundle savedInstanceState;
@@ -46,12 +45,10 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     private ClientConnectionListener connectionListener = new ClientConnectionListener() {
         @Override
         public void onMasterFound() {
-
         }
 
         @Override
         public void onClientConnecting(String host, int port) {
-
         }
 
         @Override
@@ -112,7 +109,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         overlayDisconnected = (LinearLayout) findViewById(R.id.overlay_disconnected);
 
         //Initialise Notifications
-        notificationBuilder = new NotificationCompat.Builder(this);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
         notificationBuilder.setAutoCancel(true);
 
         //Initialise NavigationDrawer
@@ -256,12 +253,10 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
-
             android.support.v4.app.FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
-
         }
     }
 

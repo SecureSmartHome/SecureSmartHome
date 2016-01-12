@@ -30,7 +30,6 @@ public class MainFragment extends BoundFragment {
                 parent.showFragmentByClass(DoorFragment.class);
             }
         });
-
         ImageButton lightButton = (ImageButton) mLinearLayout.findViewById(R.id.lightButtonOn);
         lightButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -38,7 +37,6 @@ public class MainFragment extends BoundFragment {
                 parent.showFragmentByClass(LightFragment.class);
             }
         });
-
         ImageButton climateButton = (ImageButton) mLinearLayout.findViewById(R.id.climateButton);
         climateButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,7 +44,6 @@ public class MainFragment extends BoundFragment {
                 parent.showFragmentByClass(ClimateFragment.class);
             }
         });
-
         ImageButton holidayButton = (ImageButton) mLinearLayout.findViewById(R.id.holidayButton);
         holidayButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,7 +51,6 @@ public class MainFragment extends BoundFragment {
                 parent.showFragmentByClass(HolidayFragment.class);
             }
         });
-
         ImageButton statusButton = (ImageButton) mLinearLayout.findViewById(R.id.statusButton);
         statusButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,7 +58,6 @@ public class MainFragment extends BoundFragment {
                 parent.showFragmentByClass(StatusFragment.class);
             }
         });
-
         ImageButton usersButton = (ImageButton) mLinearLayout.findViewById(R.id.usersButton);
         usersButton.setOnClickListener(new View.OnClickListener() {
             @Override

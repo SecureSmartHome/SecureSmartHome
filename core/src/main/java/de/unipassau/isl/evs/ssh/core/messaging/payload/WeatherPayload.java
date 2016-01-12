@@ -6,7 +6,6 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
  * @author Andreas Bucher
  */
 public class WeatherPayload implements MessagePayload {
-
     boolean warning; //should user be warned?
     String warnText; //what type of warning is it?
 
@@ -33,5 +32,4 @@ public class WeatherPayload implements MessagePayload {
     public String getWarnText() {
         return warnText;
     }
-
 }
