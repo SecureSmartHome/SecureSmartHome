@@ -42,7 +42,7 @@ public class StatusFragment extends BoundFragment {
     private final AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
         @Override
         public void onModulesRefreshed() {
-            getActivity().runOnUiThread(new Runnable() {
+            maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     update();

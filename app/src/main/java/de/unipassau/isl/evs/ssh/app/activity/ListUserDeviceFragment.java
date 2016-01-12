@@ -47,6 +47,7 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.USER_D
 public class ListUserDeviceFragment extends BoundFragment {
     private static final String TAG = ListUserDeviceFragment.class.getSimpleName();
 
+    //TODO Wolfgang/Phil: add Listener (Wolfgang, 2016-01-13)
     private UserDeviceListAdapter adapter;
     private ListView userDeviceList;
     /**

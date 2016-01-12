@@ -26,6 +26,8 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.TEMPLATE
  * @author Phil Werli
  */
 public class EditGroupFragment extends BoundFragment {
+
+    //TODO Wolfgang/Phil: add Listener (Wolfgang, 2016-01-13)
     private static final String TAG = EditGroupFragment.class.getSimpleName();
 
     @Override

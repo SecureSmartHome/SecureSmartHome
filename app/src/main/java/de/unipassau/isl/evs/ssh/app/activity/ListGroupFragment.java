@@ -43,6 +43,7 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.GROUP_
 public class ListGroupFragment extends BoundFragment {
     private static final String TAG = ListGroupFragment.class.getSimpleName();
 
+    //TODO Wolfgang/Phil: add Listener (Wolfgang, 2016-01-13)
     private GroupListAdapter adapter;
     private ListView groupList;
 

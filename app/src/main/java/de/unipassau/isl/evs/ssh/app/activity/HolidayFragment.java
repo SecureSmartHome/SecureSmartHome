@@ -29,12 +29,17 @@ public class HolidayFragment extends BoundFragment {
     private final AppHolidaySimulationHandler.HolidaySimulationListener holidaySimulationListener
             = new AppHolidaySimulationHandler.HolidaySimulationListener() {
         @Override
-        public void onHolidaySetReply(boolean wasSuccessful) {
-            if (wasSuccessful) {
-                updateView();
-            } else {
-                Toast.makeText(getActivity(), R.string.could_not_switch_holiday, Toast.LENGTH_SHORT).show();
-            }
+        public void onHolidaySetReply(final boolean wasSuccessful) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (wasSuccessful) {
+                        updateView();
+                    } else {
+                        Toast.makeText(getActivity(), R.string.could_not_switch_holiday, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         }
     };
 

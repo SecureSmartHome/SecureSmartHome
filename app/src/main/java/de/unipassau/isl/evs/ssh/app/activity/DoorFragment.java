@@ -49,22 +49,32 @@ public class DoorFragment extends BoundFragment {
         }
 
         @Override
-        public void blockActionFinished(boolean wasSuccessful) {
-            if (wasSuccessful) {
-                updateButtons();
-            } else {
-                Toast.makeText(getActivity(), R.string.could_not_block_door, Toast.LENGTH_SHORT).show();
-            }
+        public void blockActionFinished(final boolean wasSuccessful) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (wasSuccessful) {
+                        updateButtons();
+                    } else {
+                        Toast.makeText(getActivity(), R.string.could_not_block_door, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         }
 
         @Override
-        public void unlatchActionFinished(boolean wasSuccessful) {
-            if (wasSuccessful) {
-                updateButtons();
-            } else {
-                Log.e(TAG, "Could not open door");
-                Toast.makeText(getActivity(), "Could not open door", Toast.LENGTH_SHORT).show();
-            }
+        public void unlatchActionFinished(final boolean wasSuccessful) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (wasSuccessful) {
+                        updateButtons();
+                    } else {
+                        Log.e(TAG, "Could not open door");
+                        Toast.makeText(getActivity(), "Could not open door", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         }
 
         @Override

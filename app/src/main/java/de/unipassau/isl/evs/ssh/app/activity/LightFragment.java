@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,22 +43,24 @@ public class LightFragment extends BoundFragment {
     private final AppLightHandler.LightHandlerListener listener = new AppLightHandler.LightHandlerListener() {
         @Override
         public void statusChanged(Module module) {
-            final FragmentActivity activity = getActivity();
-            if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.notifyDataSetChanged();
-                    }
-                });
-            }
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    adapter.notifyDataSetChanged();
+                }
+            });
         }
 
         @Override
-        public void onLightSetFinished(boolean wasSuccess) {
-            if (!wasSuccess) {
-                Toast.makeText(getActivity(), "Could not switch light. Maybe missing Permission", Toast.LENGTH_SHORT).show();
-            }
+        public void onLightSetFinished(final boolean wasSuccess) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!wasSuccess) {
+                        Toast.makeText(getActivity(), "Could not switch light. Maybe missing Permission", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         }
 
         @Override

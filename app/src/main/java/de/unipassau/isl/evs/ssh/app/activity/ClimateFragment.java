@@ -39,7 +39,12 @@ public class ClimateFragment extends BoundFragment {
     private final AppClimateHandler.ClimateHandlerListener listener = new AppClimateHandler.ClimateHandlerListener() {
         @Override
         public void statusChanged(Module module) {
-            adapter.notifyDataSetChanged();
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    adapter.notifyDataSetChanged();
+                }
+            });
         }
     };
 

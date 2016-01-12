@@ -34,12 +34,17 @@ public class AddGroupFragment extends BoundFragment {
 
     private final AppUserConfigurationHandler.UserInfoListener userInfoListener = new AppUserConfigurationHandler.UserInfoListener() {
         @Override
-        public void userInfoUpdated(UserConfigurationEvent event) {
-            if (event.getType().equals(UserConfigurationEvent.EventType.GROUP_ADD)) {
-                String toastText = getResources().getString(R.string.group_created);
-                Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                toast.show();
-            }
+        public void userInfoUpdated(final UserConfigurationEvent event) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (event.getType().equals(UserConfigurationEvent.EventType.GROUP_ADD)) {
+                        String toastText = getResources().getString(R.string.group_created);
+                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                }
+            });
         }
     };
 
