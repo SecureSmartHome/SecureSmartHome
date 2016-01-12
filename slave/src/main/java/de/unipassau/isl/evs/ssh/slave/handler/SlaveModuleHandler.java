@@ -76,7 +76,6 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
                 Log.i(TAG, "Module has unknown type/accesspoint combination");
                 return;
             }
-
             if (clazz.getName().equals(ButtonSensor.class.getName())) {
                 registerButtonSensor(module);
             } else if (clazz.getName().equals(DoorBuzzer.class.getName())) {
@@ -98,7 +97,6 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
         if (!buttonSensor.getModuleType().isValidAccessPoint(accessPoint)) {
             throw new WrongAccessPointException();
         }
-
         assert getContainer() != null;
         final Key<ButtonSensor> key = new Key<>(ButtonSensor.class, moduleName);
         getContainer().register(key, new ButtonSensor(accessPoint.getPort(), moduleName));
@@ -111,7 +109,6 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
         if (!(doorBuzzer.getModuleType().isValidAccessPoint(accessPoint))) {
             throw new WrongAccessPointException();
         }
-
         assert getContainer() != null;
         final Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, moduleName);
         getContainer().register(key, new DoorBuzzer(accessPoint.getPort()));
@@ -124,7 +121,6 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
         if (!(reedSensor.getModuleType().isValidAccessPoint(accessPoint))) {
             throw new WrongAccessPointException();
         }
-
         final Key<ReedSensor> key = new Key<>(ReedSensor.class, moduleName);
         assert getContainer() != null;
         getContainer().register(key, new ReedSensor(accessPoint.getPort(), moduleName));
@@ -137,7 +133,6 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
         if (!weatherSensor.getModuleType().isValidAccessPoint(accessPoint)) {
             throw new WrongAccessPointException();
         }
-
         assert getContainer() != null;
         final Key<WeatherSensor> key = new Key<>(WeatherSensor.class, moduleName);
         getContainer().register(key, new WeatherSensor(weatherSensor));
@@ -151,7 +146,6 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
         if (!plugSwitch.getModuleType().isValidAccessPoint(plugSwitch.getModuleAccessPoint())) {
             throw new WrongAccessPointException();
         }
-
         if ( plugSwitch.getModuleAccessPoint().getType().equals(WLANAccessPoint.TYPE)) {
             final Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, moduleName);
             final WLANAccessPoint accessPoint = (WLANAccessPoint) plugSwitch.getModuleAccessPoint();

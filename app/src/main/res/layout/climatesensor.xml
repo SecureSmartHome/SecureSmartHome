@@ -21,7 +21,6 @@
         android:visibility="gone"
         />
 
-
     <TextView
         android:id="@+id/climateSensor"
         android:layout_width="wrap_content"
@@ -214,5 +213,4 @@
             android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"/>
     </TableRow>
-
 </TableLayout>

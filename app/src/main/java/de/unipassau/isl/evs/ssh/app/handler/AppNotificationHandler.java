@@ -160,7 +160,6 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
             title = resources.getString(R.string.system_health_warning_title_fixed);
             text = String.format(resources.getString(R.string.system_health_warning_text_fixed), moduleName);
         }
-
         displayNotification(title, text, StatusFragment.class, notificationID);
     }
 
