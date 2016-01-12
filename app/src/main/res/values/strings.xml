@@ -150,11 +150,10 @@
     <string name="door_locked_text">Unauthorised users can not open it anymore.</string>
     <string name="door_unlocked_title">Door is now unlocked!</string>
     <string name="door_unlocked_text">Others users can now open it.</string>
-    <string name="delete_confirmation">Are you sure you want to delete %s\?</string>
     <string name="edit_userdevice">Edit a user device</string>
     <string name="missing_permission">Missing Permission.</string>
     <string name="permission_connected_to">This permission is connected to %s</string>
-    <string name="permission_not_conneted_to">This permission is not connected to any module.</string>
+    <string name="permission_not_connected_to">This permission is not connected to any module.</string>
     <string name="group_has_no_members">This group has no members.</string>
     <string name="group_one_member">%s is the only member.</string>
     <string name="group_many_members">%1$s and %2$s and more are members.</string>

@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import de.unipassau.isl.evs.ssh.app.AppConstants;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -31,6 +30,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_GROUP_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.TEMPLATE_DIALOG;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.GROUP_ARGUMENT_FRAGMENT;
 
 /**
  * This fragment shows a list of all groups of user devices registered in the system.
@@ -69,7 +69,7 @@ public class ListGroupFragment extends BoundFragment {
                                              public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                                  Group item = adapter.getItem(position);
                                                  Bundle bundle = new Bundle();
-                                                 bundle.putSerializable(AppConstants.Fragment_Arguments.GROUP_ARGUMENT_FRAGMENT, item);
+                                                 bundle.putSerializable(GROUP_ARGUMENT_FRAGMENT, item);
                                                  ((MainActivity) getActivity()).showFragmentByClass(ListUserDeviceFragment.class, bundle);
                                              }
                                          }

@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,12 +14,10 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -247,7 +246,8 @@ public class EditUserDeviceFragment extends BoundFragment {
                     if (rhs.getPermission() == null) {
                         return -1;
                     }
-                    return lhs.getPermission().toLocalizedString(getActivity()).compareTo(rhs.getPermission().toLocalizedString(getActivity()));
+                    FragmentActivity activity = getActivity();
+                    return lhs.getPermission().toLocalizedString(activity).compareTo(rhs.getPermission().toLocalizedString(activity));
                 }
             });
         }
@@ -287,7 +287,7 @@ public class EditUserDeviceFragment extends BoundFragment {
 
         @Override
         public boolean areAllItemsEnabled() {
-            return mayEdit();
+            return userMayEdit();
         }
 
         @Override
@@ -310,24 +310,25 @@ public class EditUserDeviceFragment extends BoundFragment {
                 permissionLayout = (LinearLayout) convertView;
             }
 
-            boolean userHasPermission = userDeviceHasPermission(permission);
-            if (userHasPermission) {
-                // TODO Phil: gray all permissions if a user can't edit permissions at all (Phil, 2016-01-04)
-            }
-
             final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
             } else {
-                final Switch permissionSwitch = (Switch) permissionLayout.findViewById(R.id.listpermission_permission_switch);
-                permissionSwitch.setText(permission.getPermission().toLocalizedString(getActivity()));
-                permissionSwitch.setChecked(userHasPermission);
-                permissionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                TextView permissionText = (TextView) permissionLayout.findViewById(R.id.listpermission_permission_text);
+                permissionText.setText(permission.getPermission().toLocalizedString(getActivity()));
+
+                final Button permissionButton = (Button) permissionLayout.findViewById(R.id.listpermission_permission_button);
+                final boolean deviceHasPermission = userDeviceHasPermission(permission);
+                if (deviceHasPermission) {
+                    permissionButton.setText(getResources().getString(R.string.revoke));
+                } else {
+                    permissionButton.setText(getResources().getString(R.string.grant));
+                }
+                permissionButton.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        // TODO Phil: onCheckedChanged eventually gets called when setChecked is called (Phil, 2016-01-11)
-                        if (isChecked != userDeviceHasPermission(permission)) {
-                            if (isChecked) {
+                    public void onClick(View v) {
+                        if (userMayEdit()) {
+                            if (deviceHasPermission) {
                                 handler.grantPermission(device.getUserDeviceID(), permission);
                                 Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
                                         + " granted for user device " + device.getName());
@@ -336,12 +337,16 @@ public class EditUserDeviceFragment extends BoundFragment {
                                 Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
                                         + " revoked for user device " + device.getName());
                             }
+                            updatePermissionList();
+                        } else {
+                            Toast.makeText(getActivity(), "Missing permission.", Toast.LENGTH_SHORT).show();
                         }
+
                     }
                 });
 
-                final TextView textViewPermissionType = (TextView) permissionLayout.findViewById(R.id.listpermission_permission_type);
-                textViewPermissionType.setText(createLocalizedPermissionTypeText(permission));
+                final TextView permissionDescription = (TextView) permissionLayout.findViewById(R.id.listpermission_permission_type);
+                permissionDescription.setText(permission.getPermission().getLocalizedDescription(getActivity()));
             }
 
             return permissionLayout;
@@ -359,7 +364,7 @@ public class EditUserDeviceFragment extends BoundFragment {
             if (moduleName != null) {
                 output = String.format(getResources().getString(R.string.permission_connected_to), moduleName);
             } else {
-                output = getResources().getString(R.string.permission_not_conneted_to);
+                output = getResources().getString(R.string.permission_not_connected_to);
             }
             return output;
         }
@@ -367,7 +372,7 @@ public class EditUserDeviceFragment extends BoundFragment {
         /**
          * @return {@code true} if the current user has the permission to grant other users permissions.
          */
-        private boolean mayEdit() {
+        private boolean userMayEdit() {
             return userDeviceHasPermission(new Permission(GRANT_USER_PERMISSION));
         }
 
