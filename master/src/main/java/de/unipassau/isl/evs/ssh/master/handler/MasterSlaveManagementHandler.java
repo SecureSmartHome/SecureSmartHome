@@ -2,8 +2,11 @@ package de.unipassau.isl.evs.ssh.master.handler;
 
 import android.util.Log;
 
+import java.util.List;
+
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
+import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
@@ -30,10 +33,13 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID;
 public class MasterSlaveManagementHandler extends ModuleBroadcastHandler implements Component {
     public static final Key<MasterSlaveManagementHandler> KEY = new Key<>(MasterSlaveManagementHandler.class);
     private static final String TAG = MasterSlaveManagementHandler.class.getSimpleName();
+    private static final String MODULE_ADDED_JUST_BEFORE_SLAVE_DELETE_ERROR =
+            "Error while deleting slave, because a module depends on it. This could be because a"
+                    + " module was added just after deleting all module at this slave.";
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_SLAVE_REGISTER};
+        return new RoutingKey[]{MASTER_SLAVE_REGISTER, MASTER_SLAVE_DELETE};
     }
 
     @Override
@@ -49,11 +55,16 @@ public class MasterSlaveManagementHandler extends ModuleBroadcastHandler impleme
 
     private void handleSlaveDelete(Message.AddressedMessage message, DeleteDevicePayload deleteDevicePayload) {
         if (hasPermission(message.getFromID(), DELETE_ODROID)) {
+            final SlaveController slaveController = requireComponent(SlaveController.KEY);
+            List<Module> modulesAtSlave = slaveController.getModulesOfSlave(deleteDevicePayload.getUser());
+            for (Module module : modulesAtSlave) {
+                slaveController.removeModule(module.getName());
+            }
             try {
                 deleteSlave(deleteDevicePayload.getUser());
             } catch (IsReferencedException e) {
-                Log.i(TAG, e.getLocalizedMessage());
-                sendReply(message, new Message(new ErrorPayload(e)));
+                Log.i(TAG, MODULE_ADDED_JUST_BEFORE_SLAVE_DELETE_ERROR);
+                sendReply(message, new Message(new ErrorPayload(e, MODULE_ADDED_JUST_BEFORE_SLAVE_DELETE_ERROR)));
             }
         } else {
             sendNoPermissionReply(message, DELETE_ODROID);
