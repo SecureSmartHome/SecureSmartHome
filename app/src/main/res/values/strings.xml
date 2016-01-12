@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Secure Smart Home</string>
+    <string name="app_name" translatable="false">Secure Smart Home</string>
     <string name="title_activity_main">MainActivity</string>
 
     <string name="favourite_settings">Favourites</string>
@@ -93,7 +93,7 @@
     <string name="add_wlan_module">Add WLAN module</string>
     <string name="add_mock_module">Add mocked module</string>
     <string name="status_name">Name:</string>
-    <string name="status_id">ID:</string>
+    <string name="status_id" translatable="false">ID:</string>
     <string name="statusmodule_name">Name:</string>
     <string name="statusmodule_type">Module Type:</string>
     <string name="connector_type">Connector Type:</string>
@@ -120,11 +120,11 @@
     <string name="visible_1">Visible:</string>
     <string name="ir">IR:</string>
 
-    <string name="si_degree">%3.1f C°</string>
-    <string name="si_pressure">%4.1f Pa</string>
-    <string name="si_altitude">%4.2f m</string>
-    <string name="si_humidity">%3.2f \U+0025</string>
-    <string name="si_visible">%d Lux</string>
+    <string name="si_degree" translatable="false">%3.1f C°</string>
+    <string name="si_pressure" translatable="false">%4.1f Pa</string>
+    <string name="si_altitude" translatable="false">%4.2f m</string>
+    <string name="si_humidity" translatable="false">%3.2f \U+0025</string>
+    <string name="si_visible" translatable="false">%d Lux</string>
 
     <!--Strings used for Notifications-->
     <string name="climate_notification_title">Climate Warning!</string>

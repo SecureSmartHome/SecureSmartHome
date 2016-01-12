@@ -11,7 +11,7 @@
     <string name="add_usb_module">USB Modul hinzufügen</string>
     <string name="add_wlan_module">WLAN Modul hinzufügen</string>
     <string name="add_wlan_password">Passwort:</string>
-    <string name="add_wlan_username" > Benutzername:</string>
+    <string name="add_wlan_username">Benutzername:</string>
     <string name="added_module_fail">Hinzufügen des neuen Moduls fehlgeschlagen</string>
     <string name="added_module_success">Modul erfolgreich hinzugefügt</string>
     <string name="addmodule_sensor_type">Sensortyp:</string>
@@ -74,7 +74,7 @@
     <string name="nav_door_string">Tür</string>
     <string name="nav_edit">Bearbeiten</string>
     <string name="nav_holiday_string">Urlaub</string>
-    <string name="nav_home">Zuhause</string>
+    <string name="nav_home">Startbildschrim</string>
     <string name="nav_light_string">Licht</string>
     <string name="nav_modifyPermissions_string">Berechtigungen bearbeiten</string>
     <string name="nav_status_string">Status</string>
@@ -120,4 +120,18 @@
     <string name="welcome_to_ssh">Willkommen in der Secure Smart Home App.</string>
     <string name="door_unlatched_text"> </string>
     <string name="grant">Gewähren</string>
+    <string name="weather_service_failed_title">Wetterdienst abgestürzt.</string>
+    <string name="edit_userdevice">Nutzer bearbeiten</string>
+    <string name="group_created">Gruppe erstellt.</string>
+    <string name="group_edited">Gruppe %s bearbeitet.</string>
+    <string name="group_has_no_members">Diese Gruppe verfügt über keine Mitglieder</string>
+    <string name="group_many_members">%1$s und %2$s und mehr sind Mitglieder</string>
+    <string name="group_one_member">%s ist der einzige Nutzer</string>
+    <string name="group_removed">Gruppe %s wurde entfernt</string>
+    <string name="group_two_member">%1$s und %2$s sind Mitglieder</string>
+    <string name="missingTemplates">Fehlende Vorlage</string>
+    <string name="missing_permission">Fehlende Berechtigung</string>
+    <string name="permission_connected_to">Diese Berechtigung ist verknüpft mit %s</string>
+    <string name="permission_not_connected_to">Diese Berechtigung hat keine verbindung zu einem Modul</string>
+    <string name="weather_service_failed_text">Wetterdienst konnte keine daten von %s erhalten.</string>
 </resources>

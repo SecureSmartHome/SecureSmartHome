@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Secure Smart Home - Slave</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="connected_modules">Verbundene Module</string>
+    <string name="hello_world">Hallo Welt!</string>
+    <string name="module_information">%1$s auf %2$s via %3$s</string>
+    <string name="module_name">§1$s, %2$s</string>
+    <string name="please_scan_device">Scannen sie diesen QR-Code um den Slave Odroid zu registrieren</string>
+    <string name="qr_code_description">QR-Code</string>
+    <string name="title_activity_main">MainActivity</string>
+</resources>

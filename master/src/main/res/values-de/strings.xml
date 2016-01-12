@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Secure Smart Home - Master</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="address_format">Adresse: %s</string>
+    <string name="closed_connection_with">"Verbindung beendet mit: %s"</string>
+    <string name="connected_slaves">Verbundene Slaves</string>
+    <string name="connected_user_devices">Verbundene Nutzergeräte</string>
+    <string name="hello_world">Hallo Welt!</string>
+    <string name="id_format">ID: %s</string>
+    <string name="invalid_city">Ungültiger Stadtname</string>
+    <string name="invalid_port">Ungültiger Port. Bitte geben Sie nur Ports zwischen 1024 bis 65535</string>
+    <string name="master_city_name">MasterStadtname</string>
+    <string name="master_city_name_summary">Name der Stadt für die Wettervorhersage</string>
+    <string name="master_port_extern">MasterPortExtern</string>
+    <string name="master_port_extern_summary">Wurde geöffnet um sich mit dem Master von außerhalb zu verbinden</string>
+    <string name="master_port_intern">MasterPortIntern</string>
+    <string name="master_port_intern_summary">Wurde auf dem Master geöffnet um Verbindungen von außerhalb zu erlauben</string>
+    <string name="master_port_local">MasterPortLocal</string>
+    <string name="master_port_local_summary">Lokaler Port um sich mit dem Master zu verbinden</string>
+    <string name="please_scan_device">Scannen sie den QR-Code mit ihrem Android Gerät es als ersten Administrator zu registrieren.</string>
+    <string name="preferences">Einstellungen</string>
+    <string name="qr_code_description">Dies ist ein QR-Code</string>
+    <string name="slave_name">Slave: %s</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_preferences">Einstellungen</string>
+    <string name="title_activity_register_local_app">Lakale App registrieren</string>
+    <string name="title_activity_register_local_slave">Lokalen Slave registrieren</string>
+    <string name="userdevice_name">Nutzer Gerät: %s</string>
+    <string name="title_qrcode_activity">Master - füge initiales Gerät hinzu</string>
+</resources>
