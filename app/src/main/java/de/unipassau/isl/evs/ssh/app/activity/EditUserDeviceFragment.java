@@ -1,6 +1,5 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -23,7 +22,6 @@ import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -108,7 +106,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                 if (groups != null) {
                     bundle.putStringArray(ALL_GROUPS_DIALOG, groups);
                 }
-                createEditUserDeviceDialog(bundle).show();
+                showEditUserDeviceDialog(bundle);
             }
         });
 
@@ -158,67 +156,73 @@ public class EditUserDeviceFragment extends BoundFragment {
     /**
      * Creates and returns a dialogs that gives the user the option to edit a group.
      */
-    private Dialog createEditUserDeviceDialog(Bundle bundle) {
+    private void showEditUserDeviceDialog(Bundle bundle) {
         final UserDevice userDevice = (UserDevice) bundle.getSerializable(EDIT_USERDEVICE_DIALOG);
+        if (userDevice == null) {
+            Log.i(TAG, "No device found.");
+            return;
+        }
 
-        String[] groupNames = bundle.getStringArray(ALL_GROUPS_DIALOG);
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-
-        final ViewGroup parent = (ViewGroup) getActivity().findViewById(R.id.fragment_edit_user);
-        View dialogView = inflater.inflate(R.layout.dialog_edituserdevice, parent, false);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-        final EditText userDeviceName = (EditText) dialogView.findViewById(R.id.editdevicedialog_username);
-        List<String> groupList = new ArrayList<>();
+        final String[] groupNames = bundle.getStringArray(ALL_GROUPS_DIALOG);
         if (groupNames == null) {
             Log.i(TAG, "Empty bundle");
-        } else {
-            Collections.addAll(groupList, groupNames);
+            return;
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_spinner_dropdown_item, groupList);
-        final Spinner groupName = ((Spinner) dialogView.findViewById(R.id.editdevicedialog_spinner));
-        groupName.setAdapter(adapter);
 
-        final AlertDialog dialog = builder.create();
         final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
         if (handler == null) {
             Log.i(TAG, "Container not yet connected!");
-        } else if (userDevice == null) {
-            Log.i(TAG, "No device found.");
-        } else {
-            builder.setMessage(R.string.edit_group_dialog_title)
-                    .setView(dialogView)
-                    .setNegativeButton(R.string.cancel, null)
-                    .setPositiveButton(R.string.edit, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            String name = userDeviceName.getText().toString();
-                            String group = ((String) groupName.getSelectedItem());
-                            handler.setUserGroup(userDevice.getUserDeviceID(), group);
-                            handler.setUserName(userDevice.getUserDeviceID(), name);
-                            String toastText = "Device " + name + " edited.";
-                            Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                            toast.show();
-                        }
-                    })
-                    .setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            handler.removeUserDevice(userDevice.getUserDeviceID());
-                            String toastText = "Device " + userDevice.getName() + " removed.";
-                            Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                            toast.show();
-                        }
-                    })
-                    .create()
-                    .show();
+            return;
         }
+
+        final LayoutInflater inflater = getActivity().getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.dialog_edituserdevice, null);
+
+        final EditText userDeviceName = (EditText) dialogView.findViewById(R.id.editdevicedialog_username);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, groupNames);
+        final Spinner groupName = ((Spinner) dialogView.findViewById(R.id.editdevicedialog_spinner));
+        groupName.setAdapter(adapter);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        //TODO Phil: wrong title? (Wolfgang, 2016-01-13)
+        final AlertDialog editDialog = builder.setMessage(R.string.edit_group_dialog_title)
+                .setView(dialogView)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.edit, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        String name = userDeviceName.getText().toString();
+                        String group = ((String) groupName.getSelectedItem());
+                        handler.setUserGroup(userDevice.getUserDeviceID(), group);
+                        handler.setUserName(userDevice.getUserDeviceID(), name);
+                        String toastText = "Device " + name + " edited."; // TODO Phil: fix hardcoded strings
+                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                })
+                .setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        handler.removeUserDevice(userDevice.getUserDeviceID());
+                        String toastText = "Device " + userDevice.getName() + " removed.";// TODO Phil: fix hardcoded strings
+                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                })
+                .create();
+
+        // open the soft keyboard when dialog gets focused
+        userDeviceName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    editDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                }
+            }
+        });
+
+        editDialog.show();
         userDeviceName.requestFocus();
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        return dialog;
     }
 
     private class PermissionListAdapter extends BaseAdapter {
