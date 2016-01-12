@@ -2,6 +2,8 @@ package de.unipassau.isl.evs.ssh.master;
 
 import android.util.Log;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.container.AccessLogger;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -35,6 +37,7 @@ import de.unipassau.isl.evs.ssh.master.task.MasterWeatherCheckHandler;
 
 /**
  * This Container class manages dependencies needed in the Master part of the architecture.
+ * TODO Niko JavaDoc in Module
  *
  * @author Team
  */
@@ -44,9 +47,13 @@ public class MasterContainer extends ContainerService {
         register(DatabaseConnector.KEY, new DatabaseConnector());
         register(KeyStoreController.KEY, new KeyStoreController());
         register(NamingManager.KEY, new NamingManager(true));
+        register(ExecutionServiceComponent.KEY, new DefaultExecutionServiceComponent(getClass().getSimpleName()));
+        if (CoreConstants.TRACK_STATISTICS) {
+            register(AccessLogger.KEY, new AccessLogger());
+        }
+
         register(IncomingDispatcher.KEY, new IncomingDispatcher());
         register(OutgoingRouter.KEY, new ServerOutgoingRouter());
-        register(ExecutionServiceComponent.KEY, new DefaultExecutionServiceComponent(getClass().getSimpleName()));
         register(UDPDiscoveryServer.KEY, new UDPDiscoveryServer());
         register(Server.KEY, new Server());
 

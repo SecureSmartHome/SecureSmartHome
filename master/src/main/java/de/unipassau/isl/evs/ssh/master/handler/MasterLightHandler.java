@@ -18,6 +18,7 @@ import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.LogActions.LIGHT_OFF_ACTION;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.LogActions.LIGHT_ON_ACTION;
 import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_LIGHT_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET;
@@ -117,9 +118,8 @@ public class MasterLightHandler extends AbstractMasterHandler {
 
         messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
 
-        sendMessageToAllDevicesWithPermission(messageToSend, REQUEST_LIGHT_STATUS, null, MASTER_LIGHT_SET_REPLY);
-
-        //TODO Leon: broadcast lightstatus to all connected devices
+        sendReply(correspondingMessage, messageToSend);
+        sendMessageToAllDevicesWithPermission(messageToSend, REQUEST_LIGHT_STATUS, null, APP_LIGHT_UPDATE);
     }
 
     private void handleGetResponse(Message.AddressedMessage message) {

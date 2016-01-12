@@ -5,6 +5,7 @@ import android.util.Log;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.container.AccessLogger;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import io.netty.util.concurrent.Future;
@@ -40,6 +41,10 @@ public abstract class OutgoingRouter extends AbstractComponent {
                     }
                 }
             });
+        }
+        final AccessLogger logger = getComponent(AccessLogger.KEY);
+        if (logger != null) {
+            logger.logAccess(RoutingKey.forMessage(amsg));
         }
         return amsg;
     }

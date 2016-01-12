@@ -18,7 +18,7 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 /**
  * All Permissions that can be granted to a UserDevice and which a required for executing certain actions,
  * displaying certain information or receiving certain notifications.
- *
+ * TODO Niko JavaDoc
  * @author Team
  */
 public enum Permission {
