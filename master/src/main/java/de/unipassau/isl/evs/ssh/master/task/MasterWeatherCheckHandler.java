@@ -19,8 +19,10 @@ import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
@@ -41,13 +43,14 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_ST
  * @author Christoph Fraedrich
  */
 public class MasterWeatherCheckHandler extends AbstractMasterHandler implements ScheduledComponent {
+    public static final Key<MasterWeatherCheckHandler> KEY = new Key<>(MasterWeatherCheckHandler.class);
     private static final long CHECK_INTERVAL_MILLIS = TimeUnit.MINUTES.toMillis(5);
-    private static final Key<MasterWeatherCheckHandler> KEY = new Key<>(MasterWeatherCheckHandler.class);
     private static final String TAG = MasterWeatherCheckHandler.class.getSimpleName();
     private static final long FAILURE_UPDATE_TIMER = 45;
 
     private long timeStamp;
     final private Map<String, Boolean> openForModule = new HashMap<>();
+    private Container container;
 
     private void sendWarningNotification() {
         //No hardcoded strings, only in strings.xml
@@ -72,6 +75,8 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
 
     @Override
     public void init(Container container) {
+        this.container = container;
+        container.require(IncomingDispatcher.KEY).registerHandler(this, getRoutingKeys());
         Scheduler scheduler = container.require(Scheduler.KEY);
         PendingIntent intent = scheduler.getPendingScheduleIntent(MasterWeatherCheckHandler.KEY, null,
                 PendingIntent.FLAG_CANCEL_CURRENT);
@@ -85,13 +90,18 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
         PendingIntent intent = scheduler.getPendingScheduleIntent(MasterWeatherCheckHandler.KEY, null,
                 PendingIntent.FLAG_CANCEL_CURRENT);
         scheduler.cancel(intent);
+        if (container != null) {
+            container.require(IncomingDispatcher.KEY).unregisterHandler(this, getRoutingKeys());
+        }
+        this.container = null;
     }
 
     @Override
     public void onReceive(Intent intent) {
         OpenWeatherMap owm = new OpenWeatherMap(CoreConstants.OPENWEATHERMAP_API_KEY);
         SharedPreferences sharedPreferences = requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-        String city = sharedPreferences.getString(String.valueOf(R.string.master_city_name), null);
+        //TODO Niko: orgranize shared pref key strings (Leon, 12.01.16)
+        String city = sharedPreferences.getString("master_city_name", null);
         try {
             if (!Strings.isNullOrEmpty(city)) {
                 CurrentWeather cw = owm.currentWeatherByCityName(city);
