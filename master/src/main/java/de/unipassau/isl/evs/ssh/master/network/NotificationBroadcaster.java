@@ -29,36 +29,60 @@ public class NotificationBroadcaster extends AbstractComponent {
                 .getAllUserDevicesWithPermission(type.getReceivePermission(), null);
         NotificationPayload payload = new NotificationPayload(type, args);
         Message messageToSend = new Message(payload);
-        boolean userAtHome = false;
+        boolean userAtHome;
         //This might give an error as we do not
         // know if the enums and DTOs have the same names
         if (type.equals(NotificationPayload.NotificationType.WEATHER_WARNING)) {
             //If no one is at home everyone should get the WeatherWarning.
             //If someone with permission is at home, only them should get a notification.
-            for (UserDevice userDevice : allUserDevicesWithPermission) {
-                boolean isConnectionLocal = requireComponent(Server.KEY)
-                        .findChannel(userDevice.getUserDeviceID())
-                        .attr(ATTR_LOCAL_CONNECTION)
-                        .get();
-                if (isConnectionLocal) {
-                    userAtHome = true;
-                }
-            }
+            userAtHome = isSomeoneAtHome(allUserDevicesWithPermission);
             if (userAtHome) {
-                for (UserDevice userDevice : allUserDevicesWithPermission) {
-                    boolean isConnectionLocal = requireComponent(Server.KEY)
-                            .findChannel(userDevice.getUserDeviceID())
-                            .attr(ATTR_LOCAL_CONNECTION)
-                            .get();
-                    requireComponent(OutgoingRouter.KEY).sendMessage(userDevice.getUserDeviceID(),
-                            RoutingKeys.APP_NOTIFICATION_RECEIVE, messageToSend);
-                }
+                sendToUsersAtHome(allUserDevicesWithPermission, messageToSend);
             } else {
                 searchUsers(allUserDevicesWithPermission, messageToSend);
             }
-        } else {
+        } else if (type.equals(NotificationPayload.NotificationType.HUMIDITY_WARNING)) {
+            userAtHome = isSomeoneAtHome(allUserDevicesWithPermission);
+            if (userAtHome) {
+                sendToUsersAtHome(allUserDevicesWithPermission, messageToSend);
+            } else {
+                searchUsers(allUserDevicesWithPermission, messageToSend);
+            }
+        }else{
             searchUsers(allUserDevicesWithPermission, messageToSend);
         }
+    }
+
+    private void sendToUsersAtHome(List<UserDevice> allUserDevicesWithPermission, Message messageToSend) {
+        for (UserDevice userDevice : allUserDevicesWithPermission) {
+            boolean isConnectionLocal = false;
+            if (requireComponent(Server.KEY).findChannel(userDevice.getUserDeviceID()).attr(ATTR_LOCAL_CONNECTION) != null) {
+                isConnectionLocal = requireComponent(Server.KEY)
+                        .findChannel(userDevice.getUserDeviceID())
+                        .attr(ATTR_LOCAL_CONNECTION)
+                        .get();
+            }
+            if (isConnectionLocal) {
+                requireComponent(OutgoingRouter.KEY).sendMessage(userDevice.getUserDeviceID(),
+                        RoutingKeys.APP_NOTIFICATION_RECEIVE, messageToSend);
+            }
+        }
+    }
+
+    private boolean isSomeoneAtHome(List<UserDevice> allUserDevicesWithPermission) {
+        for (UserDevice userDevice : allUserDevicesWithPermission) {
+            boolean isConnectionLocal = false;
+            if (requireComponent(Server.KEY).findChannel(userDevice.getUserDeviceID()).attr(ATTR_LOCAL_CONNECTION) != null) {
+                isConnectionLocal = requireComponent(Server.KEY)
+                        .findChannel(userDevice.getUserDeviceID())
+                        .attr(ATTR_LOCAL_CONNECTION)
+                        .get();
+            }
+            if (isConnectionLocal) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void searchUsers(List<UserDevice> allUserDevicesWithPermission, Message messageToSend) {
