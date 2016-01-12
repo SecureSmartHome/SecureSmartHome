@@ -12,6 +12,8 @@ import de.unipassau.isl.evs.ssh.app.handler.AppNotificationHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppRegisterNewDeviceHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppSlaveManagementHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.container.AccessLogger;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -33,9 +35,13 @@ public class AppContainer extends ContainerService {
     protected void init() {
         register(KeyStoreController.KEY, new KeyStoreController());
         register(NamingManager.KEY, new NamingManager(false));
+        register(ExecutionServiceComponent.KEY, new DefaultExecutionServiceComponent(getClass().getSimpleName()));
+        if (CoreConstants.TRACK_STATISTICS) {
+            register(AccessLogger.KEY, new AccessLogger());
+        }
+
         register(IncomingDispatcher.KEY, new IncomingDispatcher());
         register(OutgoingRouter.KEY, new ClientOutgoingRouter());
-        register(ExecutionServiceComponent.KEY, new DefaultExecutionServiceComponent(getClass().getSimpleName()));
         register(UDPDiscoveryClient.KEY, new UDPDiscoveryClient());
         register(Client.KEY, new Client());
 
