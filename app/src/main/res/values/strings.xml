@@ -175,4 +175,6 @@
     <string name="cannot_remove_module">err_remove_module</string>
     <string name="add_new_user_fail">An error occured while adding the new user!</string>
     <string name="could_not_switch_holiday">Could not turn on holiday simulation</string>
+    <string name="could_not_revoke">Could not revoke permission</string>
+    <string name="could_not_grant">Could not grant permission</string>
 </resources>
