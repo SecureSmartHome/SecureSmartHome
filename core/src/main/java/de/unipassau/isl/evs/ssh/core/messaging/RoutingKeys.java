@@ -116,6 +116,8 @@ public class RoutingKeys {
     public static final RoutingKey<LightPayload> SLAVE_LIGHT_SET = new RoutingKey<>(PREFIX_SLAVE + "/light/set", LightPayload.class);
     public static final RoutingKey<LightPayload> SLAVE_LIGHT_SET_REPLY = SLAVE_LIGHT_SET.getReply(LightPayload.class);
     public static final RoutingKey<ErrorPayload> SLAVE_LIGHT_SET_ERROR = SLAVE_LIGHT_SET.getReply(ErrorPayload.class);
+
+    public static final RoutingKey<LightPayload> APP_LIGHT_UPDATE = new RoutingKey<>(PREFIX_APP + "/light/update", LightPayload.class);
     // END: Light
 
     // BEGIN: Door
