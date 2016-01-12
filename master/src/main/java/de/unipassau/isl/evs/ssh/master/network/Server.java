@@ -165,6 +165,7 @@ public class Server extends AbstractComponent {
     @Nullable
     public Channel findChannel(DeviceID id) {
         for (Channel channel : connections) {
+            //noinspection ConstantConditions
             if (channel.isActive() && Objects.equals(channel.attr(ATTR_PEER_ID).get(), id)) {
                 return channel;
             }

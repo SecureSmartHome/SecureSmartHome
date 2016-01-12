@@ -50,7 +50,6 @@ public class MasterModuleHandler extends ModuleBroadcastHandler {
             sendNoPermissionReply(original, Permission.DELETE_SENSOR);
             return;
         }
-
         requireComponent(SlaveController.KEY).removeModule(payload.getModule().getName());
         sendOnSuccess(original);
     }
@@ -62,19 +61,15 @@ public class MasterModuleHandler extends ModuleBroadcastHandler {
             sendNoPermissionReply(original, Permission.ADD_SENSOR);
             return;
         }
-
-
         Module module = payload.getModule();
 
         if (!module.getModuleType().isValidAccessPoint(module.getModuleAccessPoint())) {
             sendError(original, new WrongAccessPointException(module.getModuleAccessPoint().getType()));
             return;
         }
-
         SlaveController slaveController = requireComponent(SlaveController.KEY);
         PermissionController permissionController = requireComponent(PermissionController.KEY);
         Permission[] permissions = Permission.getPermissions(module.getModuleType());
-
         try {
             slaveController.addModule(module);
 
@@ -83,7 +78,6 @@ public class MasterModuleHandler extends ModuleBroadcastHandler {
                     permissionController.addPermission(permission, module.getName());
                 }
             }
-
             sendOnSuccess(original);
         } catch (DatabaseControllerException e) {
             sendError(original, e);

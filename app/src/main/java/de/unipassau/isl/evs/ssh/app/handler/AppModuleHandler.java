@@ -126,7 +126,6 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
         if (modulesAtSlave != null) {
             this.modulesAtSlave.putAll(modulesAtSlave);
         }
-
         fireModulesUpdated();
     }
 

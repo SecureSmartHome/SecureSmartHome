@@ -2,6 +2,8 @@ package de.unipassau.isl.evs.ssh.slave;
 
 import android.util.Log;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
+import de.unipassau.isl.evs.ssh.core.container.AccessLogger;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
@@ -21,6 +23,7 @@ import de.unipassau.isl.evs.ssh.slave.handler.SlaveSystemHealthChecker;
 
 /**
  * This Container class manages dependencies needed in the Slave part of the architecture.
+ * TODO Niko JavaDoc in Module
  *
  * @author Team
  */
@@ -29,9 +32,13 @@ public class SlaveContainer extends ContainerService {
     protected void init() {
         register(KeyStoreController.KEY, new KeyStoreController());
         register(NamingManager.KEY, new NamingManager(false));
+        register(ExecutionServiceComponent.KEY, new DefaultExecutionServiceComponent(getClass().getSimpleName()));
+        if (CoreConstants.TRACK_STATISTICS) {
+            register(AccessLogger.KEY, new AccessLogger());
+        }
+
         register(IncomingDispatcher.KEY, new IncomingDispatcher());
         register(OutgoingRouter.KEY, new ClientOutgoingRouter());
-        register(ExecutionServiceComponent.KEY, new DefaultExecutionServiceComponent(getClass().getSimpleName()));
         register(UDPDiscoveryClient.KEY, new UDPDiscoveryClient());
         register(Client.KEY, new Client());
 

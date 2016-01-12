@@ -19,10 +19,8 @@ import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandle
 import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_STATUS_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BLOCK;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH;
@@ -50,7 +48,6 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                 MASTER_DOOR_STATUS_UPDATE,
                 MASTER_DOOR_UNLATCH,
                 MASTER_DOOR_BLOCK,
-                MASTER_DOOR_STATUS_GET,
                 SLAVE_DOOR_UNLATCH_REPLY,
                 SLAVE_DOOR_UNLATCH_ERROR,
                 SLAVE_DOOR_STATUS_GET_REPLY,
@@ -68,8 +65,6 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             handleDoorUnlatchResponse(SLAVE_DOOR_UNLATCH_REPLY.getPayload(message), message);
         } else if (MASTER_DOOR_BLOCK.matches(message)) {
             handleDoorBlockSet(message, MASTER_DOOR_BLOCK.getPayload(message));
-        } else if (MASTER_DOOR_STATUS_GET.matches(message)) {
-            handleDoorStatusGet(message, MASTER_DOOR_STATUS_GET.getPayload(message));
         } else if (SLAVE_DOOR_STATUS_GET_REPLY.matches(message)) {
             handleDoorStatusGetResponse(message, SLAVE_DOOR_STATUS_GET_REPLY.getPayload(message));
         } else if (SLAVE_DOOR_STATUS_GET_ERROR.matches(message)) {
@@ -134,21 +129,6 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         final Message messageToSend = new Message(payload);
         setOpen(payload.getModuleName(), payload.isOpen());
         sendReply(correspondingMessage, messageToSend);
-    }
-
-    private void handleDoorStatusGet(Message.AddressedMessage message, DoorPayload doorPayload) {
-        final Module atModule = requireComponent(SlaveController.KEY).getModule(doorPayload.getModuleName());
-        if (hasPermission(message.getFromID(), REQUEST_DOOR_STATUS)) {
-            final Message messageToSlave = new Message(doorPayload);
-            final Message.AddressedMessage sendMessage = sendMessage(
-                    atModule.getAtSlave(),
-                    SLAVE_DOOR_STATUS_GET,
-                    messageToSlave
-            );
-            recordReceivedMessageProxy(message, sendMessage);
-        } else {
-            sendNoPermissionReply(message, REQUEST_DOOR_STATUS);
-        }
     }
 
     private void handleDoorBlockSet(Message.AddressedMessage message, DoorBlockPayload payload) {

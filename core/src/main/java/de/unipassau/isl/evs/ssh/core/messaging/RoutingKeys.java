@@ -116,15 +116,12 @@ public class RoutingKeys {
     public static final RoutingKey<LightPayload> SLAVE_LIGHT_SET = new RoutingKey<>(PREFIX_SLAVE + "/light/set", LightPayload.class);
     public static final RoutingKey<LightPayload> SLAVE_LIGHT_SET_REPLY = SLAVE_LIGHT_SET.getReply(LightPayload.class);
     public static final RoutingKey<ErrorPayload> SLAVE_LIGHT_SET_ERROR = SLAVE_LIGHT_SET.getReply(ErrorPayload.class);
+
+    public static final RoutingKey<LightPayload> APP_LIGHT_UPDATE = new RoutingKey<>(PREFIX_APP + "/light/update", LightPayload.class);
     // END: Light
 
     // BEGIN: Door
     public static final RoutingKey<DoorBellPayload> MASTER_DOOR_BELL_RING = new RoutingKey<>(PREFIX_MASTER + "/doorbell/ring", DoorBellPayload.class);
-
-    //TODO Leon: what when where how does this occur/work? (Leon, 11.01.16)
-    public static final RoutingKey<DoorPayload> MASTER_DOOR_STATUS_GET = new RoutingKey<>(PREFIX_MASTER + "/door/status_get", DoorPayload.class);
-    public static final RoutingKey<DoorStatusPayload> MASTER_DOOR_STATUS_GET_REPLY = MASTER_DOOR_STATUS_GET.getReply(DoorStatusPayload.class);
-    public static final RoutingKey<ErrorPayload> MASTER_DOOR_STATUS_GET_ERROR = MASTER_DOOR_STATUS_GET.getReply(ErrorPayload.class);
 
     public static final RoutingKey<DoorStatusPayload> MASTER_DOOR_STATUS_UPDATE = new RoutingKey<>(PREFIX_MASTER + "/door/update", DoorStatusPayload.class);
 

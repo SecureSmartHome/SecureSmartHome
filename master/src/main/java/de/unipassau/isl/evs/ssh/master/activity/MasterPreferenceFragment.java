@@ -80,7 +80,12 @@ public class MasterPreferenceFragment extends PreferenceFragment implements
                         || editTextPref.getKey().equals(getResources().getResourceEntryName(R.string.master_port_extern))
                         || editTextPref.getKey().equals(getResources().getResourceEntryName(R.string.master_port_intern))) {
                     //We can be sure this is a number due to the preference Activity only accepting numbers
-                    int port = Integer.valueOf(editTextPref.getText());
+                    int port = 0;
+                    try {
+                        port = Integer.valueOf(editTextPref.getText());
+                    } catch (NumberFormatException e) {
+                        //number is too big. error message will still appear because default value is out of range.
+                    }
 
                     if (port < 1024 || port > 65535) {
                         Toast.makeText(getActivity(), R.string.invalid_port, Toast.LENGTH_SHORT).show();

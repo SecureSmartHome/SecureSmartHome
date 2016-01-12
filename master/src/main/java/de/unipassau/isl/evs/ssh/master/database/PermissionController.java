@@ -10,6 +10,7 @@ import java.util.List;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
+import de.unipassau.isl.evs.ssh.core.container.AccessLogger;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
@@ -95,6 +96,11 @@ public class PermissionController extends AbstractComponent {
      * @return true if has permissions otherwise false.
      */
     public boolean hasPermission(DeviceID userDeviceID, de.unipassau.isl.evs.ssh.core.sec.Permission permission, String moduleName) {
+        final AccessLogger logger = getComponent(AccessLogger.KEY);
+        if (logger != null) {
+            logger.logAccess(permission);
+        }
+
         Cursor permissionCursor;
         if (Strings.isNullOrEmpty(moduleName)) {
             permissionCursor = databaseConnector

@@ -317,7 +317,7 @@ public class SlaveController extends AbstractComponent {
                             + " where " + DatabaseContract.Slave.COLUMN_FINGERPRINT + " = ?",
                     new String[]{slaveID.getIDString()});
         } catch (SQLiteConstraintException sqlce) {
-            throw new IsReferencedException("This slave is used by at least one Module", sqlce);
+            throw new IsReferencedException("This slave is in use. At least one module depends on it.", sqlce);
         }
     }
 

@@ -16,7 +16,7 @@ import io.netty.util.ResourceLeakDetector;
 
 /**
  * This Constants class provides constants needed by all modules.
- *
+ * TODO Niko JavaDoc
  * @author Team
  */
 public enum CoreConstants {

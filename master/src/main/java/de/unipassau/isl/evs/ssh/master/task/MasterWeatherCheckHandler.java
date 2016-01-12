@@ -7,12 +7,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.google.common.base.Strings;
+
 import net.aksingh.owmjapis.CurrentWeather;
 import net.aksingh.owmjapis.OpenWeatherMap;
 
-import org.json.JSONException;
-
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
@@ -21,6 +23,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
@@ -29,9 +32,7 @@ import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
 import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET_ERROR;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_GET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_UPDATE;
 
 /**
  * Task/Handler that periodically checks the records of weather data provider and issues notifications
@@ -46,7 +47,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     private static final long FAILURE_UPDATE_TIMER = 45;
 
     private long timeStamp;
-    private boolean windowOpen;
+    final private Map<String, Boolean> openForModule = new HashMap<>();
 
     private void sendWarningNotification() {
         //No hardcoded strings, only in strings.xml
@@ -56,10 +57,9 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (MASTER_DOOR_STATUS_GET_REPLY.matches(message)) {
-            windowOpen = MASTER_DOOR_STATUS_GET_REPLY.getPayload(message).isOpen();
-        } else if (MASTER_DOOR_STATUS_GET_ERROR.matches(message)) {
-            //TODO Leon: handle (Leon, 11.01.16)
+        if (MASTER_DOOR_STATUS_UPDATE.matches(message)) {
+            final DoorStatusPayload doorStatusPayload = MASTER_DOOR_STATUS_UPDATE.getPayload(message);
+            openForModule.put(doorStatusPayload.getModuleName(), doorStatusPayload.isOpen());
         } else {
             invalidMessage(message);
         }
@@ -67,7 +67,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_DOOR_STATUS_GET_REPLY, MASTER_DOOR_STATUS_GET_ERROR};
+        return new RoutingKey[]{MASTER_DOOR_STATUS_UPDATE};
     }
 
     @Override
@@ -93,10 +93,15 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
         SharedPreferences sharedPreferences = requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         String city = sharedPreferences.getString(String.valueOf(R.string.master_city_name), null);
         try {
-            if (city != null) {
+            if (!Strings.isNullOrEmpty(city)) {
                 CurrentWeather cw = owm.currentWeatherByCityName(city);
-                if (windowOpen && cw.getRainInstance().hasRain()) {
-                    sendWarningNotification();
+                if (cw.getRainInstance().hasRain()) {
+                    for (Boolean isOpen : openForModule.values()) {
+                        if (isOpen) {
+                            sendWarningNotification();
+                            break;
+                        }
+                    }
                 }
             }
         } catch (IOException e) {
