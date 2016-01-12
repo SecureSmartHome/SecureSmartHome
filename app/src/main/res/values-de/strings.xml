@@ -11,7 +11,7 @@
     <string name="add_usb_module">USB Modul hinzufügen</string>
     <string name="add_wlan_module">WLAN Modul hinzufügen</string>
     <string name="add_wlan_password">Passwort:</string>
-    <string name="add_wlan_username"> Benutzername:</string>
+    <string name="add_wlan_username" > Benutzername:</string>
     <string name="added_module_fail">Hinzufügen des neuen Moduls fehlgeschlagen</string>
     <string name="added_module_success">Modul erfolgreich hinzugefügt</string>
     <string name="addmodule_sensor_type">Sensortyp:</string>
