@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -51,7 +52,8 @@ public class EditGroupFragment extends BoundFragment {
         final Spinner spinner = (Spinner) getActivity().findViewById(R.id.editgroupfragment_spinner);
         spinner.setAdapter(new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1,
-                (templateNames != null ? templateNames : new String[]{"Missing templates"})));
+                (templateNames != null ? templateNames :
+                        new String[]{getResources().getString(R.string.missingTemplates)})));
 
         final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
         if (handler == null) {
@@ -62,6 +64,7 @@ public class EditGroupFragment extends BoundFragment {
             Log.i(TAG, "Can't build View. Missing group.");
             return;
         }
+        final Resources res = getResources();
         Button editButton = (Button) getActivity().findViewById(R.id.editgroupfragment_button_edit);
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,7 +74,7 @@ public class EditGroupFragment extends BoundFragment {
                 handler.setGroupName(group, name);
                 handler.setGroupTemplate(group, template);
                 Log.i(TAG, "Group " + name + " edited.");
-                String toastText = "Group " + name + " edited.";
+                String toastText = String.format(res.getString(R.string.group_edited), name);
                 Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
                 toast.show();
             }
@@ -82,7 +85,7 @@ public class EditGroupFragment extends BoundFragment {
             public void onClick(View v) {
                 handler.removeGroup(group);
                 Log.i(TAG, "Group " + group.getName() + " removed.");
-                String toastText = "Group " + group.getName() + " removed.";
+                String toastText = String.format(res.getString(R.string.group_removed), group.getName());
                 Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
                 toast.show();
             }

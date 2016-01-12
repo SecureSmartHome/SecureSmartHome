@@ -11,6 +11,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.common.base.Strings;
+
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
@@ -34,8 +36,7 @@ public class AddGroupFragment extends BoundFragment {
         @Override
         public void userInfoUpdated(UserConfigurationEvent event) {
             if (event.getType().equals(UserConfigurationEvent.EventType.GROUP_ADD)) {
-
-                String toastText = "Group created.";
+                String toastText = getResources().getString(R.string.group_created);
                 Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
                 toast.show();
             }
@@ -66,7 +67,8 @@ public class AddGroupFragment extends BoundFragment {
         spinner = (Spinner) getActivity().findViewById(R.id.addgroupfragment_spinner);
         spinner.setAdapter(new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1,
-                (templateNames != null ? templateNames : new String[]{"Missing templates"})));
+                (templateNames != null ? templateNames :
+                        new String[]{getResources().getString(R.string.missingTemplates)})));
 
         Button button = (Button) getActivity().findViewById(R.id.addgroupfragment_button);
         button.setOnClickListener(new View.OnClickListener() {
@@ -100,8 +102,10 @@ public class AddGroupFragment extends BoundFragment {
         super.onContainerDisconnected();
     }
 
-    // returns true if all input fields are filled in correctly
+    /**
+     * @return {@code true} if all input fields are filled in correctly
+     */
     private boolean checkInputFields() {
-        return spinner.isEnabled() && !inputGroupName.getText().toString().equals("");
+        return spinner.isEnabled() && !(Strings.isNullOrEmpty(String.valueOf(inputGroupName.getText())));
     }
 }

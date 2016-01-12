@@ -69,6 +69,8 @@ public class MasterContainer extends ContainerService {
 
         register(NotificationBroadcaster.KEY, new NotificationBroadcaster());
 
+        register(MasterWeatherCheckHandler.KEY, new MasterWeatherCheckHandler());
+
 
         registerHandler(new MasterDoorBellHandler());
         registerHandler(new MasterModuleHandler());
@@ -78,7 +80,6 @@ public class MasterContainer extends ContainerService {
         registerHandler(new MasterCameraHandler());
         registerHandler(new MasterHolidaySimulationPlannerHandler());
 
-        registerHandler(new MasterWeatherCheckHandler());
 
         registerHandler(new MasterDoorHandler());
         //registerHandler(new MasterPermissionHandler());

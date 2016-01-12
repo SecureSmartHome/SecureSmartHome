@@ -1,6 +1,5 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -36,11 +35,9 @@ import de.unipassau.isl.evs.ssh.core.network.ClientConnectionListener;
  * @author Wolfgang Popp
  */
 public class MainActivity extends BoundActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private static final String TAG = MainActivity.class.getSimpleName();
-
-    private static final String KEY_LAST_FRAGMENT = "LAST_FRAGMENT";
     public static final String KEY_NOTIFICATION_FRAGMENT = "NOTIFICATION_FRAGMENT";
-
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String KEY_LAST_FRAGMENT = "LAST_FRAGMENT";
     private LinearLayout overlayDisconnected;
 
     private boolean fragmentInitialized = false;
@@ -116,7 +113,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         //Initialise Notifications
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
         notificationBuilder.setAutoCancel(true);
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         //Initialise NavigationDrawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,12 +14,10 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +38,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.ALL_GROUPS_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_USERDEVICE_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.USER_DEVICE_ARGUMENT_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.GRANT_USER_PERMISSION;
 
 /**
  * This fragment lets the user view, edit and delete information regarding a single user device.
@@ -246,7 +246,8 @@ public class EditUserDeviceFragment extends BoundFragment {
                     if (rhs.getPermission() == null) {
                         return -1;
                     }
-                    return lhs.getPermission().toLocalizedString(getActivity()).compareTo(rhs.getPermission().toLocalizedString(getActivity()));
+                    FragmentActivity activity = getActivity();
+                    return lhs.getPermission().toLocalizedString(activity).compareTo(rhs.getPermission().toLocalizedString(activity));
                 }
             });
         }
@@ -284,6 +285,16 @@ public class EditUserDeviceFragment extends BoundFragment {
             return true;
         }
 
+        @Override
+        public boolean areAllItemsEnabled() {
+            return userMayEdit();
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            return areAllItemsEnabled();
+        }
+
         /**
          * Creates a view for every permission registered in the system. If the user device is granted a permission
          * the switch button is {@code On}.
@@ -298,32 +309,44 @@ public class EditUserDeviceFragment extends BoundFragment {
             } else {
                 permissionLayout = (LinearLayout) convertView;
             }
-            // TODO Phil: gray out the permissions a user can't change.
 
-            final Switch permissionSwitch = (Switch) permissionLayout.findViewById(R.id.listpermission_permission_switch);
             final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
             } else {
-                permissionSwitch.setText(permission.getPermission().toLocalizedString(getActivity()));
-                permissionSwitch.setChecked(userDeviceHasPermission(permission));
-                permissionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                TextView permissionText = (TextView) permissionLayout.findViewById(R.id.listpermission_permission_text);
+                permissionText.setText(permission.getPermission().toLocalizedString(getActivity()));
+
+                final Button permissionButton = (Button) permissionLayout.findViewById(R.id.listpermission_permission_button);
+                final boolean deviceHasPermission = userDeviceHasPermission(permission);
+                if (deviceHasPermission) {
+                    permissionButton.setText(getResources().getString(R.string.revoke));
+                } else {
+                    permissionButton.setText(getResources().getString(R.string.grant));
+                }
+                permissionButton.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (isChecked) {
-                            handler.grantPermission(device.getUserDeviceID(), permission);
-                            Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
-                                    + " granted for user device " + device.getName());
+                    public void onClick(View v) {
+                        if (userMayEdit()) {
+                            if (deviceHasPermission) {
+                                handler.grantPermission(device.getUserDeviceID(), permission);
+                                Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
+                                        + " granted for user device " + device.getName());
+                            } else {
+                                handler.revokePermission(device.getUserDeviceID(), permission);
+                                Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
+                                        + " revoked for user device " + device.getName());
+                            }
+                            updatePermissionList();
                         } else {
-                            handler.revokePermission(device.getUserDeviceID(), permission);
-                            Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
-                                    + " revoked for user device " + device.getName());
+                            Toast.makeText(getActivity(), "Missing permission.", Toast.LENGTH_SHORT).show();
                         }
-                        //permissionSwitch.toggle();
+
                     }
                 });
-                TextView textViewPermissionType = ((TextView) permissionLayout.findViewById(R.id.listpermission_permission_type));
-                textViewPermissionType.setText(createPermissionTypeText(permission));
+
+                final TextView permissionDescription = (TextView) permissionLayout.findViewById(R.id.listpermission_permission_type);
+                permissionDescription.setText(permission.getPermission().getLocalizedDescription(getActivity()));
             }
 
             return permissionLayout;
@@ -335,19 +358,26 @@ public class EditUserDeviceFragment extends BoundFragment {
          * @param permission The permission the text is created for.
          * @return the text to display.
          */
-        private String createPermissionTypeText(Permission permission) {
+        private String createLocalizedPermissionTypeText(Permission permission) {
             String output;
             String moduleName = permission.getModuleName();
             if (moduleName != null) {
-                output = "This permission is connected to " + moduleName;
+                output = String.format(getResources().getString(R.string.permission_connected_to), moduleName);
             } else {
-                output = "This permission is not connected to any module.";
+                output = getResources().getString(R.string.permission_not_connected_to);
             }
             return output;
         }
 
         /**
-         * @return If a user device is granted a certain permission.
+         * @return {@code true} if the current user has the permission to grant other users permissions.
+         */
+        private boolean userMayEdit() {
+            return userDeviceHasPermission(new Permission(GRANT_USER_PERMISSION));
+        }
+
+        /**
+         * @return {@code true} if a user device is granted a certain permission.
          */
         private boolean userDeviceHasPermission(Permission permission) {
             return userPermissions.contains(permission);

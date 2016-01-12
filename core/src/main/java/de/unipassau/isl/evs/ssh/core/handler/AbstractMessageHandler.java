@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.core.handler;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,9 +25,9 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  * @author Team
  */
 public abstract class AbstractMessageHandler implements MessageHandler {
+    private final Set<RoutingKey> registeredKeys = new HashSet<>(getRoutingKeys().length);
     private Container container;
     private IncomingDispatcher dispatcher;
-    private final Set<RoutingKey> registeredKeys = new HashSet<>(getRoutingKeys().length);
 
     /**
      * @return all the RoutingKeys this MessageHandler can handle
@@ -40,18 +41,21 @@ public abstract class AbstractMessageHandler implements MessageHandler {
      * RoutingKeys returned by {@link #getRoutingKeys()}.
      */
     public void init(Container container) {
+        Log.v(getClass().getSimpleName(), "init");
         this.container = container;
         container.require(IncomingDispatcher.KEY).registerHandler(this, getRoutingKeys());
     }
 
     @Override
     public void handlerAdded(IncomingDispatcher dispatcher, RoutingKey routingKey) {
+        Log.v(getClass().getSimpleName(), "registered");
         registeredKeys.add(routingKey);
         this.dispatcher = dispatcher;
     }
 
     @Override
     public void handlerRemoved(RoutingKey routingKey) {
+        Log.v(getClass().getSimpleName(), "unregistered");
         registeredKeys.remove(routingKey);
         if (registeredKeys.isEmpty()) {
             dispatcher = null;
@@ -64,6 +68,7 @@ public abstract class AbstractMessageHandler implements MessageHandler {
      * Before being removed from the Container, the handler is also unregistered from the {@link IncomingDispatcher}.
      */
     public void destroy() {
+        Log.v(getClass().getSimpleName(), "init");
         final IncomingDispatcher dispatcher = getDispatcher();
         if (dispatcher != null) {
             dispatcher.unregisterHandler(this, getRoutingKeys());

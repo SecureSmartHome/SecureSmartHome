@@ -1,6 +1,9 @@
 package de.unipassau.isl.evs.ssh.master.network;
 
+import android.util.Log;
+
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 import de.ncoder.typedmap.Key;
@@ -21,6 +24,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LO
  * @author Andreas Bucher
  */
 public class NotificationBroadcaster extends AbstractComponent {
+    private static final String TAG = NotificationBroadcaster.class.getSimpleName();
 
     public static final Key<NotificationBroadcaster> KEY = new Key<>(NotificationBroadcaster.class);
 
@@ -33,6 +37,7 @@ public class NotificationBroadcaster extends AbstractComponent {
      * @param args data that should be displayed in the notification e.g. humidity
      */
     public void sendMessageToAllReceivers(NotificationPayload.NotificationType type, Serializable... args) {
+        Log.i(TAG, "Sending notification of type " + type.toString());
         final List<UserDevice> allUserDevicesWithPermission = requireComponent(PermissionController.KEY)
                 .getAllUserDevicesWithPermission(type.getReceivePermission(), null);
         NotificationPayload payload = new NotificationPayload(type, args);
