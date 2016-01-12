@@ -6,11 +6,12 @@ import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
-import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_GET_REPLY;
@@ -23,7 +24,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY
  *
  * @author Christoph Fraedrich
  */
-public class AppHolidaySimulationHandler extends AbstractMessageHandler implements Component {
+public class AppHolidaySimulationHandler extends AbstractAppHandler implements Component {
     public static final Key<AppHolidaySimulationHandler> KEY = new Key<>(AppHolidaySimulationHandler.class);
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(5);
 
@@ -35,9 +36,9 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
     public void handle(Message.AddressedMessage message) {
         if (MASTER_HOLIDAY_GET_REPLY.matches(message) || MASTER_HOLIDAY_SET_REPLY.matches(message)) {
             this.isOn = message.getPayloadChecked(HolidaySimulationPayload.class).switchOn();
-            fireStatusChanged();
+            fireHolidayModeSet(true);
         } else if (MASTER_HOLIDAY_SET_ERROR.matches(message)) {
-            //TODO Leon: handle (Leon, 11.01.16)
+            fireHolidayModeSet(false);
         } else {
             invalidMessage(message);
         }
@@ -52,7 +53,9 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
      * @return if the Holiday Simulation is turned on.
      */
     public boolean isOn() {
-        if (System.currentTimeMillis() - lastUpdate >= REFRESH_DELAY_MILLIS) {
+        final long now = System.currentTimeMillis();
+        if (now - lastUpdate >= REFRESH_DELAY_MILLIS) {
+            lastUpdate = now;
             if (getContainer() != null && getContainer().require(NamingManager.KEY).isMasterKnown()) {
                 sendMessageToMaster(MASTER_HOLIDAY_GET, new Message(new HolidaySimulationPayload(false)));
             }
@@ -67,8 +70,20 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
      * @param on {@code true} to start the holiday simulation, {@code false} to stop the holiday simulation.
      */
     public void switchHolidaySimulation(boolean on) {
-        HolidaySimulationPayload payload = new HolidaySimulationPayload(on);
-        sendMessageToMaster(MASTER_HOLIDAY_SET, new Message(payload));
+        final HolidaySimulationPayload payload = new HolidaySimulationPayload(on);
+        final Message.AddressedMessage message = sendMessageToMaster(MASTER_HOLIDAY_SET, new Message(payload));
+        final Future<HolidaySimulationPayload> future = newResponseFuture(message);
+
+        future.addListener(new FutureListener<HolidaySimulationPayload>() {
+            @Override
+            public void operationComplete(Future<HolidaySimulationPayload> future) throws Exception {
+                boolean isSuccess = future.isSuccess();
+                if (isSuccess) {
+                    isOn = future.get().switchOn();
+                }
+                fireHolidayModeSet(isSuccess);
+            }
+        });
     }
 
     /**
@@ -85,13 +100,13 @@ public class AppHolidaySimulationHandler extends AbstractMessageHandler implemen
         listeners.remove(listener);
     }
 
-    private void fireStatusChanged() {
+    private void fireHolidayModeSet(boolean wasSuccessful) {
         for (HolidaySimulationListener listener : listeners) {
-            listener.statusChanged();
+            listener.onHolidaySetReply(wasSuccessful);
         }
     }
 
     public interface HolidaySimulationListener {
-        void statusChanged();
+        void onHolidaySetReply(boolean wasSuccessful);
     }
 }

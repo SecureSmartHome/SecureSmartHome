@@ -19,6 +19,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteDevicePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupNamePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupTemplatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetPermissionPayload;
@@ -27,6 +28,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserNamePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_ADD;
@@ -122,7 +124,7 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
                 this.allGroups.addAll(allGroups);
             }
 
-            fireUserInfoUpdated();
+            fireUserInfoUpdated(new UserConfigurationEvent());
         } else {
             tryHandleResponse(message);
         }
@@ -147,9 +149,9 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
         listeners.remove(listener);
     }
 
-    private void fireUserInfoUpdated() {
+    private void fireUserInfoUpdated(UserConfigurationEvent event) {
         for (UserInfoListener listener : listeners) {
-            listener.userInfoUpdated();
+            listener.userInfoUpdated(event);
         }
     }
 
@@ -205,14 +207,25 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
         return ImmutableList.copyOf(usersToPermissions.get(user));
     }
 
+    private void sendUserConfigMessage(Message message, RoutingKey<? extends MessagePayload> key, final UserConfigurationEvent.EventType eventType){
+        final Future<Void> future = newResponseFuture(sendMessageToMaster(key, message));
+        future.addListener(new FutureListener<Void>() {
+            @Override
+            public void operationComplete(Future<Void> future) throws Exception {
+                final boolean success = future.isSuccess();
+                fireUserInfoUpdated(new UserConfigurationEvent(eventType, success));
+            }
+        });
+    }
+
     /**
      * Sends a message to master to add the given group.
      *
      * @param group the group to add
      */
-    public Future<Void> addGroup(Group group) {
+    public void addGroup(Group group) {
         Message message = new Message(new GroupPayload(group, GroupPayload.ACTION.CREATE));
-        return newResponseFuture(sendMessageToMaster(MASTER_GROUP_ADD, message));
+        sendUserConfigMessage(message, MASTER_GROUP_ADD, UserConfigurationEvent.EventType.GROUP_ADD);
     }
 
     /**
@@ -220,29 +233,29 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      *
      * @param group the group to remove
      */
-    public Future<Void> removeGroup(Group group) {
+    public void removeGroup(Group group) {
         Message message = new Message(new GroupPayload(group, GroupPayload.ACTION.DELETE));
-        return newResponseFuture(sendMessageToMaster(MASTER_GROUP_DELETE, message));
+        sendUserConfigMessage(message, MASTER_GROUP_DELETE, UserConfigurationEvent.EventType.GROUP_DELETE);
     }
 
-    public Future<Void> setGroupName(Group group, String groupName) {
+    public void setGroupName(Group group, String groupName) {
         Message message = new Message(new SetGroupNamePayload(group, groupName));
-        return newResponseFuture(sendMessageToMaster(MASTER_GROUP_SET_NAME, message));
+        sendUserConfigMessage(message, MASTER_GROUP_SET_NAME, UserConfigurationEvent.EventType.GROUP_SET_NAME);
     }
 
-    public Future<Void> setGroupTemplate(Group group, String templateName) {
+    public void setGroupTemplate(Group group, String templateName) {
         Message message = new Message(new SetGroupTemplatePayload(group, templateName));
-        return newResponseFuture(sendMessageToMaster(MASTER_GROUP_SET_TEMPLATE, message));
+        sendUserConfigMessage(message, MASTER_GROUP_SET_TEMPLATE, UserConfigurationEvent.EventType.GROUP_SET_TEMPLATE);
     }
 
-    public Future<Void> setUserName(DeviceID user, String username) {
-        SetUserNamePayload payload = new SetUserNamePayload(user, username);
-        return newResponseFuture(sendMessageToMaster(MASTER_USER_SET_NAME, new Message(payload)));
+    public void setUserName(DeviceID user, String username) {
+        Message message = new Message(new SetUserNamePayload(user, username));
+        sendUserConfigMessage(message, MASTER_USER_SET_NAME, UserConfigurationEvent.EventType.USERNAME_SET);
     }
 
-    public Future<Void> setUserGroup(DeviceID user, String groupName) {
-        SetUserGroupPayload payload = new SetUserGroupPayload(user, groupName);
-        return newResponseFuture(sendMessageToMaster(MASTER_USER_SET_GROUP, new Message(payload)));
+    public void setUserGroup(DeviceID user, String groupName) {
+        Message message = new Message(new SetUserGroupPayload(user, groupName));
+        sendUserConfigMessage(message, MASTER_USER_SET_GROUP, UserConfigurationEvent.EventType.USER_SET_GROUP);
     }
 
     /**
@@ -251,9 +264,9 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      * @param user       the user to grant the permission
      * @param permission the permission to grant
      */
-    public Future<Void> grantPermission(DeviceID user, Permission permission) {
-        SetPermissionPayload payload = new SetPermissionPayload(user, permission, SetPermissionPayload.Action.GRANT);
-        return newResponseFuture(sendMessageToMaster(MASTER_PERMISSION_SET, new Message(payload)));
+    public void grantPermission(DeviceID user, Permission permission) {
+        Message message = new Message(new SetPermissionPayload(user, permission, SetPermissionPayload.Action.GRANT));
+        sendUserConfigMessage(message, MASTER_PERMISSION_SET, UserConfigurationEvent.EventType.PERMISSION_GRANT);
     }
 
     /**
@@ -262,9 +275,9 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      * @param user       the user to remove the permission from
      * @param permission the permission to remove
      */
-    public Future<Void> revokePermission(DeviceID user, Permission permission) {
-        SetPermissionPayload payload = new SetPermissionPayload(user, permission, SetPermissionPayload.Action.REVOKE);
-        return newResponseFuture(sendMessageToMaster(MASTER_PERMISSION_SET, new Message(payload)));
+    public void revokePermission(DeviceID user, Permission permission) {
+        Message message = new Message(new SetPermissionPayload(user, permission, SetPermissionPayload.Action.REVOKE));
+        sendUserConfigMessage(message, MASTER_PERMISSION_SET, UserConfigurationEvent.EventType.PERMISSION_REVOKE);
     }
 
     /**
@@ -272,9 +285,9 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      *
      * @param user the user to remove
      */
-    public Future<Void> removeUserDevice(DeviceID user) {
-        DeleteDevicePayload payload = new DeleteDevicePayload(user);
-        return newResponseFuture(sendMessageToMaster(MASTER_USER_DELETE, new Message(payload)));
+    public void removeUserDevice(DeviceID user) {
+        Message message = new Message(new DeleteDevicePayload(user));
+        sendUserConfigMessage(message, MASTER_USER_DELETE, UserConfigurationEvent.EventType.USER_DELETE);
     }
 
     /**
@@ -284,6 +297,6 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
         /**
          * Called when the user configuration changed.
          */
-        void userInfoUpdated();
+        void userInfoUpdated(UserConfigurationEvent event);
     }
 }

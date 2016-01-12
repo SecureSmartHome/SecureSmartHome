@@ -7,13 +7,14 @@ import java.util.List;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
-import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER_ERROR;
@@ -25,7 +26,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_RE
  * @author Wolfgang Popp
  * @author Leon Sell
  */
-public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implements Component {
+public class AppRegisterNewDeviceHandler extends AbstractAppHandler implements Component {
     public static final Key<AppRegisterNewDeviceHandler> KEY = new Key<>(AppRegisterNewDeviceHandler.class);
 
     private List<RegisterNewDeviceListener> listeners = new LinkedList<>();
@@ -40,12 +41,14 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (MASTER_USER_REGISTER_REPLY.matches(message)) {
-            handleUserRegisterResponse(MASTER_USER_REGISTER_REPLY.getPayload(message));
-        } else if (MASTER_USER_REGISTER_ERROR.matches(message)) {
-            fireTokenError();
-        } else {
-            invalidMessage(message);
+        if (!tryHandleResponse(message)) {
+            if (MASTER_USER_REGISTER_REPLY.matches(message)) {
+                handleUserRegisterResponse(MASTER_USER_REGISTER_REPLY.getPayload(message));
+            } else if (MASTER_USER_REGISTER_ERROR.matches(message)) {
+                fireTokenError();
+            } else {
+                invalidMessage(message);
+            }
         }
     }
 
@@ -107,7 +110,17 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
      */
     public void requestToken(UserDevice user) {
         Message message = new Message(new GenerateNewRegisterTokenPayload(null, user));
-        sendMessageToMaster(MASTER_USER_REGISTER, message);
+        final Future<GenerateNewRegisterTokenPayload> future = newResponseFuture(sendMessageToMaster(MASTER_USER_REGISTER, message));
+        future.addListener(new FutureListener<GenerateNewRegisterTokenPayload>() {
+            @Override
+            public void operationComplete(Future<GenerateNewRegisterTokenPayload> future) throws Exception {
+                if (future.isSuccess()){
+                    handleUserRegisterResponse(future.get());
+                } else {
+                    fireTokenError();
+                }
+            }
+        });
     }
 
     /**

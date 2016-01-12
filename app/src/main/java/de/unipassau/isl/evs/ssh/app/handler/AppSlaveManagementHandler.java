@@ -11,6 +11,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteDevicePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.RegisterSlavePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_DELETE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_DELETE_ERROR;
@@ -44,11 +45,13 @@ public class AppSlaveManagementHandler extends AbstractAppHandler implements Com
     public void handle(Message.AddressedMessage message) {
         if (!tryHandleResponse(message)) {
             if (MASTER_SLAVE_REGISTER_REPLY.matches(message)) {
-                notifySlaveRegistered(true);
+                fireSlaveRegistered(true);
             } else if (MASTER_SLAVE_REGISTER_ERROR.matches(message)) {
-                notifySlaveRegistered(false);
+                fireSlaveRegistered(false);
             } else if (MASTER_SLAVE_DELETE_REPLY.matches(message)) {
+                fireSlaveRemoved(true);
             } else if (MASTER_SLAVE_DELETE_ERROR.matches(message)) {
+                fireSlaveRemoved(false);
             } else {
                 invalidMessage(message);
             }
@@ -62,14 +65,26 @@ public class AppSlaveManagementHandler extends AbstractAppHandler implements Com
      * @param slaveName                the name of the new slave
      * @param passiveRegistrationToken the passive Registration token
      */
-    public Future<Void> registerNewSlave(DeviceID slaveID, String slaveName, byte[] passiveRegistrationToken) {
+    public void registerNewSlave(DeviceID slaveID, String slaveName, byte[] passiveRegistrationToken) {
         RegisterSlavePayload payload = new RegisterSlavePayload(slaveName, slaveID, passiveRegistrationToken);
-        return newResponseFuture(sendMessageToMaster(MASTER_SLAVE_REGISTER, new Message(payload)));
+        final Future<Void> future = newResponseFuture(sendMessageToMaster(MASTER_SLAVE_REGISTER, new Message(payload)));
+        future.addListener(new FutureListener<Void>() {
+            @Override
+            public void operationComplete(Future<Void> future) throws Exception {
+                fireSlaveRegistered(future.isSuccess());
+            }
+        });
     }
 
-    public Future<Void> deleteSlave(DeviceID slaveID) {
+    public void deleteSlave(DeviceID slaveID) {
         DeleteDevicePayload payload = new DeleteDevicePayload(slaveID);
-        return newResponseFuture(sendMessageToMaster(MASTER_SLAVE_DELETE, new Message(payload)));
+        final Future<Void> future = newResponseFuture(sendMessageToMaster(MASTER_SLAVE_DELETE, new Message(payload)));
+        future.addListener(new FutureListener<Void>() {
+            @Override
+            public void operationComplete(Future<Void> future) throws Exception {
+                fireSlaveRemoved(future.isSuccess());
+            }
+        });
     }
 
     public void addSlaveManagemntListener(SlaveManagementListener listener) {
@@ -80,13 +95,21 @@ public class AppSlaveManagementHandler extends AbstractAppHandler implements Com
         listeners.remove(listener);
     }
 
-    private void notifySlaveRegistered(boolean wasSuccessful) {
+    private void fireSlaveRegistered(boolean wasSuccessful) {
         for (SlaveManagementListener listener : listeners) {
             listener.onSlaveRegistered(wasSuccessful);
         }
     }
 
+    private void fireSlaveRemoved(boolean wasSuccessful) {
+        for (SlaveManagementListener listener : listeners) {
+            listener.onSlaveRemoved(wasSuccessful);
+        }
+    }
+
     public interface SlaveManagementListener {
         void onSlaveRegistered(boolean wasSuccessful);
+
+        void onSlaveRemoved(boolean wasSuccessful);
     }
 }

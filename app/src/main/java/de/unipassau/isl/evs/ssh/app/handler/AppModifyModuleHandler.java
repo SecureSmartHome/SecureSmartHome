@@ -11,6 +11,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModifyModulePayload;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD_ERROR;
@@ -92,14 +93,26 @@ public class AppModifyModuleHandler extends AbstractAppHandler implements Compon
      *
      * @param module the module to register
      */
-    public Future<Void> addNewModule(Module module) {
+    public void addNewModule(Module module) {
         ModifyModulePayload payload = new ModifyModulePayload(module);
-        return newResponseFuture(sendMessageToMaster(MASTER_MODULE_ADD, new Message(payload)));
+        final Future<Void> future = newResponseFuture(sendMessageToMaster(MASTER_MODULE_ADD, new Message(payload)));
+        future.addListener(new FutureListener<Void>() {
+            @Override
+            public void operationComplete(Future<Void> future) throws Exception {
+                fireRegistrationFinished(future.isSuccess());
+            }
+        });
     }
 
-    public Future<Void> removeModule(Module module) {
+    public void removeModule(Module module) {
         ModifyModulePayload payload = new ModifyModulePayload(module);
-        return newResponseFuture(sendMessageToMaster(MASTER_MODULE_REMOVE, new Message(payload)));
+        final Future<Void> future = newResponseFuture(sendMessageToMaster(MASTER_MODULE_REMOVE, new Message(payload)));
+        future.addListener(new FutureListener<Void>() {
+            @Override
+            public void operationComplete(Future<Void> future) throws Exception {
+
+            }
+        });
     }
 
     /**
