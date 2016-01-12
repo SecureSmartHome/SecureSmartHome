@@ -136,7 +136,7 @@
     <string name="system_health_warning_title_failed">Component failed!</string>
     <string name="system_health_warning_title_fixed">Component failure resolved!</string>
     <string name="system_health_warning_text_failure" formatted="false">The module %s is not responding anymore.</string>
-    <string name="system_health_warning_text_fixed" formatted="false">The module %s is not responding again.</string>
+    <string name="system_health_warning_text_fixed" formatted="false">The module %s is responding again.</string>
     <string name="door_bell_notification_title">The Doorbell rang!</string>
     <string name="door_bell_notification_text">You have visitors at your door.</string>
     <string name="holiday_mode_switched_on_title">Holiday Mode Active!</string>
@@ -145,7 +145,7 @@
     <string name="holiday_mode_switched_off_text">You have now the control over your home. Welcome back!</string>
     <string name="door_unlatched_title">Door is now open!</string>
     <!--TODO maybe add text, otherwise delete? (Phil, 2016-01-09-->
-    <string name="door_unlatched_text"></string>
+    <string name="door_unlatched_text"> </string>
     <string name="door_locked_title">Door is now locked!</string>
     <string name="door_locked_text">Unauthorised users can not open it anymore.</string>
     <string name="door_unlocked_title">Door is now unlocked!</string>
