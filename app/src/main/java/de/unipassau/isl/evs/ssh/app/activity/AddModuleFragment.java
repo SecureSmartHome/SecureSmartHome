@@ -31,10 +31,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.ModuleAccess
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.ModuleType;
 
@@ -45,8 +42,6 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.ModuleType;
  * @author Wolfgang Popp
  */
 public class AddModuleFragment extends BoundFragment implements AdapterView.OnItemSelectedListener {
-
-    private static final String KEY_CONNECTION_TYPE_SPINNER_POSITION = "CONNECTION_TYPE_SPINNER_POSITION";
 
     private static final String TAG = AddModuleFragment.class.getSimpleName();
 
@@ -62,13 +57,12 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private Spinner slaveSpinner;
     private Spinner sensorTypeSpinner;
-    private Spinner connectionTypeSpinner;
     private EditText nameInput;
 
     private final AppModifyModuleHandler.NewModuleListener listener = new AppModifyModuleHandler.NewModuleListener() {
         @Override
         public void registrationFinished(final boolean wasSuccessful) {
-            getActivity().runOnUiThread(new Runnable() {
+            maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     onRegistrationFinished(wasSuccessful);
@@ -101,7 +95,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_addmodule, container, false);
 
-        connectionTypeSpinner = (Spinner) view.findViewById(R.id.connection_type_spinner);
+        Spinner connectionTypeSpinner = (Spinner) view.findViewById(R.id.connection_type_spinner);
         sensorTypeSpinner = (Spinner) view.findViewById(R.id.add_module_sensor_type_spinner);
         slaveSpinner = (Spinner) view.findViewById(R.id.add_module_slave_spinner);
         nameInput = (EditText) view.findViewById(R.id.add_module_name_input);
@@ -131,13 +125,6 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         sensorTypeSpinner.setAdapter(sensorTypeAdapter);
         connectionTypeSpinner.setAdapter(connectionTypeAdapter);
         connectionTypeSpinner.setOnItemSelectedListener(this);
-
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(KEY_CONNECTION_TYPE_SPINNER_POSITION)) {
-                int position = savedInstanceState.getInt(KEY_CONNECTION_TYPE_SPINNER_POSITION);
-                connectionTypeSpinner.setSelection(position);
-            }
-        }
 
         return view;
     }
@@ -305,13 +292,6 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         return mockView;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        // TODO Wolfgang Save state of all spinners in this fragment. This lifecycle is currently broken (Wolfgang, 2016-03-01)
-        outState.putInt(KEY_CONNECTION_TYPE_SPINNER_POSITION, connectionTypeSpinner.getSelectedItemPosition());
-        super.onSaveInstanceState(outState);
-    }
-
     private void addNewModule(ModuleAccessPoint accessPoint) {
         final AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
         if (handler == null) {
@@ -324,11 +304,6 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         int position = sensorTypeSpinner.getSelectedItemPosition();
         ModuleType moduleType = ModuleType.values()[position];
         Module module = new Module(name, atSlave, moduleType, accessPoint);
-        handler.addNewModule(module).addListener(new GenericFutureListener<Future<? super Void>>() {
-            @Override
-            public void operationComplete(Future<? super Void> future) throws Exception {
-                onRegistrationFinished(future.isSuccess());
-            }
-        });
+        handler.addNewModule(module);
     }
 }

@@ -17,6 +17,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_LIGHT_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_REPLY;
@@ -69,11 +70,11 @@ public class AppLightHandler extends AbstractAppHandler implements Component {
                 fireLightGetFinished(false);
             } else if (MASTER_LIGHT_SET_ERROR.matches(message)) {
                 fireLightSetFinished(false);
-            } else if (true) {
+            } else if (APP_LIGHT_UPDATE.matches(message)) {
                 LightPayload payload = MASTER_LIGHT_SET_REPLY.getPayload(message);
-                setCachedStatus(payload.getModule(), payload.getOn());
-                //TODO handle push update
-                //fireStatusChanged(module);
+                final Module module = payload.getModule();
+                setCachedStatus(module, payload.getOn());
+                fireStatusChanged(module);
             } else {
                 invalidMessage(message);
             }

@@ -34,13 +34,15 @@ public class AppHolidaySimulationHandler extends AbstractAppHandler implements C
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (MASTER_HOLIDAY_GET_REPLY.matches(message) || MASTER_HOLIDAY_SET_REPLY.matches(message)) {
-            this.isOn = message.getPayloadChecked(HolidaySimulationPayload.class).switchOn();
-            fireHolidayModeSet(true);
-        } else if (MASTER_HOLIDAY_SET_ERROR.matches(message)) {
-            fireHolidayModeSet(false);
-        } else {
-            invalidMessage(message);
+        if (!tryHandleResponse(message)) {
+            if (MASTER_HOLIDAY_GET_REPLY.matches(message) || MASTER_HOLIDAY_SET_REPLY.matches(message)) {
+                this.isOn = message.getPayloadChecked(HolidaySimulationPayload.class).switchOn();
+                fireHolidayModeSet(true);
+            } else if (MASTER_HOLIDAY_SET_ERROR.matches(message)) {
+                fireHolidayModeSet(false);
+            } else {
+                invalidMessage(message);
+            }
         }
     }
 

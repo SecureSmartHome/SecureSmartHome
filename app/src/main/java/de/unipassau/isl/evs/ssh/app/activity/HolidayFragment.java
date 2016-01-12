@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppHolidaySimulationHandler;
@@ -27,10 +28,13 @@ public class HolidayFragment extends BoundFragment {
 
     private final AppHolidaySimulationHandler.HolidaySimulationListener holidaySimulationListener
             = new AppHolidaySimulationHandler.HolidaySimulationListener() {
-
         @Override
-        public void statusChanged() {
-            updateView();
+        public void onHolidaySetReply(boolean wasSuccessful) {
+            if (wasSuccessful) {
+                updateView();
+            } else {
+                Toast.makeText(getActivity(), R.string.could_not_switch_holiday, Toast.LENGTH_SHORT).show();
+            }
         }
     };
 

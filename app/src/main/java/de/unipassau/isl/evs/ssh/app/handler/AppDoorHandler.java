@@ -61,7 +61,6 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
 
     @Override
     public void handle(Message.AddressedMessage message) {
-
         if (!tryHandleResponse(message)) {
             if (MASTER_DOOR_BLOCK_REPLY.matches(message)) {
                 isDoorBlocked = MASTER_DOOR_BLOCK_REPLY.getPayload(message).isBlock();

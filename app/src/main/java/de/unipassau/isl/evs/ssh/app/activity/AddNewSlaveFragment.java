@@ -29,8 +29,23 @@ public class AddNewSlaveFragment extends ScanQRFragment {
 
     private final AppSlaveManagementHandler.SlaveManagementListener listener = new AppSlaveManagementHandler.SlaveManagementListener() {
         @Override
-        public void onSlaveRegistered(boolean wasSuccessful) {
-            onAddSlaveResponse(wasSuccessful);
+        public void onSlaveRegistered(final boolean wasSuccessful) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (wasSuccessful) {
+                        Toast.makeText(getActivity(), R.string.slave_registration_success, Toast.LENGTH_SHORT).show();
+                        ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+                    } else {
+                        Toast.makeText(getActivity(), R.string.cannot_add_slave, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onSlaveRemoved(boolean wasSuccessful) {
+            //this fragment does not handle slave removal
         }
     };
 
@@ -85,23 +100,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
             final String slaveName = slaveNameInput.getText().toString();
             final byte[] passiveRegistrationToken = info.getToken();
 
-            final Future<Void> voidFuture = handler.registerNewSlave(slaveID, slaveName, passiveRegistrationToken);
-            voidFuture.addListener(listenerOnUiThread(new GenericFutureListener<Future<? super Void>>() {
-                @Override
-                public void operationComplete(Future<? super Void> future) throws Exception {
-                    onAddSlaveResponse(future.isSuccess());
-                }
-            }));
-
-        } else {
-            Toast.makeText(getActivity(), R.string.cannot_add_slave, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void onAddSlaveResponse(boolean wasSuccess) {
-        if (wasSuccess) {
-            Toast.makeText(getActivity(), R.string.slave_registration_success, Toast.LENGTH_SHORT).show();
-            ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+            handler.registerNewSlave(slaveID, slaveName, passiveRegistrationToken);
         } else {
             Toast.makeText(getActivity(), R.string.cannot_add_slave, Toast.LENGTH_SHORT).show();
         }

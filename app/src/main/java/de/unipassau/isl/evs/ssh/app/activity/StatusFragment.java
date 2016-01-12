@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.StringRes;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,8 +24,6 @@ import de.unipassau.isl.evs.ssh.app.handler.AppSlaveManagementHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 
 /**
  * This activity allows to visualize connected Modules and slaves. If this functionality is used a
@@ -54,7 +51,49 @@ public class StatusFragment extends BoundFragment {
         }
     };
 
-    @Override
+    private final AppModifyModuleHandler.NewModuleListener modifyListener = new AppModifyModuleHandler.NewModuleListener() {
+        @Override
+        public void registrationFinished(boolean wasSuccessful) {
+            // this fragment does not handle registration of new modules
+        }
+
+        @Override
+        public void unregistrationFinished(final boolean wasSuccessful) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (wasSuccessful) {
+                        Toast.makeText(getActivity(), R.string.module_removed, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getActivity(), R.string.cannot_remove_module, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    };
+
+    private final AppSlaveManagementHandler.SlaveManagementListener slaveListener = new AppSlaveManagementHandler.SlaveManagementListener() {
+
+        @Override
+        public void onSlaveRegistered(boolean wasSuccessful) {
+            // this fragment does not handle registration of new slaves
+        }
+
+        @Override
+        public void onSlaveRemoved(final boolean wasSuccessful) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (wasSuccessful) {
+                        Toast.makeText(getActivity(), R.string.slave_removed, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getActivity(), R.string.cannot_remove_slave, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    };
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_status, container, false);
         slaveListView = (ListView) view.findViewById(R.id.deviceStatusListView);
@@ -70,7 +109,11 @@ public class StatusFragment extends BoundFragment {
         super.onContainerConnected(container);
 
         AppModuleHandler handler = container.require(AppModuleHandler.KEY);
+        AppSlaveManagementHandler slaveHandler = container.require(AppSlaveManagementHandler.KEY);
+        AppModifyModuleHandler modifyModuleHandler = container.require(AppModifyModuleHandler.KEY);
         handler.addAppModuleListener(listener);
+        slaveHandler.addSlaveManagemntListener(slaveListener);
+        modifyModuleHandler.addNewModuleListener(modifyListener);
 
         moduleListView.setAdapter(new ModuleAdapter(handler.getComponents()));
         slaveListView.setAdapter(new SlaveAdapter(handler.getSlaves()));
@@ -86,8 +129,7 @@ public class StatusFragment extends BoundFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
                         if (handler != null) {
-                            final Future<Void> future = handler.removeModule(module);
-                            future.addListener(newFutureListener(R.string.module_removed, R.string.cannot_remove_module));
+                            handler.removeModule(module);
                         }
                     }
                 };
@@ -110,8 +152,7 @@ public class StatusFragment extends BoundFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         AppSlaveManagementHandler handler = getComponent(AppSlaveManagementHandler.KEY);
                         if (handler != null) {
-                            final Future<Void> future = handler.deleteSlave(slave.getSlaveID());
-                            future.addListener(newFutureListener(R.string.slave_removed, R.string.cannot_remove_slave));
+                            handler.deleteSlave(slave.getSlaveID());
                         }
                     }
                 };
@@ -132,23 +173,20 @@ public class StatusFragment extends BoundFragment {
         super.onContainerDisconnected();
 
         AppModuleHandler handler = getComponent(AppModuleHandler.KEY);
+        AppSlaveManagementHandler slaveHandler = getComponent(AppSlaveManagementHandler.KEY);
+        AppModifyModuleHandler modifyModuleHandler = getComponent(AppModifyModuleHandler.KEY);
+
         if (handler != null) {
             handler.removeAppModuleListener(listener);
         }
-    }
 
-    private GenericFutureListener<Future<? super Void>> newFutureListener(@StringRes final int textOnSuccess, @StringRes final int textOnFail){
-        return listenerOnUiThread(new GenericFutureListener<Future<? super Void>>() {
-            @Override
-            public void operationComplete(Future<? super Void> future) throws Exception {
-                if (future.isSuccess()) {
-                    Toast.makeText(getActivity(), textOnSuccess, Toast.LENGTH_SHORT).show();
-                    update();
-                } else {
-                    Toast.makeText(getActivity(), textOnFail, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        if (slaveHandler != null) {
+            slaveHandler.addSlaveManagemntListener(slaveListener);
+        }
+
+        if (modifyModuleHandler != null) {
+            modifyModuleHandler.addNewModuleListener(modifyListener);
+        }
     }
 
     private void update() {

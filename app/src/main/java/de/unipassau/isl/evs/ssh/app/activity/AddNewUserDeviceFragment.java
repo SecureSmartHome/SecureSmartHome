@@ -22,6 +22,7 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppRegisterNewDeviceHandler;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
@@ -44,22 +45,29 @@ public class AddNewUserDeviceFragment extends BoundFragment {
 
     private final AppUserConfigurationHandler.UserInfoListener userConfigListener = new AppUserConfigurationHandler.UserInfoListener() {
         @Override
-        public void userInfoUpdated() {
-            updateGroupSpinner();
+        public void userInfoUpdated(UserConfigurationEvent event) {
+            if (event.getType().equals(UserConfigurationEvent.EventType.PUSH)) {
+                updateGroupSpinner();
+            }
         }
     };
 
     private final AppRegisterNewDeviceHandler.RegisterNewDeviceListener registerNewDeviceListener = new AppRegisterNewDeviceHandler.RegisterNewDeviceListener() {
         @Override
-        public void tokenResponse(DeviceConnectInformation deviceConnectInformation) {
-            Bundle bundle = new Bundle();
-            bundle.putSerializable(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceConnectInformation);
-            ((MainActivity) getActivity()).showFragmentByClass(QRCodeFragment.class, bundle);
+        public void tokenResponse(final DeviceConnectInformation deviceConnectInformation) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceConnectInformation);
+                    ((MainActivity) getActivity()).showFragmentByClass(QRCodeFragment.class, bundle);
+                }
+            });
         }
 
         @Override
         public void tokenError() {
-            getActivity().runOnUiThread(new Runnable() {
+            maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     Toast.makeText(getActivity(), R.string.add_new_user_fail, Toast.LENGTH_SHORT).show();

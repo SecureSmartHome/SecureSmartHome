@@ -23,14 +23,6 @@ import java.lang.ref.WeakReference;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
-import de.unipassau.isl.evs.ssh.core.handler.NoPermissionException;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
-import de.unipassau.isl.evs.ssh.core.sec.Permission;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.FutureListener;
-import io.netty.util.concurrent.GenericFutureListener;
 
 /**
  * This fragment allows to display information contained in door messages
@@ -47,23 +39,48 @@ public class DoorFragment extends BoundFragment {
 
     private final AppDoorHandler.DoorListener doorListener = new AppDoorHandler.DoorListener() {
         @Override
-        public void onPictureChanged(final byte[] image) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    displayImage(image);
-                }
-            });
-        }
-
-        @Override
         public void onDoorStatusChanged() {
-            getActivity().runOnUiThread(new Runnable() {
+            maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     updateButtons();
                 }
             });
+        }
+
+        @Override
+        public void blockActionFinished(boolean wasSuccessful) {
+            if (wasSuccessful) {
+                updateButtons();
+            } else {
+                Toast.makeText(getActivity(), R.string.could_not_block_door, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void unlatchActionFinished(boolean wasSuccessful) {
+            if (wasSuccessful) {
+                updateButtons();
+            } else {
+                Log.e(TAG, "Could not open door");
+                Toast.makeText(getActivity(), "Could not open door", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void cameraActionFinished(final boolean wasSucessful) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (wasSucessful) {
+                        displayImage();
+                    } else {
+                        Log.e(TAG, "Could not load image");
+                        Toast.makeText(getActivity(), "Could not load image", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
         }
     };
 
@@ -105,12 +122,8 @@ public class DoorFragment extends BoundFragment {
         final AppDoorHandler handler = container.require(AppDoorHandler.KEY);
         handler.addListener(doorListener);
 
-        byte[] image = handler.getPicture();
 
-        if (image != null) {
-            displayImage(image);
-        }
-
+        displayImage();
         updateButtons();
     }
 
@@ -138,17 +151,7 @@ public class DoorFragment extends BoundFragment {
             return;
         }
 
-        handler.refreshImage().addListener(listenerOnUiThread(new FutureListener<CameraPayload>() {
-            @Override
-            public void operationComplete(Future<CameraPayload> future) throws Exception {
-                if (future.isSuccess()) {
-                    displayImage(future.get().getPicture());
-                } else {
-                    Log.e(TAG, "Could not load image", future.cause());
-                    Toast.makeText(getActivity(), "Could not load image", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }));
+        handler.refreshImage();
     }
 
     /**
@@ -163,17 +166,7 @@ public class DoorFragment extends BoundFragment {
         }
 
         if (!handler.isOpen() && !handler.isBlocked()) {
-            handler.unlatchDoor().addListener(listenerOnUiThread(new FutureListener<MessagePayload>() {
-                @Override
-                public void operationComplete(Future<MessagePayload> future) throws Exception {
-                    if (future.isSuccess()) {
-                        updateButtons();
-                    } else {
-                        Log.e(TAG, "Could not open door", future.cause());
-                        Toast.makeText(getActivity(), "Could not open door", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }));
+            handler.unlatchDoor();
         }
     }
 
@@ -188,45 +181,28 @@ public class DoorFragment extends BoundFragment {
             return;
         }
 
-        GenericFutureListener<Future<MessagePayload>> listener = listenerOnUiThread(new FutureListener<MessagePayload>() {
-            @Override
-            public void operationComplete(Future<MessagePayload> future) throws Exception {
-                if (future.isSuccess()) {
-                    updateButtons();
-                } else {
-                    Throwable cause = future.cause();
-                    String text = getResources().getString(R.string.could_not_block_door);
-
-                    if (cause.getCause() instanceof NoPermissionException) {
-                        Permission missingPermission = ((NoPermissionException) cause.getCause()).getMissingPermission();
-                        text += " " + getResources().getString(R.string.access_denied);
-                        if (missingPermission != null) {
-                            text += " " + getResources().getString(R.string.missing_permission);
-                            text += " " + missingPermission.toLocalizedString(getActivity());
-                        }
-                    }
-
-                    Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Could not (un)block door.", cause);
-                }
-            }
-        });
-
         if (handler.isBlocked()) {
-            handler.unblockDoor().addListener(listener);
+            handler.unblockDoor();
         } else {
-            handler.blockDoor().addListener(listener);
+            handler.blockDoor();
         }
     }
 
     /**
      * Displays the given image on this fragment's ImageView.
-     *
-     * @param image the image to display as byte[]
      */
-    private void displayImage(byte[] image) {
-        BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-        task.execute(image);
+    private void displayImage() {
+        final AppDoorHandler handler = getComponent(AppDoorHandler.KEY);
+
+        if (handler != null) {
+            byte[] image = handler.getPicture();
+            if (image != null) {
+                BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+                task.execute(image);
+            }
+        } else {
+            Log.v(TAG, "Container not yet connected");
+        }
     }
 
     /**
