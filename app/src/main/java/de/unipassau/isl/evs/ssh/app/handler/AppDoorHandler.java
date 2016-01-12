@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.app.handler;
 
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -159,6 +160,8 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
         List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorBuzzers();
         if (doors.size() < 1) {
             Log.e(TAG, "Could not open the door. No door buzzer installed");
+            fireUnlatchActionFinished(false);
+            return;
         }
         DoorPayload doorPayload = new DoorPayload(doors.get(0).getName());
         final Message.AddressedMessage messageToMaster = sendMessageToMaster(MASTER_DOOR_UNLATCH, new Message(doorPayload));
@@ -175,6 +178,8 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
         List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorSensors();
         if (doors.size() < 1) {
             Log.e(TAG, "Could not (un)block the door. No door sensor installed");
+            fireBlockActionFinished(false);
+            return;
         }
         DoorBlockPayload doorPayload = new DoorBlockPayload(isBlocked, doors.get(0).getName());
         final Future<DoorStatusPayload> future = newResponseFuture(sendMessageToMaster(MASTER_DOOR_BLOCK, new Message(doorPayload)));
@@ -199,6 +204,8 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
         List<Module> cameras = requireComponent(AppModuleHandler.KEY).getCameras();
         if (cameras.size() < 1) {
             Log.e(TAG, "Could not refresh the door image. No camera available");
+            fireCameraActionFinished(false);
+            return;
         }
         CameraPayload payload = new CameraPayload(0, cameras.get(0).getName());
         final Future<CameraPayload> future = newResponseFuture(sendMessageToMaster(MASTER_CAMERA_GET, new Message(payload)));
