@@ -25,9 +25,9 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  * @author Team
  */
 public abstract class AbstractMessageHandler implements MessageHandler {
+    private final Set<RoutingKey> registeredKeys = new HashSet<>(getRoutingKeys().length);
     private Container container;
     private IncomingDispatcher dispatcher;
-    private final Set<RoutingKey> registeredKeys = new HashSet<>(getRoutingKeys().length);
 
     /**
      * @return all the RoutingKeys this MessageHandler can handle

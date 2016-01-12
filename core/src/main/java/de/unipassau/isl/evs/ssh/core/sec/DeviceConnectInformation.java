@@ -47,9 +47,6 @@ import static io.netty.handler.codec.base64.Base64.encode;
  * @author Niko Fink
  */
 public class DeviceConnectInformation implements Serializable {
-    private static final String TAG = DeviceConnectInformation.class.getSimpleName();
-    private static final QRCodeWriter writer = new QRCodeWriter();
-
     /**
      * Length of the IP Address, which must be an IPv4 address
      */
@@ -58,13 +55,15 @@ public class DeviceConnectInformation implements Serializable {
      * Length of the registration token
      */
     public static final int TOKEN_LENGTH = 35;
-    public static final int TOKEN_BASE64_LENGTH = encodeToken(new byte[TOKEN_LENGTH]).length();
+    private static final String TAG = DeviceConnectInformation.class.getSimpleName();
+    private static final QRCodeWriter writer = new QRCodeWriter();
     /**
      * Length of the byte array which will be encoded as String for the QR Code
      */
     private static final int DATA_LENGTH = 4 + 2 + TOKEN_BASE64_LENGTH + DeviceID.ID_LENGTH;
     private static final int BASE64_FLAGS = android.util.Base64.NO_WRAP;
-
+    public static final int TOKEN_BASE64_LENGTH = encodeToken(new byte[TOKEN_LENGTH]).length();
+    private static SecureRandom random = null;
     private final InetAddress address;
     private final int port;
     private final DeviceID id;
@@ -81,22 +80,6 @@ public class DeviceConnectInformation implements Serializable {
             throw new IllegalArgumentException("illegal token length");
         }
         this.token = token;
-    }
-
-    public InetAddress getAddress() {
-        return address;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public DeviceID getID() {
-        return id;
-    }
-
-    public byte[] getToken() {
-        return token;
     }
 
     /**
@@ -123,48 +106,6 @@ public class DeviceConnectInformation implements Serializable {
 
         return new DeviceConnectInformation(address, port, id, token);
     }
-
-    /**
-     * Serialize this Object to a String which can be converted to a QR Code
-     */
-    public String toDataString() {
-        final ByteBuf byteBuf = UnpooledByteBufAllocator.DEFAULT.heapBuffer(DATA_LENGTH, DATA_LENGTH);
-        byteBuf.writeBytes(address.getAddress());
-        byteBuf.writeShort(port);
-        byteBuf.writeBytes(id.getIDBytes());
-        byteBuf.writeBytes(encodeToken(token).getBytes());
-        return encode(byteBuf).toString(Charsets.US_ASCII);
-    }
-
-    /**
-     * Serialize this Object to a BitMatrix representing a QR Code
-     */
-    public BitMatrix toQRBitMatrix() throws WriterException {
-        return writer.encode(toDataString(), BarcodeFormat.QR_CODE, 0, 0);
-    }
-
-    /**
-     * Display the data of this Object as a QR Code
-     */
-    public Bitmap toQRBitmap(Bitmap.Config config, int onColor, int offColor) throws WriterException {
-        BitMatrix matrix = toQRBitMatrix();
-        final int width = matrix.getWidth();
-        final int height = matrix.getHeight();
-        final int[] pixels = new int[width * height];
-
-        for (int y = 0; y < height; y++) {
-            int offset = y * width;
-            for (int x = 0; x < width; x++) {
-                pixels[offset + x] = matrix.get(x, y) ? onColor : offColor;
-            }
-        }
-
-        Bitmap image = Bitmap.createBitmap(width, height, config);
-        image.setPixels(pixels, 0, width, 0, 0, width, height);
-        return image;
-    }
-
-    private static SecureRandom random = null;
 
     /**
      * Generate a random token that can be used for registration.
@@ -222,6 +163,62 @@ public class DeviceConnectInformation implements Serializable {
         } catch (UnknownHostException e) {
             throw new AssertionError("Could not resolve IP 0.0.0.0", e);
         }
+    }
+
+    public InetAddress getAddress() {
+        return address;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public DeviceID getID() {
+        return id;
+    }
+
+    public byte[] getToken() {
+        return token;
+    }
+
+    /**
+     * Serialize this Object to a String which can be converted to a QR Code
+     */
+    public String toDataString() {
+        final ByteBuf byteBuf = UnpooledByteBufAllocator.DEFAULT.heapBuffer(DATA_LENGTH, DATA_LENGTH);
+        byteBuf.writeBytes(address.getAddress());
+        byteBuf.writeShort(port);
+        byteBuf.writeBytes(id.getIDBytes());
+        byteBuf.writeBytes(encodeToken(token).getBytes());
+        return encode(byteBuf).toString(Charsets.US_ASCII);
+    }
+
+    /**
+     * Serialize this Object to a BitMatrix representing a QR Code
+     */
+    public BitMatrix toQRBitMatrix() throws WriterException {
+        return writer.encode(toDataString(), BarcodeFormat.QR_CODE, 0, 0);
+    }
+
+    /**
+     * Display the data of this Object as a QR Code
+     */
+    public Bitmap toQRBitmap(Bitmap.Config config, int onColor, int offColor) throws WriterException {
+        BitMatrix matrix = toQRBitMatrix();
+        final int width = matrix.getWidth();
+        final int height = matrix.getHeight();
+        final int[] pixels = new int[width * height];
+
+        for (int y = 0; y < height; y++) {
+            int offset = y * width;
+            for (int x = 0; x < width; x++) {
+                pixels[offset + x] = matrix.get(x, y) ? onColor : offColor;
+            }
+        }
+
+        Bitmap image = Bitmap.createBitmap(width, height, config);
+        image.setPixels(pixels, 0, width, 0, 0, width, height);
+        return image;
     }
 
     @Override

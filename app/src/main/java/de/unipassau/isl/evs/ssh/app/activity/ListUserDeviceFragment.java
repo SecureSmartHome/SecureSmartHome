@@ -3,6 +3,7 @@ package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -123,7 +124,8 @@ public class ListUserDeviceFragment extends BoundFragment {
         if (userDevice == null) {
             Log.i(TAG, "No device found.");
         } else {
-            builder.setMessage(R.string.deleteuserdevice_dialog_title + " " + userDevice.getName() + "?")
+            Resources res = getResources();
+            builder.setMessage(String.format(res.getString(R.string.deleteuserdevice_dialog_title), userDevice.getName()))
                     .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int id) {

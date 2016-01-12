@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -21,7 +22,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import de.unipassau.isl.evs.ssh.app.AppConstants;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
@@ -30,6 +30,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_GROUP_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.TEMPLATE_DIALOG;
+import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.GROUP_ARGUMENT_FRAGMENT;
 
 /**
  * This fragment shows a list of all groups of user devices registered in the system.
@@ -64,14 +65,14 @@ public class ListGroupFragment extends BoundFragment {
     private void buildView() {
         groupList = (ListView) getActivity().findViewById(R.id.listGroupContainer);
         groupList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                        @Override
-                                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                            Group item = adapter.getItem(position);
-                                            Bundle bundle = new Bundle();
-                                            bundle.putSerializable(AppConstants.FragmentArguments.GROUP_ARGUMENT_FRAGMENT, item);
-                                            ((MainActivity) getActivity()).showFragmentByClass(ListUserDeviceFragment.class, bundle);
-                                        }
-                                    }
+                                             @Override
+                                             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                                 Group item = adapter.getItem(position);
+                                                 Bundle bundle = new Bundle();
+                                                 bundle.putSerializable(GROUP_ARGUMENT_FRAGMENT, item);
+                                                 ((MainActivity) getActivity()).showFragmentByClass(ListUserDeviceFragment.class, bundle);
+                                             }
+                                         }
         );
         groupList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -221,7 +222,7 @@ public class ListGroupFragment extends BoundFragment {
             textViewGroupName.setText(group.getName());
 
             TextView textViewGroupMembers = (TextView) groupLayout.findViewById(R.id.listgroup_group_members);
-            textViewGroupMembers.setText(createGroupMemberText(group));
+            textViewGroupMembers.setText(createLocalizedGroupMemberText(group));
 
             return groupLayout;
         }
@@ -232,8 +233,9 @@ public class ListGroupFragment extends BoundFragment {
          * @param group The group the text is created for.
          * @return the text to display
          */
-        private String createGroupMemberText(Group group) {
-            String groupMemberText = "This group has no members.";
+        private String createLocalizedGroupMemberText(Group group) {
+            Resources res = getResources();
+            String groupMemberText = res.getString(R.string.group_has_no_members);
             final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
@@ -241,11 +243,11 @@ public class ListGroupFragment extends BoundFragment {
                 List<UserDevice> groupMembers = handler.getAllGroupMembers(group);
                 int numberOfMembers = groupMembers.size();
                 if (numberOfMembers >= 3) {
-                    groupMemberText = groupMembers.get(0).getName() + " and " + groupMembers.get(1).getName() + " and more are members";
+                    groupMemberText = String.format(res.getString(R.string.group_many_members), groupMembers.get(0).getName(), groupMembers.get(1).getName());
                 } else if (numberOfMembers == 1) {
-                    groupMemberText = groupMembers.get(0).getName() + " is the only member.";
+                    groupMemberText = String.format(res.getString(R.string.group_one_member), groupMembers.get(0).getName());
                 } else if (numberOfMembers == 2) {
-                    groupMemberText = groupMembers.get(0).getName() + " and " + groupMembers.get(1).getName() + " are members.";
+                    groupMemberText = String.format(res.getString(R.string.group_two_member), groupMembers.get(0).getName(), groupMembers.get(1).getName());
                 }
             }
             return groupMemberText;
