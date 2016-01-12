@@ -11,6 +11,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
+import io.netty.channel.Channel;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION;
 
@@ -23,44 +24,57 @@ public class NotificationBroadcaster extends AbstractComponent {
 
     public static final Key<NotificationBroadcaster> KEY = new Key<>(NotificationBroadcaster.class);
 
-    //TODO Check if everything's fine
+    /**
+     * Sends out a notification to all users that have the permission to receive that notification.
+     * If the notification is a WEATHER_WARNING or HUMIDITY_WARNING it first checks for users that
+     * are at home. If no one is at home, everyone with permission will receive the notification.
+     *
+     * @param type of the notification e.g. WEATHER_WARNING
+     * @param args data that should be displayed in the notification e.g. humidity
+     */
     public void sendMessageToAllReceivers(NotificationPayload.NotificationType type, Serializable... args) {
         final List<UserDevice> allUserDevicesWithPermission = requireComponent(PermissionController.KEY)
                 .getAllUserDevicesWithPermission(type.getReceivePermission(), null);
         NotificationPayload payload = new NotificationPayload(type, args);
         Message messageToSend = new Message(payload);
         boolean userAtHome;
-        //This might give an error as we do not
-        // know if the enums and DTOs have the same names
+        /*This might give an error as we do not
+          know if the enums and DTOs have the same names*/
         if (type.equals(NotificationPayload.NotificationType.WEATHER_WARNING)) {
-            //If no one is at home everyone should get the WeatherWarning.
-            //If someone with permission is at home, only them should get a notification.
+            /*If no one is at home everyone should get the WeatherWarning.
+              If someone with permission is at home, only them should get a notification.*/
             userAtHome = isSomeoneAtHome(allUserDevicesWithPermission);
             if (userAtHome) {
                 sendToUsersAtHome(allUserDevicesWithPermission, messageToSend);
             } else {
-                searchUsers(allUserDevicesWithPermission, messageToSend);
+                sendToUsers(allUserDevicesWithPermission, messageToSend);
             }
         } else if (type.equals(NotificationPayload.NotificationType.HUMIDITY_WARNING)) {
             userAtHome = isSomeoneAtHome(allUserDevicesWithPermission);
             if (userAtHome) {
                 sendToUsersAtHome(allUserDevicesWithPermission, messageToSend);
             } else {
-                searchUsers(allUserDevicesWithPermission, messageToSend);
+                sendToUsers(allUserDevicesWithPermission, messageToSend);
             }
-        }else{
-            searchUsers(allUserDevicesWithPermission, messageToSend);
+        } else {
+            sendToUsers(allUserDevicesWithPermission, messageToSend);
         }
     }
 
+    /**
+     * Searches for userDevices that are currently at home and have the permission to receive the
+     * notification. If the userDevice is connected locally it sends him the notification.
+     *
+     * @param allUserDevicesWithPermission to receive the notification
+     * @param messageToSend                content of the notification
+     */
     private void sendToUsersAtHome(List<UserDevice> allUserDevicesWithPermission, Message messageToSend) {
         for (UserDevice userDevice : allUserDevicesWithPermission) {
             boolean isConnectionLocal = false;
-            if (requireComponent(Server.KEY).findChannel(userDevice.getUserDeviceID()).attr(ATTR_LOCAL_CONNECTION) != null) {
-                isConnectionLocal = requireComponent(Server.KEY)
-                        .findChannel(userDevice.getUserDeviceID())
-                        .attr(ATTR_LOCAL_CONNECTION)
-                        .get();
+            Channel channel = requireComponent(Server.KEY).findChannel(userDevice.getUserDeviceID());
+            //noinspection ConstantConditions
+            if (channel != null && Boolean.TRUE.equals(channel.attr(ATTR_LOCAL_CONNECTION).get())) {
+                isConnectionLocal = true;
             }
             if (isConnectionLocal) {
                 requireComponent(OutgoingRouter.KEY).sendMessage(userDevice.getUserDeviceID(),
@@ -69,23 +83,30 @@ public class NotificationBroadcaster extends AbstractComponent {
         }
     }
 
+    /**
+     * Checks if at least one user, that has the permission to receive the notification, is at home.
+     *
+     * @param allUserDevicesWithPermission to receive the notification
+     * @return true if someone is home, false if no one is home
+     */
     private boolean isSomeoneAtHome(List<UserDevice> allUserDevicesWithPermission) {
         for (UserDevice userDevice : allUserDevicesWithPermission) {
-            boolean isConnectionLocal = false;
-            if (requireComponent(Server.KEY).findChannel(userDevice.getUserDeviceID()).attr(ATTR_LOCAL_CONNECTION) != null) {
-                isConnectionLocal = requireComponent(Server.KEY)
-                        .findChannel(userDevice.getUserDeviceID())
-                        .attr(ATTR_LOCAL_CONNECTION)
-                        .get();
-            }
-            if (isConnectionLocal) {
+            Channel channel = requireComponent(Server.KEY).findChannel(userDevice.getUserDeviceID());
+            //noinspection ConstantConditions
+            if (channel != null && Boolean.TRUE.equals(channel.attr(ATTR_LOCAL_CONNECTION).get())) {
                 return true;
             }
         }
         return false;
     }
 
-    private void searchUsers(List<UserDevice> allUserDevicesWithPermission, Message messageToSend) {
+    /**
+     * Sends out an notification to all userDevices with Permission to receive the notification.
+     *
+     * @param allUserDevicesWithPermission to receive the notification
+     * @param messageToSend                content of the notification
+     */
+    private void sendToUsers(List<UserDevice> allUserDevicesWithPermission, Message messageToSend) {
         for (UserDevice userDevice : allUserDevicesWithPermission) {
             requireComponent(OutgoingRouter.KEY).sendMessage(userDevice.getUserDeviceID(),
                     RoutingKeys.APP_NOTIFICATION_RECEIVE, messageToSend);
