@@ -13,6 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -50,7 +51,49 @@ public class StatusFragment extends BoundFragment {
         }
     };
 
-    @Override
+    private final AppModifyModuleHandler.NewModuleListener modifyListener = new AppModifyModuleHandler.NewModuleListener() {
+        @Override
+        public void registrationFinished(boolean wasSuccessful) {
+            // this fragment does not handle registration of new modules
+        }
+
+        @Override
+        public void unregistrationFinished(final boolean wasSuccessful) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (wasSuccessful) {
+                        Toast.makeText(getActivity(), R.string.module_removed, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getActivity(), R.string.cannot_remove_module, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    };
+
+    private final AppSlaveManagementHandler.SlaveManagementListener slaveListener = new AppSlaveManagementHandler.SlaveManagementListener() {
+
+        @Override
+        public void onSlaveRegistered(boolean wasSuccessful) {
+            // this fragment does not handle registration of new slaves
+        }
+
+        @Override
+        public void onSlaveRemoved(final boolean wasSuccessful) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (wasSuccessful) {
+                        Toast.makeText(getActivity(), R.string.slave_removed, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getActivity(), R.string.cannot_remove_slave, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    };
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_status, container, false);
         slaveListView = (ListView) view.findViewById(R.id.deviceStatusListView);
@@ -66,7 +109,11 @@ public class StatusFragment extends BoundFragment {
         super.onContainerConnected(container);
 
         AppModuleHandler handler = container.require(AppModuleHandler.KEY);
+        AppSlaveManagementHandler slaveHandler = container.require(AppSlaveManagementHandler.KEY);
+        AppModifyModuleHandler modifyModuleHandler = container.require(AppModifyModuleHandler.KEY);
         handler.addAppModuleListener(listener);
+        slaveHandler.addSlaveManagemntListener(slaveListener);
+        modifyModuleHandler.addNewModuleListener(modifyListener);
 
         moduleListView.setAdapter(new ModuleAdapter(handler.getComponents()));
         slaveListView.setAdapter(new SlaveAdapter(handler.getSlaves()));
@@ -75,19 +122,21 @@ public class StatusFragment extends BoundFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Module module = (Module) moduleListView.getItemAtPosition(position);
-                String message = String.format(getResources().getString(R.string.delete_confirmation), module.getName());
+                final String message = String.format(getResources().getString(R.string.delete_confirmation), module.getName());
+
+                final DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
+                        if (handler != null) {
+                            handler.removeModule(module);
+                        }
+                    }
+                };
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage(message)
-                        .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (getContainer() != null) {
-                                    getContainer().require(AppModifyModuleHandler.KEY).removeModule(module);
-                                }
-
-                            }
-                        })
+                        .setPositiveButton(R.string.delete, onClickListener)
                         .setNegativeButton(R.string.cancel, null).create().show();
             }
         });
@@ -96,18 +145,21 @@ public class StatusFragment extends BoundFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final Slave slave = (Slave) slaveListView.getItemAtPosition(position);
-                String message = String.format(getResources().getString(R.string.delete_confirmation), slave.getName());
+                final String message = String.format(getResources().getString(R.string.delete_confirmation), slave.getName());
+
+                final DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AppSlaveManagementHandler handler = getComponent(AppSlaveManagementHandler.KEY);
+                        if (handler != null) {
+                            handler.deleteSlave(slave.getSlaveID());
+                        }
+                    }
+                };
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage(message)
-                        .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (getContainer() != null) {
-                                    getContainer().require(AppSlaveManagementHandler.KEY).deleteSlave(slave.getSlaveID());
-                                }
-                            }
-                        })
+                        .setPositiveButton(R.string.delete, onClickListener)
                         .setNegativeButton(R.string.cancel, null).create().show();
 
             }
@@ -121,8 +173,19 @@ public class StatusFragment extends BoundFragment {
         super.onContainerDisconnected();
 
         AppModuleHandler handler = getComponent(AppModuleHandler.KEY);
+        AppSlaveManagementHandler slaveHandler = getComponent(AppSlaveManagementHandler.KEY);
+        AppModifyModuleHandler modifyModuleHandler = getComponent(AppModifyModuleHandler.KEY);
+
         if (handler != null) {
             handler.removeAppModuleListener(listener);
+        }
+
+        if (slaveHandler != null) {
+            slaveHandler.addSlaveManagemntListener(slaveListener);
+        }
+
+        if (modifyModuleHandler != null) {
+            modifyModuleHandler.addNewModuleListener(modifyListener);
         }
     }
 

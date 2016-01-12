@@ -80,7 +80,7 @@ public abstract class AbstractAppHandler extends AbstractMessageHandler {
      * {@link Future#isDone()} will return {@code true} and {@link Future#isSuccess()} {@code false},
      * {@link Future#cause()} is set to the given Throwable.
      */
-    protected <T extends MessagePayload> Future<T> newFailedFuture(Throwable cause) {
+    protected <T> Future<T> newFailedFuture(Throwable cause) {
         return requireComponent(ExecutionServiceComponent.KEY).newFailedFuture(cause);
     }
 

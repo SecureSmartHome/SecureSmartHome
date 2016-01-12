@@ -23,9 +23,6 @@ import java.lang.ref.WeakReference;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.FutureListener;
 
 /**
  * This fragment allows to display information contained in door messages
@@ -42,23 +39,48 @@ public class DoorFragment extends BoundFragment {
 
     private final AppDoorHandler.DoorListener doorListener = new AppDoorHandler.DoorListener() {
         @Override
-        public void onPictureChanged(final byte[] image) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    displayImage(image);
-                }
-            });
-        }
-
-        @Override
         public void onDoorStatusChanged() {
-            getActivity().runOnUiThread(new Runnable() {
+            maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     updateButtons();
                 }
             });
+        }
+
+        @Override
+        public void blockActionFinished(boolean wasSuccessful) {
+            if (wasSuccessful) {
+                updateButtons();
+            } else {
+                Toast.makeText(getActivity(), R.string.could_not_block_door, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void unlatchActionFinished(boolean wasSuccessful) {
+            if (wasSuccessful) {
+                updateButtons();
+            } else {
+                Log.e(TAG, "Could not open door");
+                Toast.makeText(getActivity(), "Could not open door", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void cameraActionFinished(final boolean wasSucessful) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (wasSucessful) {
+                        displayImage();
+                    } else {
+                        Log.e(TAG, "Could not load image");
+                        Toast.makeText(getActivity(), "Could not load image", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
         }
     };
 
@@ -100,12 +122,8 @@ public class DoorFragment extends BoundFragment {
         final AppDoorHandler handler = container.require(AppDoorHandler.KEY);
         handler.addListener(doorListener);
 
-        byte[] image = handler.getPicture();
 
-        if (image != null) {
-            displayImage(image);
-        }
-
+        displayImage();
         updateButtons();
     }
 
@@ -133,17 +151,7 @@ public class DoorFragment extends BoundFragment {
             return;
         }
 
-        handler.refreshImage().addListener(listenerOnUiThread(new FutureListener<CameraPayload>() {
-            @Override
-            public void operationComplete(Future<CameraPayload> future) throws Exception {
-                if (future.isSuccess()) {
-                    displayImage(future.get().getPicture());
-                } else {
-                    Log.e(TAG, "Could not load image", future.cause());
-                    Toast.makeText(getActivity(), "Could not load image", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }));
+        handler.refreshImage();
     }
 
     /**
@@ -182,12 +190,19 @@ public class DoorFragment extends BoundFragment {
 
     /**
      * Displays the given image on this fragment's ImageView.
-     *
-     * @param image the image to display as byte[]
      */
-    private void displayImage(byte[] image) {
-        BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-        task.execute(image);
+    private void displayImage() {
+        final AppDoorHandler handler = getComponent(AppDoorHandler.KEY);
+
+        if (handler != null) {
+            byte[] image = handler.getPicture();
+            if (image != null) {
+                BitmapWorkerTask task = new BitmapWorkerTask(imageView);
+                task.execute(image);
+            }
+        } else {
+            Log.v(TAG, "Container not yet connected");
+        }
     }
 
     /**

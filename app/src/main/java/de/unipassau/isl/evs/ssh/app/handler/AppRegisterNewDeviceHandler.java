@@ -7,13 +7,14 @@ import java.util.List;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
-import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER_ERROR;
@@ -25,10 +26,31 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_RE
  * @author Wolfgang Popp
  * @author Leon Sell
  */
-public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implements Component {
+public class AppRegisterNewDeviceHandler extends AbstractAppHandler implements Component {
     public static final Key<AppRegisterNewDeviceHandler> KEY = new Key<>(AppRegisterNewDeviceHandler.class);
 
     private List<RegisterNewDeviceListener> listeners = new LinkedList<>();
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{
+                MASTER_USER_REGISTER_REPLY,
+                MASTER_USER_REGISTER_ERROR
+        };
+    }
+
+    @Override
+    public void handle(Message.AddressedMessage message) {
+        if (!tryHandleResponse(message)) {
+            if (MASTER_USER_REGISTER_REPLY.matches(message)) {
+                handleUserRegisterResponse(MASTER_USER_REGISTER_REPLY.getPayload(message));
+            } else if (MASTER_USER_REGISTER_ERROR.matches(message)) {
+                fireTokenError();
+            } else {
+                invalidMessage(message);
+            }
+        }
+    }
 
     /**
      * Adds the given listener to this handler.
@@ -54,20 +76,10 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
         }
     }
 
-    @Override
-    public void handle(Message.AddressedMessage message) {
-        if (MASTER_USER_REGISTER_REPLY.matches(message)) {
-            handleUserRegisterResponse(MASTER_USER_REGISTER_REPLY.getPayload(message));
-        } else if (MASTER_USER_REGISTER_ERROR.matches(message)) {
-            //TODO Leon: handle (Leon, 11.01.16)
-        } else {
-            invalidMessage(message);
+    private void fireTokenError() {
+        for (RegisterNewDeviceListener listener : listeners) {
+            listener.tokenError();
         }
-    }
-
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_USER_REGISTER_REPLY, MASTER_USER_REGISTER_ERROR};
     }
 
     private void handleUserRegisterResponse(GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload) {
@@ -90,13 +102,25 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
     }
 
     /**
-     * Sends a request message for a token to the master.
+     * Sends a request message for a token to the master. {@code requestToken()} does not return a Future like other
+     * functions that are sending messages. Use the {@code RegisterNewDeviceListener} to get notified when a reply
+     * message is handled by this handler.
      *
      * @param user the user who is registered
      */
     public void requestToken(UserDevice user) {
         Message message = new Message(new GenerateNewRegisterTokenPayload(null, user));
-        sendMessageToMaster(MASTER_USER_REGISTER, message);
+        final Future<GenerateNewRegisterTokenPayload> future = newResponseFuture(sendMessageToMaster(MASTER_USER_REGISTER, message));
+        future.addListener(new FutureListener<GenerateNewRegisterTokenPayload>() {
+            @Override
+            public void operationComplete(Future<GenerateNewRegisterTokenPayload> future) throws Exception {
+                if (future.isSuccess()){
+                    handleUserRegisterResponse(future.get());
+                } else {
+                    fireTokenError();
+                }
+            }
+        });
     }
 
     /**
@@ -110,5 +134,7 @@ public class AppRegisterNewDeviceHandler extends AbstractMessageHandler implemen
          * @param deviceConnectInformation the QR-Code information to display on the admin's screen
          */
         void tokenResponse(DeviceConnectInformation deviceConnectInformation);
+
+        void tokenError();
     }
 }

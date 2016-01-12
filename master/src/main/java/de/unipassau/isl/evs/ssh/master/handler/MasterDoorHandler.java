@@ -10,6 +10,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBlockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
@@ -61,18 +62,24 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         } else if (MASTER_DOOR_UNLATCH.matches(message)) {
             handleDoorUnlatchRequest(message, MASTER_DOOR_UNLATCH.getPayload(message));
         } else if (SLAVE_DOOR_UNLATCH_REPLY.matches(message)) {
-            handleDoorUnlatchResponse(message);
+            handleDoorUnlatchResponse(SLAVE_DOOR_UNLATCH_REPLY.getPayload(message), message);
         } else if (MASTER_DOOR_BLOCK.matches(message)) {
             handleDoorBlockSet(message, MASTER_DOOR_BLOCK.getPayload(message));
         } else if (SLAVE_DOOR_STATUS_GET_REPLY.matches(message)) {
             handleDoorStatusGetResponse(message, SLAVE_DOOR_STATUS_GET_REPLY.getPayload(message));
         } else if (SLAVE_DOOR_STATUS_GET_ERROR.matches(message)) {
-            //TODO
+            replyError(message, SLAVE_DOOR_STATUS_GET_ERROR);
         } else if (SLAVE_DOOR_UNLATCH_ERROR.matches(message)) {
-            //TODO
+            replyError(message, SLAVE_DOOR_UNLATCH_ERROR);
         } else {
             invalidMessage(message);
         }
+    }
+
+    private void replyError(Message.AddressedMessage message, RoutingKey<ErrorPayload> routingKey) {
+        Message messageToSend = new Message(routingKey.getPayload(message));
+        Message.AddressedMessage original = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
+        sendReply(original, messageToSend);
     }
 
     private void handleDoorStatusUpdate(DoorStatusPayload payload) {
@@ -107,12 +114,12 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         }
     }
 
-    private void handleDoorUnlatchResponse(Message.AddressedMessage message) {
+    private void handleDoorUnlatchResponse(DoorPayload payload, Message.AddressedMessage message) {
         requireComponent(NotificationBroadcaster.KEY).sendMessageToAllReceivers(DOOR_UNLATCHED, message);
-
         final Message.AddressedMessage correspondingMessage =
                 takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
         sendReply(correspondingMessage, new Message());
+        broadcastDoorStatus(payload.getModuleName());
     }
 
 

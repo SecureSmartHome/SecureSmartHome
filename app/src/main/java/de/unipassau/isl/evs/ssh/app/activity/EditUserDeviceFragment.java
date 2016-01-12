@@ -30,6 +30,7 @@ import java.util.List;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
@@ -59,11 +60,17 @@ public class EditUserDeviceFragment extends BoundFragment {
 
     final private AppUserConfigurationHandler.UserInfoListener listener = new AppUserConfigurationHandler.UserInfoListener() {
         @Override
-        public void userInfoUpdated() {
-            getActivity().runOnUiThread(new Runnable() {
+        public void userInfoUpdated(final UserConfigurationEvent event) {
+            maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    permissionListAdapter.notifyDataSetChanged();
+                    if (event.getType().equals(UserConfigurationEvent.EventType.PUSH)) {
+                        permissionListAdapter.notifyDataSetChanged();
+                    } else if (event.getType().equals(UserConfigurationEvent.EventType.PERMISSION_GRANT) && !event.wasSuccessful()) {
+                        Toast.makeText(getActivity(), R.string.could_not_grant, Toast.LENGTH_SHORT).show();
+                    } else if (event.getType().equals(UserConfigurationEvent.EventType.PERMISSION_REVOKE) && !event.wasSuccessful()) {
+                        Toast.makeText(getActivity(), R.string.could_not_revoke, Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
         }
@@ -156,7 +163,9 @@ public class EditUserDeviceFragment extends BoundFragment {
 
         String[] groupNames = bundle.getStringArray(ALL_GROUPS_DIALOG);
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_edituserdevice, null, false);
+
+        final ViewGroup parent = (ViewGroup) getActivity().findViewById(R.id.fragment_edit_user);
+        View dialogView = inflater.inflate(R.layout.dialog_edituserdevice, parent, false);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         final EditText userDeviceName = (EditText) dialogView.findViewById(R.id.editdevicedialog_username);

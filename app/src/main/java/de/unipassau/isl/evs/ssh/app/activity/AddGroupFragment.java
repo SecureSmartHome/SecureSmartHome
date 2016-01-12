@@ -16,6 +16,7 @@ import com.google.common.base.Strings;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 
@@ -28,16 +29,19 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.TEMPLATE
  */
 public class AddGroupFragment extends BoundFragment {
     private static final String TAG = AddNewUserDeviceFragment.class.getSimpleName();
-    private final AppUserConfigurationHandler.UserInfoListener userInfoListener = new AppUserConfigurationHandler.UserInfoListener() {
-        @Override
-        public void userInfoUpdated() {
-            String toastText = getResources().getString(R.string.group_created);
-            Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-            toast.show();
-        }
-    };
     private Spinner spinner;
     private EditText inputGroupName;
+
+    private final AppUserConfigurationHandler.UserInfoListener userInfoListener = new AppUserConfigurationHandler.UserInfoListener() {
+        @Override
+        public void userInfoUpdated(UserConfigurationEvent event) {
+            if (event.getType().equals(UserConfigurationEvent.EventType.GROUP_ADD)) {
+                String toastText = getResources().getString(R.string.group_created);
+                Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -73,11 +77,11 @@ public class AddGroupFragment extends BoundFragment {
                 if (checkInputFields() && isContainerConnected()) {
                     String name = inputGroupName.getText().toString();
                     String template = ((String) spinner.getSelectedItem());
-                    final AppUserConfigurationHandler component = getComponent(AppUserConfigurationHandler.KEY);
-                    if (component == null) {
+                    final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+                    if (handler == null) {
                         Log.i(TAG, "Can't add group, Container not yet connected!");
                     } else {
-                        component.addGroup(new Group(name, template));
+                        handler.addGroup(new Group(name, template));
                         Log.i(TAG, "Group " + name + " added.");
                     }
                 } else {

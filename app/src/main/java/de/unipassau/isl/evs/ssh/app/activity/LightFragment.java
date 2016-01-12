@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +40,7 @@ public class LightFragment extends BoundFragment {
     private static final String TAG = LightFragment.class.getSimpleName();
 
     final private LightListAdapter adapter = new LightListAdapter();
+
     private final AppLightHandler.LightHandlerListener listener = new AppLightHandler.LightHandlerListener() {
         @Override
         public void statusChanged(Module module) {
@@ -51,6 +53,18 @@ public class LightFragment extends BoundFragment {
                     }
                 });
             }
+        }
+
+        @Override
+        public void onLightSetFinished(boolean wasSuccess) {
+            if (!wasSuccess) {
+                Toast.makeText(getActivity(), "Could not switch light. Maybe missing Permission", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onLightGetFinished(boolean wasSuccess) {
+            // this fragment does not handle explicit get requests
         }
     };
 

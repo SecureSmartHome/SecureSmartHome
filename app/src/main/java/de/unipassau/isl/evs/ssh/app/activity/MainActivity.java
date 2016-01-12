@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -79,6 +80,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
                     showConnectionOverlay(getString(R.string.warn_client_rejected));
                 }
             });
+            shutdownService();
         }
     };
 

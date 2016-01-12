@@ -69,17 +69,30 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
     }
 
     /**
+     * Requests the current climate status for a Module.
+     * Stops the handler from pulling data more often than RefreshDelay allows it.
+     *
+     * @param module WeatherSensor Module.
+     * @return current Climate data.
+     */
+    private ClimateStatus maybeRequestClimateStatus(Module module) {
+        final ClimateStatus status = climateStatusMapping.get(module);
+        final long now = System.currentTimeMillis();
+        if (now - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
+            status.setTimestamp(now);
+            requestClimateStatus(module);
+        }
+        return status;
+    }
+
+    /**
      * Return temperature that is measured in Temperature1 sensor.
      *
      * @param module The weatherboard which sensors are measured.
      * @return The temperature measured in Temperature1 sensor.
      */
     public double getTemp1(Module module) {
-        final ClimateStatus status = climateStatusMapping.get(module);
-        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
-            requestClimateStatus(module);
-        }
-        return status.getTemp1();
+        return maybeRequestClimateStatus(module).getTemp1();
     }
 
     /**
@@ -89,11 +102,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      * @return The temperature measured in Temperature2 sensor.
      */
     public double getTemp2(Module module) {
-        final ClimateStatus status = climateStatusMapping.get(module);
-        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
-            requestClimateStatus(module);
-        }
-        return status.getTemp2();
+        return maybeRequestClimateStatus(module).getTemp2();
     }
 
     /**
@@ -103,11 +112,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      * @return The temperature measured in AirPressure sensor.
      */
     public double getPressure(Module module) {
-        final ClimateStatus status = climateStatusMapping.get(module);
-        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
-            requestClimateStatus(module);
-        }
-        return status.getPressure();
+        return maybeRequestClimateStatus(module).getPressure();
     }
 
     /**
@@ -117,11 +122,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      * @return The temperature measured in Altitude sensor.
      */
     public double getAltitude(Module module) {
-        final ClimateStatus status = climateStatusMapping.get(module);
-        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
-            requestClimateStatus(module);
-        }
-        return status.getAltitude();
+        return maybeRequestClimateStatus(module).getAltitude();
     }
 
     /**
@@ -131,11 +132,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      * @return The temperature measured in Humidity sensor.
      */
     public double getHumidity(Module module) {
-        final ClimateStatus status = climateStatusMapping.get(module);
-        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
-            requestClimateStatus(module);
-        }
-        return status.getHumidity();
+        return maybeRequestClimateStatus(module).getHumidity();
     }
 
     /**
@@ -145,11 +142,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      * @return The temperature measured in UV Radiation sensor.
      */
     public double getUv(Module module) {
-        final ClimateStatus status = climateStatusMapping.get(module);
-        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
-            requestClimateStatus(module);
-        }
-        return status.getUv();
+        return maybeRequestClimateStatus(module).getUv();
     }
 
     /**
@@ -159,11 +152,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      * @return The temperature measured in IR Radiation sensor.
      */
     public int getVisible(Module module) {
-        final ClimateStatus status = climateStatusMapping.get(module);
-        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
-            requestClimateStatus(module);
-        }
-        return status.getVisible();
+        return maybeRequestClimateStatus(module).getVisible();
     }
 
     /**
@@ -173,11 +162,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      * @return The temperature measured in Light Intensity sensor.
      */
     public int getIr(Module module) {
-        final ClimateStatus status = climateStatusMapping.get(module);
-        if (System.currentTimeMillis() - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
-            requestClimateStatus(module);
-        }
-        return status.getIr();
+        return maybeRequestClimateStatus(module).getIr();
     }
 
     /**
@@ -322,6 +307,10 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
 
         public long getTimestamp() {
             return timestamp;
+        }
+
+        public void setTimestamp(long timestamp) {
+            this.timestamp = timestamp;
         }
     }
 }

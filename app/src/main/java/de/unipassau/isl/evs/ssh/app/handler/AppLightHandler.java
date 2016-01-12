@@ -11,11 +11,13 @@ import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_LIGHT_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET_REPLY;
@@ -29,7 +31,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_S
  *
  * @author Phil Werli
  */
-public class AppLightHandler extends AbstractMessageHandler implements Component {
+public class AppLightHandler extends AbstractAppHandler implements Component {
     public static final Key<AppLightHandler> KEY = new Key<>(AppLightHandler.class);
 
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.MINUTES.toMillis(2);
@@ -55,18 +57,27 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (MASTER_LIGHT_SET_REPLY.matches(message)) {
-            LightPayload payload = MASTER_LIGHT_SET_REPLY.getPayload(message);
-            setCachedStatus(payload.getModule(), payload.getOn());
-        } else if (MASTER_LIGHT_GET_REPLY.matches(message)) {
-            LightPayload payload = MASTER_LIGHT_GET_REPLY.getPayload(message);
-            setCachedStatus(payload.getModule(), payload.getOn());
-        } else if (MASTER_LIGHT_GET_ERROR.matches(message)) {
-            //TODO Leon: handle (Leon, 11.01.16)
-        } else if (MASTER_LIGHT_SET_ERROR.matches(message)) {
-            //TODO Leon: handle (Leon, 11.01.16)
-        } else {
-            invalidMessage(message);
+        if (!tryHandleResponse(message)) {
+            if (MASTER_LIGHT_SET_REPLY.matches(message)) {
+                LightPayload payload = MASTER_LIGHT_SET_REPLY.getPayload(message);
+                setCachedStatus(payload.getModule(), payload.getOn());
+                fireLightSetFinished(true);
+            } else if (MASTER_LIGHT_GET_REPLY.matches(message)) {
+                LightPayload payload = MASTER_LIGHT_GET_REPLY.getPayload(message);
+                setCachedStatus(payload.getModule(), payload.getOn());
+                fireLightGetFinished(true);
+            } else if (MASTER_LIGHT_GET_ERROR.matches(message)) {
+                fireLightGetFinished(false);
+            } else if (MASTER_LIGHT_SET_ERROR.matches(message)) {
+                fireLightSetFinished(false);
+            } else if (APP_LIGHT_UPDATE.matches(message)) {
+                LightPayload payload = MASTER_LIGHT_SET_REPLY.getPayload(message);
+                final Module module = payload.getModule();
+                setCachedStatus(module, payload.getOn());
+                fireStatusChanged(module);
+            } else {
+                invalidMessage(message);
+            }
         }
     }
 
@@ -107,9 +118,6 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
             lightStatusMapping.put(module, status);
         } else {
             status.setOn(isOn);
-        }
-        for (LightHandlerListener listener : listeners) {
-            listener.statusChanged(module);
         }
     }
 
@@ -153,7 +161,18 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
     private void requestLightStatus(Module m) {
         LightPayload lightPayload = new LightPayload(false, m);
         Message message = new Message(lightPayload);
-        sendMessageToMaster(MASTER_LIGHT_GET, message);
+        final Future<LightPayload> future = newResponseFuture(sendMessageToMaster(MASTER_LIGHT_GET, message));
+        future.addListener(new FutureListener<LightPayload>() {
+            @Override
+            public void operationComplete(Future<LightPayload> future) throws Exception {
+                boolean wasSuccess = future.isSuccess();
+                if (wasSuccess) {
+                    LightPayload payload = future.get();
+                    setCachedStatus(payload.getModule(), payload.getOn());
+                }
+                fireLightGetFinished(wasSuccess);
+            }
+        });
     }
 
     /**
@@ -165,7 +184,18 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
     public void setLight(Module module, boolean status) {
         LightPayload lightPayload = new LightPayload(status, module);
         Message message = new Message(lightPayload);
-        sendMessageToMaster(MASTER_LIGHT_SET, message);
+        final Future<LightPayload> future = newResponseFuture(sendMessageToMaster(MASTER_LIGHT_SET, message));
+        future.addListener(new FutureListener<LightPayload>() {
+            @Override
+            public void operationComplete(Future<LightPayload> future) throws Exception {
+                boolean wasSuccess = future.isSuccess();
+                if (wasSuccess) {
+                    LightPayload payload = future.get();
+                    setCachedStatus(payload.getModule(), payload.getOn());
+                }
+                fireLightSetFinished(wasSuccess);
+            }
+        });
     }
 
     /**
@@ -182,8 +212,30 @@ public class AppLightHandler extends AbstractMessageHandler implements Component
         listeners.remove(listener);
     }
 
+    private void fireStatusChanged(Module module) {
+        for (LightHandlerListener listener : listeners) {
+            listener.statusChanged(module);
+        }
+    }
+
+    private void fireLightSetFinished(boolean wasSuccessful) {
+        for (LightHandlerListener listener : listeners) {
+            listener.onLightSetFinished(wasSuccessful);
+        }
+    }
+
+    private void fireLightGetFinished(boolean wasSuccessful) {
+        for (LightHandlerListener listener : listeners) {
+            listener.onLightGetFinished(wasSuccessful);
+        }
+    }
+
     public interface LightHandlerListener {
         void statusChanged(Module module);
+
+        void onLightSetFinished(boolean wasSuccess);
+
+        void onLightGetFinished(boolean wasSuccess);
     }
 
     /**

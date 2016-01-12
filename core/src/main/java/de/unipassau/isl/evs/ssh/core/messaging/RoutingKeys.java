@@ -134,7 +134,7 @@ public class RoutingKeys {
     public static final RoutingKey<ErrorPayload> MASTER_DOOR_BLOCK_ERROR = MASTER_DOOR_BLOCK.getReply(ErrorPayload.class);
 
     public static final RoutingKey<DoorPayload> SLAVE_DOOR_UNLATCH = new RoutingKey<>(PREFIX_SLAVE + "/door/unlatch", DoorPayload.class);
-    public static final RoutingKey<Void> SLAVE_DOOR_UNLATCH_REPLY = SLAVE_DOOR_UNLATCH.getReply(Void.class);
+    public static final RoutingKey<DoorPayload> SLAVE_DOOR_UNLATCH_REPLY = SLAVE_DOOR_UNLATCH.getReply(DoorPayload.class);
     public static final RoutingKey<ErrorPayload> SLAVE_DOOR_UNLATCH_ERROR = SLAVE_DOOR_UNLATCH.getReply(ErrorPayload.class);
 
     public static final RoutingKey<DoorStatusPayload> SLAVE_DOOR_STATUS_GET = new RoutingKey<>(PREFIX_SLAVE + "/door/status_get", DoorStatusPayload.class);

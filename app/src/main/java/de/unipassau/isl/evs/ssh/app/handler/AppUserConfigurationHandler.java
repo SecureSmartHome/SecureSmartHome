@@ -15,11 +15,11 @@ import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
-import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteDevicePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupNamePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupTemplatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetPermissionPayload;
@@ -27,6 +27,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserGroupPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserNamePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_USERINFO_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_ADD;
@@ -44,15 +46,15 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_S
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_NAME;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET_ERROR;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USERNAME_SET_REPLY;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE;
 
 /**
  * The AppUserConfigurationHandler handles the messaging that is needed to provide user and group
@@ -60,7 +62,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DE
  *
  * @author Wolfgang Popp
  */
-public class AppUserConfigurationHandler extends AbstractMessageHandler implements Component {
+public class AppUserConfigurationHandler extends AbstractAppHandler implements Component {
     public static final Key<AppUserConfigurationHandler> KEY = new Key<>(AppUserConfigurationHandler.class);
 
     private final ListMultimap<UserDevice, Permission> usersToPermissions = ArrayListMultimap.create();
@@ -69,30 +71,6 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
     private final List<Group> allGroups = new LinkedList<>();
 
     private final List<UserInfoListener> listeners = new LinkedList<>();
-
-    /**
-     * Adds the given listener to this handler.
-     *
-     * @param listener the listener to add
-     */
-    public void addUserInfoListener(AppUserConfigurationHandler.UserInfoListener listener) {
-        listeners.add(listener);
-    }
-
-    /**
-     * Removes the given listener from this handler.
-     *
-     * @param listener the listener to remove
-     */
-    public void removeUserInfoListener(AppUserConfigurationHandler.UserInfoListener listener) {
-        listeners.remove(listener);
-    }
-
-    private void fireUserInfoUpdated() {
-        for (UserInfoListener listener : listeners) {
-            listener.userInfoUpdated();
-        }
-    }
 
     @Override
     public RoutingKey[] getRoutingKeys() {
@@ -146,9 +124,34 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
                 this.allGroups.addAll(allGroups);
             }
 
-            fireUserInfoUpdated();
+            fireUserInfoUpdated(new UserConfigurationEvent());
         } else {
-            invalidMessage(message);
+            tryHandleResponse(message);
+        }
+        // invalidMessage is not called because handled by tryHandleResponse()
+    }
+
+    /**
+     * Adds the given listener to this handler.
+     *
+     * @param listener the listener to add
+     */
+    public void addUserInfoListener(AppUserConfigurationHandler.UserInfoListener listener) {
+        listeners.add(listener);
+    }
+
+    /**
+     * Removes the given listener from this handler.
+     *
+     * @param listener the listener to remove
+     */
+    public void removeUserInfoListener(AppUserConfigurationHandler.UserInfoListener listener) {
+        listeners.remove(listener);
+    }
+
+    private void fireUserInfoUpdated(UserConfigurationEvent event) {
+        for (UserInfoListener listener : listeners) {
+            listener.userInfoUpdated(event);
         }
     }
 
@@ -204,6 +207,17 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
         return ImmutableList.copyOf(usersToPermissions.get(user));
     }
 
+    private void sendUserConfigMessage(Message message, RoutingKey<? extends MessagePayload> key, final UserConfigurationEvent.EventType eventType){
+        final Future<Void> future = newResponseFuture(sendMessageToMaster(key, message));
+        future.addListener(new FutureListener<Void>() {
+            @Override
+            public void operationComplete(Future<Void> future) throws Exception {
+                final boolean success = future.isSuccess();
+                fireUserInfoUpdated(new UserConfigurationEvent(eventType, success));
+            }
+        });
+    }
+
     /**
      * Sends a message to master to add the given group.
      *
@@ -211,7 +225,7 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      */
     public void addGroup(Group group) {
         Message message = new Message(new GroupPayload(group, GroupPayload.ACTION.CREATE));
-        sendMessageToMaster(MASTER_GROUP_ADD, message);
+        sendUserConfigMessage(message, MASTER_GROUP_ADD, UserConfigurationEvent.EventType.GROUP_ADD);
     }
 
     /**
@@ -221,27 +235,27 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      */
     public void removeGroup(Group group) {
         Message message = new Message(new GroupPayload(group, GroupPayload.ACTION.DELETE));
-        sendMessageToMaster(MASTER_GROUP_DELETE, message);
+        sendUserConfigMessage(message, MASTER_GROUP_DELETE, UserConfigurationEvent.EventType.GROUP_DELETE);
     }
 
     public void setGroupName(Group group, String groupName) {
         Message message = new Message(new SetGroupNamePayload(group, groupName));
-        sendMessageToMaster(MASTER_GROUP_SET_NAME, message);
+        sendUserConfigMessage(message, MASTER_GROUP_SET_NAME, UserConfigurationEvent.EventType.GROUP_SET_NAME);
     }
 
     public void setGroupTemplate(Group group, String templateName) {
         Message message = new Message(new SetGroupTemplatePayload(group, templateName));
-        sendMessageToMaster(MASTER_GROUP_SET_TEMPLATE, message);
+        sendUserConfigMessage(message, MASTER_GROUP_SET_TEMPLATE, UserConfigurationEvent.EventType.GROUP_SET_TEMPLATE);
     }
 
     public void setUserName(DeviceID user, String username) {
-        SetUserNamePayload payload = new SetUserNamePayload(user, username);
-        sendMessageToMaster(MASTER_USER_SET_NAME, new Message(payload));
+        Message message = new Message(new SetUserNamePayload(user, username));
+        sendUserConfigMessage(message, MASTER_USER_SET_NAME, UserConfigurationEvent.EventType.USERNAME_SET);
     }
 
     public void setUserGroup(DeviceID user, String groupName) {
-        SetUserGroupPayload payload = new SetUserGroupPayload(user, groupName);
-        sendMessageToMaster(MASTER_USER_SET_GROUP, new Message(payload));
+        Message message = new Message(new SetUserGroupPayload(user, groupName));
+        sendUserConfigMessage(message, MASTER_USER_SET_GROUP, UserConfigurationEvent.EventType.USER_SET_GROUP);
     }
 
     /**
@@ -251,8 +265,8 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      * @param permission the permission to grant
      */
     public void grantPermission(DeviceID user, Permission permission) {
-        SetPermissionPayload payload = new SetPermissionPayload(user, permission, SetPermissionPayload.Action.GRANT);
-        sendMessageToMaster(MASTER_PERMISSION_SET, new Message(payload));
+        Message message = new Message(new SetPermissionPayload(user, permission, SetPermissionPayload.Action.GRANT));
+        sendUserConfigMessage(message, MASTER_PERMISSION_SET, UserConfigurationEvent.EventType.PERMISSION_GRANT);
     }
 
     /**
@@ -262,8 +276,8 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      * @param permission the permission to remove
      */
     public void revokePermission(DeviceID user, Permission permission) {
-        SetPermissionPayload payload = new SetPermissionPayload(user, permission, SetPermissionPayload.Action.REVOKE);
-        sendMessageToMaster(MASTER_PERMISSION_SET, new Message(payload));
+        Message message = new Message(new SetPermissionPayload(user, permission, SetPermissionPayload.Action.REVOKE));
+        sendUserConfigMessage(message, MASTER_PERMISSION_SET, UserConfigurationEvent.EventType.PERMISSION_REVOKE);
     }
 
     /**
@@ -272,8 +286,8 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
      * @param user the user to remove
      */
     public void removeUserDevice(DeviceID user) {
-        DeleteDevicePayload payload = new DeleteDevicePayload(user);
-        sendMessageToMaster(MASTER_USER_DELETE, new Message(payload));
+        Message message = new Message(new DeleteDevicePayload(user));
+        sendUserConfigMessage(message, MASTER_USER_DELETE, UserConfigurationEvent.EventType.USER_DELETE);
     }
 
     /**
@@ -283,6 +297,6 @@ public class AppUserConfigurationHandler extends AbstractMessageHandler implemen
         /**
          * Called when the user configuration changed.
          */
-        void userInfoUpdated();
+        void userInfoUpdated(UserConfigurationEvent event);
     }
 }

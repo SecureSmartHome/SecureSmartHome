@@ -43,8 +43,6 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.ModuleType;
  */
 public class AddModuleFragment extends BoundFragment implements AdapterView.OnItemSelectedListener {
 
-    private static final String KEY_CONNECTION_TYPE_SPINNER_POSITION = "CONNECTION_TYPE_SPINNER_POSITION";
-
     private static final String TAG = AddModuleFragment.class.getSimpleName();
 
     private LinearLayout wlanView;
@@ -56,40 +54,48 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     private Button addMockButton;
     private Button addUSBButton;
     private Button addGPIOButton;
+
+    private Spinner slaveSpinner;
+    private Spinner sensorTypeSpinner;
+    private EditText nameInput;
+
     private final AppModifyModuleHandler.NewModuleListener listener = new AppModifyModuleHandler.NewModuleListener() {
         @Override
         public void registrationFinished(final boolean wasSuccessful) {
-            getActivity().runOnUiThread(new Runnable() {
+            maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    String text;
-                    if (wasSuccessful) {
-                        text = getResources().getString(R.string.added_module_success);
-                    } else {
-                        text = getResources().getString(R.string.added_module_fail);
-                    }
-
-                    addWLANButton.setEnabled(true);
-                    addMockButton.setEnabled(true);
-                    addUSBButton.setEnabled(true);
-                    addGPIOButton.setEnabled(true);
-
-                    Toast.makeText(getActivity(), text, Toast.LENGTH_LONG).show();
-                    ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+                    onRegistrationFinished(wasSuccessful);
                 }
             });
         }
+
+        @Override
+        public void unregistrationFinished(boolean wasSuccessful) {
+        }
     };
-    private Spinner slaveSpinner;
-    private Spinner sensorTypeSpinner;
-    private Spinner connectionTypeSpinner;
-    private EditText nameInput;
+
+    private void onRegistrationFinished(boolean wasSuccessful) {
+        if (!wasSuccessful) {
+            Toast.makeText(getActivity(), R.string.added_module_fail, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        addWLANButton.setEnabled(true);
+        addMockButton.setEnabled(true);
+        addUSBButton.setEnabled(true);
+        addGPIOButton.setEnabled(true);
+
+        Toast.makeText(getActivity(), R.string.added_module_success, Toast.LENGTH_LONG).show();
+        ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_addmodule, container, false);
 
-        connectionTypeSpinner = (Spinner) view.findViewById(R.id.connection_type_spinner);
+        Spinner connectionTypeSpinner = (Spinner) view.findViewById(R.id.connection_type_spinner);
         sensorTypeSpinner = (Spinner) view.findViewById(R.id.add_module_sensor_type_spinner);
         slaveSpinner = (Spinner) view.findViewById(R.id.add_module_slave_spinner);
         nameInput = (EditText) view.findViewById(R.id.add_module_name_input);
@@ -119,13 +125,6 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         sensorTypeSpinner.setAdapter(sensorTypeAdapter);
         connectionTypeSpinner.setAdapter(connectionTypeAdapter);
         connectionTypeSpinner.setOnItemSelectedListener(this);
-
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(KEY_CONNECTION_TYPE_SPINNER_POSITION)) {
-                int position = savedInstanceState.getInt(KEY_CONNECTION_TYPE_SPINNER_POSITION);
-                connectionTypeSpinner.setSelection(position);
-            }
-        }
 
         return view;
     }
@@ -291,13 +290,6 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         });
 
         return mockView;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        // TODO Wolfgang Save state of all spinners in this fragment. This lifecycle is currently broken (Wolfgang, 2016-03-01)
-        outState.putInt(KEY_CONNECTION_TYPE_SPINNER_POSITION, connectionTypeSpinner.getSelectedItemPosition());
-        super.onSaveInstanceState(outState);
     }
 
     private void addNewModule(ModuleAccessPoint accessPoint) {

@@ -6,10 +6,11 @@ import java.util.List;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModifyModulePayload;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD_ERROR;
@@ -23,10 +24,37 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_
  *
  * @author Wolfgang Popp
  */
-public class AppModifyModuleHandler extends AbstractMessageHandler implements Component {
+public class AppModifyModuleHandler extends AbstractAppHandler implements Component {
     public static final Key<AppModifyModuleHandler> KEY = new Key<>(AppModifyModuleHandler.class);
 
     private List<NewModuleListener> listeners = new LinkedList<>();
+
+    @Override
+    public RoutingKey[] getRoutingKeys() {
+        return new RoutingKey[]{
+                MASTER_MODULE_ADD_REPLY,
+                MASTER_MODULE_ADD_ERROR,
+                MASTER_MODULE_REMOVE_REPLY,
+                MASTER_MODULE_REMOVE_ERROR
+        };
+    }
+
+    @Override
+    public void handle(Message.AddressedMessage message) {
+        if (!tryHandleResponse(message)) {
+            if (MASTER_MODULE_ADD_REPLY.matches(message)) {
+                fireRegistrationFinished(true);
+            } else if (MASTER_MODULE_ADD_ERROR.matches(message)) {
+                fireRegistrationFinished(false);
+            } else if (MASTER_MODULE_REMOVE_REPLY.matches(message)) {
+                fireUnregistrationFinished(true);
+            } else if (MASTER_MODULE_REMOVE_ERROR.matches(message)) {
+                fireUnregistrationFinished(false);
+            } else {
+                invalidMessage(message);
+            }
+        }
+    }
 
     /**
      * Adds a new NewModuleListener to this handler.
@@ -52,30 +80,10 @@ public class AppModifyModuleHandler extends AbstractMessageHandler implements Co
         }
     }
 
-    @Override
-    public void handle(Message.AddressedMessage message) {
-        if (MASTER_MODULE_ADD_REPLY.matches(message)) {
-            fireRegistrationFinished(true);
-        } else if (MASTER_MODULE_ADD_ERROR.matches(message)) {
-            fireRegistrationFinished(false);
-        } else if (MASTER_MODULE_REMOVE_REPLY.matches(message)) {
-            // FIXME Wolfgang: Uncomment? (Phil, 8-1-16)
-            // fireRegistrationFinished(false);
-        } else if (MASTER_MODULE_REMOVE_ERROR.matches(message)) {
-            //TODO Leon: handle (Leon, 11.01.16)
-        } else {
-            invalidMessage(message);
+    private void fireUnregistrationFinished(boolean wasSuccessful) {
+        for (NewModuleListener listener : listeners) {
+            listener.unregistrationFinished(wasSuccessful);
         }
-    }
-
-    @Override
-    public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{
-                MASTER_MODULE_ADD_REPLY,
-                MASTER_MODULE_ADD_ERROR,
-                MASTER_MODULE_REMOVE_REPLY,
-                MASTER_MODULE_REMOVE_ERROR
-        };
     }
 
     /**
@@ -86,12 +94,24 @@ public class AppModifyModuleHandler extends AbstractMessageHandler implements Co
      */
     public void addNewModule(Module module) {
         ModifyModulePayload payload = new ModifyModulePayload(module);
-        sendMessageToMaster(MASTER_MODULE_ADD, new Message(payload));
+        final Future<Void> future = newResponseFuture(sendMessageToMaster(MASTER_MODULE_ADD, new Message(payload)));
+        future.addListener(new FutureListener<Void>() {
+            @Override
+            public void operationComplete(Future<Void> future) throws Exception {
+                fireRegistrationFinished(future.isSuccess());
+            }
+        });
     }
 
-    public void removeModule(Module module){
+    public void removeModule(Module module) {
         ModifyModulePayload payload = new ModifyModulePayload(module);
-        sendMessageToMaster(MASTER_MODULE_REMOVE, new Message(payload));
+        final Future<Void> future = newResponseFuture(sendMessageToMaster(MASTER_MODULE_REMOVE, new Message(payload)));
+        future.addListener(new FutureListener<Void>() {
+            @Override
+            public void operationComplete(Future<Void> future) throws Exception {
+
+            }
+        });
     }
 
     /**
@@ -105,5 +125,7 @@ public class AppModifyModuleHandler extends AbstractMessageHandler implements Co
          * @param wasSuccessful indicates whether the registration was successful or not
          */
         void registrationFinished(boolean wasSuccessful);
+
+        void unregistrationFinished(boolean wasSuccessful);
     }
 }
