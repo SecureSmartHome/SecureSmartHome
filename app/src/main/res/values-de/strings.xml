@@ -18,11 +18,11 @@
     <string name="altitude">Höhe:</string>
     <string name="apply">Bestätigen</string>
     <string name="blockDoor">Tür sperren</string>
-    <string name="brightness_warning_text">"Sie sollten bei %d Lux kein Licht benötigen, bitte schalten Sie es aus."</string>
+    <string name="brightness_warning_text">Sie sollten bei %d Lux kein Licht benötigen, bitte schalten Sie es aus.</string>
     <string name="brightness_warning_title">Beleuchtungswarnung!</string>
     <string name="cannot_add_slave">Der neue Slave konnte nicht hinzugefügt werden.</string>
     <string name="click_to_register">Klicken sie unten, um sich in einem System zu registrieren.</string>
-    <string name="climate_notification_text">"Die Luftfeuchtigkeit beträgt %3.2f, bitte lüften sie bei Gelegenheit."</string>
+    <string name="climate_notification_text">Die Luftfeuchtigkeit beträgt %3.2f \U+0025, bitte lüften sie bei Gelegenheit.</string>
     <string name="climate_notification_title">Raumklimawarnung!</string>
     <string name="climate_sensor">Raumklimasensor:</string>
     <string name="connected_to_type">Verbunden mit Slave:</string>
@@ -63,7 +63,7 @@
     <string name="humidity">Luftfeuchtigkeit:</string>
     <string name="ip_address">IP Adresse:</string>
     <string name="ir">IR:</string>
-    <string name="is_in_group">"ist in Gruppe %s"</string>
+    <string name="is_in_group">ist in Gruppe %s</string>
     <string name="malformed_qr_code">Defekter QR-Code</string>
     <string name="name_of_new_sensor">Name des neuen Sensors:</string>
     <string name="name_of_new_slave">Name des neuen Slaves</string>
@@ -99,8 +99,8 @@
     <string name="status_name">Name:</string>
     <string name="switchSimulationOff">Simulation ausschalten</string>
     <string name="switchSimulationOn">Simulation anschalten</string>
-    <string name="system_health_warning_text_failure">"Das Modul %s antwortet nicht mehr."</string>
-    <string name="system_health_warning_text_fixed">"Das Modul %s antwortet wieder."</string>
+    <string name="system_health_warning_text_failure">Das Modul %s antwortet nicht mehr.</string>
+    <string name="system_health_warning_text_fixed">Das Modul %s antwortet wieder.</string>
     <string name="system_health_warning_title_failed">Komponente ausgefallen!</string>
     <string name="system_health_warning_title_fixed">Komponente funktioniert wieder!</string>
     <string name="temperature2">Temperatur 2:</string>

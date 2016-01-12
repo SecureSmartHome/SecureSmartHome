@@ -120,17 +120,17 @@
     <string name="visible_1">Visible:</string>
     <string name="ir">IR:</string>
 
-    <string name="si_degree" formatted="false">%3.1f C°</string>
-    <string name="si_pressure" formatted="false">%4.1f Pa</string>
-    <string name="si_altitude" formatted="false">%4.2f m</string>
-    <string name="si_humidity" formatted="false">%3.2f %</string>
-    <string name="si_visible" formatted="false">%d%n Lux</string>
+    <string name="si_degree">%3.1f C°</string>
+    <string name="si_pressure">%4.1f Pa</string>
+    <string name="si_altitude">%4.2f m</string>
+    <string name="si_humidity">%3.2f \U+0025</string>
+    <string name="si_visible">%d Lux</string>
 
     <!--Strings used for Notifications-->
     <string name="climate_notification_title">Climate Warning!</string>
-    <string name="climate_notification_text" formatted="false">Your indoor humidity is at %3.2f % please air your home.</string>
+    <string name="climate_notification_text">Your indoor humidity is at %3.2f \U+0025 please air your home.</string>
     <string name="brightness_warning_title">Light Warning!</string>
-    <string name="brightness_warning_text" formatted="false">It has %d%n Lux in your room, which should be bright enough.</string>
+    <string name="brightness_warning_text">It has %d Lux in your room, which should be bright enough.</string>
     <string name="weather_warning_title">Weather Warning!</string>
     <string name="weather_warning_text">Please close all doors and windows. It will rain today.</string>
     <string name="system_health_warning_title_failed">Component failed!</string>
