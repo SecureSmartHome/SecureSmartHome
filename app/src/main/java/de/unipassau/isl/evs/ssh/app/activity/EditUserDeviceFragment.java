@@ -328,7 +328,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                     @Override
                     public void onClick(View v) {
                         if (userMayEdit()) {
-                            if (deviceHasPermission) {
+                            if (!deviceHasPermission) {
                                 handler.grantPermission(device.getUserDeviceID(), permission);
                                 Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
                                         + " granted for user device " + device.getName());
