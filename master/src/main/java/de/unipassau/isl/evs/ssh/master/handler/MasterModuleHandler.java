@@ -11,6 +11,8 @@ import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+import de.unipassau.isl.evs.ssh.master.network.ModuleBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.UserConfigurationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_ADD;
@@ -22,7 +24,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_
  * @author Andreas Bucher
  * @author Wolfgang Popp
  */
-public class MasterModuleHandler extends ModuleBroadcastHandler {
+public class MasterModuleHandler extends AbstractMasterHandler {
 
     @Override
     public RoutingKey[] getRoutingKeys() {
@@ -32,8 +34,9 @@ public class MasterModuleHandler extends ModuleBroadcastHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_DEVICE_CONNECTED.matches(message)) {
-            DeviceID deviceID = MASTER_DEVICE_CONNECTED.getPayload(message).deviceID;
-            updateClient(deviceID);
+            final DeviceID deviceID = MASTER_DEVICE_CONNECTED.getPayload(message).deviceID;
+            final ModuleBroadcaster broadcaster = requireComponent(ModuleBroadcaster.KEY);
+            broadcaster.updateClient(deviceID);
         } else if (MASTER_MODULE_ADD.matches(message)) {
             addModule(MASTER_MODULE_ADD.getPayload(message), message);
         } else if (MASTER_MODULE_REMOVE.matches(message)) {
@@ -85,8 +88,14 @@ public class MasterModuleHandler extends ModuleBroadcastHandler {
     }
 
     private void sendOnSuccess(Message.AddressedMessage original) {
-        updateAllClients();
         sendReply(original, new Message());
+
+        final ModuleBroadcaster moduleBroadcaster = requireComponent(ModuleBroadcaster.KEY);
+        moduleBroadcaster.updateAllClients();
+
+        // also update the user configuration, since new permissions might have been added or removed
+        final UserConfigurationBroadcaster userBroadcaster = requireComponent(UserConfigurationBroadcaster.KEY);
+        userBroadcaster.updateAllClients();
     }
 
     private void sendError(Message.AddressedMessage original, Exception e) {

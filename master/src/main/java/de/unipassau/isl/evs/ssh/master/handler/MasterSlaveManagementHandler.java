@@ -17,6 +17,8 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.database.IsReferencedException;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
+import de.unipassau.isl.evs.ssh.master.network.ModuleBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.UserConfigurationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_DELETE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_REGISTER;
@@ -30,7 +32,7 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID;
  *
  * @author Leon Sell
  */
-public class MasterSlaveManagementHandler extends ModuleBroadcastHandler implements Component {
+public class MasterSlaveManagementHandler extends AbstractMasterHandler implements Component {
     public static final Key<MasterSlaveManagementHandler> KEY = new Key<>(MasterSlaveManagementHandler.class);
     private static final String TAG = MasterSlaveManagementHandler.class.getSimpleName();
     private static final String MODULE_ADDED_JUST_BEFORE_SLAVE_DELETE_ERROR =
@@ -62,6 +64,7 @@ public class MasterSlaveManagementHandler extends ModuleBroadcastHandler impleme
             }
             try {
                 deleteSlave(deleteDevicePayload.getUser());
+                requireComponent(UserConfigurationBroadcaster.KEY).updateAllClients();
             } catch (IsReferencedException e) {
                 Log.i(TAG, MODULE_ADDED_JUST_BEFORE_SLAVE_DELETE_ERROR);
                 sendReply(message, new Message(new ErrorPayload(e, MODULE_ADDED_JUST_BEFORE_SLAVE_DELETE_ERROR)));
@@ -79,6 +82,7 @@ public class MasterSlaveManagementHandler extends ModuleBroadcastHandler impleme
                         registerSlavePayload.getSlaveID(),
                         registerSlavePayload.getPassiveRegistrationToken()
                 ));
+                sendReply(message, new Message());
             } catch (AlreadyInUseException e) {
                 Log.i(TAG, e.getLocalizedMessage());
                 sendReply(message, new Message(new ErrorPayload(e)));
@@ -90,11 +94,13 @@ public class MasterSlaveManagementHandler extends ModuleBroadcastHandler impleme
 
     public void registerSlave(Slave slave) throws AlreadyInUseException {
         requireComponent(SlaveController.KEY).addSlave(slave);
-        updateAllClients();
+        final ModuleBroadcaster broadcaster = requireComponent(ModuleBroadcaster.KEY);
+        broadcaster.updateAllClients();
     }
 
     public void deleteSlave(DeviceID slaveID) throws IsReferencedException {
         requireComponent(SlaveController.KEY).removeSlave(slaveID);
-        updateAllClients();
+        final ModuleBroadcaster broadcaster = requireComponent(ModuleBroadcaster.KEY);
+        broadcaster.updateAllClients();
     }
 }

@@ -1,13 +1,16 @@
-package de.unipassau.isl.evs.ssh.master.handler;
+package de.unipassau.isl.evs.ssh.master.network;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
 import java.util.List;
 
+import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
+import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
@@ -18,15 +21,8 @@ import de.unipassau.isl.evs.ssh.master.network.Server;
 /**
  * @author Wolfgang Popp.
  */
-public abstract class ModuleBroadcastHandler extends AbstractMasterHandler {
-
-
-    @Override
-    public abstract RoutingKey[] getRoutingKeys();
-
-    @Override
-    public abstract void handle(Message.AddressedMessage message);
-
+public class ModuleBroadcaster extends AbstractComponent {
+    public static final Key<ModuleBroadcaster> KEY = new Key<>(ModuleBroadcaster.class);
 
     private Message createUpdateMessage() {
         final SlaveController slaveController = requireComponent(SlaveController.KEY);
@@ -40,15 +36,15 @@ public abstract class ModuleBroadcastHandler extends AbstractMasterHandler {
         return new Message(new ModulesPayload(modulesAtSlave, slaves));
     }
 
-    protected void updateAllClients() {
+    public void updateAllClients() {
         final Iterable<DeviceID> connectedClients = requireComponent(Server.KEY).getActiveDevices();
         for (DeviceID connectedClient : connectedClients) {
             updateClient(connectedClient);
         }
     }
 
-    protected void updateClient(DeviceID id) {
+    public void updateClient(DeviceID id) {
         final Message message = createUpdateMessage();
-        sendMessage(id, RoutingKeys.GLOBAL_MODULES_UPDATE, message);
+        requireComponent(OutgoingRouter.KEY).sendMessage(id, RoutingKeys.GLOBAL_MODULES_UPDATE, message);
     }
 }

@@ -28,10 +28,12 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterSlaveManagementHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterSystemHealthCheckHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserLocationHandler;
+import de.unipassau.isl.evs.ssh.master.network.ModuleBroadcaster;
 import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.network.ServerOutgoingRouter;
 import de.unipassau.isl.evs.ssh.master.network.UDPDiscoveryServer;
+import de.unipassau.isl.evs.ssh.master.network.UserConfigurationBroadcaster;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
 import de.unipassau.isl.evs.ssh.master.task.MasterWeatherCheckHandler;
 
@@ -68,6 +70,8 @@ public class MasterContainer extends ContainerService {
         register(MasterSlaveManagementHandler.KEY, new MasterSlaveManagementHandler());
 
         register(NotificationBroadcaster.KEY, new NotificationBroadcaster());
+        register(ModuleBroadcaster.KEY, new ModuleBroadcaster());
+        register(UserConfigurationBroadcaster.KEY, new UserConfigurationBroadcaster());
 
         register(MasterWeatherCheckHandler.KEY, new MasterWeatherCheckHandler());
 

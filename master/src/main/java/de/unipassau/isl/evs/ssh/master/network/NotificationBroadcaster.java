@@ -3,7 +3,6 @@ package de.unipassau.isl.evs.ssh.master.network;
 import android.util.Log;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 
 import de.ncoder.typedmap.Key;
