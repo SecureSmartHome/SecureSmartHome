@@ -1,4 +1,5 @@
 <resources>
+    <!--TODO Bad naming of Strings change_style_to_this-->
     <string name="app_name">Secure Smart Home</string>
     <string name="title_activity_main">MainActivity</string>
 
