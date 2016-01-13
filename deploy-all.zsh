@@ -6,12 +6,15 @@ MASTER='192.168.0.100:5555'
 SLAVE='192.168.0.101:5555'
 APPS=( "${(@f)$(adb devices -l | grep usb | cut -f1 -d ' ')}" )
 
+DO_DEPLOY=true
+DO_CLEAR=false
+
 if [[ $1 == "--clear" || $1 == "-c" ]]; then
     DO_DEPLOY=true
     DO_CLEAR=true
 elif [[ $1 == "--clear-only" || $1 == "-o" ]]; then
-    DO_DEPLOY=true
-    DO_CLEAR=false
+    DO_DEPLOY=false
+    DO_CLEAR=true
 elif [[ $1 != "" || $1 == "-h" || $1 == "--help" ]]; then
     echo "This Script builds and deploys the Secure Smart Home System on Odroids and all"
     echo "connected Android Smartphones that are connected via usb debugging."
@@ -33,7 +36,7 @@ fi
 adb connect $MASTER
 adb connect $SLAVE
 
-if [[ DO_CLEAR ]]; then
+if [[ $DO_CLEAR ]]; then
     echo Clearing data on master: $MASTER
     adb -s $MASTER shell "pm clear de.unipassau.isl.evs.ssh.master"
 
@@ -46,7 +49,7 @@ if [[ DO_CLEAR ]]; then
     done
 fi
 
-if [[ DO_DEPLOY ]]; then
+if [[ $DO_DEPLOY ]]; then
 
     ./gradlew master:assembleDebug slave:assembleDebug app:assembleDebug
 
