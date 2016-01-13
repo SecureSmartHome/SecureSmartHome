@@ -47,5 +47,6 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="51dp"
-        android:src="@drawable/ic_holiday_island"/>
+        android:src="@drawable/ic_holiday_island"
+        android:transitionName="holidayIconTransition"/>
 </RelativeLayout>
