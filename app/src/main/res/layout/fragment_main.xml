@@ -79,7 +79,8 @@
             android:background="?android:selectableItemBackground"
             android:padding="20dp"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_holiday_island"/>
+            android:src="@drawable/ic_holiday_island"
+            android:transitionName="holidayIconTransition"/>
     </LinearLayout>
 
     <LinearLayout

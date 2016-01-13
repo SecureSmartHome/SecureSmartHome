@@ -5,11 +5,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
+import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,6 +19,8 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.util.Objects;
 
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
@@ -245,27 +249,51 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
      * @param bundle the bundle that is given with the new fragment
      */
     public void showFragmentByClass(Class clazz, Bundle bundle) {
-        Fragment fragment = null;
+        final Fragment currentFragment = getCurrentFragment();
+        if (currentFragment != null && Objects.equals(clazz, currentFragment.getClass())) {
+            return;
+        }
+
+        final Fragment fragment;
         try {
             fragment = (Fragment) clazz.newInstance();
             if (bundle != null) {
                 fragment.setArguments(bundle);
             }
         } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
+            Log.wtf(TAG, "Could not instantiate fragment", e);
+            return;
         }
-        if (fragment != null) {
-            // Hide Keyboard before every fragment transaction
-            View view = getCurrentFocus();
-            if (view != null) {
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-            }
-            android.support.v4.app.FragmentTransaction fragmentTransaction =
-                    getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, fragment);
-            fragmentTransaction.commit();
+
+        // Hide Keyboard before every fragment transaction
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
+
+        if (currentFragment instanceof MainFragment && fragment instanceof HolidayFragment) {
+            transaction.addSharedElement(currentFragment.getView().findViewById(R.id.holidayButton), "holidayIconTransition");
+
+            final TransitionInflater inflater = TransitionInflater.from(this);
+            currentFragment.setSharedElementReturnTransition(
+                    inflater.inflateTransition(R.transition.change_image_trans));
+            currentFragment.setExitTransition(
+                    inflater.inflateTransition(android.R.transition.explode));
+
+            fragment.setSharedElementEnterTransition(
+                    inflater.inflateTransition(R.transition.change_image_trans));
+            fragment.setEnterTransition(
+                    inflater.inflateTransition(android.R.transition.explode));
+        } else if (fragment instanceof MainFragment && currentFragment != null) {
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+        } else {
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        }
+
+        transaction.commit();
     }
 
     // maps button resource ids to Fragment classes.
