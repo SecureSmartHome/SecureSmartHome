@@ -90,8 +90,8 @@ public class AppLightHandler extends AbstractAppHandler implements Component {
 
     @Override
     public void destroy() {
-        super.destroy();
         requireComponent(AppModuleHandler.KEY).removeAppModuleListener(listener);
+        super.destroy();
     }
 
     private void update() {
