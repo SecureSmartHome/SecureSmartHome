@@ -3,6 +3,8 @@ package de.unipassau.isl.evs.ssh.master.handler;
 import android.util.Base64;
 import android.util.Log;
 
+import com.google.common.base.Strings;
+
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -92,7 +94,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
      * @return the generated token.
      */
     public byte[] generateNewRegisterToken(UserDevice device) throws AlreadyInUseException {
-        if (requireComponent(UserManagementController.KEY).getUserDevice(device.getUserDeviceID()) != null) {
+        if (requireComponent(UserManagementController.KEY).getUserDevice(device.getName()) != null) {
             throw new AlreadyInUseException("A device with the given name is already registered at the system.");
         }
         final byte[] token = DeviceConnectInformation.getRandomToken();

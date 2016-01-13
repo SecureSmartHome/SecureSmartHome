@@ -3,6 +3,8 @@ package de.unipassau.isl.evs.ssh.master.database;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 
+import com.google.common.base.Strings;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -243,6 +245,9 @@ public class UserManagementController extends AbstractComponent {
      * @return The requested UserDevice.
      */
     public UserDevice getUserDevice(DeviceID deviceID) {
+        if (deviceID == null || Strings.isNullOrEmpty(deviceID.getIDString())) {
+            return null;
+        }
         Cursor userDeviceCursor = databaseConnector.executeSql("select u."
                         + DatabaseContract.UserDevice.COLUMN_NAME
                         + ", u." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
@@ -251,7 +256,7 @@ public class UserManagementController extends AbstractComponent {
                         + " join " + DatabaseContract.Group.TABLE_NAME + " g"
                         + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID + " = g."
                         + DatabaseContract.Group.COLUMN_ID
-                        + " where " + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
+                        + " where u." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " = ?",
                 new String[]{deviceID.getIDString()});
         if (userDeviceCursor.moveToNext()) {
             return new UserDevice(userDeviceCursor.getString(0),
@@ -260,4 +265,30 @@ public class UserManagementController extends AbstractComponent {
         return null;
     }
 
+    /**
+     * Get a UserDevice by Name
+     *
+     * @param name Name of the UserDevice.
+     * @return The requested UserDevice.
+     */
+    public UserDevice getUserDevice(String name) {
+        if (Strings.isNullOrEmpty(name)) {
+            return null;
+        }
+        Cursor userDeviceCursor = databaseConnector.executeSql("select u."
+                        + DatabaseContract.UserDevice.COLUMN_NAME
+                        + ", u." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
+                        + ", g." + DatabaseContract.Group.COLUMN_NAME
+                        + " from " + DatabaseContract.UserDevice.TABLE_NAME + " u"
+                        + " join " + DatabaseContract.Group.TABLE_NAME + " g"
+                        + " on u." + DatabaseContract.UserDevice.COLUMN_GROUP_ID + " = g."
+                        + DatabaseContract.Group.COLUMN_ID
+                        + " where u." + DatabaseContract.UserDevice.COLUMN_NAME + " = ?",
+                new String[]{name});
+        if (userDeviceCursor.moveToNext()) {
+            return new UserDevice(userDeviceCursor.getString(0),
+                    userDeviceCursor.getString(2), new DeviceID(userDeviceCursor.getString(1)));
+        }
+        return null;
+    }
 }
