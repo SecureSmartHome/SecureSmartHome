@@ -14,6 +14,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
@@ -111,6 +112,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
             Scheduler scheduler = getContainer().require(Scheduler.KEY);
             PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
             scheduler.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), SCHEDULE_LOOKAHEAD_MILLIS, intent);
+            getContainer().require(IncomingDispatcher.KEY).registerHandler(this, getRoutingKeys());
         }
     }
 
@@ -120,6 +122,7 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
             Scheduler scheduler = getContainer().require(Scheduler.KEY);
             PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
             scheduler.cancel(intent);
+            getContainer().require(IncomingDispatcher.KEY).unregisterHandler(this, getRoutingKeys());
         }
     }
 
