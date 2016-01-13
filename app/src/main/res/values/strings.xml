@@ -150,7 +150,7 @@
     <string name="door_locked_text">Unauthorised users can not open it anymore.</string>
     <string name="door_unlocked_title">Door is now unlocked!</string>
     <string name="door_unlocked_text">Others users can now open it.</string>
-    <string name="edit_user_device">Edit User Device</string>
+    <string name="edit_user_device">Edit %s</string>
     <string name="missing_permission">Missing Permission</string>
     <string name="permission_connected_to">This permission is connected to %s</string>
     <string name="permission_not_connected_to">This permission is not connected to any module.</string>

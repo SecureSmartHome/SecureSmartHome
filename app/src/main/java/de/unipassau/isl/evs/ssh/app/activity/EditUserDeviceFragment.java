@@ -63,6 +63,7 @@ public class EditUserDeviceFragment extends BoundFragment {
      * The device the fragment is created for.
      */
     private UserDevice device;
+    private ListView userPermissionList;
     private PermissionListAdapter permissionListAdapter;
 
     final private AppUserConfigurationHandler.UserInfoListener listener = new AppUserConfigurationHandler.UserInfoListener() {
@@ -120,6 +121,8 @@ public class EditUserDeviceFragment extends BoundFragment {
                 if (groups != null) {
                     bundle.putStringArray(ALL_GROUPS_DIALOG, groups);
                 }
+
+                // check if user has permission to edit a group
                 if (hasPermission(new Permission(CHANGE_USER_NAME)) && hasPermission(new Permission(CHANGE_USER_GROUP))) {
                     showEditUserDeviceDialog(bundle);
                 } else {
@@ -128,7 +131,7 @@ public class EditUserDeviceFragment extends BoundFragment {
             }
         });
 
-        ListView userPermissionList = (ListView) getActivity().findViewById(R.id.listUserPermissionContainer);
+        userPermissionList = (ListView) getActivity().findViewById(R.id.listUserPermissionContainer);
         permissionListAdapter = new PermissionListAdapter();
         userPermissionList.setAdapter(permissionListAdapter);
     }
@@ -144,7 +147,7 @@ public class EditUserDeviceFragment extends BoundFragment {
     public void onContainerDisconnected() {
         AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
         if (handler != null) {
-            handler.addUserInfoListener(listener); // ASK Wolfi remove listener?
+            handler.removeUserInfoListener(listener);
         }
         super.onContainerDisconnected();
     }
@@ -172,7 +175,7 @@ public class EditUserDeviceFragment extends BoundFragment {
 
 
     /**
-     * Creates and returns a dialogs that gives the user the option to edit a group.
+     * Creates and shows a dialogs that gives the user the option to edit a group.
      */
     private void showEditUserDeviceDialog(Bundle bundle) {
         final UserDevice userDevice = (UserDevice) bundle.getSerializable(EDIT_USERDEVICE_DIALOG);
@@ -196,6 +199,9 @@ public class EditUserDeviceFragment extends BoundFragment {
         final LayoutInflater inflater = getActivity().getLayoutInflater();
         final View dialogView = inflater.inflate(R.layout.dialog_edituserdevice, null);
 
+        final TextView title = (TextView) dialogView.findViewById(R.id.editdevicedialog_title);
+        title.setText(String.format(getResources().getString(R.string.edit_user_device), userDevice.getName()));
+
         final EditText userDeviceName = (EditText) dialogView.findViewById(R.id.editdevicedialog_username);
         userDeviceName.setText(userDevice.getName());
 
@@ -204,9 +210,9 @@ public class EditUserDeviceFragment extends BoundFragment {
         groupName.setAdapter(adapter);
         groupName.setSelection(adapter.getPosition(userDevice.getInGroup()));
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final Resources res = getResources();
-        final AlertDialog editDialog = builder.setMessage(R.string.edit_user_device)
+        final AlertDialog editDialog = builder
                 .setView(dialogView)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.edit, new DialogInterface.OnClickListener() {
@@ -246,6 +252,9 @@ public class EditUserDeviceFragment extends BoundFragment {
         userDeviceName.requestFocus();
     }
 
+    /**
+     * Adapter used for {@link #userPermissionList}.
+     */
     private class PermissionListAdapter extends BaseAdapter {
         private List<Permission> allPermissions;
         private Set<Permission> userPermissions;

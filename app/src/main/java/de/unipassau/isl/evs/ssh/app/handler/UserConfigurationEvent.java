@@ -1,11 +1,13 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
 /**
+ * TODO Wolfi: add javadoc (Phil, 2016-01-13)
+ *
  * @author Wolfgang Popp.
  */
 public class UserConfigurationEvent {
-    private EventType type;
     private final boolean wasSuccessful;
+    private EventType type;
 
     public UserConfigurationEvent(){
         this.wasSuccessful = true;
