@@ -206,6 +206,13 @@ public class DatabaseConnector extends AbstractComponent {
             }
 
             int[] childrenPermissionsIDs = new int[]{
+                    Permission.REQUEST_LIGHT_STATUS.ordinal(),
+                    Permission.REQUEST_WINDOW_STATUS.ordinal(),
+                    Permission.REQUEST_DOOR_STATUS.ordinal(),
+                    Permission.UNLATCH_DOOR.ordinal(),
+                    Permission.REQUEST_CAMERA_STATUS.ordinal(),
+                    Permission.TAKE_CAMERA_PICTURE.ordinal(),
+                    Permission.REQUEST_WEATHER_STATUS.ordinal(),
                     Permission.HUMIDITY_WARNING.ordinal(),
                     Permission.BRIGHTNESS_WARNING.ordinal(),
                     Permission.BELL_RANG.ordinal(),
@@ -215,18 +222,27 @@ public class DatabaseConnector extends AbstractComponent {
                     Permission.DOOR_UNLOCKED.ordinal()
             };
 
+            int[] guestPermissionIDs = new int[]{
+                    Permission.REQUEST_LIGHT_STATUS.ordinal(),
+                    Permission.BRIGHTNESS_WARNING.ordinal()
+            };
+
             final int childrenTemplateID = 2;
-            final int guestsTemplateID = 3;
             for (int permission : childrenPermissionsIDs) {
                 ContentValues values = new ContentValues(2);
                 values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID, permission);
                 values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID, childrenTemplateID);
                 db.insert(DatabaseContract.ComposedOfPermission.TABLE_NAME, null, values);
 
-                values = new ContentValues(2);
+            }
+
+            final int guestsTemplateID = 3;
+            for (int permission : guestPermissionIDs) {
+                ContentValues values = new ContentValues(2);
                 values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID, permission);
                 values.put(DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID, guestsTemplateID);
                 db.insert(DatabaseContract.ComposedOfPermission.TABLE_NAME, null, values);
+
             }
         }
 
