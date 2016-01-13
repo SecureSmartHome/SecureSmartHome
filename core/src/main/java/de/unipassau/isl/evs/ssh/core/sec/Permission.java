@@ -27,10 +27,10 @@ public enum Permission {
     RENAME_ODROID,
     DELETE_ODROID,
 
-    //Sensor
-    ADD_SENSOR,
+    //Module
+    ADD_MODULE,
     RENAME_MODULE,
-    DELETE_SENSOR,
+    DELETE_MODULE,
 
     //Light
     REQUEST_LIGHT_STATUS,

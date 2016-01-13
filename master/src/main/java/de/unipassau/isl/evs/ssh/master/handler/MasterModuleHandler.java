@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import de.unipassau.isl.evs.ssh.core.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.WrongAccessPointException;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -8,7 +9,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModifyModulePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
-import de.unipassau.isl.evs.ssh.core.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.ModuleBroadcaster;
@@ -49,8 +49,8 @@ public class MasterModuleHandler extends AbstractMasterHandler {
     private void removeModule(ModifyModulePayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, Permission.DELETE_SENSOR)) {
-            sendNoPermissionReply(original, Permission.DELETE_SENSOR);
+        if (!hasPermission(fromID, Permission.DELETE_MODULE)) {
+            sendNoPermissionReply(original, Permission.DELETE_MODULE);
             return;
         }
         requireComponent(SlaveController.KEY).removeModule(payload.getModule().getName());
@@ -60,8 +60,8 @@ public class MasterModuleHandler extends AbstractMasterHandler {
     private void addModule(ModifyModulePayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, Permission.ADD_SENSOR)) {
-            sendNoPermissionReply(original, Permission.ADD_SENSOR);
+        if (!hasPermission(fromID, Permission.ADD_MODULE)) {
+            sendNoPermissionReply(original, Permission.ADD_MODULE);
             return;
         }
         Module module = payload.getModule();
