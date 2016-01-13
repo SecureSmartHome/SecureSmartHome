@@ -23,7 +23,6 @@ import de.unipassau.isl.evs.ssh.slave.handler.SlaveSystemHealthChecker;
 
 /**
  * This Container class manages dependencies needed in the Slave part of the architecture.
- * TODO Niko JavaDoc in Module
  *
  * @author Team
  */

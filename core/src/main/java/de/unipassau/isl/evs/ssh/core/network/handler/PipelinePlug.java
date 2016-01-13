@@ -7,7 +7,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ReferenceCountUtil;
 
 /**
- * TODO JavaDoc
+ * This ChannelHandler can be added to the end of every pipeline and will log unhandled read messages, exceptions
+ * and user events to logcat.
  *
  * @author Niko Fink
  */

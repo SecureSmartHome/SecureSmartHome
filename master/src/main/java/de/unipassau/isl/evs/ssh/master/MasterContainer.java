@@ -28,18 +28,17 @@ import de.unipassau.isl.evs.ssh.master.handler.MasterSlaveManagementHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterSystemHealthCheckHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.master.handler.MasterUserLocationHandler;
-import de.unipassau.isl.evs.ssh.master.network.ModuleBroadcaster;
-import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.network.ServerOutgoingRouter;
 import de.unipassau.isl.evs.ssh.master.network.UDPDiscoveryServer;
-import de.unipassau.isl.evs.ssh.master.network.UserConfigurationBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.broadcast.ModuleBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.broadcast.NotificationBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.broadcast.UserConfigurationBroadcaster;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
 import de.unipassau.isl.evs.ssh.master.task.MasterWeatherCheckHandler;
 
 /**
  * This Container class manages dependencies needed in the Master part of the architecture.
- * TODO Niko JavaDoc in Module
  *
  * @author Team
  */

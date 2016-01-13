@@ -23,11 +23,12 @@ import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.core.database.DatabaseControllerException;
+import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.core.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
-import de.unipassau.isl.evs.ssh.master.network.UserConfigurationBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.broadcast.UserConfigurationBroadcaster;
 import io.netty.channel.Channel;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE;
@@ -46,7 +47,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
 
     //TODO Leon: move to CoreConstants and internationalize (Niko, 2016-01-05)
     public static final String FIRST_USER = "Admin";
-    public static final String NO_GROUP = "No Group";
+    public static final String FIRST_GROUP = DatabaseContract.Group.DefaultValues.PARENTS.toString();
     private final Map<String, UserDevice> userDeviceForToken = new HashMap<>();
 
     @Override

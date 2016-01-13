@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.slave.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
@@ -22,11 +21,12 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
-import de.unipassau.isl.evs.ssh.slave.BuildConfig;
 import de.unipassau.isl.evs.ssh.slave.R;
 import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
 
 /**
+ * An Activity containing the surfaceHolder used for capturing a camera picture.
+ *
  * @author Tobias Marktscheffel
  * @author Christoph Fraedrich
  * @author Niko Fink
@@ -53,7 +53,6 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
         Log.v(TAG, "onCreate()");
         doBind();
 
-        setVisible(BuildConfig.DEBUG); //only display in debug mode
         setContentView(R.layout.activity_camera);
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
         surfaceView.getHolder().addCallback(this);

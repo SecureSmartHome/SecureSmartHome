@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
-import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
 
@@ -34,7 +33,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVE
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DISCOVERY_PAYLOAD_RESPONSE;
 
 /**
- * This component is responsible for responding to UDP discovery packets, signalling the address and port back to
+ * This component is responsible for responding to UDP discovery packets and signalling the address and port back to
  * {@link Client}s searching for this Master.
  *
  * @author Niko Fink
@@ -88,7 +87,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
     }
 
     /**
-     * Send a response with the connection information of this Master to the requesting Client.
+     * Send a response with the ConnectInformation of this Master to the requesting Client.
      *
      * @param request the request sent from a {@link Client}
      * @return the ChannelFuture returned by {@link io.netty.channel.Channel#write(Object)}
@@ -96,18 +95,21 @@ public class UDPDiscoveryServer extends AbstractComponent {
     private ChannelFuture sendDiscoveryResponse(DatagramPacket request) {
         final ByteBuf buffer = channel.channel().alloc().heapBuffer();
 
+        // gather information
         final byte[] header = DISCOVERY_PAYLOAD_RESPONSE.getBytes();
         final String addressString = request.recipient().getAddress().getHostAddress();
         final byte[] address = addressString.getBytes();
-        final int port = ((InetSocketAddress) requireComponent(Server.KEY).getAddress()).getPort();
+        final int port = requireComponent(Server.KEY).getAddress().getPort();
         Log.i(TAG, "sendDiscoveryResponse with connection data " + addressString + ":" + port + " to " + request.sender());
 
+        // write it to the buffer
         buffer.writeInt(header.length);
         buffer.writeBytes(header);
         buffer.writeInt(address.length);
         buffer.writeBytes(address);
         buffer.writeInt(port);
 
+        // and sign the data
         try {
             Signature signature = Signature.getInstance("ECDSA");
             signature.initSign(requireComponent(KeyStoreController.KEY).getOwnPrivateKey());
@@ -151,7 +153,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
 
                 final boolean isMasterKnown = buffer.readBoolean();
                 if (isMasterKnown) {
-                    // if the master is known to the device, the IDs must match
+                    // if the master is known to the device, the ID that the device is searching must match with mine
                     final DeviceID masterID = readDeviceID(buffer);
                     if (!ownID.equals(masterID)) {
                         Log.d(TAG, "Discarding UDP inquiry from " + clientID + "(" + request.sender() + ") " +

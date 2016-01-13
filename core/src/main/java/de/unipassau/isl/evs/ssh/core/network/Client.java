@@ -42,9 +42,9 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_HA
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION;
 
 /**
- * A netty stack accepting connections to and from the master and handling communication with them using a netty pipeline.
+ * A netty stack holding a connection to the Master and handling communication with it using a netty pipeline.
  * For details about the pipeline, see {@link ClientHandshakeHandler}.
- * For details about switching to UDP discovery, see {@link #initClient()} and {@link #shouldReconnectTCP()}.
+ * For details about UDP discovery, see {@link #initClient()}, {@link #shouldReconnectTCP()} and the {@link UDPDiscoveryClient}.
  * This component is used by the Slave and the end-user android App.
  *
  * @author Phil Werli & Niko Fink
@@ -58,20 +58,16 @@ public class Client extends AbstractComponent {
     static final String PREF_HOST = Client.class.getName() + ".PREF_HOST";
     static final String PREF_PORT = Client.class.getName() + ".PREF_PORT";
     private static final String TAG = Client.class.getSimpleName();
+
     /**
-     * The minimum number of seconds between
+     * If this number of milliseconds between two disconnects is exceeded, they are deemed as unrelated
      */
     private static final long CLIENT_MILLIS_BETWEEN_DISCONNECTS = TimeUnit.SECONDS.toMillis(10);
     /**
-     * Default value for maximum timeouts.
+     * If there are more disconnects within {@link #CLIENT_MILLIS_BETWEEN_DISCONNECTS} than this number,
+     * the client should retry connecting with the explicitly set master or try UDP discovery.
      */
     private static final int CLIENT_MAX_DISCONNECTS = 3;
-    private final List<ClientConnectionListener> listeners = new ArrayList<>();
-    /**
-     * The channel listening for incoming TCP connections on the port of the client.
-     * Use {@link ChannelFuture#sync()} to wait for client startup.
-     */
-    private ChannelFuture channelFuture;
     /**
      * An Android BroadcastReceiver that is notified once the Phone connects to or is disconnected from a WiFi network.
      */
@@ -93,7 +89,12 @@ public class Client extends AbstractComponent {
         }
     };
     /**
-     * Boolean if the client connection is active.
+     * The channel listening for incoming TCP connections on the port of the client.
+     * Use {@link ChannelFuture#sync()} to wait for client startup.
+     */
+    private ChannelFuture channelFuture;
+    /**
+     * Boolean indicating if the client connection is active.
      */
     private boolean isActive;
     /**
@@ -105,8 +106,10 @@ public class Client extends AbstractComponent {
      */
     private int disconnectsInARow = 0;
 
+    private final List<ClientConnectionListener> listeners = new ArrayList<>();
+
     /**
-     * Configure netty and add related Components to the Container.
+     * Configure netty and initialize related Components.
      * Afterwards call {@link #initClient()} method to start the netty IO client asynchronously.
      */
     @Override
@@ -260,7 +263,7 @@ public class Client extends AbstractComponent {
     }
 
     /**
-     * HandshakeHandle can be changed or mocked for testing
+     * HandshakeHandler can be changed or mocked for testing
      *
      * @return the ClientHandshakeHandler to use
      */
@@ -311,12 +314,16 @@ public class Client extends AbstractComponent {
 
     /**
      * Called by {@link UDPDiscoveryClient} once it found a possible address of the master.
-     * Saves the new address
+     * Saves the new address.
      */
     public void onMasterFound(InetSocketAddress address) {
         onMasterFound(address, null);
     }
 
+    /**
+     * Called by {@link UDPDiscoveryClient} once it found a possible address of the master.
+     * Saves the new address.
+     */
     public void onMasterFound(InetSocketAddress address, String token) {
         Log.i(TAG, "discovery successful, found " + address + " with token " + token);
         final PrefEditor editor = editPrefs().setLastAddress(address);
@@ -405,22 +412,41 @@ public class Client extends AbstractComponent {
         return requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences();
     }
 
+    /**
+     * @return the token sent to the Master for active registration
+     * @see de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket.ActiveRegistrationRequest
+     */
     public String getActiveRegistrationToken() {
         return getSharedPrefs().getString(PREF_TOKEN_ACTIVE, null);
     }
 
+    /**
+     * @return the token sent to the Master for active registration
+     * @see de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket.ActiveRegistrationRequest
+     */
     public byte[] getActiveRegistrationTokenBytes() {
         return DeviceConnectInformation.decodeToken(getActiveRegistrationToken());
     }
 
+    /**
+     * @return the token expected from the Master for passive registration
+     * @see de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket.ServerAuthenticationResponse
+     */
     public String getPassiveRegistrationToken() {
         return getSharedPrefs().getString(PREF_TOKEN_PASSIVE, null);
     }
 
+    /**
+     * @return the token expected from the Master for passive registration
+     * @see de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket.ServerAuthenticationResponse
+     */
     public byte[] getPassiveRegistrationTokenBytes() {
         return DeviceConnectInformation.decodeToken(getPassiveRegistrationToken());
     }
 
+    /**
+     * @return the Address the Client will trz to connect to
+     */
     public InetSocketAddress getConnectAddress() {
         InetSocketAddress address = getLastAddress();
         if (address == null) {
@@ -429,10 +455,16 @@ public class Client extends AbstractComponent {
         return address;
     }
 
+    /**
+     * @return the address the last successful connection was established to
+     */
     public InetSocketAddress getLastAddress() {
         return getPrefsAddress(LAST_HOST, LAST_PORT);
     }
 
+    /**
+     * @return the master address that was configured by the user
+     */
     public InetSocketAddress getConfiguredAddress() {
         return getPrefsAddress(PREF_HOST, PREF_PORT);
     }
@@ -449,48 +481,11 @@ public class Client extends AbstractComponent {
         }
     }
 
+    /**
+     * @return an editor for modifying all preferences related to the client
+     */
     public PrefEditor editPrefs() {
         return new PrefEditor(getSharedPrefs().edit());
-    }
-
-    //Listeners/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void addListener(ClientConnectionListener object) {
-        listeners.add(object);
-    }
-
-    public void removeListener(ClientConnectionListener object) {
-        listeners.remove(object);
-    }
-
-    private void notifyMasterFound() {
-        for (ClientConnectionListener listener : listeners) {
-            listener.onMasterFound();
-        }
-    }
-
-    private void notifyClientConnecting(String host, int port) {
-        for (ClientConnectionListener listener : listeners) {
-            listener.onClientConnecting(host, port);
-        }
-    }
-
-    void notifyClientConnected() {
-        for (ClientConnectionListener listener : listeners) {
-            listener.onClientConnected();
-        }
-    }
-
-    private void notifyClientDisconnected() {
-        for (ClientConnectionListener listener : listeners) {
-            listener.onClientDisconnected();
-        }
-    }
-
-    void notifyClientRejected(String message) {
-        for (ClientConnectionListener listener : listeners) {
-            listener.onClientRejected(message);
-        }
     }
 
     public static class PrefEditor {
@@ -544,6 +539,46 @@ public class Client extends AbstractComponent {
 
         public void apply() {
             editor.apply();
+        }
+    }
+
+    //Listeners/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void addListener(ClientConnectionListener object) {
+        listeners.add(object);
+    }
+
+    public void removeListener(ClientConnectionListener object) {
+        listeners.remove(object);
+    }
+
+    private void notifyMasterFound() {
+        for (ClientConnectionListener listener : listeners) {
+            listener.onMasterFound();
+        }
+    }
+
+    private void notifyClientConnecting(String host, int port) {
+        for (ClientConnectionListener listener : listeners) {
+            listener.onClientConnecting(host, port);
+        }
+    }
+
+    void notifyClientConnected() {
+        for (ClientConnectionListener listener : listeners) {
+            listener.onClientConnected();
+        }
+    }
+
+    private void notifyClientDisconnected() {
+        for (ClientConnectionListener listener : listeners) {
+            listener.onClientDisconnected();
+        }
+    }
+
+    void notifyClientRejected(String message) {
+        for (ClientConnectionListener listener : listeners) {
+            listener.onClientRejected(message);
         }
     }
 }

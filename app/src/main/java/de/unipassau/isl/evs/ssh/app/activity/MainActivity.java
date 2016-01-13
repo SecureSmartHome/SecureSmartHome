@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -81,12 +82,15 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
 
         @Override
         public void onClientRejected(String message) {
-            shutdownService();
-            wasRejected = true;
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    shutdownService();
+                    wasRejected = true;
                     showConnectionOverlay(getString(R.string.warn_client_rejected));
+                    finish();
+                    Intent intent = new Intent(MainActivity.this, RejectedActivity.class);
+                    startActivity(intent);
                 }
             });
         }

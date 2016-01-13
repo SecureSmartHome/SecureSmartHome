@@ -14,6 +14,7 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.master.R;
 
 /**
+ * PreferenceFragment containing preferences for the Master.
  *
  * @author Niko Fink
  * @author Christoph Frädrich

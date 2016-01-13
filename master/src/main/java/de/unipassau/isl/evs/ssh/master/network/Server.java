@@ -94,8 +94,8 @@ public class Server extends AbstractComponent {
      * Scotty, start me up!
      * Initializes the netty data pipeline and starts the IO server
      *
-     * @throws InterruptedException     if interrupted while waiting for the startup
-     * @throws IllegalArgumentException is the Server is already running
+     * @throws InterruptedException  if interrupted while waiting for the startup
+     * @throws IllegalStateException is the Server is already running
      */
     private void startServer() throws InterruptedException {
         if (isChannelOpen()) {
@@ -112,28 +112,22 @@ public class Server extends AbstractComponent {
                 .childHandler(getHandshakeHandler())
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-        //Wait for the start of the server
+        //Bind to ports and wait for the start of the server
         final int localPort = getLocalPort();
         if (localPort < 0 || localPort > 65535) {
             throw new StartupException("Illegal localPort " + localPort);
         }
         localChannel = b.bind(localPort).sync();
-        if (localChannel == null) {
-            throw new StartupException("Could not open server channel");
-        }
 
         final int publicPort = getPublicPort();
         if (publicPort >= 0 && publicPort <= 65535 && localPort != publicPort) {
             publicChannel = b.bind(publicPort).sync();
-            if (publicChannel == null) {
-                throw new StartupException("Could not open server channel");
-            }
         }
         Log.i(getClass().getSimpleName(), "Server bound to port " + localChannel + (publicChannel != null ? " and " + publicChannel : ""));
     }
 
     /**
-     * HandshakeHandle can be changed or mocked for testing
+     * HandshakeHandler can be changed or mocked for testing
      *
      * @return the ServerHandshakeHandler to use
      */
@@ -143,7 +137,7 @@ public class Server extends AbstractComponent {
     }
 
     /**
-     * Stop listening, close all connections and shut down the executors.
+     * Stop listening and close all connections.
      */
     public void destroy() {
         if (localChannel != null && localChannel.channel() != null) {
@@ -156,7 +150,7 @@ public class Server extends AbstractComponent {
     }
 
     /**
-     * Finds the Channel that is contained in a pipeline of a netty IO channel matching the given ID.
+     * Finds the Channel representing a connection to a Client with a matching DeviceID.
      *
      * @return the found Channel, or {@code null} if no Channel matches the given ID
      */
@@ -228,6 +222,9 @@ public class Server extends AbstractComponent {
         return connections;
     }
 
+    /**
+     * @return an Iterable containing the DeviceIDs of all currently connected Devices
+     */
     public Iterable<DeviceID> getActiveDevices() {
         final ChannelGroup input = getActiveChannels();
         final Iterable<DeviceID> transformed = Iterables.transform(input, new Function<Channel, DeviceID>() {

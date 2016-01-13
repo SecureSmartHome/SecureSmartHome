@@ -14,7 +14,11 @@ import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION;
 
 /**
- * TODO Niko add Javadoc for whole class. (Phil, 2016-01-09)
+ * Base class for one of the two Slave Activities that are required for the setup:
+ * <ol>
+ * <li>SlaveQRCodeActivity, displayed first and as long as no Master is known</li>
+ * <li>MainActivity, displayed as soon as the system is set up</li>
+ * </ol>
  *
  * @author Niko Fink
  */

@@ -4,9 +4,8 @@ import java.io.Serializable;
 
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SystemHealthPayload;
-import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.broadcast.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SYSTEM_HEALTH_CHECK;
 import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.SYSTEM_HEALTH_WARNING;

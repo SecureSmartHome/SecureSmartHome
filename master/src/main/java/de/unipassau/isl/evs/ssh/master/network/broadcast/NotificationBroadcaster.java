@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.master.network;
+package de.unipassau.isl.evs.ssh.master.network.broadcast;
 
 import android.util.Log;
 
@@ -13,6 +13,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
+import de.unipassau.isl.evs.ssh.master.network.Server;
 import io.netty.channel.Channel;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION;

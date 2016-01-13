@@ -11,8 +11,6 @@ import com.google.common.base.Strings;
 import net.aksingh.owmjapis.CurrentWeather;
 import net.aksingh.owmjapis.OpenWeatherMap;
 
-import org.json.JSONException;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +30,7 @@ import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
-import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.broadcast.NotificationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_UPDATE;
 
