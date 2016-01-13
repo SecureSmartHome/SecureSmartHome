@@ -100,8 +100,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     public void onReceive(Intent intent) {
         OpenWeatherMap owm = new OpenWeatherMap(CoreConstants.OPENWEATHERMAP_API_KEY);
         SharedPreferences sharedPreferences = requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-        //TODO Niko: orgranize shared pref key strings (Leon, 12.01.16)
-        String city = sharedPreferences.getString("master_city_name", null);
+        String city = sharedPreferences.getString(requireComponent(ContainerService.KEY_CONTEXT).getResources().getString(R.string.master_city_name), null);
         try {
             if (!Strings.isNullOrEmpty(city)) {
                 CurrentWeather cw = owm.currentWeatherByCityName(city);

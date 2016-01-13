@@ -70,9 +70,9 @@ public class MasterPreferenceFragment extends PreferenceFragment implements
             if (Strings.isNullOrEmpty(editTextPref.getText())) {
                 resetSummary(editTextPref);
             } else {
-                if (editTextPref.getKey().equals(getResources().getResourceEntryName(R.string.master_port_local))
-                        || editTextPref.getKey().equals(getResources().getResourceEntryName(R.string.master_port_extern))
-                        || editTextPref.getKey().equals(getResources().getResourceEntryName(R.string.master_port_intern))) {
+                if (editTextPref.getKey().equals(getResources().getString(R.string.master_port_local))
+                        || editTextPref.getKey().equals(getResources().getString(R.string.master_port_extern))
+                        || editTextPref.getKey().equals(getResources().getString(R.string.master_port_intern))) {
                     //We can be sure this is a number due to the preference Activity only accepting numbers
                     int port = 0;
                     try {
@@ -95,7 +95,7 @@ public class MasterPreferenceFragment extends PreferenceFragment implements
                         p.setSummary(editTextPref.getText());
                     }
 
-                } else if (editTextPref.getKey().equals(getResources().getResourceEntryName((R.string.master_city_name)))) {
+                } else if (editTextPref.getKey().equals(getResources().getString((R.string.master_city_name)))) {
                     p.setSummary(editTextPref.getText());
                 }
             }
@@ -103,11 +103,16 @@ public class MasterPreferenceFragment extends PreferenceFragment implements
     }
 
     private void resetSummary(EditTextPreference p) {
-        int resId = getResources().getIdentifier(p.getKey() + "_summary", "string",
-                getActivity().getPackageName());
-
-        String summary = getResources().getString(resId);
-
-        p.setSummary(summary);
+        if (p.getKey().equals(getResources().getString(R.string.master_city_name))) {
+            p.setSummary(getResources().getString(R.string.master_city_name_summary));
+        } else if (p.getKey().equals(getResources().getString(R.string.master_port_local))) {
+            p.setSummary(getResources().getString(R.string.master_port_local_summary));
+        } else if (p.getKey().equals(getResources().getString(R.string.master_port_extern))) {
+            p.setSummary(getResources().getString(R.string.master_port_extern_summary));
+        } else if (p.getKey().equals(getResources().getString(R.string.master_port_intern))) {
+            p.setSummary(getResources().getString(R.string.master_port_intern_summary));
+        } else {
+            p.setSummary("");
+        }
     }
 }
