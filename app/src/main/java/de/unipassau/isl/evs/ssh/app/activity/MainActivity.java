@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -274,23 +275,27 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, fragment);
 
-        if (currentFragment instanceof MainFragment && fragment instanceof HolidayFragment) {
-            transaction.addSharedElement(currentFragment.getView().findViewById(R.id.holidayButton), "holidayIconTransition");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (currentFragment instanceof MainFragment && fragment instanceof HolidayFragment) {
+                View fragmentView = currentFragment.getView();
+                if (fragmentView != null) {
+                    transaction.addSharedElement(fragmentView.findViewById(R.id.holidayButton), "holidayIconTransition");
+                }
+                final TransitionInflater inflater = TransitionInflater.from(this);
+                currentFragment.setSharedElementReturnTransition(
+                        inflater.inflateTransition(R.transition.change_image_trans));
+                currentFragment.setExitTransition(
+                        inflater.inflateTransition(android.R.transition.explode));
 
-            final TransitionInflater inflater = TransitionInflater.from(this);
-            currentFragment.setSharedElementReturnTransition(
-                    inflater.inflateTransition(R.transition.change_image_trans));
-            currentFragment.setExitTransition(
-                    inflater.inflateTransition(android.R.transition.explode));
-
-            fragment.setSharedElementEnterTransition(
-                    inflater.inflateTransition(R.transition.change_image_trans));
-            fragment.setEnterTransition(
-                    inflater.inflateTransition(android.R.transition.explode));
-        } else if (fragment instanceof MainFragment && currentFragment != null) {
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-        } else {
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                fragment.setSharedElementEnterTransition(
+                        inflater.inflateTransition(R.transition.change_image_trans));
+                fragment.setEnterTransition(
+                        inflater.inflateTransition(android.R.transition.explode));
+            } else if (fragment instanceof MainFragment && currentFragment != null) {
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+            } else {
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            }
         }
 
         transaction.commit();
