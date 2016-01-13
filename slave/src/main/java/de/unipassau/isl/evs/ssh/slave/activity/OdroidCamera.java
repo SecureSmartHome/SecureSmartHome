@@ -73,21 +73,24 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
             camera = Camera.open();
             params = camera.getParameters();
         } catch (RuntimeException e) {
+            Log.e(TAG, "Could not open camera", e);
             camera = null;
+            finish();
         }
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.d(TAG, "surfaceChanged(holder = [" + holder + "], format = [" + format + "], width = [" + width + "], height = [" + height + "])");
-        if ( camera == null || holder.getSurface() == null) return;
+        if (camera == null || holder.getSurface() == null) return;
         try {
             camera.setPreviewDisplay(holder);
             camera.addCallbackBuffer(new byte[getImageSize()]);
             camera.setPreviewCallbackWithBuffer(this);
             camera.startPreview();
-        } catch (IOException | RuntimeException ioe) {
-            Log.e(TAG, "Could not set preview display", ioe);
+        } catch (IOException | RuntimeException e) {
+            Log.e(TAG, "Could not set preview display", e);
+            finish();
         }
     }
 
@@ -134,8 +137,6 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
 
     private void sendImageOrError() {
         if (getContainer() == null || lastSnapshot == null) {
-            sendError();
-            finish();
             return;
         }
         int width = params.getPreviewSize().width;
@@ -159,6 +160,14 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
         finish();
     }
 
+    @Override
+    public void onContainerDisconnected() {
+        if (lastSnapshot == null) {
+            sendError();
+        }
+        super.onContainerDisconnected();
+    }
+
     private void sendCompressedImage(byte[] jpegData) {
         CameraPayload payload = new CameraPayload(getCameraID(), getModuleName());
         payload.setPicture(jpegData);
@@ -166,7 +175,7 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
         requireComponent(OutgoingRouter.KEY).sendReply(getReplyToMessage(), reply);
     }
 
-    private void sendError(){
+    private void sendError() {
         Message reply = new Message(new ErrorPayload("Could not load image. Is a camera installed?"));
         requireComponent(OutgoingRouter.KEY).sendReply(getReplyToMessage(), reply);
     }
