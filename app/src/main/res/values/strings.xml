@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Secure Smart Home</string>
     <string name="title_activity_main">MainActivity</string>
@@ -120,68 +121,6 @@
     <string name="visible_1">Visible:</string>
     <string name="ir">IR:</string>
 
-    <string name="si_degree" translatable="false">%3.1f C°</string>
-    <string name="si_pressure" translatable="false">%4.1f Pa</string>
-    <string name="si_altitude" translatable="false">%4.2f m</string>
-    <string name="si_humidity" translatable="false">%3.2f \U+0025</string>
-    <string name="si_visible" translatable="false">%d Lux</string>
-
-    <!--Strings used for Notifications-->
-    <string name="climate_notification_title">Climate Warning!</string>
-    <string name="climate_notification_text">Your indoor humidity is at %3.2f \U+0025 please air your home.</string>
-    <string name="brightness_warning_title">Light Warning!</string>
-    <string name="brightness_warning_text">It has %d Lux in your room, which should be bright enough.</string>
-    <string name="weather_warning_title">Weather Warning!</string>
-    <string name="weather_warning_text">Please close all doors and windows. It will rain today.</string>
-    <string name="system_health_warning_title_failed">Component failed!</string>
-    <string name="system_health_warning_title_fixed">Component failure resolved!</string>
-    <string name="system_health_warning_text_failure">The module %s is not responding anymore.</string>
-    <string name="system_health_warning_text_fixed">The module %s is responding again.</string>
-    <string name="door_bell_notification_title">The Doorbell rang!</string>
-    <string name="door_bell_notification_text">You have visitors at your door.</string>
-    <string name="holiday_mode_switched_on_title">Holiday Mode Active!</string>
-    <string name="holiday_mode_switched_on_text">Your home is now controlling itself.</string>
-    <string name="holiday_mode_switched_off_title">Holiday Mode Inactive!</string>
-    <string name="holiday_mode_switched_off_text">You have now the control over your home. Welcome back!</string>
-    <string name="door_unlatched_title">Door is now open!</string>
-    <!--TODO maybe add text, otherwise delete? (Phil, 2016-01-09-->
-    <string name="door_unlatched_text"></string>
-    <string name="door_locked_title">Door is now locked!</string>
-    <string name="door_locked_text">Unauthorised users can not open it anymore.</string>
-    <string name="door_unlocked_title">Door is now unlocked!</string>
-    <string name="door_unlocked_text">Others users can now open it.</string>
-    <string name="edit_user_device">Edit %s</string>
-    <string name="missing_permission">Missing Permission</string>
-    <string name="permission_connected_to">This permission is connected to %s</string>
-    <string name="permission_not_connected_to">This permission is not connected to any module.</string>
-    <string name="group_has_no_members">This group has no members.</string>
-    <string name="group_one_member">%s is the only member.</string>
-    <string name="group_many_members">%1$s and %2$s and more are members.</string>
-    <string name="group_two_member">%1$s and %2$s are members.</string>
-    <string name="group_created">Group created.</string>
-    <string name="missingTemplates">Missing templates</string>
-    <string name="group_edited">Group %s edited.</string>
-    <string name="group_removed">Group %s removed.</string>
-    <string name="delete_confirmation">Are you sure you want to delete \'%s\'</string>
-    <string name="weather_service_failed_title">Weather Service failed.</string>
-    <string name="weather_service_failed_text">Weather Service was not able to retrieve data for %s</string>
-    <string name="could_not_block_door">Could not (un)block door.</string>
-    <string name="access_denied">Access denied!</string>
-    <string name="slave_registration_success">Successfully registered slave</string>
-    <string name="cannot_remove_slave">Cannot remove slave</string>
-    <string name="slave_removed">Slave Removed</string>
-    <string name="module_removed">Module removed</string>
-    <string name="cannot_remove_module">err_remove_module</string>
-    <string name="add_new_user_fail">An error occurred while adding the new user!</string>
-    <string name="could_not_switch_holiday">Could not turn on holiday simulation</string>
-    <string name="could_not_revoke">Could not revoke permission</string>
-    <string name="could_not_grant">Could not grant permission</string>
-    <string name="device_edited">Device %s edited.</string>
-    <string name="device_removed">Device %s removed.</string>
-    <string name="could_not_edit_user_device_name">Could not edit user device name</string>
-    <string name="could_not_edit_user_device_group">Could not edit user device group</string>
-    <string name="you_can_not_edit_groups">You cannot edit groups</string>
-
     <!-- Permission names -->
     <string name="perm_add_odroid">ADD_ODROID</string>
     <string name="perm_rename_odroid">RENAME_ODROID</string>
@@ -267,4 +206,74 @@
     <string name="perm-desc_door_locked">DOOR_LOCKED</string>
     <string name="perm-desc_door_unlocked">DOOR_UNLOCKED</string>
     <string name="perm-desc_switch_light">SWITCH_LIGHT</string>
+
+    <string name="si_degree" translatable="false">%3.1f C°</string>
+    <string name="si_pressure" translatable="false">%4.1f Pa</string>
+    <string name="si_altitude" translatable="false">%4.2f m</string>
+    <string name="si_humidity" translatable="false">%3.2f \U+0025</string>
+    <string name="si_visible" translatable="false">%d Lux</string>
+
+    <!--Strings used for Notifications-->
+    <string name="climate_notification_title">Climate Warning!</string>
+    <string name="climate_notification_text">Your indoor humidity is at %3.2f \U+0025 please air your home.</string>
+    <string name="brightness_warning_title">Light Warning!</string>
+    <string name="brightness_warning_text">It has %d Lux in your room, which should be bright enough.</string>
+    <string name="weather_warning_title">Weather Warning!</string>
+    <string name="weather_warning_text">Please close all doors and windows. It will rain today.</string>
+    <string name="system_health_warning_title_failed">Component failed!</string>
+    <string name="system_health_warning_title_fixed">Component failure resolved!</string>
+    <string name="system_health_warning_text_failure">The module %s is not responding anymore.</string>
+    <string name="system_health_warning_text_fixed">The module %s is responding again.</string>
+    <string name="door_bell_notification_title">The Doorbell rang!</string>
+    <string name="door_bell_notification_text">You have visitors at your door.</string>
+    <string name="holiday_mode_switched_on_title">Holiday Mode Active!</string>
+    <string name="holiday_mode_switched_on_text">Your home is now controlling itself.</string>
+    <string name="holiday_mode_switched_off_title">Holiday Mode Inactive!</string>
+    <string name="holiday_mode_switched_off_text">You have now the control over your home. Welcome back!</string>
+    <string name="door_unlatched_title">Door is now open!</string>
+    <!--TODO maybe add text, otherwise delete? (Phil, 2016-01-09-->
+    <string name="door_unlatched_text"></string>
+    <string name="door_locked_title">Door is now locked!</string>
+    <string name="door_locked_text">Unauthorised users can not open it anymore.</string>
+    <string name="door_unlocked_title">Door is now unlocked!</string>
+    <string name="door_unlocked_text">Others users can now open it.</string>
+    <string name="edit_user_device">Edit %s</string>
+    <string name="missing_permission">Missing Permission</string>
+    <string name="permission_connected_to">This permission is connected to %s</string>
+    <string name="permission_not_connected_to">This permission is not connected to any module.</string>
+    <string name="group_has_no_members">This group has no members.</string>
+    <string name="group_one_member">%s is the only member.</string>
+    <string name="group_many_members">%1$s and %2$s and more are members.</string>
+    <string name="group_two_member">%1$s and %2$s are members.</string>
+    <string name="group_created">Group created.</string>
+    <string name="missingTemplates">Missing templates</string>
+    <string name="group_edited">Group %s edited.</string>
+    <string name="group_removed">Group %s removed.</string>
+    <string name="delete_confirmation">Are you sure you want to delete \'%s\'</string>
+    <string name="weather_service_failed_title">Weather Service failed.</string>
+    <string name="weather_service_failed_text">Weather Service was not able to retrieve data for %s</string>
+    <string name="could_not_block_door">Could not (un)block door.</string>
+    <string name="access_denied">Access denied!</string>
+    <string name="slave_registration_success">Successfully registered slave</string>
+    <string name="cannot_remove_slave">Cannot remove slave</string>
+    <string name="slave_removed">Slave Removed</string>
+    <string name="module_removed">Module removed</string>
+    <string name="cannot_remove_module">err_remove_module</string>
+    <string name="add_new_user_fail">An error occurred while adding the new user!</string>
+    <string name="could_not_switch_holiday">Could not turn on holiday simulation</string>
+    <string name="could_not_revoke">Could not revoke permission</string>
+    <string name="could_not_grant">Could not grant permission</string>
+    <string name="device_edited">Device %s edited.</string>
+    <string name="device_removed">Device %s removed.</string>
+    <string name="could_not_edit_user_device_name">Could not edit user device name</string>
+    <string name="could_not_edit_user_device_group">Could not edit user device group</string>
+    <string name="you_can_not_edit_groups">You can\'t edit groups</string>
+    <string name="you_cant_delete_users">You can\'t delete users</string>
+    <string name="could_not_set_group_name">Could not set group name</string>
+    <string name="could_note_set_group_template">Could not set group template</string>
+    <string name="could_not_delete_group">Could not delete group</string>
+    <string name="you_can_not_add_groups">You can\'t add groups</string>
+    <string name="you_can_not_add_new_modules">You can\'t add new modules</string>
+    <string name="could_not_switch_light">Could not switch light. Maybe missing Permission</string>
+    <string name="you_can_not_add_new_users">You can\'t add new users</string>
 </resources>
