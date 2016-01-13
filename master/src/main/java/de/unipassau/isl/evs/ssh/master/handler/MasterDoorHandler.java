@@ -10,10 +10,9 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBlockPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
-import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.broadcast.NotificationBroadcaster;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;

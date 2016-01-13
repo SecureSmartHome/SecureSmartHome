@@ -16,7 +16,7 @@ import de.unipassau.isl.evs.ssh.core.database.IsReferencedException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.core.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
-import de.unipassau.isl.evs.ssh.master.network.UserConfigurationBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.broadcast.UserConfigurationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_ADD;

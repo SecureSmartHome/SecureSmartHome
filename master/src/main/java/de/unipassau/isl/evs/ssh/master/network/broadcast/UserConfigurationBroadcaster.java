@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.master.network;
+package de.unipassau.isl.evs.ssh.master.network.broadcast;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ArrayListMultimap;
@@ -19,8 +19,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
-import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
+import de.unipassau.isl.evs.ssh.master.network.Server;
 
 /**
  * @author Wolfgang Popp.

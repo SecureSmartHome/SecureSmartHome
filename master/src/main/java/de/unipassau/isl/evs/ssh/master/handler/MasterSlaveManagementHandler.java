@@ -17,8 +17,8 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.core.database.IsReferencedException;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
-import de.unipassau.isl.evs.ssh.master.network.ModuleBroadcaster;
-import de.unipassau.isl.evs.ssh.master.network.UserConfigurationBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.broadcast.ModuleBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.broadcast.UserConfigurationBroadcaster;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_DELETE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_REGISTER;

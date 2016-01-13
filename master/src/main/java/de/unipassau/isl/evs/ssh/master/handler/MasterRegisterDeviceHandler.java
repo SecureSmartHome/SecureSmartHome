@@ -28,7 +28,7 @@ import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.core.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
-import de.unipassau.isl.evs.ssh.master.network.UserConfigurationBroadcaster;
+import de.unipassau.isl.evs.ssh.master.network.broadcast.UserConfigurationBroadcaster;
 import io.netty.channel.Channel;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE;
