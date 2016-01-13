@@ -24,7 +24,9 @@ import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
+import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.network.UserConfigurationBroadcaster;
+import io.netty.channel.Channel;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER;
@@ -64,12 +66,18 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
 
     private void deleteUser(DeleteDevicePayload payload, Message.AddressedMessage original) {
         DeviceID fromID = original.getFromID();
+        final DeviceID userToDelete = payload.getUser();
 
         if (!hasPermission(fromID, DELETE_USER)) {
             sendNoPermissionReply(original, DELETE_USER);
             return;
         }
-        requireComponent(UserManagementController.KEY).removeUserDevice(payload.getUser());
+        requireComponent(UserManagementController.KEY).removeUserDevice(userToDelete);
+
+        final Channel channel = requireComponent(Server.KEY).findChannel(userToDelete);
+        if (channel != null) {
+            channel.close();
+        }
 
         sendReply(original, new Message());
         requireComponent(UserConfigurationBroadcaster.KEY).updateAllClients();
