@@ -69,10 +69,6 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v(TAG, "surfaceCreated(holder = [" + holder + "])");
-        if (!this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            camera = null;
-            return;
-        }
         try {
             camera = Camera.open();
             params = camera.getParameters();
@@ -90,7 +86,7 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
             camera.addCallbackBuffer(new byte[getImageSize()]);
             camera.setPreviewCallbackWithBuffer(this);
             camera.startPreview();
-        } catch (IOException ioe) {
+        } catch (IOException | RuntimeException ioe) {
             Log.e(TAG, "Could not set preview display", ioe);
         }
     }
@@ -114,8 +110,14 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
     private void releaseCamera() {
         Log.v(TAG, "Releasing camera " + camera);
         if (camera == null) return;
-        camera.stopPreview();
+
+        try {
+            camera.stopPreview();
+        } catch (RuntimeException e) {
+            Log.i(TAG, "Could not stop preview, probably no camera connected", e);
+        }
         camera.release();
+        camera = null;
     }
 
     @Override
