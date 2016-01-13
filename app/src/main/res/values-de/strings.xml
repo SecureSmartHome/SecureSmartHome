@@ -69,7 +69,7 @@
     <string name="name_of_new_slave">Name des neuen Slaves</string>
     <string name="nav_addModule_string">Modul hinzufügen</string>
     <string name="nav_addNewUserDevice_sting">Nutzer hinzufügen</string>
-    <string name="nav_add_odroid_string">Odroid hinzufügen</string>
+    <string name="nav_add_odroid_string">Slave hinzufügen</string>
     <string name="nav_climate_string">Klima</string>
     <string name="nav_door_string">Tür</string>
     <string name="nav_edit">Bearbeiten</string>

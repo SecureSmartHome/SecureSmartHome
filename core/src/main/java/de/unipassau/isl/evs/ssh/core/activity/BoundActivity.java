@@ -87,11 +87,11 @@ public class BoundActivity extends AppCompatActivity {
         Intent intent = new Intent(this, serviceClass);
         startService(intent);
         if (!serviceBound) {
-            Log.v(TAG, "onStart not bound, binding");
+            Log.v(TAG, "doBind not bound, binding");
             serviceBound = bindService(intent, serviceConn, BIND_AUTO_CREATE);
-            Log.v(TAG, "onStart binding " + (serviceBound ? "successful" : "failed"));
+            Log.v(TAG, "doBind binding " + (serviceBound ? "successful" : "failed"));
         } else {
-            Log.v(TAG, "onStart already bound");
+            Log.v(TAG, "doBind already bound");
         }
     }
 
@@ -100,11 +100,11 @@ public class BoundActivity extends AppCompatActivity {
      */
     protected void doUnbind() {
         if (serviceBound) {
-            Log.v(TAG, "onStop bound, unbinding");
+            Log.v(TAG, "doUnbind bound, unbinding");
             unbindService(serviceConn);
             serviceBound = false;
         } else {
-            Log.v(TAG, "onStop not bound, unbinding unnecessary");
+            Log.v(TAG, "doUnbind not bound, unbinding unnecessary");
         }
     }
 
@@ -159,6 +159,7 @@ public class BoundActivity extends AppCompatActivity {
     }
 
     protected void shutdownService() {
+        doUnbind();
         final Intent intent = new Intent(this, serviceClass);
         stopService(intent);
     }
