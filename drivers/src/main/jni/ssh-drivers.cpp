@@ -8,6 +8,10 @@
 struct termios ios; //parameters for IO access
 int fd; // file descriptor
 
+double atof(const char *nptr) {
+    return (strtod(nptr, NULL));
+}
+
 extern "C" {
 JNIEXPORT void JNICALL
 Java_de_unipassau_isl_evs_ssh_drivers_lib_WeatherSensor_initSerialInterface(JNIEnv *env, jobject instance) {
