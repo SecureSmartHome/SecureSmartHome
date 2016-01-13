@@ -13,7 +13,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
-import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
+import de.unipassau.isl.evs.ssh.core.database.UnknownReferenceException;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.LogActions.LIGHT_OFF_ACTION;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.LogActions.LIGHT_ON_ACTION;
@@ -22,7 +22,6 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_LIGHT_UPDA
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_LIGHT_SET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET_REPLY;

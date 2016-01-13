@@ -10,11 +10,11 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.SetPermissionPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserGroupPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetUserNamePayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
-import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
-import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
-import de.unipassau.isl.evs.ssh.master.database.IsReferencedException;
+import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
+import de.unipassau.isl.evs.ssh.core.database.DatabaseControllerException;
+import de.unipassau.isl.evs.ssh.core.database.IsReferencedException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
-import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
+import de.unipassau.isl.evs.ssh.core.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.network.UserConfigurationBroadcaster;
 

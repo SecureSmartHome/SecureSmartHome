@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.master.database;
+package de.unipassau.isl.evs.ssh.core.database;
 
 /**
  * Exception should be used if the given reference is not present in the database. E.g. adding a module with atSlave 12

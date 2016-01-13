@@ -15,7 +15,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
-import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
+import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;

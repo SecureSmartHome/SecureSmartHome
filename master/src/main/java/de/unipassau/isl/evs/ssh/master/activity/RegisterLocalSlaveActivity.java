@@ -17,7 +17,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
-import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
+import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.handler.MasterSlaveManagementHandler;
 
 /**

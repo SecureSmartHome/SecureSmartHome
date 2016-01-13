@@ -3,8 +3,6 @@ package de.unipassau.isl.evs.ssh.master.handler;
 import android.util.Base64;
 import android.util.Log;
 
-import com.google.common.base.Strings;
-
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -23,10 +21,10 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenP
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
-import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
-import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
+import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
+import de.unipassau.isl.evs.ssh.core.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
-import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
+import de.unipassau.isl.evs.ssh.core.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.network.UserConfigurationBroadcaster;
