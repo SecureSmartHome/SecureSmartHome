@@ -2,13 +2,15 @@ package de.unipassau.isl.evs.ssh.app.handler;
 
 import android.support.annotation.NonNull;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.SetMultimap;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
@@ -65,10 +67,10 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SE
 public class AppUserConfigurationHandler extends AbstractAppHandler implements Component {
     public static final Key<AppUserConfigurationHandler> KEY = new Key<>(AppUserConfigurationHandler.class);
 
-    private final ListMultimap<UserDevice, Permission> usersToPermissions = ArrayListMultimap.create();
-    private final ListMultimap<Group, UserDevice> groupToUserDevice = ArrayListMultimap.create();
-    private final List<Permission> allPermissions = new LinkedList<>();
-    private final List<Group> allGroups = new LinkedList<>();
+    private final SetMultimap<UserDevice, Permission> usersToPermissions = HashMultimap.create();
+    private final SetMultimap<Group, UserDevice> groupToUserDevice = HashMultimap.create();
+    private final Set<Permission> allPermissions = new HashSet<>();
+    private final Set<Group> allGroups = new HashSet<>();
 
     private final List<UserInfoListener> listeners = new LinkedList<>();
 
@@ -100,13 +102,13 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
         if (APP_USERINFO_UPDATE.matches(message)) {
             UserDeviceInformationPayload payload = APP_USERINFO_UPDATE.getPayload(message);
 
-            ImmutableListMultimap<UserDevice, Permission> usersToPermissions = payload.getUsersToPermissions();
+            ListMultimap<UserDevice, Permission> usersToPermissions = payload.getUsersToPermissions();
             if (usersToPermissions != null) {
                 this.usersToPermissions.clear();
                 this.usersToPermissions.putAll(usersToPermissions);
             }
 
-            ImmutableListMultimap<Group, UserDevice> groupToUserDevice = payload.getGroupToUserDevice();
+            ListMultimap<Group, UserDevice> groupToUserDevice = payload.getGroupToUserDevice();
             if (groupToUserDevice != null) {
                 this.groupToUserDevice.clear();
                 this.groupToUserDevice.putAll(groupToUserDevice);
@@ -161,8 +163,8 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      * @return a list of all groups
      */
     @NonNull
-    public ImmutableList<Group> getAllGroups() {
-        return ImmutableList.copyOf(allGroups);
+    public Set<Group> getAllGroups() {
+        return Collections.unmodifiableSet(allGroups);
     }
 
     /**
@@ -171,8 +173,8 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      * @return a list of all UserDevices
      */
     @NonNull
-    public ImmutableList<UserDevice> getAllUserDevices() {
-        return ImmutableList.copyOf(usersToPermissions.keySet());
+    public Set<UserDevice> getAllUserDevices() {
+        return Collections.unmodifiableSet(usersToPermissions.keySet());
     }
 
     /**
@@ -182,8 +184,8 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      * @return a list of all members
      */
     @NonNull
-    public ImmutableList<UserDevice> getAllGroupMembers(Group group) {
-        return ImmutableList.copyOf(groupToUserDevice.get(group));
+    public Set<UserDevice> getAllGroupMembers(Group group) {
+        return Collections.unmodifiableSet(groupToUserDevice.get(group));
     }
 
     /**
@@ -192,8 +194,8 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      * @return a list of all permissions
      */
     @NonNull
-    public ImmutableList<Permission> getAllPermissions() {
-        return ImmutableList.copyOf(allPermissions);
+    public Set<Permission> getAllPermissions() {
+        return Collections.unmodifiableSet(allPermissions);
     }
 
     /**
@@ -203,11 +205,43 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      * @return a list of all permissions of the user
      */
     @NonNull
-    public ImmutableList<Permission> getPermissionForUser(UserDevice user) {
-        return ImmutableList.copyOf(usersToPermissions.get(user));
+    public Set<Permission> getPermissionForUser(UserDevice user) {
+        return Collections.unmodifiableSet(usersToPermissions.get(user));
     }
 
-    private void sendUserConfigMessage(Message message, RoutingKey<? extends MessagePayload> key, final UserConfigurationEvent.EventType eventType){
+    /**
+     * Returns a list of all permissions of the given device.
+     *
+     * @param userDeviceID DeviceID associated with the user.
+     * @return a list of all permissions of the user
+     */
+    @NonNull
+    public Set<Permission> getPermissionForUser(DeviceID userDeviceID) {
+        for (UserDevice device : usersToPermissions.keySet()) {
+            if (userDeviceID.equals(device.getUserDeviceID())) {
+                return getPermissionForUser(device);
+            }
+        }
+        return Collections.emptySet();
+    }
+
+    /**
+     * Returns whether a given user has a given Permission.
+     *
+     * @param userDeviceID DeviceID associated with the user.
+     * @param permission   Permission to check.
+     * @return true if has permissions otherwise false.
+     */
+    public boolean hasPermission(DeviceID userDeviceID, de.unipassau.isl.evs.ssh.core.sec.Permission permission) {
+        for (UserDevice device : usersToPermissions.keySet()) {
+            if (userDeviceID.equals(device.getUserDeviceID())) {
+                return usersToPermissions.get(device).contains(new Permission(permission));
+            }
+        }
+        return false;
+    }
+
+    private void sendUserConfigMessage(Message message, RoutingKey<? extends MessagePayload> key, final UserConfigurationEvent.EventType eventType) {
         final Future<Void> future = newResponseFuture(sendMessageToMaster(key, message));
         future.addListener(new FutureListener<Void>() {
             @Override

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--@author Phil Werli-->
 <resources>
-    <color name="colorPrimary">#2979FF</color>
-    <color name="colorPrimaryDark">#cf2979ff</color>
+    <color name="colorPrimary">@color/md_blue_500</color>
+    <color name="colorPrimaryDark">@color/md_blue_700</color>
     <color name="colorPrimaryLight">#448AFF</color>
     <color name="colorBackground">#f5d3d3d3</color>
     <color name="colorAccent">#fb8c00</color>
@@ -704,4 +704,6 @@
     <color name="md_falcon_A400_25">#40598bae</color>
 
     <color name="md_statusbar_translucent">#4000</color>
+    <color name="black">#ffffff</color>
+    <color name="foreground_material_light">#ffffff</color>
 </resources>

@@ -17,6 +17,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import java.util.List;
+import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
@@ -38,20 +39,6 @@ import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
  */
 public class AddNewUserDeviceFragment extends BoundFragment {
     private static final String TAG = AddNewUserDeviceFragment.class.getSimpleName();
-    private List<String> groups;
-    private Spinner spinner;
-    private EditText inputUserName;
-    private Button button;
-
-    private final AppUserConfigurationHandler.UserInfoListener userConfigListener = new AppUserConfigurationHandler.UserInfoListener() {
-        @Override
-        public void userInfoUpdated(UserConfigurationEvent event) {
-            if (event.getType().equals(UserConfigurationEvent.EventType.PUSH)) {
-                updateGroupSpinner();
-            }
-        }
-    };
-
     private final AppRegisterNewDeviceHandler.RegisterNewDeviceListener registerNewDeviceListener = new AppRegisterNewDeviceHandler.RegisterNewDeviceListener() {
         @Override
         public void tokenResponse(final DeviceConnectInformation deviceConnectInformation) {
@@ -75,6 +62,18 @@ public class AddNewUserDeviceFragment extends BoundFragment {
             });
         }
     };
+    private List<String> groups;
+    private Spinner spinner;
+    private final AppUserConfigurationHandler.UserInfoListener userConfigListener = new AppUserConfigurationHandler.UserInfoListener() {
+        @Override
+        public void userInfoUpdated(UserConfigurationEvent event) {
+            if (event.getType().equals(UserConfigurationEvent.EventType.PUSH)) {
+                updateGroupSpinner();
+            }
+        }
+    };
+    private EditText inputUserName;
+    private Button button;
 
     private void updateGroupSpinner() {
         AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
@@ -83,7 +82,7 @@ public class AddNewUserDeviceFragment extends BoundFragment {
             return;
         }
 
-        List<Group> allGroups = handler.getAllGroups();
+        Set<Group> allGroups = handler.getAllGroups();
         if (allGroups.size() < 1) {
             Log.i(TAG, "No groups available, yet.");
             return;

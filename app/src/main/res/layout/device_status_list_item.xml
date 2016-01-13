@@ -11,49 +11,45 @@
     android:rowCount="3">
 
     <TableRow
-        android:padding="3dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="3dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:text="@string/status_name"
-            android:textColor="@color/colorSecondaryText"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/deviceStatusSlaveName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="3dp"
-            android:layout_marginEnd="3dp"
             android:layout_column="1"
-            android:textColor="@color/colorSecondaryText" />
+            android:layout_marginEnd="3dp"
+            android:layout_marginStart="3dp" />
     </TableRow>
 
     <TableRow
-        android:padding="3dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="3dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:text="@string/status_id"
-            android:textColor="@color/colorSecondaryText"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/deviceStatusSlaveId"
-            android:layout_marginStart="3dp"
-            android:layout_marginEnd="3dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="1"
-            android:textColor="@color/colorSecondaryText" />
+            android:layout_marginEnd="3dp"
+            android:layout_marginStart="3dp" />
     </TableRow>
 
 </TableLayout>

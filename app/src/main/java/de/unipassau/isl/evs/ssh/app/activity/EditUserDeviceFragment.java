@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
@@ -140,7 +141,7 @@ public class EditUserDeviceFragment extends BoundFragment {
         if (handler == null) {
             Log.i(TAG, "Container not yet connected!");
         } else {
-            List<Group> groups = handler.getAllGroups();
+            Set<Group> groups = handler.getAllGroups();
             groupNames = new String[groups.size()];
             int counter = 0;
             for (Group g :
@@ -227,7 +228,7 @@ public class EditUserDeviceFragment extends BoundFragment {
 
     private class PermissionListAdapter extends BaseAdapter {
         private List<Permission> allPermissions;
-        private List<Permission> userPermissions;
+        private Set<Permission> userPermissions;
 
         public PermissionListAdapter() {
             updatePermissionList();
@@ -247,7 +248,7 @@ public class EditUserDeviceFragment extends BoundFragment {
             }
             userPermissions = handler.getPermissionForUser(device);
 
-            List<Permission> tempPermissionList = handler.getAllPermissions();
+            Set<Permission> tempPermissionList = handler.getAllPermissions();
 
             allPermissions = Lists.newArrayList(tempPermissionList);
             Collections.sort(allPermissions, new Comparator<Permission>() {

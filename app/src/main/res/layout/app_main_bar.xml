@@ -17,17 +17,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:theme="@style/AppTheme.AppBarOverlay" />
+            app:theme="@style/AppTheme.AppBarOverlay" />
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/appbar"
-            android:background="@color/colorToolbar"
             android:elevation="16dp"
             android:minHeight="?attr/actionBarSize"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:theme="@style/AppTheme.PopupOverlay" />
 
         <FrameLayout
             android:id="@+id/fragment_container"
