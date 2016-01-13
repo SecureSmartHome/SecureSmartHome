@@ -37,7 +37,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.ALL_GROUPS_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_USERDEVICE_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.USER_DEVICE_ARGUMENT_FRAGMENT;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.GRANT_USER_PERMISSION;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION;
 
 /**
  * This fragment lets the user view, edit and delete information regarding a single user device.
@@ -386,7 +386,7 @@ public class EditUserDeviceFragment extends BoundFragment {
          * @return {@code true} if the current user has the permission to grant other users permissions.
          */
         private boolean userMayEdit() {
-            return userDeviceHasPermission(new Permission(GRANT_USER_PERMISSION));
+            return userDeviceHasPermission(new Permission(MODIFY_USER_PERMISSION));
         }
 
         /**
