@@ -34,10 +34,18 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.ALL_GROUPS_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_USERDEVICE_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.USER_DEVICE_ARGUMENT_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.PERMISSION_GRANT;
+import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.PERMISSION_REVOKE;
+import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.PUSH;
+import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.USERNAME_SET;
+import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.USER_SET_GROUP;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION;
 
 /**
@@ -63,18 +71,23 @@ public class EditUserDeviceFragment extends BoundFragment {
             maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (event.getType().equals(UserConfigurationEvent.EventType.PUSH)) {
+                    if (event.getType().equals(PUSH)) {
                         permissionListAdapter.notifyDataSetChanged();
-                    } else if (event.getType().equals(UserConfigurationEvent.EventType.PERMISSION_GRANT) && !event.wasSuccessful()) {
+                    } else if (event.getType().equals(PERMISSION_GRANT) && !event.wasSuccessful()) {
                         Toast.makeText(getActivity(), R.string.could_not_grant, Toast.LENGTH_SHORT).show();
-                    } else if (event.getType().equals(UserConfigurationEvent.EventType.PERMISSION_REVOKE) && !event.wasSuccessful()) {
+                    } else if (event.getType().equals(PERMISSION_REVOKE) && !event.wasSuccessful()) {
                         Toast.makeText(getActivity(), R.string.could_not_revoke, Toast.LENGTH_SHORT).show();
+                    } else if (event.getType().equals(USERNAME_SET) && !event.wasSuccessful()) {
+                        Toast.makeText(getActivity(), R.string.could_not_edit_user_device_name, Toast.LENGTH_SHORT).show();
+                    } else if (event.getType().equals(USER_SET_GROUP) && !event.wasSuccessful()) {
+                        Toast.makeText(getActivity(), R.string.could_not_edit_user_device_group, Toast.LENGTH_SHORT).show();
                     }
                 }
             });
         }
     };
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_edituserdevice, container, false);
     }
@@ -107,7 +120,11 @@ public class EditUserDeviceFragment extends BoundFragment {
                 if (groups != null) {
                     bundle.putStringArray(ALL_GROUPS_DIALOG, groups);
                 }
-                showEditUserDeviceDialog(bundle);
+                if (hasPermission(new Permission(CHANGE_USER_NAME)) && hasPermission(new Permission(CHANGE_USER_GROUP))) {
+                    showEditUserDeviceDialog(bundle);
+                } else {
+                    Toast.makeText(getActivity(), R.string.you_can_not_edit_groups, Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -127,7 +144,7 @@ public class EditUserDeviceFragment extends BoundFragment {
     public void onContainerDisconnected() {
         AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
         if (handler != null) {
-            handler.addUserInfoListener(listener);
+            handler.addUserInfoListener(listener); // ASK Wolfi remove listener?
         }
         super.onContainerDisconnected();
     }
@@ -180,13 +197,16 @@ public class EditUserDeviceFragment extends BoundFragment {
         final View dialogView = inflater.inflate(R.layout.dialog_edituserdevice, null);
 
         final EditText userDeviceName = (EditText) dialogView.findViewById(R.id.editdevicedialog_username);
+        userDeviceName.setText(userDevice.getName());
+
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, groupNames);
         final Spinner groupName = ((Spinner) dialogView.findViewById(R.id.editdevicedialog_spinner));
         groupName.setAdapter(adapter);
+        groupName.setSelection(adapter.getPosition(userDevice.getInGroup()));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        //TODO Phil: wrong title? (Wolfgang, 2016-01-13)
-        final AlertDialog editDialog = builder.setMessage(R.string.edit_group_dialog_title)
+        final Resources res = getResources();
+        final AlertDialog editDialog = builder.setMessage(R.string.edit_user_device)
                 .setView(dialogView)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.edit, new DialogInterface.OnClickListener() {
@@ -194,18 +214,18 @@ public class EditUserDeviceFragment extends BoundFragment {
                     public void onClick(DialogInterface dialog, int id) {
                         String name = userDeviceName.getText().toString();
                         String group = ((String) groupName.getSelectedItem());
-                        handler.setUserGroup(userDevice.getUserDeviceID(), group);
-                        handler.setUserName(userDevice.getUserDeviceID(), name);
-                        String toastText = "Device " + name + " edited."; // TODO Phil: fix hardcoded strings
-                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                        toast.show();
+                        DeviceID userDeviceID = userDevice.getUserDeviceID();
+
+                        handler.setUserName(userDeviceID, name);
+                        handler.setUserGroup(userDeviceID, group);
+                        // TODO Phil: refresh ui (Phil, 2016-01-13)
                     }
                 })
                 .setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         handler.removeUserDevice(userDevice.getUserDeviceID());
-                        String toastText = "Device " + userDevice.getName() + " removed.";// TODO Phil: fix hardcoded strings
+                        String toastText = String.format(res.getString(R.string.device_removed), userDevice.getName());
                         Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
                         toast.show();
                     }
@@ -246,10 +266,8 @@ public class EditUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-            userPermissions = handler.getPermissionForUser(device);
-
+            userPermissions = handler.getPermissionForUser(device.getUserDeviceID());
             Set<Permission> tempPermissionList = handler.getAllPermissions();
-
             allPermissions = Lists.newArrayList(tempPermissionList);
             Collections.sort(allPermissions, new Comparator<Permission>() {
                 @Override
@@ -300,18 +318,13 @@ public class EditUserDeviceFragment extends BoundFragment {
         }
 
         @Override
-        public boolean areAllItemsEnabled() {
-            return userMayEdit();
-        }
-
-        @Override
         public boolean isEnabled(int position) {
+            // TODO Phil: test what {@code false} does exactly (Phil, 2016-01-13)
             return areAllItemsEnabled();
         }
 
         /**
-         * Creates a view for every permission registered in the system. If the user device is granted a permission
-         * the switch button is {@code On}.
+         * Creates a view for every permission registered in the system.
          */
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -341,7 +354,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                 permissionButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (userMayEdit()) {
+                        if (hasPermission(new Permission(MODIFY_USER_PERMISSION))) {
                             if (!deviceHasPermission) {
                                 handler.grantPermission(device.getUserDeviceID(), permission);
                                 Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
@@ -364,30 +377,6 @@ public class EditUserDeviceFragment extends BoundFragment {
             }
 
             return permissionLayout;
-        }
-
-        /**
-         * Creates a small description where a permission is
-         *
-         * @param permission The permission the text is created for.
-         * @return the text to display.
-         */
-        private String createLocalizedPermissionTypeText(Permission permission) {
-            String output;
-            String moduleName = permission.getModuleName();
-            if (moduleName != null) {
-                output = String.format(getResources().getString(R.string.permission_connected_to), moduleName);
-            } else {
-                output = getResources().getString(R.string.permission_not_connected_to);
-            }
-            return output;
-        }
-
-        /**
-         * @return {@code true} if the current user has the permission to grant other users permissions.
-         */
-        private boolean userMayEdit() {
-            return userDeviceHasPermission(new Permission(MODIFY_USER_PERMISSION));
         }
 
         /**
