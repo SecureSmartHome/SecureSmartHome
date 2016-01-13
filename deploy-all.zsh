@@ -36,7 +36,7 @@ fi
 adb connect $MASTER
 adb connect $SLAVE
 
-if [[ $DO_CLEAR ]]; then
+if $DO_CLEAR; then
     echo Clearing data on master: $MASTER
     adb -s $MASTER shell "pm clear de.unipassau.isl.evs.ssh.master"
 
@@ -49,7 +49,7 @@ if [[ $DO_CLEAR ]]; then
     done
 fi
 
-if [[ $DO_DEPLOY ]]; then
+if $DO_DEPLOY; then
 
     ./gradlew master:assembleDebug slave:assembleDebug app:assembleDebug
 
