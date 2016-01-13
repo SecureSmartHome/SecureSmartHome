@@ -70,6 +70,8 @@ public class MasterLightHandler extends AbstractMasterHandler {
                 MASTER_LIGHT_GET,
                 SLAVE_LIGHT_SET_REPLY,
                 SLAVE_LIGHT_GET_REPLY,
+                SLAVE_LIGHT_GET_ERROR,
+                SLAVE_LIGHT_SET_ERROR,
                 MASTER_DOOR_UNLATCH};
     }
 
@@ -99,7 +101,7 @@ public class MasterLightHandler extends AbstractMasterHandler {
     private void handleGetRequest(Message.AddressedMessage message) {
         final LightPayload payload = MASTER_LIGHT_GET.getPayload(message);
         final Module atModule = payload.getModule();
-        if (hasPermission(message.getFromID(), REQUEST_LIGHT_STATUS, atModule.getName())) {
+        if (hasPermission(message.getFromID(), REQUEST_LIGHT_STATUS)) {
             final Message messageToSend = new Message(payload);
             final Message.AddressedMessage sendMessage =
                     sendMessage(atModule.getAtSlave(), SLAVE_LIGHT_GET, messageToSend);

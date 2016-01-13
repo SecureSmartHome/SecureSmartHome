@@ -35,7 +35,7 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_GROUP;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.GRANT_USER_PERMISSION;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION;
 
 /**
  * Handles messages indicating that a device wants to register itself at the system and also generates
@@ -199,8 +199,8 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         PermissionController controller = requireComponent(PermissionController.KEY);
         DeviceID fromID = original.getFromID();
 
-        if (!hasPermission(fromID, GRANT_USER_PERMISSION)) {
-            sendNoPermissionReply(original, GRANT_USER_PERMISSION);
+        if (!hasPermission(fromID, MODIFY_USER_PERMISSION)) {
+            sendNoPermissionReply(original, MODIFY_USER_PERMISSION);
             return;
         }
 
