@@ -57,18 +57,8 @@ public class RoutingKey<T> {
     }
 
     @NonNull
-    public <V> RoutingKey<V> getError(Class<V> replyPayload) {
-        return new RoutingKey<>(getErrorKey(key), replyPayload);
-    }
-
-    @NonNull
     public static String getReplyKey(String key) {
         return key + SUFFIX_REPLY;
-    }
-
-    @NonNull
-    public static String getErrorKey(String key) {
-        return key + SUFFIX_ERROR;
     }
 
     public boolean isReply() {
