@@ -1,7 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -12,12 +11,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
@@ -28,13 +27,20 @@ import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
+import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.DELETE_USERDEVICE_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.GROUP_ARGUMENT_FRAGMENT;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.USER_DEVICE_ARGUMENT_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.USER_DELETE;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER;
 
 
 /**
@@ -47,8 +53,22 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.USER_D
  */
 public class ListUserDeviceFragment extends BoundFragment {
     private static final String TAG = ListUserDeviceFragment.class.getSimpleName();
-
-    //TODO Wolfgang/Phil: add Listener (Wolfgang, 2016-01-13)
+    final private AppUserConfigurationHandler.UserInfoListener listener = new AppUserConfigurationHandler.UserInfoListener() {
+        @Override
+        public void userInfoUpdated(final UserConfigurationEvent event) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // TODO Phil: Test if needed and correct (Phil, 2016-01-13)
+                    if (event.getType().equals(USER_DELETE) && event.wasSuccessful()) {
+                        Toast.makeText(getActivity(), "delete successful", Toast.LENGTH_SHORT).show();
+                    } else if (event.getType().equals(USER_DELETE) && event.wasSuccessful()) {
+                        Toast.makeText(getActivity(), "delete failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    };
     private UserDeviceListAdapter adapter;
     private ListView userDeviceList;
     /**
@@ -66,6 +86,7 @@ public class ListUserDeviceFragment extends BoundFragment {
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
         buildView();
+        container.require(AppUserConfigurationHandler.KEY).addUserInfoListener(listener);
     }
 
     /**
@@ -82,10 +103,15 @@ public class ListUserDeviceFragment extends BoundFragment {
                                                   // when a user clicks short on an item, he opens the ListUserDeviceFragment
                                                   @Override
                                                   public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                                      UserDevice item = adapter.getItem(position);
-                                                      Bundle bundle = new Bundle();
-                                                      bundle.putSerializable(USER_DEVICE_ARGUMENT_FRAGMENT, item);
-                                                      ((MainActivity) getActivity()).showFragmentByClass(EditUserDeviceFragment.class, bundle);
+                                                      if (hasPermission(new Permission(CHANGE_USER_NAME)) &&
+                                                              hasPermission(new Permission(CHANGE_USER_GROUP))) {
+                                                          UserDevice item = adapter.getItem(position);
+                                                          Bundle bundle = new Bundle();
+                                                          bundle.putSerializable(USER_DEVICE_ARGUMENT_FRAGMENT, item);
+                                                          ((MainActivity) getActivity()).showFragmentByClass(EditUserDeviceFragment.class, bundle);
+                                                      } else {
+                                                          Toast.makeText(getActivity(), R.string.you_can_not_edit_user_devices, Toast.LENGTH_SHORT).show();
+                                                      }
                                                   }
                                               }
         );
@@ -95,8 +121,13 @@ public class ListUserDeviceFragment extends BoundFragment {
                 UserDevice item = adapter.getItem(position);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(DELETE_USERDEVICE_DIALOG, item);
-                createRemoveUserDeviceDialog(bundle).show();
-                return true;
+                if (hasPermission(new Permission(DELETE_USER))) {
+                    showRemoveUserDeviceDialog(bundle);
+                    return true;
+                } else {
+                    Toast.makeText(getActivity(), R.string.you_cant_delete_users, Toast.LENGTH_SHORT).show();
+                    return false;
+                }
 
             }
         });
@@ -105,7 +136,11 @@ public class ListUserDeviceFragment extends BoundFragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity) getActivity()).showFragmentByClass(AddNewUserDeviceFragment.class);
+                if (hasPermission(new Permission(ADD_USER))) {
+                    ((MainActivity) getActivity()).showFragmentByClass(AddNewUserDeviceFragment.class);
+                } else {
+                    Toast.makeText(getActivity(), R.string.you_can_not_add_new_users, Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -113,40 +148,43 @@ public class ListUserDeviceFragment extends BoundFragment {
         userDeviceList.setAdapter(adapter);
     }
 
+    @Override
+    public void onContainerDisconnected() {
+        AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        if (handler != null) {
+            handler.removeUserInfoListener(listener);
+        }
+        super.onContainerDisconnected();
+    }
+
     /**
      * Creates and returns a dialogs that gives the user the option to delete a user device.
      */
-    private Dialog createRemoveUserDeviceDialog(Bundle bundle) {
+    private void showRemoveUserDeviceDialog(Bundle bundle) {
         final UserDevice userDevice = (UserDevice) bundle.getSerializable(DELETE_USERDEVICE_DIALOG);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        final AlertDialog dialog = builder.create();
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         if (userDevice == null) {
             Log.i(TAG, "No device found.");
-        } else {
-            Resources res = getResources();
-            builder.setMessage(String.format(res.getString(R.string.deleteuserdevice_dialog_title), userDevice.getName()))
-                    .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
-                            if (handler == null) {
-                                Log.i(TAG, "Container not yet connected!");
-                            } else {
-                                handler.removeUserDevice(userDevice.getUserDeviceID());
-                            }
-                        }
-                    })
-                    .setNegativeButton(R.string.cancel, null)
-                    .create()
-                    .show();
+            return;
         }
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        return dialog;
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        final Resources res = getResources();
+        AlertDialog dialog = builder
+                .setMessage(String.format(res.getString(R.string.deleteuserdevice_dialog_title), userDevice.getName()))
+                .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+                        if (handler == null) {
+                            Log.i(TAG, "Container not yet connected!");
+                        } else {
+                            handler.removeUserDevice(userDevice.getUserDeviceID());
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        dialog.show();
     }
 
     /**
