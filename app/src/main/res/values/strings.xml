@@ -82,7 +82,7 @@
     <string name="add_group">Add Group</string>
     <string name="edit_group">Edit Group</string>
     <string name="remove_group">Remove Group</string>
-    <string name="gpio_port">GPIO Port:</string>
+    <string name="gpio_pin">GPIO Pin:</string>
     <string name="add_gpio_module">Add GPIO module</string>
     <string name="usb_port">USB Port:</string>
     <string name="add_usb_module">Add USB module</string>
