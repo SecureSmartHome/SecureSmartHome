@@ -164,11 +164,6 @@ public class BoundActivity extends AppCompatActivity {
         stopService(intent);
     }
 
-    protected void shutdownService() {
-        final Intent intent = new Intent(this, serviceClass);
-        stopService(intent);
-    }
-
     /**
      * @return the Container of the ContainerService this Activity is bound to, or {@code null} if this Activity
      * isn't currently bound
