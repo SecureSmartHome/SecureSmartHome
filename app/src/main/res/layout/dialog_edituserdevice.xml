@@ -5,11 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="@dimen/fab_margin"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="@dimen/abc_dialog_padding_material">
+
+    <TextView
+        android:id="@+id/editdevicedialog_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/typography_headline1"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:labelFor="@+id/editdevicedialog_username"
         android:text="@string/name"
         android:textAppearance="?android:attr/textAppearanceMedium"/>
 
@@ -21,6 +29,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:labelFor="@+id/editdevicedialog_spinner"
         android:text="@string/group"
         android:textAppearance="?android:attr/textAppearanceMedium"/>
 
@@ -28,6 +37,5 @@
         android:id="@+id/editdevicedialog_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-
 
 </LinearLayout>
