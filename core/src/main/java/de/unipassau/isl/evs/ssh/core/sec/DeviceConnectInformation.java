@@ -42,9 +42,10 @@ import static io.netty.handler.codec.base64.Base64.encode;
  * <li>{@link DeviceID}</li>
  * <li>{@link Client#getActiveRegistrationToken() Active} or {@link Client#getPassiveRegistrationToken() Passive} Registration Token</li>
  * </ul>
- * //TODO Niko: describe active and passive registration (NIko, 2016-01-11)
  *
  * @author Niko Fink
+ * @see de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket.ServerAuthenticationResponse
+ * @see de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket.ActiveRegistrationRequest
  */
 public class DeviceConnectInformation implements Serializable {
     /**

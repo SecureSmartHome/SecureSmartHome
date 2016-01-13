@@ -94,8 +94,8 @@ public class WelcomeScreenFragment extends ScanQRFragment {
             } else {
                 client.onMasterFound(new InetSocketAddress(info.getAddress(), info.getPort()), encodeToken(info.getToken()));
             }
-            //TODO do not immediately switch to MainFragment, but show progress indicator while connecting.
-            // see SlaveQRCodeActivity for the related ClientConnectionListener (Niko, 2016-01-10)
+            /* TODO Wolfi/Phil: do not immediately switch to MainFragment, but show progress indicator while connecting;
+            see SlaveQRCodeActivity for the related ClientConnectionListener (Niko, 2016-01-10) */
             ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         }
     }

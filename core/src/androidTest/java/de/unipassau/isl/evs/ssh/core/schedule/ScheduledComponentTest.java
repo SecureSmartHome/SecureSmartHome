@@ -131,7 +131,8 @@ public class ScheduledComponentTest extends InstrumentationTestCase {
 
 
     public void testScheduleRepeat() throws Exception {
-        //FIXME test takes too long because repeating alarms can't be scheduled exactly
+        //test takes too long because repeating alarms can't be scheduled exactly
+
         //ContainerService.Binder container = binding.get(2, TimeUnit.SECONDS);
         //final AtomicInteger count = new AtomicInteger(0);
         //Scheduler scheduler = container.get(Scheduler.KEY);

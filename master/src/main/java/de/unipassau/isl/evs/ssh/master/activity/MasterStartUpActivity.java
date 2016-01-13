@@ -10,12 +10,12 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.StartUpActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
-import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
@@ -23,7 +23,12 @@ import de.unipassau.isl.evs.ssh.master.network.Server;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION;
 
 /**
- * TODO Niko add Javadoc for whole class. (Phil, 2016-01-09)
+ * Base class for one of the three Master Activities that are required for the setup:
+ * <ol>
+ * <li>MasterPreferenceActivity, displayed first and when no Preferences are set</li>
+ * <li>MasterQRCodeActivity, displayed afterwards as long as no UserDevices are registered</li>
+ * <li>MainActivity, displayed as soon as the system is set up</li>
+ * </ol>
  *
  * @author Niko Fink
  */

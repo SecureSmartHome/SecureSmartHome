@@ -139,10 +139,8 @@ public class BoundFragment extends Fragment {
     }
 
     /**
-     * TODO Niko: javadoc (Phil, 2016-01-13)
-     *
-     * @param runnable
-     * @return
+     * Run the given runnable on the UI Thread, but only if the fragment is still attached and the Activity is available.
+     * @return {@code true} if the fragment was still attached and the Runnable will be run
      */
     protected boolean maybeRunOnUiThread(Runnable runnable) {
         final FragmentActivity activity = getActivity();
@@ -152,7 +150,6 @@ public class BoundFragment extends Fragment {
         }
         return false;
     }
-
 
     /**
      * Checks if the current user is granted a given permission.

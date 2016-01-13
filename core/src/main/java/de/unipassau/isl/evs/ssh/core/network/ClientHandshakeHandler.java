@@ -48,6 +48,8 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.WRITER_
 
 /**
  * A ChannelHandlerAdapter that will execute the Handshake with the Master and add the IncomingDispatcher on success.
+ * See {@link HandshakePacket} for the handshake sequence, also {@link #setState(State, State)}
+ * transitions show the order the functions must be executed.
  *
  * @author Niko Fink: Handshake Sequence
  * @author Christoph Fraedrich: Registration

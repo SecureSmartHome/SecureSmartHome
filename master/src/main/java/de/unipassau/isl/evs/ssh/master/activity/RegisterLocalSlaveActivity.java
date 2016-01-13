@@ -13,15 +13,16 @@ import java.io.Serializable;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
-import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.handler.MasterSlaveManagementHandler;
 
 /**
- * TODO Niko: javadoc (Niko, 2016-01-05)
+ * Activity that can be started by the Slave if it detected that a Master is also running on the same device.
+ * Asks the user if the Slave should be registered or not.
  *
  * @author Niko Fink
  */

@@ -16,7 +16,7 @@ import io.netty.util.ResourceLeakDetector;
 
 /**
  * This Constants class provides constants needed by all modules.
- * TODO Niko JavaDoc
+ *
  * @author Team
  */
 public enum CoreConstants {
@@ -31,6 +31,10 @@ public enum CoreConstants {
      */
     public static final String OPENWEATHERMAP_API_KEY = "f5301a474451c6e1394268314b72a358";
 
+    /**
+     * {@code true}, if statistics about the delay between receiving requests and sending the corresponding response
+     * should be logged. Parsed from String so that IDEs don't nag about constant expressions.
+     */
     public static final boolean TRACK_STATISTICS = Boolean.parseBoolean("true");
 
     /**
@@ -41,11 +45,11 @@ public enum CoreConstants {
     public enum NettyConstants {
         ;
         /**
-         * Default port used by netty for Connections from local network
+         * Default port used by netty for connections from local network
          */
         public static final int DEFAULT_LOCAL_PORT = 13131;
         /**
-         * Default port used by netty
+         * Default port used by netty for connections from the internet
          */
         public static final int DEFAULT_PUBLIC_PORT = 13130;
 
@@ -63,20 +67,49 @@ public enum CoreConstants {
          */
         public static final int ALL_IDLE_TIME = 0;
 
-        public static final ResourceLeakDetector.Level RESOURCE_LEAK_DETECTION = ResourceLeakDetector.Level.PARANOID;
+        /**
+         * ResourceLeakDetector used for unreleased Netty Buffers
+         */
+        public static final ResourceLeakDetector.Level RESOURCE_LEAK_DETECTION =
+                BuildConfig.DEBUG ? ResourceLeakDetector.Level.PARANOID : ResourceLeakDetector.Level.SIMPLE;
 
+        /**
+         * Protocol identifier for the discovery protocol so that only devices which also understand each other can find
+         * each other via UDP discovery.
+         */
         public static final int DISCOVERY_PROTOCOL_VERSION = 2;
         /**
          * Default discovery port used by netty
          */
         public static final int DISCOVERY_SERVER_PORT = 13132;
+        /**
+         * UDP broadcast address
+         */
         public static final String DISCOVERY_HOST = "255.255.255.255";
+        /**
+         * Identifier for an UDP discovery request
+         */
         public static final String DISCOVERY_PAYLOAD_REQUEST = "de.unipassau.isl.evs.ssh.udp_discovery.REQUEST" + DISCOVERY_PROTOCOL_VERSION;
+        /**
+         * Identifier for an UDP discovery response
+         */
         public static final String DISCOVERY_PAYLOAD_RESPONSE = "de.unipassau.isl.evs.ssh.udp_discovery.RESPONSE" + DISCOVERY_PROTOCOL_VERSION;
 
+        /**
+         * The certificate of the peer device, set after it is verified by the handshake
+         */
         public static final AttributeKey<X509Certificate> ATTR_PEER_CERT = AttributeKey.valueOf(X509Certificate.class.getName());
+        /**
+         * The DeviceID of the peer device, set after it is verified by the handshake
+         */
         public static final AttributeKey<DeviceID> ATTR_PEER_ID = AttributeKey.valueOf(DeviceID.class.getName());
+        /**
+         * Whether the handshake is finished, the peer device is authenticated and ATTR_PEER_CERT and ATTR_PEER_ID are set.
+         */
         public static final AttributeKey<Boolean> ATTR_HANDSHAKE_FINISHED = AttributeKey.valueOf("HandshakeFinished");
+        /**
+         * Whether the Client is connected to the local port or via internet.
+         */
         public static final AttributeKey<Boolean> ATTR_LOCAL_CONNECTION = AttributeKey.valueOf("LocalConnection");
     }
 
@@ -102,7 +135,7 @@ public enum CoreConstants {
             return ctx.getResources().getString(this.resID);
         }
 
-        public boolean isValidAccessPoint(ModuleAccessPoint accessPoint){
+        public boolean isValidAccessPoint(ModuleAccessPoint accessPoint) {
             switch (this) {
                 case Light:
                     return accessPoint.getType().equals(WLANAccessPoint.TYPE);
@@ -126,6 +159,8 @@ public enum CoreConstants {
     }
 
     /**
+     * Actions logged for Holiday simulation
+     *
      * @author Leon Sell
      */
     public enum LogActions {
