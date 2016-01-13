@@ -39,6 +39,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     private static final String KEY_LAST_FRAGMENT = "LAST_FRAGMENT";
     private LinearLayout overlayDisconnected;
 
+    private boolean wasRejected = false;
     private boolean fragmentInitialized = false;
     private Bundle savedInstanceState;
 
@@ -66,7 +67,9 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    showDisconnectedOverlay();
+                    if (!wasRejected) {
+                        showDisconnectedOverlay();
+                    }
                 }
             });
         }
@@ -74,6 +77,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         @Override
         public void onClientRejected(String message) {
             shutdownService();
+            wasRejected = true;
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
