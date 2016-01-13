@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.master.database;
+package de.unipassau.isl.evs.ssh.core.database;
 
 /**
  * Exception should be used if the item that should be deleted is referenced by another item in the database.

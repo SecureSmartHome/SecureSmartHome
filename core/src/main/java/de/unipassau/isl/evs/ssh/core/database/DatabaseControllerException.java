@@ -1,4 +1,4 @@
-package de.unipassau.isl.evs.ssh.master.database;
+package de.unipassau.isl.evs.ssh.core.database;
 
 /**
  * Exception combines any amount of exceptions of subclasses of the DatabaseControllerException.
