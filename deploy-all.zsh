@@ -18,14 +18,14 @@ elif [[ $1 != "" || $1 == "-h" || $1 == "--help" ]]; then
     echo
     echo "Master will be deployed on: $MASTER"
     echo "Slave will be deployed on: $SLAVE"
-    echo "APPS will be deployed on: $APPS"
+    echo "Apps will be deployed on: $APPS"
     echo
     echo "Usage: $0  [ OPTION ]"
     echo
     echo "OPTION:"
-    echo "  --help, -h         Prints this help and exits"
-    echo "  --clear, -c        Clears data cache on all devices, builds and redeploys"
-    echo "  --clear-only, -o   Only clears data cache on all devices and exits"
+    echo "  --help, -h         Print this help and exit"
+    echo "  --clear, -c        Clear data cache on all devices, build and redeploy"
+    echo "  --clear-only, -o   Only clear data cache on all devices and exit"
 
     exit
 fi
