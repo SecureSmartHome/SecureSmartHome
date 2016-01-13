@@ -1,6 +1,5 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,7 +9,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
@@ -18,7 +22,6 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_GROUP_DIALOG;
-import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.TEMPLATE_DIALOG;
 
 /**
  * This fragment gives the user the option to choose a name and a template used to edit an existing group.
@@ -26,8 +29,6 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.TEMPLATE
  * @author Phil Werli
  */
 public class EditGroupFragment extends BoundFragment {
-
-    //TODO Wolfgang/Phil: add Listener (Wolfgang, 2016-01-13)
     private static final String TAG = EditGroupFragment.class.getSimpleName();
 
     @Override
@@ -47,27 +48,41 @@ public class EditGroupFragment extends BoundFragment {
      */
     private void buildView() {
         final Group group = (Group) getArguments().getSerializable(EDIT_GROUP_DIALOG);
-        String[] templateNames = getArguments().getStringArray(TEMPLATE_DIALOG);
-
-        final EditText inputGroupName = (EditText) getActivity().findViewById(R.id.editgroupfragment_group_name);
-
-        final Spinner spinner = (Spinner) getActivity().findViewById(R.id.editgroupfragment_spinner);
-        spinner.setAdapter(new ArrayAdapter<>(getActivity(),
-                android.R.layout.simple_list_item_1,
-                (templateNames != null ? templateNames :
-                        new String[]{getResources().getString(R.string.missingTemplates)})));
-
+        if (group == null) {
+            Log.i(TAG, "Can't build View. Missing group.");
+            return;
+        }
         final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
         if (handler == null) {
             Log.i(TAG, "Container not yet connected!");
             return;
         }
-        if (group == null) {
-            Log.i(TAG, "Can't build View. Missing group.");
-            return;
-        }
-        final Resources res = getResources();
-        Button editButton = (Button) getActivity().findViewById(R.id.editgroupfragment_button_edit);
+        final Set<String> unsortedTemplates = handler.getAllTemplates();
+        List<String> sortedTemplates = new LinkedList<>(unsortedTemplates);
+        Collections.sort(sortedTemplates, new Comparator<String>() {
+            @Override
+            public int compare(String lhs, String rhs) {
+                if (lhs == null) {
+                    return rhs == null ? 0 : 1;
+                }
+                if (rhs == null) {
+                    return -1;
+                }
+                return lhs.compareTo(rhs);
+            }
+        });
+
+        final EditText inputGroupName = (EditText) getActivity().findViewById(R.id.editgroupfragment_group_name);
+        inputGroupName.setText(group.getName());
+
+        final Spinner spinner = (Spinner) getActivity().findViewById(R.id.editgroupfragment_spinner);
+        final ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, sortedTemplates);
+        spinner.setAdapter(adapter);
+        spinner.setSelection(adapter.getPosition(group.getTemplateName()));
+
+
+        final Button editButton = (Button) getActivity().findViewById(R.id.editgroupfragment_button_edit);
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -76,20 +91,18 @@ public class EditGroupFragment extends BoundFragment {
                 handler.setGroupName(group, name);
                 handler.setGroupTemplate(group, template);
                 Log.i(TAG, "Group " + name + " edited.");
-                String toastText = String.format(res.getString(R.string.group_edited), name);
-                Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                toast.show();
+                // TODO Phil: better handling (Phil, 2016-01-13)
+                ((MainActivity) getActivity()).showFragmentByClass(ListGroupFragment.class);
             }
         });
-        Button removeButton = ((Button) getActivity().findViewById(R.id.editgroupfragment_button_remove));
+        final Button removeButton = ((Button) getActivity().findViewById(R.id.editgroupfragment_button_remove));
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 handler.removeGroup(group);
                 Log.i(TAG, "Group " + group.getName() + " removed.");
-                String toastText = String.format(res.getString(R.string.group_removed), group.getName());
-                Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                toast.show();
+                // TODO Phil: better handling (Phil, 2016-01-13)
+                ((MainActivity) getActivity()).showFragmentByClass(ListGroupFragment.class);
             }
         });
     }

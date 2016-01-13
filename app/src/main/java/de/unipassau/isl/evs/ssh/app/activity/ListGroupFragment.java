@@ -13,9 +13,8 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -26,13 +25,20 @@ import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
+import de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
+import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_GROUP_DIALOG;
-import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.TEMPLATE_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.GROUP_ARGUMENT_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.GROUP_DELETE;
+import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.GROUP_SET_NAME;
+import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.GROUP_SET_TEMPLATE;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_GROUP;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_GROUP_NAME;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_GROUP_TEMPLATE;
 
 /**
  * This fragment shows a list of all groups of user devices registered in the system.
@@ -44,7 +50,24 @@ import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.GROUP_
  */
 public class ListGroupFragment extends BoundFragment {
     private static final String TAG = ListGroupFragment.class.getSimpleName();
-
+    final private AppUserConfigurationHandler.UserInfoListener listener = new AppUserConfigurationHandler.UserInfoListener() {
+        @Override
+        public void userInfoUpdated(final UserConfigurationEvent event) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // ask Wolfi correct?
+                    if (event.getType().equals(GROUP_SET_NAME) && !event.wasSuccessful()) {
+                        Toast.makeText(getActivity(), R.string.could_not_set_group_name, Toast.LENGTH_SHORT).show();
+                    } else if (event.getType().equals(GROUP_SET_TEMPLATE) && !event.wasSuccessful()) {
+                        Toast.makeText(getActivity(), R.string.could_note_set_group_template, Toast.LENGTH_SHORT).show();
+                    } else if (event.getType().equals(GROUP_DELETE) && !event.wasSuccessful()) {
+                        Toast.makeText(getActivity(), R.string.could_not_delete_group, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    };
     //TODO Wolfgang/Phil: add Listener (Wolfgang, 2016-01-13)
     private GroupListAdapter adapter;
     private ListView groupList;
@@ -59,6 +82,16 @@ public class ListGroupFragment extends BoundFragment {
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
         buildView();
+        container.require(AppUserConfigurationHandler.KEY).addUserInfoListener(listener);
+    }
+
+    @Override
+    public void onContainerDisconnected() {
+        AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        if (handler != null) {
+            handler.removeUserInfoListener(listener);
+        }
+        super.onContainerDisconnected();
     }
 
     /**
@@ -80,57 +113,32 @@ public class ListGroupFragment extends BoundFragment {
         groupList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Group item = adapter.getItem(position);
-                Bundle bundle = new Bundle();
-                bundle.putSerializable(EDIT_GROUP_DIALOG, item);
-                String[] templates = buildTemplatesFromGroups();
-                if (templates != null) {
-                    bundle.putStringArray(TEMPLATE_DIALOG, templates);
+                if (hasPermission(new Permission(CHANGE_GROUP_NAME)) && hasPermission(new Permission(CHANGE_GROUP_TEMPLATE))) {
+                    Group item = adapter.getItem(position);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable(EDIT_GROUP_DIALOG, item);
+                    ((MainActivity) getActivity()).showFragmentByClass(EditGroupFragment.class, bundle);
+                    return true;
+                } else {
+                    // TODO Phil: add love (Phil, 2016-01-13)
+                    Toast.makeText(getActivity(), R.string.you_can_not_edit_groups, Toast.LENGTH_SHORT).show();
+                    return false;
                 }
-                ((MainActivity) getActivity()).showFragmentByClass(EditGroupFragment.class, bundle);
-                return true;
             }
         });
         FloatingActionButton fab = ((FloatingActionButton) getActivity().findViewById(R.id.addgroup_fab));
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bundle bundle = new Bundle();
-                String[] templates = buildTemplatesFromGroups();
-                if (templates != null) {
-                    bundle.putStringArray(TEMPLATE_DIALOG, buildTemplatesFromGroups());
+                if (hasPermission(new Permission(ADD_GROUP))) {
+                    ((MainActivity) getActivity()).showFragmentByClass(AddGroupFragment.class);
+                } else {
+                    Toast.makeText(getActivity(), R.string.you_can_not_add_groups, Toast.LENGTH_SHORT).show();
                 }
-                ((MainActivity) getActivity()).showFragmentByClass(AddGroupFragment.class, bundle);
             }
         });
         adapter = new GroupListAdapter();
         groupList.setAdapter(adapter);
-    }
-
-    /**
-     * @return A String Array of Template names generated from all groups.
-     */
-    private String[] buildTemplatesFromGroups() {
-        String[] templateArray = new String[0];
-        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
-        if (handler == null) {
-            Log.i(TAG, "Container not yet connected!");
-        } else {
-            Set<Group> groups = handler.getAllGroups();
-            List<String> templateNames = Lists.newArrayList(Iterables.transform(groups, new Function<Group, String>() {
-                @Override
-                public String apply(Group input) {
-                    return input.getTemplateName();
-                }
-            }));
-            templateArray = new String[templateNames.size()];
-            int counter = 0;
-            for (String s : templateNames) {
-                templateArray[counter] = s;
-                counter++;
-            }
-        }
-        return templateArray;
     }
 
     /**

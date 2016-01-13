@@ -54,11 +54,6 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
     private Button addMockButton;
     private Button addUSBButton;
     private Button addGPIOButton;
-
-    private Spinner slaveSpinner;
-    private Spinner sensorTypeSpinner;
-    private EditText nameInput;
-
     private final AppModifyModuleHandler.NewModuleListener listener = new AppModifyModuleHandler.NewModuleListener() {
         @Override
         public void registrationFinished(final boolean wasSuccessful) {
@@ -74,6 +69,9 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         public void unregistrationFinished(boolean wasSuccessful) {
         }
     };
+    private Spinner slaveSpinner;
+    private Spinner sensorTypeSpinner;
+    private EditText nameInput;
 
     private void onRegistrationFinished(boolean wasSuccessful) {
         if (!wasSuccessful) {
@@ -88,7 +86,6 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
         Toast.makeText(getActivity(), R.string.added_module_success, Toast.LENGTH_LONG).show();
         ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
-
     }
 
     @Override

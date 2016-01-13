@@ -16,6 +16,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:labelFor="@+id/addgroupfragment_group_name"
         android:text="@string/name"
         android:textAppearance="?android:attr/textAppearanceMedium"/>
 
@@ -32,6 +33,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:labelFor="@+id/addgroupfragment_spinner"
         android:text="@string/set_permission_template"
         android:textAppearance="?android:attr/textAppearanceMedium"
         />

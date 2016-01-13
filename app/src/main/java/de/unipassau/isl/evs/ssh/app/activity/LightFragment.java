@@ -27,6 +27,7 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 
 /**
  * This fragment allows to display the status of all registered lights.
@@ -39,7 +40,6 @@ public class LightFragment extends BoundFragment {
     private static final String TAG = LightFragment.class.getSimpleName();
 
     final private LightListAdapter adapter = new LightListAdapter();
-
     private final AppLightHandler.LightHandlerListener listener = new AppLightHandler.LightHandlerListener() {
         @Override
         public void statusChanged(Module module) {
@@ -57,7 +57,7 @@ public class LightFragment extends BoundFragment {
                 @Override
                 public void run() {
                     if (!wasSuccess) {
-                        Toast.makeText(getActivity(), "Could not switch light. Maybe missing Permission", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), R.string.could_not_switch_light, Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -68,6 +68,7 @@ public class LightFragment extends BoundFragment {
             // this fragment does not handle explicit get requests
         }
     };
+    private ListView lights;
 
     @Override
     public void onContainerConnected(Container container) {
@@ -88,20 +89,27 @@ public class LightFragment extends BoundFragment {
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_light, container, false);
-        ListView listView = (ListView) root.findViewById(R.id.lightButtonContainer);
-        listView.setAdapter(adapter);
+        FrameLayout view = (FrameLayout) inflater.inflate(R.layout.fragment_light, container, false);
+        lights = (ListView) view.findViewById(R.id.lightButtonContainer);
+        lights.setAdapter(adapter);
 
-        FloatingActionButton fab = ((FloatingActionButton) root.findViewById(R.id.light_fab));
+        FloatingActionButton fab = ((FloatingActionButton) view.findViewById(R.id.light_fab));
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity) getActivity()).showFragmentByClass(AddModuleFragment.class);
+                if (hasPermission(new Permission(de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_MODULE))) {
+                    ((MainActivity) getActivity()).showFragmentByClass(AddModuleFragment.class);
+                } else {
+                    Toast.makeText(getActivity(), R.string.you_can_not_add_new_modules, Toast.LENGTH_SHORT).show();
+                }
             }
         });
-        return root;
+        return view;
     }
 
+    /**
+     * Adapter used for {@link #lights}.
+     */
     private class LightListAdapter extends BaseAdapter {
         private final List<Module> lightModules = new ArrayList<>();
         private LayoutInflater inflater;
