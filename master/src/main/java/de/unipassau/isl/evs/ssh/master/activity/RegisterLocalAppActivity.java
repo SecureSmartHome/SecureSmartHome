@@ -22,6 +22,7 @@ import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
 import de.unipassau.isl.evs.ssh.master.R;
+import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
@@ -60,12 +61,18 @@ public class RegisterLocalAppActivity extends BoundActivity {
             } catch (UnknownHostException e) {
                 throw new AssertionError("Could not lookup 127.0.0.1", e);
             }
-            DeviceConnectInformation deviceInfo = new DeviceConnectInformation(
-                    address,
-                    ((InetSocketAddress) requireComponent(Server.KEY).getAddress()).getPort(),
-                    requireComponent(NamingManager.KEY).getMasterID(),
-                    requireComponent(MasterRegisterDeviceHandler.KEY).generateNewRegisterToken(userDevice)
-            );
+            DeviceConnectInformation deviceInfo = null;
+            try {
+                deviceInfo = new DeviceConnectInformation(
+                        address,
+                        ((InetSocketAddress) requireComponent(Server.KEY).getAddress()).getPort(),
+                        requireComponent(NamingManager.KEY).getMasterID(),
+                        requireComponent(MasterRegisterDeviceHandler.KEY).generateNewRegisterToken(userDevice)
+                );
+            } catch (AlreadyInUseException e) {
+                //TODO someone: Handle exception. This exception occurs when the given name is already registered. (Leon, 13.01.16)
+                return;
+            }
 
             final Intent data = new Intent();
             data.putExtra(CoreConstants.QRCodeInformation.ZXING_SCAN_RESULT, deviceInfo.toDataString());

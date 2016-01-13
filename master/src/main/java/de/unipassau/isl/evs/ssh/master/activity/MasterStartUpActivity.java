@@ -15,6 +15,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.master.MasterContainer;
+import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
@@ -79,12 +80,19 @@ public class MasterStartUpActivity extends StartUpActivity {
                 MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.NO_GROUP,
                 DeviceID.NO_DEVICE
         );
-        final DeviceConnectInformation deviceInformation = new DeviceConnectInformation(
-                DeviceConnectInformation.findIPAddress(this),
-                prefs.getInt(Server.PREF_SERVER_LOCAL_PORT, CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT),
-                container.require(NamingManager.KEY).getMasterID(),
-                container.require(MasterRegisterDeviceHandler.KEY).generateNewRegisterToken(userDevice)
-        );
+        final DeviceConnectInformation deviceInformation;
+        try {
+            deviceInformation = new DeviceConnectInformation(
+                    DeviceConnectInformation.findIPAddress(this),
+                    prefs.getInt(Server.PREF_SERVER_LOCAL_PORT, CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT),
+                    container.require(NamingManager.KEY).getMasterID(),
+                    container.require(MasterRegisterDeviceHandler.KEY).generateNewRegisterToken(userDevice)
+            );
+        } catch (AlreadyInUseException e) {
+            Log.wtf(TAG, "Something went wrong while getting a new register token. Apparently a user with the given "
+                    + "name already exists.");
+            return;
+        }
 
         final Intent intent = new Intent(this, MasterQRCodeActivity.class);
         intent.putExtra(EXTRA_QR_DEVICE_INFORMATION, deviceInformation);

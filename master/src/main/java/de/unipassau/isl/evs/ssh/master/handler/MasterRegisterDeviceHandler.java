@@ -16,10 +16,12 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteDevicePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
+import de.unipassau.isl.evs.ssh.master.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
@@ -89,7 +91,10 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
      * @param device information which will be associated with the device using this token to register.
      * @return the generated token.
      */
-    public byte[] generateNewRegisterToken(UserDevice device) {
+    public byte[] generateNewRegisterToken(UserDevice device) throws AlreadyInUseException {
+        if (requireComponent(UserManagementController.KEY).getUserDevice(device.getUserDeviceID()) != null) {
+            throw new AlreadyInUseException("A device with the given name is already registered at the system.");
+        }
         final byte[] token = DeviceConnectInformation.getRandomToken();
         userDeviceForToken.put(Base64.encodeToString(token, Base64.NO_WRAP), device);
         return token;
@@ -169,7 +174,13 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
         if (hasPermission(message.getFromID(), ADD_USER)) {
             final GenerateNewRegisterTokenPayload generateNewRegisterTokenPayload =
                     MASTER_USER_REGISTER.getPayload(message);
-            final byte[] newToken = generateNewRegisterToken(generateNewRegisterTokenPayload.getUserDevice());
+            final byte[] newToken;
+            try {
+                newToken = generateNewRegisterToken(generateNewRegisterTokenPayload.getUserDevice());
+            } catch (AlreadyInUseException e) {
+                sendReply(message, new Message(new ErrorPayload(e)));
+                return;
+            }
             final String base64Token = Base64.encodeToString(newToken, Base64.NO_WRAP);
             userDeviceForToken.put(base64Token, generateNewRegisterTokenPayload.getUserDevice());
             final Message reply = new Message(new GenerateNewRegisterTokenPayload(
