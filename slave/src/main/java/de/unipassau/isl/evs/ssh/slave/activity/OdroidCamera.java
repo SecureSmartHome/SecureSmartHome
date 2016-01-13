@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.slave.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
@@ -20,6 +21,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.CameraPayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.slave.BuildConfig;
 import de.unipassau.isl.evs.ssh.slave.R;
 import de.unipassau.isl.evs.ssh.slave.SlaveContainer;
@@ -67,14 +69,22 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v(TAG, "surfaceCreated(holder = [" + holder + "])");
-        camera = Camera.open();
-        params = camera.getParameters();
+        if (!this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+            camera = null;
+            return;
+        }
+        try {
+            camera = Camera.open();
+            params = camera.getParameters();
+        } catch (RuntimeException e) {
+            camera = null;
+        }
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.d(TAG, "surfaceChanged(holder = [" + holder + "], format = [" + format + "], width = [" + width + "], height = [" + height + "])");
-        if (holder.getSurface() == null) return;
+        if ( camera == null || holder.getSurface() == null) return;
         try {
             camera.setPreviewDisplay(holder);
             camera.addCallbackBuffer(new byte[getImageSize()]);
@@ -112,16 +122,18 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
     public void onPreviewFrame(byte[] raw, Camera cam) {
         Log.d(TAG, "onPreviewFrame(raw = byte[" + raw.length + "], cam = [" + cam + "])");
         lastSnapshot = raw;
-        maybeSendImage();
+        sendImageOrError();
     }
 
     @Override
     public void onContainerConnected(Container container) {
-        maybeSendImage();
+        sendImageOrError();
     }
 
-    private void maybeSendImage() {
+    private void sendImageOrError() {
         if (getContainer() == null || lastSnapshot == null) {
+            sendError();
+            finish();
             return;
         }
         int width = params.getPreviewSize().width;
@@ -149,6 +161,11 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
         CameraPayload payload = new CameraPayload(getCameraID(), getModuleName());
         payload.setPicture(jpegData);
         Message reply = new Message(payload);
+        requireComponent(OutgoingRouter.KEY).sendReply(getReplyToMessage(), reply);
+    }
+
+    private void sendError(){
+        Message reply = new Message(new ErrorPayload("Could not load image. Is a camera installed?"));
         requireComponent(OutgoingRouter.KEY).sendReply(getReplyToMessage(), reply);
     }
 

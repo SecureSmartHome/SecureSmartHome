@@ -152,6 +152,7 @@ public class RoutingKeys {
 
     public static final RoutingKey<CameraPayload> SLAVE_CAMERA_GET = new RoutingKey<>(PREFIX_SLAVE + "/camera/get", CameraPayload.class);
     public static final RoutingKey<CameraPayload> SLAVE_CAMERA_GET_REPLY = SLAVE_CAMERA_GET.getReply(CameraPayload.class);
+    public static final RoutingKey<ErrorPayload> SLAVE_CAMERA_GET_ERROR = SLAVE_CAMERA_GET.getReply(ErrorPayload.class);
     // END: Camera
 
     // BEGIN: Notification
