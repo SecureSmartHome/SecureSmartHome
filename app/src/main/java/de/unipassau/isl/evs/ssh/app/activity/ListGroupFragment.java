@@ -18,9 +18,11 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
@@ -114,7 +116,7 @@ public class ListGroupFragment extends BoundFragment {
         if (handler == null) {
             Log.i(TAG, "Container not yet connected!");
         } else {
-            List<Group> groups = handler.getAllGroups();
+            Set<Group> groups = handler.getAllGroups();
             List<String> templateNames = Lists.newArrayList(Iterables.transform(groups, new Function<Group, String>() {
                 @Override
                 public String apply(Group input) {
@@ -154,7 +156,7 @@ public class ListGroupFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-            List<Group> allGroups = handler.getAllGroups();
+            Set<Group> allGroups = handler.getAllGroups();
             groups = Lists.newArrayList(allGroups);
             Collections.sort(groups, new Comparator<Group>() {
                 @Override
@@ -241,7 +243,7 @@ public class ListGroupFragment extends BoundFragment {
             if (handler == null) {
                 Log.i(TAG, "Container not yet connected!");
             } else {
-                List<UserDevice> groupMembers = handler.getAllGroupMembers(group);
+                final ArrayList<UserDevice> groupMembers = Lists.newArrayList(handler.getAllGroupMembers(group));
                 int numberOfMembers = groupMembers.size();
                 if (numberOfMembers >= 3) {
                     groupMemberText = String.format(res.getString(R.string.group_many_members), groupMembers.get(0).getName(), groupMembers.get(1).getName());

@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
@@ -172,7 +173,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                 return;
             }
 
-            List<UserDevice> allUserDevices = handler.getAllGroupMembers(group);
+            Set<UserDevice> allUserDevices = handler.getAllGroupMembers(group);
 
             userDevices = Lists.newArrayList(allUserDevices);
             Collections.sort(userDevices, new Comparator<UserDevice>() {

@@ -230,13 +230,12 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      *
      * @param userDeviceID DeviceID associated with the user.
      * @param permission   Permission to check.
-     * @param moduleName   Module the permission applies for.
      * @return true if has permissions otherwise false.
      */
-    protected boolean hasPermission(DeviceID userDeviceID, de.unipassau.isl.evs.ssh.core.sec.Permission permission, String moduleName) {
+    public boolean hasPermission(DeviceID userDeviceID, de.unipassau.isl.evs.ssh.core.sec.Permission permission) {
         for (UserDevice device : usersToPermissions.keySet()) {
             if (userDeviceID.equals(device.getUserDeviceID())) {
-                return usersToPermissions.get(device).contains(new Permission(permission, moduleName));
+                return usersToPermissions.get(device).contains(new Permission(permission));
             }
         }
         return false;
