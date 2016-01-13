@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">EVS SSH core</string>
+    <string name="app_name">Secure Smart Home</string>
 
     <string name="module_type_light">Light</string>
     <string name="module_type_weather_board">Weatherboard</string>
