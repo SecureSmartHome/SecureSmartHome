@@ -19,6 +19,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
+import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 
 /**
@@ -43,10 +44,12 @@ public class UserConfigurationBroadcaster extends AbstractComponent {
         final PermissionController permissionController = requireComponent(PermissionController.KEY);
         final List<Group> groups;
         final List<UserDevice> userDevices;
-        List<Permission> permissions;
+        final List<String> templates;
+        final List<Permission> permissions;
         groups = requireComponent(UserManagementController.KEY).getGroups();
         userDevices = requireComponent(UserManagementController.KEY).getUserDevices();
         permissions = requireComponent(PermissionController.KEY).getPermissions();
+        templates = requireComponent(PermissionController.KEY).getTemplates();
 
         ImmutableListMultimap<Group, UserDevice> groupDeviceMapping = Multimaps.index(userDevices,
                 new Function<UserDevice, Group>() {
@@ -70,7 +73,8 @@ public class UserConfigurationBroadcaster extends AbstractComponent {
                 userHasPermissions,
                 groupDeviceMapping,
                 permissions,
-                groups
+                groups,
+                templates
         );
     }
 }
