@@ -2,10 +2,8 @@ package de.unipassau.isl.evs.ssh.master.task;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.google.common.base.Strings;
 
@@ -19,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
-import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
@@ -27,13 +24,13 @@ import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.ScheduledComponent;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.handler.AbstractMasterHandler;
 import de.unipassau.isl.evs.ssh.master.network.NotificationBroadcaster;
 
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_UPDATE;
 
 /**
@@ -45,18 +42,12 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_ST
 public class MasterWeatherCheckHandler extends AbstractMasterHandler implements ScheduledComponent {
     public static final Key<MasterWeatherCheckHandler> KEY = new Key<>(MasterWeatherCheckHandler.class);
     private static final long CHECK_INTERVAL_MILLIS = TimeUnit.MINUTES.toMillis(5);
-    private static final String TAG = MasterWeatherCheckHandler.class.getSimpleName();
-    private static final long FAILURE_UPDATE_TIMER = 45;
+    private static final long FAILURE_UPDATE_TIMER = TimeUnit.MINUTES.toMillis(45);
 
-    private long timeStamp;
-    final private Map<String, Boolean> openForModule = new HashMap<>();
     private Container container;
-
-    private void sendWarningNotification() {
-        //No hardcoded strings, only in strings.xml
-        NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
-        notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.WEATHER_WARNING);
-    }
+    private long timeStamp;
+    private final Map<String, Boolean> openForModule = new HashMap<>();
+    private final OpenWeatherMap owm = new OpenWeatherMap(CoreConstants.OPENWEATHERMAP_API_KEY);
 
     @Override
     public void handle(Message.AddressedMessage message) {
@@ -86,41 +77,54 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
 
     @Override
     public void destroy() {
-        Scheduler scheduler = requireComponent(Scheduler.KEY);
-        PendingIntent intent = scheduler.getPendingScheduleIntent(MasterWeatherCheckHandler.KEY, null,
-                PendingIntent.FLAG_CANCEL_CURRENT);
-        scheduler.cancel(intent);
         if (container != null) {
-            container.require(IncomingDispatcher.KEY).unregisterHandler(this, getRoutingKeys());
+            Scheduler scheduler = requireComponent(Scheduler.KEY);
+            PendingIntent intent = scheduler.getPendingScheduleIntent(MasterWeatherCheckHandler.KEY, null,
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            scheduler.cancel(intent);
+
+            requireComponent(IncomingDispatcher.KEY).unregisterHandler(this, getRoutingKeys());
         }
         this.container = null;
     }
 
     @Override
     public void onReceive(Intent intent) {
-        OpenWeatherMap owm = new OpenWeatherMap(CoreConstants.OPENWEATHERMAP_API_KEY);
-        SharedPreferences sharedPreferences = requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, Context.MODE_PRIVATE);
-        String city = sharedPreferences.getString(requireComponent(ContainerService.KEY_CONTEXT).getResources().getString(R.string.master_city_name), null);
-        try {
-            if (!Strings.isNullOrEmpty(city)) {
-                CurrentWeather cw = owm.currentWeatherByCityName(city);
-                if (cw.getRainInstance().hasRain()) {
-                    for (Boolean isOpen : openForModule.values()) {
-                        if (isOpen) {
-                            sendWarningNotification();
-                            break;
+        SharedPreferences sharedPreferences = requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences();
+        final String city = sharedPreferences.getString(
+                requireComponent(ContainerService.KEY_CONTEXT).getResources().getString(R.string.master_city_name),
+                null
+        );
+        if (Strings.isNullOrEmpty(city)) {
+            return;
+        }
+        requireComponent(ExecutionServiceComponent.KEY).execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    CurrentWeather cw = owm.currentWeatherByCityName(city);
+                    if (cw.getRainInstance().hasRain()) {
+                        for (Boolean isOpen : openForModule.values()) {
+                            if (isOpen) {
+                                sendWarningNotification();
+                                break;
+                            }
                         }
+                    }
+                } catch (IOException e) {
+                    if (timeStamp - System.currentTimeMillis() > FAILURE_UPDATE_TIMER) {
+                        requireComponent(NotificationBroadcaster.KEY).sendMessageToAllReceivers(
+                                NotificationPayload.NotificationType.WEATHER_SERVICE_FAILED, city);
+                        timeStamp = System.currentTimeMillis();
                     }
                 }
             }
-        } catch (IOException e) {
-            if (timeStamp - System.currentTimeMillis() > TimeUnit.MINUTES.toMillis(FAILURE_UPDATE_TIMER)) {
-                requireComponent(NotificationBroadcaster.KEY).sendMessageToAllReceivers(
-                        NotificationPayload.NotificationType.WEATHER_SERVICE_FAILED, city);
-                timeStamp = System.currentTimeMillis();
-            }
-        } catch (Exception e) {
-            Log.wtf(TAG, e);
-        }
+        });
+    }
+
+    private void sendWarningNotification() {
+        //No hardcoded strings, only in strings.xml
+        NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
+        notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.WEATHER_WARNING);
     }
 }
