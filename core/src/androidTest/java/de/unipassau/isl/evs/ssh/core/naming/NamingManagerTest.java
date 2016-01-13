@@ -71,12 +71,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
     }
 
     private Container createDefaultEnvironment(boolean isMasterEnv) {
-        // Setup environment
-        SimpleContainer container = new SimpleContainer();
         Context context = getInstrumentation().getTargetContext();
-        container.register(ContainerService.KEY_CONTEXT, new ContainerService.ContextComponent(context));
-        container.register(KeyStoreController.KEY, new KeyStoreController());
-        container.register(NamingManager.KEY, new NamingManager(isMasterEnv));
 
         // Clear SharedPreferences
         SharedPreferences sharedPref = context.getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
@@ -84,6 +79,11 @@ public class NamingManagerTest extends InstrumentationTestCase {
         editor.remove(NamingManager.PREF_MASTER_ID);
         editor.commit();
 
+        // Setup environment
+        SimpleContainer container = new SimpleContainer();
+        container.register(ContainerService.KEY_CONTEXT, new ContainerService.ContextComponent(context));
+        container.register(KeyStoreController.KEY, new KeyStoreController());
+        container.register(NamingManager.KEY, new NamingManager(isMasterEnv));
         return container;
     }
 
@@ -93,7 +93,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
         NamingManager naming = container.require(NamingManager.KEY);
 
         // Ensure Master is still unknown
-        assertNull(naming.getMasterID());
+        assertFalse(naming.isMasterIDKnown());
 
         // Now Handshake is complete and master is known
         DeviceID masterId = createEnvironmentAsAfterHandshake(container);

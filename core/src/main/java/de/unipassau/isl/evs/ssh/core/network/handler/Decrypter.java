@@ -42,7 +42,7 @@ public class Decrypter extends ReplayingDecoder {
             in.readerIndex(in.readerIndex() + encryptedLength);
 
             decoded.add(out);
-        } catch (GeneralSecurityException e) {
+        } catch (GeneralSecurityException | RuntimeException e) {
             ctx.close();
             throw e;
         }

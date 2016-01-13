@@ -22,6 +22,9 @@ import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.network.ClientHandshakeHandler;
+import de.unipassau.isl.evs.ssh.core.network.UDPDiscoveryClient;
+import de.unipassau.isl.evs.ssh.core.schedule.DefaultExecutionServiceComponent;
+import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.MessageToMessageDecoder;
@@ -45,7 +48,7 @@ public class ServerTest extends InstrumentationTestCase {
         addContext(container);
         Server server = addServer(container);
         try {
-            Socket client1 = new Socket("localhost", ((InetSocketAddress) server.getAddress()).getPort());
+            Socket client1 = new Socket("localhost", server.getAddress().getPort());
             Thread.sleep(1000); //wait for the connection to be established
 
             assertTrue(client1.isConnected());
@@ -67,6 +70,7 @@ public class ServerTest extends InstrumentationTestCase {
         try {
             SimpleContainer clientContainer = new SimpleContainer();
             addContext(clientContainer);
+            clientContainer.register(UDPDiscoveryClient.KEY, new UDPDiscoveryClient());
             clientContainer.register(Client.KEY, new Client());
             Thread.sleep(1000); //wait for the connection to be established
 
@@ -94,11 +98,13 @@ public class ServerTest extends InstrumentationTestCase {
         SimpleContainer serverContainer = new SimpleContainer();
         addContext(serverContainer);
         Server server = new TestServer(serverQueue, serverChannel);
+        serverContainer.register(UDPDiscoveryServer.KEY, new UDPDiscoveryServer());
         serverContainer.register(Server.KEY, server);
         try {
             SimpleContainer clientContainer = new SimpleContainer();
             addContext(clientContainer);
             Client client = new TestClient(clientQueue, clientChannel);
+            clientContainer.register(UDPDiscoveryClient.KEY, new UDPDiscoveryClient());
             clientContainer.register(Client.KEY, client);
 
             try {
@@ -139,6 +145,7 @@ public class ServerTest extends InstrumentationTestCase {
     private void addContext(SimpleContainer container) {
         container.register(ContainerService.KEY_CONTEXT,
                 new ContainerService.ContextComponent(getInstrumentation().getTargetContext()));
+        container.register(ExecutionServiceComponent.KEY, new DefaultExecutionServiceComponent("test"));
 
         SharedPreferences sharedPref = container.get(ContainerService.KEY_CONTEXT).getSharedPreferences();
         Client.PrefEditor editor = new Client.PrefEditor(sharedPref.edit().clear());
@@ -148,6 +155,7 @@ public class ServerTest extends InstrumentationTestCase {
 
     @NonNull
     private Server addServer(SimpleContainer container) {
+        container.register(UDPDiscoveryServer.KEY, new UDPDiscoveryServer());
         container.register(Server.KEY, new Server());
 
         Server server = container.get(Server.KEY);
