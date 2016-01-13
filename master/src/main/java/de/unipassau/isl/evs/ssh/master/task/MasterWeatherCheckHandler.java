@@ -4,11 +4,14 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.google.common.base.Strings;
 
 import net.aksingh.owmjapis.CurrentWeather;
 import net.aksingh.owmjapis.OpenWeatherMap;
+
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -43,6 +46,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     public static final Key<MasterWeatherCheckHandler> KEY = new Key<>(MasterWeatherCheckHandler.class);
     private static final long CHECK_INTERVAL_MILLIS = TimeUnit.MINUTES.toMillis(5);
     private static final long FAILURE_UPDATE_TIMER = TimeUnit.MINUTES.toMillis(45);
+    private static final String TAG = MasterWeatherCheckHandler.class.getSimpleName();
 
     private Container container;
     private long timeStamp;
@@ -129,6 +133,8 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
                                 NotificationPayload.NotificationType.WEATHER_SERVICE_FAILED, city);
                         timeStamp = System.currentTimeMillis();
                     }
+                } catch (Exception e) {
+                    Log.e(TAG, e.getLocalizedMessage());
                 }
             }
         });
