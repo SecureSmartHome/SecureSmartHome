@@ -59,6 +59,7 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
 
     @Override
     protected void onDestroy() {
+        releaseCamera();
         doUnbind();
         super.onDestroy();
     }
@@ -97,6 +98,11 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.v(TAG, "surfaceDestroyed(holder = [" + holder + "])");
+        releaseCamera();
+    }
+
+    private void releaseCamera() {
+        Log.v(TAG, "Releasing camera " + camera);
         if (camera == null) return;
         camera.stopPreview();
         camera.release();
