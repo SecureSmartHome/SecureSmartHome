@@ -98,6 +98,18 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
         if (Strings.isNullOrEmpty(city)) {
             return;
         }
+
+        //Presentation Mode
+        if (city.equals("Mordor")) {
+            for (Boolean isOpen : openForModule.values()) {
+                if (isOpen) {
+                    sendWarningNotification();
+                    break;
+                }
+            }
+            return;
+        }
+
         requireComponent(ExecutionServiceComponent.KEY).execute(new Runnable() {
             @Override
             public void run() {
