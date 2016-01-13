@@ -67,8 +67,8 @@ public class UserConfigurationBroadcaster extends AbstractComponent {
         }
 
         return new UserDeviceInformationPayload(
-                ImmutableListMultimap.copyOf(userHasPermissions),
-                ImmutableListMultimap.copyOf(groupDeviceMapping),
+                userHasPermissions,
+                groupDeviceMapping,
                 permissions,
                 groups
         );
