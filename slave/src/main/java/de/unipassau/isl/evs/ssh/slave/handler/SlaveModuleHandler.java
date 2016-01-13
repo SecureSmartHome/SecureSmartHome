@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.slave.handler;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.common.collect.Sets;
@@ -11,6 +12,7 @@ import java.util.Set;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.GPIOAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.MockAccessPoint;
@@ -146,7 +148,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
         if (!plugSwitch.getModuleType().isValidAccessPoint(plugSwitch.getModuleAccessPoint())) {
             throw new WrongAccessPointException();
         }
-        if ( plugSwitch.getModuleAccessPoint().getType().equals(WLANAccessPoint.TYPE)) {
+        if (plugSwitch.getModuleAccessPoint().getType().equals(WLANAccessPoint.TYPE)) {
             final Key<EdimaxPlugSwitch> key = new Key<>(EdimaxPlugSwitch.class, moduleName);
             final WLANAccessPoint accessPoint = (WLANAccessPoint) plugSwitch.getModuleAccessPoint();
             getContainer().register(key, new EdimaxPlugSwitch(accessPoint.getiPAddress(),
@@ -158,39 +160,38 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
     }
 
     private void unregisterModule(Set<Module> componentsToRemove) {
+        final Container container = getContainer();
+
         for (Module module : componentsToRemove) {
-            final Key<? extends Component> key = new Key<>(getDriverClass(module), module.getName());
-            assert getContainer() != null;
-            if (getContainer().isRegistered(key)) {
-                getContainer().unregister(key);
+            final Class<? extends Component> driverClass = getDriverClass(module);
+
+            if (driverClass != null) {
+                final Key<? extends Component> key = new Key<>(driverClass, module.getName());
+                assert container != null;
+                if (container.isRegistered(key)) {
+                    container.unregister(key);
+                }
             }
         }
     }
 
-    public Class<? extends Component> getDriverClass(Module module) {
-        final Class<? extends Component> clazz;
+    @Nullable
+    public static Class<? extends Component> getDriverClass(Module module) {
         switch (module.getModuleType()) {
             case WindowSensor:
             case DoorSensor:
-                clazz = ReedSensor.class;
-                break;
+                return ReedSensor.class;
             case WeatherBoard:
-                clazz = WeatherSensor.class;
-                break;
+                return WeatherSensor.class;
             case DoorBuzzer:
-                clazz = DoorBuzzer.class;
-                break;
+                return DoorBuzzer.class;
             case Doorbell:
-                clazz = ButtonSensor.class;
-                break;
+                return ButtonSensor.class;
             case Light:
-                clazz = EdimaxPlugSwitch.class;
-                break;
+                return EdimaxPlugSwitch.class;
             default:
-                clazz = null;
-                break;
+                return null;
         }
-        return clazz;
     }
 
     /**
