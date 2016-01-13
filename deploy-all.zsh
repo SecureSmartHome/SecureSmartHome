@@ -41,7 +41,7 @@ if [[ DO_CLEAR ]]; then
     adb -s $SLAVE shell "pm clear de.unipassau.isl.evs.ssh.slave"
 
     for app in "${APPS[@]}"; do
-        echo Clearing data on app: $APPS
+        echo Clearing data on app: $app
         adb -s $app shell "pm clear de.unipassau.isl.evs.ssh.app"
     done
 fi
