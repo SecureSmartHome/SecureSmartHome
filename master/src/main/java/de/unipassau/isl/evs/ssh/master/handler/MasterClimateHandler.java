@@ -32,9 +32,9 @@ import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayloa
 public class MasterClimateHandler extends AbstractMasterHandler implements Component {
     public static final Key<MasterClimateHandler> KEY = new Key<>(MasterClimateHandler.class);
 
-    private static final long WARNING_TIMER = 5;
+    private static final long WARNING_TIMER = TimeUnit.MINUTES.toMillis(5);
 
-    private long humiditiyTimeStamp;
+    private long humidityTimeStamp;
     private long brightnessTimeStamp;
 
     private final Map<Module, ClimatePayload> latestWeatherData = new HashMap<>();
@@ -77,7 +77,7 @@ public class MasterClimateHandler extends AbstractMasterHandler implements Compo
         NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
         //TODO Schwellwert puffer hinzufügen. Wenn lampe eingeschaltet und über Schwellwert keine warnung.
         if (payload.getVisible() > MasterConstants.ClimateThreshold.VISIBLE_LIGHT) {
-            if (System.currentTimeMillis() - brightnessTimeStamp > TimeUnit.MINUTES.toMillis(WARNING_TIMER)) {
+            if (System.currentTimeMillis() - brightnessTimeStamp > WARNING_TIMER) {
                 for (Module module : latestLightStatus.keySet()) {
                     if (latestLightStatus.get(module)) {
                         Serializable serializableLight = payload.getVisible();
@@ -95,10 +95,10 @@ public class MasterClimateHandler extends AbstractMasterHandler implements Compo
         NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
         //The following values will not be checked as they are not of interest: Altitude, Pressure, Temp1, Temp2
         if (payload.getHumidity() > MasterConstants.ClimateThreshold.HUMIDITY) {
-            if (System.currentTimeMillis() - humiditiyTimeStamp > TimeUnit.MINUTES.toMillis(WARNING_TIMER)) {
+            if (System.currentTimeMillis() - humidityTimeStamp > WARNING_TIMER) {
                 Serializable serializableHumidity = payload.getHumidity();
                 notificationBroadcaster.sendMessageToAllReceivers(HUMIDITY_WARNING, serializableHumidity);
-                humiditiyTimeStamp= System.currentTimeMillis();
+                humidityTimeStamp = System.currentTimeMillis();
             }
         }
     }
