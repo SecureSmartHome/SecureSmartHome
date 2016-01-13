@@ -1,8 +1,11 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
@@ -28,6 +31,11 @@ import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayloa
  */
 public class MasterClimateHandler extends AbstractMasterHandler implements Component {
     public static final Key<MasterClimateHandler> KEY = new Key<>(MasterClimateHandler.class);
+
+    private static final long WARNING_TIMER = 5;
+
+    private long humiditiyTimeStamp;
+    private long brightnessTimeStamp;
 
     private final Map<Module, ClimatePayload> latestWeatherData = new HashMap<>();
     private final Map<Module, Boolean> latestLightStatus = new HashMap<>();
@@ -61,19 +69,36 @@ public class MasterClimateHandler extends AbstractMasterHandler implements Compo
     }
 
     private void evaluateWeatherData(ClimatePayload payload) {
+        evaluateHumidity(payload);
+        evaluateBrightness(payload);
+    }
+
+    private void evaluateBrightness(ClimatePayload payload) {
+        NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
+        //TODO Schwellwert puffer hinzufügen. Wenn lampe eingeschaltet und über Schwellwert keine warnung.
+        if (payload.getVisible() > MasterConstants.ClimateThreshold.VISIBLE_LIGHT) {
+            if (System.currentTimeMillis() - brightnessTimeStamp > TimeUnit.MINUTES.toMillis(WARNING_TIMER)) {
+                for (Module module : latestLightStatus.keySet()) {
+                    if (latestLightStatus.get(module)) {
+                        Serializable serializableLight = payload.getVisible();
+                        notificationBroadcaster.sendMessageToAllReceivers(BRIGHTNESS_WARNING, serializableLight);
+                    }
+                }
+
+                brightnessTimeStamp = System.currentTimeMillis();
+            }
+        }
+    }
+
+    @NonNull
+    private void evaluateHumidity(ClimatePayload payload) {
         NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
         //The following values will not be checked as they are not of interest: Altitude, Pressure, Temp1, Temp2
         if (payload.getHumidity() > MasterConstants.ClimateThreshold.HUMIDITY) {
-            Serializable serializableHumidity = payload.getHumidity();
-            notificationBroadcaster.sendMessageToAllReceivers(HUMIDITY_WARNING, serializableHumidity);
-        }
-        //TODO Schwellwert puffer hinzufügen. Wenn lampe eingeschaltet und über Schwellwert keine warnung.
-        if (payload.getVisible() > MasterConstants.ClimateThreshold.VISIBLE_LIGHT) {
-            for (Module module : latestLightStatus.keySet()) {
-                if (latestLightStatus.get(module)) {
-                    Serializable serializableLight = payload.getVisible();
-                    notificationBroadcaster.sendMessageToAllReceivers(BRIGHTNESS_WARNING, serializableLight);
-                }
+            if (System.currentTimeMillis() - humiditiyTimeStamp > TimeUnit.MINUTES.toMillis(WARNING_TIMER)) {
+                Serializable serializableHumidity = payload.getHumidity();
+                notificationBroadcaster.sendMessageToAllReceivers(HUMIDITY_WARNING, serializableHumidity);
+                humiditiyTimeStamp= System.currentTimeMillis();
             }
         }
     }
