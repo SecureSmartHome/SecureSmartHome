@@ -6,6 +6,9 @@ MASTER='192.168.0.100:5555'
 SLAVE='192.168.0.101:5555'
 APPS=( "${(@f)$(adb devices -l | grep usb | cut -f1 -d ' ')}" )
 
+DO_DEPLOY=true
+DO_CLEAR=false
+
 if [[ $1 == "--clear" || $1 == "-c" ]]; then
     DO_DEPLOY=true
     DO_CLEAR=true
