@@ -150,14 +150,14 @@ public enum Permission {
 
     /**
      * @return the localized description of this Permission as defined in the strings.xml for the current locale.
-     * The identifier of the String constant is the lower case name of the enum constant with the prefix "perm-desc_",
-     * so for {@link #ADD_ODROID} it would be "perm-desc_add_odroid".
+     * The identifier of the String constant is the lower case name of the enum constant with the prefix "perm_desc_",
+     * so for {@link #ADD_ODROID} it would be "perm_desc_add_odroid".
      * If no localized description is found, the empty String is returned.
      */
     @NonNull
     public String getLocalizedDescription(Context context) {
         Resources res = context.getResources();
-        int resId = res.getIdentifier("perm-desc_" + this.name().toLowerCase(), "string", context.getPackageName());
+        int resId = res.getIdentifier("perm_desc_" + this.name().toLowerCase(), "string", context.getPackageName());
         return resId == 0 ? "" : res.getString(resId);
     }
 }
