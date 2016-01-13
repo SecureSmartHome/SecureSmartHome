@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.app.handler;
 
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.List;

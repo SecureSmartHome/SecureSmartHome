@@ -6,9 +6,13 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
@@ -134,6 +138,12 @@ public class BoundFragment extends Fragment {
         };
     }
 
+    /**
+     * TODO Niko: javadoc (Phil, 2016-01-13)
+     *
+     * @param runnable
+     * @return
+     */
     protected boolean maybeRunOnUiThread(Runnable runnable) {
         final FragmentActivity activity = getActivity();
         if (activity != null) {
@@ -141,5 +151,24 @@ public class BoundFragment extends Fragment {
             return true;
         }
         return false;
+    }
+
+
+    /**
+     * Checks if the current user is granted a given permission.
+     *
+     * @param permission The permission that will be checked.
+     * @return {@code true} if the current user has the given permission.
+     * @author Phil Werli
+     */
+    protected boolean hasPermission(Permission permission) {
+        final NamingManager namingManager = getComponent(NamingManager.KEY);
+        if (namingManager == null) {
+            return false;
+        }
+        final DeviceID ownID = namingManager.getOwnID();
+        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+
+        return handler != null && handler.hasPermission(ownID, permission.getPermission());
     }
 }

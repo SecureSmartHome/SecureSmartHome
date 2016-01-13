@@ -1,7 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -40,6 +39,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     private static final String KEY_LAST_FRAGMENT = "LAST_FRAGMENT";
     private LinearLayout overlayDisconnected;
 
+    private boolean wasRejected = false;
     private boolean fragmentInitialized = false;
     private Bundle savedInstanceState;
 
@@ -67,20 +67,23 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    showDisconnectedOverlay();
+                    if (!wasRejected) {
+                        showDisconnectedOverlay();
+                    }
                 }
             });
         }
 
         @Override
         public void onClientRejected(String message) {
+            shutdownService();
+            wasRejected = true;
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     showConnectionOverlay(getString(R.string.warn_client_rejected));
                 }
             });
-            shutdownService();
         }
     };
 
@@ -206,7 +209,10 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(KEY_LAST_FRAGMENT, getCurrentFragment().getClass().getName());
+        final Fragment currentFragment = getCurrentFragment();
+        if (currentFragment != null) {
+            outState.putString(KEY_LAST_FRAGMENT, currentFragment.getClass().getName());
+        }
     }
 
     @Override

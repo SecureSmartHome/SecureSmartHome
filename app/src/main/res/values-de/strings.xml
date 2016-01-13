@@ -121,7 +121,7 @@
     <string name="door_unlatched_text"> </string>
     <string name="grant">Gewähren</string>
     <string name="weather_service_failed_title">Wetterdienst abgestürzt.</string>
-    <string name="edit_userdevice">Nutzer bearbeiten</string>
+    <string name="edit_user_device">%s bearbeiten</string>
     <string name="group_created">Gruppe erstellt.</string>
     <string name="group_edited">Gruppe %s bearbeitet.</string>
     <string name="group_has_no_members">Diese Gruppe verfügt über keine Mitglieder</string>

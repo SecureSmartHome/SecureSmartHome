@@ -53,9 +53,14 @@ public class SlaveSystemHealthChecker extends AbstractComponent {
         public void run() {
             SlaveModuleHandler handler = requireComponent(SlaveModuleHandler.KEY);
             List<Module> modules = handler.getModules();
+
             for (Module module : modules) {
-                Key<? extends Component> key = new Key<>(handler.getDriverClass(module), module.getName());
-                checkStatus(handler.getDriverClass(module), requireComponent(key), module);
+                final Class<? extends Component> driverClass = SlaveModuleHandler.getDriverClass(module);
+
+                if (driverClass != null) {
+                    Key<? extends Component> key = new Key<>(driverClass, module.getName());
+                    checkStatus(driverClass, requireComponent(key), module);
+                }
             }
         }
 

@@ -46,5 +46,5 @@
         android:layout_alignTop="@+id/doorFragmentOpenButton"
         android:layout_centerHorizontal="true"
         android:elevation="2dp"
-        android:src="@android:drawable/stat_notify_sync_noanim" />
+        android:src="@drawable/ic_linked_camera_black_24dp" />
 </RelativeLayout>
