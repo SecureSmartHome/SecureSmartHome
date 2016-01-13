@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 
 import de.ncoder.typedmap.Key;
 import de.ncoder.typedmap.TypedMap;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.schedule.Scheduler;
 
 /**
@@ -179,6 +181,10 @@ public class ContainerService extends Service implements Container {
             } else {
                 return new Intent(intent);
             }
+        }
+
+        public SharedPreferences getSharedPreferences() {
+            return super.getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         }
     }
 

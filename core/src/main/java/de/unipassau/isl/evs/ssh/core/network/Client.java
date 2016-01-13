@@ -38,8 +38,6 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
-import static android.content.Context.MODE_PRIVATE;
-import static de.unipassau.isl.evs.ssh.core.CoreConstants.FILE_SHARED_PREFS;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_HANDSHAKE_FINISHED;
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION;
 
@@ -404,7 +402,7 @@ public class Client extends AbstractComponent {
     }
 
     private SharedPreferences getSharedPrefs() {
-        return requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences(FILE_SHARED_PREFS, MODE_PRIVATE);
+        return requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences();
     }
 
     public String getActiveRegistrationToken() {

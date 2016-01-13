@@ -1,6 +1,5 @@
 package de.unipassau.isl.evs.ssh.master.network;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.test.InstrumentationTestCase;
@@ -19,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
 import de.unipassau.isl.evs.ssh.core.network.Client;
@@ -142,8 +140,7 @@ public class ServerTest extends InstrumentationTestCase {
         container.register(ContainerService.KEY_CONTEXT,
                 new ContainerService.ContextComponent(getInstrumentation().getTargetContext()));
 
-        SharedPreferences sharedPref = container.get(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = container.get(ContainerService.KEY_CONTEXT).getSharedPreferences();
         Client.PrefEditor editor = new Client.PrefEditor(sharedPref.edit().clear());
         editor.setLastAddress(InetSocketAddress.createUnresolved("localhost", DEFAULT_LOCAL_PORT));
         assertTrue(editor.commit());

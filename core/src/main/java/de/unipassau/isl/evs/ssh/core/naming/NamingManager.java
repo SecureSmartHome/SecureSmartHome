@@ -1,6 +1,5 @@
 package de.unipassau.isl.evs.ssh.core.naming;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 
@@ -12,7 +11,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import de.ncoder.typedmap.Key;
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
@@ -74,7 +72,7 @@ public class NamingManager extends AbstractComponent {
         if (this.masterID != null) throw new IllegalStateException("masterID already known");
 
         requireComponent(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE)
+                .getSharedPreferences()
                 .edit()
                 .putString(PREF_MASTER_ID, masterID.getIDString())
                 .commit();
@@ -237,8 +235,7 @@ public class NamingManager extends AbstractComponent {
     }
 
     private void loadMasterData() throws UnresolvableNamingException {
-        final SharedPreferences prefs = requireComponent(ContainerService.KEY_CONTEXT)
-                .getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
+        final SharedPreferences prefs = requireComponent(ContainerService.KEY_CONTEXT).getSharedPreferences();
 
         String masterIDStr = prefs.getString(PREF_MASTER_ID, null);
         if (masterIDStr != null) {
