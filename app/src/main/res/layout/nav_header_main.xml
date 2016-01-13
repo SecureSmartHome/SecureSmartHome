@@ -1,27 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--@author Andreas Bucher-->
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?><!--@author Andreas Bucher-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/nav_header_height"
+    android:layout_height="wrap_content"
     android:layout_alignParentStart="true"
-    android:background="@drawable/nav_drawer_background"
+    android:background="@color/md_teal_700"
     android:elevation="16dp"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    >
+    android:paddingBottom="16dp"
+    android:paddingEnd="16dp"
+    android:paddingStart="16dp"
+    android:paddingTop="42dp">
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="center"
+        android:src="@drawable/icon"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:id="@+id/nav_draw_ssh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/nav_text_margin_bottom"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/nav_text_margin_top"
+        android:background="#00000000"
         android:gravity="start"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:singleLine="false"
         android:text="@string/secure_smart_home"
-        android:textColor="@color/colorPrimaryText"
-        android:textSize="@dimen/typography_headline2"
-        android:textStyle="bold"/>
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/md_white_1000"
+        android:textStyle="bold"
+        android:layout_alignTop="@+id/imageView2"
+        android:layout_toEndOf="@+id/imageView2" />
 
 </RelativeLayout>

@@ -15,8 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/deviceStatusConnectedSlaves"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/colorSecondaryText" />
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <ListView
         android:id="@+id/deviceStatusListView"
@@ -30,8 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/deviceStatusConnectedModules"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/colorSecondaryText" />
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <ListView
         android:id="@+id/deviceStatusModulesListView"

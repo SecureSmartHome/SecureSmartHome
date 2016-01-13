@@ -20,9 +20,9 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/colorNavigationDrawerBackground"
         android:elevation="16dp"
         app:headerLayout="@layout/nav_header_main"
+        app:theme="@style/AppTheme.NavigationDrawer"
         app:menu="@menu/activity_main_drawer">
     </android.support.design.widget.NavigationView>
 </android.support.v4.widget.DrawerLayout>
