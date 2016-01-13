@@ -15,6 +15,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteDevicePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
@@ -23,9 +24,12 @@ import de.unipassau.isl.evs.ssh.master.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
 import de.unipassau.isl.evs.ssh.master.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
+import de.unipassau.isl.evs.ssh.master.network.UserConfigurationBroadcaster;
 
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_REGISTER;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER;
 
 /**
  * Handles messages indicating that a device wants to register itself at the system and also generates
@@ -43,7 +47,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_USER_REGISTER};
+        return new RoutingKey[]{MASTER_USER_REGISTER, MASTER_USER_DELETE};
     }
 
 
@@ -51,9 +55,24 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
     public void handle(Message.AddressedMessage message) {
         if (MASTER_USER_REGISTER.matches(message)) {
             handleInitRequest(message);
+        } else if (MASTER_USER_DELETE.matches(message)) {
+            deleteUser(MASTER_USER_DELETE.getPayload(message), message);
         } else {
             invalidMessage(message);
         }
+    }
+
+    private void deleteUser(DeleteDevicePayload payload, Message.AddressedMessage original) {
+        DeviceID fromID = original.getFromID();
+
+        if (!hasPermission(fromID, DELETE_USER)) {
+            sendNoPermissionReply(original, DELETE_USER);
+            return;
+        }
+        requireComponent(UserManagementController.KEY).removeUserDevice(payload.getUser());
+
+        sendReply(original, new Message());
+        requireComponent(UserConfigurationBroadcaster.KEY).updateAllClients();
     }
 
     /**
@@ -88,6 +107,7 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
             }
             addUserDeviceToDatabase(deviceID, newDevice);
             userDeviceForToken.remove(base64Token);
+            requireComponent(UserConfigurationBroadcaster.KEY).updateAllClients();
             return true;
         } else {
             Log.w(getClass().getSimpleName(), "Some tried using an unknown token to register. Token: " + base64Token

@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.master.handler;
 
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.DeleteDevicePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.SetGroupNamePayload;
@@ -25,7 +24,6 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_D
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_NAME;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_GROUP_SET_TEMPLATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PERMISSION_SET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_DELETE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_GROUP;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SET_NAME;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_GROUP;
@@ -34,7 +32,6 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_GROUP_TEMPLATE
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_GROUP;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION;
 
 /**
@@ -53,7 +50,6 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
                 MASTER_PERMISSION_SET,
                 MASTER_USER_SET_GROUP,
                 MASTER_USER_SET_NAME,
-                MASTER_USER_DELETE,
                 MASTER_GROUP_ADD,
                 MASTER_GROUP_DELETE,
                 MASTER_GROUP_SET_NAME,
@@ -72,8 +68,6 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
             setUserGroup(MASTER_USER_SET_GROUP.getPayload(message), message);
         } else if (MASTER_USER_SET_NAME.matches(message)) {
             setUserName(MASTER_USER_SET_NAME.getPayload(message), message);
-        } else if (MASTER_USER_DELETE.matches(message)) {
-            deleteUser(MASTER_USER_DELETE.getPayload(message), message);
         } else if (MASTER_GROUP_ADD.matches(message)) {
             addGroup(MASTER_GROUP_ADD.getPayload(message), message);
         } else if (MASTER_GROUP_DELETE.matches(message)) {
@@ -165,18 +159,6 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
         } catch (AlreadyInUseException e) {
             sendError(original, e);
         }
-    }
-
-    private void deleteUser(DeleteDevicePayload payload, Message.AddressedMessage original) {
-        DeviceID fromID = original.getFromID();
-
-        if (!hasPermission(fromID, DELETE_USER)) {
-            sendNoPermissionReply(original, DELETE_USER);
-            return;
-        }
-
-        requireComponent(UserManagementController.KEY).removeUserDevice(payload.getUser());
-        sendOnSuccess(original);
     }
 
     private void setUserGroup(SetUserGroupPayload payload, Message.AddressedMessage original) {
