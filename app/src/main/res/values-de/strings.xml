@@ -49,7 +49,7 @@
     <string name="error_cannot_add_user">Neuer Nutzer konnte nicht hinzugefügt werden. Es fehlen Informationen.</string>
     <string name="error_fill_all_fields">Modul konnte nicht hinzugefügt werden. Es fehlen Informationen.</string>
     <string name="favourite_settings">Favouriten</string>
-    <string name="gpio_port">GPIO Port:</string>
+    <string name="gpio_pin">GPIO Pin:</string>
     <string name="granted">Bewilligt</string>
     <string name="group">Gruppe</string>
     <string name="group_name">Gruppenname</string>
