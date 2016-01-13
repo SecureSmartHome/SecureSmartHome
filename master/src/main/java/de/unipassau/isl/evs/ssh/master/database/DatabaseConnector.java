@@ -16,7 +16,9 @@ import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.MockAccessPo
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.WLANAccessPoint;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
-import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
+
+import static de.unipassau.isl.evs.ssh.master.database.DatabaseContract.Group;
+import static de.unipassau.isl.evs.ssh.master.database.DatabaseContract.PermissionTemplate;
 
 /**
  * The DatabaseConnector allows to establish connections to the used database and execute operations on it.
@@ -77,7 +79,7 @@ public class DatabaseConnector extends AbstractComponent {
                 + DatabaseContract.UserDevice.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
                 + DatabaseContract.UserDevice.COLUMN_FINGERPRINT + " VARCHAR NOT NULL UNIQUE,"
                 + DatabaseContract.UserDevice.COLUMN_GROUP_ID + " INTEGER NOT NULL,"
-                + "FOREIGN KEY(" + DatabaseContract.UserDevice.COLUMN_GROUP_ID + ") REFERENCES " + DatabaseContract.Group.TABLE_NAME + "(" + DatabaseContract.Group.COLUMN_ID + ")"
+                + "FOREIGN KEY(" + DatabaseContract.UserDevice.COLUMN_GROUP_ID + ") REFERENCES " + Group.TABLE_NAME + "(" + Group.COLUMN_ID + ")"
                 + ");"
 
                 + "CREATE TABLE " + DatabaseContract.Permission.TABLE_NAME + " ("
@@ -96,23 +98,23 @@ public class DatabaseConnector extends AbstractComponent {
                 + "FOREIGN KEY(" + DatabaseContract.HasPermission.COLUMN_PERMISSION_ID + ") REFERENCES " + DatabaseContract.Permission.TABLE_NAME + "(" + DatabaseContract.Permission.COLUMN_ID + ") ON DELETE CASCADE"
                 + ");"
 
-                + "CREATE TABLE " + DatabaseContract.Group.TABLE_NAME + " ("
-                + DatabaseContract.Group.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
-                + DatabaseContract.Group.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
-                + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + " INTEGER NOT NULL,"
-                + "FOREIGN KEY(" + DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID + ") REFERENCES " + DatabaseContract.PermissionTemplate.TABLE_NAME + "(" + DatabaseContract.PermissionTemplate.COLUMN_ID + ")"
+                + "CREATE TABLE " + Group.TABLE_NAME + " ("
+                + Group.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
+                + Group.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE,"
+                + Group.COLUMN_PERMISSION_TEMPLATE_ID + " INTEGER NOT NULL,"
+                + "FOREIGN KEY(" + Group.COLUMN_PERMISSION_TEMPLATE_ID + ") REFERENCES " + PermissionTemplate.TABLE_NAME + "(" + PermissionTemplate.COLUMN_ID + ")"
                 + ");"
 
-                + "CREATE TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + " ("
-                + DatabaseContract.PermissionTemplate.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
-                + DatabaseContract.PermissionTemplate.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE"
+                + "CREATE TABLE " + PermissionTemplate.TABLE_NAME + " ("
+                + PermissionTemplate.COLUMN_ID + "  INTEGER NOT NULL PRIMARY KEY,"
+                + PermissionTemplate.COLUMN_NAME + " VARCHAR NOT NULL UNIQUE"
                 + ");"
 
                 + "CREATE TABLE " + DatabaseContract.ComposedOfPermission.TABLE_NAME + " ("
                 + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID + " INTEGER NOT NULL,"
                 + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID + " INTEGER NOT NULL,"
                 + "PRIMARY KEY (" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID + "," + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID + "),"
-                + "FOREIGN KEY(" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID + ") REFERENCES " + DatabaseContract.PermissionTemplate.TABLE_NAME + "(" + DatabaseContract.PermissionTemplate.COLUMN_ID + ") ON DELETE CASCADE,"
+                + "FOREIGN KEY(" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_TEMPLATE_ID + ") REFERENCES " + PermissionTemplate.TABLE_NAME + "(" + PermissionTemplate.COLUMN_ID + ") ON DELETE CASCADE,"
                 + "FOREIGN KEY(" + DatabaseContract.ComposedOfPermission.COLUMN_PERMISSION_ID + ") REFERENCES " + DatabaseContract.Permission.TABLE_NAME + "(" + DatabaseContract.Permission.COLUMN_ID + ") ON DELETE CASCADE"
                 + ");"
 
@@ -154,14 +156,13 @@ public class DatabaseConnector extends AbstractComponent {
                 + "DROP TABLE " + DatabaseContract.UserDevice.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.Permission.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.ElectronicModule.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.Group.TABLE_NAME + ";"
+                + "DROP TABLE " + Group.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.Slave.TABLE_NAME + ";"
-                + "DROP TABLE " + DatabaseContract.PermissionTemplate.TABLE_NAME + ";"
+                + "DROP TABLE " + PermissionTemplate.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + ";";
 
         private String[] defaultTemplates = {"Default_Template", "Parents_Template",
                 "Children_Template", "Guests_Template"};
-        private String[] groupNames = {MasterRegisterDeviceHandler.NO_GROUP, "Parents", "Children", "Guests"};
 
 
         private DBOpenHelper(Context context) {
@@ -177,19 +178,21 @@ public class DatabaseConnector extends AbstractComponent {
             }
         }
 
-        private void insertGroups(SQLiteDatabase db) {
-            for (int i = 0; i < defaultTemplates.length; i++) {
-                ContentValues values = new ContentValues(2);
-                values.put(DatabaseContract.PermissionTemplate.COLUMN_NAME, defaultTemplates[i]);
-                values.put(DatabaseContract.PermissionTemplate.COLUMN_ID, i);
-                db.insert(DatabaseContract.PermissionTemplate.TABLE_NAME, null, values);
-            }
+        private void insertGroupsAndTemplates(SQLiteDatabase db) {
+            final PermissionTemplate.DefaultValues[] templates = PermissionTemplate.DefaultValues.values();
+            final Group.DefaultValues[] groups = Group.DefaultValues.values();
 
-            for (int i = 0; i < groupNames.length; i++) {
-                ContentValues values = new ContentValues(2);
-                values.put(DatabaseContract.Group.COLUMN_NAME, groupNames[i]);
-                values.put(DatabaseContract.Group.COLUMN_PERMISSION_TEMPLATE_ID, i);
-                db.insert(DatabaseContract.Group.TABLE_NAME, null, values);
+            for (int i = 0; i < templates.length; i++) {
+                ContentValues template = new ContentValues(1);
+                template.put(PermissionTemplate.COLUMN_NAME, templates[i].toString());
+                long id = db.insert(PermissionTemplate.TABLE_NAME, null, template);
+
+                if (i < groups.length) {
+                    ContentValues group = new ContentValues(2);
+                    group.put(Group.COLUMN_NAME, groups[i].toString());
+                    group.put(Group.COLUMN_PERMISSION_TEMPLATE_ID, id);
+                    db.insert(Group.TABLE_NAME, null, group);
+                }
             }
         }
 
@@ -229,7 +232,7 @@ public class DatabaseConnector extends AbstractComponent {
 
         private void insertDefaults(SQLiteDatabase db) {
             insertPermissions(db);
-            insertGroups(db);
+            insertGroupsAndTemplates(db);
             fillTemplates(db);
         }
 

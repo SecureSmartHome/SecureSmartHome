@@ -52,7 +52,7 @@ public class RegisterLocalAppActivity extends BoundActivity {
                 name = "Local App";
             }
             UserDevice userDevice = new UserDevice(
-                    name, MasterRegisterDeviceHandler.NO_GROUP, DeviceID.NO_DEVICE
+                    name, MasterRegisterDeviceHandler.FIRST_GROUP, DeviceID.NO_DEVICE
             );
 
             final Inet4Address address;

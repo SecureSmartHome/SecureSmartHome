@@ -73,7 +73,7 @@ public class MasterStartUpActivity extends StartUpActivity {
     private void startQRCodeActivity(Container container) {
         final SharedPreferences prefs = getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, Context.MODE_PRIVATE);
         final UserDevice userDevice = new UserDevice(
-                MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.NO_GROUP,
+                MasterRegisterDeviceHandler.FIRST_USER, MasterRegisterDeviceHandler.FIRST_GROUP,
                 DeviceID.NO_DEVICE
         );
         final DeviceConnectInformation deviceInformation;
