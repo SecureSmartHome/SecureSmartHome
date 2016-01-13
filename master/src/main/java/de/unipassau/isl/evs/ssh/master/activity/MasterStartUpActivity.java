@@ -28,10 +28,6 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTR
  * @author Niko Fink
  */
 public class MasterStartUpActivity extends StartUpActivity {
-    protected static final String PREF_PORT_LOCAL = "master_port_local";
-    protected static final String PREF_PORT_INTERN = "master_port_intern";
-    protected static final String PREF_PORT_EXTERN = "master_port_extern";
-    protected static final String PREF_CITY_NAME = "master_city_name";
     protected static final String PREF_PREFERENCES_SET = "master_preferences_set";
 
     public MasterStartUpActivity() {

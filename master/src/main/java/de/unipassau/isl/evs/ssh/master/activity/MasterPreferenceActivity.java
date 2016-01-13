@@ -58,10 +58,10 @@ public class MasterPreferenceActivity extends MasterStartUpActivity {
         final SharedPreferences.Editor edit = prefs.edit();
 
         try {
-            return validatePort(prefs, edit, PREF_PORT_LOCAL, Server.PREF_SERVER_LOCAL_PORT) &&
-                    validatePort(prefs, edit, PREF_PORT_INTERN, Server.PREF_SERVER_LOCAL_PORT) &&
-                    validatePort(prefs, edit, PREF_PORT_EXTERN, null) &&
-                    !Strings.isNullOrEmpty(prefs.getString(PREF_CITY_NAME, null));
+            return validatePort(prefs, edit, getResources().getString(R.string.master_port_local), Server.PREF_SERVER_LOCAL_PORT) &&
+                    validatePort(prefs, edit, getResources().getString(R.string.master_port_intern), Server.PREF_SERVER_LOCAL_PORT) &&
+                    validatePort(prefs, edit, getResources().getString(R.string.master_port_extern), null) &&
+                    !Strings.isNullOrEmpty(prefs.getString(getResources().getString(R.string.master_city_name), null));
         } catch (ClassCastException e) {
             return false;
         } finally {

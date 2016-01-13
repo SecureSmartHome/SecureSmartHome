@@ -12,11 +12,11 @@
     <string name="title_activity_preferences">Preferences</string>
     <string name="preferences">Preferences</string>
 
-    <!--                   SharedPreferencesKey                    -->
-    <string name="master_city_name">MasterCityName</string>
-    <string name="master_port_local">MasterPortLocal</string>
-    <string name="master_port_intern">MasterPortIntern</string>
-    <string name="master_port_extern">MasterPortExtern</string>
+    <!--SharedPreferencesKey, don't translate-->
+    <string name="master_city_name">master_city_name</string>
+    <string name="master_port_local">master_port_local</string>
+    <string name="master_port_intern">master_port_intern</string>
+    <string name="master_port_extern">master_port_extern</string>
 
     <!--Used in the MainActivity-->
     <string name="connected_user_devices">Connected User Devices</string>
