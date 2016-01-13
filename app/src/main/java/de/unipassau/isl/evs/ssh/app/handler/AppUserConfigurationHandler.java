@@ -71,6 +71,7 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
     private final SetMultimap<Group, UserDevice> groupToUserDevice = HashMultimap.create();
     private final Set<Permission> allPermissions = new HashSet<>();
     private final Set<Group> allGroups = new HashSet<>();
+    private final Set<String> allTemplates = new HashSet<>();
 
     private final List<UserInfoListener> listeners = new LinkedList<>();
 
@@ -124,6 +125,12 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
             if (allGroups != null) {
                 this.allGroups.clear();
                 this.allGroups.addAll(allGroups);
+            }
+
+            List<String> allTemplates = payload.getTemplates();
+            if (allTemplates != null) {
+                this.allTemplates.clear();
+                this.allTemplates.addAll(allTemplates);
             }
 
             fireUserInfoUpdated(new UserConfigurationEvent());
@@ -223,6 +230,10 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
             }
         }
         return Collections.emptySet();
+    }
+
+    public Set<String> getAllTemplates() {
+        return Collections.unmodifiableSet(allTemplates);
     }
 
     /**
