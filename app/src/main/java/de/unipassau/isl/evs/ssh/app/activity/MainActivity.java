@@ -1,7 +1,6 @@
 package de.unipassau.isl.evs.ssh.app.activity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -74,13 +73,13 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
 
         @Override
         public void onClientRejected(String message) {
+            shutdownService();
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     showConnectionOverlay(getString(R.string.warn_client_rejected));
                 }
             });
-            shutdownService();
         }
     };
 
@@ -206,7 +205,10 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(KEY_LAST_FRAGMENT, getCurrentFragment().getClass().getName());
+        final Fragment currentFragment = getCurrentFragment();
+        if (currentFragment != null) {
+            outState.putString(KEY_LAST_FRAGMENT, currentFragment.getClass().getName());
+        }
     }
 
     @Override
