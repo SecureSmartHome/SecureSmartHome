@@ -69,7 +69,6 @@
             android:scaleType="centerInside"
             android:src="@drawable/ic_thermometer"/>
 
-        android:transitionName="holidayIconTransition"/>
         <ImageButton
             android:id="@+id/holidayButton"
             android:layout_width="0dp"
@@ -85,7 +84,7 @@
             android:padding="20dp"
             android:scaleType="centerInside"
             android:src="@drawable/ic_holiday_island"
-            />
+            android:transitionName="holidayIconTransition"/>
 
     </LinearLayout>
 
