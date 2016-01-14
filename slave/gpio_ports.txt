@@ -1,5 +1,5 @@
 // Plugged in
-DoorBuzzer = 28
+DoorBuzzer = 22
 DoorBell = 192
 DoorSensor = 21
 

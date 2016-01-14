@@ -76,7 +76,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
             final Class<? extends Component> clazz = getDriverClass(module);
             if (clazz == null) {
                 Log.i(TAG, "Module has unknown type/accesspoint combination");
-                return;
+                continue;
             }
             if (clazz.getName().equals(ButtonSensor.class.getName())) {
                 registerButtonSensor(module);
