@@ -185,7 +185,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         if (isBlocked != null) {
             return isBlocked;
         } else {
-            return false;
+            return true;
         }
     }
 }
