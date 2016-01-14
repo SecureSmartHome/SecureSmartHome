@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Secure Smart Home</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main" translatable="false">MainActivity</string>
 
     <string name="favourite_settings">Favourites</string>
 
@@ -39,7 +39,7 @@
 
     <!--Strings used for the Welcome Screen-->
     <string name="welcome_to_ssh">Welcome to the Secure Smart Home App.</string>
-    <string name="click_to_register">Click below to register in a system.</string>
+    <string name="click_to_register">Click below to register.</string>
 
     <string name="register">Register</string>
     <string name="refreshImage">Refresh Image</string>
@@ -59,7 +59,7 @@
     <string name="added_module_fail">Adding new module failed</string>
     <string name="permission_dialog_title">Edit Permission</string>
     <string name="is_in_group">"is in group %s\."</string>
-    <string name="device_id">"Device ID: %s"</string>
+    <string name="device_id">Device ID: %s</string>
     <string name="error_cannot_add_user">Cannot add new user. Missing information.</string>
     <string name="error_cannot_add_group">Cannot add new group. Missing information.</string>
     <string-array name="sensor_connection_types">
@@ -122,90 +122,85 @@
     <string name="ir">IR:</string>
 
     <!-- Permission names -->
-    <string name="perm_add_odroid">ADD_ODROID</string>
-    <string name="perm_rename_odroid">RENAME_ODROID</string>
-    <string name="perm_delete_odroid">DELETE_ODROID</string>
-    <string name="perm_add_sensor">ADD_SENSOR</string>
-    <string name="perm_rename_module">RENAME_MODULE</string>
-    <string name="perm_delete_sensor">DELETE_SENSOR</string>
-    <string name="perm_request_light_status">REQUEST_LIGHT_STATUS</string>
-    <string name="perm_request_window_status">REQUEST_WINDOW_STATUS</string>
-    <string name="perm_request_door_status">REQUEST_DOOR_STATUS</string>
-    <string name="perm_lock_door">LOCK_DOOR</string>
-    <string name="perm_unlatch_door">UNLATCH_DOOR</string>
-    <string name="perm_unlatch_door_on_holiday">UNLATCH_DOOR_ON_HOLIDAY</string>
-    <string name="perm_request_camera_status">REQUEST_CAMERA_STATUS</string>
-    <string name="perm_take_camera_picture">TAKE_CAMERA_PICTURE</string>
-    <string name="perm_request_weather_status">REQUEST_WEATHER_STATUS</string>
-    <string name="perm_toggle_holiday_simulation">TOGGLE_HOLIDAY_SIMULATION</string>
-    <string name="perm_add_user">ADD_USER</string>
-    <string name="perm_delete_user">DELETE_USER</string>
-    <string name="perm_change_user_name">CHANGE_USER_NAME</string>
-    <string name="perm_change_user_group">CHANGE_USER_GROUP</string>
-    <string name="perm_modify_user_permission">MODIFY_USER_PERMISSION</string>
-    <string name="perm_add_group">ADD_GROUP</string>
-    <string name="perm_delete_group">DELETE_GROUP</string>
-    <string name="perm_change_group_name">CHANGE_GROUP_NAME</string>
-    <string name="perm_show_group_member">SHOW_GROUP_MEMBER</string>
-    <string name="perm_change_group_template">CHANGE_GROUP_TEMPLATE</string>
-    <string name="perm_create_template">CREATE_TEMPLATE</string>
-    <string name="perm_delete_template">DELETE_TEMPLATE</string>
-    <string name="perm_edit_template">EDIT_TEMPLATE</string>
-    <string name="perm_show_template_permission">SHOW_TEMPLATE_PERMISSION</string>
-    <string name="perm_humidity_warning">HUMIDITY_WARNING</string>
-    <string name="perm_brightness_warning">BRIGHTNESS_WARNING</string>
-    <string name="perm_holiday_mode_switched_on">HOLIDAY_MODE_SWITCHED_ON</string>
-    <string name="perm_holiday_mode_switched_off">HOLIDAY_MODE_SWITCHED_OFF</string>
-    <string name="perm_system_health_warning">SYSTEM_HEALTH_WARNING</string>
-    <string name="perm_bell_rang">BELL_RANG</string>
-    <string name="perm_weather_warning">WEATHER_WARNING</string>
-    <string name="perm_door_unlatched">DOOR_UNLATCHED</string>
-    <string name="perm_door_locked">DOOR_LOCKED</string>
-    <string name="perm_door_unlocked">DOOR_UNLOCKED</string>
-    <string name="perm_switch_light">SWITCH_LIGHT</string>
+    <string name="perm_add_odroid">Adding Odroids</string>
+    <string name="perm_rename_odroid">Edit Odroid names</string>
+    <string name="perm_delete_odroid">Delete Odroids</string>
+    <string name="perm_add_sensor">Adding Modules</string>
+    <string name="perm_rename_module">Edit module names</string>
+    <string name="perm_delete_sensor">Delete Modules</string>
+    <string name="perm_request_light_status">Request light status</string>
+    <string name="perm_request_window_status">Request window status</string>
+    <string name="perm_request_door_status">Request door status</string>
+    <string name="perm_lock_door">Lock the door</string>
+    <string name="perm_unlatch_door">Unlatch door</string>
+    <string name="perm_unlatch_door_on_holiday">Unlatch door while holiday simulation</string>
+    <string name="perm_request_camera_status">Request camera status</string>
+    <string name="perm_take_camera_picture">Trigger taking a camera picture</string>
+    <string name="perm_request_weather_status">Request weather status</string>
+    <string name="perm_toggle_holiday_simulation">Toggle holiday simulation</string>
+    <string name="perm_add_user">Adding Users</string>
+    <string name="perm_delete_user">Delete Users</string>
+    <string name="perm_change_user_name">Edit User Names</string>
+    <string name="perm_change_user_group">Edit User Groups</string>
+    <string name="perm_modify_user_permission">Edit user permissions</string>
+    <string name="perm_add_group">Adding Groups</string>
+    <string name="perm_delete_group">Delete Groups</string>
+    <string name="perm_change_group_name">Edit Group Names</string>
+    <string name="perm_show_group_member">Display group members</string>
+    <string name="perm_change_group_template">Edit Group Permission Templates</string>
+    <string name="perm_create_template">Create new Templates</string>
+    <string name="perm_delete_template">Delete Permission Templates</string>
+    <string name="perm_edit_template">Edit permission templates</string>
+    <string name="perm_show_template_permission">Display permission templates</string>
+    <string name="perm_humidity_warning">Receive roomclimate warnings</string>
+    <string name="perm_brightness_warning">Receive Brightness Warnings</string>
+    <string name="perm_holiday_mode_switched_on">Enabling the holiday simulation</string>
+    <string name="perm_holiday_mode_switched_off">Disable the holiday simulation</string>
+    <string name="perm_system_health_warning">Receive system health notifiations</string>
+    <string name="perm_bell_rang">Receive Doorbell Notifications</string>
+    <string name="perm_weather_warning">Receive weather warnings</string>
+    <string name="perm_door_unlatched">Request door unlatched status</string>
+    <string name="perm_door_locked">Request door locked status</string>
+    <string name="perm_door_unlocked">Request door unlocked status</string>
+    <string name="perm_switch_light">Switch lights</string>
 
     <!-- Permission descriptions -->
-    <string name="perm_desc_add_odroid">ADD_ODROID</string>
-    <string name="perm_desc_rename_odroid">RENAME_ODROID</string>
-    <string name="perm_desc_delete_odroid">DELETE_ODROID</string>
-    <string name="perm_desc_add_sensor">ADD_SENSOR</string>
-    <string name="perm_desc_rename_module">RENAME_MODULE</string>
-    <string name="perm_desc_delete_sensor">DELETE_SENSOR</string>
-    <string name="perm_desc_request_light_status">REQUEST_LIGHT_STATUS</string>
-    <string name="perm_desc_request_window_status">REQUEST_WINDOW_STATUS</string>
-    <string name="perm_desc_request_door_status">REQUEST_DOOR_STATUS</string>
-    <string name="perm_desc_lock_door">LOCK_DOOR</string>
-    <string name="perm_desc_unlatch_door">UNLATCH_DOOR</string>
-    <string name="perm_desc_unlatch_door_on_holiday">UNLATCH_DOOR_ON_HOLIDAY</string>
-    <string name="perm_desc_request_camera_status">REQUEST_CAMERA_STATUS</string>
-    <string name="perm_desc_take_camera_picture">TAKE_CAMERA_PICTURE</string>
-    <string name="perm_desc_request_weather_status">REQUEST_WEATHER_STATUS</string>
-    <string name="perm_desc_toggle_holiday_simulation">TOGGLE_HOLIDAY_SIMULATION</string>
-    <string name="perm_desc_add_user">ADD_USER</string>
-    <string name="perm_desc_delete_user">DELETE_USER</string>
-    <string name="perm_desc_change_user_name">CHANGE_USER_NAME</string>
-    <string name="perm_desc_change_user_group">CHANGE_USER_GROUP</string>
-    <string name="perm_desc_modify_user_permission">MODIFY_USER_PERMISSION</string>
-    <string name="perm_desc_add_group">ADD_GROUP</string>
-    <string name="perm_desc_delete_group">DELETE_GROUP</string>
-    <string name="perm_desc_change_group_name">CHANGE_GROUP_NAME</string>
-    <string name="perm_desc_show_group_member">SHOW_GROUP_MEMBER</string>
-    <string name="perm_desc_change_group_template">CHANGE_GROUP_TEMPLATE</string>
-    <string name="perm_desc_create_template">CREATE_TEMPLATE</string>
-    <string name="perm_desc_delete_template">DELETE_TEMPLATE</string>
-    <string name="perm_desc_edit_template">EDIT_TEMPLATE</string>
-    <string name="perm_desc_show_template_permission">SHOW_TEMPLATE_PERMISSION</string>
-    <string name="perm_desc_humidity_warning">HUMIDITY_WARNING</string>
-    <string name="perm_desc_brightness_warning">BRIGHTNESS_WARNING</string>
-    <string name="perm_desc_holiday_mode_switched_on">HOLIDAY_MODE_SWITCHED_ON</string>
-    <string name="perm_desc_holiday_mode_switched_off">HOLIDAY_MODE_SWITCHED_OFF</string>
-    <string name="perm_desc_system_health_warning">SYSTEM_HEALTH_WARNING</string>
-    <string name="perm_desc_bell_rang">BELL_RANG</string>
-    <string name="perm_desc_weather_warning">WEATHER_WARNING</string>
-    <string name="perm_desc_door_unlatched">DOOR_UNLATCHED</string>
-    <string name="perm_desc_door_locked">DOOR_LOCKED</string>
-    <string name="perm_desc_door_unlocked">DOOR_UNLOCKED</string>
-    <string name="perm_desc_switch_light">SWITCH_LIGHT</string>
+    <string name="perm_desc_add_odroid">Allows adding new Odroids</string>
+    <string name="perm_desc_rename_odroid">Allows renaming a Odroid\' Name</string>
+    <string name="perm_desc_delete_odroid">Allows deleting Odroids</string>
+    <string name="perm_desc_add_sensor">Allows adding new Modules</string>
+    <string name="perm_desc_rename_module">Allows renaming a Module\'s Name</string>
+    <string name="perm_desc_delete_sensor">Allows deleting Modules</string>
+    <string name="perm_desc_request_light_status">Allows requesting the Lightstatus</string>
+    <string name="perm_desc_request_window_status">Allows requesting the Windowstatus</string>
+    <string name="perm_desc_request_door_status">Allows requesting the Doorstatus</string>
+    <string name="perm_desc_lock_door">Allows locking the Door</string>
+    <string name="perm_desc_unlatch_door">Allows unlatching the Door</string>
+    <string name="perm_desc_unlatch_door_on_holiday">Allows unlatching the Door while the Holiday Simulation is active</string>
+    <string name="perm_desc_request_camera_status">Allows requesting the Camerastatus</string>
+    <string name="perm_desc_take_camera_picture">Allows receiving pictures from the camera</string>
+    <string name="perm_desc_request_weather_status">Allows requesting the Climatestatus</string>
+    <string name="perm_desc_toggle_holiday_simulation">Allows toggling the Holiday Simulation</string>
+    <string name="perm_desc_add_user">Allows adding new Users</string>
+    <string name="perm_desc_delete_user">Allows deleting Users</string>
+    <string name="perm_desc_change_user_name">Allows editing a User\'s Name</string>
+    <string name="perm_desc_change_user_group">Allows editing a User\'s Group</string>
+    <string name="perm_desc_modify_user_permission">Allows modifying a User\'s Permission</string>
+    <string name="perm_desc_add_group">Allows adding new Groups</string>
+    <string name="perm_desc_delete_group">Allows deleting Groups</string>
+    <string name="perm_desc_change_group_name">Allows editing Group Names</string>
+    <string name="perm_desc_show_group_member">Allows requesting a Group\'s members</string>
+    <string name="perm_desc_change_group_template">Allows editing Group\'s Permission Templates</string>
+    <string name="perm_desc_create_template">Allows creating Permission Templates</string>
+    <string name="perm_desc_delete_template">Allows deleting Permissin Templates</string>
+    <string name="perm_desc_edit_template">Allows editing Permission Templates</string>
+    <string name="perm_desc_show_template_permission">Allows requesting a Permission Template</string>
+    <string name="perm_desc_humidity_warning">Allows receiving Climate Warnings</string>
+    <string name="perm_desc_brightness_warning">Allows reveiving Brightness Warnings</string>
+    <string name="perm_desc_system_health_warning">Allows requesting System Health Warnings</string>
+    <string name="perm_desc_bell_rang">Allows receiving Doorbell Notifications</string>
+    <string name="perm_desc_weather_warning">Allows receiving Weather Notifications</string>
+    <string name="perm_desc_switch_light">Allows switching a Light</string>
 
     <string name="si_degree" translatable="false">%3.1f C°</string>
     <string name="si_pressure" translatable="false">%4.1f Pa</string>
@@ -232,7 +227,7 @@
     <string name="holiday_mode_switched_off_text">You have now the control over your home. Welcome back!</string>
     <string name="door_unlatched_title">Door is now open!</string>
     <!--TODO maybe add text, otherwise delete? (Phil, 2016-01-09-->
-    <string name="door_unlatched_text"></string>
+    <string name="door_unlatched_text" translatable="false"></string>
     <string name="door_locked_title">Door is now locked!</string>
     <string name="door_locked_text">Unauthorised users can not open it anymore.</string>
     <string name="door_unlocked_title">Door is now unlocked!</string>

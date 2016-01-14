@@ -4,7 +4,7 @@
     <!-- Permission names -->
     <string name="perm_add_group">Hinzufügen von Gruppen</string>
     <string name="perm_add_odroid">Hinzufügen von Odroids</string>
-    <string name="perm_add_sensor">Hinzufügen von Sensoren</string>
+    <string name="perm_add_sensor">Hinzufügen von Modulen</string>
     <string name="perm_add_user">Hinzufügen von Nutzern</string>
     <string name="perm_bell_rang">Empfangen von Klingelbenachrichtigungen</string>
     <string name="perm_brightness_warning">Beleuchtungswarnung empfangen</string>
@@ -15,7 +15,7 @@
     <string name="perm_create_template">Erstellen von Berechtigungsvorlagen</string>
     <string name="perm_delete_group">Entfernen von Gruppen</string>
     <string name="perm_delete_odroid">Entfernen von Odroids</string>
-    <string name="perm_delete_sensor">Entfernen von Sensoren</string>
+    <string name="perm_delete_sensor">Entfernen von Modulen</string>
     <string name="perm_delete_template">Entfernen von Berechtigungsvorlagen</string>
     <string name="perm_delete_user">Entfernen von Benutzern</string>
     <string name="perm_door_locked">Empfangen ob Tür gesperrt</string>
@@ -47,7 +47,7 @@
     <!-- Permission descriptions -->
     <string name="perm_desc_add_group">Ermöglicht das Hinzufügen neuer Gruppen</string>
     <string name="perm_desc_add_odroid">Ermöglicht das Hinzufügen neuer Odroids</string>
-    <string name="perm_desc_add_sensor">Ermöglicht das Hinzufügen neuer Sensoren</string>
+    <string name="perm_desc_add_sensor">Ermöglicht das Hinzufügen neuer Module</string>
     <string name="perm_desc_add_user">Ermöglicht das Hinzufügen neuer Nutzer</string>
     <string name="perm_desc_bell_rang">Ermöglicht dem Empfang von Klingelbenachrichtigungen</string>
     <string name="perm_desc_brightness_warning">Ermöglicht dem Empfang von Beleuchtungswarnungen</string>
@@ -58,7 +58,7 @@
     <string name="perm_desc_create_template">Ermöglicht das Erstellen von Berechtigungsvorlagen</string>
     <string name="perm_desc_delete_group">Ermöglicht das Löschen von Gruppen</string>
     <string name="perm_desc_delete_odroid">Ermöglicht das Entfernen von Odroids</string>
-    <string name="perm_desc_delete_sensor">Ermöglicht das Entfernen von Sensoren</string>
+    <string name="perm_desc_delete_sensor">Ermöglicht das Entfernen von Modulen</string>
     <string name="perm_desc_delete_template">Ermöglicht das Löschen von Berechtigungsvorlagen</string>
     <string name="perm_desc_delete_user">Ermöglicht das Entfernen von Benutzern</string>
     <string name="perm_desc_door_locked">Ermöglicht die Statusabfrage ob die Tür gesperrt wurde</string>
@@ -116,20 +116,20 @@
     <string name="brightness_warning_text">Sie sollten bei %d Lux kein Licht benötigen, bitte schalten Sie es aus.</string>
     <string name="brightness_warning_title">Beleuchtungswarnung!</string>
     <string name="cannot_add_slave">Der neue Slave konnte nicht hinzugefügt werden.</string>
-    <string name="click_to_register">Klicken sie unten, um sich in einem System zu registrieren.</string>
+    <string name="click_to_register">Klicken sie unten, um sich zu registrieren.</string>
     <string name="climate_notification_text">Die Luftfeuchtigkeit beträgt %3.2f \U+0025, bitte lüften sie bei Gelegenheit.</string>
     <string name="climate_notification_title">Raumklimawarnung!</string>
     <string name="climate_sensor">Raumklimasensor:</string>
     <string name="connected_to_type">Verbunden mit Slave:</string>
     <string name="connector_type">Verbindungstyp:</string>
     <string name="create">Erstellen</string>
-    <string name="delete_confirmation">"Sind Sie sicher, dass sie \'%s\' entfernen wollen"</string>
-    <string name="deleteuserdevice_dialog_title">Gerät entfernen</string>
+    <string name="delete_confirmation">Sind Sie sicher, dass sie \'%s\' entfernen wollen</string>
+    <string name="deleteuserdevice_dialog_title">Gerät %s entfernen?</string>
     <string name="denied">Verweigert</string>
     <string name="deviceSatusConnectedSlaves">Verbundene Slaves</string>
     <string name="deviceStatusConnectedModules">Verbundene Module</string>
     <string name="deviceStatusConnectedSlaves">Verbundene Slaves</string>
-    <string name="device_id">"Geräte ID: %s"</string>
+    <string name="device_id">Geräte ID: %s</string>
     <string name="doorStatusOpen">Status: geöffnet</string>
     <string name="door_bell_notification_text">Sie haben Besuch an der Haustür.</string>
     <string name="door_bell_notification_title">Es hat geklingelt!</string>
@@ -200,7 +200,6 @@
     <string name="system_health_warning_title_fixed">Komponente funktioniert wieder!</string>
     <string name="temperature2">Temperatur 2:</string>
     <string name="temperature_1">Temperatur 1:</string>
-    <string name="title_activity_main">MainActivity</string>
     <string name="turn_off">Ausschalten</string>
     <string name="turn_on">Einschalten</string>
     <string name="unblockDoor">Tür entsperren</string>
@@ -214,7 +213,6 @@
     <string name="weather_warning_title">Wetterwarnung!</string>
     <string name="welcome_to_ssh">Willkommen in der Secure Smart Home App.</string>
     <string name="door_unlatched_text"> </string>
-    <string name="grant">Gewähren</string>
     <string name="weather_service_failed_title">Wetterdienst abgestürzt.</string>
     <string name="edit_user_device">%s bearbeiten</string>
     <string name="group_created">Gruppe erstellt.</string>
@@ -230,7 +228,7 @@
     <string name="permission_not_connected_to">Diese Berechtigung hat keine verbindung zu einem Modul</string>
     <string name="weather_service_failed_text">Wetterdienst konnte keine daten von %s erhalten.</string>
     <string name="access_denied">Zugriff verweigert!</string>
-    <string name="add_new_user_fail">Beim hinzufügen eines neuen Nutzers trat ein Fehler auf!</string>
+    <string name="add_new_user_fail">Beim Hinzufügen eines neuen Nutzers trat ein Fehler auf!</string>
     <string name="cannot_remove_module">Modul konnte nicht entfernt werden</string>
     <string name="cannot_remove_slave">Slave konnte nicht entfernt werden</string>
     <string name="could_not_block_door">Tür konnte nicht ge-/entsperrt werden.</string>
@@ -241,9 +239,13 @@
     <string name="could_not_revoke">Berechtigung konnte nicht entzogen werden</string>
     <string name="could_not_set_group_name">Gruppenname konnte nicht vergeben werden</string>
     <string name="could_not_switch_holiday">Die Urlaubssimulation konnte nicht gestartet werden</string>
-    <string name="could_not_switch_light">Licht konnte nicht geschalten werden. Eventuell fehlt Ihnen die Berechtigung dazu</string>
+    <string name="could_not_switch_light">Licht konnte nicht geschalten werden.</string>
     <string name="could_note_set_group_template">Gruppenvorlage konnte nicht gesetzt werden</string>
     <string name="device_edited">Modul %s wurde bearbeitet</string>
     <string name="device_removed">Modul %s wurde entfernt</string>
     <string name="module_removed">Modul wurde entfernt</string>
+    <string name="you_can_not_edit_user_devices">Sie können Nutzer nicht bearbeiten</string>
+    <string name="you_can_not_set_permissions">Sie können Berechtigungen nicht bearbeiten</string>
+    <string name="you_can_not_start_or_stop_the_holiday_simulation">Sie können den Status der Urlaubsimulation nicht ändern</string>
+    <string name="you_can_not_switch_light">Sie können das Licht nicht an- oder ausschalten</string>
 </resources>
