@@ -10,6 +10,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
+import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
@@ -40,7 +41,7 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR;
  */
 public class MasterLightHandler extends AbstractMasterHandler {
     private static final String TAG = MasterLightHandler.class.getSimpleName();
-    private static final int BRIGHTNESS_LOWER_THRESHOLD = 20000; //TODO migrate to constants
+    private static final int BRIGHTNESS_LOWER_THRESHOLD = 20000;
 
     @Override
     public void handle(Message.AddressedMessage message) {
@@ -53,9 +54,9 @@ public class MasterLightHandler extends AbstractMasterHandler {
         } else if (SLAVE_LIGHT_SET_REPLY.matches(message)) {
             handleSetResponse(message);
         } else if (SLAVE_LIGHT_GET_ERROR.matches(message)) {
-            //TODO Leon: handle (Leon, 11.01.16)
+            handleGetError(message, SLAVE_LIGHT_GET_ERROR.getPayload(message));
         } else if (SLAVE_LIGHT_SET_ERROR.matches(message)) {
-            //TODO Leon: handle (Leon, 11.01.16)
+            handleSetError(message, SLAVE_LIGHT_SET_ERROR.getPayload(message));
         } else if (MASTER_DOOR_UNLATCH.matches(message)) {
             handleDoorUnlatched(message);
         } else {
@@ -72,6 +73,18 @@ public class MasterLightHandler extends AbstractMasterHandler {
                 SLAVE_LIGHT_GET_ERROR,
                 SLAVE_LIGHT_SET_ERROR,
                 MASTER_DOOR_UNLATCH};
+    }
+
+    private void handleSetError(Message.AddressedMessage message, ErrorPayload payload) {
+        final Message.AddressedMessage correspondingMessage =
+                takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
+        sendReply(correspondingMessage, new Message(payload));
+    }
+
+    private void handleGetError(Message.AddressedMessage message, ErrorPayload payload) {
+        final Message.AddressedMessage correspondingMessage =
+                takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
+        sendReply(correspondingMessage, new Message(payload));
     }
 
     private void handleSetRequest(Message.AddressedMessage message) {
