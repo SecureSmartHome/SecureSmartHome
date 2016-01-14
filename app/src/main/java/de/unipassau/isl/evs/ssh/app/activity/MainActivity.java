@@ -145,9 +145,12 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        final Fragment currentFragment = getCurrentFragment();
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if (!getCurrentFragment().getClass().equals(MainFragment.class)) {
+        } else if (currentFragment != null && currentFragment.getClass().equals(WelcomeScreenFragment.class)) {
+            super.onBackPressed();
+        } else if (currentFragment != null && !currentFragment.getClass().equals(MainFragment.class)) {
             showFragmentByClass(MainFragment.class);
         } else {
             super.onBackPressed();
@@ -182,6 +185,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     /**
      * @return the currently displayed Fragment
      */
+    @Nullable
     private Fragment getCurrentFragment() {
         return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
     }
@@ -196,14 +200,19 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         }
     }
 
-    @Nullable
-    private Class getInitialFragment() {
+    private boolean isRegistered() {
         NamingManager manager = getComponent(NamingManager.KEY);
         if (manager == null) {
             Log.i(TAG, "Container not yet connected.");
-            return null;
+            return false;
         }
-        if (!manager.isMasterIDKnown()) {
+
+        return manager.isMasterIDKnown();
+    }
+
+    @Nullable
+    private Class getInitialFragment() {
+        if (isRegistered()) {
             return WelcomeScreenFragment.class;
         }
 
@@ -256,21 +265,26 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
      * @param bundle the bundle that is given with the new fragment
      */
     public void showFragmentByClass(Class clazz, Bundle bundle) {
-
-        final Permission permission = permissionForFragment.get(clazz);
+        Class classToShow = clazz;
+        final Permission permission = permissionForFragment.get(classToShow);
         if (permission != null && !hasPermission(permission)) {
             Toast.makeText(this, String.format(getString(R.string.fragment_access_denied), permission.toLocalizedString(this)), Toast.LENGTH_SHORT).show();
             return;
         }
 
         final Fragment currentFragment = getCurrentFragment();
-        if (currentFragment != null && Objects.equals(clazz, currentFragment.getClass())) {
+        if (currentFragment != null && Objects.equals(classToShow, currentFragment.getClass())) {
             return;
+        }
+
+        // avoid leaving the welcome fragment before registration
+        if (!isRegistered()) {
+            classToShow = WelcomeScreenFragment.class;
         }
 
         final Fragment fragment;
         try {
-            fragment = (Fragment) clazz.newInstance();
+            fragment = (Fragment) classToShow.newInstance();
             if (bundle != null) {
                 fragment.setArguments(bundle);
             }
