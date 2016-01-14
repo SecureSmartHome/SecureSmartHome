@@ -23,11 +23,18 @@ import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
 /**
+ * The ModuleBroadcaster class sends push messages to connected clients to update their information about users and
+ * groups.
+ *
  * @author Wolfgang Popp.
  */
 public class UserConfigurationBroadcaster extends AbstractComponent {
     public static final Key<UserConfigurationBroadcaster> KEY = new Key<>(UserConfigurationBroadcaster.class);
 
+
+    /**
+     * Sends a message with a UserDeviceInformationPayload to each connected client.
+     */
     public void updateAllClients() {
         final Iterable<DeviceID> connectedClients = requireComponent(Server.KEY).getActiveDevices();
         for (DeviceID connectedClient : connectedClients) {
@@ -35,6 +42,11 @@ public class UserConfigurationBroadcaster extends AbstractComponent {
         }
     }
 
+    /**
+     * Sends a message with a UserDeviceInformationPayload to the given client.
+     *
+     * @param id the id of the client that will receive the message
+     */
     public void updateClient(DeviceID id) {
         final Message message = new Message(generateUserDeviceInformationPayload());
         requireComponent(OutgoingRouter.KEY).sendMessage(id, RoutingKeys.APP_USERINFO_UPDATE, message);
