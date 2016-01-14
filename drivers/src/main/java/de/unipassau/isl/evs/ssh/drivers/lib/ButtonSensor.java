@@ -33,6 +33,7 @@ public class ButtonSensor extends AbstractComponent {
      * Constructor of the class representing a push button
      *
      * @param ioAdress where the button is connected to the odroid
+     * @throws EvsIoException if the pin could not be registered
      */
     public ButtonSensor(int ioAdress, String moduleName) throws EvsIoException {
         this.moduleName = moduleName;
@@ -46,7 +47,7 @@ public class ButtonSensor extends AbstractComponent {
      * @return true if the push button is currently pressed
      */
     public boolean isPressed() throws EvsIoException {
-        return  EvsIo.readValue(ioAddress).startsWith("1");
+        return EvsIo.readValue(ioAddress).startsWith("1");
     }
 
     @Override

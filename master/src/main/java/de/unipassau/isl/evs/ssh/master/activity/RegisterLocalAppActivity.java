@@ -51,7 +51,7 @@ public class RegisterLocalAppActivity extends BoundActivity {
             final TextView inputName = (TextView) findViewById(R.id.inputName);
             String name = inputName.getText().toString().trim();
             if (Strings.isNullOrEmpty(name)) {
-                name = "Local App";
+                name = getString(R.string.local_app);
             }
             UserDevice userDevice = new UserDevice(
                     name, MasterRegisterDeviceHandler.FIRST_GROUP, DeviceID.NO_DEVICE
@@ -66,7 +66,7 @@ public class RegisterLocalAppActivity extends BoundActivity {
             try {
                 final InetSocketAddress serverAddress = getContainer().require(Server.KEY).getAddress();
                 if (serverAddress == null) {
-                    Toast.makeText(this, "Server not started yet, please wait for Server startup", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.server_not_started, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 DeviceConnectInformation deviceInfo = new DeviceConnectInformation(
@@ -81,7 +81,7 @@ public class RegisterLocalAppActivity extends BoundActivity {
                 setResult(RESULT_OK, data);
                 finish();
             } catch (AlreadyInUseException e) {
-                Toast.makeText(this, "Name already in use", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.name_in_use, Toast.LENGTH_SHORT).show();
             }
         }
     }

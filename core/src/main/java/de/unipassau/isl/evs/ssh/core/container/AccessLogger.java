@@ -61,6 +61,9 @@ public class AccessLogger extends AbstractComponent {
         super.destroy();
     }
 
+    /**
+     * Log that the given object has been access together with the current call stack.
+     */
     public void logAccess(Object accessed) {
         if (writer == null) {
             return;

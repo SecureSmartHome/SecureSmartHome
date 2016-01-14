@@ -40,7 +40,7 @@ public class MasterPreferenceActivity extends MasterStartUpActivity {
                                 .commit();
                         doBind();
                     } else {
-                        Toast.makeText(MasterPreferenceActivity.this, "Please set all preferences before continuing", Toast.LENGTH_SHORT)
+                        Toast.makeText(MasterPreferenceActivity.this, R.string.please_set_prefs, Toast.LENGTH_SHORT)
                                 .show();
                     }
                 }

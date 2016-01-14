@@ -173,6 +173,9 @@ public abstract class AbstractMessageHandler implements MessageHandler {
         return requireComponent(OutgoingRouter.KEY).sendMessageToMaster(routingKey, msg);
     }
 
+    /**
+     * Convenience Method delegating to {@link OutgoingRouter#sendReply(Message.AddressedMessage, Message)} of the current Container.
+     */
     protected Message.AddressedMessage sendReply(Message.AddressedMessage original, Message reply) {
         return requireComponent(OutgoingRouter.KEY).sendReply(original, reply);
     }

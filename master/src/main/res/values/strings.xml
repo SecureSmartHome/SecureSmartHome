@@ -44,4 +44,10 @@
     <string name="ignore">Ignore</string>
     <string name="register_local_app">Register the locally installed Secure Smart Home App with this Master?</string>
     <string name="register_local_slave">Register the locally installed Secure Smart Home Slave with this Master?</string>
+    <string name="please_set_prefs">Please set all preferences before continuing</string>
+    <string name="server_not_started">Server not started yet, please wait for Server startup</string>
+    <string name="local_app">Local App</string>
+    <string name="name_in_use">Name already in use</string>
+    <string name="local_slave">Local Slave</string>
+    <string name="label_device_name">Name of the Device</string>
 </resources>

@@ -48,7 +48,7 @@ public class RegisterLocalSlaveActivity extends BoundActivity {
                 final TextView inputName = (TextView) findViewById(R.id.inputName);
                 String name = inputName.getText().toString().trim();
                 if (Strings.isNullOrEmpty(name)) {
-                    name = "Local Slave";
+                    name = getString(R.string.local_slave);
                 }
                 final Slave slave = new Slave(
                         name,
@@ -61,7 +61,7 @@ public class RegisterLocalSlaveActivity extends BoundActivity {
                     setResult(Activity.RESULT_OK);
                     finish();
                 } catch (AlreadyInUseException e) {
-                    Toast.makeText(this, "Name already in use", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.name_in_use), Toast.LENGTH_SHORT).show();
                 }
             }
         }
