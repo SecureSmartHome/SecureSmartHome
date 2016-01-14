@@ -10,7 +10,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  *
  * @author Leon Sell
  */
-public class Slave implements Serializable {
+public class Slave implements Serializable, NamedDTO {
     private String name;
     private DeviceID slaveID;
     private byte[] passiveRegistrationToken;
@@ -23,6 +23,7 @@ public class Slave implements Serializable {
         this.passiveRegistrationToken = passiveRegistrationToken;
     }
 
+    @Override
     public String getName() {
         return name;
     }

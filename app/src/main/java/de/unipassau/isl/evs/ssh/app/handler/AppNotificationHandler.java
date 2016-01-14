@@ -30,8 +30,18 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
-import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.*;
-import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.*;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.BELL_RANG;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.BRIGHTNESS_WARNING;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.DOOR_LOCKED;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.DOOR_UNLATCHED;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.DOOR_UNLOCKED;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.HOLIDAY_MODE_SWITCHED_OFF;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.HOLIDAY_MODE_SWITCHED_ON;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.HUMIDITY_WARNING;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.SYSTEM_HEALTH_WARNING;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.WEATHER_SERVICE_FAILED;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.WEATHER_WARNING;
 
 /**
  * Notification Handler for the App that receives Messages from the MasterNotificationHandler
@@ -59,8 +69,6 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
             Serializable[] args = notificationPayload.getArgs();
 
             switch (type) {
-                case UNKNOWN:
-                    break;
                 case WEATHER_WARNING:
                     issueWeatherWarning(WEATHER_WARNING.ordinal());
                     break;
@@ -94,8 +102,9 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
                 case WEATHER_SERVICE_FAILED:
                     issueWeatherServiceFailed(WEATHER_SERVICE_FAILED.ordinal(), args);
                     break;
+                case UNKNOWN:
                 default:
-                    //HANDLE
+                    Log.w(TAG, "Can't handle notification with type " + type);
                     break;
             }
         } else {

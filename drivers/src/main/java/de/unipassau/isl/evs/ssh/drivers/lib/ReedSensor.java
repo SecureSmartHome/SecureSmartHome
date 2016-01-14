@@ -66,8 +66,6 @@ public class ReedSensor extends AbstractComponent {
         future.cancel(true);
     }
 
-
-    // TESTME
     private class ReedPollingRunnable implements Runnable {
         private final String TAG = ReedPollingRunnable.class.getSimpleName();
         private final ReedSensor sensor;

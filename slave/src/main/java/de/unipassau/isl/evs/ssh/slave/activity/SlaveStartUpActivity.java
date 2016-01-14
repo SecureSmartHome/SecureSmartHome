@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.slave.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.util.Log;
 
@@ -22,6 +23,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTR
  *
  * @author Niko Fink
  */
+@SuppressLint("Registered")
 public class SlaveStartUpActivity extends StartUpActivity {
     public SlaveStartUpActivity() {
         super(SlaveContainer.class);

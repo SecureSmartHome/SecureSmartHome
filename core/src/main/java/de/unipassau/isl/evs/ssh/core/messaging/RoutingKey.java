@@ -90,6 +90,7 @@ public class RoutingKey<T> {
      * Use {@link Message#getPayloadChecked(Class)} if you are not sure about the RoutingKey of your message,
      * i.e. only one Payload Class but multiple String RoutingKeys are possible (e.g. GET_REPLY and SET_REPLY with the
      * same payload, but obviously different String keys).
+     * As per {@link #payloadMatches(Message)} may only return null iff {@code T == Void.class}.
      *
      * @throws IllegalArgumentException if the message doesn't match this RoutingKey.
      * @see #matches(Message.AddressedMessage)
@@ -99,6 +100,7 @@ public class RoutingKey<T> {
                 || (message instanceof Message.AddressedMessage && !matches((Message.AddressedMessage) message))) {
             throw new IllegalArgumentException("Message doesn't match RoutingKey " + this);
         }
+        //noinspection ConstantConditions
         return message.getPayloadChecked(getPayloadClass());
     }
 

@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
 import android.annotation.SuppressLint;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.security.GeneralSecurityException;
@@ -252,7 +253,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         container.require(Client.KEY).notifyClientConnected();
     }
 
-    protected void handshakeFailed(ChannelHandlerContext ctx, String message) {
+    protected void handshakeFailed(ChannelHandlerContext ctx, @Nullable String message) {
         if (state != State.FAILED) {
             throw new IllegalStateException("Handshake not finished: " + state);
         }
@@ -262,7 +263,7 @@ public class ClientHandshakeHandler extends ChannelHandlerAdapter {
         ctx.close();
     }
 
-    private void setState(State expectedState, State newState) throws HandshakeException {
+    private void setState(@Nullable State expectedState, @Nullable State newState) throws HandshakeException {
         if (state != expectedState) {
             throw new HandshakeException("Expected state " + expectedState + " but was " + state + ", " +
                     "new state would have been " + newState);

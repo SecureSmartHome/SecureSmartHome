@@ -11,6 +11,7 @@ import com.google.common.base.Strings;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
@@ -63,11 +64,16 @@ public class RegisterLocalAppActivity extends BoundActivity {
                 throw new AssertionError("Could not lookup 127.0.0.1", e);
             }
             try {
+                final InetSocketAddress serverAddress = getContainer().require(Server.KEY).getAddress();
+                if (serverAddress == null) {
+                    Toast.makeText(this, "Server not started yet, please wait for Server startup", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 DeviceConnectInformation deviceInfo = new DeviceConnectInformation(
                         address,
-                        requireComponent(Server.KEY).getAddress().getPort(),
-                        requireComponent(NamingManager.KEY).getMasterID(),
-                        requireComponent(MasterRegisterDeviceHandler.KEY).generateNewRegisterToken(userDevice)
+                        serverAddress.getPort(),
+                        getContainer().require(NamingManager.KEY).getMasterID(),
+                        getContainer().require(MasterRegisterDeviceHandler.KEY).generateNewRegisterToken(userDevice)
                 );
 
                 final Intent data = new Intent();

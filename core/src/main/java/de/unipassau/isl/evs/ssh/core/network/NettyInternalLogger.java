@@ -11,6 +11,7 @@ import io.netty.util.internal.logging.AbstractInternalLogger;
  *
  * @author Niko Fink
  */
+@SuppressWarnings("ALL")
 public class NettyInternalLogger extends AbstractInternalLogger {
     public NettyInternalLogger(String name) {
         super(name);

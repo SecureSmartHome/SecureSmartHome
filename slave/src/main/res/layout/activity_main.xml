@@ -14,91 +14,109 @@
         android:padding="@dimen/activity_vertical_margin">
 
         <TableLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
             android:stretchColumns="1">
 
             <TableRow>
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_column="1"
                     android:text="@string/slave"
-                    android:textSize="@dimen/typography_subheadline"
+                    android:textSize="16sp"
                     android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/mainactivity_slave_slaveid"
-                    android:textSize="@dimen/typography_subheadline"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"/>
             </TableRow>
 
             <TableRow>
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_column="1"
                     android:text="@string/address"
-                    android:textSize="@dimen/typography_subheadline"/>
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/mainactivity_slave_slaveaddress"
-                    android:textSize="@dimen/typography_subheadline"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"/>
             </TableRow>
 
             <TableRow>
 
                 <TextView
-                    android:id="@+id/mainactivity_slave_connected"
-                    android:layout_column="1"/>
-            </TableRow>
-
-            <TableRow
-                android:id="@+id/mainactivity_slave_mastercontainer_id">
-
-                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_column="1"
                     android:text="@string/master"
-                    android:textSize="@dimen/typography_subheadline"
+                    android:textSize="16sp"
                     android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/mainactivity_slave_masterid"
-                    android:textSize="@dimen/typography_subheadline"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"/>
             </TableRow>
 
-
-            <TableRow
-                android:id="@+id/mainactivity_slave_mastercontainer_address">
+            <TableRow>
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_column="1"
                     android:text="@string/address"
-                    android:textSize="@dimen/typography_subheadline"/>
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/mainactivity_slave_masteraddress"
-                    android:textSize="@dimen/typography_subheadline"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"/>
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="1"
+                    android:text="Connection status"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/mainactivity_slave_connection"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"/>
             </TableRow>
         </TableLayout>
-
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="15dp"/>
-
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/connected_modules"
-            android:textSize="@dimen/typography_subheadline"
-            android:textStyle="bold"
-            />
+            android:textSize="16sp"
+            android:textStyle="bold"/>
 
         <ListView
             android:id="@+id/mainactivity_slave_listview_slaves"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:isScrollContainer="false">
-        </ListView>
+            android:isScrollContainer="false"/>
 
     </LinearLayout>
 </ScrollView>

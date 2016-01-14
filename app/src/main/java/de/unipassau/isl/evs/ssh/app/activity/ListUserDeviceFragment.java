@@ -21,7 +21,6 @@ import android.widget.Toast;
 import com.google.common.collect.Lists;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -30,11 +29,13 @@ import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
+import de.unipassau.isl.evs.ssh.core.database.dto.NamedDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.DELETE_USERDEVICE_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.GROUP_ARGUMENT_FRAGMENT;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.USER_DEVICE_ARGUMENT_FRAGMENT;
+import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.USERNAME_SET;
 import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.USER_DELETE;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP;
@@ -52,33 +53,51 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER;
  */
 public class ListUserDeviceFragment extends BoundFragment {
     private static final String TAG = ListUserDeviceFragment.class.getSimpleName();
-    final private AppUserConfigurationHandler.UserInfoListener listener = new AppUserConfigurationHandler.UserInfoListener() {
-        @Override
-        public void userInfoUpdated(final UserConfigurationEvent event) {
-            maybeRunOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    // TODO Phil: Test if needed and correct (Phil, 2016-01-13)
-                    if (event.getType().equals(USER_DELETE) && event.wasSuccessful()) {
-                        Toast.makeText(getActivity(), "delete successful", Toast.LENGTH_SHORT).show();
-                    } else if (event.getType().equals(USER_DELETE) && event.wasSuccessful()) {
-                        Toast.makeText(getActivity(), "delete failed", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-        }
-    };
     private UserDeviceListAdapter adapter;
     private ListView userDeviceList;
     /**
      * The group the fragment is created for.
      */
     private Group group;
+    final private AppUserConfigurationHandler.UserInfoListener listener = new AppUserConfigurationHandler.UserInfoListener() {
+        @Override
+        public void userInfoUpdated(final UserConfigurationEvent event) {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (event.getType().equals(UserConfigurationEvent.EventType.PUSH)) {
+                        update();
+                    } else if (event.getType().equals(USERNAME_SET)) {
+                        if (event.wasSuccessful()) {
+                            update();
+                            Toast.makeText(getActivity(), R.string.edit_user_success, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), R.string.could_not_edit_user, Toast.LENGTH_SHORT).show();
+                        }
+                    } else if (event.getType().equals(USER_DELETE)) {
+                        if (event.wasSuccessful()) {
+                            update();
+                            Toast.makeText(getActivity(), R.string.delete_user_success, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), R.string.could_not_delete_user, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            });
+        }
+    };
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_listuserdevicefromgroup, container, false);
+    }
+
+    /**
+     * Updates the adapter.
+     */
+    private void update() {
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -217,18 +236,7 @@ public class ListUserDeviceFragment extends BoundFragment {
             Set<UserDevice> allUserDevices = handler.getAllGroupMembers(group);
 
             userDevices = Lists.newArrayList(allUserDevices);
-            Collections.sort(userDevices, new Comparator<UserDevice>() {
-                @Override
-                public int compare(UserDevice lhs, UserDevice rhs) {
-                    if (lhs.getName() == null) {
-                        return rhs.getName() == null ? 0 : 1;
-                    }
-                    if (rhs.getName() == null) {
-                        return -1;
-                    }
-                    return lhs.getName().compareTo(rhs.getName());
-                }
-            });
+            Collections.sort(userDevices, NamedDTO.COMPARATOR);
         }
 
         @Override

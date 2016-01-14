@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.network;
 
 import android.annotation.SuppressLint;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.net.InetSocketAddress;
@@ -268,7 +269,7 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
         container.require(OutgoingRouter.KEY).sendMessageLocal(RoutingKeys.MASTER_DEVICE_CONNECTED, message);
     }
 
-    private void setState(ChannelHandlerContext ctx, State expectedState, State newState) throws HandshakeException {
+    private void setState(ChannelHandlerContext ctx, @Nullable State expectedState, @Nullable State newState) throws HandshakeException {
         if (!ctx.channel().attr(STATE).compareAndSet(expectedState, newState)) {
             throw new HandshakeException("Expected state " + expectedState + " but was " + getState(ctx) + ", " +
                     "new state would have been " + newState);

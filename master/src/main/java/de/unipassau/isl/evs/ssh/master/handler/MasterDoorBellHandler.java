@@ -12,12 +12,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.broadcast.NotificationBroadcaster;
 
-import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BELL_RING;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.BELL_RANG;
 
 /**
  * Handles messages received when the doorbell is used, requests a picture from the camera
@@ -42,7 +38,6 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
             invalidMessage(message);
         }
     }
-
 
 
     private void handleDoorBellRing(Message.AddressedMessage message, DoorBellPayload doorBellPayload) {

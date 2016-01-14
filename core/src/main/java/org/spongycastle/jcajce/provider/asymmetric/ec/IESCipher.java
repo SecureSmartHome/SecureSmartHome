@@ -57,6 +57,7 @@ import javax.crypto.ShortBufferException;
  *
  * @author Niko Fink
  */
+@SuppressWarnings("ALL")
 public class IESCipher
         extends CipherSpi {
     private final JcaJceHelper helper = new BCJcaJceHelper();

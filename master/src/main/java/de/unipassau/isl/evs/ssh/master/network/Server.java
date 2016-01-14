@@ -133,6 +133,7 @@ public class Server extends AbstractComponent {
      */
     @NonNull
     protected ServerHandshakeHandler getHandshakeHandler() {
+        assert getContainer() != null;
         return new ServerHandshakeHandler(this, getContainer());
     }
 
@@ -196,6 +197,7 @@ public class Server extends AbstractComponent {
     /**
      * @return the local Address this server is listening on
      */
+    @Nullable
     public InetSocketAddress getAddress() {
         if (localChannel != null && localChannel.channel() != null) {
             return (InetSocketAddress) localChannel.channel().localAddress();
@@ -207,6 +209,7 @@ public class Server extends AbstractComponent {
     /**
      * @return the public Address this server is listening on
      */
+    @Nullable
     public InetSocketAddress getPublicAddress() {
         if (publicChannel != null && publicChannel.channel() != null) {
             return (InetSocketAddress) publicChannel.channel().localAddress();
@@ -233,6 +236,7 @@ public class Server extends AbstractComponent {
                 return input.attr(ATTR_PEER_ID).get();
             }
         });
+        //noinspection UnnecessaryLocalVariable
         final Iterable<DeviceID> filtered = Iterables.filter(transformed, new Predicate<DeviceID>() {
             @Override
             public boolean apply(@Nullable DeviceID input) {

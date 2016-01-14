@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +26,7 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.database.dto.NamedDTO;
 
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_MODULE;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT;
@@ -128,18 +128,7 @@ public class LightFragment extends BoundFragment {
             final Map<Module, AppLightHandler.LightStatus> lightModulesStatus = handler.getAllLightModuleStates();
             lightModules.clear();
             lightModules.addAll(lightModulesStatus.keySet());
-            Collections.sort(lightModules, new Comparator<Module>() {
-                @Override
-                public int compare(Module lhs, Module rhs) {
-                    if (lhs.getName() == null) {
-                        return rhs.getName() == null ? 0 : 1;
-                    }
-                    if (rhs.getName() == null) {
-                        return -1;
-                    }
-                    return lhs.getName().compareTo(rhs.getName());
-                }
-            });
+            Collections.sort(lightModules, NamedDTO.COMPARATOR);
 
             super.notifyDataSetChanged();
         }
