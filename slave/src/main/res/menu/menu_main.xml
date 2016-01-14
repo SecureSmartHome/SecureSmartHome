@@ -1,6 +1,9 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:tools="http://schemas.android.com/tools"
-      tools:context=".activity.MainActivity">
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Phil Werli-->
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activity.MainActivity">
     <item
         android:id="@+id/action_refresh"
         android:orderInCategory="100"

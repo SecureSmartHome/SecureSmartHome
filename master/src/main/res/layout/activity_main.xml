@@ -49,7 +49,7 @@
 
                 <TextView
                     android:layout_column="1"
-                    android:text="Active Connections"
+                    android:text="@string/active_connections"
                     android:textSize="@dimen/typography_subheadline"
                     android:textStyle="bold"
                     />

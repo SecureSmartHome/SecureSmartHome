@@ -15,23 +15,19 @@
         android:textStyle="bold"
         />
 
-    <TableLayout
+    <TableRow
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:stretchColumns="1">
+        android:layout_height="wrap_content">
 
-        <TableRow>
+        <TextView
+            android:id="@+id/slavelayout_slave_address"
+            android:layout_column="1"
+            android:text="@string/address_format"/>
 
-            <TextView
-                android:id="@+id/slavelayout_slave_address"
-                android:layout_column="1"
-                android:text="@string/address_format"/>
-
-            <TextView
-                android:id="@+id/slavelayout_slave_id"
-                android:layout_gravity="right"
-                android:text="@string/id_format"
-                />
-        </TableRow>
-    </TableLayout>
+        <TextView
+            android:id="@+id/slavelayout_slave_id"
+            android:layout_gravity="right"
+            android:text="@string/id_format"
+            />
+    </TableRow>
 </LinearLayout>

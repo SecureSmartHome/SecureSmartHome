@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:text="Please configure the Secure Smart Home Master before adding the first admin device."
+        android:text="@string/please_configure_the_ssh"
         android:textAppearance="?android:attr/textAppearanceLarge"/>
 
     <fragment
@@ -34,6 +34,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="Proceed"/>
+        android:text="@string/proceed"/>
 
 </RelativeLayout>

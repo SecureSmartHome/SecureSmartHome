@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--@author Wolfgang Popp-->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,12 +13,12 @@
     tools:context="de.unipassau.isl.evs.ssh.app.activity.RejectedActivity">
 
     <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/md_grey_50"
-        android:text="@string/warn_client_rejected"
-        android:id="@+id/textView"
+        android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_alignParentEnd="true" />
+        android:text="@string/warn_client_rejected"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/md_grey_50"/>
 </RelativeLayout>

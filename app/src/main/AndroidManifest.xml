@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.unipassau.isl.evs.ssh.app">
+<manifest
+    package="de.unipassau.isl.evs.ssh.app"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -31,7 +32,9 @@
 
         <service android:name=".AppContainer" />
 
-        <activity android:name=".activity.RejectedActivity"></activity>
+        <activity android:name=".activity.RejectedActivity">
+
+        </activity>
     </application>
 
 </manifest>

@@ -1,5 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!--@author Phil Werli-->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Phil Werli-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -13,7 +15,7 @@
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:textSize="@dimen/typography_headline1"
-        android:textStyle="bold" />
+        android:textStyle="bold"/>
 
     <TextView
         android:id="@+id/listgroup_group_members"
@@ -22,5 +24,5 @@
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:textSize="@dimen/typography_subheadline" />
+        android:textSize="@dimen/typography_subheadline"/>
 </LinearLayout>

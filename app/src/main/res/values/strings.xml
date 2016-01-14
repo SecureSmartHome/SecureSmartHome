@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--@author Team-->
 <resources>
     <string name="app_name" translatable="false">Secure Smart Home</string>
     <string name="title_activity_main" translatable="false">MainActivity</string>
@@ -226,7 +227,6 @@
     <string name="holiday_mode_switched_off_title">Holiday Mode Inactive!</string>
     <string name="holiday_mode_switched_off_text">You have now the control over your home. Welcome back!</string>
     <string name="door_unlatched_title">Door is now open!</string>
-    <!--TODO maybe add text, otherwise delete? (Phil, 2016-01-09-->
     <string name="door_unlatched_text" translatable="false"></string>
     <string name="door_locked_title">Door is now locked!</string>
     <string name="door_locked_text">Unauthorised users can not open it anymore.</string>

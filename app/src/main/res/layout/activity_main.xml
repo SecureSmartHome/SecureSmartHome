@@ -22,7 +22,7 @@
         android:layout_gravity="start"
         android:elevation="16dp"
         app:headerLayout="@layout/nav_header_main"
-        app:theme="@style/AppTheme.NavigationDrawer"
-        app:menu="@menu/activity_main_drawer">
+        app:menu="@menu/activity_main_drawer"
+        app:theme="@style/AppTheme.NavigationDrawer">
     </android.support.design.widget.NavigationView>
 </android.support.v4.widget.DrawerLayout>

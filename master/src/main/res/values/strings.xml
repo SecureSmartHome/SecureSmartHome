@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Team-->
 <resources>
     <string name="app_name">Secure Smart Home - Master</string>
     <string name="title_activity_main">MainActivity</string>
@@ -35,4 +37,11 @@
     <string name="master_port_local_summary">Local port to connect to master</string>
     <string name="invalid_port">Invalid port entered. Please only enter Ports from 1024 to 65535</string>
     <string name="invalid_city">Invalid city name.</string>
+    <string name="active_connections">Active Connections</string>
+    <string name="proceed">Proceed</string>
+    <string name="please_configure_the_ssh">Please configure the Secure Smart Home Master before adding the first admin device.</string>
+    <string name="register">Register</string>
+    <string name="ignore">Ignore</string>
+    <string name="register_local_app">Register the locally installed Secure Smart Home App with this Master?</string>
+    <string name="register_local_slave">Register the locally installed Secure Smart Home Slave with this Master?</string>
 </resources>

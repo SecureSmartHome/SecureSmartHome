@@ -36,7 +36,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_
  * @author Phil Werli
  */
 public class MasterQRCodeActivity extends MasterStartUpActivity implements MessageHandler {
-    public static final String EXTRA_REGISTERED_DEVICE = "EXTRA_REGISTERED_DEVICE";
+    private static final String EXTRA_REGISTERED_DEVICE = "EXTRA_REGISTERED_DEVICE";
 
     /**
      * The QR-Code which will be displayed.

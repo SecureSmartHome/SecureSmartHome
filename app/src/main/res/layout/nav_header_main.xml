@@ -1,5 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!--@author Andreas Bucher-->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Andreas Bucher-->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_alignParentStart="true"
@@ -16,25 +18,25 @@
         android:id="@+id/imageView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:scaleType="center"
-        android:src="@drawable/icon"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:scaleType="center"
+        android:src="@drawable/icon"/>
 
     <TextView
         android:id="@+id/nav_draw_ssh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/imageView2"
+        android:layout_toEndOf="@+id/imageView2"
         android:background="#00000000"
         android:gravity="start"
-        android:paddingStart="16dp"
         android:paddingEnd="16dp"
+        android:paddingStart="16dp"
         android:singleLine="false"
         android:text="@string/secure_smart_home"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/md_white_1000"
-        android:textStyle="bold"
-        android:layout_alignTop="@+id/imageView2"
-        android:layout_toEndOf="@+id/imageView2" />
+        android:textStyle="bold"/>
 
 </RelativeLayout>

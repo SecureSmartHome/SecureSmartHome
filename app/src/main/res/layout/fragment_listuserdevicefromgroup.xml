@@ -1,5 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!--@author Phil Werli-->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Phil Werli-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -16,17 +18,18 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center_horizontal"
-            android:textSize="@dimen/typography_display1" />
+            android:textSize="@dimen/typography_display1"/>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_margin="8dp" />
+            android:layout_margin="8dp"/>
 
         <ListView
             android:id="@+id/listuserDeviceContainer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"></ListView>
+            android:layout_height="wrap_content">
+        </ListView>
 
     </LinearLayout>
 
@@ -42,6 +45,6 @@
         android:scaleType="center"
         android:src="@drawable/ic_add"
         app:borderWidth="0dp"
-        app:pressedTranslationZ="12dp" />
+        app:pressedTranslationZ="12dp"/>
 </FrameLayout>
 

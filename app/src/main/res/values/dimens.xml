@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--@author Phil Werli-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Phil Werli-->
 <resources>
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_height">110dp</dimen>

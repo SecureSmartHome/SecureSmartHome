@@ -1,5 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!--@author Phil Werli-->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Phil Werli-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="180dp"
     android:elevation="8dp"
@@ -21,7 +23,7 @@
             android:layout_marginBottom="25sp"
             android:padding="8sp"
             android:text=""
-            android:textSize="@dimen/typography_subheadline" />
+            android:textSize="@dimen/typography_subheadline"/>
 
         <Button
             android:id="@+id/lightButtonButton"
@@ -30,7 +32,7 @@
             android:background="@color/button_green"
             android:padding="16dp"
             android:text="@string/turn_on"
-            android:textSize="14sp" />
+            android:textSize="14sp"/>
 
     </LinearLayout>
 
@@ -49,7 +51,7 @@
         android:contentDescription="@string/status_of_light"
         android:padding="20dp"
         android:src="@drawable/ic_light_on"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/lightButtonImageViewOff"
@@ -66,5 +68,5 @@
         android:contentDescription="@string/status_of_light"
         android:padding="20dp"
         android:src="@drawable/ic_light_off"
-        android:visibility="visible" />
+        android:visibility="visible"/>
 </LinearLayout>

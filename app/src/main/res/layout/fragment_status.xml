@@ -1,5 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!--Author: Wolfgang Popp-->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--Author: Wolfgang Popp-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,25 +17,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/deviceStatusConnectedSlaves"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
 
     <ListView
         android:id="@+id/deviceStatusListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="center_horizontal"
-        android:layout_weight="1" />
+        android:layout_weight="1"/>
 
     <TextView
         android:id="@+id/deviceStatusConnectedModules"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/deviceStatusConnectedModules"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
 
     <ListView
         android:id="@+id/deviceStatusModulesListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"/>
 </LinearLayout>

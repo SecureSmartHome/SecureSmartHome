@@ -1,5 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!--@author Andreas Bucher-->
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--@author Andreas Bucher-->
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -17,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            app:theme="@style/AppTheme.AppBarOverlay" />
+            app:theme="@style/AppTheme.AppBarOverlay"/>
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -26,14 +28,14 @@
             android:layout_below="@id/appbar"
             android:elevation="16dp"
             android:minHeight="?attr/actionBarSize"
-            app:theme="@style/AppTheme.PopupOverlay" />
+            app:theme="@style/AppTheme.PopupOverlay"/>
 
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentBottom="true"
-            android:layout_below="@id/toolbar" />
+            android:layout_below="@id/toolbar"/>
 
         <LinearLayout
             android:id="@+id/overlay_disconnected"
@@ -54,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:background="@color/md_red_400"
                 android:gravity="center"
-                android:padding="16dp" />
+                android:padding="16dp"/>
         </LinearLayout>
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>
