@@ -45,7 +45,6 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER;
 public class MasterRegisterDeviceHandler extends AbstractMasterHandler implements Component {
     public static final Key<MasterRegisterDeviceHandler> KEY = new Key<>(MasterRegisterDeviceHandler.class);
 
-    //TODO Leon: move to CoreConstants and internationalize (Niko, 2016-01-05)
     public static final String FIRST_USER = "Admin";
     public static final String FIRST_GROUP = DatabaseContract.Group.DefaultValues.PARENTS.toString();
     private final Map<String, UserDevice> userDeviceForToken = new HashMap<>();

@@ -12,7 +12,6 @@ public class LightPayload implements MessagePayload {
     private Module module;
     private boolean on;
 
-    //TODO-Chris check if name of module is enough or better
     public LightPayload(boolean on, Module module) {
         this.on = on;
         this.module = module;

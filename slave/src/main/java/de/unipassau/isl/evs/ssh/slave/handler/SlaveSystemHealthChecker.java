@@ -85,7 +85,7 @@ public class SlaveSystemHealthChecker extends AbstractComponent {
                 } catch (IOException e) {
                     success = false;
                 }
-            }//TODO Camera
+            }
 
             if (success) {
                 if (failedModules.containsKey(module)) {
