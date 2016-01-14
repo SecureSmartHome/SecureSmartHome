@@ -17,11 +17,23 @@ public class ClimatePayload implements MessagePayload {
     private final double uv;
     private final int visible;
     private final int ir;
-    private final String notificationType;
     private final Module module;
 
+    /**
+     * Constructor for a ClimatePayload, containing current data from the WeatherBoard.
+     *
+     * @param temp1    Temperature 1
+     * @param temp2    Temperature 2
+     * @param pressure Air pressure
+     * @param altitude Altitude
+     * @param humidity Humidity
+     * @param uv       UV Index
+     * @param visible  Visible light in Lux
+     * @param ir       IR light in Lux
+     * @param module   The WeatherBoard containing this data
+     */
     public ClimatePayload(double temp1, double temp2, double pressure, double altitude, double humidity,
-                          double uv, int visible, int ir, String notificationType, Module module) {
+                          double uv, int visible, int ir, Module module) {
         this.temp1 = temp1;
         this.temp2 = temp2;
         this.pressure = pressure;
@@ -30,37 +42,7 @@ public class ClimatePayload implements MessagePayload {
         this.uv = uv;
         this.visible = visible;
         this.ir = ir;
-        this.notificationType = notificationType; //see CoreConstants.NotificationTyp
         this.module = module;
-    }
-
-    /**
-     * Creates a new payload based on a given one, ignoring the notification type of the old payload and allowing
-     * to set a new one.
-     *
-     * @param payload          which is to be copied
-     * @param notificationType that is to be set
-     */
-    public ClimatePayload(ClimatePayload payload, String notificationType) {
-        this.module = payload.module;
-        this.temp1 = payload.temp1;
-        this.temp2 = payload.temp2;
-        this.pressure = payload.pressure;
-        this.altitude = payload.altitude;
-        this.humidity = payload.humidity;
-        this.uv = payload.uv;
-        this.visible = payload.visible;
-        this.ir = payload.ir;
-        this.notificationType = notificationType;
-    }
-
-    /**
-     * Payload containing current WeatherSensor data.
-     *
-     * @return ClimatePayload containing the ClimatePayload data.
-     */
-    public ClimatePayload getClimatePayload() {
-        return ClimatePayload.this;
     }
 
     public Module getModule() {
@@ -101,14 +83,5 @@ public class ClimatePayload implements MessagePayload {
 
     public Module getModuleName() {
         return module;
-    }
-
-    /**
-     * Depending on the notification type a client decides if a warning shall be shown or not.
-     *
-     * @return String allowing the user to decide if a warning shall be displayed
-     */
-    public String getNotificationType() {
-        return notificationType;
     }
 }

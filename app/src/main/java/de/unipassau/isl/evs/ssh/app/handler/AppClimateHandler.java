@@ -184,9 +184,9 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         if (status != null) {
             climatePayload = new ClimatePayload(status.getTemp1(), status.getTemp2(),
                     status.getPressure(), status.getAltitude(), status.getHumidity(), status.getUv(),
-                    status.getVisible(), status.getIr(), "", m);
+                    status.getVisible(), status.getIr(), m);
         } else {
-            climatePayload = new ClimatePayload(0, 0, 0, 0, 0, 0, 0, 0, "", m);
+            climatePayload = new ClimatePayload(0, 0, 0, 0, 0, 0, 0, 0, m);
         }
         sendMessageToMaster(RoutingKeys.MASTER_REQUEST_WEATHER_INFO, new Message(climatePayload));
     }
