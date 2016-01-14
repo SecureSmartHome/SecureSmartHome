@@ -124,11 +124,13 @@ public class EditUserDeviceFragment extends BoundFragment {
                 }
 
                 // check if user has permission to edit a group
-                final MainActivity activity = (MainActivity) getActivity();
-                if (activity != null && activity.hasPermission(CHANGE_USER_NAME) && activity.hasPermission(CHANGE_USER_GROUP)) {
-                    showEditUserDeviceDialog(bundle);
-                } else {
+                    final MainActivity activity = (MainActivity) getActivity();
+                if (activity == null && !activity.hasPermission(CHANGE_USER_NAME)) {
+                    Toast.makeText(getActivity(), R.string.you_can_not_edit_users, Toast.LENGTH_SHORT).show();
+                } else if (activity == null && activity.hasPermission(CHANGE_USER_GROUP)) {
                     Toast.makeText(getActivity(), R.string.you_can_not_edit_groups, Toast.LENGTH_SHORT).show();
+                } else {
+                    showEditUserDeviceDialog(bundle);
                 }
             }
         });

@@ -31,35 +31,19 @@ public class MasterDoorBellHandler extends AbstractMasterHandler {
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_DOOR_BELL_RING, MASTER_CAMERA_GET_REPLY};
+        return new RoutingKey[]{MASTER_DOOR_BELL_RING};
     }
 
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_DOOR_BELL_RING.matches(message)) {
             handleDoorBellRing(message, MASTER_DOOR_BELL_RING.getPayload(message));
-        } else if (MASTER_CAMERA_GET_REPLY.matches(message)) {
-            handleCameraResponse(message, MASTER_CAMERA_GET_REPLY.getPayload(message));
         } else {
             invalidMessage(message);
         }
     }
 
-    private void handleCameraResponse(Message.AddressedMessage message, CameraPayload cameraPayload) {
-        //Check if message comes from master
-        if (isMaster(message.getFromID())) {
-            final Message.AddressedMessage correspondingMessage =
-                    takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
-            final DoorBellPayload doorBellPayload = MASTER_DOOR_BELL_RING.getPayload(correspondingMessage);
-            doorBellPayload.setCameraPayload(cameraPayload);
 
-            final Message messageToSend = new Message(doorBellPayload);
-
-            sendMessageToAllDevicesWithPermission(messageToSend, BELL_RANG, null, APP_DOOR_RING);
-        } else {
-            Log.e(TAG, "A non master device tried to send a master only message.");
-        }
-    }
 
     private void handleDoorBellRing(Message.AddressedMessage message, DoorBellPayload doorBellPayload) {
         //Check if message comes from a slave.

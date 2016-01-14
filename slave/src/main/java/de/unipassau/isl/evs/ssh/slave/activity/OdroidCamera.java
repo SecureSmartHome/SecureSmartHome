@@ -136,6 +136,7 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
 
     private void sendImageOrError() {
         if (getContainer() == null || lastSnapshot == null) {
+            sendError();
             return;
         }
         int width = params.getPreviewSize().width;

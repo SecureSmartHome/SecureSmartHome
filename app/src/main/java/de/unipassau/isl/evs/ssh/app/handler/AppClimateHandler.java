@@ -61,6 +61,14 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         setClimate(payload, message);
     }
 
+    @Override
+    public void init(Container container) {
+        super.init(container);
+        for (Module module : getComponent(AppModuleHandler.KEY).getWeather()) {
+            requestClimateStatus(module);
+        }
+    }
+
     /**
      * Links the sensorData to a Module. If the data is already linked to the Module, it refreshes the Data.
      *
@@ -95,7 +103,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      * @param module WeatherSensor Module.
      * @return current Climate data.
      */
-    private ClimateStatus maybeRequestClimateStatus(Module module) {
+    public ClimateStatus maybeRequestClimateStatus(Module module) {
         final ClimateStatus status = climateStatusMapping.get(module);
         final long now = System.currentTimeMillis();
         if (now - status.getTimestamp() >= REFRESH_DELAY_MILLIS) {
@@ -210,9 +218,14 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      */
     private void requestClimateStatus(Module m) {
         ClimateStatus status = climateStatusMapping.get(m);
-        ClimatePayload climatePayload = new ClimatePayload(status.getTemp1(), status.getTemp2(),
-                status.getPressure(), status.getAltitude(), status.getHumidity(), status.getUv(),
-                status.getVisible(), status.getIr(), "", m);
+        ClimatePayload climatePayload;
+        if (status != null) {
+            climatePayload = new ClimatePayload(status.getTemp1(), status.getTemp2(),
+                    status.getPressure(), status.getAltitude(), status.getHumidity(), status.getUv(),
+                    status.getVisible(), status.getIr(), "", m);
+        } else {
+            climatePayload = new ClimatePayload(0, 0, 0, 0, 0, 0, 0, 0, "", m);
+        }
         sendMessageToMaster(RoutingKeys.MASTER_REQUEST_WEATHER_INFO, new Message(climatePayload));
     }
 
@@ -255,6 +268,17 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      */
     public void removeListener(AppClimateHandler.ClimateHandlerListener listener) {
         listeners.remove(listener);
+    }
+
+    public void maybeUpdateModules() {
+        List<Module> weatherBoards = requireComponent(AppModuleHandler.KEY).getWeather();
+        if (weatherBoards.size() > climateStatusMapping.keySet().size()) {
+            for (Module weatherBoard : weatherBoards) {
+                if (!climateStatusMapping.containsKey(weatherBoard)) {
+                    climateStatusMapping.put(weatherBoard, new ClimateStatus(0,0,0,0,0,0,0,0));
+                }
+            }
+        }
     }
 
     public interface ClimateHandlerListener {
