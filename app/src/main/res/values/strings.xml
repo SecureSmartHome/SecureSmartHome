@@ -209,6 +209,17 @@
     <string name="si_humidity" translatable="false">%3.2f \U+0025</string>
     <string name="si_visible" translatable="false">%d Lux</string>
 
+    <!--String to describe ImageViews / ImageButtons-->
+    <string name="refresh_the_image" translatable="false">Refresh the image</string>
+    <string name="image_showing_an_island" translatable="false">A image showing an island</string>
+    <string name="open_door" translatable="false">Open the Door Fragment</string>
+    <string name="open_light" translatable="false">Open Light Fragment</string>
+    <string name="open_climate" translatable="false">Open Climate Fragment</string>
+    <string name="open_holiday" translatable="false">Open Holiday Fragment</string>
+    <string name="open_status" translatable="false">Open Status Fragment</string>
+    <string name="open_group" translatable="false">Open Group Fragment</string>
+
+
     <!--Strings used for Notifications-->
     <string name="climate_notification_title">Climate Warning!</string>
     <string name="climate_notification_text">Your indoor humidity is at %3.2f \U+0025 please air your home.</string>
@@ -232,6 +243,8 @@
     <string name="door_locked_text">Unauthorised users can not open it anymore.</string>
     <string name="door_unlocked_title">Door is now unlocked!</string>
     <string name="door_unlocked_text">Others users can now open it.</string>
+
+
     <string name="edit_user_device">Edit %s</string>
     <string name="missing_permission">Missing permission</string>
     <string name="permission_connected_to">This permission is connected to %s.</string>
@@ -288,4 +301,7 @@
     <string name="you_can_not_unlatch_door">You can\'t unlatch the door</string>
     <string name="you_can_not_unblock_door">You can\'t (un)block the door</string>
     <string name="you_can_not_request_picture">You can\'t request a picture</string>
+    <string name="master_port">Master Port</string>
+    <string name="master_host_address">Master Host Address</string>
+    <string name="please_enter_master_address">Please enter the address of the Master that will be used if it can\'t be found on the local network. This address will be used when connecting from outside your home network, so the address shouldn\'t change often and the port must be made available through the firewall.</string>
 </resources>

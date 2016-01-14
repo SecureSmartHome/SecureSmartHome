@@ -23,6 +23,7 @@
             android:layout_weight="1"
             android:adjustViewBounds="true"
             android:background="?android:selectableItemBackground"
+            android:contentDescription="@string/open_door"
             android:padding="20dp"
             android:scaleType="centerInside"
             android:src="@drawable/ic_door_open"
@@ -39,6 +40,7 @@
             android:layout_weight="1"
             android:adjustViewBounds="true"
             android:background="?android:selectableItemBackground"
+            android:contentDescription="@string/open_light"
             android:padding="20dp"
             android:scaleType="centerInside"
             android:src="@drawable/ic_light_bulb_on"
@@ -62,10 +64,12 @@
             android:layout_weight="1"
             android:adjustViewBounds="true"
             android:background="?android:selectableItemBackground"
+            android:contentDescription="@string/open_climate"
             android:padding="20dp"
             android:scaleType="centerInside"
             android:src="@drawable/ic_thermometer"/>
 
+        android:transitionName="holidayIconTransition"/>
         <ImageButton
             android:id="@+id/holidayButton"
             android:layout_width="0dp"
@@ -77,10 +81,12 @@
             android:layout_weight="1"
             android:adjustViewBounds="true"
             android:background="?android:selectableItemBackground"
+            android:contentDescription="@string/open_holiday"
             android:padding="20dp"
             android:scaleType="centerInside"
             android:src="@drawable/ic_holiday_island"
-            android:transitionName="holidayIconTransition"/>
+            />
+
     </LinearLayout>
 
     <LinearLayout
@@ -100,6 +106,7 @@
             android:layout_weight="1"
             android:adjustViewBounds="true"
             android:background="?android:selectableItemBackground"
+            android:contentDescription="@string/open_status"
             android:padding="20dp"
             android:scaleType="centerInside"
             android:src="@drawable/ic_status_tool"/>
@@ -115,6 +122,7 @@
             android:layout_weight="1"
             android:adjustViewBounds="true"
             android:background="?android:selectableItemBackground"
+            android:contentDescription="@string/open_group"
             android:padding="20dp"
             android:scaleType="centerInside"
             android:src="@drawable/ic_user_big"/>
