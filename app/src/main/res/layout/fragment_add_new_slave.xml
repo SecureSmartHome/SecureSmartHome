@@ -14,6 +14,7 @@
 
     <EditText
         android:id="@+id/add_new_slave_name"
+        android:inputType="textVisiblePassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 

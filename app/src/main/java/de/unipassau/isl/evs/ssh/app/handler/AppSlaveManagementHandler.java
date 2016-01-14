@@ -21,13 +21,12 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_R
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_REGISTER_REPLY;
 
 /**
- * The AppSlaveManagementHandler handles the messaging needed to add a new slave to the system.
+ * The AppSlaveManagementHandler handles the messaging needed to add and remove a slave from the system.
  *
  * @author Wolfgang Popp
  */
 public class AppSlaveManagementHandler extends AbstractAppHandler implements Component {
     public static final Key<AppSlaveManagementHandler> KEY = new Key<>(AppSlaveManagementHandler.class);
-    private static final String TAG = AppSlaveManagementHandler.class.getSimpleName();
 
     private List<SlaveManagementListener> listeners = new LinkedList<>();
 
@@ -76,6 +75,11 @@ public class AppSlaveManagementHandler extends AbstractAppHandler implements Com
         });
     }
 
+    /**
+     * Sends a message to master to delete the given slave.
+     *
+     * @param slaveID the slave to delete
+     */
     public void deleteSlave(DeviceID slaveID) {
         DeleteDevicePayload payload = new DeleteDevicePayload(slaveID);
         final Future<Void> future = newResponseFuture(sendMessageToMaster(MASTER_SLAVE_DELETE, new Message(payload)));
@@ -87,10 +91,20 @@ public class AppSlaveManagementHandler extends AbstractAppHandler implements Com
         });
     }
 
+    /**
+     * Adds the given SlaveManagementListener to this handler.
+     *
+     * @param listener the listener to add
+     */
     public void addSlaveManagementListener(SlaveManagementListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Removes the given SlaveManagementListener from this handler.
+     *
+     * @param listener the listener to remove
+     */
     public void removeSlaveManagementListener(SlaveManagementListener listener) {
         listeners.remove(listener);
     }
@@ -107,9 +121,22 @@ public class AppSlaveManagementHandler extends AbstractAppHandler implements Com
         }
     }
 
+    /**
+     * The listener interface to get notified when a new slave has been registered or removed.
+     */
     public interface SlaveManagementListener {
+        /**
+         * Called when the slave registration process finished.
+         *
+         * @param wasSuccessful true if the registration was successful, false otherwise
+         */
         void onSlaveRegistered(boolean wasSuccessful);
 
+        /**
+         * Called when the slave remove process has finished.
+         *
+         * @param wasSuccessful true if the remove process was successful, false otherwise
+         */
         void onSlaveRemoved(boolean wasSuccessful);
     }
 }

@@ -19,9 +19,11 @@ public final class DeviceID implements Serializable {
     public static final int ID_LENGTH = 32;
 
     private static final byte[] NO_DEVICE_BYTES = new byte[ID_LENGTH];
+
     static {
         Arrays.fill(NO_DEVICE_BYTES, ((byte) 0));
     }
+
     public static final DeviceID NO_DEVICE = new DeviceID(NO_DEVICE_BYTES);
 
     private final String id;

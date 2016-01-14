@@ -29,8 +29,8 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.TAKE_CAMERA_PICTURE;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR;
 
 /**
- * This fragment allows to display information contained in door messages
- * which are received from the IncomingDispatcher.
+ * The DoorFragment provides a UI to interact with the door. This fragment provides UI components to block, unblock,
+ * unlatch the door. It can display a picture from a camera that is connected to a slave in the SecureSmartHome.
  *
  * @author Wolfgang Popp
  */
@@ -82,11 +82,11 @@ public class DoorFragment extends BoundFragment {
         }
 
         @Override
-        public void cameraActionFinished(final boolean wasSucessful) {
+        public void cameraActionFinished(final boolean wasSuccessful) {
             maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (wasSucessful) {
+                    if (wasSuccessful) {
                         displayImage();
                     } else {
                         Log.e(TAG, "Could not load image");

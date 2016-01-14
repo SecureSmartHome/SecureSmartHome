@@ -24,6 +24,9 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID;
  */
 public class AddNewSlaveFragment extends ScanQRFragment {
     private static final String KEY_SLAVE_NAME = "SLAVE_NAME";
+
+    private EditText slaveNameInput;
+
     private final AppSlaveManagementHandler.SlaveManagementListener listener = new AppSlaveManagementHandler.SlaveManagementListener() {
         @Override
         public void onSlaveRegistered(final boolean wasSuccessful) {
@@ -45,8 +48,8 @@ public class AddNewSlaveFragment extends ScanQRFragment {
             //this fragment does not handle slave removal
         }
     };
-    private EditText slaveNameInput;
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_new_slave, container, false);
         slaveNameInput = (EditText) view.findViewById(R.id.add_new_slave_name);

@@ -232,6 +232,11 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
         return Collections.emptySet();
     }
 
+    /**
+     * Returns a list of all templates.
+     *
+     * @return a list of all templates
+     */
     public Set<String> getAllTemplates() {
         return Collections.unmodifiableSet(allTemplates);
     }
@@ -283,21 +288,45 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
         sendUserConfigMessage(message, MASTER_GROUP_DELETE, UserConfigurationEvent.EventType.GROUP_DELETE);
     }
 
+    /**
+     * Sends a message to master to set the name of the given group.
+     *
+     * @param group     the group to modify
+     * @param groupName the name to set
+     */
     public void setGroupName(Group group, String groupName) {
         Message message = new Message(new SetGroupNamePayload(group, groupName));
         sendUserConfigMessage(message, MASTER_GROUP_SET_NAME, UserConfigurationEvent.EventType.GROUP_SET_NAME);
     }
 
+    /**
+     * Sends a message to master to set the template of the given group.
+     *
+     * @param group        the group to modify
+     * @param templateName the template to set
+     */
     public void setGroupTemplate(Group group, String templateName) {
         Message message = new Message(new SetGroupTemplatePayload(group, templateName));
         sendUserConfigMessage(message, MASTER_GROUP_SET_TEMPLATE, UserConfigurationEvent.EventType.GROUP_SET_TEMPLATE);
     }
 
+    /**
+     * Sends a message to master to set the name of the given user.
+     *
+     * @param user     the user to modify
+     * @param username the name to set
+     */
     public void setUserName(DeviceID user, String username) {
         Message message = new Message(new SetUserNamePayload(user, username));
         sendUserConfigMessage(message, MASTER_USER_SET_NAME, UserConfigurationEvent.EventType.USERNAME_SET);
     }
 
+    /**
+     * Sends a message to master to set group of the given user.
+     *
+     * @param user      the user to modify
+     * @param groupName the group to set
+     */
     public void setUserGroup(DeviceID user, String groupName) {
         Message message = new Message(new SetUserGroupPayload(user, groupName));
         sendUserConfigMessage(message, MASTER_USER_SET_GROUP, UserConfigurationEvent.EventType.USER_SET_GROUP);
@@ -341,6 +370,8 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
     public interface UserInfoListener {
         /**
          * Called when the user configuration changed.
+         *
+         * @param event the event that triggered the invocation of this method
          */
         void userInfoUpdated(UserConfigurationEvent event);
     }

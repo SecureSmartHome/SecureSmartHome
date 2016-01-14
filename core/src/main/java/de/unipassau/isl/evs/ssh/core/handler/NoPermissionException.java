@@ -5,7 +5,7 @@ import de.unipassau.isl.evs.ssh.core.sec.Permission;
 /**
  * @author Wolfgang Popp.
  */
-public class NoPermissionException extends Exception{
+public class NoPermissionException extends Exception {
     private Permission missingPermission;
 
     public NoPermissionException(Permission missingPermission) {

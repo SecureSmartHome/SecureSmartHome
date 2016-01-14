@@ -39,8 +39,7 @@ import de.unipassau.isl.evs.ssh.core.network.ClientConnectionListener;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 /**
- * As this Activity also displays information like whether the light is on or not, this Activity also
- * needs to messages concerning that information.
+ * The MainActivity provides the main UI components. It also manages the fragment lifecycle.
  *
  * @author Andreas Bucher
  * @author Wolfgang Popp

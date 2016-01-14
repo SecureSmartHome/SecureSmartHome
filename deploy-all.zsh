@@ -17,7 +17,7 @@ elif [[ $1 == "--clear-only" || $1 == "-o" ]]; then
     DO_CLEAR=true
 elif [[ $1 != "" || $1 == "-h" || $1 == "--help" ]]; then
     echo "This Script builds and deploys the Secure Smart Home System on Odroids and all"
-    echo "connected Android Smartphones that are connected via usb debugging."
+    echo "Android smartphones that are connected via usb debugging."
     echo
     echo "Master will be deployed on: $MASTER"
     echo "Slave will be deployed on: $SLAVE"

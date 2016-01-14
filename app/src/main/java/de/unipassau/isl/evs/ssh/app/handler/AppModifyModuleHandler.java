@@ -20,7 +20,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_REMOVE_REPLY;
 
 /**
- * The AppModifyModuleHandler handles the messaging needed to register a new ElectronicModule.
+ * The AppModifyModuleHandler handles the messaging needed to register and remove a ElectronicModule.
  *
  * @author Wolfgang Popp
  */
@@ -103,13 +103,19 @@ public class AppModifyModuleHandler extends AbstractAppHandler implements Compon
         });
     }
 
+    /**
+     * Removes the given module. Invoker of this method can be notified with a NewModuleListener
+     * when this action finished.
+     *
+     * @param module the module to remove
+     */
     public void removeModule(Module module) {
         ModifyModulePayload payload = new ModifyModulePayload(module);
         final Future<Void> future = newResponseFuture(sendMessageToMaster(MASTER_MODULE_REMOVE, new Message(payload)));
         future.addListener(new FutureListener<Void>() {
             @Override
             public void operationComplete(Future<Void> future) throws Exception {
-
+                fireUnregistrationFinished(future.isSuccess());
             }
         });
     }
@@ -126,6 +132,11 @@ public class AppModifyModuleHandler extends AbstractAppHandler implements Compon
          */
         void registrationFinished(boolean wasSuccessful);
 
+        /**
+         * Invoked when the deletion of a ElectronicModule finished.
+         *
+         * @param wasSuccessful indicates whether the deletion was successful or not
+         */
         void unregistrationFinished(boolean wasSuccessful);
     }
 }

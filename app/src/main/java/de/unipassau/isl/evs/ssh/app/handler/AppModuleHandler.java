@@ -28,7 +28,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.GLOBAL_MODULES_UPDATE;
 
 /**
- * AppModuleHandler offers a list of all Modules that are active in the System.
+ * AppModuleHandler manages information of all modules and slaves that are active in the System.
  *
  * @author Andreas Bucher
  * @author Wolfgang Popp
@@ -97,10 +97,20 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
         }
     }
 
+    /**
+     * Adds the given AppModuleListener to this handler.
+     *
+     * @param listener the listener to add
+     */
     public void addAppModuleListener(AppModuleListener listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Removes the given AppModuleListener from this handler
+     *
+     * @param listener the listener to remove
+     */
     public void removeAppModuleListener(AppModuleListener listener) {
         listeners.remove(listener);
     }
@@ -129,41 +139,76 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
         fireModulesUpdated();
     }
 
+    /**
+     * Gets all currently installed Modules.
+     *
+     * @return a list of currently installed Modules
+     */
     @NonNull
     public List<Module> getComponents() {
         return ImmutableList.copyOf(components);
     }
 
+    /**
+     * Gets all currently installed lights.
+     *
+     * @return a list of currently installed lights
+     */
     @NonNull
     public List<Module> getLights() {
         Iterable<Module> filtered = Iterables.filter(components, PREDICATE_LIGHT);
         return Lists.newArrayList(filtered);
     }
 
+    /**
+     * Gets all currently installed door sensors.
+     *
+     * @return a list of all installed door sensors
+     */
     @NonNull
     public List<Module> getDoorSensors() {
         Iterable<Module> filtered = Iterables.filter(components, PREDICATE_DOOR_SENSOR);
         return Lists.newArrayList(filtered);
     }
 
+    /**
+     * Gets all currently installed door buzzers.
+     *
+     * @return a list of all installed door buzzers
+     */
     @NonNull
     public List<Module> getDoorBuzzers() {
         Iterable<Module> filtered = Iterables.filter(components, PREDICATE_DOOR_BUZZER);
         return Lists.newArrayList(filtered);
     }
 
+    /**
+     * Gets all currently installed cameras.
+     *
+     * @return a list of all installed cameras
+     */
     @NonNull
     public List<Module> getCameras() {
         Iterable<Module> filtered = Iterables.filter(components, PREDICATE_CAMERA);
         return Lists.newArrayList(filtered);
     }
 
+    /**
+     * Gets all currently installed weather boards.
+     *
+     * @return a list of all installed weather boards
+     */
     @NonNull
     public List<Module> getWeather() {
         Iterable<Module> filtered = Iterables.filter(components, PREDICATE_WEATHER);
         return Lists.newArrayList(filtered);
     }
 
+    /**
+     * Gets all currently installed slaves.
+     *
+     * @return a list of all installed slaves
+     */
     @NonNull
     public List<Slave> getSlaves() {
         return ImmutableList.copyOf(slaves);
@@ -180,7 +225,14 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
         return modulesAtSlave.get(slave);
     }
 
+    /**
+     * The AppModuleListener is the listener interface used to be notified when the module or slave information changes.
+     */
     public interface AppModuleListener {
+
+        /**
+         * Called when module or slave information changes.
+         */
         void onModulesRefreshed();
     }
 }

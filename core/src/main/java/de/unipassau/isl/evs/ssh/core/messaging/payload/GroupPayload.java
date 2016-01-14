@@ -1,8 +1,5 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 
 /**

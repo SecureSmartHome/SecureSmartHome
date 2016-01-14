@@ -114,7 +114,7 @@ public class AppRegisterNewDeviceHandler extends AbstractAppHandler implements C
         future.addListener(new FutureListener<GenerateNewRegisterTokenPayload>() {
             @Override
             public void operationComplete(Future<GenerateNewRegisterTokenPayload> future) throws Exception {
-                if (future.isSuccess()){
+                if (future.isSuccess()) {
                     handleUserRegisterResponse(future.get());
                 } else {
                     fireTokenError();
@@ -135,6 +135,9 @@ public class AppRegisterNewDeviceHandler extends AbstractAppHandler implements C
          */
         void tokenResponse(DeviceConnectInformation deviceConnectInformation);
 
+        /**
+         * Called when the request for a new token failed.
+         */
         void tokenError();
     }
 }

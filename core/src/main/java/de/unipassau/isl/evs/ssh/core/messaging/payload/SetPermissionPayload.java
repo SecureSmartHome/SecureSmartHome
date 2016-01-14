@@ -29,7 +29,7 @@ public class SetPermissionPayload implements MessagePayload {
         return permission;
     }
 
-    public Action getAction(){
+    public Action getAction() {
         return action;
     }
 }

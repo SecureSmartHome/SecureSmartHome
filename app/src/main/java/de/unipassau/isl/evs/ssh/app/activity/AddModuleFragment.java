@@ -38,7 +38,7 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_MODULE;
 
 /**
  * This fragment allows to add new sensors to the system. If this functionality is used, a message
- * containing all needed information is generated and passed to the OutgoingRouter.
+ * containing all needed information is generated and sent to master.
  *
  * @author Wolfgang Popp
  */

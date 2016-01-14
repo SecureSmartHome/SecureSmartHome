@@ -248,12 +248,31 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
      * The listener interface to receive door events.
      */
     public interface DoorListener {
+
+        /**
+         * Called when the door status changed. This happens either when the door was (un)blocked, unlatched or opened.
+         */
         void onDoorStatusChanged();
 
+        /**
+         * Called when a door (un)block action finished.
+         *
+         * @param wasSuccessful true when the action finished successfully
+         */
         void blockActionFinished(boolean wasSuccessful);
 
+        /**
+         * Called when a door unlatch action finished.
+         *
+         * @param wasSuccessful true when the action finished successfully
+         */
         void unlatchActionFinished(boolean wasSuccessful);
 
-        void cameraActionFinished(boolean wasSucessful);
+        /**
+         * Called when a camera request finished.
+         *
+         * @param wasSuccessful true when the action finished successfully
+         */
+        void cameraActionFinished(boolean wasSuccessful);
     }
 }

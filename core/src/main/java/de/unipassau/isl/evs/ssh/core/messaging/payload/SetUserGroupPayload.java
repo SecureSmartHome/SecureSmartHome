@@ -1,6 +1,5 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
-import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**

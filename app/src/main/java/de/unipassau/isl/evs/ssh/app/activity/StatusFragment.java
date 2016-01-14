@@ -29,8 +29,8 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.RENAME_MODULE;
 
 /**
- * This activity allows to visualize connected Modules and slaves. If this functionality is used a
- * message, requesting all needed information, is generated and passed to the OutgoingRouter.
+ * This activity allows to visualize connected modules and slaves. It also allows to delete modules and slaves. If this
+ * functionality is used a message, requesting all needed information, is generated and passed to the OutgoingRouter.
  *
  * @author Wolfgang Popp
  */
@@ -93,6 +93,7 @@ public class StatusFragment extends BoundFragment {
         }
     };
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_status, container, false);
         slaveListView = (ListView) view.findViewById(R.id.deviceStatusListView);

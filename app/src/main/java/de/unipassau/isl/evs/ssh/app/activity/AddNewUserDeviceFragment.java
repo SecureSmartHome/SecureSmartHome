@@ -31,9 +31,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 
 /**
- * This fragment allows to enter information describing new user devices and provide a QR-Code
- * which a given user device has to scan. If this functionality is used a message,
- * containing all needed information, is generated and passed to the OutgoingRouter.
+ * This fragment is used to start the process of registering a new user. The name and the group of the new user can be
+ * set in this fragment.
  *
  * @author Wolfgang Popp
  */
