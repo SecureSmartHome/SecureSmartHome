@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteConstraintException;
 
 import com.google.common.base.Strings;
 
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -84,7 +83,7 @@ public class HolidayController extends AbstractComponent {
      * @param to   End point in time of the range.
      * @return List of the entries found.
      */
-    public List<HolidayAction> getHolidayActions(Date from, Date to) {
+    public List<HolidayAction> getHolidayActions(long from, long to) {
         Cursor holidayEntriesCursor = databaseConnector.executeSql("select "
                         + "h." + DatabaseContract.HolidayLog.COLUMN_ACTION
                         + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
@@ -95,7 +94,7 @@ public class HolidayController extends AbstractComponent {
                         + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
                         + " where " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
                         + " >= ? and " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " <= ?",
-                new String[]{String.valueOf(from.getTime()), String.valueOf(to.getTime())});
+                new String[]{String.valueOf(from), String.valueOf(to)});
         List<HolidayAction> actions = new LinkedList<>();
         while (holidayEntriesCursor.moveToNext()) {
             actions.add(new HolidayAction(
@@ -113,7 +112,7 @@ public class HolidayController extends AbstractComponent {
                         + " is NULL"
                         + " and " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP
                         + " >= ? and " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + " <= ?",
-                new String[]{String.valueOf(from.getTime()), String.valueOf(to.getTime())});
+                new String[]{String.valueOf(from), String.valueOf(to)});
         while (holidayEntriesCursor.moveToNext()) {
             actions.add(new HolidayAction(
                             null,

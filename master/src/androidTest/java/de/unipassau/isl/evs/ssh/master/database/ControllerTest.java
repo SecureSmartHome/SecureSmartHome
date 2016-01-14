@@ -567,12 +567,12 @@ public class ControllerTest extends InstrumentationTestCase {
         slaveController.addSlave(new Slave("slave", device1, new byte[]{0, 0}));
         slaveController.addModule(new Module("module", device1, CoreConstants.ModuleType.Light, new USBAccessPoint(0)));
 
-        Date d1 = new Date(System.currentTimeMillis());
+        long d1 = System.currentTimeMillis();
         Thread.sleep(1000);
         holidayController.addHolidayLogEntryNow("1", null);
         holidayController.addHolidayLogEntryNow("2", "module");
         Thread.sleep(1000);
-        Date d2 = new Date(System.currentTimeMillis());
+        long d2 = System.currentTimeMillis();
         Thread.sleep(1000);
         holidayController.addHolidayLogEntryNow("3", null);
         holidayController.addHolidayLogEntryNow("4", "module");
@@ -584,7 +584,7 @@ public class ControllerTest extends InstrumentationTestCase {
             assertTrue(true);
         }
         Thread.sleep(1000);
-        Date d3 = new Date(System.currentTimeMillis());
+        long d3 = System.currentTimeMillis();
         Thread.sleep(1000);
 
         List<HolidayAction> d1d2 = holidayController.getHolidayActions(d1, d2);

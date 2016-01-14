@@ -179,7 +179,7 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
     }
 
     private void blockDoor(boolean isBlocked) {
-        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorSensors();
+        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorBuzzers();
         if (doors.size() < 1) {
             Log.e(TAG, "Could not (un)block the door. No door sensor installed");
             fireBlockActionFinished(false);
