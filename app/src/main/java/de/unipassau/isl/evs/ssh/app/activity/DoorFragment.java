@@ -25,11 +25,6 @@ import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.LOCK_DOOR;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.TAKE_CAMERA_PICTURE;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR_ON_HOLIDAY;
-
 /**
  * The DoorFragment provides a UI to interact with the door. This fragment provides UI components to block, unblock,
  * unlatch the door. It can display a picture from a camera that is connected to a slave in the SecureSmartHome.
@@ -186,7 +181,8 @@ public class DoorFragment extends BoundFragment {
         }
 
         if (!handler.isOpen() && !handler.isBlocked()) {
-            if (((MainActivity) getActivity()).hasPermission(Permission.UNLATCH_DOOR) || ((MainActivity) getActivity()).hasPermission(Permission.UNLATCH_DOOR_ON_HOLIDAY)) {
+            MainActivity activity = (MainActivity) getActivity();
+            if (activity.hasPermission(Permission.UNLATCH_DOOR) || activity.hasPermission(Permission.UNLATCH_DOOR_ON_HOLIDAY)) {
                 handler.unlatchDoor();
             } else {
                 Toast.makeText(getActivity(), R.string.you_can_not_unlatch_door, Toast.LENGTH_SHORT).show();
