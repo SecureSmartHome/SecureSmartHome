@@ -21,7 +21,6 @@ import android.widget.Toast;
 import com.google.common.collect.Lists;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -30,6 +29,7 @@ import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
+import de.unipassau.isl.evs.ssh.core.database.dto.NamedDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.DELETE_USERDEVICE_DIALOG;
@@ -236,18 +236,7 @@ public class ListUserDeviceFragment extends BoundFragment {
             Set<UserDevice> allUserDevices = handler.getAllGroupMembers(group);
 
             userDevices = Lists.newArrayList(allUserDevices);
-            Collections.sort(userDevices, new Comparator<UserDevice>() {
-                @Override
-                public int compare(UserDevice lhs, UserDevice rhs) {
-                    if (lhs.getName() == null) {
-                        return rhs.getName() == null ? 0 : 1;
-                    }
-                    if (rhs.getName() == null) {
-                        return -1;
-                    }
-                    return lhs.getName().compareTo(rhs.getName());
-                }
-            });
+            Collections.sort(userDevices, NamedDTO.COMPARATOR);
         }
 
         @Override

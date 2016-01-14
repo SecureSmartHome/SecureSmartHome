@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.google.common.collect.Lists;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +23,7 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppClimateHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.database.dto.NamedDTO;
 
 /**
  * This Fragment displays current data of the WeatherSensor. {@link AppClimateHandler} delivers this data.
@@ -110,18 +110,7 @@ public class ClimateFragment extends BoundFragment {
             handler.maybeUpdateModules();
             final Map<Module, AppClimateHandler.ClimateStatus> climateStatus = handler.getAllClimateModuleStates();
             climateSensorModules = Lists.newArrayList(climateStatus.keySet());
-            Collections.sort(climateSensorModules, new Comparator<Module>() {
-                @Override
-                public int compare(Module lhs, Module rhs) {
-                    if (lhs.getName() == null) {
-                        return rhs.getName() == null ? 0 : 1;
-                    }
-                    if (rhs.getName() == null) {
-                        return -1;
-                    }
-                    return lhs.getName().compareTo(rhs.getName());
-                }
-            });
+            Collections.sort(climateSensorModules, NamedDTO.COMPARATOR);
         }
 
         /**

@@ -42,6 +42,7 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
     private Camera.Parameters params;
 
     private byte[] lastSnapshot;
+    private boolean imageSent = false;
 
     public OdroidCamera() {
         super(SlaveContainer.class);
@@ -51,7 +52,6 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.v(TAG, "onCreate()");
-        doBind();
 
         setContentView(R.layout.activity_camera);
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
@@ -59,18 +59,16 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
     }
 
     @Override
-    protected void onDestroy() {
-        releaseCamera();
-        doUnbind();
-        super.onDestroy();
-    }
-
-    @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v(TAG, "surfaceCreated(holder = [" + holder + "])");
         try {
             camera = Camera.open();
-            params = camera.getParameters();
+            if (camera == null) {
+                Log.e(TAG, "No camera available");
+                finish();
+            } else {
+                params = camera.getParameters();
+            }
         } catch (RuntimeException e) {
             Log.e(TAG, "Could not open camera", e);
             camera = null;
@@ -93,6 +91,52 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
         }
     }
 
+    @Override
+    public void onPreviewFrame(byte[] raw, Camera cam) {
+        Log.d(TAG, "onPreviewFrame(raw = byte[" + raw.length + "], cam = [" + cam + "])");
+        lastSnapshot = raw;
+        sendImage();
+    }
+
+    @Override
+    public void onContainerConnected(Container container) {
+        super.onContainerConnected(container);
+        sendImage();
+    }
+
+    @Override
+    public void onContainerDisconnected() {
+        if (!imageSent) {
+            Message reply = new Message(new ErrorPayload("OdroidCamera Activity finished without taking a picture. Is a camera installed?"));
+            requireComponent(OutgoingRouter.KEY).sendReply(getReplyToMessage(), reply);
+        }
+        super.onContainerDisconnected();
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        Log.v(TAG, "surfaceDestroyed(holder = [" + holder + "])");
+        releaseCamera();
+    }
+
+    @Override
+    protected void onDestroy() {
+        releaseCamera();
+        super.onDestroy();
+    }
+
+    private void releaseCamera() {
+        Log.v(TAG, "Releasing camera " + camera);
+        if (camera == null) return;
+        try {
+            camera.stopPreview();
+        } catch (RuntimeException e) {
+            Log.i(TAG, "Could not stop preview, probably no camera connected", e);
+        }
+        camera.release();
+        camera = null;
+    }
+
     private int getImageSize() {
         List<Camera.Size> sizes = params.getSupportedPreviewSizes();
         for (Camera.Size size : sizes) {
@@ -103,38 +147,7 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
         return size;
     }
 
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.v(TAG, "surfaceDestroyed(holder = [" + holder + "])");
-        releaseCamera();
-    }
-
-    private void releaseCamera() {
-        Log.v(TAG, "Releasing camera " + camera);
-        if (camera == null) return;
-
-        try {
-            camera.stopPreview();
-        } catch (RuntimeException e) {
-            Log.i(TAG, "Could not stop preview, probably no camera connected", e);
-        }
-        camera.release();
-        camera = null;
-    }
-
-    @Override
-    public void onPreviewFrame(byte[] raw, Camera cam) {
-        Log.d(TAG, "onPreviewFrame(raw = byte[" + raw.length + "], cam = [" + cam + "])");
-        lastSnapshot = raw;
-        sendImageOrError();
-    }
-
-    @Override
-    public void onContainerConnected(Container container) {
-        sendImageOrError();
-    }
-
-    private void sendImageOrError() {
+    private void sendImage() {
         if (getContainer() == null || lastSnapshot == null) {
             sendError();
             return;
@@ -147,7 +160,12 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
         try (ByteArrayOutputStream outStream = new ByteArrayOutputStream()) {
             yuvimage.compressToJpeg(rect, 80, outStream);
             byte[] jpegData = outStream.toByteArray();
-            sendCompressedImage(jpegData);
+
+            CameraPayload payload = new CameraPayload(getCameraID(), getModuleName());
+            payload.setPicture(jpegData);
+            Message reply = new Message(payload);
+            requireComponent(OutgoingRouter.KEY).sendReply(getReplyToMessage(), reply);
+            imageSent = true;
 
             //File file = new File(Environment.getExternalStorageDirectory().getPath(),
             //        "snapshot" + System.currentTimeMillis() + ".jpg");
@@ -158,26 +176,6 @@ public class OdroidCamera extends BoundActivity implements SurfaceHolder.Callbac
         }
 
         finish();
-    }
-
-    @Override
-    public void onContainerDisconnected() {
-        if (lastSnapshot == null) {
-            sendError();
-        }
-        super.onContainerDisconnected();
-    }
-
-    private void sendCompressedImage(byte[] jpegData) {
-        CameraPayload payload = new CameraPayload(getCameraID(), getModuleName());
-        payload.setPicture(jpegData);
-        Message reply = new Message(payload);
-        requireComponent(OutgoingRouter.KEY).sendReply(getReplyToMessage(), reply);
-    }
-
-    private void sendError() {
-        Message reply = new Message(new ErrorPayload("Could not load image. Is a camera installed?"));
-        requireComponent(OutgoingRouter.KEY).sendReply(getReplyToMessage(), reply);
     }
 
     public static Intent getIntent(Context context, int cameraId, String moduleName, Message.AddressedMessage replyToMessage) {

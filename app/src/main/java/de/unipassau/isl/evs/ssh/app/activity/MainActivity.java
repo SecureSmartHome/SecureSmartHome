@@ -403,7 +403,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
                 @Override
                 public void run() {
                     showConnectionOverlay(getString(R.string.warn_client_rejected));
-                    shutdownService();
+                    forceStopService();
                     finish();
 
                     Intent intent = new Intent(MainActivity.this, RejectedActivity.class);
