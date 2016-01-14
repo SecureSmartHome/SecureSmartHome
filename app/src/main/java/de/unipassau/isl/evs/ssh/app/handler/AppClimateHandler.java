@@ -32,39 +32,10 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
     private final List<ClimateHandlerListener> listeners = new ArrayList<>();
     private final Map<Module, ClimateStatus> climateStatusMapping = new HashMap<>();
 
-    final private AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
-        @Override
-        public void onModulesRefreshed() {
-            update();
-        }
-    };
-
     @Override
     public void init(Container container) {
         super.init(container);
-        requireComponent(AppModuleHandler.KEY).addAppModuleListener(listener);
-    }
-
-    @Override
-    public void destroy() {
-        requireComponent(AppModuleHandler.KEY).removeAppModuleListener(listener);
-        super.destroy();
-    }
-
-    /**
-     * Request current weatherSensor data.
-     *
-     * @param payload MessagePayload
-     * @param message MessageContent
-     */
-    public void toggleClimate(ClimatePayload payload, String message) {
-        setClimate(payload, message);
-    }
-
-    @Override
-    public void init(Container container) {
-        super.init(container);
-        for (Module module : getComponent(AppModuleHandler.KEY).getWeather()) {
+        for (Module module : container.require(AppModuleHandler.KEY).getWeather()) {
             requestClimateStatus(module);
         }
     }
@@ -111,15 +82,6 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
             requestClimateStatus(module);
         }
         return status;
-    }
-
-    private void update() {
-        climateStatusMapping.clear();
-        List<Module> lights = requireComponent(AppModuleHandler.KEY).getLights();
-        for (Module m : lights) {
-            climateStatusMapping.put(m, new ClimateStatus(0, 0, 0, 0, 0, 0, 0, 0));
-            requestClimateStatus(m);
-        }
     }
 
     /**
@@ -229,11 +191,6 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         sendMessageToMaster(RoutingKeys.MASTER_REQUEST_WEATHER_INFO, new Message(climatePayload));
     }
 
-    private void setClimate(ClimatePayload payload, String s) {
-        ClimatePayload climatePayload = new ClimatePayload(payload, s);
-        sendMessageToMaster(RoutingKeys.MASTER_REQUEST_WEATHER_INFO, new Message(climatePayload));
-    }
-
     /**
      * Handles received Message from MasterClimateHandler. Refreshes SensorData.
      *
@@ -270,6 +227,9 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         listeners.remove(listener);
     }
 
+    /**
+     * TODO Andi: javadoc (Phil, 2016-01-14)
+     */
     public void maybeUpdateModules() {
         List<Module> weatherBoards = requireComponent(AppModuleHandler.KEY).getWeather();
         if (weatherBoards.size() > climateStatusMapping.keySet().size()) {
@@ -285,6 +245,9 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         void statusChanged(Module module);
     }
 
+    /**
+     * TODO Andi: javadoc (Phil, 2016-01-14)
+     */
     public class ClimateStatus {
         private double temp1;
         private double temp2;
