@@ -19,6 +19,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_CAMERA_BROADCAST;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_RING;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_STATUS_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
@@ -50,6 +51,7 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
         return new RoutingKey[]{
                 APP_DOOR_RING,
                 APP_DOOR_STATUS_UPDATE,
+                APP_CAMERA_BROADCAST,
                 MASTER_DOOR_BLOCK_REPLY,
                 MASTER_DOOR_BLOCK_ERROR,
                 MASTER_DOOR_UNLATCH_REPLY,
@@ -73,6 +75,9 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
                 fireUnlatchActionFinished(false);
             } else if (MASTER_CAMERA_GET_REPLY.matches(message)) {
                 picture = MASTER_CAMERA_GET_REPLY.getPayload(message).getPicture();
+                fireCameraActionFinished(true);
+            } else if (APP_CAMERA_BROADCAST.matches(message)){
+                picture = APP_CAMERA_BROADCAST.getPayload(message).getPicture();
                 fireCameraActionFinished(true);
             } else if (MASTER_CAMERA_GET_ERROR.matches(message)) {
                 fireCameraActionFinished(false);

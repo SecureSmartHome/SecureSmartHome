@@ -8,10 +8,12 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_CAMERA_BROADCAST;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_CAMERA_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_CAMERA_GET_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_CAMERA_GET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.BELL_RANG;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_CAMERA_STATUS;
 
 /**
@@ -67,6 +69,11 @@ public class MasterCameraHandler extends AbstractMasterHandler {
     private void handleResponse(Message.AddressedMessage message, CameraPayload cameraPayload) {
         Message reply = new Message(cameraPayload);
         Message.AddressedMessage originalMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
-        sendReply(originalMessage, reply);
+        if (originalMessage != null) {
+            sendReply(originalMessage, reply);
+        } else {
+            //Broadcast picture too all devices that may also be informed that the bell rang
+            sendMessageToAllDevicesWithPermission(reply, BELL_RANG, null, APP_CAMERA_BROADCAST);
+        }
     }
 }
