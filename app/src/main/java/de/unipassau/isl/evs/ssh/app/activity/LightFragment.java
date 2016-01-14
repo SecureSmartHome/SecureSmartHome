@@ -29,6 +29,8 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT;
+
 /**
  * This fragment allows to display the status of all registered lights.
  * The fragment gets the information from the {@link AppLightHandler}.
@@ -197,7 +199,11 @@ public class LightFragment extends BoundFragment {
                 public void onClick(View v) {
                     final AppLightHandler appLightHandler = getComponent(AppLightHandler.KEY);
                     if (appLightHandler != null) {
-                        appLightHandler.toggleLight(module);
+                        if (hasPermission(new Permission(SWITCH_LIGHT))) {
+                            appLightHandler.toggleLight(module);
+                        } else {
+                            Toast.makeText(getActivity(), R.string.you_can_not_switch_light, Toast.LENGTH_SHORT).show();
+                        }
                     } else {
                         Log.w(TAG, "Could not switch light, AppLightHandler not available");
                     }

@@ -274,7 +274,10 @@
     <string name="could_not_delete_group">Could not delete group</string>
     <string name="you_can_not_add_groups">You can\'t add groups</string>
     <string name="you_can_not_add_new_modules">You can\'t add new modules</string>
-    <string name="could_not_switch_light">Could not switch light. Maybe missing Permission</string>
+    <string name="could_not_switch_light">Could not switch light.</string>
     <string name="you_can_not_add_new_users">You can\'t add new users</string>
     <string name="you_can_not_edit_user_devices">You can\'t edit user devices</string>
+    <string name="you_can_not_set_permissions">You can\'t set permissions</string>
+    <string name="you_can_not_switch_light">You can\'t switch the light</string>
+    <string name="you_can_not_start_or_stop_the_holiday_simulation">You can\'t start or stop the holiday simulation</string>
 </resources>

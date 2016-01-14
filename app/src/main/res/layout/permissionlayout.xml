@@ -25,9 +25,10 @@
 
         <Button
             android:id="@+id/listpermission_permission_button"
-            android:layout_width="98dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
+            android:singleLine="true"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold" />
     </TableRow>

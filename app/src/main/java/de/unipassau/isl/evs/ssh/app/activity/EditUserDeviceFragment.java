@@ -375,7 +375,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                             }
                             updatePermissionList();
                         } else {
-                            Toast.makeText(getActivity(), "Missing permission.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), R.string.you_can_not_set_permissions, Toast.LENGTH_SHORT).show();
                         }
 
                     }

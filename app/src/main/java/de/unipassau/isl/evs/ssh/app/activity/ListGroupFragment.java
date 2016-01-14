@@ -68,7 +68,6 @@ public class ListGroupFragment extends BoundFragment {
             });
         }
     };
-    //TODO Wolfgang/Phil: add Listener (Wolfgang, 2016-01-13)
     private GroupListAdapter adapter;
     private ListView groupList;
 
@@ -120,7 +119,6 @@ public class ListGroupFragment extends BoundFragment {
                     ((MainActivity) getActivity()).showFragmentByClass(EditGroupFragment.class, bundle);
                     return true;
                 } else {
-                    // TODO Phil: add love (Phil, 2016-01-13)
                     Toast.makeText(getActivity(), R.string.you_can_not_edit_groups, Toast.LENGTH_SHORT).show();
                     return false;
                 }
