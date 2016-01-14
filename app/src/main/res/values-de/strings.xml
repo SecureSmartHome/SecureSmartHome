@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--translation @author Andreas Bucher-->
+<!--translation @author Phil Werli-->
 <resources>
-
     <!-- Permission names -->
     <string name="perm_add_group">Hinzufügen von Gruppen</string>
     <string name="perm_add_odroid">Hinzufügen von Odroids</string>
