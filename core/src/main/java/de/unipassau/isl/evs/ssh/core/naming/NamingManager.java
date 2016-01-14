@@ -41,6 +41,11 @@ public class NamingManager extends AbstractComponent {
         this.isMaster = isMaster;
     }
 
+    /**
+     * Checks whether or not a this NamingManager is running on the master
+     *
+     * @return true if running on master
+     */
     public boolean isMaster() {
         return isMaster;
     }
@@ -67,6 +72,12 @@ public class NamingManager extends AbstractComponent {
         return masterID;
     }
 
+    /**
+     * Sets the master id. On client devices the master id is unknown until the handshake completed successfully. When
+     * the handshake completed the id can be set with this method.
+     *
+     * @param masterID the master's id
+     */
     public void setMasterID(DeviceID masterID) {
         if (masterID == null) throw new NullPointerException("masterID");
         if (this.masterID != null) throw new IllegalStateException("masterID already known");
@@ -101,6 +112,13 @@ public class NamingManager extends AbstractComponent {
         return masterCert;
     }
 
+    /**
+     * Sets the master's certificate. On client devices the master certificate is unknown on first startup. During the
+     * handshake the master's certificate is received. When the handshake completed the certificate can be saved with
+     * this method.
+     *
+     * @param masterCert the master's id
+     */
     public void setMasterCertificate(X509Certificate masterCert) throws CertificateException, NoSuchAlgorithmException, KeyStoreException {
         if (masterCert == null) throw new NullPointerException("masterCert");
         if (this.masterCert != null) throw new IllegalStateException("masterCert already known");
@@ -120,6 +138,8 @@ public class NamingManager extends AbstractComponent {
     }
 
     /**
+     * Checks whether master is known.
+     *
      * @return {@code true}, if the ID of the Master is known, i.e. it is stored in the SharedPreferences
      */
     public boolean isMasterIDKnown() {
@@ -179,15 +199,6 @@ public class NamingManager extends AbstractComponent {
     @NonNull
     public PublicKey getPublicKey(DeviceID id) throws UnresolvableNamingException {
         return getCertificate(id).getPublicKey();
-    }
-
-    /**
-     * @deprecated use {@link DeviceID#fromCertificate(X509Certificate)} instead
-     */
-    @Deprecated
-    @NonNull
-    public DeviceID getDeviceID(X509Certificate cert) {
-        return DeviceID.fromCertificate(cert);
     }
 
     /**

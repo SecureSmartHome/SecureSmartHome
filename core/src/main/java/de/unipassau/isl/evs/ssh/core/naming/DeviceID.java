@@ -16,6 +16,10 @@ import java.util.Arrays;
  */
 public final class DeviceID implements Serializable {
     private static final String ID_MD_ALG = "SHA-256";
+
+    /**
+     * The length of a device id in bytes
+     */
     public static final int ID_LENGTH = 32;
 
     private static final byte[] NO_DEVICE_BYTES = new byte[ID_LENGTH];
@@ -24,6 +28,10 @@ public final class DeviceID implements Serializable {
         Arrays.fill(NO_DEVICE_BYTES, ((byte) 0));
     }
 
+    /**
+     * A device id for a dummy device. Can be used if no device is available but a device id is needed. This approach
+     * fixes a bootstrapping problem during the very first handshake.
+     */
     public static final DeviceID NO_DEVICE = new DeviceID(NO_DEVICE_BYTES);
 
     private final String id;
@@ -40,6 +48,11 @@ public final class DeviceID implements Serializable {
         validateLength();
     }
 
+    /**
+     * Constructs a new DeviceID from the given byte array.
+     *
+     * @param bytes a
+     */
     public DeviceID(byte[] bytes) {
         this.id = Base64.encodeToString(bytes, Base64.NO_WRAP).trim();
         this.bytes = Arrays.copyOf(bytes, bytes.length);
@@ -52,6 +65,12 @@ public final class DeviceID implements Serializable {
         }
     }
 
+    /**
+     * Creates a new Device id from the given certificate.
+     *
+     * @param cert the certificate to create the id from
+     * @return the device id corresponding to the certificate
+     */
     public static DeviceID fromCertificate(X509Certificate cert) {
         MessageDigest md;
         try {
@@ -86,6 +105,11 @@ public final class DeviceID implements Serializable {
         return id;
     }
 
+    /**
+     * Gets a byte representation of this device id.
+     *
+     * @return the byte representation of this id
+     */
     public byte[] getIDBytes() {
         return Arrays.copyOf(bytes, bytes.length);
     }
@@ -108,6 +132,11 @@ public final class DeviceID implements Serializable {
         return id.hashCode();
     }
 
+    /**
+     * Returns a short description of this device id.
+     *
+     * @return the short description
+     */
     public String toShortString() {
         return id.substring(0, Math.min(id.length(), 7));
     }
