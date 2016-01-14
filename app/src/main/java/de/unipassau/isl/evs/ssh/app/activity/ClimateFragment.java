@@ -107,6 +107,7 @@ public class ClimateFragment extends BoundFragment {
                 return;
             }
 
+            handler.maybeUpdateModules();
             final Map<Module, AppClimateHandler.ClimateStatus> climateStatus = handler.getAllClimateModuleStates();
             climateSensorModules = Lists.newArrayList(climateStatus.keySet());
             Collections.sort(climateSensorModules, new Comparator<Module>() {
