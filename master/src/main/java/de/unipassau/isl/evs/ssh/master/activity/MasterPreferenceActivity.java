@@ -24,8 +24,11 @@ public class MasterPreferenceActivity extends MasterStartUpActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!isSwitching()) { //TODO Niko: check if MasterPreferenceActivity can be displayed after setup (Niko, 2016-01-13)
+        if (!isSwitching()) {
             setContentView(R.layout.activity_master_preference);
+            findViewById(R.id.textViewInfo).setVisibility(
+                    getSharedPreferences().getBoolean(PREF_PREFERENCES_SET, false) ? View.GONE : View.VISIBLE
+            );
             findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
