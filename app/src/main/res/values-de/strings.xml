@@ -240,4 +240,5 @@
     <string name="you_can_not_add_new_users">Sie können keine neuen Nutzer hinzufügen</string>
     <string name="you_can_not_edit_groups">Sie können Gruppen nicht bearbeiten</string>
     <string name="you_cant_delete_users">Sie können Nutzer nicht entfernen</string>
+    <string name="you_can_not_edit_users">Sie können Benutzer nicht bearbeiten</string>
 </resources>
