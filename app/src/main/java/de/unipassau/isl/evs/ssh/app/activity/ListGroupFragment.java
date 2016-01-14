@@ -58,7 +58,9 @@ public class ListGroupFragment extends BoundFragment {
             maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (event.getType().equals(UserConfigurationEvent.EventType.GROUP_ADD)) {
+                    if (event.getType().equals(UserConfigurationEvent.EventType.PUSH)) {
+                        update();
+                    } else if (event.getType().equals(UserConfigurationEvent.EventType.GROUP_ADD)) {
                         if (event.wasSuccessful()) {
                             Toast.makeText(getActivity(), R.string.group_created, Toast.LENGTH_SHORT).show();
                             update();
