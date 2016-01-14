@@ -110,10 +110,14 @@ public class EditGroupFragment extends BoundFragment {
             @Override
             public void onClick(View v) {
                 if (activity.hasPermission(DELETE_MODULE)) {
-                    handler.removeGroup(group);
-                    Log.i(TAG, "Group " + group.getName() + " removed.");
-                    ((MainActivity) getActivity()).showFragmentByClass(ListGroupFragment.class);
-                    // TODO Phil: better handling (Phil, 2016-01-13)
+                    if (!handler.getAllGroupMembers(group).isEmpty()) {
+                        handler.removeGroup(group);
+                        Log.i(TAG, "Group " + group.getName() + " removed.");
+                        ((MainActivity) getActivity()).showFragmentByClass(ListGroupFragment.class);
+                        // TODO Phil: better handling (Phil, 2016-01-13)
+                    } else {
+                        Toast.makeText(getActivity(), R.string.you_can_not_remove_not_empty_group, Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     Toast.makeText(getActivity(), R.string.you_can_not_remove_groups, Toast.LENGTH_SHORT).show();
                 }

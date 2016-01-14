@@ -293,6 +293,7 @@
     <string name="perm_desc_door_unlocked">Allows you to check if the door is unlocked.</string>
     <string name="perm_desc_holiday_mode_switched_off">Allows you to check if the holiday simulation is inactive.</string>
     <string name="perm_desc_holiday_mode_switched_on">Allows you to check if the holiday simulation is active.</string>
+
     <string name="you_can_not_remove_users">You can\'t remove users</string>
     <string name="you_can_not_remove_modules">You can\'t remove modules</string>
     <string name="you_can_not_add_modules">You can\'t add new modules</string>
@@ -304,4 +305,5 @@
     <string name="master_port">Master Port</string>
     <string name="master_host_address">Master Host Address</string>
     <string name="please_enter_master_address">Please enter the address of the Master that will be used if it can\'t be found on the local network. This address will be used when connecting from outside your home network, so the address shouldn\'t change often and the port must be made available through the firewall.</string>
+    <string name="you_can_not_remove_not_empty_group">You can\'t remove this group. There are still users in it</string>
 </resources>
