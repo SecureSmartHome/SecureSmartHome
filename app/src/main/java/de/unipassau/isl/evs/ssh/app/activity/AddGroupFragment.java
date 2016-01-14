@@ -22,7 +22,6 @@ import java.util.Set;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
-import de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
@@ -34,20 +33,6 @@ import de.unipassau.isl.evs.ssh.core.sec.Permission;
  */
 public class AddGroupFragment extends BoundFragment {
     private static final String TAG = AddNewUserDeviceFragment.class.getSimpleName();
-    private final AppUserConfigurationHandler.UserInfoListener userInfoListener = new AppUserConfigurationHandler.UserInfoListener() {
-        @Override
-        public void userInfoUpdated(final UserConfigurationEvent event) {
-            maybeRunOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (event.getType().equals(UserConfigurationEvent.EventType.GROUP_ADD)) {
-                        String toastText = getResources().getString(R.string.group_created);
-                        Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-        }
-    };
     private Spinner spinner;
     private EditText inputGroupName;
 
@@ -59,7 +44,6 @@ public class AddGroupFragment extends BoundFragment {
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        container.require(AppUserConfigurationHandler.KEY).addUserInfoListener(userInfoListener);
         buildView();
     }
 
@@ -91,40 +75,30 @@ public class AddGroupFragment extends BoundFragment {
         inputGroupName = (EditText) getActivity().findViewById(R.id.addgroupfragment_group_name);
 
         spinner = (Spinner) getActivity().findViewById(R.id.addgroupfragment_spinner);
-        final ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, sortedTemplates);
-        spinner.setAdapter(adapter);
+
+        spinner.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, sortedTemplates));
 
         final Button button = (Button) getActivity().findViewById(R.id.addgroupfragment_button);
         button.setOnClickListener(new View.OnClickListener() {
+                                      final MainActivity activity = (MainActivity) getActivity();
                                       @Override
                                       public void onClick(View v) {
                                           if (checkInputFields() && isContainerConnected()) {
-                                              if (((MainActivity) getActivity()).hasPermission(Permission.ADD_GROUP)) {
+                                              if (activity.hasPermission(Permission.ADD_GROUP)) {
                                                   final String name = inputGroupName.getText().toString();
                                                   final String template = ((String) spinner.getSelectedItem());
                                                   handler.addGroup(new Group(name, template));
                                                   Log.i(TAG, "Group " + name + " added.");
+                                                  activity.showFragmentByClass(ListGroupFragment.class);
                                               } else {
-                                                  Toast.makeText(getActivity(), R.string.you_can_not_add_groups, Toast.LENGTH_SHORT).show();
+                                                  Toast.makeText(activity, R.string.you_can_not_add_groups, Toast.LENGTH_SHORT).show();
                                               }
                                           } else {
-                                              ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_cannot_add_group));
+                                              ErrorDialog.show(activity, getActivity().getResources().getString(R.string.error_cannot_add_group));
                                           }
                                       }
                                   }
         );
-    }
-
-    @Override
-    public void onContainerDisconnected() {
-        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
-        if (handler == null) {
-            Log.i(TAG, "Container not yet connected!");
-        } else {
-            handler.removeUserInfoListener(userInfoListener);
-        }
-        super.onContainerDisconnected();
     }
 
     /**

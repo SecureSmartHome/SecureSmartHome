@@ -144,7 +144,7 @@
     <string name="could_not_edit_user_device_name">Nutzername konnte nicht bearbeitet werden</string>
     <string name="could_not_grant">Berechtigung konnte nicht erteilt werden</string>
     <string name="could_not_revoke">Berechtigung konnte nicht entzogen werden</string>
-    <string name="could_not_set_group_name">Gruppenname konnte nicht vergeben werden</string>
+    <string name="could_not_edit_group">Gruppenname konnte nicht vergeben werden</string>
     <string name="could_not_switch_holiday">Die Urlaubssimulation konnte nicht gestartet werden</string>
     <string name="could_not_switch_light">Licht konnte nicht geschalten werden. Eventuell fehlt Ihnen die Berechtigung dazu</string>
     <string name="could_note_set_group_template">Gruppenvorlage konnte nicht gesetzt werden</string>

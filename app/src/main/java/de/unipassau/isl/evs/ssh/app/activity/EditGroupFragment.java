@@ -110,7 +110,7 @@ public class EditGroupFragment extends BoundFragment {
             @Override
             public void onClick(View v) {
                 if (activity.hasPermission(DELETE_MODULE)) {
-                    if (!handler.getAllGroupMembers(group).isEmpty()) {
+                    if (handler.getAllGroupMembers(group).isEmpty()) {
                         handler.removeGroup(group);
                         Log.i(TAG, "Group " + group.getName() + " removed.");
                         ((MainActivity) getActivity()).showFragmentByClass(ListGroupFragment.class);

@@ -253,10 +253,10 @@
     <string name="group_one_member">%s is the only member.</string>
     <string name="group_many_members">%1$s and %2$s and more are members.</string>
     <string name="group_two_member">%1$s and %2$s are members.</string>
-    <string name="group_created">Group created.</string>
+    <string name="group_created">Group created</string>
     <string name="missingTemplates">Missing templates</string>
-    <string name="group_edited">Group %s edited.</string>
-    <string name="group_removed">Group %s removed.</string>
+    <string name="group_edited">Group %s edited</string>
+    <string name="group_removed">Group %s removed</string>
     <string name="delete_confirmation">Are you sure you want to delete \'%s\'?</string>
     <string name="weather_service_failed_title">Weather service failed.</string>
     <string name="weather_service_failed_text">Weather service was not able to retrieve data for %s</string>
@@ -276,7 +276,7 @@
     <string name="could_not_edit_user_device_name">Could not edit user device name.</string>
     <string name="could_not_edit_user_device_group">Could not edit user device group.</string>
     <string name="you_can_not_edit_groups">You can\'t edit groups</string>
-    <string name="could_not_set_group_name">Could not set group name.</string>
+    <string name="could_not_edit_group">Could not edit group</string>
     <string name="could_note_set_group_template">Could not set group template.</string>
     <string name="could_not_delete_group">Could not delete group.</string>
     <string name="you_can_not_add_groups">You can\'t add groups</string>
@@ -306,4 +306,10 @@
     <string name="master_host_address">Master Host Address</string>
     <string name="please_enter_master_address">Please enter the address of the Master that will be used if it can\'t be found on the local network. This address will be used when connecting from outside your home network, so the address shouldn\'t change often and the port must be made available through the firewall.</string>
     <string name="you_can_not_remove_not_empty_group">You can\'t remove this group. There are still users in it</string>
+    <string name="edit_group_success">Group edited</string>
+    <string name="delete_group_success">Group deleted</string>
+    <string name="edit_user_success">User edited</string>
+    <string name="delete_user_success">User deleted</string>
+    <string name="could_not_edit_user">Could not edit user</string>
+    <string name="could_not_delete_user">Could not remove user</string>
 </resources>
