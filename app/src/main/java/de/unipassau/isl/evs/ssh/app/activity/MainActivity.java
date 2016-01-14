@@ -212,7 +212,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
 
     @Nullable
     private Class getInitialFragment() {
-        if (isRegistered()) {
+        if (!isRegistered()) {
             return WelcomeScreenFragment.class;
         }
 
@@ -266,8 +266,10 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
      */
     public void showFragmentByClass(Class clazz, Bundle bundle) {
         Class classToShow = clazz;
+        final boolean isRegistered = isRegistered();
         final Permission permission = permissionForFragment.get(classToShow);
-        if (permission != null && !hasPermission(permission)) {
+
+        if (permission != null && !hasPermission(permission) && isRegistered) {
             Toast.makeText(this, String.format(getString(R.string.fragment_access_denied), permission.toLocalizedString(this)), Toast.LENGTH_SHORT).show();
             return;
         }
@@ -278,7 +280,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         }
 
         // avoid leaving the welcome fragment before registration
-        if (!isRegistered()) {
+        if (!isRegistered) {
             classToShow = WelcomeScreenFragment.class;
         }
 
