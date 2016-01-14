@@ -106,11 +106,11 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
     @Override
     public void init(Container container) {
+        super.init(container);
         if (getContainer() != null) {
             Scheduler scheduler = getContainer().require(Scheduler.KEY);
             PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
             scheduler.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), SCHEDULE_LOOKAHEAD_MILLIS, intent);
-            getContainer().require(IncomingDispatcher.KEY).registerHandler(this, getRoutingKeys());
         }
     }
 
@@ -120,8 +120,8 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
             Scheduler scheduler = getContainer().require(Scheduler.KEY);
             PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
             scheduler.cancel(intent);
-            getContainer().require(IncomingDispatcher.KEY).unregisterHandler(this, getRoutingKeys());
         }
+        super.destroy();
     }
 
     private class HolidayLightAction implements Runnable {
