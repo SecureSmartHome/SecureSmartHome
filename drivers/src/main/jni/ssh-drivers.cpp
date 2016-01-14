@@ -12,6 +12,12 @@ double atof(const char *nptr) {
     return (strtod(nptr, NULL));
 }
 
+double atof(const char *nptr, const char *eptr) {
+    return (strtod(nptr, NULL));
+}
+
+
+
 extern "C" {
 JNIEXPORT void JNICALL
 Java_de_unipassau_isl_evs_ssh_drivers_lib_WeatherSensor_initSerialInterface(JNIEnv *env, jobject instance) {
@@ -87,12 +93,12 @@ Java_de_unipassau_isl_evs_ssh_drivers_lib_WeatherSensor_readData(JNIEnv *env, jo
                 env->SetDoubleField(instance, env->GetFieldID(thisWeather, "temp1", "D"), temperature1);
                 break;
             case '1':
-                pressure = atof(&readBuf[1]);
+                pressure = atof(&readBuf[1], &readBuf[3]);
                 LOGD("Found value for pressure: %f", pressure);
                 env->SetDoubleField(instance, env->GetFieldID(thisWeather, "pressure", "D"), pressure);
                 break;
             case '0':
-                altitude = atof(&readBuf[1]);
+                altitude = atof(&readBuf[1], &readBuf[3]);
                 LOGD("Found value for altitude: %f", altitude);
                 env->SetDoubleField(instance, env->GetFieldID(thisWeather, "altitude", "D"), altitude);
                 break;
