@@ -27,9 +27,7 @@ import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.NamedDTO;
-
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_MODULE;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 /**
  * This fragment allows to display the status of all registered lights.
@@ -70,7 +68,6 @@ public class LightFragment extends BoundFragment {
             // this fragment does not handle explicit get requests
         }
     };
-    private ListView lights;
 
     @Override
     public void onContainerConnected(Container container) {
@@ -91,16 +88,16 @@ public class LightFragment extends BoundFragment {
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FrameLayout view = (FrameLayout) inflater.inflate(R.layout.fragment_light, container, false);
-        lights = (ListView) view.findViewById(R.id.lightButtonContainer);
+        final FrameLayout view = (FrameLayout) inflater.inflate(R.layout.fragment_light, container, false);
+        final ListView lights = (ListView) view.findViewById(R.id.lightButtonContainer);
         lights.setAdapter(adapter);
 
-        FloatingActionButton fab = ((FloatingActionButton) view.findViewById(R.id.light_fab));
+        final FloatingActionButton fab = ((FloatingActionButton) view.findViewById(R.id.light_fab));
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final MainActivity activity = (MainActivity) getActivity();
-                if (activity != null && activity.hasPermission(ADD_MODULE)) {
+                if (activity != null && activity.hasPermission(Permission.ADD_MODULE)) {
                     activity.showFragmentByClass(AddModuleFragment.class);
                 } else {
                     Toast.makeText(getActivity(), R.string.you_can_not_add_new_modules, Toast.LENGTH_SHORT).show();
@@ -111,7 +108,7 @@ public class LightFragment extends BoundFragment {
     }
 
     /**
-     * Adapter used for {@link #lights}.
+     * Adapter used for {@code lights}.
      */
     private class LightListAdapter extends BaseAdapter {
         private final List<Module> lightModules = new ArrayList<>();
@@ -177,21 +174,20 @@ public class LightFragment extends BoundFragment {
                 if (inflater == null) {
                     inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 }
-                //create LinearLayout as defined in lightbutton.xml file
+                //create LinearLayout as defined in layout file
                 lightButtonLayout = (LinearLayout) inflater.inflate(R.layout.lightbutton, parent, false);
             } else {
                 lightButtonLayout = (LinearLayout) convertView;
             }
 
-            Button button = (Button) lightButtonLayout.findViewById(R.id.lightButtonButton);
+            final Button button = (Button) lightButtonLayout.findViewById(R.id.lightButtonButton);
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    final AppLightHandler appLightHandler = getComponent(AppLightHandler.KEY);
-                    if (appLightHandler != null) {
-                        final MainActivity activity = (MainActivity) getActivity();
-                        if (activity != null && activity.hasPermission(SWITCH_LIGHT)) {
-                            appLightHandler.toggleLight(module);
+                    final AppLightHandler handler = getComponent(AppLightHandler.KEY);
+                    if (handler != null) {
+                        if (((MainActivity) getActivity()).hasPermission(Permission.SWITCH_LIGHT, module.getName())) {
+                            handler.toggleLight(module);
                         } else {
                             Toast.makeText(getActivity(), R.string.you_can_not_switch_light, Toast.LENGTH_SHORT).show();
                         }
@@ -202,12 +198,12 @@ public class LightFragment extends BoundFragment {
             });
             button.setEnabled(appLightHandler != null);
 
-            TextView textView = (TextView) lightButtonLayout.findViewById(R.id.lightButtonTextView);
+            final TextView textView = (TextView) lightButtonLayout.findViewById(R.id.lightButtonTextView);
             textView.setText(module.getName());
 
             // set up ImageView and button
-            ImageView imageViewOn = (ImageView) lightButtonLayout.findViewById(R.id.lightButtonImageViewOn);
-            ImageView imageViewOff = (ImageView) lightButtonLayout.findViewById(R.id.lightButtonImageViewOff);
+            final ImageView imageViewOn = (ImageView) lightButtonLayout.findViewById(R.id.lightButtonImageViewOn);
+            final ImageView imageViewOff = (ImageView) lightButtonLayout.findViewById(R.id.lightButtonImageViewOff);
             if (isLightOn) {
                 imageViewOff.setVisibility(View.GONE);
                 imageViewOn.setVisibility(View.VISIBLE);
