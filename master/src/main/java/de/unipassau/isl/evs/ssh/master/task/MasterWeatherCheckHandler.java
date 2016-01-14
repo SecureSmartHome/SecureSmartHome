@@ -47,7 +47,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
     private static final String TAG = MasterWeatherCheckHandler.class.getSimpleName();
 
     private Container container;
-    private long timeStamp;
+    private long timeStamp = -1;
     private final Map<String, Boolean> openForModule = new HashMap<>();
     private final OpenWeatherMap owm = new OpenWeatherMap(CoreConstants.OPENWEATHERMAP_API_KEY);
 
@@ -117,6 +117,11 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
             public void run() {
                 try {
                     CurrentWeather cw = owm.currentWeatherByCityName(city);
+                    if (cw == null || cw.getRainInstance() == null) {
+                        WeatherServiceFailed(city);
+                        return;
+                    }
+
                     if (cw.getRainInstance().hasRain()) {
                         for (Boolean isOpen : openForModule.values()) {
                             if (isOpen) {
@@ -126,16 +131,21 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
                         }
                     }
                 } catch (IOException e) {
-                    if (timeStamp - System.currentTimeMillis() > FAILURE_UPDATE_TIMER) {
-                        requireComponent(NotificationBroadcaster.KEY).sendMessageToAllReceivers(
-                                NotificationPayload.NotificationType.WEATHER_SERVICE_FAILED, city);
-                        timeStamp = System.currentTimeMillis();
-                    }
+                    Log.e(TAG, e.getLocalizedMessage());
+                    WeatherServiceFailed(city);
                 } catch (Exception e) {
                     Log.e(TAG, e.getLocalizedMessage());
                 }
             }
         });
+    }
+
+    private void WeatherServiceFailed(String city) {
+        if (timeStamp == -1 || timeStamp - System.currentTimeMillis() > FAILURE_UPDATE_TIMER) {
+            requireComponent(NotificationBroadcaster.KEY).sendMessageToAllReceivers(
+                    NotificationPayload.NotificationType.WEATHER_SERVICE_FAILED, city);
+            timeStamp = System.currentTimeMillis();
+        }
     }
 
     private void sendWarningNotification() {

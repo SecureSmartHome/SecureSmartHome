@@ -153,6 +153,8 @@ public class RoutingKeys {
     public static final RoutingKey<CameraPayload> SLAVE_CAMERA_GET = new RoutingKey<>(PREFIX_SLAVE + "/camera/get", CameraPayload.class);
     public static final RoutingKey<CameraPayload> SLAVE_CAMERA_GET_REPLY = SLAVE_CAMERA_GET.getReply(CameraPayload.class);
     public static final RoutingKey<ErrorPayload> SLAVE_CAMERA_GET_ERROR = SLAVE_CAMERA_GET.getReply(ErrorPayload.class);
+
+    public static final RoutingKey<CameraPayload> APP_CAMERA_BROADCAST = new RoutingKey<>(PREFIX_APP + "camera/broadcast", CameraPayload.class);
     // END: Camera
 
     // BEGIN: Notification
@@ -169,7 +171,7 @@ public class RoutingKeys {
     // END: HolidaySimulation
 
     // BEGIN: Weather
-    public static final RoutingKey<MessagePayload> MASTER_REQUEST_WEATHER_INFO = new RoutingKey<>(PREFIX_MASTER + "/weatherinfo/request", MessagePayload.class);
+    public static final RoutingKey<ClimatePayload> MASTER_REQUEST_WEATHER_INFO = new RoutingKey<>(PREFIX_MASTER + "/weatherinfo/request", ClimatePayload.class);
     public static final RoutingKey<ClimatePayload> MASTER_REQUEST_WEATHER_INFO_REPLY = MASTER_REQUEST_WEATHER_INFO.getReply(ClimatePayload.class);
     public static final RoutingKey<ClimatePayload> MASTER_PUSH_WEATHER_INFO = new RoutingKey<>(PREFIX_MASTER + "/weatherinfo/push", ClimatePayload.class);
     // END: Weather
