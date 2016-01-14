@@ -21,11 +21,9 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_GROUP_DIALOG;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_GROUP_NAME;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_GROUP_TEMPLATE;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_MODULE;
 
 /**
  * This fragment gives the user the option to choose a name and a template used to edit an existing group.
@@ -91,14 +89,13 @@ public class EditGroupFragment extends BoundFragment {
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (activity.hasPermission(CHANGE_GROUP_NAME) && activity.hasPermission(CHANGE_GROUP_TEMPLATE)) {
+                if (activity.hasPermission(Permission.CHANGE_GROUP_NAME) && activity.hasPermission(Permission.CHANGE_GROUP_TEMPLATE)) {
                     String name = inputGroupName.getText().toString();
                     String template = ((String) spinner.getSelectedItem());
                     handler.setGroupName(group, name);
                     handler.setGroupTemplate(group, template);
                     Log.i(TAG, "Group " + name + " edited.");
                     activity.showFragmentByClass(ListGroupFragment.class);
-                    // TODO Phil: better handling (Phil, 2016-01-13)
                 } else {
                     Toast.makeText(getActivity(), R.string.you_can_not_edit_groups, Toast.LENGTH_SHORT).show();
                 }
@@ -109,12 +106,11 @@ public class EditGroupFragment extends BoundFragment {
         removeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (activity.hasPermission(DELETE_MODULE)) {
+                if (activity.hasPermission(Permission.DELETE_MODULE)) {
                     if (handler.getAllGroupMembers(group).isEmpty()) {
                         handler.removeGroup(group);
                         Log.i(TAG, "Group " + group.getName() + " removed.");
                         ((MainActivity) getActivity()).showFragmentByClass(ListGroupFragment.class);
-                        // TODO Phil: better handling (Phil, 2016-01-13)
                     } else {
                         Toast.makeText(getActivity(), R.string.you_can_not_remove_not_empty_group, Toast.LENGTH_SHORT).show();
                     }

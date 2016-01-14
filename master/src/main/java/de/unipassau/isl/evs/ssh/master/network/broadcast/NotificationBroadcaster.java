@@ -24,9 +24,8 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.ATTR_LO
  * @author Andreas Bucher
  */
 public class NotificationBroadcaster extends AbstractComponent {
-    private static final String TAG = NotificationBroadcaster.class.getSimpleName();
-
     public static final Key<NotificationBroadcaster> KEY = new Key<>(NotificationBroadcaster.class);
+    private static final String TAG = NotificationBroadcaster.class.getSimpleName();
 
     /**
      * Sends out a notification to all users that have the permission to receive that notification.
@@ -106,7 +105,7 @@ public class NotificationBroadcaster extends AbstractComponent {
     }
 
     /**
-     * Sends out an notification to all userDevices with Permission to receive the notification.
+     * Sends out an notification to all userDevices with PermissionDTO to receive the notification.
      *
      * @param allUserDevicesWithPermission to receive the notification
      * @param messageToSend                content of the notification

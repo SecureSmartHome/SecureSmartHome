@@ -15,7 +15,7 @@ import java.util.Set;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.dto.PermissionDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
@@ -67,9 +67,9 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_SE
 public class AppUserConfigurationHandler extends AbstractAppHandler implements Component {
     public static final Key<AppUserConfigurationHandler> KEY = new Key<>(AppUserConfigurationHandler.class);
 
-    private final SetMultimap<UserDevice, Permission> usersToPermissions = HashMultimap.create();
+    private final SetMultimap<UserDevice, PermissionDTO> usersToPermissions = HashMultimap.create();
     private final SetMultimap<Group, UserDevice> groupToUserDevice = HashMultimap.create();
-    private final Set<Permission> allPermissions = new HashSet<>();
+    private final Set<PermissionDTO> allPermissions = new HashSet<>();
     private final Set<Group> allGroups = new HashSet<>();
     private final Set<String> allTemplates = new HashSet<>();
 
@@ -103,7 +103,7 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
         if (APP_USERINFO_UPDATE.matches(message)) {
             UserDeviceInformationPayload payload = APP_USERINFO_UPDATE.getPayload(message);
 
-            ListMultimap<UserDevice, Permission> usersToPermissions = payload.getUsersToPermissions();
+            ListMultimap<UserDevice, PermissionDTO> usersToPermissions = payload.getUsersToPermissions();
             if (usersToPermissions != null) {
                 this.usersToPermissions.clear();
                 this.usersToPermissions.putAll(usersToPermissions);
@@ -115,7 +115,7 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
                 this.groupToUserDevice.putAll(groupToUserDevice);
             }
 
-            List<Permission> allPermissions = payload.getAllPermissions();
+            List<PermissionDTO> allPermissions = payload.getAllPermissions();
             if (allPermissions != null) {
                 this.allPermissions.clear();
                 this.allPermissions.addAll(allPermissions);
@@ -201,7 +201,7 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      * @return a list of all permissions
      */
     @NonNull
-    public Set<Permission> getAllPermissions() {
+    public Set<PermissionDTO> getAllPermissions() {
         return Collections.unmodifiableSet(allPermissions);
     }
 
@@ -212,7 +212,7 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      * @return a list of all permissions of the user
      */
     @NonNull
-    public Set<Permission> getPermissionForUser(UserDevice user) {
+    public Set<PermissionDTO> getPermissionForUser(UserDevice user) {
         return Collections.unmodifiableSet(usersToPermissions.get(user));
     }
 
@@ -223,7 +223,7 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      * @return a list of all permissions of the user
      */
     @NonNull
-    public Set<Permission> getPermissionForUser(DeviceID userDeviceID) {
+    public Set<PermissionDTO> getPermissionForUser(DeviceID userDeviceID) {
         for (UserDevice device : usersToPermissions.keySet()) {
             if (userDeviceID.equals(device.getUserDeviceID())) {
                 return getPermissionForUser(device);
@@ -242,16 +242,16 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
     }
 
     /**
-     * Returns whether a given user has a given Permission.
+     * Returns whether a given user has a given PermissionDTO.
      *
      * @param userDeviceID DeviceID associated with the user.
-     * @param permission   Permission to check.
+     * @param permission   PermissionDTO to check.
      * @return true if has permissions otherwise false.
      */
-    public boolean hasPermission(DeviceID userDeviceID, de.unipassau.isl.evs.ssh.core.sec.Permission permission) {
+    public boolean hasPermission(DeviceID userDeviceID, PermissionDTO permission) {
         for (UserDevice device : usersToPermissions.keySet()) {
             if (userDeviceID.equals(device.getUserDeviceID())) {
-                return usersToPermissions.get(device).contains(new Permission(permission));
+                return usersToPermissions.get(device).contains(permission);
             }
         }
         return false;
@@ -338,7 +338,7 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      * @param user       the user to grant the permission
      * @param permission the permission to grant
      */
-    public void grantPermission(DeviceID user, Permission permission) {
+    public void grantPermission(DeviceID user, PermissionDTO permission) {
         Message message = new Message(new SetPermissionPayload(user, permission, SetPermissionPayload.Action.GRANT));
         sendUserConfigMessage(message, MASTER_PERMISSION_SET, UserConfigurationEvent.EventType.PERMISSION_GRANT);
     }
@@ -349,7 +349,7 @@ public class AppUserConfigurationHandler extends AbstractAppHandler implements C
      * @param user       the user to remove the permission from
      * @param permission the permission to remove
      */
-    public void revokePermission(DeviceID user, Permission permission) {
+    public void revokePermission(DeviceID user, PermissionDTO permission) {
         Message message = new Message(new SetPermissionPayload(user, permission, SetPermissionPayload.Action.REVOKE));
         sendUserConfigMessage(message, MASTER_PERMISSION_SET, UserConfigurationEvent.EventType.PERMISSION_REVOKE);
     }

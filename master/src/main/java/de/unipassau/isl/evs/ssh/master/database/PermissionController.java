@@ -16,7 +16,7 @@ import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
 import de.unipassau.isl.evs.ssh.core.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.core.database.IsReferencedException;
 import de.unipassau.isl.evs.ssh.core.database.UnknownReferenceException;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.dto.PermissionDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
@@ -48,7 +48,7 @@ public class PermissionController extends AbstractComponent {
      * @param templateName Name of the template.
      * @return List of the Permissions in the template.
      */
-    public List<Permission> getPermissionsOfTemplate(String templateName) {
+    public List<PermissionDTO> getPermissionsOfTemplate(String templateName) {
         Cursor permissionsCursor = databaseConnector
                 .executeSql("select p." + DatabaseContract.Permission.COLUMN_NAME
                         + ", m." + DatabaseContract.ElectronicModule.COLUMN_NAME
@@ -64,9 +64,9 @@ public class PermissionController extends AbstractComponent {
                         + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID
                         + " where pt." + DatabaseContract.PermissionTemplate.COLUMN_NAME
                         + " = ?", new String[]{templateName});
-        List<Permission> permissions = new LinkedList<>();
+        List<PermissionDTO> permissions = new LinkedList<>();
         while (permissionsCursor.moveToNext()) {
-            permissions.add(new Permission(
+            permissions.add(new PermissionDTO(
                     de.unipassau.isl.evs.ssh.core.sec.Permission.valueOf(permissionsCursor.getString(0)),
                     permissionsCursor.getString(1)
             ));
@@ -84,7 +84,7 @@ public class PermissionController extends AbstractComponent {
                                 + " = ? and " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL",
                         new String[]{templateName});
         while (permissionsCursor.moveToNext()) {
-            permissions.add(new Permission(
+            permissions.add(new PermissionDTO(
                     de.unipassau.isl.evs.ssh.core.sec.Permission.valueOf(permissionsCursor.getString(0))
             ));
         }
@@ -92,10 +92,10 @@ public class PermissionController extends AbstractComponent {
     }
 
     /**
-     * Returns whether a given user has a given Permission.
+     * Returns whether a given user has a given PermissionDTO.
      *
      * @param userDeviceID DeviceID associated with the user.
-     * @param permission Permission to check.
+     * @param permission PermissionDTO to check.
      * @param moduleName Module the permission applies for.
      * @return true if has permissions otherwise false.
      */
@@ -160,10 +160,10 @@ public class PermissionController extends AbstractComponent {
     }
 
     /**
-     * Add a Permission to a Template.
+     * Add a PermissionDTO to a Template.
      *
      * @param templateName Name of the Template.
-     * @param permission Permission to add.
+     * @param permission PermissionDTO to add.
      * @param moduleName Module the permission applies for.
      */
     public void addPermissionToTemplate(String templateName, de.unipassau.isl.evs.ssh.core.sec.Permission permission,
@@ -190,16 +190,16 @@ public class PermissionController extends AbstractComponent {
                 );
             }
         } catch (SQLiteConstraintException sqlce) {
-            throw new UnknownReferenceException("The given Template or Permission does not exist in the database",
+            throw new UnknownReferenceException("The given Template or PermissionDTO does not exist in the database",
                     sqlce);
         }
     }
 
     /**
-     * Remove a Permission from a Template.
+     * Remove a PermissionDTO from a Template.
      *
      * @param templateName Name of the Template.
-     * @param permission Permission to remove.
+     * @param permission PermissionDTO to remove.
      * @param moduleName Module the permission applies for.
      */
     public void removePermissionFromTemplate(String templateName, de.unipassau.isl.evs.ssh.core.sec.Permission permission, String moduleName) {
@@ -225,10 +225,10 @@ public class PermissionController extends AbstractComponent {
     }
 
     /**
-     * Add a Permission for a UserDevice.
+     * Add a PermissionDTO for a UserDevice.
      *
      * @param userDeviceID DeviceID of the UserDevice.
-     * @param permission Permission to add.
+     * @param permission PermissionDTO to add.
      * @param moduleName Module the permission applies for.
      */
     public void addUserPermission(DeviceID userDeviceID, de.unipassau.isl.evs.ssh.core.sec.Permission permission,
@@ -255,15 +255,15 @@ public class PermissionController extends AbstractComponent {
             }
         } catch (SQLiteConstraintException sqlce) {
             throw new UnknownReferenceException(
-                    "The given UserDevice or Permission does not exist in the database", sqlce);
+                    "The given UserDevice or PermissionDTO does not exist in the database", sqlce);
         }
     }
 
     /**
-     * Remove a Permission for a UserDevice.
+     * Remove a PermissionDTO for a UserDevice.
      *
      * @param userDeviceID DeviceID of the UserDevice.
-     * @param permission Permission to remove.
+     * @param permission PermissionDTO to remove.
      * @param moduleName Module the permission applies for.
      */
     public void removeUserPermission(DeviceID userDeviceID, de.unipassau.isl.evs.ssh.core.sec.Permission permission,
@@ -307,9 +307,9 @@ public class PermissionController extends AbstractComponent {
     }
 
     /**
-     * Adds a new Permission to the database.
+     * Adds a new PermissionDTO to the database.
      *
-     * @param permission Permission to add.
+     * @param permission PermissionDTO to add.
      * @param moduleName Module the permission applies for.
      */
     public void addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission permission,
@@ -337,9 +337,9 @@ public class PermissionController extends AbstractComponent {
     }
 
     /**
-     * Removes a Permission from the database.
+     * Removes a PermissionDTO from the database.
      *
-     * @param permission Permission to remove.
+     * @param permission PermissionDTO to remove.
      * @param moduleName Module the permission applies for.
      */
     public void removePermission(de.unipassau.isl.evs.ssh.core.sec.Permission permission, String moduleName) {
@@ -366,7 +366,7 @@ public class PermissionController extends AbstractComponent {
      *
      * @return All names as a list.
      */
-    public List<Permission> getPermissions() {
+    public List<PermissionDTO> getPermissions() {
         //Permissions with module
         Cursor permissionsCursor = databaseConnector.executeSql("select p."
                 + DatabaseContract.Permission.COLUMN_NAME
@@ -375,9 +375,9 @@ public class PermissionController extends AbstractComponent {
                 + " p join " + DatabaseContract.ElectronicModule.TABLE_NAME
                 + " m on p." + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID
                 + " = m." + DatabaseContract.ElectronicModule.COLUMN_ID, new String[]{});
-        List<Permission> permissions = new LinkedList<>();
+        List<PermissionDTO> permissions = new LinkedList<>();
         while (permissionsCursor.moveToNext()) {
-            permissions.add(new Permission(
+            permissions.add(new PermissionDTO(
                     de.unipassau.isl.evs.ssh.core.sec.Permission.valueOf(permissionsCursor.getString(0)),
                     permissionsCursor.getString(1)
             ));
@@ -387,7 +387,7 @@ public class PermissionController extends AbstractComponent {
                 + " from " + DatabaseContract.Permission.TABLE_NAME
                 + " where " + DatabaseContract.Permission.COLUMN_ELECTRONIC_MODULE_ID + " is NULL", new String[]{});
         while (permissionsCursor.moveToNext()) {
-            permissions.add(new Permission(de.unipassau.isl.evs.ssh.core.sec.Permission.valueOf(
+            permissions.add(new PermissionDTO(de.unipassau.isl.evs.ssh.core.sec.Permission.valueOf(
                     permissionsCursor.getString(0)
             )));
         }
@@ -431,7 +431,7 @@ public class PermissionController extends AbstractComponent {
     /**
      * Returns all UserDevices that have a given permission.
      *
-     * @param permission Permission to check for.
+     * @param permission PermissionDTO to check for.
      * @param moduleName Module the permission applies for.
      * @return List of the UserDevices.
      */
@@ -492,8 +492,8 @@ public class PermissionController extends AbstractComponent {
      * @param userDeviceID The UserDevice which has the Permissions which will be returned.
      * @return List of all Permissions that the given UserDevice has.
      */
-    public List<Permission> getPermissionsOfUserDevice(DeviceID userDeviceID) {
-        List<Permission> permissions = new LinkedList<>();
+    public List<PermissionDTO> getPermissionsOfUserDevice(DeviceID userDeviceID) {
+        List<PermissionDTO> permissions = new LinkedList<>();
         Cursor permissionCursor;
         permissionCursor = databaseConnector
                 .executeSql("select p." + DatabaseContract.Permission.COLUMN_NAME
@@ -511,7 +511,7 @@ public class PermissionController extends AbstractComponent {
                         + " where ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
                         + " = ?", new String[]{userDeviceID.getIDString()});
         while (permissionCursor.moveToNext()) {
-            permissions.add(new Permission(
+            permissions.add(new PermissionDTO(
                     de.unipassau.isl.evs.ssh.core.sec.Permission.valueOf(permissionCursor.getString(0)),
                     permissionCursor.getString(1)
             ));
@@ -529,7 +529,7 @@ public class PermissionController extends AbstractComponent {
                         + " is NULL and ud." + DatabaseContract.UserDevice.COLUMN_FINGERPRINT
                         + " = ?", new String[]{userDeviceID.getIDString()});
         while (permissionCursor.moveToNext()) {
-            permissions.add(new Permission(de.unipassau.isl.evs.ssh.core.sec.Permission.valueOf(
+            permissions.add(new PermissionDTO(de.unipassau.isl.evs.ssh.core.sec.Permission.valueOf(
                     permissionCursor.getString(0)
             )));
         }

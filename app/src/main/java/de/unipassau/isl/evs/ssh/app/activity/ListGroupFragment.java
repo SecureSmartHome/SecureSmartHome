@@ -29,14 +29,12 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.NamedDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_GROUP_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.GROUP_ARGUMENT_FRAGMENT;
 import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.GROUP_DELETE;
 import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.GROUP_SET_NAME;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_GROUP;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_GROUP_NAME;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_GROUP_TEMPLATE;
 
 /**
  * This fragment shows a list of all groups of user devices registered in the system.
@@ -137,7 +135,7 @@ public class ListGroupFragment extends BoundFragment {
         groupList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (activity.hasPermission(CHANGE_GROUP_NAME) && activity.hasPermission(CHANGE_GROUP_TEMPLATE)) {
+                if (activity.hasPermission(Permission.CHANGE_GROUP_NAME) && activity.hasPermission(Permission.CHANGE_GROUP_TEMPLATE)) {
                     Group item = adapter.getItem(position);
                     Bundle bundle = new Bundle();
                     bundle.putSerializable(EDIT_GROUP_DIALOG, item);
@@ -153,7 +151,7 @@ public class ListGroupFragment extends BoundFragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (activity.hasPermission(ADD_GROUP)) {
+                if (activity.hasPermission(Permission.ADD_GROUP)) {
                     activity.showFragmentByClass(AddGroupFragment.class);
                 } else {
                     Toast.makeText(activity, R.string.you_can_not_add_groups, Toast.LENGTH_SHORT).show();

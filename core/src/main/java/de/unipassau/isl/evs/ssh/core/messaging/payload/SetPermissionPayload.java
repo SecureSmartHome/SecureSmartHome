@@ -1,6 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.messaging.payload;
 
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.dto.PermissionDTO;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 /**
@@ -10,7 +10,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  */
 public class SetPermissionPayload implements MessagePayload {
     private final DeviceID user;
-    private final Permission permission;
+    private final PermissionDTO permission;
     private final Action action;
 
     /**
@@ -27,7 +27,7 @@ public class SetPermissionPayload implements MessagePayload {
      * @param permission the permission to grant or revoke
      * @param action     either Action.GRANT or ACTION.REVOKE
      */
-    public SetPermissionPayload(DeviceID user, Permission permission, Action action) {
+    public SetPermissionPayload(DeviceID user, PermissionDTO permission, Action action) {
         this.user = user;
         this.permission = permission;
         this.action = action;
@@ -47,8 +47,15 @@ public class SetPermissionPayload implements MessagePayload {
      *
      * @return the permission to grant or revoke from the user
      */
-    public Permission getPermission() {
+    public PermissionDTO getPermission() {
         return permission;
+    }
+
+    /**
+     * The Action enum describes whether to grant or revoke the permission.
+     */
+    public enum Action {
+        GRANT, REVOKE
     }
 
     /**

@@ -32,9 +32,10 @@ import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.dto.PermissionDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.ALL_GROUPS_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_USERDEVICE_DIALOG;
@@ -44,10 +45,6 @@ import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventT
 import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.PUSH;
 import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.USERNAME_SET;
 import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.USER_SET_GROUP;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION;
 
 /**
  * This fragment lets the user view, edit and delete information regarding a single user device.
@@ -125,9 +122,9 @@ public class EditUserDeviceFragment extends BoundFragment {
 
                 // check if user has permission to edit a group
                 final MainActivity activity = (MainActivity) getActivity();
-                if (activity != null && !activity.hasPermission(CHANGE_USER_NAME)) {
+                if (activity != null && !activity.hasPermission(Permission.CHANGE_USER_NAME)) {
                     Toast.makeText(getActivity(), R.string.you_can_not_edit_user_devices, Toast.LENGTH_SHORT).show();
-                } else if (activity != null && activity.hasPermission(CHANGE_USER_GROUP)) {
+                } else if (activity != null && activity.hasPermission(Permission.CHANGE_USER_GROUP)) {
                     Toast.makeText(getActivity(), R.string.you_can_not_edit_groups, Toast.LENGTH_SHORT).show();
                 } else {
                     showEditUserDeviceDialog(bundle);
@@ -223,7 +220,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         final MainActivity activity = (MainActivity) getActivity();
-                        if (activity.hasPermission(CHANGE_USER_NAME) && activity.hasPermission(CHANGE_USER_GROUP)) {
+                        if (activity.hasPermission(Permission.CHANGE_USER_NAME) && activity.hasPermission(Permission.CHANGE_USER_GROUP)) {
                             String name = userDeviceName.getText().toString();
                             String group = ((String) groupName.getSelectedItem());
                             DeviceID userDeviceID = userDevice.getUserDeviceID();
@@ -231,7 +228,6 @@ public class EditUserDeviceFragment extends BoundFragment {
                             // no permission check as method only gets called when user can edit user name / user group
                             handler.setUserName(userDeviceID, name);
                             handler.setUserGroup(userDeviceID, group);
-                            // TODO Phil: refresh ui (Phil, 2016-01-13)
                         } else {
                             Toast.makeText(getActivity(), R.string.you_can_not_edit_user_devices, Toast.LENGTH_SHORT).show();
                         }
@@ -240,7 +236,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                 .setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (((MainActivity) getActivity()).hasPermission(DELETE_USER)) {
+                        if (((MainActivity) getActivity()).hasPermission(Permission.DELETE_USER)) {
                             handler.removeUserDevice(userDevice.getUserDeviceID());
                             String toastText = String.format(res.getString(R.string.device_removed), userDevice.getName());
                             Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT).show();
@@ -269,8 +265,8 @@ public class EditUserDeviceFragment extends BoundFragment {
      * Adapter used for {@link #userPermissionList}.
      */
     private class PermissionListAdapter extends BaseAdapter {
-        private List<Permission> allPermissions;
-        private Set<Permission> userPermissions;
+        private List<PermissionDTO> allPermissions;
+        private Set<PermissionDTO> userPermissions;
 
         public PermissionListAdapter() {
             updatePermissionList();
@@ -289,11 +285,11 @@ public class EditUserDeviceFragment extends BoundFragment {
                 return;
             }
             userPermissions = handler.getPermissionForUser(device.getUserDeviceID());
-            Set<Permission> tempPermissionList = handler.getAllPermissions();
+            Set<PermissionDTO> tempPermissionList = handler.getAllPermissions();
             allPermissions = Lists.newArrayList(tempPermissionList);
-            Collections.sort(allPermissions, new Comparator<Permission>() {
+            Collections.sort(allPermissions, new Comparator<PermissionDTO>() {
                 @Override
-                public int compare(Permission lhs, Permission rhs) {
+                public int compare(PermissionDTO lhs, PermissionDTO rhs) {
                     if (lhs.getPermission() == null) {
                         return rhs.getPermission() == null ? 0 : 1;
                     }
@@ -316,7 +312,7 @@ public class EditUserDeviceFragment extends BoundFragment {
         }
 
         @Override
-        public Permission getItem(int position) {
+        public PermissionDTO getItem(int position) {
             if (allPermissions != null) {
                 return allPermissions.get(position);
             } else {
@@ -326,7 +322,7 @@ public class EditUserDeviceFragment extends BoundFragment {
 
         @Override
         public long getItemId(int position) {
-            final Permission item = getItem(position);
+            final PermissionDTO item = getItem(position);
             if (item != null && item.getPermission() != null) {
                 return item.getPermission().hashCode();
             } else {
@@ -351,7 +347,7 @@ public class EditUserDeviceFragment extends BoundFragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = getActivity().getLayoutInflater();
-            final Permission permission = getItem(position);
+            final PermissionDTO permission = getItem(position);
             LinearLayout permissionLayout;
             if (convertView == null) {
                 permissionLayout = (LinearLayout) inflater.inflate(R.layout.permissionlayout, parent, false);
@@ -377,7 +373,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                     @Override
                     public void onClick(View v) {
                         final MainActivity activity = (MainActivity) getActivity();
-                        if (activity != null && activity.hasPermission(MODIFY_USER_PERMISSION)) {
+                        if (activity != null && activity.hasPermission(Permission.MODIFY_USER_PERMISSION)) {
                             if (!deviceHasPermission) {
                                 handler.grantPermission(device.getUserDeviceID(), permission);
                                 Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
@@ -405,7 +401,7 @@ public class EditUserDeviceFragment extends BoundFragment {
         /**
          * @return {@code true} if a user device is granted a certain permission.
          */
-        private boolean userDeviceHasPermission(Permission permission) {
+        private boolean userDeviceHasPermission(PermissionDTO permission) {
             return userPermissions.contains(permission);
         }
     }

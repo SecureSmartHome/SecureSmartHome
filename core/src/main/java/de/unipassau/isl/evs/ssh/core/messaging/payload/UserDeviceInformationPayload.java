@@ -5,7 +5,7 @@ import com.google.common.collect.ListMultimap;
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.dto.PermissionDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 /**
@@ -17,18 +17,18 @@ public class UserDeviceInformationPayload implements MessagePayload {
     /**
      * If a device has no permissions, it is still in the map with an empty permission list
      */
-    private final ListMultimap<UserDevice, Permission> usersToPermissions;
+    private final ListMultimap<UserDevice, PermissionDTO> usersToPermissions;
     /**
      * If a group contains no devices, it is still in the map with an empty devicelist
      */
     private final ListMultimap<Group, UserDevice> groupToUserDevice;
-    private final List<Permission> allPermissions;
+    private final List<PermissionDTO> allPermissions;
     private final List<Group> allGroups;
     private List<String> templates;
 
-    public UserDeviceInformationPayload(ListMultimap<UserDevice, Permission> usersToPermissions,
+    public UserDeviceInformationPayload(ListMultimap<UserDevice, PermissionDTO> usersToPermissions,
                                         ListMultimap<Group, UserDevice> groupToUserDevice,
-                                        List<Permission> allPermissions,
+                                        List<PermissionDTO> allPermissions,
                                         List<Group> allGroups,
                                         List<String> templates
     ) {
@@ -39,7 +39,7 @@ public class UserDeviceInformationPayload implements MessagePayload {
         this.templates = templates;
     }
 
-    public ListMultimap<UserDevice, Permission> getUsersToPermissions() {
+    public ListMultimap<UserDevice, PermissionDTO> getUsersToPermissions() {
         return usersToPermissions;
     }
 
@@ -47,7 +47,7 @@ public class UserDeviceInformationPayload implements MessagePayload {
         return groupToUserDevice;
     }
 
-    public List<Permission> getAllPermissions() {
+    public List<PermissionDTO> getAllPermissions() {
         return allPermissions;
     }
 

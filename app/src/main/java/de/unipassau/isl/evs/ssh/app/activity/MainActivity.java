@@ -32,6 +32,7 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.PermissionDTO;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
@@ -65,14 +66,61 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
 
     private LinearLayout overlayDisconnected;
     private boolean wasRejected = false;
+    private final ClientConnectionListener connectionListener = new ClientConnectionListener() {
+        @Override
+        public void onMasterFound() {
+        }
+
+        @Override
+        public void onClientConnecting(String host, int port) {
+        }
+
+        @Override
+        public void onClientConnected() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    overlayDisconnected.setVisibility(View.GONE);
+                }
+            });
+        }
+
+        @Override
+        public void onClientDisconnected() {
+            if (!wasRejected) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showConnectionOverlay(getString(R.string.warn_no_connection_to_master));
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onClientRejected(String message) {
+            wasRejected = true;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showConnectionOverlay(getString(R.string.warn_client_rejected));
+                    forceStopService();
+                    finish();
+
+                    Intent intent = new Intent(MainActivity.this, RejectedActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
+    };
     private boolean fragmentInitialized = false;
     private Bundle savedInstanceState;
+
+    // Lifecycle ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public MainActivity() {
         super(AppContainer.class);
     }
-
-    // Lifecycle ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,6 +214,8 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         }
     }
 
+    // Navigation //////////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Override
     public void onContainerDisconnected() {
         final Fragment fragment = getCurrentFragment();
@@ -179,8 +229,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         }
         client.removeListener(connectionListener);
     }
-
-    // Navigation //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * @return the currently displayed Fragment
@@ -240,12 +288,13 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     }
 
     /**
-     * Checks if the current user is granted a given permission.
+     * Checks if the current user is granted a given permission to a given module.
      *
      * @param permission The permission that will be checked.
+     * @param moduleName The given module name. {@code null} if given permission not not connected to any module.
      * @return {@code true} if the current user has the given permission.
      */
-    public boolean hasPermission(Permission permission) {
+    public boolean hasPermission(Permission permission, String moduleName) {
         // @author Phil Werli
         final NamingManager namingManager = getComponent(NamingManager.KEY);
         if (namingManager == null) {
@@ -254,7 +303,18 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         final DeviceID ownID = namingManager.getOwnID();
         final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
 
-        return handler != null && handler.hasPermission(ownID, permission);
+        return handler != null && handler.hasPermission(ownID, new PermissionDTO(permission, moduleName));
+    }
+
+    /**
+     * Checks if the current user is granted a given permission.
+     *
+     * @param permission The permission that will be checked.
+     * @return {@code true} if the current user has the given permission.
+     * @see #hasPermission(de.unipassau.isl.evs.ssh.core.sec.Permission, String)
+     */
+    public boolean hasPermission(Permission permission) {
+        return hasPermission(permission, null);
     }
 
     /**
@@ -270,7 +330,8 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         final Permission permission = permissionForFragment.get(classToShow);
 
         if (permission != null && !hasPermission(permission) && isRegistered) {
-            Toast.makeText(this, String.format(getString(R.string.fragment_access_denied), permission.toLocalizedString(this)), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, String.format(getString(R.string.fragment_access_denied),
+                    permission.toLocalizedString(this)), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -330,6 +391,8 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         transaction.commit();
     }
 
+    // Client Connection ///////////////////////////////////////////////////////////////////////////////////////////////
+
     /**
      * maps button resource ids to Fragment classes.
      */
@@ -362,56 +425,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         }
         showFragmentByClass(clazz);
     }
-
-    // Client Connection ///////////////////////////////////////////////////////////////////////////////////////////////
-
-    private final ClientConnectionListener connectionListener = new ClientConnectionListener() {
-        @Override
-        public void onMasterFound() {
-        }
-
-        @Override
-        public void onClientConnecting(String host, int port) {
-        }
-
-        @Override
-        public void onClientConnected() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    overlayDisconnected.setVisibility(View.GONE);
-                }
-            });
-        }
-
-        @Override
-        public void onClientDisconnected() {
-            if (!wasRejected) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showConnectionOverlay(getString(R.string.warn_no_connection_to_master));
-                    }
-                });
-            }
-        }
-
-        @Override
-        public void onClientRejected(String message) {
-            wasRejected = true;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    showConnectionOverlay(getString(R.string.warn_client_rejected));
-                    forceStopService();
-                    finish();
-
-                    Intent intent = new Intent(MainActivity.this, RejectedActivity.class);
-                    startActivity(intent);
-                }
-            });
-        }
-    };
 
     private void showConnectionOverlay(String text) {
         overlayDisconnected.setVisibility(View.VISIBLE);

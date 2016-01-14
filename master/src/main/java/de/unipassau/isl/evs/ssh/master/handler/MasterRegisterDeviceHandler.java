@@ -11,7 +11,10 @@ import java.util.Map;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
+import de.unipassau.isl.evs.ssh.core.database.DatabaseControllerException;
+import de.unipassau.isl.evs.ssh.core.database.UnknownReferenceException;
+import de.unipassau.isl.evs.ssh.core.database.dto.PermissionDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
@@ -21,11 +24,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenP
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
-import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
-import de.unipassau.isl.evs.ssh.core.database.DatabaseControllerException;
 import de.unipassau.isl.evs.ssh.master.database.DatabaseContract;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
-import de.unipassau.isl.evs.ssh.core.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import de.unipassau.isl.evs.ssh.master.network.broadcast.UserConfigurationBroadcaster;
@@ -137,8 +137,8 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
         }
         //Add permissions. First device gets all permissions. Others get the permissions of the group they belong to.
         if (requireComponent(UserManagementController.KEY).getUserDevices().size() == 1) {
-            final List<Permission> permissions = requireComponent(PermissionController.KEY).getPermissions();
-            for (Permission permission : permissions) {
+            final List<PermissionDTO> permissions = requireComponent(PermissionController.KEY).getPermissions();
+            for (PermissionDTO permission : permissions) {
                 try {
                     requireComponent(PermissionController.KEY).addUserPermission(
                             deviceID,
@@ -153,9 +153,9 @@ public class MasterRegisterDeviceHandler extends AbstractMasterHandler implement
         } else {
             final String templateName = requireComponent(UserManagementController.KEY)
                     .getGroup(newDevice.getInGroup()).getTemplateName();
-            final List<Permission> permissions = requireComponent(PermissionController.KEY)
+            final List<PermissionDTO> permissions = requireComponent(PermissionController.KEY)
                     .getPermissionsOfTemplate(templateName);
-            for (Permission permission : permissions) {
+            for (PermissionDTO permission : permissions) {
                 try {
                     requireComponent(PermissionController.KEY).addUserPermission(
                             deviceID,

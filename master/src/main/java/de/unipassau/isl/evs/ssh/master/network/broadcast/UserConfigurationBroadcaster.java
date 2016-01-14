@@ -11,7 +11,7 @@ import java.util.List;
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.AbstractComponent;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.dto.PermissionDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
@@ -57,7 +57,7 @@ public class UserConfigurationBroadcaster extends AbstractComponent {
         final List<Group> groups;
         final List<UserDevice> userDevices;
         final List<String> templates;
-        final List<Permission> permissions;
+        final List<PermissionDTO> permissions;
         groups = requireComponent(UserManagementController.KEY).getGroups();
         userDevices = requireComponent(UserManagementController.KEY).getUserDevices();
         permissions = requireComponent(PermissionController.KEY).getPermissions();
@@ -76,7 +76,7 @@ public class UserConfigurationBroadcaster extends AbstractComponent {
                     }
                 });
 
-        ListMultimap<UserDevice, Permission> userHasPermissions = ArrayListMultimap.create();
+        ListMultimap<UserDevice, PermissionDTO> userHasPermissions = ArrayListMultimap.create();
         for (UserDevice userDevice : userDevices) {
             userHasPermissions.putAll(userDevice, permissionController.getPermissionsOfUserDevice(userDevice.getUserDeviceID()));
         }

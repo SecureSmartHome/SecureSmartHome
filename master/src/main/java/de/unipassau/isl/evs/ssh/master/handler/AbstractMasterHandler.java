@@ -78,11 +78,11 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
     }
 
     /**
-     * Check if a given Device has a given Permission. Master has all Permission.
+     * Check if a given Device has a given PermissionDTO. Master has all PermissionDTO.
      *
      * @param userDeviceID DeviceID of the Device.
-     * @param permission   Permission to check for.
-     * @param moduleName   Module the Permission applies for.
+     * @param permission   PermissionDTO to check for.
+     * @param moduleName   Module the PermissionDTO applies for.
      * @return true if has permissions otherwise false.
      */
     protected boolean hasPermission(DeviceID userDeviceID, Permission permission, String moduleName) {
@@ -91,10 +91,10 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
     }
 
     /**
-     * Has Permission for Permissions that are independent of a Module.
+     * Has PermissionDTO for Permissions that are independent of a Module.
      *
      * @param userDeviceID DeviceID of the Device.
-     * @param permission   Permission to check for.
+     * @param permission   PermissionDTO to check for.
      * @return true if has permissions otherwise false.
      */
     protected boolean hasPermission(DeviceID userDeviceID, Permission permission) {
@@ -102,11 +102,11 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
     }
 
     /**
-     * Send a message to all Devices that have a given Permission.
+     * Send a message to all Devices that have a given PermissionDTO.
      *
      * @param messageToSend Message to send to the devices.
-     * @param permission    Permission the Device has to have.
-     * @param moduleName    Module to Permission applies for.
+     * @param permission    PermissionDTO the Device has to have.
+     * @param moduleName    Module to PermissionDTO applies for.
      * @param routingKey    RoutingKey to send the message with.
      */
     protected void sendMessageToAllDevicesWithPermission(
@@ -126,7 +126,7 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
      * Send a reply containing a no permission error.
      *
      * @param original   Message to reply to
-     * @param permission Permission the author of the original Message doesn't have.
+     * @param permission PermissionDTO the author of the original Message doesn't have.
      */
     protected void sendNoPermissionReply(Message.AddressedMessage original, Permission permission) {
         Message message = new Message(new ErrorPayload(new NoPermissionException(permission)));

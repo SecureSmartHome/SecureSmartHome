@@ -16,7 +16,7 @@ public class NoPermissionException extends Exception {
      * @param missingPermission the permission that is missing to execute an action
      */
     public NoPermissionException(Permission missingPermission) {
-        super("Missing Permission: " + missingPermission.toString());
+        super("Missing PermissionDTO: " + missingPermission.toString());
         this.missingPermission = missingPermission;
     }
 

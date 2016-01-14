@@ -31,16 +31,13 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.NamedDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.DELETE_USERDEVICE_DIALOG;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.GROUP_ARGUMENT_FRAGMENT;
 import static de.unipassau.isl.evs.ssh.app.AppConstants.FragmentArguments.USER_DEVICE_ARGUMENT_FRAGMENT;
 import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.USERNAME_SET;
 import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.USER_DELETE;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_USER;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER;
 
 
 /**
@@ -122,7 +119,7 @@ public class ListUserDeviceFragment extends BoundFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final MainActivity activity = (MainActivity) getActivity();
-                if (activity != null && activity.hasPermission(CHANGE_USER_NAME) && activity.hasPermission(CHANGE_USER_GROUP)) {
+                if (activity != null && activity.hasPermission(Permission.CHANGE_USER_NAME) && activity.hasPermission(Permission.CHANGE_USER_GROUP)) {
                     UserDevice item = adapter.getItem(position);
                     Bundle bundle = new Bundle();
                     bundle.putSerializable(USER_DEVICE_ARGUMENT_FRAGMENT, item);
@@ -140,7 +137,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(DELETE_USERDEVICE_DIALOG, item);
                 final MainActivity activity = (MainActivity) getActivity();
-                if (activity != null && activity.hasPermission(DELETE_USER)) {
+                if (activity != null && activity.hasPermission(Permission.DELETE_USER)) {
                     showRemoveUserDeviceDialog(bundle);
                     return true;
                 } else {
@@ -156,7 +153,7 @@ public class ListUserDeviceFragment extends BoundFragment {
             @Override
             public void onClick(View v) {
                 final MainActivity activity = (MainActivity) getActivity();
-                if (activity.hasPermission(ADD_USER)) {
+                if (activity.hasPermission(Permission.ADD_USER)) {
                     ((MainActivity) getActivity()).showFragmentByClass(AddNewUserDeviceFragment.class);
                 } else {
                     Toast.makeText(getActivity(), R.string.you_can_not_add_new_users, Toast.LENGTH_SHORT).show();
@@ -197,7 +194,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                         final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
                         if (handler == null) {
                             Log.i(TAG, "Container not yet connected!");
-                        } else if (((MainActivity) getActivity()).hasPermission(DELETE_USER)) {
+                        } else if (((MainActivity) getActivity()).hasPermission(Permission.DELETE_USER)) {
                             handler.removeUserDevice(userDevice.getUserDeviceID());
                         } else {
                             Toast.makeText(getActivity(), R.string.you_can_not_remove_users, Toast.LENGTH_SHORT).show();

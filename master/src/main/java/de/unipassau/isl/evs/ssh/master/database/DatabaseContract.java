@@ -8,6 +8,53 @@ package de.unipassau.isl.evs.ssh.master.database;
  */
 public class DatabaseContract {
 
+    public static class Group {
+        public static final String TABLE_NAME = "DeviceGroup";
+        public static final String COLUMN_ID = "_ID";
+        public static final String COLUMN_NAME = "name";
+        public static final String COLUMN_PERMISSION_TEMPLATE_ID = "permissionTemplateId";
+
+        public enum DefaultValues {
+            PARENTS("Parents"),
+            CHILDREN("Children"),
+            GUESTS("Guests");
+
+            final String name;
+
+            DefaultValues(String name) {
+                this.name = name;
+            }
+
+            @Override
+            public String toString() {
+                return name;
+            }
+        }
+    }
+
+    public static class PermissionTemplate {
+        public static final String TABLE_NAME = "PermissionTemplate";
+        public static final String COLUMN_ID = "_ID";
+        public static final String COLUMN_NAME = "name";
+
+        public enum DefaultValues {
+            PARENTS_TEMPLATE("ParentsTemplate"),
+            CHILDREN_TEMPLATE("ChildrenTemplate"),
+            GUESTS_TEMPLATE("GuestsTemplate");
+
+            final String name;
+
+            DefaultValues(String name) {
+                this.name = name;
+            }
+
+            @Override
+            public String toString() {
+                return name;
+            }
+        }
+    }
+
     /**
      * @author Leon Sell
      */
@@ -62,7 +109,7 @@ public class DatabaseContract {
     }
 
     public class Permission {
-        public static final String TABLE_NAME = "Permission";
+        public static final String TABLE_NAME = "PermissionDTO";
         public static final String COLUMN_ID = "_ID";
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_ELECTRONIC_MODULE_ID = "electronicModuleId";
@@ -80,53 +127,6 @@ public class DatabaseContract {
         public static final String COLUMN_ACTION = "action";
         public static final String COLUMN_TIMESTAMP = "timestamp";
         public static final String COLUMN_ELECTRONIC_MODULE_ID = "electronicModuleId";
-    }
-
-    public static class Group {
-        public static final String TABLE_NAME = "DeviceGroup";
-        public static final String COLUMN_ID = "_ID";
-        public static final String COLUMN_NAME = "name";
-        public static final String COLUMN_PERMISSION_TEMPLATE_ID = "permissionTemplateId";
-
-        public enum DefaultValues {
-            PARENTS("Parents"),
-            CHILDREN("Children"),
-            GUESTS("Guests");
-
-            final String name;
-
-            DefaultValues(String name) {
-                this.name = name;
-            }
-
-            @Override
-            public String toString() {
-                return name;
-            }
-        }
-    }
-
-    public static class PermissionTemplate {
-        public static final String TABLE_NAME = "PermissionTemplate";
-        public static final String COLUMN_ID = "_ID";
-        public static final String COLUMN_NAME = "name";
-
-        public enum DefaultValues {
-            PARENTS_TEMPLATE("ParentsTemplate"),
-            CHILDREN_TEMPLATE("ChildrenTemplate"),
-            GUESTS_TEMPLATE("GuestsTemplate");
-
-            final String name;
-
-            DefaultValues(String name) {
-                this.name = name;
-            }
-
-            @Override
-            public String toString() {
-                return name;
-            }
-        }
     }
 
     public class ComposedOfPermission {

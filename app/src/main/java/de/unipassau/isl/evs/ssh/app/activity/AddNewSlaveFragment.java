@@ -14,8 +14,7 @@ import de.unipassau.isl.evs.ssh.app.handler.AppSlaveManagementHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
-
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 /**
  * The AddNewSlaveFragment is used to add new Slaves to the SecureSmartHome.
@@ -24,9 +23,6 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_ODROID;
  */
 public class AddNewSlaveFragment extends ScanQRFragment {
     private static final String KEY_SLAVE_NAME = "SLAVE_NAME";
-
-    private EditText slaveNameInput;
-
     private final AppSlaveManagementHandler.SlaveManagementListener listener = new AppSlaveManagementHandler.SlaveManagementListener() {
         @Override
         public void onSlaveRegistered(final boolean wasSuccessful) {
@@ -48,6 +44,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
             //this fragment does not handle slave removal
         }
     };
+    private EditText slaveNameInput;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -95,7 +92,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
     protected void onQRCodeScanned(DeviceConnectInformation info) {
         AppSlaveManagementHandler handler = getComponent(AppSlaveManagementHandler.KEY);
 
-        if (info != null && handler != null && ((MainActivity) getActivity()).hasPermission(ADD_ODROID)) {
+        if (info != null && handler != null && ((MainActivity) getActivity()).hasPermission(Permission.ADD_ODROID)) {
             final DeviceID slaveID = info.getID();
             final String slaveName = slaveNameInput.getText().toString();
             final byte[] passiveRegistrationToken = info.getToken();

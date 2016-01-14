@@ -23,6 +23,7 @@ import java.lang.ref.WeakReference;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.LOCK_DOOR;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.TAKE_CAMERA_PICTURE;
@@ -165,7 +166,7 @@ public class DoorFragment extends BoundFragment {
             Log.i(TAG, "Container not bound.");
             return;
         }
-        if (((MainActivity) getActivity()).hasPermission(TAKE_CAMERA_PICTURE)) {
+        if (((MainActivity) getActivity()).hasPermission(Permission.TAKE_CAMERA_PICTURE)) {
             handler.refreshImage();
         } else {
             Toast.makeText(getActivity(), R.string.you_can_not_request_picture, Toast.LENGTH_SHORT).show();
@@ -185,7 +186,7 @@ public class DoorFragment extends BoundFragment {
         }
 
         if (!handler.isOpen() && !handler.isBlocked()) {
-            if (((MainActivity) getActivity()).hasPermission(UNLATCH_DOOR) || ((MainActivity) getActivity()).hasPermission(UNLATCH_DOOR_ON_HOLIDAY)) {
+            if (((MainActivity) getActivity()).hasPermission(Permission.UNLATCH_DOOR) || ((MainActivity) getActivity()).hasPermission(Permission.UNLATCH_DOOR_ON_HOLIDAY)) {
                 handler.unlatchDoor();
             } else {
                 Toast.makeText(getActivity(), R.string.you_can_not_unlatch_door, Toast.LENGTH_SHORT).show();
@@ -204,7 +205,7 @@ public class DoorFragment extends BoundFragment {
             return;
         }
 
-        if (((MainActivity) getActivity()).hasPermission(LOCK_DOOR)) {
+        if (((MainActivity) getActivity()).hasPermission(Permission.LOCK_DOOR)) {
             if (handler.isBlocked()) {
                 handler.unblockDoor();
             } else {

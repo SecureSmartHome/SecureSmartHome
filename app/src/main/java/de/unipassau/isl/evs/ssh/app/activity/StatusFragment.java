@@ -24,9 +24,7 @@ import de.unipassau.isl.evs.ssh.app.handler.AppSlaveManagementHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
-
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID;
-import static de.unipassau.isl.evs.ssh.core.sec.Permission.RENAME_MODULE;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 /**
  * This activity allows to visualize connected modules and slaves. It also allows to delete modules and slaves. If this
@@ -128,7 +126,7 @@ public class StatusFragment extends BoundFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
-                        if (handler != null && ((MainActivity) getActivity()).hasPermission(RENAME_MODULE)) {
+                        if (handler != null && ((MainActivity) getActivity()).hasPermission(Permission.RENAME_MODULE)) {
                             handler.removeModule(module);
                         } else {
                             Toast.makeText(getActivity(), R.string.you_can_not_remove_modules, Toast.LENGTH_SHORT).show();
@@ -153,7 +151,7 @@ public class StatusFragment extends BoundFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         AppSlaveManagementHandler handler = getComponent(AppSlaveManagementHandler.KEY);
-                        if (handler != null && ((MainActivity) getActivity()).hasPermission(DELETE_ODROID)) {
+                        if (handler != null && ((MainActivity) getActivity()).hasPermission(Permission.DELETE_ODROID)) {
                             handler.deleteSlave(slave.getSlaveID());
                         } else {
                             Toast.makeText(getActivity(), R.string.you_can_not_remove_odroids, Toast.LENGTH_SHORT).show();

@@ -21,7 +21,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
+import de.unipassau.isl.evs.ssh.core.database.dto.PermissionDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
@@ -71,13 +71,13 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add same name. Will not fail when module is null for both and name is same.
         try {
             permissionController.addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT, "m1");
-            Assert.fail("Permission controller should have thrown AlreadyInUseException");
+            Assert.fail("PermissionDTO controller should have thrown AlreadyInUseException");
         } catch (DatabaseControllerException e) {
         }
 
         //Check that permissions are inserted
         List<de.unipassau.isl.evs.ssh.core.sec.Permission> permissions = new LinkedList<>();
-        for (Permission permission : permissionController.getPermissions()) {
+        for (PermissionDTO permission : permissionController.getPermissions()) {
             permissions.add(permission.getPermission());
         }
         assertTrue(permissions.containsAll(Arrays.asList(
@@ -87,12 +87,12 @@ public class ControllerTest extends InstrumentationTestCase {
                 de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT
         )));
 
-        //Remove Permission
+        //Remove PermissionDTO
         permissionController.removePermission(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT, "m1");
 
         //Check that permission is removed
         permissions = new LinkedList<>();
-        for (Permission permission : permissionController.getPermissions()) {
+        for (PermissionDTO permission : permissionController.getPermissions()) {
             permissions.add(permission.getPermission());
         }
         assertFalse(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT));
@@ -102,7 +102,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Check that it's still not in database and not getting added again magically ~~~
         permissions = new LinkedList<>();
-        for (Permission permission : permissionController.getPermissions()) {
+        for (PermissionDTO permission : permissionController.getPermissions()) {
             permissions.add(permission.getPermission());
         }
         assertFalse(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT));
@@ -115,13 +115,13 @@ public class ControllerTest extends InstrumentationTestCase {
 
         try {
             permissionController.addPermissionToTemplate("44", de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID, null);
-            Assert.fail("Permission controller should have thrown UnknownReferenceException");
+            Assert.fail("PermissionDTO controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
         }
 
         //Check that permissions are in template
         permissions = new LinkedList<>();
-        for (Permission permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
+        for (PermissionDTO permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
             permissions.add(permission.getPermission());
         }
         assertTrue(permissions.containsAll(Arrays.asList(
@@ -132,7 +132,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Check that permissions are in template
         permissions = new LinkedList<>();
-        for (Permission permission : permissionController.getPermissionsOfTemplate("asdf")) {
+        for (PermissionDTO permission : permissionController.getPermissionsOfTemplate("asdf")) {
             permissions.add(permission.getPermission());
         }
         assertTrue(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID));
@@ -142,7 +142,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Check that template and permission removed from template still exist
         permissions = new LinkedList<>();
-        for (Permission permission : permissionController.getPermissions()) {
+        for (PermissionDTO permission : permissionController.getPermissions()) {
             permissions.add(permission.getPermission());
         }
 
@@ -155,7 +155,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Check that permissions are removed from template
         permissions = new LinkedList<>();
-        for (Permission permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
+        for (PermissionDTO permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
             permissions.add(permission.getPermission());
         }
         assertFalse(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS));
@@ -166,7 +166,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Check that permission is gone
         permissions = new LinkedList<>();
-        for (Permission permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
+        for (PermissionDTO permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
             permissions.add(permission.getPermission());
         }
         assertFalse(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS));
@@ -179,7 +179,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Check that permission is still there
         permissions = new LinkedList<>();
-        for (Permission permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
+        for (PermissionDTO permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
             permissions.add(permission.getPermission());
         }
         assertTrue(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID));
@@ -209,7 +209,7 @@ public class ControllerTest extends InstrumentationTestCase {
         permissionController.addTemplate("tmpl3");
         permissionController.addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_GROUP, null);
         permissionController.addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION, null);
-        //Permission w/ module
+        //PermissionDTO w/ module
         slaveController.addSlave(new Slave("abc", altDevice2, null));
         slaveController.addModule(new Module("m1", altDevice2, CoreConstants.ModuleType.DoorBuzzer,
                 new USBAccessPoint(1)));
@@ -218,7 +218,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Rename to already existing
         try {
             permissionController.changeTemplateName("tmpl2", "tmpl");
-            Assert.fail("Permission controller should have thrown AlreadyInUseException");
+            Assert.fail("PermissionDTO controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
@@ -226,7 +226,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add same name
         try {
             permissionController.addTemplate("tmpl");
-            Assert.fail("Permission controller should have thrown AlreadyInUseException");
+            Assert.fail("PermissionDTO controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
@@ -239,7 +239,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Use same Groupname twice
         try {
             userManagementController.addGroup(new Group("grp1", "tmpl"));
-            Assert.fail("Permission controller should have thrown DatabaseControllerException");
+            Assert.fail("PermissionDTO controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
@@ -247,7 +247,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Test adding group with not existing template
         try {
             userManagementController.addGroup(new Group("dkjfkdfj", "aklsdjflasdjlf"));
-            Assert.fail("Permission controller should have thrown DatabaseControllerException");
+            Assert.fail("PermissionDTO controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
@@ -270,7 +270,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change to none existing template
         try {
             userManagementController.changeTemplateOfGroup("grp1", "adfdfdsfdfs");
-            Assert.fail("Permission controller should have thrown UnknownReferenceException");
+            Assert.fail("PermissionDTO controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException e) {
             assertFalse(false);
         }
@@ -283,7 +283,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change to already existing name
         try {
             userManagementController.changeGroupName("grp3", "such wow");
-            Assert.fail("Permission controller should have thrown AlreadyInUseException");
+            Assert.fail("PermissionDTO controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
@@ -300,7 +300,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Remove template w/ group reference
         try {
             permissionController.removeTemplate("tmpl3");
-            Assert.fail("Permission controller should have thrown IsReferencedException");
+            Assert.fail("PermissionDTO controller should have thrown IsReferencedException");
         } catch (IsReferencedException isReferencedException) {
             assertFalse(false);
         }
@@ -314,7 +314,7 @@ public class ControllerTest extends InstrumentationTestCase {
         try {
             userManagementController.addUserDevice(
                     new UserDevice("askdfj", "--", altDevice2));
-            Assert.fail("Permission controller should have thrown DatabaseControllerException");
+            Assert.fail("PermissionDTO controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
@@ -322,7 +322,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Remove group in use
         try {
             userManagementController.removeGroup("such wow");
-            Assert.fail("Permission controller should have thrown IsReferencedException");
+            Assert.fail("PermissionDTO controller should have thrown IsReferencedException");
         } catch (IsReferencedException isReferencedException) {
             assertFalse(false);
         }
@@ -330,7 +330,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Check colliding
         try {
             userManagementController.addUserDevice(new UserDevice("u2", "such wow", device3));
-            Assert.fail("Permission controller should have thrown DatabaseControllerException");
+            Assert.fail("PermissionDTO controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
@@ -355,7 +355,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add to none device
         try {
             permissionController.addUserPermission(altDevice1, de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT, "m1");
-            Assert.fail("Permission controller should have thrown UnknownReferenceException");
+            Assert.fail("PermissionDTO controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
@@ -387,7 +387,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Rename to same as other
         try {
             userManagementController.changeUserDeviceName(device4, "11u");
-            Assert.fail("Permission controller should have thrown AlreadyInUseException");
+            Assert.fail("PermissionDTO controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
@@ -411,7 +411,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change to none existing group
         try {
             userManagementController.changeGroupMembership(device1, "asdf");
-            Assert.fail("Permission controller should have thrown UnknownReferenceException");
+            Assert.fail("PermissionDTO controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException e) {
             assertFalse(false);
         }
@@ -450,13 +450,13 @@ public class ControllerTest extends InstrumentationTestCase {
         //Add already existing slave
         try {
             slaveController.addSlave(new Slave("s1", altDevice1, null));
-            Assert.fail("Permission controller should have thrown AlreadyInUseException");
+            Assert.fail("PermissionDTO controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
         try {
             slaveController.addSlave(new Slave("s55", device2, null));
-            Assert.fail("Permission controller should have thrown AlreadyInUseException");
+            Assert.fail("PermissionDTO controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
@@ -474,7 +474,7 @@ public class ControllerTest extends InstrumentationTestCase {
         try {
             slaveController.addModule(new Module("m1", altDevice1, CoreConstants.ModuleType.DoorSensor,
                     new USBAccessPoint(2)));
-            Assert.fail("Permission controller should have thrown DatabaseControllerException");
+            Assert.fail("PermissionDTO controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
@@ -483,7 +483,7 @@ public class ControllerTest extends InstrumentationTestCase {
         try {
             slaveController.addModule(new Module("m2", device1, CoreConstants.ModuleType.DoorSensor,
                     new USBAccessPoint(1)));
-            Assert.fail("Permission controller should have thrown DatabaseControllerException");
+            Assert.fail("PermissionDTO controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
@@ -499,7 +499,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Remove locked slave
         try {
             slaveController.removeSlave(device1);
-            Assert.fail("Permission controller should have thrown IsReferencedException");
+            Assert.fail("PermissionDTO controller should have thrown IsReferencedException");
         } catch (IsReferencedException isReferencedException) {
             assertTrue(true);
         }
@@ -522,7 +522,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change to existing name
         try {
             slaveController.changeSlaveName("abcd", "abc");
-            Assert.fail("Permission controller should have thrown AlreadyInUseException");
+            Assert.fail("PermissionDTO controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
@@ -537,7 +537,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Change to existing name
         try {
             slaveController.changeModuleName("m2", "asdf");
-            Assert.fail("Permission controller should have thrown AlreadyInUseException");
+            Assert.fail("PermissionDTO controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertNotNull(slaveController.getModule("asdf"));
             assertNotNull(slaveController.getModule("m2"));
@@ -579,7 +579,7 @@ public class ControllerTest extends InstrumentationTestCase {
         //Check illegal stuff add
         try {
             holidayController.addHolidayLogEntryNow(null, null);
-            Assert.fail("Permission controller should have thrown IllegalArgumentException");
+            Assert.fail("PermissionDTO controller should have thrown IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             assertTrue(true);
         }
