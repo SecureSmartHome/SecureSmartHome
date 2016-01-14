@@ -8,7 +8,7 @@ package de.unipassau.isl.evs.ssh.app.handler;
  */
 public class UserConfigurationEvent {
     private final boolean wasSuccessful;
-    private EventType type;
+    private final EventType type;
 
     /**
      * Constructs a new UserConfigurationEvent for a pushed message. Pushed messages are messages that are not a reply

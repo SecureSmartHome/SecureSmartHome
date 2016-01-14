@@ -34,7 +34,7 @@ public class MasterModuleHandler extends AbstractMasterHandler {
     @Override
     public void handle(Message.AddressedMessage message) {
         if (MASTER_DEVICE_CONNECTED.matches(message)) {
-            final DeviceID deviceID = MASTER_DEVICE_CONNECTED.getPayload(message).deviceID;
+            final DeviceID deviceID = MASTER_DEVICE_CONNECTED.getPayload(message).getDeviceID();
             final ModuleBroadcaster broadcaster = requireComponent(ModuleBroadcaster.KEY);
             broadcaster.updateClient(deviceID);
         } else if (MASTER_MODULE_ADD.matches(message)) {

@@ -21,7 +21,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 public class ModulesPayload implements MessagePayload {
 
     private List<Slave> slaves;
-    private ListMultimap<Slave, Module> modulesAtSlave;
+    private final ListMultimap<Slave, Module> modulesAtSlave;
 
     /**
      * Constructs a new and empty Modules Payload.

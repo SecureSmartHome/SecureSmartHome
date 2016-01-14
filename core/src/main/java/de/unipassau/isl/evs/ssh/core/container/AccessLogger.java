@@ -22,7 +22,7 @@ import io.netty.channel.EventLoop;
 public class AccessLogger extends AbstractComponent {
     private static final String TAG = AccessLogger.class.getSimpleName();
     public static final Key<AccessLogger> KEY = new Key<>(AccessLogger.class);
-    private Set<Integer> knownStackTraces = new HashSet<>();
+    private final Set<Integer> knownStackTraces = new HashSet<>();
     private Writer writer;
     private EventLoop eventLoop;
 

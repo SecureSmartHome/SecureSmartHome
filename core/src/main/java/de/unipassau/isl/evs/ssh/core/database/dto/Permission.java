@@ -12,8 +12,8 @@ import java.io.Serializable;
  * @author Leon Sell
  */
 public class Permission implements Serializable {
-    de.unipassau.isl.evs.ssh.core.sec.Permission permission;
-    String moduleName;
+    private de.unipassau.isl.evs.ssh.core.sec.Permission permission;
+    private String moduleName;
 
     public Permission(de.unipassau.isl.evs.ssh.core.sec.Permission permission) {
         this.permission = permission;

@@ -6,8 +6,8 @@ import android.test.ServiceTestCase;
 import de.ncoder.typedmap.Key;
 
 public class ContainerServiceTest extends ServiceTestCase<ContainerService> {
-    private Key<TestComponent> k = new Key<>(TestComponent.class);
-    private TestComponent c = new TestComponent();
+    private final Key<TestComponent> k = new Key<>(TestComponent.class);
+    private final TestComponent c = new TestComponent();
 
     public ContainerServiceTest() {
         super(ContainerService.class);

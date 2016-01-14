@@ -2,7 +2,6 @@ package de.unipassau.isl.evs.ssh.master.database;
 
 import android.content.Context;
 import android.test.InstrumentationTestCase;
-import android.util.Base64;
 
 import junit.framework.Assert;
 
@@ -33,12 +32,12 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  * @author Leon Sell
  */
 public class ControllerTest extends InstrumentationTestCase {
-    final DeviceID device1 = new DeviceID("YXNqZGZsw7ZrYXNkZmFhc2RmdmF3YXZhc3Zhc3ZhZmE=");
-    final DeviceID device2 = new DeviceID("YXNqZGZsw7ZiYXNkZmFhc2RmdmF3YXZhc3Zhc3ZhZmE=");
-    final DeviceID device3 = new DeviceID("YXNqZGZsw7ZiYXNkZmFhc2RmdmltZHZhc3Zhc3ZhZmE=");
-    final DeviceID device4 = new DeviceID("YXNqZGZsw7ZiYXMnK2Fhc2RmdmltZHZhc3Zhc3ZhZmE=");
-    final DeviceID altDevice1 = new DeviceID("YXNqZGZsw7ZiYXMnK2Fhc2RmdmltZHZhcz0/c3ZhZmE=");
-    final DeviceID altDevice2 = new DeviceID("YXNqZGZsw7ZiYXMnK2Fhc2RmdUltZHZhcz0/c3ZhZmE=");
+    private final DeviceID device1 = new DeviceID("YXNqZGZsw7ZrYXNkZmFhc2RmdmF3YXZhc3Zhc3ZhZmE=");
+    private final DeviceID device2 = new DeviceID("YXNqZGZsw7ZiYXNkZmFhc2RmdmF3YXZhc3Zhc3ZhZmE=");
+    private final DeviceID device3 = new DeviceID("YXNqZGZsw7ZiYXNkZmFhc2RmdmltZHZhc3Zhc3ZhZmE=");
+    private final DeviceID device4 = new DeviceID("YXNqZGZsw7ZiYXMnK2Fhc2RmdmltZHZhc3Zhc3ZhZmE=");
+    private final DeviceID altDevice1 = new DeviceID("YXNqZGZsw7ZiYXMnK2Fhc2RmdmltZHZhcz0/c3ZhZmE=");
+    private final DeviceID altDevice2 = new DeviceID("YXNqZGZsw7ZiYXMnK2Fhc2RmdUltZHZhcz0/c3ZhZmE=");
 
     public void testTemplatesAndPermissions() throws DatabaseControllerException {
         Context context = getInstrumentation().getTargetContext();

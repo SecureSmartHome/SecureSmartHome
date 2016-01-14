@@ -61,7 +61,7 @@ public class MasterUserConfigurationHandler extends AbstractMasterHandler {
     public void handle(Message.AddressedMessage message) {
         if (MASTER_DEVICE_CONNECTED.matches(message)) {
             final UserConfigurationBroadcaster broadcaster = requireComponent(UserConfigurationBroadcaster.KEY);
-            broadcaster.updateClient(MASTER_DEVICE_CONNECTED.getPayload(message).deviceID);
+            broadcaster.updateClient(MASTER_DEVICE_CONNECTED.getPayload(message).getDeviceID());
         } else if (MASTER_PERMISSION_SET.matches(message)) {
             setPermission(MASTER_PERMISSION_SET.getPayload(message), message);
         } else if (MASTER_USER_SET_GROUP.matches(message)) {

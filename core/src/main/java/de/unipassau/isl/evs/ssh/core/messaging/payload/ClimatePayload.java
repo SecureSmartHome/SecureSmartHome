@@ -9,10 +9,16 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  */
 public class ClimatePayload implements MessagePayload {
 
-    private double temp1, temp2, pressure, altitude, humidity, uv;
-    private int visible, ir;
-    private String notificationType;
-    private Module module;
+    private final double temp1;
+    private final double temp2;
+    private final double pressure;
+    private final double altitude;
+    private final double humidity;
+    private final double uv;
+    private final int visible;
+    private final int ir;
+    private final String notificationType;
+    private final Module module;
 
     public ClimatePayload(double temp1, double temp2, double pressure, double altitude, double humidity,
                           double uv, int visible, int ir, String notificationType, Module module) {

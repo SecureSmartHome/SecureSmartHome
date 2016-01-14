@@ -6,8 +6,8 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  * @author Wolfgang Popp.
  */
 public class SetUserGroupPayload implements MessagePayload {
-    private String groupName;
-    private DeviceID user;
+    private final String groupName;
+    private final DeviceID user;
 
     public SetUserGroupPayload(DeviceID user, String group) {
         this.groupName = group;

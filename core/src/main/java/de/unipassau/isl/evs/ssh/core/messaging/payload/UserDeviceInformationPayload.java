@@ -17,13 +17,13 @@ public class UserDeviceInformationPayload implements MessagePayload {
     /**
      * If a device has no permissions, it is still in the map with an empty permission list
      */
-    private ListMultimap<UserDevice, Permission> usersToPermissions;
+    private final ListMultimap<UserDevice, Permission> usersToPermissions;
     /**
      * If a group contains no devices, it is still in the map with an empty devicelist
      */
-    private ListMultimap<Group, UserDevice> groupToUserDevice;
-    private List<Permission> allPermissions;
-    private List<Group> allGroups;
+    private final ListMultimap<Group, UserDevice> groupToUserDevice;
+    private final List<Permission> allPermissions;
+    private final List<Group> allGroups;
     private List<String> templates;
 
     public UserDeviceInformationPayload(ListMultimap<UserDevice, Permission> usersToPermissions,

@@ -186,7 +186,7 @@ public class NamingManager extends AbstractComponent {
      */
     @Deprecated
     @NonNull
-    public DeviceID getDeviceID(X509Certificate cert) throws UnresolvableNamingException {
+    public DeviceID getDeviceID(X509Certificate cert) {
         return DeviceID.fromCertificate(cert);
     }
 

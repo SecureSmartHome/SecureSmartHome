@@ -75,7 +75,7 @@ public class AppModuleHandler extends AbstractMessageHandler implements Componen
     private final Set<Module> components = new HashSet<>();
     private final List<Slave> slaves = new LinkedList<>();
     private final ListMultimap<Slave, Module> modulesAtSlave = ArrayListMultimap.create();
-    private List<AppModuleListener> listeners = new LinkedList<>();
+    private final List<AppModuleListener> listeners = new LinkedList<>();
 
     @Override
     public RoutingKey[] getRoutingKeys() {

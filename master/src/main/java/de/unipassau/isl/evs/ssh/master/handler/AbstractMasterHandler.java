@@ -25,7 +25,7 @@ import de.unipassau.isl.evs.ssh.master.database.SlaveController;
  * @author Leon Sell
  */
 public abstract class AbstractMasterHandler extends AbstractMessageHandler {
-    private Map<Integer, Message.AddressedMessage> proxiedMessages = new HashMap<>();
+    private final Map<Integer, Message.AddressedMessage> proxiedMessages = new HashMap<>();
 
     /**
      * Remember that I sent another message (the proxy message) in order to fulfill a received request.

@@ -31,9 +31,9 @@ public class IncomingDispatcherTest extends TestCase {
         ID3 = new DeviceID(id);
     }
 
-    private Container container = new SimpleContainer();
-    private IncomingDispatcher dispatcher = new IncomingDispatcher();
-    private EmbeddedChannel channel = new EmbeddedChannel(dispatcher);
+    private final Container container = new SimpleContainer();
+    private final IncomingDispatcher dispatcher = new IncomingDispatcher();
+    private final EmbeddedChannel channel = new EmbeddedChannel(dispatcher);
 
     @Override
     protected void setUp() throws Exception {

@@ -365,7 +365,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
 
     // Client Connection ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    private ClientConnectionListener connectionListener = new ClientConnectionListener() {
+    private final ClientConnectionListener connectionListener = new ClientConnectionListener() {
         @Override
         public void onMasterFound() {
         }

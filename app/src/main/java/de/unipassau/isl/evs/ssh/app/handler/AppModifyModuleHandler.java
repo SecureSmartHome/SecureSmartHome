@@ -27,7 +27,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_MODULE_
 public class AppModifyModuleHandler extends AbstractAppHandler implements Component {
     public static final Key<AppModifyModuleHandler> KEY = new Key<>(AppModifyModuleHandler.class);
 
-    private List<NewModuleListener> listeners = new LinkedList<>();
+    private final List<NewModuleListener> listeners = new LinkedList<>();
 
     @Override
     public RoutingKey[] getRoutingKeys() {

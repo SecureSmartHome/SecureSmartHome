@@ -9,13 +9,25 @@ import io.netty.channel.Channel;
  * @author Christoph Fraedrich
  */
 public class DeviceConnectedPayload implements MessagePayload {
-    public final DeviceID deviceID;
-    public final Channel channel;
-    public final boolean isLocal;
+    private final DeviceID deviceID;
+    private final Channel channel;
+    private final boolean isLocal;
 
     public DeviceConnectedPayload(DeviceID deviceID, Channel channel, boolean isLocal) {
         this.deviceID = deviceID;
         this.channel = channel;
         this.isLocal = isLocal;
+    }
+
+    public DeviceID getDeviceID() {
+        return deviceID;
+    }
+
+    public Channel getChannel() {
+        return channel;
+    }
+
+    public boolean isLocal() {
+        return isLocal;
     }
 }

@@ -9,8 +9,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  */
 public class LightPayload implements MessagePayload {
 
-    private Module module;
-    private boolean on;
+    private final Module module;
+    private final boolean on;
 
     public LightPayload(boolean on, Module module) {
         this.on = on;

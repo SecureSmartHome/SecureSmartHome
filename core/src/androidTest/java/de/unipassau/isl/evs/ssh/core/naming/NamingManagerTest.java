@@ -48,7 +48,7 @@ public class NamingManagerTest extends InstrumentationTestCase {
 
     }
 
-    private DeviceID createEnvironmentAsAfterHandshake(Container container) throws GeneralSecurityException, UnresolvableNamingException {
+    private DeviceID createEnvironmentAsAfterHandshake(Container container) throws GeneralSecurityException {
         Context context = container.require(ContainerService.KEY_CONTEXT);
         NamingManager naming = container.require(NamingManager.KEY);
 

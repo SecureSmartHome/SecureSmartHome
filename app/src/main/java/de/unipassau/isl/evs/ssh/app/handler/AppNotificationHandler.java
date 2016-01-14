@@ -32,7 +32,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_NOTIFICATION_RECEIVE;
 import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.*;
 import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.*;
-import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.DOOR_LOCKED;
 
 /**
  * Notification Handler for the App that receives Messages from the MasterNotificationHandler

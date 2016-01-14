@@ -27,7 +27,7 @@ import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 public class ReedSensor extends AbstractComponent {
     public static final Key<ReedSensor> KEY = new Key<>(ReedSensor.class);
     private final String moduleName;
-    private int ioAddress;
+    private final int ioAddress;
     private Container container;
     private ScheduledFuture future;
 

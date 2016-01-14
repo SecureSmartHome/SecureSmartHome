@@ -161,10 +161,6 @@ public class DatabaseConnector extends AbstractComponent {
                 + "DROP TABLE " + PermissionTemplate.TABLE_NAME + ";"
                 + "DROP TABLE " + DatabaseContract.HolidayLog.TABLE_NAME + ";";
 
-        private String[] defaultTemplates = {"Default_Template", "Parents_Template",
-                "Children_Template", "Guests_Template"};
-
-
         private DBOpenHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }

@@ -10,7 +10,7 @@ import java.util.Arrays;
  */
 public abstract class ModuleAccessPoint implements Serializable {
     //Amount all different possible entries for access information in the database.
-    public static int COMBINED_AMOUNT_OF_ACCESS_INFORMATION = 6;
+    public static final int COMBINED_AMOUNT_OF_ACCESS_INFORMATION = 6;
 
     /**
      * Builds a ModuleAccessPoint object from the given information and type.

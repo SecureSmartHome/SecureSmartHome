@@ -61,10 +61,10 @@ public class IESCipher
         extends CipherSpi {
     private final JcaJceHelper helper = new BCJcaJceHelper();
 
-    private int ivLength;
-    private IESEngine engine;
+    private final int ivLength;
+    private final IESEngine engine;
     private int state = -1;
-    private ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     private AlgorithmParameters engineParam = null;
     private IESParameterSpec engineSpec = null;
     private AsymmetricKeyParameter key;
@@ -171,7 +171,7 @@ public class IESCipher
             throws NoSuchPaddingException {
         String paddingName = Strings.toUpperCase(padding);
 
-        // TDOD: make this meaningful...
+        // TODO: make this meaningful...
         if (paddingName.equals("NOPADDING")) {
 
         } else if (paddingName.equals("PKCS5PADDING") || paddingName.equals("PKCS7PADDING")) {

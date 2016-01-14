@@ -25,7 +25,7 @@ import de.unipassau.isl.evs.ssh.core.schedule.ExecutionServiceComponent;
 public class ButtonSensor extends AbstractComponent {
     public static final Key<ButtonSensor> KEY = new Key<>(ButtonSensor.class);
     private final String moduleName;
-    private int ioAddress;
+    private final int ioAddress;
     private Container container;
     private ScheduledFuture future;
 
@@ -68,7 +68,7 @@ public class ButtonSensor extends AbstractComponent {
     private class DoorPollingRunnable implements Runnable {
         private final String TAG = DoorPollingRunnable.class.getSimpleName();
 
-        private ButtonSensor sensor;
+        private final ButtonSensor sensor;
         private boolean isPressedFilter = true;
 
         public DoorPollingRunnable(ButtonSensor sensor) {

@@ -28,7 +28,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_SLAVE_R
 public class AppSlaveManagementHandler extends AbstractAppHandler implements Component {
     public static final Key<AppSlaveManagementHandler> KEY = new Key<>(AppSlaveManagementHandler.class);
 
-    private List<SlaveManagementListener> listeners = new LinkedList<>();
+    private final List<SlaveManagementListener> listeners = new LinkedList<>();
 
     @Override
     public RoutingKey[] getRoutingKeys() {
