@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -149,13 +150,14 @@ public class ContainerService extends Service implements Container {
      * A Component that holds a to the {@link Context} of the ContainerService that manages the Container.
      */
     public static class ContextComponent extends ContextWrapper implements Component {
+        @Nullable
         private final Intent intent;
 
         public ContextComponent(Context base) {
             this(base, null);
         }
 
-        public ContextComponent(Context base, Intent intent) {
+        public ContextComponent(Context base, @Nullable Intent intent) {
             super(base);
             this.intent = intent;
         }
@@ -175,6 +177,7 @@ public class ContainerService extends Service implements Container {
             return getClass().getSimpleName();
         }
 
+        @Nullable
         public Intent getStartIntent() {
             if (intent == null) {
                 return null;

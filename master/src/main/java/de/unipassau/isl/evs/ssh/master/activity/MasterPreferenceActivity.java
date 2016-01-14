@@ -1,7 +1,9 @@
 package de.unipassau.isl.evs.ssh.master.activity;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Toast;
 
@@ -56,7 +58,8 @@ public class MasterPreferenceActivity extends MasterStartUpActivity {
         return getSharedPreferences(CoreConstants.FILE_SHARED_PREFS, MODE_PRIVATE);
     }
 
-    public boolean allPreferencesSet() {
+    @SuppressLint("CommitPrefEdits")
+    private boolean allPreferencesSet() {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor edit = prefs.edit();
 
@@ -72,7 +75,7 @@ public class MasterPreferenceActivity extends MasterStartUpActivity {
         }
     }
 
-    private boolean validatePort(SharedPreferences prefs, SharedPreferences.Editor edit, String stringPref, String intPref) {
+    private boolean validatePort(SharedPreferences prefs, SharedPreferences.Editor edit, String stringPref, @Nullable String intPref) {
         int value;
         try {
             value = prefs.getInt(stringPref, -1);

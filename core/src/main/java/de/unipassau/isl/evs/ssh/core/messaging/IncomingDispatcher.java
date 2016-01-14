@@ -34,7 +34,7 @@ public class IncomingDispatcher extends ChannelHandlerAdapter implements Compone
     private static final String TAG = IncomingDispatcher.class.getSimpleName();
     public static final Key<IncomingDispatcher> KEY = new Key<>(IncomingDispatcher.class);
 
-    protected final SetMultimap<RoutingKey, MessageHandler> mappings = HashMultimap.create();
+    private final SetMultimap<RoutingKey, MessageHandler> mappings = HashMultimap.create();
     private Container container;
 
     @Override

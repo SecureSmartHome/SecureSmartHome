@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.schedule;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -72,7 +73,7 @@ public abstract class ExecutionServiceComponent extends AbstractComponent implem
      * will return {@code true}. All {@link FutureListener} added to it will be notified directly. Also
      * every call of blocking methods will just return without blocking.
      */
-    public <V> io.netty.util.concurrent.Future<V> newSucceededFuture(V result) {
+    public <V> io.netty.util.concurrent.Future<V> newSucceededFuture(@Nullable V result) {
         return next().newSucceededFuture(result);
     }
 

@@ -30,9 +30,8 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayl
  *
  * @author Team
  */
-public class RoutingKeys {
-    private RoutingKeys() {
-    }
+public enum RoutingKeys {
+    ;
 
     private static final String PREFIX_MASTER = "/master";
     private static final String PREFIX_SLAVE = "/slave";

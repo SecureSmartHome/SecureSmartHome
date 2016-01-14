@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.core.naming;
 
+import android.support.annotation.Nullable;
 import android.util.Base64;
 
 import java.io.Serializable;
@@ -115,7 +116,7 @@ public final class DeviceID implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

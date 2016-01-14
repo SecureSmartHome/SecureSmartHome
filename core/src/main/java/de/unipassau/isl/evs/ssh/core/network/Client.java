@@ -597,7 +597,7 @@ public class Client extends AbstractComponent {
         }
     }
 
-    void notifyClientRejected(String message) {
+    void notifyClientRejected(@Nullable String message) {
         for (ClientConnectionListener listener : listeners) {
             listener.onClientRejected(message);
         }
