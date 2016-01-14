@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.master.database;
 
 import android.content.Context;
 import android.test.InstrumentationTestCase;
+import android.util.Base64;
 
 import junit.framework.Assert;
 
@@ -13,7 +14,12 @@ import java.util.List;
 import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
 import de.unipassau.isl.evs.ssh.core.container.SimpleContainer;
+import de.unipassau.isl.evs.ssh.core.database.AlreadyInUseException;
+import de.unipassau.isl.evs.ssh.core.database.DatabaseControllerException;
+import de.unipassau.isl.evs.ssh.core.database.IsReferencedException;
+import de.unipassau.isl.evs.ssh.core.database.UnknownReferenceException;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
+import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.ModuleAccessPoint.USBAccessPoint;
 import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
@@ -26,11 +32,14 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  *
  * @author Leon Sell
  */
-// TODO: 07.01.16 Leon, update whole class. there have been many changes to the controllers classes.
-// this class is very broken atm
 public class ControllerTest extends InstrumentationTestCase {
+    final DeviceID device1 = new DeviceID("YXNqZGZsw7ZrYXNkZmFhc2RmdmF3YXZhc3Zhc3ZhZmE=");
+    final DeviceID device2 = new DeviceID("YXNqZGZsw7ZiYXNkZmFhc2RmdmF3YXZhc3Zhc3ZhZmE=");
+    final DeviceID device3 = new DeviceID("YXNqZGZsw7ZiYXNkZmFhc2RmdmltZHZhc3Zhc3ZhZmE=");
+    final DeviceID device4 = new DeviceID("YXNqZGZsw7ZiYXMnK2Fhc2RmdmltZHZhc3Zhc3ZhZmE=");
+    final DeviceID altDevice1 = new DeviceID("YXNqZGZsw7ZiYXMnK2Fhc2RmdmltZHZhcz0/c3ZhZmE=");
+    final DeviceID altDevice2 = new DeviceID("YXNqZGZsw7ZiYXMnK2Fhc2RmdUltZHZhcz0/c3ZhZmE=");
 
-    /*
     public void testTemplatesAndPermissions() throws DatabaseControllerException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
@@ -50,119 +59,118 @@ public class ControllerTest extends InstrumentationTestCase {
         permissionController.addTemplate("asdf");
 
         //Modules w/ Slaves to test Permissions
-        slaveController.addSlave(new Slave("s1", new DeviceID("1"), null));
-        slaveController.addModule(new Module("m1", new DeviceID("1"), CoreConstants.ModuleType.Light,
+        slaveController.addSlave(new Slave("s1", device1, null));
+        slaveController.addModule(new Module("m1", device1, CoreConstants.ModuleType.Light,
                 new USBAccessPoint(1)));
 
         //Add Permissions
-        permissionController.addPermission("test");
-        permissionController.addPermission("test2);
-        permissionController.addPermission("test3", "m1");
-        permissionController.addPermission("test4", "m1");
+        permissionController.addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID, null);
+        permissionController.addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission.BELL_RANG, null);
+        permissionController.addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS, null);
+        permissionController.addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT, "m1");
 
         //Add same name. Will not fail when module is null for both and name is same.
         try {
-            permissionController.addPermission("test3", "m1");
+            permissionController.addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT, "m1");
             Assert.fail("Permission controller should have thrown AlreadyInUseException");
-        } catch (AlreadyInUseException e) {
-            assertFalse(false);
+        } catch (DatabaseControllerException e) {
         }
 
         //Check that permissions are inserted
-        List<String> permissions = new LinkedList<>();
+        List<de.unipassau.isl.evs.ssh.core.sec.Permission> permissions = new LinkedList<>();
         for (Permission permission : permissionController.getPermissions()) {
-            permissions.add(permission.getName()); // as they are unique in this testcase and i don't want to implement
-            // hashcode just for this test, just the name works fine.
+            permissions.add(permission.getPermission());
         }
-        assertTrue(permissions.containsAll(Arrays.asList("test", "test2", "test3", "test4")));
+        assertTrue(permissions.containsAll(Arrays.asList(
+                de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID,
+                de.unipassau.isl.evs.ssh.core.sec.Permission.BELL_RANG,
+                de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS,
+                de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT
+        )));
 
         //Remove Permission
-        permissionController.removePermission("test4", "m1");
+        permissionController.removePermission(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT, "m1");
 
         //Check that permission is removed
         permissions = new LinkedList<>();
         for (Permission permission : permissionController.getPermissions()) {
-            permissions.add(permission.getName());
+            permissions.add(permission.getPermission());
         }
-        assertFalse(permissions.contains("test4"));
+        assertFalse(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT));
 
         //Remove element that is already removed
-        permissionController.removePermission("test4", "m1");
+        permissionController.removePermission(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT, "m1");
 
         //Check that it's still not in database and not getting added again magically ~~~
         permissions = new LinkedList<>();
         for (Permission permission : permissionController.getPermissions()) {
-            permissions.add(permission.getName());
+            permissions.add(permission.getPermission());
         }
-        assertFalse(permissions.contains("test4"));
+        assertFalse(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT));
 
         //Add permissions to templates.
-        permissionController.addPermissionToTemplate("Whaddaup", "test", null);
-        permissionController.addPermissionToTemplate("Whaddaup", "test2", null);
-        permissionController.addPermissionToTemplate("Whaddaup", "test3", "m1");
-        permissionController.addPermissionToTemplate("asdf", "test", null);
+        permissionController.addPermissionToTemplate("Whaddaup", de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID, null);
+        permissionController.addPermissionToTemplate("Whaddaup", de.unipassau.isl.evs.ssh.core.sec.Permission.BELL_RANG, null);
+        permissionController.addPermissionToTemplate("Whaddaup", de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS, null);
+        permissionController.addPermissionToTemplate("asdf", de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID, null);
 
-        //Add none existing permissions or template
         try {
-            permissionController.addPermissionToTemplate("asdf", "zzz", null);
+            permissionController.addPermissionToTemplate("44", de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID, null);
             Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
-            assertFalse(false);
-        }
-        try {
-            permissionController.addPermissionToTemplate("44", "test", null);
-            Assert.fail("Permission controller should have thrown UnknownReferenceException");
-        } catch (UnknownReferenceException unknownReferenceException) {
-            assertFalse(false);
         }
 
         //Check that permissions are in template
         permissions = new LinkedList<>();
         for (Permission permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
-            permissions.add(permission.getName());
+            permissions.add(permission.getPermission());
         }
-        assertTrue(permissions.containsAll(Arrays.asList("test", "test2", "test3")));
+        assertTrue(permissions.containsAll(Arrays.asList(
+                de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID,
+                de.unipassau.isl.evs.ssh.core.sec.Permission.BELL_RANG,
+                de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS
+                )));
 
         //Check that permissions are in template
         permissions = new LinkedList<>();
         for (Permission permission : permissionController.getPermissionsOfTemplate("asdf")) {
-            permissions.add(permission.getName());
+            permissions.add(permission.getPermission());
         }
-        assertTrue(permissions.contains("test"));
+        assertTrue(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID));
 
         //Remove permissions from template
-        permissionController.removePermissionFromTemplate("Whaddaup", "test3", "m1");
+        permissionController.removePermissionFromTemplate("Whaddaup", de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS, null);
 
         //Check that template and permission removed from template still exist
         permissions = new LinkedList<>();
         for (Permission permission : permissionController.getPermissions()) {
-            permissions.add(permission.getName());
+            permissions.add(permission.getPermission());
         }
 
-        assertTrue(permissions.contains("test3"));
+        assertTrue(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS));
         assertTrue(permissionController.getTemplates().contains("Whaddaup"));
 
         //Check remove of none existing permission
-        assertFalse(permissions.contains("test4"));
-        permissionController.removePermissionFromTemplate("Whaddaup", "test4", null);
+        assertFalse(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT));
+        permissionController.removePermissionFromTemplate("Whaddaup", de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT, "m1");
 
         //Check that permissions are removed from template
         permissions = new LinkedList<>();
         for (Permission permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
-            permissions.add(permission.getName());
+            permissions.add(permission.getPermission());
         }
-        assertFalse(permissions.contains("test3"));
-        assertFalse(permissions.contains("test4"));
+        assertFalse(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS));
+        assertFalse(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT));
 
         //Remove permission w/ template refs
-        permissionController.removePermission("test3", "m1");
+        permissionController.removePermission(de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS, "m1");
 
         //Check that permission is gone
         permissions = new LinkedList<>();
         for (Permission permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
-            permissions.add(permission.getName());
+            permissions.add(permission.getPermission());
         }
-        assertFalse(permissions.contains("test3"));
+        assertFalse(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.REQUEST_LIGHT_STATUS));
 
         //Remove template w/ permission refs
         permissionController.removeTemplate("asdf");
@@ -173,9 +181,9 @@ public class ControllerTest extends InstrumentationTestCase {
         //Check that permission is still there
         permissions = new LinkedList<>();
         for (Permission permission : permissionController.getPermissionsOfTemplate("Whaddaup")) {
-            permissions.add(permission.getName());
+            permissions.add(permission.getPermission());
         }
-        assertTrue(permissions.contains("test"));
+        assertTrue(permissions.contains(de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID));
     }
 
     public void testUserDevicesSlashGroupsAndPermissions() throws DatabaseControllerException {
@@ -200,13 +208,13 @@ public class ControllerTest extends InstrumentationTestCase {
         permissionController.changeTemplateName("tmplll", "tmpl");
         permissionController.addTemplate("tmpl2");
         permissionController.addTemplate("tmpl3");
-        permissionController.addPermission("perm1", null);
-        permissionController.addPermission("perm2", null);
+        permissionController.addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_GROUP, null);
+        permissionController.addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION, null);
         //Permission w/ module
-        slaveController.addSlave(new Slave("abc", new DeviceID("111"), null));
-        slaveController.addModule(new Module("m1", new DeviceID("111"), CoreConstants.ModuleType.DoorBuzzer,
+        slaveController.addSlave(new Slave("abc", altDevice2, null));
+        slaveController.addModule(new Module("m1", altDevice2, CoreConstants.ModuleType.DoorBuzzer,
                 new USBAccessPoint(1)));
-        permissionController.addPermission("perm3", "m1");
+        permissionController.addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT, "m1");
 
         //Rename to already existing
         try {
@@ -249,7 +257,7 @@ public class ControllerTest extends InstrumentationTestCase {
         assertTrue(userManagementController.getGroup("grp1") != null);
         assertTrue(userManagementController.getGroup("grp2") != null);
         assertTrue(userManagementController.getGroup("grp3") != null);
-        assertTrue(userManagementController.getGroups().size() == 3);
+        assertTrue(userManagementController.getGroups().size() == 6); // there are 3 default groups: Parents, Children, Guests
 
         //Check if groups have right template
         assertEquals(userManagementController.getGroup("grp1").getTemplateName(), "tmpl");
@@ -270,7 +278,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Test rename
         userManagementController.changeGroupName("grp1", "such wow");
-        assertTrue(userManagementController.getGroups().size() == 3);
+        assertTrue(userManagementController.getGroups().size() == 6); // 3 extra default groups
         assertTrue(userManagementController.getGroup("such wow") != null);
 
         //Change to already existing name
@@ -283,7 +291,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Test removing groups
         userManagementController.removeGroup("grp2");
-        assertTrue(userManagementController.getGroups().size() == 2);
+        assertTrue(userManagementController.getGroups().size() == 5); // 3 default groups
         List<String> groups = new LinkedList<>();
         for (Group group : userManagementController.getGroups()) {
             groups.add(group.getName());
@@ -299,14 +307,14 @@ public class ControllerTest extends InstrumentationTestCase {
         }
 
         //Test userdevice init
-        userManagementController.addUserDevice(new UserDevice("u1", "such wow", new DeviceID("1")));
-        userManagementController.addUserDevice(new UserDevice("u2", "such wow", new DeviceID("2")));
-        userManagementController.addUserDevice(new UserDevice("u3", "grp3", new DeviceID("4")));
+        userManagementController.addUserDevice(new UserDevice("u1", "such wow", device1));
+        userManagementController.addUserDevice(new UserDevice("u2", "such wow", device2));
+        userManagementController.addUserDevice(new UserDevice("u3", "grp3", device4));
 
         //Test adding userdevice with none existing group
         try {
             userManagementController.addUserDevice(
-                    new UserDevice("askdfj", "--", new DeviceID("20")));
+                    new UserDevice("askdfj", "--", altDevice2));
             Assert.fail("Permission controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
@@ -322,110 +330,101 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Check colliding
         try {
-            userManagementController.addUserDevice(new UserDevice("u2", "such wow", new DeviceID("3")));
+            userManagementController.addUserDevice(new UserDevice("u2", "such wow", device3));
             Assert.fail("Permission controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
             assertFalse(false);
         }
         assertTrue(userManagementController.getUserDevices().size() == 3);
-        assertTrue(userManagementController.getUserDevice(new DeviceID("1")) != null);
-        assertTrue(userManagementController.getUserDevice(new DeviceID("2")) != null);
-        assertTrue(userManagementController.getUserDevice(new DeviceID("3")) == null);
-        assertTrue(userManagementController.getUserDevice(new DeviceID("4")) != null);
+        assertTrue(userManagementController.getUserDevice(device1) != null);
+        assertTrue(userManagementController.getUserDevice(device2) != null);
+        assertTrue(userManagementController.getUserDevice(device3) == null);
+        assertTrue(userManagementController.getUserDevice(device4) != null);
 
         //Check in group
-        assertEquals(userManagementController.getUserDevice(new DeviceID("1")).getInGroup(), "such wow");
-        assertEquals(userManagementController.getUserDevice(new DeviceID("2")).getInGroup(), "such wow");
-        assertEquals(userManagementController.getUserDevice(new DeviceID("4")).getInGroup(), "grp3");
+        assertEquals(userManagementController.getUserDevice(device1).getInGroup(), "such wow");
+        assertEquals(userManagementController.getUserDevice(device2).getInGroup(), "such wow");
+        assertEquals(userManagementController.getUserDevice(device4).getInGroup(), "grp3");
 
         //Test permissions w/ userdevices
-        permissionController.addUserPermission(new DeviceID("1"), "perm1", null);
-        permissionController.addUserPermission(new DeviceID("2"), "perm2", null);
-        permissionController.addUserPermission(new DeviceID("4"), "perm2", null);
-        permissionController.addUserPermission(new DeviceID("4"), "perm1", null);
-        permissionController.addUserPermission(new DeviceID("4"), "perm3", "m1");
+        permissionController.addUserPermission(device1, de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_GROUP, null);
+        permissionController.addUserPermission(device2, de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION, null);
+        permissionController.addUserPermission(device4, de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION, null);
+        permissionController.addUserPermission(device4, de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_GROUP, null);
+        permissionController.addUserPermission(device4, de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT, "m1");
 
-        //Add none existing permissions or devices
+        //Add to none device
         try {
-            permissionController.addUserPermission(new DeviceID("4"), "zzz", null);
-            Assert.fail("Permission controller should have thrown UnknownReferenceException");
-        } catch (UnknownReferenceException unknownReferenceException) {
-            assertFalse(false);
-        }
-        try {
-            permissionController.addUserPermission(new DeviceID("44"), "perm3", "m1");
+            permissionController.addUserPermission(altDevice1, de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT, "m1");
             Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException unknownReferenceException) {
             assertFalse(false);
         }
 
         //Remove permission
-        permissionController.removeUserPermission(new DeviceID("4"), "perm2", null);
+        permissionController.removeUserPermission(device4, de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION, null);
         //Remove permission user doesn't have
-        permissionController.removeUserPermission(new DeviceID("1"), "perm2", null);
-        //Remove permission user that doesn't exist
-        permissionController.removeUserPermission(new DeviceID("1"), "asdfas", null);
+        permissionController.removeUserPermission(device1, de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION, null);
         //Remove permission from user that doesn't exist
-        permissionController.removeUserPermission(new DeviceID("1000"), "perm2", null);
+        permissionController.removeUserPermission(altDevice1, de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION, null);
 
         //Check no changes to userdevices in database
         assertTrue(userManagementController.getUserDevices().size() == 3);
-        assertTrue(userManagementController.getUserDevice(new DeviceID("1")) != null);
-        assertTrue(userManagementController.getUserDevice(new DeviceID("2")) != null);
-        assertTrue(userManagementController.getUserDevice(new DeviceID("3")) == null);
-        assertTrue(userManagementController.getUserDevice(new DeviceID("4")) != null);
+        assertTrue(userManagementController.getUserDevice(device1) != null);
+        assertTrue(userManagementController.getUserDevice(device2) != null);
+        assertTrue(userManagementController.getUserDevice(device3) == null);
+        assertTrue(userManagementController.getUserDevice(device4) != null);
 
         //check removal of permissions
-        assertTrue(permissionController.hasPermission(new DeviceID("2"), "perm2", null));
-        assertFalse(permissionController.hasPermission(new DeviceID("2"), "asdf", null));
-        assertFalse(permissionController.hasPermission(new DeviceID("1"), "perm2", null));
-        assertFalse(permissionController.hasPermission(new DeviceID("4"), "perm2", null));
-        assertTrue(permissionController.hasPermission(new DeviceID("4"), "perm1", null));
-        assertTrue(permissionController.hasPermission(new DeviceID("4"), "perm3", "m1"));
+        assertTrue(permissionController.hasPermission(device2, de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION, null));
+        assertFalse(permissionController.hasPermission(device1, de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION, null));
+        assertFalse(permissionController.hasPermission(device4, de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION, null));
+        assertTrue(permissionController.hasPermission(device4, de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_GROUP, null));
+        assertTrue(permissionController.hasPermission(device4, de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT, "m1"));
 
         //Test name change
-        userManagementController.changeUserDeviceName("u1", "1u");
-        userManagementController.changeUserDeviceName("u2", "11u");
+        userManagementController.changeUserDeviceName(device1, "1u");
+        userManagementController.changeUserDeviceName(device2, "11u");
         //Rename to same as other
         try {
-            userManagementController.changeUserDeviceName("u3", "11u");
+            userManagementController.changeUserDeviceName(device4, "11u");
             Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
         assertTrue(userManagementController.getUserDevices().size() == 3);
         //Users still there
-        assertTrue(userManagementController.getUserDevice(new DeviceID("1")) != null);
-        assertTrue(userManagementController.getUserDevice(new DeviceID("2")) != null);
-        assertTrue(userManagementController.getUserDevice(new DeviceID("3")) == null);
-        assertTrue(userManagementController.getUserDevice(new DeviceID("4")) != null);
+        assertTrue(userManagementController.getUserDevice(device1) != null);
+        assertTrue(userManagementController.getUserDevice(device2) != null);
+        assertTrue(userManagementController.getUserDevice(device3) == null);
+        assertTrue(userManagementController.getUserDevice(device4) != null);
         //Users have new name
-        assertEquals(userManagementController.getUserDevice(new DeviceID("1")).getName(), "1u");
-        assertEquals(userManagementController.getUserDevice(new DeviceID("2")).getName(), "11u");
-        assertEquals(userManagementController.getUserDevice(new DeviceID("4")).getName(), "u3");
+        assertEquals(userManagementController.getUserDevice(device1).getName(), "1u");
+        assertEquals(userManagementController.getUserDevice(device2).getName(), "11u");
+        assertEquals(userManagementController.getUserDevice(device4).getName(), "u3");
 
 
         //Test change group membership
-        assertEquals(userManagementController.getUserDevice(new DeviceID("1")).getInGroup(), "such wow");
-        userManagementController.changeGroupMembership(new DeviceID("1"), "grp3");
-        assertEquals(userManagementController.getUserDevice(new DeviceID("1")).getInGroup(), "grp3");
+        assertEquals(userManagementController.getUserDevice(device1).getInGroup(), "such wow");
+        userManagementController.changeGroupMembership(device1, "grp3");
+        assertEquals(userManagementController.getUserDevice(device1).getInGroup(), "grp3");
 
         //Change to none existing group
         try {
-            userManagementController.changeGroupMembership(new DeviceID("1"), "asdf");
+            userManagementController.changeGroupMembership(device1, "asdf");
             Assert.fail("Permission controller should have thrown UnknownReferenceException");
         } catch (UnknownReferenceException e) {
             assertFalse(false);
         }
         //Change from none existing user
-        userManagementController.changeGroupMembership(new DeviceID("asdfjasldf"), "grp3");
+        userManagementController.changeGroupMembership(altDevice1, "grp3");
 
         //Check user removal
-        assertTrue(userManagementController.getUserDevice(new DeviceID("1")) != null);
-        userManagementController.removeUserDevice(new DeviceID("1"));
-        assertTrue(userManagementController.getUserDevice(new DeviceID("1")) == null);
+        assertTrue(userManagementController.getUserDevice(device1) != null);
+        userManagementController.removeUserDevice(device1);
+        assertTrue(userManagementController.getUserDevice(device1) == null);
         //Remove none existing user
-        userManagementController.removeUserDevice(new DeviceID("200"));
+        userManagementController.removeUserDevice(altDevice1);
     }
 
     public void testSlaveController() throws DatabaseControllerException {
@@ -440,9 +439,9 @@ public class ControllerTest extends InstrumentationTestCase {
         SlaveController slaveController = container.require(SlaveController.KEY);
 
         //Test slave init
-        slaveController.addSlave(new Slave("s1", new DeviceID("1"), null));
-        slaveController.addSlave(new Slave("s2", new DeviceID("2"), null));
-        slaveController.addSlave(new Slave("s3", new DeviceID("3"), null));
+        slaveController.addSlave(new Slave("s1", device1, null));
+        slaveController.addSlave(new Slave("s2", device2, null));
+        slaveController.addSlave(new Slave("s3", device3, null));
         List<String> slaves = new LinkedList<>();
         for (Slave slave : slaveController.getSlaves()) {
             slaves.add(slave.getName());
@@ -451,22 +450,22 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Add already existing slave
         try {
-            slaveController.addSlave(new Slave("s1", new DeviceID("55"), null));
+            slaveController.addSlave(new Slave("s1", altDevice1, null));
             Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
         try {
-            slaveController.addSlave(new Slave("s55", new DeviceID("2"), null));
+            slaveController.addSlave(new Slave("s55", device2, null));
             Assert.fail("Permission controller should have thrown AlreadyInUseException");
         } catch (AlreadyInUseException e) {
             assertFalse(false);
         }
 
         //Test modules init
-        slaveController.addModule(new Module("m1", new DeviceID("1"), CoreConstants.ModuleType.WeatherBoard,
+        slaveController.addModule(new Module("m1", device1, CoreConstants.ModuleType.WeatherBoard,
                 new USBAccessPoint(2)));
-        slaveController.addModule(new Module("m2", new DeviceID("1"), CoreConstants.ModuleType.Webcam,
+        slaveController.addModule(new Module("m2", device1, CoreConstants.ModuleType.Webcam,
                 new USBAccessPoint(1)));
         assertNotNull(slaveController.getModule("m1"));
         assertNotNull(slaveController.getModule("m2"));
@@ -474,7 +473,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Test to init modules at none existing slaves
         try {
-            slaveController.addModule(new Module("m1", new DeviceID("99"), CoreConstants.ModuleType.DoorSensor,
+            slaveController.addModule(new Module("m1", altDevice1, CoreConstants.ModuleType.DoorSensor,
                     new USBAccessPoint(2)));
             Assert.fail("Permission controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
@@ -483,7 +482,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Add module with already existing name
         try {
-            slaveController.addModule(new Module("m2", new DeviceID("1"), CoreConstants.ModuleType.DoorSensor,
+            slaveController.addModule(new Module("m2", device1, CoreConstants.ModuleType.DoorSensor,
                     new USBAccessPoint(1)));
             Assert.fail("Permission controller should have thrown DatabaseControllerException");
         } catch (DatabaseControllerException e) {
@@ -492,7 +491,7 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Check if modules are on slave
         List<String> modules = new LinkedList<>();
-        for (Module module : slaveController.getModulesOfSlave(new DeviceID("1"))) {
+        for (Module module : slaveController.getModulesOfSlave(device1)) {
             modules.add(module.getName());
         }
         assertTrue(modules.containsAll(Arrays.asList("m1", "m2")));
@@ -500,13 +499,13 @@ public class ControllerTest extends InstrumentationTestCase {
 
         //Remove locked slave
         try {
-            slaveController.removeSlave(new DeviceID("1"));
+            slaveController.removeSlave(device1);
             Assert.fail("Permission controller should have thrown IsReferencedException");
         } catch (IsReferencedException isReferencedException) {
             assertTrue(true);
         }
         //Remove slave
-        slaveController.removeSlave(new DeviceID("2"));
+        slaveController.removeSlave(device2);
         slaves = new LinkedList<>();
         for (Slave slave : slaveController.getSlaves()) {
             slaves.add(slave.getName());
@@ -553,7 +552,7 @@ public class ControllerTest extends InstrumentationTestCase {
         assertTrue(slaveController.getModules().size() == 1);
     }
 
-    public void testHolidayController() throws InterruptedException {
+    public void testHolidayController() throws InterruptedException, DatabaseControllerException {
         Context context = getInstrumentation().getTargetContext();
         //Clear database before running tests to assure clean test
         context.deleteDatabase(DatabaseConnector.DATABASE_NAME);
@@ -562,22 +561,25 @@ public class ControllerTest extends InstrumentationTestCase {
                 new ContainerService.ContextComponent(context));
         container.register(DatabaseConnector.KEY, new DatabaseConnector());
         container.register(HolidayController.KEY, new HolidayController());
+        container.register(SlaveController.KEY, new SlaveController());
         HolidayController holidayController = container.require(HolidayController.KEY);
+        SlaveController slaveController = container.require(SlaveController.KEY);
 
-        //Add suff
-        // TODO: 06.01.16 Leon, update so the test works for new holidaycontroller impl
+        slaveController.addSlave(new Slave("slave", device1, new byte[]{0, 0}));
+        slaveController.addModule(new Module("module", device1, CoreConstants.ModuleType.Light, new USBAccessPoint(0)));
+
         Date d1 = new Date(System.currentTimeMillis());
         Thread.sleep(1000);
-        holidayController.addHolidayLogEntry("1");
-        holidayController.addHolidayLogEntry("2");
+        holidayController.addHolidayLogEntryNow("1", null);
+        holidayController.addHolidayLogEntryNow("2", "module");
         Thread.sleep(1000);
         Date d2 = new Date(System.currentTimeMillis());
         Thread.sleep(1000);
-        holidayController.addHolidayLogEntry("3");
-        holidayController.addHolidayLogEntry("4");
+        holidayController.addHolidayLogEntryNow("3", null);
+        holidayController.addHolidayLogEntryNow("4", "module");
         //Check illegal stuff add
         try {
-            holidayController.addHolidayLogEntry(null);
+            holidayController.addHolidayLogEntryNow(null, null);
             Assert.fail("Permission controller should have thrown IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             assertTrue(true);
@@ -586,12 +588,27 @@ public class ControllerTest extends InstrumentationTestCase {
         Date d3 = new Date(System.currentTimeMillis());
         Thread.sleep(1000);
 
-        assertTrue(holidayController.getLogEntriesRange(d1, d2).containsAll(Arrays.asList("1", "2")));
-        assertTrue(holidayController.getLogEntriesRange(d1, d2).size() == 2);
-        assertTrue(holidayController.getLogEntriesRange(d2, d3).containsAll(Arrays.asList("3", "4")));
-        assertTrue(holidayController.getLogEntriesRange(d2, d3).size() == 2);
-        assertTrue(holidayController.getLogEntriesRange(d1, d3).containsAll(Arrays.asList("1", "2", "3", "4")));
-        assertTrue(holidayController.getLogEntriesRange(d1, d3).size() == 4);
+        List<HolidayAction> d1d2 = holidayController.getHolidayActions(d1, d2);
+        List<String> d1d2Actions = new LinkedList<>();
+        for (HolidayAction holidayAction : d1d2) {
+            d1d2Actions.add(holidayAction.getActionName());
+        }
+        List<HolidayAction> d2d3 = holidayController.getHolidayActions(d2, d3);
+        List<String> d2d3Actions = new LinkedList<>();
+        for (HolidayAction holidayAction : d2d3) {
+            d2d3Actions.add(holidayAction.getActionName());
+        }
+        List<HolidayAction> d1d3 = holidayController.getHolidayActions(d1, d3);
+        List<String> d1d3Actions = new LinkedList<>();
+        for (HolidayAction holidayAction : d1d3) {
+            d1d3Actions.add(holidayAction.getActionName());
+        }
+
+        assertTrue(d1d2Actions.containsAll(Arrays.asList("1", "2")));
+        assertTrue(d1d2Actions.size() == 2);
+        assertTrue(d2d3Actions.containsAll(Arrays.asList("3", "4")));
+        assertTrue(d2d3Actions.size() == 2);
+        assertTrue(d1d3Actions.containsAll(Arrays.asList("1", "2", "3", "4")));
+        assertTrue(d1d3Actions.size() == 4);
     }
-        */
 }
