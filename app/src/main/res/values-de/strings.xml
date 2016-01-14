@@ -118,7 +118,6 @@
     <string name="weather_warning_title">Wetterwarnung!</string>
     <string name="welcome_to_ssh">Willkommen in der Secure Smart Home App.</string>
     <string name="door_unlatched_text"> </string>
-    <string name="grant">Gewähren</string>
     <string name="weather_service_failed_title">Wetterdienst abgestürzt.</string>
     <string name="edit_user_device">%s bearbeiten</string>
     <string name="group_created">Gruppe erstellt.</string>
@@ -238,7 +237,6 @@
     <string name="you_can_not_add_new_modules">Sie könnem keine neuen Module hinzufügen</string>
     <string name="you_can_not_add_new_users">Sie können keine neuen Nutzer hinzufügen</string>
     <string name="you_can_not_edit_groups">Sie können Gruppen nicht bearbeiten</string>
-    <string name="you_cant_delete_users">Sie können Nutzer nicht entfernen</string>
     <string name="could_not_delete_user">Benutzer konnte nicht gelöscht werden</string>
     <string name="could_not_edit_user">Benutzer konnte nicht editiert werden</string>
     <string name="delete_group_success">Grouppe wurde gelöscht</string>
@@ -246,9 +244,9 @@
     <string name="edit_group_success">Gruppe wurde editiert</string>
     <string name="edit_user_success">Benutzer wurde editiert</string>
     <string name="fragment_access_denied">Zugriff verweigert. Fehlende Berechtigung: %s</string>
-    <string name="master_host_address">Master Host Addresse</string>
+    <string name="master_host_address">Master Host Adresse</string>
     <string name="master_port"></string>
-    <string name="please_enter_master_address">Bitte geben Sie die Addresse des Master ein, die benutzt wird, wenn dieser im lokalen Netzwerk nicht gefunden werden kann. Diese Addresse wird benutzt, um sich von außerhalb des Heimnetzwerks zu verbinden. Diese Addresse sollte selten geändert werden und der Port muss in der Firewall freigeschalten werden.</string>
+    <string name="please_enter_master_address">Bitte geben Sie die Adresse des Master ein, die benutzt wird, wenn dieser im lokalen Netzwerk nicht gefunden werden kann. Diese Addresse wird benutzt, um sich von außerhalb des Heimnetzwerks zu verbinden. Diese Addresse sollte selten geändert werden und der Port muss in der Firewall freigeschalten werden.</string>
     <string name="you_can_not_add_modules">Sie können keine neuen Module hinzufügen</string>
     <string name="you_can_not_edit_user_devices">Sie können keine Benutzer editieren</string>
     <string name="you_can_not_remove_groups">Sie können keine Gruppen entfernen</string>
