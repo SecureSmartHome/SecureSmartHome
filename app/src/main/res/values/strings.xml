@@ -61,8 +61,8 @@
     <string name="permission_dialog_title">Edit permission.</string>
     <string name="is_in_group">"is in group %s\."</string>
     <string name="device_id">Device ID: %s</string>
-    <string name="error_cannot_add_user">Cannot add new user. Missing information.</string>
-    <string name="error_cannot_add_group">Cannot add new group. Missing information.</string>
+    <string name="error_cannot_add_user">Can't add new user. Missing information.</string>
+    <string name="error_cannot_add_group">Can't add new group. Missing information.</string>
     <string-array name="sensor_connection_types">
         <!-- Do not change the order of items! Changing the order would break AddModuleFragment -->
         <item>GPIO</item>
@@ -263,7 +263,6 @@
     <string name="could_not_edit_user_device_name">Could not edit user device name.</string>
     <string name="could_not_edit_user_device_group">Could not edit user device group.</string>
     <string name="you_can_not_edit_groups">You can\'t edit groups</string>
-    <string name="you_cant_delete_users">You can\'t delete users</string>
     <string name="could_not_set_group_name">Could not set group name.</string>
     <string name="could_note_set_group_template">Could not set group template.</string>
     <string name="could_not_delete_group">Could not delete group.</string>
@@ -281,4 +280,12 @@
     <string name="perm_desc_door_unlocked">Allows you to check if the door is unlocked.</string>
     <string name="perm_desc_holiday_mode_switched_off">Allows you to check if the holiday simulation is inactive.</string>
     <string name="perm_desc_holiday_mode_switched_on">Allows you to check if the holiday simulation is active.</string>
+    <string name="you_can_not_remove_users">You can\'t remove users</string>
+    <string name="you_can_not_remove_modules">You can\'t remove modules</string>
+    <string name="you_can_not_add_modules">You can\'t add new modules</string>
+    <string name="you_can_not_remove_odroids">You can\'t remove Odroids</string>
+    <string name="you_can_not_remove_groups">You can\'t remove groups</string>
+    <string name="you_can_not_unlatch_door">You can\'t unlatch the door</string>
+    <string name="you_can_not_unblock_door">You can\'t (un)block the door</string>
+    <string name="you_can_not_request_picture">You can\'t request a picture</string>
 </resources>

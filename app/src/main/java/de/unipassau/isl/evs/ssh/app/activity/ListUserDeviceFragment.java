@@ -125,7 +125,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                     showRemoveUserDeviceDialog(bundle);
                     return true;
                 } else {
-                    Toast.makeText(getActivity(), R.string.you_cant_delete_users, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), R.string.you_can_not_remove_users, Toast.LENGTH_SHORT).show();
                     return false;
                 }
 
@@ -178,8 +178,10 @@ public class ListUserDeviceFragment extends BoundFragment {
                         final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
                         if (handler == null) {
                             Log.i(TAG, "Container not yet connected!");
-                        } else {
+                        } else if (((MainActivity) getActivity()).hasPermission(DELETE_USER)) {
                             handler.removeUserDevice(userDevice.getUserDeviceID());
+                        } else {
+                            Toast.makeText(getActivity(), R.string.you_can_not_remove_users, Toast.LENGTH_SHORT).show();
                         }
                     }
                 })

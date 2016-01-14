@@ -87,11 +87,11 @@ public class AppSlaveManagementHandler extends AbstractAppHandler implements Com
         });
     }
 
-    public void addSlaveManagemntListener(SlaveManagementListener listener) {
+    public void addSlaveManagementListener(SlaveManagementListener listener) {
         listeners.add(listener);
     }
 
-    public void removeSlaveManagemntListener(SlaveManagementListener listener) {
+    public void removeSlaveManagementListener(SlaveManagementListener listener) {
         listeners.remove(listener);
     }
 

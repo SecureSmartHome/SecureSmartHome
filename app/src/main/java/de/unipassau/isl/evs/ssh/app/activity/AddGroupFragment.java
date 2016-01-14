@@ -25,6 +25,7 @@ import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 /**
  * This fragment gives the user the option to choose a name and a template to create a new group.
@@ -99,10 +100,14 @@ public class AddGroupFragment extends BoundFragment {
                                       @Override
                                       public void onClick(View v) {
                                           if (checkInputFields() && isContainerConnected()) {
-                                              final String name = inputGroupName.getText().toString();
-                                              final String template = ((String) spinner.getSelectedItem());
-                                              handler.addGroup(new Group(name, template));
-                                              Log.i(TAG, "Group " + name + " added.");
+                                              if (((MainActivity) getActivity()).hasPermission(Permission.ADD_GROUP)) {
+                                                  final String name = inputGroupName.getText().toString();
+                                                  final String template = ((String) spinner.getSelectedItem());
+                                                  handler.addGroup(new Group(name, template));
+                                                  Log.i(TAG, "Group " + name + " added.");
+                                              } else {
+                                                  Toast.makeText(getActivity(), R.string.you_can_not_add_groups, Toast.LENGTH_SHORT).show();
+                                              }
                                           } else {
                                               ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_cannot_add_group));
                                           }

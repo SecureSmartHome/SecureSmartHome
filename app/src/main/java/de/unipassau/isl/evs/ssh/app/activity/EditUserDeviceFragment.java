@@ -46,6 +46,7 @@ import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventT
 import static de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent.EventType.USER_SET_GROUP;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_GROUP;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.CHANGE_USER_NAME;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_USER;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.MODIFY_USER_PERMISSION;
 
 /**
@@ -219,22 +220,31 @@ public class EditUserDeviceFragment extends BoundFragment {
                 .setPositiveButton(R.string.edit, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        String name = userDeviceName.getText().toString();
-                        String group = ((String) groupName.getSelectedItem());
-                        DeviceID userDeviceID = userDevice.getUserDeviceID();
+                        final MainActivity activity = (MainActivity) getActivity();
+                        if (activity.hasPermission(CHANGE_USER_NAME) && activity.hasPermission(CHANGE_USER_GROUP)) {
+                            String name = userDeviceName.getText().toString();
+                            String group = ((String) groupName.getSelectedItem());
+                            DeviceID userDeviceID = userDevice.getUserDeviceID();
 
-                        handler.setUserName(userDeviceID, name);
-                        handler.setUserGroup(userDeviceID, group);
-                        // TODO Phil: refresh ui (Phil, 2016-01-13)
+                            // no permission check as method only gets called when user can edit user name / user group
+                            handler.setUserName(userDeviceID, name);
+                            handler.setUserGroup(userDeviceID, group);
+                            // TODO Phil: refresh ui (Phil, 2016-01-13)
+                        } else {
+                            Toast.makeText(getActivity(), R.string.you_can_not_edit_user_devices, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        handler.removeUserDevice(userDevice.getUserDeviceID());
-                        String toastText = String.format(res.getString(R.string.device_removed), userDevice.getName());
-                        Toast toast = Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT);
-                        toast.show();
+                        if (((MainActivity) getActivity()).hasPermission(DELETE_USER)) {
+                            handler.removeUserDevice(userDevice.getUserDeviceID());
+                            String toastText = String.format(res.getString(R.string.device_removed), userDevice.getName());
+                            Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), R.string.you_can_not_remove_users, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .create();

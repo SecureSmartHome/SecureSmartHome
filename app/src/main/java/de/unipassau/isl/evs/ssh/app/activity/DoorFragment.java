@@ -24,6 +24,10 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppDoorHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.LOCK_DOOR;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.TAKE_CAMERA_PICTURE;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR;
+
 /**
  * This fragment allows to display information contained in door messages
  * which are received from the IncomingDispatcher.
@@ -160,8 +164,12 @@ public class DoorFragment extends BoundFragment {
             Log.i(TAG, "Container not bound.");
             return;
         }
+        if (((MainActivity) getActivity()).hasPermission(TAKE_CAMERA_PICTURE)) {
+            handler.refreshImage();
+        } else {
+            Toast.makeText(getActivity(), R.string.you_can_not_request_picture, Toast.LENGTH_SHORT).show();
+        }
 
-        handler.refreshImage();
     }
 
     /**
@@ -176,7 +184,11 @@ public class DoorFragment extends BoundFragment {
         }
 
         if (!handler.isOpen() && !handler.isBlocked()) {
-            handler.unlatchDoor();
+            if (((MainActivity) getActivity()).hasPermission(UNLATCH_DOOR)) {
+                handler.unlatchDoor();
+            } else {
+                Toast.makeText(getActivity(), R.string.you_can_not_unlatch_door, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -191,10 +203,14 @@ public class DoorFragment extends BoundFragment {
             return;
         }
 
-        if (handler.isBlocked()) {
-            handler.unblockDoor();
+        if (((MainActivity) getActivity()).hasPermission(LOCK_DOOR)) {
+            if (handler.isBlocked()) {
+                handler.unblockDoor();
+            } else {
+                handler.blockDoor();
+            }
         } else {
-            handler.blockDoor();
+            Toast.makeText(getActivity(), R.string.you_can_not_unblock_door, Toast.LENGTH_SHORT).show();
         }
     }
 

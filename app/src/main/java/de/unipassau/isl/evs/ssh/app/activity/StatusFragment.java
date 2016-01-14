@@ -25,6 +25,9 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.DELETE_ODROID;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.RENAME_MODULE;
+
 /**
  * This activity allows to visualize connected Modules and slaves. If this functionality is used a
  * message, requesting all needed information, is generated and passed to the OutgoingRouter.
@@ -33,24 +36,6 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
  */
 public class StatusFragment extends BoundFragment {
     private static final String TAG = StatusFragment.class.getSimpleName();
-
-    private ListView slaveListView;
-    private ListView moduleListView;
-    private TextView connectedSlavesText;
-    private TextView connectedModulesText;
-
-    private final AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
-        @Override
-        public void onModulesRefreshed() {
-            maybeRunOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    update();
-                }
-            });
-        }
-    };
-
     private final AppModifyModuleHandler.NewModuleListener modifyListener = new AppModifyModuleHandler.NewModuleListener() {
         @Override
         public void registrationFinished(boolean wasSuccessful) {
@@ -71,7 +56,6 @@ public class StatusFragment extends BoundFragment {
             });
         }
     };
-
     private final AppSlaveManagementHandler.SlaveManagementListener slaveListener = new AppSlaveManagementHandler.SlaveManagementListener() {
 
         @Override
@@ -89,6 +73,21 @@ public class StatusFragment extends BoundFragment {
                     } else {
                         Toast.makeText(getActivity(), R.string.cannot_remove_slave, Toast.LENGTH_SHORT).show();
                     }
+                }
+            });
+        }
+    };
+    private ListView slaveListView;
+    private ListView moduleListView;
+    private TextView connectedSlavesText;
+    private TextView connectedModulesText;
+    private final AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
+        @Override
+        public void onModulesRefreshed() {
+            maybeRunOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    update();
                 }
             });
         }
@@ -112,7 +111,7 @@ public class StatusFragment extends BoundFragment {
         AppSlaveManagementHandler slaveHandler = container.require(AppSlaveManagementHandler.KEY);
         AppModifyModuleHandler modifyModuleHandler = container.require(AppModifyModuleHandler.KEY);
         handler.addAppModuleListener(listener);
-        slaveHandler.addSlaveManagemntListener(slaveListener);
+        slaveHandler.addSlaveManagementListener(slaveListener);
         modifyModuleHandler.addNewModuleListener(modifyListener);
 
         moduleListView.setAdapter(new ModuleAdapter(handler.getComponents()));
@@ -128,8 +127,10 @@ public class StatusFragment extends BoundFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
-                        if (handler != null) {
+                        if (handler != null && ((MainActivity) getActivity()).hasPermission(RENAME_MODULE)) {
                             handler.removeModule(module);
+                        } else {
+                            Toast.makeText(getActivity(), R.string.you_can_not_remove_modules, Toast.LENGTH_SHORT).show();
                         }
                     }
                 };
@@ -151,8 +152,10 @@ public class StatusFragment extends BoundFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         AppSlaveManagementHandler handler = getComponent(AppSlaveManagementHandler.KEY);
-                        if (handler != null) {
+                        if (handler != null && ((MainActivity) getActivity()).hasPermission(DELETE_ODROID)) {
                             handler.deleteSlave(slave.getSlaveID());
+                        } else {
+                            Toast.makeText(getActivity(), R.string.you_can_not_remove_odroids, Toast.LENGTH_SHORT).show();
                         }
                     }
                 };
@@ -181,7 +184,7 @@ public class StatusFragment extends BoundFragment {
         }
 
         if (slaveHandler != null) {
-            slaveHandler.addSlaveManagemntListener(slaveListener);
+            slaveHandler.addSlaveManagementListener(slaveListener);
         }
 
         if (modifyModuleHandler != null) {

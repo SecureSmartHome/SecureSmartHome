@@ -34,6 +34,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 
 import static de.unipassau.isl.evs.ssh.core.CoreConstants.ModuleType;
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_MODULE;
 
 /**
  * This fragment allows to add new sensors to the system. If this functionality is used, a message
@@ -295,12 +296,16 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             Log.e(TAG, "Container not connected");
             return;
         }
+        if (((MainActivity) getActivity()).hasPermission(ADD_MODULE)) {
+            String name = nameInput.getText().toString();
+            DeviceID atSlave = ((Slave) slaveSpinner.getSelectedItem()).getSlaveID();
+            int position = sensorTypeSpinner.getSelectedItemPosition();
+            ModuleType moduleType = ModuleType.values()[position];
+            Module module = new Module(name, atSlave, moduleType, accessPoint);
+            handler.addNewModule(module);
+        } else {
+            Toast.makeText(getActivity(), R.string.you_can_not_add_modules, Toast.LENGTH_SHORT).show();
 
-        String name = nameInput.getText().toString();
-        DeviceID atSlave = ((Slave) slaveSpinner.getSelectedItem()).getSlaveID();
-        int position = sensorTypeSpinner.getSelectedItemPosition();
-        ModuleType moduleType = ModuleType.values()[position];
-        Module module = new Module(name, atSlave, moduleType, accessPoint);
-        handler.addNewModule(module);
+        }
     }
 }

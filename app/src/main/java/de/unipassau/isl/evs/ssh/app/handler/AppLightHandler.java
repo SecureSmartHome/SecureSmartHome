@@ -182,7 +182,7 @@ public class AppLightHandler extends AbstractAppHandler implements Component {
      * @param module The light-module which status should be changed.
      * @param status The status of the module.
      */
-    public void setLight(Module module, boolean status) {
+    private void setLight(Module module, boolean status) {
         LightPayload lightPayload = new LightPayload(status, module);
         Message message = new Message(lightPayload);
         final Future<LightPayload> future = newResponseFuture(sendMessageToMaster(MASTER_LIGHT_SET, message));
