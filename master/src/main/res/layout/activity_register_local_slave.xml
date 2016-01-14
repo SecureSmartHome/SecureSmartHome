@@ -19,22 +19,32 @@
         android:layout_alignParentTop="true"
         android:text="@string/register_local_slave"/>
 
-    <EditText
-        android:id="@+id/inputName"
-        android:layout_width="wrap_content"
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/inputName_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/textView"
         android:layout_alignStart="@+id/textView"
         android:layout_below="@+id/textView"
         android:layout_marginTop="16dp"
-        android:hint="@string/name"/>
+        android:hint="@string/name">
+
+        <EditText
+            android:id="@+id/inputName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Name of the Device"
+            android:text="Local Slave"/>
+
+    </android.support.design.widget.TextInputLayout>
+
 
     <Button
         android:id="@+id/buttonRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_below="@id/inputName"
+        android:layout_below="@id/inputName_layout"
         android:layout_marginTop="32dp"
         android:text="@string/register"/>
 

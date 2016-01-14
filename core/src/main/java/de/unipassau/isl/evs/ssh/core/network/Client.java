@@ -289,7 +289,7 @@ public class Client extends AbstractComponent {
      * Increments the disconnect counter and tries to re-establish the connection.
      */
     protected synchronized void channelClosed(Channel channel) {
-        if (channel != this.channelFuture.channel()) {
+        if (this.channelFuture != null && this.channelFuture.channel() != channel) {
             return; //channel has already been exchanged by new one, don't start another client
         }
         notifyClientDisconnected();
@@ -331,6 +331,15 @@ public class Client extends AbstractComponent {
             editor.setActiveRegistrationToken(token);
         }
         editor.commit();
+        lastDisconnect = 0;
+        disconnectsInARow = 0;
+        notifyMasterFound();
+        initClient();
+    }
+
+    public void onMasterConfigured(InetSocketAddress address) {
+        Log.i(TAG, "master configured as " + address);
+        editPrefs().setConfiguredAddress(address).commit();
         lastDisconnect = 0;
         disconnectsInARow = 0;
         notifyMasterFound();
@@ -432,6 +441,7 @@ public class Client extends AbstractComponent {
      * @return the token expected from the Master for passive registration
      * @see de.unipassau.isl.evs.ssh.core.network.handshake.HandshakePacket.ServerAuthenticationResponse
      */
+    @Nullable
     public String getPassiveRegistrationToken() {
         return getSharedPrefs().getString(PREF_TOKEN_PASSIVE, null);
     }
@@ -447,6 +457,7 @@ public class Client extends AbstractComponent {
     /**
      * @return the Address the Client will trz to connect to
      */
+    @Nullable
     public InetSocketAddress getConnectAddress() {
         InetSocketAddress address = getLastAddress();
         if (address == null) {
@@ -458,6 +469,7 @@ public class Client extends AbstractComponent {
     /**
      * @return the address the last successful connection was established to
      */
+    @Nullable
     public InetSocketAddress getLastAddress() {
         return getPrefsAddress(LAST_HOST, LAST_PORT);
     }
@@ -465,6 +477,7 @@ public class Client extends AbstractComponent {
     /**
      * @return the master address that was configured by the user
      */
+    @Nullable
     public InetSocketAddress getConfiguredAddress() {
         return getPrefsAddress(PREF_HOST, PREF_PORT);
     }
@@ -495,35 +508,43 @@ public class Client extends AbstractComponent {
             this.editor = editor;
         }
 
-        public PrefEditor setActiveRegistrationToken(String token) {
+        public PrefEditor setActiveRegistrationToken(@Nullable String token) {
             editor.putString(PREF_TOKEN_ACTIVE, token);
             return this;
         }
 
-        public PrefEditor setActiveRegistrationToken(byte[] token) {
-            return setActiveRegistrationToken(DeviceConnectInformation.encodeToken(token));
+        public PrefEditor setActiveRegistrationToken(@Nullable byte[] token) {
+            if (token == null) {
+                return setActiveRegistrationToken((String) null);
+            } else {
+                return setActiveRegistrationToken(DeviceConnectInformation.encodeToken(token));
+            }
         }
 
-        public PrefEditor setPassiveRegistrationToken(String token) {
+        public PrefEditor setPassiveRegistrationToken(@Nullable String token) {
             editor.putString(PREF_TOKEN_PASSIVE, token);
             return this;
         }
 
-        public PrefEditor setPassiveRegistrationToken(byte[] token) {
-            return setPassiveRegistrationToken(DeviceConnectInformation.encodeToken(token));
+        public PrefEditor setPassiveRegistrationToken(@Nullable byte[] token) {
+            if (token == null) {
+                return setActiveRegistrationToken((String) null);
+            } else {
+                return setPassiveRegistrationToken(DeviceConnectInformation.encodeToken(token));
+            }
         }
 
-        public PrefEditor setLastAddress(InetSocketAddress address) {
+        public PrefEditor setLastAddress(@Nullable InetSocketAddress address) {
             setPrefsAddress(address, LAST_HOST, LAST_PORT);
             return this;
         }
 
-        public PrefEditor setConfiguredAddress(InetSocketAddress address) {
+        public PrefEditor setConfiguredAddress(@Nullable InetSocketAddress address) {
             setPrefsAddress(address, PREF_HOST, PREF_PORT);
             return this;
         }
 
-        private void setPrefsAddress(InetSocketAddress address, String prefHost, String prefPort) {
+        private void setPrefsAddress(@Nullable InetSocketAddress address, String prefHost, String prefPort) {
             if (address == null) {
                 editor.remove(prefPort);
                 editor.remove(prefHost);

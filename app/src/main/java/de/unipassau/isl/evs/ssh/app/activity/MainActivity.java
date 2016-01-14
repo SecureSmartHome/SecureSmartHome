@@ -69,66 +69,11 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     private boolean fragmentInitialized = false;
     private Bundle savedInstanceState;
 
-    private ClientConnectionListener connectionListener = new ClientConnectionListener() {
-        @Override
-        public void onMasterFound() {
-        }
-
-        @Override
-        public void onClientConnecting(String host, int port) {
-        }
-
-        @Override
-        public void onClientConnected() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    overlayDisconnected.setVisibility(View.GONE);
-                }
-            });
-        }
-
-        @Override
-        public void onClientDisconnected() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!wasRejected) {
-                        showDisconnectedOverlay();
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void onClientRejected(String message) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    shutdownService();
-                    wasRejected = true;
-                    showConnectionOverlay(getString(R.string.warn_client_rejected));
-                    finish();
-                    Intent intent = new Intent(MainActivity.this, RejectedActivity.class);
-                    startActivity(intent);
-                }
-            });
-        }
-    };
-
     public MainActivity() {
         super(AppContainer.class);
     }
 
-    private void showConnectionOverlay(String text) {
-        overlayDisconnected.setVisibility(View.VISIBLE);
-        TextView textView = (TextView) overlayDisconnected.findViewById(R.id.overlay_text);
-        textView.setText(text);
-    }
-
-    private void showDisconnectedOverlay() {
-        showConnectionOverlay(getString(R.string.warn_no_connection_to_master));
-    }
+    // Lifecycle ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +86,12 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         setSupportActionBar(toolbar);
 
         overlayDisconnected = (LinearLayout) findViewById(R.id.overlay_disconnected);
+        findViewById(R.id.overlay_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new MasterAddressDialog().show(getFragmentManager(), "dialog");
+            }
+        });
 
         //Initialise Notifications
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
@@ -171,8 +122,69 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         client.addListener(connectionListener);
 
         if (container.require(NamingManager.KEY).isMasterKnown() && !client.isConnectionEstablished()) {
-            showDisconnectedOverlay();
+            showConnectionOverlay(getString(R.string.warn_no_connection_to_master));
         }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        showFragmentById(id);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else if (!getCurrentFragment().getClass().equals(MainFragment.class)) {
+            showFragmentByClass(MainFragment.class);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        final Fragment currentFragment = getCurrentFragment();
+        if (currentFragment != null) {
+            outState.putString(KEY_LAST_FRAGMENT, currentFragment.getClass().getName());
+        }
+    }
+
+    @Override
+    public void onContainerDisconnected() {
+        final Fragment fragment = getCurrentFragment();
+        if (fragment instanceof BoundFragment) {
+            ((BoundFragment) fragment).onContainerDisconnected();
+        }
+        Client client = getComponent(Client.KEY);
+        if (client == null) {
+            Log.i(TAG, "Container not yet connected.");
+            return;
+        }
+        client.removeListener(connectionListener);
+    }
+
+    // Navigation //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @return the currently displayed Fragment
+     */
+    private Fragment getCurrentFragment() {
+        return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
     }
 
     private void showInitialFragment() {
@@ -207,53 +219,6 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
             }
         }
         return MainFragment.class;
-    }
-
-    @Override
-    public void onContainerDisconnected() {
-        final Fragment fragment = getCurrentFragment();
-        if (fragment instanceof BoundFragment) {
-            ((BoundFragment) fragment).onContainerDisconnected();
-        }
-        Client client = getComponent(Client.KEY);
-        if (client == null) {
-            Log.i(TAG, "Container not yet connected.");
-            return;
-        }
-        client.removeListener(connectionListener);
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else if (!getCurrentFragment().getClass().equals(MainFragment.class)) {
-            showFragmentByClass(MainFragment.class);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        final Fragment currentFragment = getCurrentFragment();
-        if (currentFragment != null) {
-            outState.putString(KEY_LAST_FRAGMENT, currentFragment.getClass().getName());
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    // returns the currently displayed Fragment
-    private Fragment getCurrentFragment() {
-        return getSupportFragmentManager().findFragmentById(R.id.fragment_container);
     }
 
     /**
@@ -350,7 +315,9 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         transaction.commit();
     }
 
-    // maps button resource ids to Fragment classes.
+    /**
+     * maps button resource ids to Fragment classes.
+     */
     private void showFragmentById(int id) {
         Class clazz;
         if (id == R.id.nav_home) {
@@ -381,13 +348,59 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
         showFragmentByClass(clazz);
     }
 
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        showFragmentById(id);
+    // Client Connection ///////////////////////////////////////////////////////////////////////////////////////////////
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
+    private ClientConnectionListener connectionListener = new ClientConnectionListener() {
+        @Override
+        public void onMasterFound() {
+        }
+
+        @Override
+        public void onClientConnecting(String host, int port) {
+        }
+
+        @Override
+        public void onClientConnected() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    overlayDisconnected.setVisibility(View.GONE);
+                }
+            });
+        }
+
+        @Override
+        public void onClientDisconnected() {
+            if (!wasRejected) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showConnectionOverlay(getString(R.string.warn_no_connection_to_master));
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onClientRejected(String message) {
+            wasRejected = true;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showConnectionOverlay(getString(R.string.warn_client_rejected));
+                    shutdownService();
+                    finish();
+
+                    Intent intent = new Intent(MainActivity.this, RejectedActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
+    };
+
+    private void showConnectionOverlay(String text) {
+        overlayDisconnected.setVisibility(View.VISIBLE);
+        TextView textView = (TextView) overlayDisconnected.findViewById(R.id.overlay_text);
+        textView.setText(text);
     }
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:padding="@dimen/abc_dialog_padding_material">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Please enter the address of the Master that will be used if it can't be found on the local network. This address will be used when connecting from outside your home network, so the address shouldn't change often and the port must be made available through the firewall."/>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/editTextHost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Master Host Address"
+            android:inputType="textUri"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/editTextPort"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Master Port"
+            android:inputType="number"/>
+
+    </android.support.design.widget.TextInputLayout>
+</LinearLayout>

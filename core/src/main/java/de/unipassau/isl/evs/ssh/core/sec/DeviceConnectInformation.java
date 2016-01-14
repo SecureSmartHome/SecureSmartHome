@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.format.Formatter;
 import android.util.Base64;
 import android.util.Log;
@@ -120,11 +122,13 @@ public class DeviceConnectInformation implements Serializable {
         return token;
     }
 
-    public static String encodeToken(byte[] token) {
+    @NonNull
+    public static String encodeToken(@NonNull byte[] token) {
         return Base64.encodeToString(token, BASE64_FLAGS);
     }
 
-    public static byte[] decodeToken(String token) {
+    @NonNull
+    public static byte[] decodeToken(@Nullable String token) {
         if (Strings.isNullOrEmpty(token)) return new byte[0];
         return Base64.decode(token, BASE64_FLAGS);
     }
