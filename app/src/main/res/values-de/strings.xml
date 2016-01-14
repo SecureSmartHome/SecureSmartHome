@@ -105,7 +105,6 @@
     <string name="system_health_warning_title_fixed">Komponente funktioniert wieder!</string>
     <string name="temperature2">Temperatur 2:</string>
     <string name="temperature_1">Temperatur 1:</string>
-    <string name="title_activity_main">MainActivity</string>
     <string name="turn_off">Ausschalten</string>
     <string name="turn_on">Einschalten</string>
     <string name="unblockDoor">Tür entsperren</string>
@@ -135,7 +134,7 @@
     <string name="permission_not_connected_to">Diese Berechtigung hat keine verbindung zu einem Modul</string>
     <string name="weather_service_failed_text">Wetterdienst konnte keine daten von %s erhalten.</string>
     <string name="access_denied">Zugriff verweigert!</string>
-    <string name="add_new_user_fail">Beim hinzufügen eines neuen Nutzers trat ein Fehler auf!</string>
+    <string name="add_new_user_fail">Beim Hinzufügen eines neuen Nutzers trat ein Fehler auf!</string>
     <string name="cannot_remove_module">Modul konnte nicht entfernt werden</string>
     <string name="cannot_remove_slave">Slave konnte nicht entfernt werden</string>
     <string name="could_not_block_door">Tür konnte nicht ge-/entsperrt werden.</string>
@@ -240,4 +239,27 @@
     <string name="you_can_not_add_new_users">Sie können keine neuen Nutzer hinzufügen</string>
     <string name="you_can_not_edit_groups">Sie können Gruppen nicht bearbeiten</string>
     <string name="you_cant_delete_users">Sie können Nutzer nicht entfernen</string>
+    <string name="could_not_delete_user">Benutzer konnte nicht gelöscht werden</string>
+    <string name="could_not_edit_user">Benutzer konnte nicht editiert werden</string>
+    <string name="delete_group_success">Grouppe wurde gelöscht</string>
+    <string name="delete_user_success">Benutzer wurde gelöscht</string>
+    <string name="edit_group_success">Gruppe wurde editiert</string>
+    <string name="edit_user_success">Benutzer wurde editiert</string>
+    <string name="fragment_access_denied">Zugriff verweigert. Fehlende Berechtigung: %s</string>
+    <string name="master_host_address">Master Host Addresse</string>
+    <string name="master_port"></string>
+    <string name="please_enter_master_address">Bitte geben Sie die Addresse des Master ein, die benutzt wird, wenn dieser im lokalen Netzwerk nicht gefunden werden kann. Diese Addresse wird benutzt, um sich von außerhalb des Heimnetzwerks zu verbinden. Diese Addresse sollte selten geändert werden und der Port muss in der Firewall freigeschalten werden.</string>
+    <string name="you_can_not_add_modules">Sie können keine neuen Module hinzufügen</string>
+    <string name="you_can_not_edit_user_devices">Sie können keine Benutzer editieren</string>
+    <string name="you_can_not_remove_groups">Sie können keine Gruppen entfernen</string>
+    <string name="you_can_not_remove_modules">Sie können keine Module entfernen</string>
+    <string name="you_can_not_remove_not_empty_group">Sie können diese Grouppe nicht löschen, da sie nicht leer ist.</string>
+    <string name="you_can_not_remove_odroids">Sie können keine Odroids entfernen</string>
+    <string name="you_can_not_remove_users">Sie können keine Benutzer entfernen</string>
+    <string name="you_can_not_request_picture">Sie können kein Bild anfordern</string>
+    <string name="you_can_not_set_permissions">Sie können keine Berechtigungen setzen</string>
+    <string name="you_can_not_start_or_stop_the_holiday_simulation">Sie können die Urlaubssimulation nicht umschalten</string>
+    <string name="you_can_not_switch_light">Sie können das Licht nicht umschalten</string>
+    <string name="you_can_not_unblock_door">Sie können die Tür nicht (ent-)sperren</string>
+    <string name="you_can_not_unlatch_door">Sie können die Tür nicht entriegeln</string>
 </resources>

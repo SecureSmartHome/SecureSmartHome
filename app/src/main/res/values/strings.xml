@@ -302,7 +302,7 @@
     <string name="you_can_not_unlatch_door">You can\'t unlatch the door</string>
     <string name="you_can_not_unblock_door">You can\'t (un)block the door</string>
     <string name="you_can_not_request_picture">You can\'t request a picture</string>
-    <string name="master_port">Master Port</string>
+    <string name="master_port" translatable="false">Master Port</string>
     <string name="master_host_address">Master Host Address</string>
     <string name="please_enter_master_address">Please enter the address of the Master that will be used if it can\'t be found on the local network. This address will be used when connecting from outside your home network, so the address shouldn\'t change often and the port must be made available through the firewall.</string>
     <string name="you_can_not_remove_not_empty_group">You can\'t remove this group. There are still users in it</string>
