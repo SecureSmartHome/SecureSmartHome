@@ -39,16 +39,17 @@ public class HolidayController extends AbstractComponent {
     /**
      * Add a new action to the database.
      *
-     * @param action Action to be added to the database.
+     * @param action     Action to be added to the database.
      * @param moduleName Module where the action occurs.
+     * @param timestamp  The timestamp of the action.
      */
-    public void addHolidayLogEntryNow(String action, String moduleName) throws UnknownReferenceException {
+    public void addHolidayLogEntry(String action, String moduleName, long timestamp) throws UnknownReferenceException {
         if (Strings.isNullOrEmpty(moduleName)) {
             databaseConnector.executeSql(
                     "insert into " + DatabaseContract.HolidayLog.TABLE_NAME
                             + " (" + DatabaseContract.HolidayLog.COLUMN_ACTION
                             + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + ") values (?, ?)",
-                    new String[] { action, String.valueOf(System.currentTimeMillis()) }
+                    new String[]{action, String.valueOf(timestamp)}
             );
         } else {
             try {
@@ -58,12 +59,22 @@ public class HolidayController extends AbstractComponent {
                                 + ", " + DatabaseContract.HolidayLog.COLUMN_ELECTRONIC_MODULE_ID
                                 + ", " + DatabaseContract.HolidayLog.COLUMN_TIMESTAMP + ") values (?,("
                                 + DatabaseContract.SqlQueries.MODULE_ID_FROM_NAME_SQL_QUERY + "),?)",
-                        new String[]{ action, moduleName, String.valueOf(System.currentTimeMillis()) }
+                        new String[]{action, moduleName, String.valueOf(timestamp)}
                 );
             } catch (SQLiteConstraintException sqlce) {
                 throw new UnknownReferenceException("The given module doesn't exist.", sqlce);
             }
         }
+    }
+
+    /**
+     * Add a new action to the database. With the current time as the timestamp.
+     *
+     * @param action     Action to be added to the database.
+     * @param moduleName Module where the action occurs.
+     */
+    public void addHolidayLogEntryNow(String action, String moduleName) throws UnknownReferenceException {
+        addHolidayLogEntry(action, moduleName, System.currentTimeMillis());
     }
 
     /**
