@@ -7,7 +7,7 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
  */
 public class HolidaySimulationPayload implements MessagePayload {
 
-    private boolean on; //either indicates if the simulation should be switch on or off, or if it is switched on or off
+    private final boolean on; //either indicates if the simulation should be switch on or off, or if it is switched on or off
 
     public HolidaySimulationPayload(boolean on) {
         this.on = on;

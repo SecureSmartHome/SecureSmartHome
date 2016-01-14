@@ -42,7 +42,7 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
 
     private boolean isDoorBlocked = false;
     private boolean isDoorOpen = false;
-    private List<DoorListener> listeners = new LinkedList<>();
+    private final List<DoorListener> listeners = new LinkedList<>();
     private byte[] picture = null;
 
     @Override

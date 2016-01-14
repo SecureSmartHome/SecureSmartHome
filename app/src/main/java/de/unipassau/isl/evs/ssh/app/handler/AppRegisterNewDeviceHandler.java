@@ -29,7 +29,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_USER_RE
 public class AppRegisterNewDeviceHandler extends AbstractAppHandler implements Component {
     public static final Key<AppRegisterNewDeviceHandler> KEY = new Key<>(AppRegisterNewDeviceHandler.class);
 
-    private List<RegisterNewDeviceListener> listeners = new LinkedList<>();
+    private final List<RegisterNewDeviceListener> listeners = new LinkedList<>();
 
     @Override
     public RoutingKey[] getRoutingKeys() {

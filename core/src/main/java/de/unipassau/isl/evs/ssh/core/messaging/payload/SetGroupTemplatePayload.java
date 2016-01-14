@@ -6,8 +6,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Group;
  * @author Wolfgang Popp.
  */
 public class SetGroupTemplatePayload implements MessagePayload {
-    private Group group;
-    private String templateName;
+    private final Group group;
+    private final String templateName;
 
     public SetGroupTemplatePayload(Group group, String templateName) {
         this.group = group;

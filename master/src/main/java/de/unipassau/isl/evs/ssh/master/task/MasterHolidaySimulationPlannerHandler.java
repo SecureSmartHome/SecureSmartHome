@@ -13,8 +13,6 @@ import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.HolidayAction;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
-import de.unipassau.isl.evs.ssh.core.messaging.IncomingDispatcher;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
@@ -126,8 +124,8 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
     private class HolidayLightAction implements Runnable {
 
-        String moduleName;
-        String actionName;
+        final String moduleName;
+        final String actionName;
 
         public HolidayLightAction(String moduleName, String actionName) {
             this.moduleName = moduleName;

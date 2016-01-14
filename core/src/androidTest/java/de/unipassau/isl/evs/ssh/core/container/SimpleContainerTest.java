@@ -6,11 +6,11 @@ import de.ncoder.typedmap.Key;
 
 public class SimpleContainerTest extends TestCase {
     private final Key<TestComponent> k = new Key<>(TestComponent.class);
-    private Container container = new SimpleContainer();
-    private Key<TestComponent> k1 = new Key<>(TestComponent.class, "1");
-    private Key<TestComponent> k2 = new Key<>(TestComponent.class, "2");
-    private TestComponent c1 = new TestComponent();
-    private TestComponent c2 = new TestComponent();
+    private final Container container = new SimpleContainer();
+    private final Key<TestComponent> k1 = new Key<>(TestComponent.class, "1");
+    private final Key<TestComponent> k2 = new Key<>(TestComponent.class, "2");
+    private final TestComponent c1 = new TestComponent();
+    private final TestComponent c2 = new TestComponent();
 
     public void testRegister() {
         assertFalse(c1.isActive());

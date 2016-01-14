@@ -9,7 +9,7 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  */
 public class ModifyModulePayload implements MessagePayload {
 
-    private Module module;
+    private final Module module;
 
     public ModifyModulePayload(Module module) {
         this.module = module;

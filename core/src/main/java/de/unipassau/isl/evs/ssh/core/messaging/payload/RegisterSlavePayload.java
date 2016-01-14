@@ -8,7 +8,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 public class RegisterSlavePayload implements MessagePayload {
     private String name;
     private DeviceID slaveID;
-    private byte[] passiveRegistrationToken;
+    private final byte[] passiveRegistrationToken;
 
     public RegisterSlavePayload(String name, DeviceID slaveID, byte[] passiveRegistrationToken) {
         this.name = name;

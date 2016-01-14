@@ -9,8 +9,8 @@ import de.unipassau.isl.evs.ssh.core.database.dto.Module;
  */
 public class SystemHealthPayload implements MessagePayload {
 
-    private boolean hasError;
-    private Module module;
+    private final boolean hasError;
+    private final Module module;
 
     public SystemHealthPayload(boolean hasError, Module defectModule) {
         this.hasError = hasError;

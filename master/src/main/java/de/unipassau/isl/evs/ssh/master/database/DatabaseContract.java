@@ -93,7 +93,7 @@ public class DatabaseContract {
             CHILDREN("Children"),
             GUESTS("Guests");
 
-            String name;
+            final String name;
 
             DefaultValues(String name) {
                 this.name = name;
@@ -116,7 +116,7 @@ public class DatabaseContract {
             CHILDREN_TEMPLATE("ChildrenTemplate"),
             GUESTS_TEMPLATE("GuestsTemplate");
 
-            String name;
+            final String name;
 
             DefaultValues(String name) {
                 this.name = name;

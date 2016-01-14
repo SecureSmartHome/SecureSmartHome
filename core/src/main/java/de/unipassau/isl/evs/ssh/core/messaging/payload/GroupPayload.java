@@ -10,8 +10,8 @@ public class GroupPayload implements MessagePayload {
         CREATE, DELETE
     }
 
-    private Group group;
-    private ACTION action;
+    private final Group group;
+    private final ACTION action;
 
     public GroupPayload(Group group, ACTION action) {
         this.group = group;

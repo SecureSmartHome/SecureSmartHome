@@ -6,8 +6,8 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  * @author Wolfgang Popp.
  */
 public class SetUserNamePayload implements MessagePayload {
-    private DeviceID user;
-    private String username;
+    private final DeviceID user;
+    private final String username;
 
     public SetUserNamePayload(DeviceID user, String username) {
         this.user = user;

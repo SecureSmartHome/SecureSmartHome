@@ -4,8 +4,8 @@ package de.unipassau.isl.evs.ssh.core.messaging.payload;
  * @author Leon Sell
  */
 public class RenameModulePayload implements MessagePayload {
-    String oldName;
-    String newName;
+    private String oldName;
+    private String newName;
 
     public RenameModulePayload(String oldName, String newName) {
         this.oldName = oldName;

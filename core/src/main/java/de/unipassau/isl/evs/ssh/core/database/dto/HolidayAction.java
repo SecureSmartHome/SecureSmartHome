@@ -8,9 +8,9 @@ package de.unipassau.isl.evs.ssh.core.database.dto;
  * @author Christoph Fraedrich
  */
 public class HolidayAction {
-    private String moduleName;
-    private long timeStamp;
-    private String actionName;
+    private final String moduleName;
+    private final long timeStamp;
+    private final String actionName;
 
     /**
      * Creates a new HolidayAction Object

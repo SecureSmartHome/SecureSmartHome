@@ -50,7 +50,7 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
         KeyStoreController controller = new KeyStoreController();
 
         container.register(KEY, controller);
-        purgeKeyStore(controller);
+        purgeKeyStore();
         container.unregister(KEY);
         container.register(KEY, controller);
     }
@@ -68,7 +68,7 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
         KeyStoreController controller = new KeyStoreController();
 
         container.register(KEY, controller);
-        purgeKeyStore(controller);
+        purgeKeyStore();
         container.unregister(KEY);
         container.register(KEY, controller);
 
@@ -100,7 +100,7 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
         KeyStoreController controller = new KeyStoreController();
 
         container.register(KEY, controller);
-        purgeKeyStore(controller);
+        purgeKeyStore();
         container.unregister(KEY);
         container.register(KEY, controller);
 
@@ -164,7 +164,7 @@ public class KeyStoreControllerTest extends InstrumentationTestCase {
         assertTrue(Arrays.equals(controller.getCertificate("TestAlias").getEncoded(), cert.getEncoded()));
     }
 
-    private void purgeKeyStore(KeyStoreController controller) throws KeyStoreException {
+    private void purgeKeyStore() {
         getInstrumentation().getTargetContext().deleteFile(KEY_STORE_FILENAME);
     }
 }

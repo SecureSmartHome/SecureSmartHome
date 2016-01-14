@@ -45,11 +45,11 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
         if (RoutingKeys.MASTER_DEVICE_CONNECTED.matches(message)) {
             final DeviceConnectedPayload payload = RoutingKeys.MASTER_DEVICE_CONNECTED.getPayload(message);
 
-            if (!positionMap.containsKey(payload.deviceID)) {
-                positionMap.put(payload.deviceID, new LinkedList<Message.AddressedMessage>());
+            if (!positionMap.containsKey(payload.getDeviceID())) {
+                positionMap.put(payload.getDeviceID(), new LinkedList<Message.AddressedMessage>());
             }
 
-            final List<Message.AddressedMessage> list = positionMap.get(payload.deviceID);
+            final List<Message.AddressedMessage> list = positionMap.get(payload.getDeviceID());
             list.add(0, message);
 
             if (list.size() > MAX_POSITION_COUNT) {
@@ -74,13 +74,10 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
         final Message.AddressedMessage preLastMessage = positionMap.get(deviceID).get(1);
 
         //Is last location local and was last outside of home network and was that change in the last 2 min?
-        if (MASTER_DEVICE_CONNECTED.getPayload(lastMessage).isLocal
-                && !MASTER_DEVICE_CONNECTED.getPayload(preLastMessage).isLocal
-                && lastMessage.getHeaders().get(Message.HEADER_TIMESTAMP) - System.currentTimeMillis() > TimeUnit.MINUTES.toMillis(interval)) {
-            return true;
-        }
+        return MASTER_DEVICE_CONNECTED.getPayload(lastMessage).isLocal()
+                && !MASTER_DEVICE_CONNECTED.getPayload(preLastMessage).isLocal()
+                && lastMessage.getHeaders().get(Message.HEADER_TIMESTAMP) - System.currentTimeMillis() > TimeUnit.MINUTES.toMillis(interval);
 
-        return false;
     }
 
     /**
@@ -90,6 +87,6 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
      * @return true if device is in local network
      */
     public boolean isDeviceLocal(DeviceID deviceID) {
-        return MASTER_DEVICE_CONNECTED.getPayload(positionMap.get(deviceID).get(0)).isLocal;
+        return MASTER_DEVICE_CONNECTED.getPayload(positionMap.get(deviceID).get(0)).isLocal();
     }
 }

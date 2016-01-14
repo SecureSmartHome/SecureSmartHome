@@ -7,9 +7,9 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  * @author Wolfgang Popp.
  */
 public class SetPermissionPayload implements MessagePayload {
-    private DeviceID user;
-    private Permission permission;
-    private Action action;
+    private final DeviceID user;
+    private final Permission permission;
+    private final Action action;
 
     public enum Action {
         GRANT, REVOKE

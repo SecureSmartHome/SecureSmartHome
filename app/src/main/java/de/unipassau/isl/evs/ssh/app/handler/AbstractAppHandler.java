@@ -24,7 +24,7 @@ import io.netty.util.concurrent.Promise;
  * @author Niko Fink
  */
 public abstract class AbstractAppHandler extends AbstractMessageHandler {
-    private Map<Integer, Promise<?>> mappings = new HashMap<>();
+    private final Map<Integer, Promise<?>> mappings = new HashMap<>();
 
     /**
      * Generate a new Future that will track the status of the request contained in the given sent AddressedMessage.
@@ -138,9 +138,11 @@ public abstract class AbstractAppHandler extends AbstractMessageHandler {
      * used Futures
      */
     private static class MessageMetrics {
-        private String key;
+        private final String key;
         private String status;
-        private long queued, sent, finished;
+        private final long queued;
+        private long sent;
+        private long finished;
 
         public MessageMetrics(Message.AddressedMessage message) {
             this.key = message.getRoutingKey();

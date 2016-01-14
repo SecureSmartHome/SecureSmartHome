@@ -108,7 +108,7 @@ public class MasterQRCodeActivity extends MasterStartUpActivity implements Messa
         if (MASTER_DEVICE_CONNECTED.matches(message)) {
             final DeviceConnectedPayload connectedDevice = MASTER_DEVICE_CONNECTED.getPayload(message);
             final UserDevice registeredDevice = (UserDevice) getIntent().getSerializableExtra(EXTRA_REGISTERED_DEVICE);
-            if (registeredDevice == null || connectedDevice.deviceID.equals(registeredDevice.getUserDeviceID())) {
+            if (registeredDevice == null || connectedDevice.getDeviceID().equals(registeredDevice.getUserDeviceID())) {
                 checkSwitchActivity();
             }
         }
