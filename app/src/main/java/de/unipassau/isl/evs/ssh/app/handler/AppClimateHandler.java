@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.container.Component;
+import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.AbstractMessageHandler;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -30,6 +31,25 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(1);
     private final List<ClimateHandlerListener> listeners = new ArrayList<>();
     private final Map<Module, ClimateStatus> climateStatusMapping = new HashMap<>();
+
+    final private AppModuleHandler.AppModuleListener listener = new AppModuleHandler.AppModuleListener() {
+        @Override
+        public void onModulesRefreshed() {
+            update();
+        }
+    };
+
+    @Override
+    public void init(Container container) {
+        super.init(container);
+        requireComponent(AppModuleHandler.KEY).addAppModuleListener(listener);
+    }
+
+    @Override
+    public void destroy() {
+        requireComponent(AppModuleHandler.KEY).removeAppModuleListener(listener);
+        super.destroy();
+    }
 
     /**
      * Request current weatherSensor data.
@@ -83,6 +103,15 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
             requestClimateStatus(module);
         }
         return status;
+    }
+
+    private void update() {
+        climateStatusMapping.clear();
+        List<Module> lights = requireComponent(AppModuleHandler.KEY).getLights();
+        for (Module m : lights) {
+            climateStatusMapping.put(m, new ClimateStatus(0, 0, 0, 0, 0, 0, 0, 0));
+            requestClimateStatus(m);
+        }
     }
 
     /**
