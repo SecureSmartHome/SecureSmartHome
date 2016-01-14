@@ -2,6 +2,7 @@ package de.unipassau.isl.evs.ssh.master.database;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.provider.ContactsContract;
 import android.test.InstrumentationTestCase;
 
 import de.unipassau.isl.evs.ssh.core.container.ContainerService;
@@ -34,8 +35,16 @@ public class DatabaseConnectorTest extends InstrumentationTestCase {
         c.moveToFirst();
         assertEquals(c.getString(c.getColumnIndex("name")), "HolidayLog");
 
+        c = db.executeSql("select name from " + DatabaseContract.Permission.TABLE_NAME + " where name = ?;", new String[] {Permission.TAKE_CAMERA_PICTURE.toString()});
+        c.moveToFirst();
+        assertEquals(c.getString(0), Permission.TAKE_CAMERA_PICTURE.toString());
+
+        c = db.executeSql("select name from " + DatabaseContract.Group.TABLE_NAME + " where name = '" + DatabaseContract.Group.DefaultValues.CHILDREN.toString() + "';", null);
+        c.moveToFirst();
+        assertEquals(c.getString(0), DatabaseContract.Group.DefaultValues.CHILDREN.toString());
+
         db.executeSql("insert into PermissionTemplate values (123, 'theTemplate')", null);
-        db.executeSql("insert into DeviceGroup values (?,?,?)", new String[]{"2", "theGroup", "123"});
+        db.executeSql("insert into DeviceGroup values (?,?,?)", new String[]{"4", "theGroup", "123"});
         db.executeSql("insert into UserDevice values (?,?,?,?);", new String[]{"1001", "bob", "fingerprint", "2"});
         c = db.executeSql("select * from UserDevice where _ID = 1001;", null);
         c.moveToFirst();
@@ -49,9 +58,5 @@ public class DatabaseConnectorTest extends InstrumentationTestCase {
         while (c.moveToNext()) {
             c.getString(c.getColumnIndex(DatabaseContract.Permission.COLUMN_NAME));
         }
-        c = db.executeSql("Select " + DatabaseContract.Permission.COLUMN_NAME + " from " + DatabaseContract.Permission.TABLE_NAME + " where _ID = 1", null);
-        c.moveToFirst();
-        assertEquals(Permission.ADD_ODROID.toString(), c.getString(c.getColumnIndex(DatabaseContract.Permission.COLUMN_NAME)));
-
     }
 }

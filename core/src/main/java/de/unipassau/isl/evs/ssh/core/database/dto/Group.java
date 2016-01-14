@@ -7,7 +7,7 @@ import java.io.Serializable;
  *
  * @author Leon Sell
  */
-public class Group implements Serializable {
+public class Group implements Serializable, NamedDTO {
     private String name;
     private String templateName;
 

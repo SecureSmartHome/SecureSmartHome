@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.network.handshake;
 
+import android.support.annotation.Nullable;
+
 import com.google.common.base.MoreObjects;
 
 import java.io.Serializable;
@@ -72,6 +74,7 @@ public abstract class HandshakePacket implements Serializable {
                 version_name = (String) clazz.getField("VERSION_NAME").get(null);
             }
 
+            @Nullable
             public static SerializableBuildConfig getInstance() {
                 for (String s : new String[]{"app", "slave", "master", "core"}) {
                     try {
@@ -130,10 +133,12 @@ public abstract class HandshakePacket implements Serializable {
     public static class CHAP extends HandshakePacket {
         public static final int CHALLENGE_LENGTH = 32;
 
+        @Nullable
         public final byte[] challenge;
+        @Nullable
         public final byte[] response;
 
-        public CHAP(byte[] challenge, byte[] response) {
+        public CHAP(@Nullable byte[] challenge, @Nullable byte[] response) {
             this.challenge = challenge;
             this.response = response;
         }
@@ -174,22 +179,24 @@ public abstract class HandshakePacket implements Serializable {
      */
     public static class ServerAuthenticationResponse extends HandshakePacket {
         public final boolean isAuthenticated;
+        @Nullable
         public final String message;
+        @Nullable
         public final byte[] passiveRegistrationToken;
         public final boolean isConnectionLocal;
 
-        public ServerAuthenticationResponse(boolean isAuthenticated, String message, byte[] passiveRegistrationToken, boolean isConnectionLocal) {
+        public ServerAuthenticationResponse(boolean isAuthenticated, @Nullable String message, @Nullable byte[] passiveRegistrationToken, boolean isConnectionLocal) {
             this.isAuthenticated = isAuthenticated;
             this.message = message;
             this.passiveRegistrationToken = passiveRegistrationToken;
             this.isConnectionLocal = isConnectionLocal;
         }
 
-        public static ServerAuthenticationResponse authenticated(String message, byte[] passiveRegistrationToken, boolean isConnectionLocal) {
+        public static ServerAuthenticationResponse authenticated(@Nullable String message, @Nullable byte[] passiveRegistrationToken, boolean isConnectionLocal) {
             return new ServerAuthenticationResponse(true, message, passiveRegistrationToken, isConnectionLocal);
         }
 
-        public static ServerAuthenticationResponse unauthenticated(String message) {
+        public static ServerAuthenticationResponse unauthenticated(@Nullable String message) {
             return new ServerAuthenticationResponse(false, message, null, false);
         }
 

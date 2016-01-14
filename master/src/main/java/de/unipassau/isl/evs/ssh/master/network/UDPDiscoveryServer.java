@@ -2,8 +2,10 @@ package de.unipassau.isl.evs.ssh.master.network;
 
 import android.content.Context;
 import android.net.wifi.WifiManager;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
+import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.security.Signature;
 
@@ -90,16 +92,20 @@ public class UDPDiscoveryServer extends AbstractComponent {
      * Send a response with the ConnectInformation of this Master to the requesting Client.
      *
      * @param request the request sent from a {@link Client}
-     * @return the ChannelFuture returned by {@link io.netty.channel.Channel#write(Object)}
      */
-    private ChannelFuture sendDiscoveryResponse(DatagramPacket request) {
+    private void sendDiscoveryResponse(DatagramPacket request) {
         final ByteBuf buffer = channel.channel().alloc().heapBuffer();
 
         // gather information
         final byte[] header = DISCOVERY_PAYLOAD_RESPONSE.getBytes();
         final String addressString = request.recipient().getAddress().getHostAddress();
         final byte[] address = addressString.getBytes();
-        final int port = requireComponent(Server.KEY).getAddress().getPort();
+        final InetSocketAddress serverAddress = requireComponent(Server.KEY).getAddress();
+        if (serverAddress == null) {
+            Log.w(TAG, "Could not respond to UDP discovery request as Server is not started yet");
+            return;
+        }
+        final int port = serverAddress.getPort();
         Log.i(TAG, "sendDiscoveryResponse with connection data " + addressString + ":" + port + " to " + request.sender());
 
         // write it to the buffer
@@ -122,7 +128,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
         }
 
         final DatagramPacket response = new DatagramPacket(buffer, request.sender());
-        return channel.channel().writeAndFlush(response);
+        channel.channel().writeAndFlush(response);
     }
 
     /**
@@ -184,6 +190,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
         /**
          * Read a string.
          */
+        @Nullable
         private String readString(ByteBuf buffer) {
             final int length = buffer.readInt();
             if (length < 0 || length > 0xFFFF) {
@@ -197,6 +204,7 @@ public class UDPDiscoveryServer extends AbstractComponent {
         /**
          * Read a DeviceID.
          */
+        @Nullable
         private DeviceID readDeviceID(ByteBuf buffer) {
             final int length = buffer.readInt();
             if (length != DeviceID.ID_LENGTH) {

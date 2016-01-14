@@ -14,84 +14,83 @@
         android:padding="@dimen/activity_horizontal_margin">
 
         <TableLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
             android:stretchColumns="1">
 
             <TableRow>
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_column="1"
                     android:text="@string/master"
-                    android:textSize="@dimen/typography_headline1"
+                    android:textSize="16sp"
                     android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/mainactivity_master_masterid"
-                    android:textSize="@dimen/typography_subheadline"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"/>
             </TableRow>
 
             <TableRow>
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_column="1"
                     android:text="@string/address"
-                    android:textSize="@dimen/typography_subheadline"
+                    android:textSize="16sp"
                     android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/mainactivity_master_address"
-                    android:textSize="@dimen/typography_subheadline"
-                    />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"/>
             </TableRow>
 
             <TableRow>
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_column="1"
                     android:text="@string/active_connections"
-                    android:textSize="@dimen/typography_subheadline"
-                    android:textStyle="bold"
-                    />
-                <!--TODO Phil extract in string resource-->
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+
                 <TextView
                     android:id="@+id/mainactivity_master_connected"
-                    android:textSize="@dimen/typography_subheadline"
-                    />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"/>
             </TableRow>
         </TableLayout>
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="15dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/connected_slaves"
-            android:textSize="@dimen/typography_headline1"
-            android:textStyle="bold"
-            />
+            android:textSize="16sp"
+            android:textStyle="bold"/>
 
         <ListView
             android:id="@+id/mainactivity_master_listview_slaves"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:isScrollContainer="false">
-
-        </ListView>
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp"/>
+            android:layout_marginBottom="32dp"
+            android:isScrollContainer="false"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/connected_user_devices"
-            android:textSize="@dimen/typography_headline1"
-            android:textStyle="bold"
-            />
+            android:textSize="16sp"
+            android:textStyle="bold"/>
 
         <ListView
             android:id="@+id/mainactivity_master_listview_userdevices"

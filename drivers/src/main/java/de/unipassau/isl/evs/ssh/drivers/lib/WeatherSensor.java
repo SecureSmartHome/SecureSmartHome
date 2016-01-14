@@ -151,7 +151,7 @@ public class WeatherSensor extends AbstractComponent {
          */
         private void sendWeatherInfo() {
             ClimatePayload payload = new ClimatePayload(getTemperature1(), getTemperature2(), getPressure(),
-                    getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), "", getModule());
+                    getAltitude(), getHumidity(), getUV(), getVisibleLight(), getInfrared(), getModule());
 
             NamingManager namingManager = requireComponent(NamingManager.KEY);
 

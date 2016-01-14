@@ -57,7 +57,7 @@ public class RegisterLocalSlaveActivity extends BoundActivity {
                 );
 
                 try {
-                    requireComponent(MasterSlaveManagementHandler.KEY).registerSlave(slave);
+                    getContainer().require(MasterSlaveManagementHandler.KEY).registerSlave(slave);
                     setResult(Activity.RESULT_OK);
                     finish();
                 } catch (AlreadyInUseException e) {

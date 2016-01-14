@@ -1,8 +1,10 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
@@ -11,12 +13,14 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.broadcast.NotificationBroadcaster;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_STATUS_UPDATE;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BLOCK;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
@@ -44,6 +48,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     @Override
     public RoutingKey[] getRoutingKeys() {
         return new RoutingKey[]{
+                MASTER_DEVICE_CONNECTED,
                 MASTER_DOOR_STATUS_UPDATE,
                 MASTER_DOOR_UNLATCH,
                 MASTER_DOOR_BLOCK,
@@ -56,7 +61,9 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (MASTER_DOOR_STATUS_UPDATE.matches(message)) {
+        if (MASTER_DEVICE_CONNECTED.matches(message)) {
+            pushDoorStatus(MASTER_DEVICE_CONNECTED.getPayload(message).getDeviceID());
+        } else if (MASTER_DOOR_STATUS_UPDATE.matches(message)) {
             handleDoorStatusUpdate(MASTER_DOOR_STATUS_UPDATE.getPayload(message));
         } else if (MASTER_DOOR_UNLATCH.matches(message)) {
             handleDoorUnlatchRequest(message, MASTER_DOOR_UNLATCH.getPayload(message));
@@ -72,6 +79,17 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             replyError(message, SLAVE_DOOR_UNLATCH_ERROR);
         } else {
             invalidMessage(message);
+        }
+    }
+
+    private void pushDoorStatus(DeviceID deviceID) {
+        final SlaveController slaveController = requireComponent(SlaveController.KEY);
+        final List<Module> doors = slaveController.getModulesByType(CoreConstants.ModuleType.DoorBuzzer);
+        for (Module door : doors) {
+            final String moduleName = door.getName();
+            boolean isOpen = getOpen(moduleName);
+            boolean isBlocked = getBlocked(moduleName);
+            sendMessage(deviceID, APP_DOOR_STATUS_UPDATE, new Message(new DoorStatusPayload(isOpen, isBlocked, moduleName)));
         }
     }
 

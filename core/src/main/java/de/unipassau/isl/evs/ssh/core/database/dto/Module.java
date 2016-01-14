@@ -11,7 +11,7 @@ import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
  *
  * @author Leon Sell
  */
-public class Module implements Serializable {
+public class Module implements Serializable, NamedDTO {
     private String name;
     private DeviceID atSlave;
     private CoreConstants.ModuleType moduleType;

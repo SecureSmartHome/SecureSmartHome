@@ -17,11 +17,9 @@ import java.io.PrintWriter;
  * @author Betreuer
  * @author Niko Fink
  */
-public class EvsIo {
+public enum EvsIo {
+    ;
     private static final String TAG = EvsIo.class.getSimpleName();
-
-    private EvsIo() {
-    }
 
     /**
      * Set-Up a GPIO pin

@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.master.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,6 +33,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.QRCodeInformation.EXTR
  *
  * @author Niko Fink
  */
+@SuppressLint("Registered")
 public class MasterStartUpActivity extends StartUpActivity {
     protected static final String PREF_PREFERENCES_SET = "master_preferences_set";
 

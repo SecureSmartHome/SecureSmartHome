@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.google.common.collect.Sets;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -54,7 +54,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
      *                   the SaveContainer. All modules that are in the container but not in the
      *                   list are unregistered.
      */
-    public void updateModule(List<Module> components) throws WrongAccessPointException, EvsIoException {
+    private void updateModule(List<Module> components) throws WrongAccessPointException, EvsIoException {
         if (this.components.size() < 1) {
             final Set<Module> newComponents = Sets.newHashSet(components);
             registerModules(newComponents);
@@ -200,7 +200,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
      * @return a list of registered components
      */
     public List<Module> getModules() {
-        return new ArrayList<>(components);
+        return Collections.unmodifiableList(components);
     }
 
     @Override

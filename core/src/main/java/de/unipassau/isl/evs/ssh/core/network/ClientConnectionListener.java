@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.network;
 
+import android.support.annotation.Nullable;
+
 /**
  * A Listener that can be notified when the Connected State of the {@link Client} changes.
  *
@@ -31,5 +33,5 @@ public interface ClientConnectionListener {
     /**
      * Called when the Master rejected this Client with a given message.
      */
-    void onClientRejected(String message);
+    void onClientRejected(@Nullable String message);
 }

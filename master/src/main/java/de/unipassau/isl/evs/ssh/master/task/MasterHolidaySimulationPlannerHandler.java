@@ -3,8 +3,9 @@ package de.unipassau.isl.evs.ssh.master.task;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.SystemClock;
+import android.util.Log;
 
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +31,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_HOLIDAY_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET;
 import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.HOLIDAY_MODE_SWITCHED_OFF;
+import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.HOLIDAY_MODE_SWITCHED_ON;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.TOGGLE_HOLIDAY_SIMULATION;
 
 /**
@@ -42,6 +44,7 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.TOGGLE_HOLIDAY_SIMULA
 public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler implements ScheduledComponent {
     private static final long SCHEDULE_LOOKAHEAD_MILLIS = TimeUnit.HOURS.toMillis(1);
     public static final Key<MasterHolidaySimulationPlannerHandler> KEY = new Key<>(MasterHolidaySimulationPlannerHandler.class);
+    private static final String TAG = MasterHolidaySimulationPlannerHandler.class.getSimpleName();
 
     private boolean runHolidaySimulation = false;
 
@@ -67,7 +70,18 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
             runHolidaySimulation = holidaySimulationPayload.switchOn();
             replyStatus(message);
             final NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
-            notificationBroadcaster.sendMessageToAllReceivers(HOLIDAY_MODE_SWITCHED_OFF);
+            if (runHolidaySimulation) {
+                notificationBroadcaster.sendMessageToAllReceivers(HOLIDAY_MODE_SWITCHED_ON);
+                Scheduler scheduler = requireComponent(Scheduler.KEY);
+                PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, PendingIntent.FLAG_CANCEL_CURRENT);
+                scheduler.setRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 1000, SCHEDULE_LOOKAHEAD_MILLIS, intent);
+            } else {
+                Scheduler scheduler = requireComponent(Scheduler.KEY);
+                PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, PendingIntent.FLAG_CANCEL_CURRENT);
+                scheduler.cancel(intent);
+                notificationBroadcaster.sendMessageToAllReceivers(HOLIDAY_MODE_SWITCHED_OFF);
+                //TODO Leon: kill all planned tasks (Leon, 14.01.16)
+            }
         } else {
             sendNoPermissionReply(message, TOGGLE_HOLIDAY_SIMULATION);
         }
@@ -81,23 +95,20 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
 
     @Override
     public void onReceive(Intent intent) {
+        Log.i(TAG, "HolidayPlanner calculating...");
         //Cannot do anything without the container
         if (runHolidaySimulation && getContainer() != null) {
-            List<HolidayAction> logEntriesRange = getContainer().require(HolidayController.KEY).getHolidayActions(new Date(),
-                    new Date(System.currentTimeMillis() + SCHEDULE_LOOKAHEAD_MILLIS));
+            final long planningStartTime = System.currentTimeMillis();
+            //replays last week
+            List<HolidayAction> lastWeek = requireComponent(HolidayController.KEY).getHolidayActions(
+                    planningStartTime - TimeUnit.DAYS.toMillis(7),
+                    planningStartTime - TimeUnit.DAYS.toMillis(7) + SCHEDULE_LOOKAHEAD_MILLIS
+            );
 
-            for (HolidayAction a : logEntriesRange) {
-                //Cannot do anything better as the standard java date api sucks
-                int minNow = new Date(System.currentTimeMillis()).getMinutes();
-                int minPast = new Date(a.getTimeStamp()).getMinutes();
-
-                if (minPast > minNow) {
-                    minPast += 60;
-                }
-
-                long delay = minPast - minNow;
-                getContainer().require(ExecutionServiceComponent.KEY).schedule(new HolidayLightAction(a.getModuleName(),
-                        a.getActionName()), delay, TimeUnit.MINUTES);
+            for (HolidayAction a : lastWeek) {
+                requireComponent(ExecutionServiceComponent.KEY).schedule(new HolidayLightAction(a.getModuleName(),
+                        a.getActionName()), (a.getTimeStamp() + TimeUnit.DAYS.toMillis(7) - planningStartTime) / 1000,
+                        TimeUnit.SECONDS);
             }
         }
     }
@@ -105,18 +116,14 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
     @Override
     public void init(Container container) {
         super.init(container);
-        if (getContainer() != null) {
-            Scheduler scheduler = getContainer().require(Scheduler.KEY);
-            PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
-            scheduler.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), SCHEDULE_LOOKAHEAD_MILLIS, intent);
-        }
     }
 
     @Override
     public void destroy() {
         if (getContainer() != null) {
-            Scheduler scheduler = getContainer().require(Scheduler.KEY);
-            PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, 0);
+            //TODO Leon: only cancel, when not already canceled (Leon, 14.01.16)
+            Scheduler scheduler = requireComponent(Scheduler.KEY);
+            PendingIntent intent = scheduler.getPendingScheduleIntent(MasterHolidaySimulationPlannerHandler.KEY, null, PendingIntent.FLAG_CANCEL_CURRENT);
             scheduler.cancel(intent);
         }
         super.destroy();

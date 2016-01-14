@@ -1,6 +1,7 @@
 package de.unipassau.isl.evs.ssh.core.messaging;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.io.Serializable;
@@ -37,19 +38,21 @@ public class Message implements Serializable {
     @Deprecated
     public static final Key<String> HEADER_REPLY_TO_KEY = new Key<>(String.class, "replyToKey");
 
+    @NonNull
     private final TypedMap<Object> headers;
+    @Nullable
     private MessagePayload payload;
 
     public Message() {
         this(null);
     }
 
-    public Message(MessagePayload payload) {
+    public Message(@Nullable MessagePayload payload) {
         this(new TypedMap<>(), payload);
     }
 
     @SuppressWarnings("unchecked")
-    private Message(TypedMap headers, MessagePayload payload) {
+    private Message(@NonNull TypedMap headers, @Nullable MessagePayload payload) {
         this.headers = headers;
         this.payload = payload;
     }
@@ -58,11 +61,13 @@ public class Message implements Serializable {
      * @deprecated use {@link RoutingKey#getPayload(Message)} for type-checked access that also checks the RoutingKey,
      * or at least {@link #getPayloadChecked(Class)} for type-save access when the same Payload class is used for multiple RoutingKeys.
      */
+    @Nullable
     @Deprecated
     public MessagePayload getPayload() {
         return getPayloadUnchecked();
     }
 
+    @Nullable
     MessagePayload getPayloadUnchecked() {
         return payload;
     }
@@ -73,11 +78,12 @@ public class Message implements Serializable {
      *
      * @throws ClassCastException
      */
+    @Nullable
     public <T> T getPayloadChecked(Class<T> payloadClass) {
         return payloadClass.cast(getPayloadUnchecked());
     }
 
-    public void setPayload(MessagePayload payload) {
+    public void setPayload(@Nullable MessagePayload payload) {
         this.payload = payload;
     }
 
@@ -109,6 +115,7 @@ public class Message implements Serializable {
         return headers.remove(key);
     }
 
+    @NonNull
     public TypedMap<Object> getHeaders() {
         return headers;
     }
@@ -139,6 +146,7 @@ public class Message implements Serializable {
     }
 
     private void payloadToString(StringBuilder bob) {
+        assert payload != null;
         bob.append(payload.getClass().getName()).append("{\n");
         for (Field field : getFields(payload.getClass())) {
             Object value;
@@ -243,7 +251,7 @@ public class Message implements Serializable {
             this(new TypedMap<>(from.headers), from.payload, fromID, toID, routingKey);
         }
 
-        private AddressedMessage(TypedMap headers, MessagePayload payload, DeviceID fromID, DeviceID toID, String routingKey) {
+        private AddressedMessage(TypedMap headers, @Nullable MessagePayload payload, DeviceID fromID, DeviceID toID, String routingKey) {
             super(headers.unmodifiableView(), payload);
             if (fromID == null) {
                 throw new NullPointerException("fromID");

@@ -42,8 +42,10 @@ public class HolidayModeTest extends InstrumentationTestCase {
         if (lightModule == null) {
             Assert.fail("No light module!");
         }
-        holidayController.addHolidayLogEntry(CoreConstants.LogActions.LIGHT_ON_ACTION, lightModule.getName(), System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1));
-        holidayController.addHolidayLogEntry(CoreConstants.LogActions.LIGHT_OFF_ACTION, lightModule.getName(), System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1) + TimeUnit.SECONDS.toMillis(5));
-        holidayController.addHolidayLogEntry(CoreConstants.LogActions.LIGHT_ON_ACTION, lightModule.getName(), System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1) + TimeUnit.SECONDS.toMillis(10));
+        final long sevenDaysAgo = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
+        holidayController.addHolidayLogEntry(CoreConstants.LogActions.LIGHT_ON_ACTION, lightModule.getName(), sevenDaysAgo + TimeUnit.SECONDS.toMillis(20));
+        holidayController.addHolidayLogEntry(CoreConstants.LogActions.LIGHT_OFF_ACTION, lightModule.getName(), sevenDaysAgo + TimeUnit.SECONDS.toMillis(25));
+        holidayController.addHolidayLogEntry(CoreConstants.LogActions.LIGHT_ON_ACTION, lightModule.getName(), sevenDaysAgo + TimeUnit.SECONDS.toMillis(30));
+        holidayController.addHolidayLogEntry(CoreConstants.LogActions.LIGHT_OFF_ACTION, lightModule.getName(), sevenDaysAgo + TimeUnit.SECONDS.toMillis(35));
     }
 }

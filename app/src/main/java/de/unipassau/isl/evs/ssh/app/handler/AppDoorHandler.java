@@ -179,7 +179,7 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
     }
 
     private void blockDoor(boolean isBlocked) {
-        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorSensors();
+        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorBuzzers();
         if (doors.size() < 1) {
             Log.e(TAG, "Could not (un)block the door. No door sensor installed");
             fireBlockActionFinished(false);
@@ -190,13 +190,13 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
         future.addListener(new FutureListener<DoorStatusPayload>() {
             @Override
             public void operationComplete(Future<DoorStatusPayload> future) throws Exception {
-                boolean wasSuccessfull = future.isSuccess();
-                if (wasSuccessfull) {
+                boolean wasSuccessful = future.isSuccess();
+                if (wasSuccessful) {
                     final DoorStatusPayload payload = future.get();
                     isDoorBlocked = payload.isBlocked();
                     isDoorOpen = payload.isOpen();
                 }
-                fireBlockActionFinished(wasSuccessfull);
+                fireBlockActionFinished(wasSuccessful);
             }
         });
     }

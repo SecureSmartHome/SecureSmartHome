@@ -2,8 +2,9 @@ package de.unipassau.isl.evs.ssh.master.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,25 +16,30 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.common.collect.Lists;
-
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.database.dto.NamedDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.Slave;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
-import de.unipassau.isl.evs.ssh.master.MasterContainer;
+import de.unipassau.isl.evs.ssh.core.sec.DeviceConnectInformation;
 import de.unipassau.isl.evs.ssh.master.R;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.group.ChannelGroup;
+
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_LOCAL_PORT;
+import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT_PUBLIC_PORT;
 
 /**
  * MainActivity for the Master App.
@@ -46,8 +52,8 @@ public class MainActivity extends MasterStartUpActivity {
 
     private ListView slaveList;
     private ListView userDeviceList;
-    private UserDeviceAdapter userDeviceAdapter;
     private SlaveAdapter slaveAdapter;
+    private UserDeviceAdapter userDeviceAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,10 +66,9 @@ public class MainActivity extends MasterStartUpActivity {
     @Override
     public void onContainerConnected(Container container) {
         super.onContainerConnected(container);
-        if (isSwitching()) {
-            return;
+        if (!isSwitching()) {
+            buildView();
         }
-        buildView();
     }
 
     @Override
@@ -82,9 +87,7 @@ public class MainActivity extends MasterStartUpActivity {
             startActivity(intent);
             return true;
         } else if (id == R.id.action_restart) {
-            doUnbind();
-            stopService(new Intent(this, MasterContainer.class));
-            doBind();
+            forceRestartService();
             return true;
         } else if (id == R.id.action_refresh) {
             userDeviceAdapter.notifyDataSetChanged();
@@ -106,7 +109,7 @@ public class MainActivity extends MasterStartUpActivity {
         DeviceID id = getMasterID();
         if (id != null) {
             masterID.setText(id.toShortString());
-            address.setText(getMasterAddress(id));
+            address.setText(getMasterAddress());
         }
 
         TextView connected = (TextView) findViewById(R.id.mainactivity_master_connected);
@@ -121,9 +124,7 @@ public class MainActivity extends MasterStartUpActivity {
                 if (server != null) {
                     final Channel channel = server.findChannel(item.getSlaveID());
                     if (channel != null) {
-                        channel.close();
-                        String text = String.format(getResources().getString(R.string.closed_connection_with), item.getName());
-                        Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+                        channel.close().addListener(newConnectionClosedListener(item.getName()));
                     }
                 }
                 return true;
@@ -139,7 +140,7 @@ public class MainActivity extends MasterStartUpActivity {
                 if (server != null) {
                     final Channel channel = server.findChannel(item.getUserDeviceID());
                     if (channel != null) {
-                        channel.close();
+                        channel.close().addListener(newConnectionClosedListener(item.getName()));
                     }
                 }
                 return true;
@@ -152,6 +153,23 @@ public class MainActivity extends MasterStartUpActivity {
         userDeviceList.setAdapter(userDeviceAdapter);
     }
 
+    @NonNull
+    private ChannelFutureListener newConnectionClosedListener(final String name) {
+        return new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String text = String.format(getResources().getString(R.string.closed_connection_with), name);
+                        Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        };
+    }
+
+    @Nullable
     private DeviceID getMasterID() {
         final NamingManager component = getComponent(NamingManager.KEY);
         if (component == null) {
@@ -161,32 +179,41 @@ public class MainActivity extends MasterStartUpActivity {
         return component.getMasterID();
     }
 
-    private String getMasterAddress(DeviceID id) {
-        String address = "Currently not connected";
-        Server server = getComponent(Server.KEY);
+    private String getMasterAddress() {
+        final InetAddress ipAddress = DeviceConnectInformation.findIPAddress(this);
+        StringBuilder bob = new StringBuilder();
+        final Server server = getComponent(Server.KEY);
         if (server == null) {
             Log.i(TAG, "Container not yet connected.");
+            bob.append(ipAddress.getHostAddress());
+            bob.append(":" + DEFAULT_LOCAL_PORT);
+            //noinspection ConstantConditions
+            if (DEFAULT_PUBLIC_PORT != DEFAULT_LOCAL_PORT) {
+                bob.append("/" + DEFAULT_PUBLIC_PORT);
+            }
         } else {
-            Channel ch = server.findChannel(id);
-            if (ch != null) {
-                address = ch.remoteAddress().toString();
+            final InetSocketAddress localAddress = server.getAddress();
+            final InetSocketAddress publicAddress = server.getPublicAddress();
+            if (localAddress.getAddress().isAnyLocalAddress()) {
+                bob.append(ipAddress.getHostAddress());
+            } else {
+                bob.append(localAddress.getAddress().getHostAddress());
+            }
+            bob.append(":").append(localAddress.getPort());
+            if (publicAddress != null && publicAddress.getPort() != localAddress.getPort()) {
+                bob.append("/").append(publicAddress.getPort());
             }
         }
-        return address;
+        return bob.toString();
     }
 
-    /**
-     * @param id The device the address is returned for.
-     * @return The devices network address.
-     */
     private String getAddress(DeviceID id) {
-        // TODO Phil only returns master address (Phil, 2016-01-10)
         String address = "Currently not connected";
         Server server = getComponent(Server.KEY);
         if (server == null) {
             Log.i(TAG, "Container not yet connected.");
         } else {
-            Channel ch = server.findChannel(id);
+            final Channel ch = server.findChannel(id);
             if (ch != null) {
                 address = ch.remoteAddress().toString();
             }
@@ -208,68 +235,32 @@ public class MainActivity extends MasterStartUpActivity {
      * Adapter used for {@link #slaveList}.
      */
     private class SlaveAdapter extends BaseAdapter {
-        List<Slave> slaves = new LinkedList<>();
-
-        public SlaveAdapter() {
-        }
-
-        private void updateSlaveList() {
-            SlaveController handler = getComponent(SlaveController.KEY);
-
-            if (handler == null) {
-                Log.i(TAG, "Container not yet connected!");
-                return;
-            }
-
-            List<Slave> allSlaves = handler.getSlaves();
-
-            slaves = Lists.newArrayList(allSlaves);
-            Collections.sort(slaves, new Comparator<Slave>() {
-                @Override
-                public int compare(Slave lhs, Slave rhs) {
-                    if (lhs.getName() == null) {
-                        return rhs.getName() == null ? 0 : 1;
-                    }
-                    if (rhs.getName() == null) {
-                        return -1;
-                    }
-                    return lhs.getName().compareTo(rhs.getName());
-                }
-            });
-        }
+        private final List<Slave> slaves = new ArrayList<>();
 
         @Override
         public void notifyDataSetChanged() {
-            updateSlaveList();
+            SlaveController handler = getComponent(SlaveController.KEY);
+            if (handler != null) {
+                slaves.clear();
+                slaves.addAll(handler.getSlaves());
+                Collections.sort(slaves, NamedDTO.COMPARATOR);
+            }
             super.notifyDataSetChanged();
         }
 
         @Override
         public int getCount() {
-            if (slaves != null) {
-                return slaves.size();
-            } else {
-                return 0;
-            }
+            return slaves.size();
         }
 
         @Override
         public Slave getItem(int position) {
-            if (slaves != null) {
-                return slaves.get(position);
-            } else {
-                return null;
-            }
+            return slaves.get(position);
         }
 
         @Override
         public long getItemId(int position) {
-            final Slave item = getItem(position);
-            if (item != null && item.getName() != null) {
-                return item.getName().hashCode();
-            } else {
-                return 0;
-            }
+            return getItem(position).hashCode();
         }
 
         @Override
@@ -277,10 +268,9 @@ public class MainActivity extends MasterStartUpActivity {
             // the slave the view is created for
             final Slave item = getItem(position);
 
-            LinearLayout layout;
-            LayoutInflater inflater = getLayoutInflater();
+            final LinearLayout layout;
             if (convertView == null) {
-                layout = (LinearLayout) inflater.inflate(R.layout.slavelayout, parent, false);
+                layout = (LinearLayout) getLayoutInflater().inflate(R.layout.item_slave, parent, false);
             } else {
                 layout = (LinearLayout) convertView;
             }
@@ -306,79 +296,42 @@ public class MainActivity extends MasterStartUpActivity {
      * Adapter used for {@link #userDeviceList}.
      */
     private class UserDeviceAdapter extends BaseAdapter {
-        List<UserDevice> userDevices = new LinkedList<>();
-
-        public UserDeviceAdapter() {
-        }
-
-        private void updateUserDeviceList() {
-            UserManagementController handler = getComponent(UserManagementController.KEY);
-
-            if (handler == null) {
-                Log.i(TAG, "Container not yet connected!");
-                return;
-            }
-
-            List<UserDevice> allUserDevices = handler.getUserDevices();
-
-            userDevices = Lists.newArrayList(allUserDevices);
-            Collections.sort(userDevices, new Comparator<UserDevice>() {
-                @Override
-                public int compare(UserDevice lhs, UserDevice rhs) {
-                    if (lhs.getName() == null) {
-                        return rhs.getName() == null ? 0 : 1;
-                    }
-                    if (rhs.getName() == null) {
-                        return -1;
-                    }
-                    return lhs.getName().compareTo(rhs.getName());
-                }
-            });
-        }
+        private final List<UserDevice> userDevices = new ArrayList<>();
 
         @Override
         public void notifyDataSetChanged() {
-            updateUserDeviceList();
+            UserManagementController handler = getComponent(UserManagementController.KEY);
+            if (handler != null) {
+                userDevices.clear();
+                userDevices.addAll(handler.getUserDevices());
+                Collections.sort(userDevices, NamedDTO.COMPARATOR);
+            }
             super.notifyDataSetChanged();
         }
 
         @Override
         public int getCount() {
-            if (userDevices != null) {
-                return userDevices.size();
-            } else {
-                return 0;
-            }
+            return userDevices.size();
         }
 
         @Override
         public UserDevice getItem(int position) {
-            if (userDevices != null) {
-                return userDevices.get(position);
-            } else {
-                return null;
-            }
+            return userDevices.get(position);
         }
 
         @Override
         public long getItemId(int position) {
-            final UserDevice item = getItem(position);
-            if (item != null && item.getName() != null) {
-                return item.getName().hashCode();
-            } else {
-                return 0;
-            }
+            return getItem(position).hashCode();
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             // the user device the view is created for
-            UserDevice item = getItem(position);
+            final UserDevice item = getItem(position);
 
-            LinearLayout layout;
-            LayoutInflater inflater = getLayoutInflater();
+            final LinearLayout layout;
             if (convertView == null) {
-                layout = (LinearLayout) inflater.inflate(R.layout.userdevicelayout, parent, false);
+                layout = (LinearLayout) getLayoutInflater().inflate(R.layout.item_userdevice, parent, false);
             } else {
                 layout = (LinearLayout) convertView;
             }

@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -57,6 +58,7 @@ public class BoundActivity extends AppCompatActivity {
         }
     };
     private final boolean bindOnStart;
+    private Intent intent;
 
     /**
      * Constructor for the BoundActivity
@@ -79,12 +81,17 @@ public class BoundActivity extends AppCompatActivity {
         this.bindOnStart = bindOnStart;
     }
 
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        this.intent = new Intent(this, this.serviceClass);
+        super.onCreate(savedInstanceState);
+    }
+
     /**
      * Calls {@link #startService(Intent)} and {@link #bindService(Intent, ServiceConnection, int)} in order
      * to connect to the {@link ContainerService}.
      */
     protected void doBind() {
-        Intent intent = new Intent(this, serviceClass);
         startService(intent);
         if (!serviceBound) {
             Log.v(TAG, "doBind not bound, binding");
@@ -158,12 +165,6 @@ public class BoundActivity extends AppCompatActivity {
     public void onContainerDisconnected() {
     }
 
-    protected void shutdownService() {
-        doUnbind();
-        final Intent intent = new Intent(this, serviceClass);
-        stopService(intent);
-    }
-
     /**
      * @return the Container of the ContainerService this Activity is bound to, or {@code null} if this Activity
      * isn't currently bound
@@ -204,5 +205,21 @@ public class BoundActivity extends AppCompatActivity {
         } else {
             throw new IllegalStateException("Activity not bound to ContainerService");
         }
+    }
+
+    /**
+     * Disconnects from the bound Service and forces it to stop.
+     */
+    protected void forceStopService() {
+        doUnbind();
+        stopService(intent);
+    }
+
+    /**
+     * Forces the bound service to restart and rebinds.
+     */
+    protected void forceRestartService() {
+        forceStopService();
+        doBind();
     }
 }
