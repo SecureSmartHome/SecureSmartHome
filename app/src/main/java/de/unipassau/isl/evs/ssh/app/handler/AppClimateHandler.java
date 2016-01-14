@@ -228,14 +228,16 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
     }
 
     /**
-     * TODO Andi: javadoc (Phil, 2016-01-14)
+     * Checks if there are weatherBoards registered in the system and puts all of them in the
+     * climate mapping.
+     * They all get their default values.
      */
     public void maybeUpdateModules() {
         List<Module> weatherBoards = requireComponent(AppModuleHandler.KEY).getWeather();
         if (weatherBoards.size() > climateStatusMapping.keySet().size()) {
             for (Module weatherBoard : weatherBoards) {
                 if (!climateStatusMapping.containsKey(weatherBoard)) {
-                    climateStatusMapping.put(weatherBoard, new ClimateStatus(0,0,0,0,0,0,0,0));
+                    climateStatusMapping.put(weatherBoard, new ClimateStatus(0, 0, 0, 0, 0, 0, 0, 0));
                 }
             }
         }
@@ -246,7 +248,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
     }
 
     /**
-     * TODO Andi: javadoc (Phil, 2016-01-14)
+     * ClimateStatus saves the current climateData for a module.
      */
     public class ClimateStatus {
         private double temp1;
