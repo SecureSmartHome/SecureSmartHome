@@ -13,7 +13,6 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.GenerateNewRegisterTokenP
 import de.unipassau.isl.evs.ssh.core.messaging.payload.GroupPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.HolidaySimulationPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
-import de.unipassau.isl.evs.ssh.core.messaging.payload.MessagePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModifyModulePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ModulesPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;

@@ -190,13 +190,13 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
         future.addListener(new FutureListener<DoorStatusPayload>() {
             @Override
             public void operationComplete(Future<DoorStatusPayload> future) throws Exception {
-                boolean wasSuccessfull = future.isSuccess();
-                if (wasSuccessfull) {
+                boolean wasSuccessful = future.isSuccess();
+                if (wasSuccessful) {
                     final DoorStatusPayload payload = future.get();
                     isDoorBlocked = payload.isBlocked();
                     isDoorOpen = payload.isOpen();
                 }
-                fireBlockActionFinished(wasSuccessfull);
+                fireBlockActionFinished(wasSuccessful);
             }
         });
     }

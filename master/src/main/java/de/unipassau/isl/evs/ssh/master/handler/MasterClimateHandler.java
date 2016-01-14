@@ -1,7 +1,5 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
-import android.support.annotation.NonNull;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

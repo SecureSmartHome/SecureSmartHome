@@ -42,7 +42,7 @@ public class UserConfigurationEvent {
     /**
      * Checks weather the action corresponding to this event was successful.
      *
-     * @return true if the actino was successful
+     * @return true if the action was successful
      */
     public boolean wasSuccessful() {
         return wasSuccessful;

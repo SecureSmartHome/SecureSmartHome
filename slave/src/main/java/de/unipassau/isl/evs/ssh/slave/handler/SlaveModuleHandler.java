@@ -54,7 +54,7 @@ public class SlaveModuleHandler extends AbstractMessageHandler implements Compon
      *                   the SaveContainer. All modules that are in the container but not in the
      *                   list are unregistered.
      */
-    public void updateModule(List<Module> components) throws WrongAccessPointException, EvsIoException {
+    private void updateModule(List<Module> components) throws WrongAccessPointException, EvsIoException {
         if (this.components.size() < 1) {
             final Set<Module> newComponents = Sets.newHashSet(components);
             registerModules(newComponents);
