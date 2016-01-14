@@ -28,7 +28,6 @@ import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_GROUP_DIALOG;
@@ -112,11 +111,12 @@ public class ListGroupFragment extends BoundFragment {
         groupList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (hasPermission(new Permission(CHANGE_GROUP_NAME)) && hasPermission(new Permission(CHANGE_GROUP_TEMPLATE))) {
+                final MainActivity activity = (MainActivity) getActivity();
+                if (activity != null && activity.hasPermission(CHANGE_GROUP_NAME) && activity.hasPermission(CHANGE_GROUP_TEMPLATE)) {
                     Group item = adapter.getItem(position);
                     Bundle bundle = new Bundle();
                     bundle.putSerializable(EDIT_GROUP_DIALOG, item);
-                    ((MainActivity) getActivity()).showFragmentByClass(EditGroupFragment.class, bundle);
+                    activity.showFragmentByClass(EditGroupFragment.class, bundle);
                     return true;
                 } else {
                     Toast.makeText(getActivity(), R.string.you_can_not_edit_groups, Toast.LENGTH_SHORT).show();
@@ -128,8 +128,9 @@ public class ListGroupFragment extends BoundFragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hasPermission(new Permission(ADD_GROUP))) {
-                    ((MainActivity) getActivity()).showFragmentByClass(AddGroupFragment.class);
+                final MainActivity activity = (MainActivity) getActivity();
+                if (activity != null && activity.hasPermission(ADD_GROUP)) {
+                    activity.showFragmentByClass(AddGroupFragment.class);
                 } else {
                     Toast.makeText(getActivity(), R.string.you_can_not_add_groups, Toast.LENGTH_SHORT).show();
                 }

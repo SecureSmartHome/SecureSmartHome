@@ -13,7 +13,6 @@ import android.widget.Toast;
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppHolidaySimulationHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.HOLIDAY_MODE_SWITCHED_OFF;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.HOLIDAY_MODE_SWITCHED_ON;
@@ -57,7 +56,8 @@ public class HolidayFragment extends BoundFragment {
         switchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hasPermission(new Permission(HOLIDAY_MODE_SWITCHED_ON)) && hasPermission(new Permission(HOLIDAY_MODE_SWITCHED_OFF))) {
+                final MainActivity activity = (MainActivity) getActivity();
+                if (activity != null && activity.hasPermission(HOLIDAY_MODE_SWITCHED_ON) && activity.hasPermission(HOLIDAY_MODE_SWITCHED_OFF)) {
                     switchButtonAction();
                 } else {
                     Toast.makeText(getActivity(), R.string.you_can_not_start_or_stop_the_holiday_simulation, Toast.LENGTH_SHORT).show();

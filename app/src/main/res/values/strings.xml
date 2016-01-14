@@ -275,6 +275,7 @@
     <string name="you_can_not_set_permissions">You can\'t set permissions</string>
     <string name="you_can_not_switch_light">You can\'t switch the light</string>
     <string name="you_can_not_start_or_stop_the_holiday_simulation">You can\'t start or stop the holiday simulation</string>
+    <string name="fragment_access_denied">Access denied. Missing Permission: %s</string>
     <string name="perm_desc_door_locked">Allows you to check  if the door is locked.</string>
     <string name="perm_desc_door_unlatched">Allows you to check  if the door is unlatched.</string>
     <string name="perm_desc_door_unlocked">Allows you to check if the door is unlocked.</string>

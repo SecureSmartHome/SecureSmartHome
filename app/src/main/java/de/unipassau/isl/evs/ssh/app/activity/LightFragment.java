@@ -27,8 +27,8 @@ import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 
+import static de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_MODULE;
 import static de.unipassau.isl.evs.ssh.core.sec.Permission.SWITCH_LIGHT;
 
 /**
@@ -99,8 +99,9 @@ public class LightFragment extends BoundFragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hasPermission(new Permission(de.unipassau.isl.evs.ssh.core.sec.Permission.ADD_MODULE))) {
-                    ((MainActivity) getActivity()).showFragmentByClass(AddModuleFragment.class);
+                final MainActivity activity = (MainActivity) getActivity();
+                if (activity != null && activity.hasPermission(ADD_MODULE)) {
+                    activity.showFragmentByClass(AddModuleFragment.class);
                 } else {
                     Toast.makeText(getActivity(), R.string.you_can_not_add_new_modules, Toast.LENGTH_SHORT).show();
                 }
@@ -199,7 +200,8 @@ public class LightFragment extends BoundFragment {
                 public void onClick(View v) {
                     final AppLightHandler appLightHandler = getComponent(AppLightHandler.KEY);
                     if (appLightHandler != null) {
-                        if (hasPermission(new Permission(SWITCH_LIGHT))) {
+                        final MainActivity activity = (MainActivity) getActivity();
+                        if (activity != null && activity.hasPermission(SWITCH_LIGHT)) {
                             appLightHandler.toggleLight(module);
                         } else {
                             Toast.makeText(getActivity(), R.string.you_can_not_switch_light, Toast.LENGTH_SHORT).show();

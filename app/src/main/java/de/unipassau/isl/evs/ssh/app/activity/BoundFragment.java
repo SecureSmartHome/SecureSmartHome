@@ -150,22 +150,4 @@ public class BoundFragment extends Fragment {
         }
         return false;
     }
-
-    /**
-     * Checks if the current user is granted a given permission.
-     *
-     * @param permission The permission that will be checked.
-     * @return {@code true} if the current user has the given permission.
-     * @author Phil Werli
-     */
-    protected boolean hasPermission(Permission permission) {
-        final NamingManager namingManager = getComponent(NamingManager.KEY);
-        if (namingManager == null) {
-            return false;
-        }
-        final DeviceID ownID = namingManager.getOwnID();
-        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
-
-        return handler != null && handler.hasPermission(ownID, permission.getPermission());
-    }
 }

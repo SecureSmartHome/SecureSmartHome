@@ -21,16 +21,22 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import de.unipassau.isl.evs.ssh.app.AppContainer;
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
 import de.unipassau.isl.evs.ssh.core.container.Container;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.network.Client;
 import de.unipassau.isl.evs.ssh.core.network.ClientConnectionListener;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 /**
  * As this Activity also displays information like whether the light is on or not, this Activity also
@@ -43,8 +49,22 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     public static final String KEY_NOTIFICATION_FRAGMENT = "NOTIFICATION_FRAGMENT";
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String KEY_LAST_FRAGMENT = "LAST_FRAGMENT";
-    private LinearLayout overlayDisconnected;
 
+    // This defines which permission is needed to show a fragment
+    private static final Map<Class<? extends BoundFragment>, Permission> permissionForFragment = new HashMap<>();
+
+    static {
+        permissionForFragment.put(AddModuleFragment.class, Permission.ADD_MODULE);
+        permissionForFragment.put(AddNewSlaveFragment.class, Permission.ADD_ODROID);
+        permissionForFragment.put(AddNewUserDeviceFragment.class, Permission.ADD_USER);
+        permissionForFragment.put(ClimateFragment.class, Permission.REQUEST_WEATHER_STATUS);
+        permissionForFragment.put(DoorFragment.class, Permission.REQUEST_DOOR_STATUS);
+        permissionForFragment.put(HolidayFragment.class, Permission.TOGGLE_HOLIDAY_SIMULATION);
+        permissionForFragment.put(LightFragment.class, Permission.REQUEST_LIGHT_STATUS);
+        permissionForFragment.put(ListUserDeviceFragment.class, Permission.SHOW_GROUP_MEMBER);
+    }
+
+    private LinearLayout overlayDisconnected;
     private boolean wasRejected = false;
     private boolean fragmentInitialized = false;
     private Bundle savedInstanceState;
@@ -247,6 +267,24 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
     }
 
     /**
+     * Checks if the current user is granted a given permission.
+     *
+     * @param permission The permission that will be checked.
+     * @return {@code true} if the current user has the given permission.
+     */
+    public boolean hasPermission(Permission permission) {
+        // @author Phil Werli
+        final NamingManager namingManager = getComponent(NamingManager.KEY);
+        if (namingManager == null) {
+            return false;
+        }
+        final DeviceID ownID = namingManager.getOwnID();
+        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+
+        return handler != null && handler.hasPermission(ownID, permission);
+    }
+
+    /**
      * Displays a fragment and takes care of lifecycle actions like saving state when rotating the
      * screen or managing the back button behavior.
      *
@@ -254,6 +292,13 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
      * @param bundle the bundle that is given with the new fragment
      */
     public void showFragmentByClass(Class clazz, Bundle bundle) {
+
+        final Permission permission = permissionForFragment.get(clazz);
+        if (permission != null && !hasPermission(permission)) {
+            Toast.makeText(this, String.format(getString(R.string.fragment_access_denied), permission.toLocalizedString(this)), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         final Fragment currentFragment = getCurrentFragment();
         if (currentFragment != null && Objects.equals(clazz, currentFragment.getClass())) {
             return;

@@ -30,7 +30,6 @@ import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
 import de.unipassau.isl.evs.ssh.app.handler.UserConfigurationEvent;
 import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
-import de.unipassau.isl.evs.ssh.core.database.dto.Permission;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.DELETE_USERDEVICE_DIALOG;
@@ -100,28 +99,29 @@ public class ListUserDeviceFragment extends BoundFragment {
 
         userDeviceList = (ListView) getActivity().findViewById(R.id.listuserDeviceContainer);
         userDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                                  // when a user clicks short on an item, he opens the ListUserDeviceFragment
-                                                  @Override
-                                                  public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                                      if (hasPermission(new Permission(CHANGE_USER_NAME)) &&
-                                                              hasPermission(new Permission(CHANGE_USER_GROUP))) {
-                                                          UserDevice item = adapter.getItem(position);
-                                                          Bundle bundle = new Bundle();
-                                                          bundle.putSerializable(USER_DEVICE_ARGUMENT_FRAGMENT, item);
-                                                          ((MainActivity) getActivity()).showFragmentByClass(EditUserDeviceFragment.class, bundle);
-                                                      } else {
-                                                          Toast.makeText(getActivity(), R.string.you_can_not_edit_user_devices, Toast.LENGTH_SHORT).show();
-                                                      }
-                                                  }
-                                              }
-        );
+            // when a user clicks short on an item, he opens the ListUserDeviceFragment
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final MainActivity activity = (MainActivity) getActivity();
+                if (activity != null && activity.hasPermission(CHANGE_USER_NAME) && activity.hasPermission(CHANGE_USER_GROUP)) {
+                    UserDevice item = adapter.getItem(position);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable(USER_DEVICE_ARGUMENT_FRAGMENT, item);
+                    activity.showFragmentByClass(EditUserDeviceFragment.class, bundle);
+                } else {
+                    Toast.makeText(getActivity(), R.string.you_can_not_edit_user_devices, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         userDeviceList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 UserDevice item = adapter.getItem(position);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(DELETE_USERDEVICE_DIALOG, item);
-                if (hasPermission(new Permission(DELETE_USER))) {
+                final MainActivity activity = (MainActivity) getActivity();
+                if (activity != null && activity.hasPermission(DELETE_USER)) {
                     showRemoveUserDeviceDialog(bundle);
                     return true;
                 } else {
@@ -136,7 +136,8 @@ public class ListUserDeviceFragment extends BoundFragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hasPermission(new Permission(ADD_USER))) {
+                final MainActivity activity = (MainActivity) getActivity();
+                if (activity.hasPermission(ADD_USER)) {
                     ((MainActivity) getActivity()).showFragmentByClass(AddNewUserDeviceFragment.class);
                 } else {
                     Toast.makeText(getActivity(), R.string.you_can_not_add_new_users, Toast.LENGTH_SHORT).show();
