@@ -105,26 +105,31 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
     }
 
     private void updateDisplayedData() {
-        final DeviceID slaveID = getSlaveID();
-        if (slaveID != null) {
-            ((TextView) findViewById(R.id.mainactivity_slave_slaveid)).setText(slaveID.toShortString());
-        }
-        ((TextView) findViewById(R.id.mainactivity_slave_slaveaddress)).setText(getMyAddress());
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final DeviceID slaveID = getSlaveID();
+                if (slaveID != null) {
+                    ((TextView) findViewById(R.id.mainactivity_slave_slaveid)).setText(slaveID.toShortString());
+                }
+                ((TextView) findViewById(R.id.mainactivity_slave_slaveaddress)).setText(getMyAddress());
 
-        final DeviceID masterID = getMasterID();
-        if (masterID != null) {
-            ((TextView) findViewById(R.id.mainactivity_slave_masterid)).setText(masterID.toShortString());
-        }
-        ((TextView) findViewById(R.id.mainactivity_slave_masteraddress)).setText(getMasterAddress());
+                final DeviceID masterID = getMasterID();
+                if (masterID != null) {
+                    ((TextView) findViewById(R.id.mainactivity_slave_masterid)).setText(masterID.toShortString());
+                }
+                ((TextView) findViewById(R.id.mainactivity_slave_masteraddress)).setText(getMasterAddress());
 
-        final Client client = getComponent(Client.KEY);
-        int text = R.string.slave_not_connected;
-        if (client != null && client.isConnectionEstablished()) {
-            text = R.string.slave_connected;
-        }
-        ((TextView) findViewById(R.id.mainactivity_slave_connection)).setText(text);
+                final Client client = getComponent(Client.KEY);
+                int text = R.string.slave_not_connected;
+                if (client != null && client.isConnectionEstablished()) {
+                    text = R.string.slave_connected;
+                }
+                ((TextView) findViewById(R.id.mainactivity_slave_connection)).setText(text);
 
-        moduleListAdapter.notifyDataSetChanged();
+                moduleListAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     /**
@@ -161,7 +166,7 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
             bob.append(address.getAddress().getHostAddress());
             bob.append(":").append(address.getPort());
         }
-        return bob.toString();
+        return DeviceConnectInformation.trimAddress(bob.toString());
     }
 
     private String getMasterAddress() {
@@ -169,11 +174,11 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
         if (client != null) {
             final InetSocketAddress connectedAddress = client.getAddress();
             if (connectedAddress != null) {
-                return connectedAddress.toString();
+                return DeviceConnectInformation.trimAddress(connectedAddress.toString());
             }
             final InetSocketAddress connectAddress = client.getConnectAddress();
             if (connectAddress != null) {
-                return connectAddress.toString();
+                return DeviceConnectInformation.trimAddress(connectAddress.toString());
             }
         }
         return getString(R.string.no_master_address_known);
@@ -186,8 +191,13 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
 
     @Override
     public void onClientConnecting(String host, int port) {
-        updateDisplayedData();
-        ((TextView) findViewById(R.id.mainactivity_slave_connection)).setText(R.string.slave_connecting);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateDisplayedData();
+                ((TextView) findViewById(R.id.mainactivity_slave_connection)).setText(R.string.slave_connecting);
+            }
+        });
     }
 
     @Override
@@ -202,13 +212,18 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
 
     @Override
     public void onClientRejected(String message) {
-        forceStopService();
-        finish();
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.slave_rejected)
-                .setMessage(R.string.warn_slave_rejected)
-                .setNeutralButton(R.string.dismiss, null)
-                .create().show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                forceStopService();
+                finish();
+                new AlertDialog.Builder(SlaveMainActivity.this)
+                        .setTitle(R.string.slave_rejected)
+                        .setMessage(R.string.warn_slave_rejected)
+                        .setNeutralButton(R.string.dismiss, null)
+                        .create().show();
+            }
+        });
     }
 
     /**

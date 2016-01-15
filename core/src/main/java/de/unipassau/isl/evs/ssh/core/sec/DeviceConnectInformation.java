@@ -143,9 +143,12 @@ public class DeviceConnectInformation implements Serializable {
         final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
         if (connectionInfo != null) {
             try {
-                return InetAddress.getByName(
+                final InetAddress address = InetAddress.getByName(
                         Formatter.formatIpAddress(connectionInfo.getIpAddress())
                 );
+                if (!address.isAnyLocalAddress()) {
+                    return address;
+                }
             } catch (UnknownHostException e) {
                 Log.wtf(TAG, "Android API couldn't resolve the IP Address of the local device", e);
             }
@@ -155,7 +158,7 @@ public class DeviceConnectInformation implements Serializable {
             for (NetworkInterface intf : interfaces) {
                 List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
                 for (InetAddress addr : addrs) {
-                    if (!addr.isLoopbackAddress() && addr.getAddress().length == ADDRESS_LENGTH) {
+                    if (!addr.isLoopbackAddress() && !addr.isAnyLocalAddress() && addr.getAddress().length == ADDRESS_LENGTH) {
                         return addr;
                     }
                 }
@@ -168,6 +171,14 @@ public class DeviceConnectInformation implements Serializable {
         } catch (UnknownHostException e) {
             throw new AssertionError("Could not resolve IP 0.0.0.0", e);
         }
+    }
+
+    public static String trimAddress(Object obj) {
+        String address = String.valueOf(obj).trim();
+        if (address.startsWith("/")) {
+            address = address.substring(1);
+        }
+        return address;
     }
 
     public InetAddress getAddress() {
