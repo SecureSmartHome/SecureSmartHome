@@ -36,7 +36,7 @@ public class SlaveDoorHandler extends AbstractMessageHandler {
 
     private void handleUnlatchDoor(final DoorPayload payload, final Message.AddressedMessage message) {
         Key<DoorBuzzer> key = new Key<>(DoorBuzzer.class, payload.getModuleName());
-        requireComponent(key).unlock(8000).addListener(new FutureListener<Void>() {
+        requireComponent(key).unlock(7000).addListener(new FutureListener<Void>() {
             @Override
             public void operationComplete(Future<Void> future) throws Exception {
                 if (future.isSuccess()) {
