@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,7 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR_ON_HOLID
  * @author Wolfgang Popp
  */
 public class MasterDoorHandler extends AbstractMasterHandler {
+    private static final String TAG = MasterDoorHandler.class.getSimpleName();
     private final Map<Integer, Boolean> blockedFor = new HashMap<>();
     private final Map<Integer, Boolean> openFor = new HashMap<>();
 
@@ -60,7 +63,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         if (MASTER_DOOR_GET.matches(message)) {
             handleDoorGetRequest(MASTER_DOOR_GET.getPayload(message), message);
         } else if (MASTER_DOOR_STATUS_UPDATE.matches(message)) {
-            handleDoorStatusUpdate(MASTER_DOOR_STATUS_UPDATE.getPayload(message));
+            handleDoorStatusUpdate(message, MASTER_DOOR_STATUS_UPDATE.getPayload(message));
         } else if (MASTER_DOOR_UNLATCH.matches(message)) {
             handleDoorUnlatchRequest(message, MASTER_DOOR_UNLATCH.getPayload(message));
         } else if (SLAVE_DOOR_UNLATCH_REPLY.matches(message)) {
@@ -93,9 +96,13 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         sendReply(original, messageToSend);
     }
 
-    private void handleDoorStatusUpdate(DoorStatusPayload payload) {
-        setOpen(payload.getModuleName(), payload.isOpen());
-        broadcastDoorStatus(payload.getModuleName());
+    private void handleDoorStatusUpdate(Message.AddressedMessage message, DoorStatusPayload payload) {
+        if (isSlave(message.getFromID())){
+            setOpen(payload.getModuleName(), payload.isOpen());
+            broadcastDoorStatus(payload.getModuleName());
+        } else {
+            Log.w(TAG, "Received door status from a client that is no slave");
+        }
     }
 
     private void handleDoorUnlatchRequest(Message.AddressedMessage message, DoorPayload payload) {
