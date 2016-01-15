@@ -183,9 +183,9 @@
     <string name="perm_delete_sensor">Entfernen von Sensoren</string>
     <string name="perm_delete_template">Entfernen von Berechtigungsvorlagen</string>
     <string name="perm_delete_user">Entfernen von Benutzern</string>
-    <string name="perm_door_locked">Empfangen ob Tür gesperrt</string>
-    <string name="perm_door_unlocked">Entsperren der Tür</string>
-    <string name="perm_door_unlatched">Entriegeln der Tür</string>
+    <string name="perm_door_locked">Benachrichtigung beim Verriegeln der Tür</string>
+    <string name="perm_door_unlocked">Benachrichtigung beim Entsperren der Tür</string>
+    <string name="perm_door_unlatched">Benachrichtigung beim Entriegeln der Tür</string>
     <string name="perm_edit_template">Berechtigungsvorlagen bearbeiten</string>
     <string name="perm_holiday_mode_switched_off">Urlaubsmodus deaktivieren</string>
     <string name="perm_holiday_mode_switched_on">Urlaubsmodus aktivieren</string>
