@@ -113,7 +113,6 @@ public class ClimateFragment extends BoundFragment {
             header.setText(getResources().getString(R.string.connected_weather_boards));
         }
         adapter.update(modules);
-
     }
 
     /**
@@ -164,7 +163,6 @@ public class ClimateFragment extends BoundFragment {
         @Override
         public long getItemId(int position) {
             return getItem(position).getName().hashCode();
-
         }
 
         /**
@@ -184,7 +182,6 @@ public class ClimateFragment extends BoundFragment {
             } else {
                 climateSensorLayout = (LinearLayout) convertView;
             }
-
             final Module m = getItem(position);
 
             /*
