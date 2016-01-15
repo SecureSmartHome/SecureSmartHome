@@ -68,12 +68,6 @@ public enum Permission {
     SHOW_GROUP_MEMBER,
     CHANGE_GROUP_TEMPLATE,
 
-    //Templates
-    CREATE_TEMPLATE,
-    DELETE_TEMPLATE,
-    EDIT_TEMPLATE,
-    SHOW_TEMPLATE_PERMISSION,
-
     //Notification Types
     HUMIDITY_WARNING,
     BRIGHTNESS_WARNING,

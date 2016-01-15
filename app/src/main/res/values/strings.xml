@@ -123,6 +123,8 @@
 
     <!-- Permission names -->
     <string name="perm_add_odroid">Adding Odroids</string>
+    <string name="perm_add_module">Adding Modules</string>
+    <string name="perm_delete_module">Delete Modules</string>
     <string name="perm_rename_odroid">Edit Odroid names</string>
     <string name="perm_delete_odroid">Delete Odroids</string>
     <string name="perm_add_sensor">Adding modules</string>
@@ -147,11 +149,6 @@
     <string name="perm_delete_group">Delete groups</string>
     <string name="perm_change_group_name">Edit group names</string>
     <string name="perm_show_group_member">Display group members</string>
-    <string name="perm_change_group_template">Edit group permission templates</string>
-    <string name="perm_create_template">Create new templates</string>
-    <string name="perm_delete_template">Delete permission templates</string>
-    <string name="perm_edit_template">Edit permission templates</string>
-    <string name="perm_show_template_permission">Display permission templates</string>
     <string name="perm_humidity_warning">Receive room climate warnings</string>
     <string name="perm_brightness_warning">Receive brightness warnings</string>
     <string name="perm_holiday_mode_switched_on">Enabling the holiday simulation</string>
@@ -191,11 +188,6 @@
     <string name="perm_desc_delete_group">Allows deleting groups.</string>
     <string name="perm_desc_change_group_name">Allows editing group names.</string>
     <string name="perm_desc_show_group_member">Allows requesting a group\'s members.</string>
-    <string name="perm_desc_change_group_template">Allows editing group\'s permission templates.</string>
-    <string name="perm_desc_create_template">Allows creating permission templates.</string>
-    <string name="perm_desc_delete_template">Allows deleting permission templates.</string>
-    <string name="perm_desc_edit_template">Allows editing Permission Templates.</string>
-    <string name="perm_desc_show_template_permission">Allows requesting a permission template.</string>
     <string name="perm_desc_humidity_warning">Allows receiving climate warnings.</string>
     <string name="perm_desc_brightness_warning">Allows receiving brightness warnings.</string>
     <string name="perm_desc_system_health_warning">Allows requesting System Health warnings.</string>

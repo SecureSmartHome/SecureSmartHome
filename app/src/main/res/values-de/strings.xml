@@ -149,10 +149,10 @@
     <string name="device_edited">Modul %s wurde bearbeitet</string>
     <string name="device_removed">Modul %s wurde entfernt</string>
     <string name="module_removed">Modul wurde entfernt</string>
-    <string name="perm_desc_add_group">Ermöglicht das hinzufügen neuer Gruppen</string>
-    <string name="perm_desc_add_odroid">Ermöglicht das hinzufügen neuer Odroids</string>
-    <string name="perm_desc_add_sensor">Ermöglicht das hinzufügen neuer Sensoren</string>
-    <string name="perm_desc_add_user">Ermöglicht das hinzufügen neuer Nutzer</string>
+    <string name="perm_desc_add_group">Ermöglicht das Hinzufügen neuer Gruppen</string>
+    <string name="perm_desc_add_odroid">Ermöglicht das Hinzufügen neuer Odroids</string>
+    <string name="perm_desc_add_sensor">Ermöglicht das Hinzufügen neuer Sensoren</string>
+    <string name="perm_desc_add_user">Ermöglicht das Hinzufügen neuer Nutzer</string>
     <string name="perm_desc_bell_rang">Ermöglicht dem Empfang von Klingelbenachrichtigungen</string>
     <string name="perm_desc_brightness_warning">Ermöglicht dem Empfang von Beleuchtungswarnungen</string>
     <string name="perm_desc_change_group_name">Ermöglicht das Bearbeiten von Gruppennamen</string>
@@ -194,7 +194,7 @@
     <string name="perm_modify_user_permission">Nutzerberechtigungen bearbeiten</string>
     <string name="perm_rename_module">Module umbenennen</string>
     <string name="perm_rename_odroid">Odroids umbenennen</string>
-    <string name="perm_request_camera_status">Kamerastatus abgragen</string>
+    <string name="perm_request_camera_status">Kamerastatus abfragen</string>
     <string name="perm_request_door_status">Türstatus abfragen</string>
     <string name="perm_request_light_status">Lichtstatus abfragen</string>
     <string name="perm_request_weather_status">Klimastatus abfragen</string>
@@ -202,7 +202,7 @@
     <string name="perm_show_group_member">Gruppenmitglieder anzeigen</string>
     <string name="perm_show_template_permission">Berechtigungsvorlagen anzeigen</string>
     <string name="perm_switch_light">Schalten des Lichts</string>
-    <string name="perm_system_health_warning">System health warnungen erhalten</string>
+    <string name="perm_system_health_warning">Systemstatus Warnungen erhalten</string>
     <string name="perm_take_camera_picture">Kamerabild erstellen</string>
     <string name="perm_toggle_holiday_simulation">Urlaubsmodus bedienen</string>
     <string name="perm_unlatch_door">Tür entriegeln</string>
@@ -225,13 +225,14 @@
     <string name="perm_desc_show_group_member">Ermöglicht es Gruppenmitglieder anzufragen</string>
     <string name="perm_desc_show_template_permission">Ermöglicht es Berechtigungsvorlagen abzufragen</string>
     <string name="perm_desc_switch_light">Ermöglicht die Beleuchtung zu bedienen</string>
-    <string name="perm_desc_system_health_warning">Ermöglicht es System Health Warnungen zu erhalten</string>
+    <string name="perm_desc_system_health_warning">Ermöglicht es Systemstatus Warnungen zu erhalten</string>
     <string name="perm_desc_take_camera_picture">Ermöglicht es Kamerabilder anzufragen</string>
     <string name="perm_desc_toggle_holiday_simulation">Ermöglicht es den Urlaubsmodus zu schalten</string>
     <string name="perm_desc_unlatch_door">Ermöglicht es die Tür zu entriegeln</string>
     <string name="perm_desc_unlatch_door_on_holiday">Ermöglicht es die Tür während des Urlaubsmodus zu entriegeln</string>
     <string name="perm_desc_weather_warning">Ermöglicht es Wetterwarnungen zu erhalten</string>
     <string name="slave_registration_success">Slave wurde erfolgreich im System registriert</string>
+
     <string name="slave_removed">Slave wurde entfernt</string>
     <string name="you_can_not_add_groups">Sie können Gruppen nicht hinzufügen</string>
     <string name="you_can_not_add_new_modules">Sie könnem keine neuen Module hinzufügen</string>
@@ -268,6 +269,8 @@
     <string name="perm_desc_switch_light_extern">Erlaubt das Schalten des Lichtes von außerhalb des Heimbereichs</string>
     <string name="user_edited">Benutzer editiert</string>
     <string name="with_id_is_in_group">mit ID %1$s ist in Gruppe %2$s.</string>
+    <string name="perm_add_module">Allows </string>
+    <string name="perm_delete_module">Allows deleteing modules</string>
     <string name="connected_weather_boards">Verbundene Wetterstationen:</string>
     <string name="no_climate_sensor_connected">Keine verbundenen Wetterstationen.</string>
 </resources>
