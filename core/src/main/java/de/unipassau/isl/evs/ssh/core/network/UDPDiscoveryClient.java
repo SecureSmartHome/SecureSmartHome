@@ -78,9 +78,11 @@ public class UDPDiscoveryClient extends AbstractComponent {
      */
     public void startDiscovery(long timeout) {
         if (this.timeout > 0 && timeout > 0) {
-            this.timeout = Math.max(this.timeout, timeout);
+            this.timeout = Math.max(this.timeout, System.currentTimeMillis() + timeout);
+        } else if (timeout > 0) {
+            this.timeout = System.currentTimeMillis() + timeout;
         } else {
-            this.timeout = timeout;
+            this.timeout = 0;
         }
         Log.i(TAG, "startDiscovery, " + (isDiscoveryRunning ? "already" : "currently not") + " running with timeout " + timeout);
         if (!isDiscoveryRunning) {

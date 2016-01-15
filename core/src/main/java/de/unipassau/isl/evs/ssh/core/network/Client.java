@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -67,7 +68,7 @@ public class Client extends AbstractComponent {
      * If there are more disconnects within {@link #CLIENT_MILLIS_BETWEEN_DISCONNECTS} than this number,
      * the client should retry connecting with the explicitly set master or try UDP discovery.
      */
-    private static final int CLIENT_MAX_DISCONNECTS = 3;
+    private static final int CLIENT_MAX_DISCONNECTS = 5;
     /**
      * An Android BroadcastReceiver that is notified once the Phone connects to or is disconnected from a WiFi network.
      */
@@ -127,7 +128,11 @@ public class Client extends AbstractComponent {
         isActive = true;
         initClient();
         // register BroadcastListener
-        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         requireComponent(ContainerService.KEY_CONTEXT).registerReceiver(broadcastReceiver, filter);
     }
 
@@ -331,18 +336,23 @@ public class Client extends AbstractComponent {
             editor.setActiveRegistrationToken(token);
         }
         editor.commit();
-        lastDisconnect = 0;
-        disconnectsInARow = 0;
-        notifyMasterFound();
-        initClient();
+        addressChanged(address);
     }
 
     public void onMasterConfigured(InetSocketAddress address) {
         Log.i(TAG, "master configured as " + address);
         editPrefs().setConfiguredAddress(address).commit();
+        addressChanged(address);
+    }
+
+    private void addressChanged(InetSocketAddress address) {
         lastDisconnect = 0;
         disconnectsInARow = 0;
         notifyMasterFound();
+        if (!address.equals(getAddress()) && channelFuture != null) {
+            Log.i(TAG, "Found new address, closing old connection " + channelFuture.channel());
+            channelFuture.channel().close(); //close the current connection if a new address was found
+        }
         initClient();
     }
 
