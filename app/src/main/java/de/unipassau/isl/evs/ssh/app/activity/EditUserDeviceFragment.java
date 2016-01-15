@@ -453,6 +453,7 @@ public class EditUserDeviceFragment extends BoundFragment {
 
         @NonNull
         private Character getSection(PermissionDTO next) {
+            if (getActivity() == null) return 'A';
             final String name = next.getPermission().toLocalizedString(getActivity());
             return Character.toUpperCase(name.charAt(0));
         }
