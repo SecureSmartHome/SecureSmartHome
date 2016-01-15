@@ -87,6 +87,7 @@ public class NotificationBroadcaster extends AbstractComponent {
                         RoutingKeys.APP_NOTIFICATION_RECEIVE, messageToSend);
             }
         }
+
     }
 
     /**
