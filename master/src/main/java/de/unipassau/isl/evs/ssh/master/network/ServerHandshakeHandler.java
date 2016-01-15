@@ -37,6 +37,7 @@ import de.unipassau.isl.evs.ssh.core.sec.KeyStoreController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.handler.MasterRegisterDeviceHandler;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerAdapter;
@@ -267,6 +268,19 @@ public class ServerHandshakeHandler extends ChannelHandlerAdapter {
 
         Message message = new Message(new DeviceConnectedPayload(deviceID, ctx.channel(), ctx.attr(ATTR_LOCAL_CONNECTION).get()));
         container.require(OutgoingRouter.KEY).sendMessageLocal(RoutingKeys.MASTER_DEVICE_CONNECTED, message);
+
+        ctx.channel().closeFuture().addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                for (Server.ServerConnectionListener listener : server.listeners) {
+                    listener.onClientConnected(future.channel());
+                }
+            }
+        });
+
+        for (Server.ServerConnectionListener listener : server.listeners) {
+            listener.onClientConnected(ctx.channel());
+        }
     }
 
     private void setState(ChannelHandlerContext ctx, @Nullable State expectedState, @Nullable State newState) throws HandshakeException {

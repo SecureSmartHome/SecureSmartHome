@@ -1,5 +1,6 @@
 package de.unipassau.isl.evs.ssh.slave.activity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -79,11 +80,16 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
             return;
         }
         buildView();
+        container.require(Client.KEY).addListener(this);
     }
 
     @Override
     public void onContainerDisconnected() {
         updateDisplayedData();
+        final Client client = getComponent(Client.KEY);
+        if (client != null) {
+            client.removeListener(this);
+        }
     }
 
     /**
@@ -112,9 +118,9 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
         ((TextView) findViewById(R.id.mainactivity_slave_masteraddress)).setText(getMasterAddress());
 
         final Client client = getComponent(Client.KEY);
-        String text = "not connected";
+        int text = R.string.slave_not_connected;
         if (client != null && client.isConnectionEstablished()) {
-            text = "connected";
+            text = R.string.slave_connected;
         }
         ((TextView) findViewById(R.id.mainactivity_slave_connection)).setText(text);
 
@@ -170,7 +176,7 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
                 return connectAddress.toString();
             }
         }
-        return "No address known";
+        return getString(R.string.no_master_address_known);
     }
 
     @Override
@@ -181,7 +187,7 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
     @Override
     public void onClientConnecting(String host, int port) {
         updateDisplayedData();
-        ((TextView) findViewById(R.id.mainactivity_slave_connection)).setText("connecting");
+        ((TextView) findViewById(R.id.mainactivity_slave_connection)).setText(R.string.slave_connecting);
     }
 
     @Override
@@ -197,6 +203,12 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
     @Override
     public void onClientRejected(String message) {
         forceStopService();
+        finish();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.slave_rejected)
+                .setMessage(R.string.warn_slave_rejected)
+                .setNeutralButton(R.string.dismiss, null)
+                .create().show();
     }
 
     /**
@@ -267,6 +279,4 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
                     moduleType, atSlave, moduleAccessPoint);
         }
     }
-
-
 }
