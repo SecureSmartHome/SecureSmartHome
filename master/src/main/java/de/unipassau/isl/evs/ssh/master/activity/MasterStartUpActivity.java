@@ -67,7 +67,7 @@ public class MasterStartUpActivity extends StartUpActivity {
                     }
                 });
             } else {
-                return doSwitch(MainActivity.class, "everything is set up");
+                return doSwitch(MasterMainActivity.class, "everything is set up");
             }
         }
         Log.i(TAG, "Staying in " + getClass().getSimpleName() + " as Preferences are set, but Container is not connected");

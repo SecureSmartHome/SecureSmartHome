@@ -121,7 +121,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                 }
 
                 // check if user has permission to edit a group
-                final MainActivity activity = (MainActivity) getActivity();
+                final AppMainActivity activity = (AppMainActivity) getActivity();
                 if (activity != null && !activity.hasPermission(Permission.CHANGE_USER_NAME)) {
                     Toast.makeText(getActivity(), R.string.you_can_not_edit_user_devices, Toast.LENGTH_SHORT).show();
                 } else if (activity != null && activity.hasPermission(Permission.CHANGE_USER_GROUP)) {
@@ -219,7 +219,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                 .setPositiveButton(R.string.edit, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        final MainActivity activity = (MainActivity) getActivity();
+                        final AppMainActivity activity = (AppMainActivity) getActivity();
                         if (activity.hasPermission(Permission.CHANGE_USER_NAME) && activity.hasPermission(Permission.CHANGE_USER_GROUP)) {
                             String name = userDeviceName.getText().toString();
                             String group = ((String) groupName.getSelectedItem());
@@ -236,7 +236,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                 .setNeutralButton(R.string.remove, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (((MainActivity) getActivity()).hasPermission(Permission.DELETE_USER)) {
+                        if (((AppMainActivity) getActivity()).hasPermission(Permission.DELETE_USER)) {
                             handler.removeUserDevice(userDevice.getUserDeviceID());
                             String toastText = String.format(res.getString(R.string.device_removed), userDevice.getName());
                             Toast.makeText(getActivity(), toastText, Toast.LENGTH_SHORT).show();
@@ -372,7 +372,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                 permissionButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        final MainActivity activity = (MainActivity) getActivity();
+                        final AppMainActivity activity = (AppMainActivity) getActivity();
                         if (activity != null && activity.hasPermission(Permission.MODIFY_USER_PERMISSION)) {
                             if (!deviceHasPermission) {
                                 handler.grantPermission(device.getUserDeviceID(), permission);

@@ -14,11 +14,11 @@ import java.io.Serializable;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.app.R;
+import de.unipassau.isl.evs.ssh.app.activity.AppMainActivity;
 import de.unipassau.isl.evs.ssh.app.activity.ClimateFragment;
 import de.unipassau.isl.evs.ssh.app.activity.DoorFragment;
 import de.unipassau.isl.evs.ssh.app.activity.HolidayFragment;
 import de.unipassau.isl.evs.ssh.app.activity.LightFragment;
-import de.unipassau.isl.evs.ssh.app.activity.MainActivity;
 import de.unipassau.isl.evs.ssh.app.activity.MainFragment;
 import de.unipassau.isl.evs.ssh.app.activity.StatusFragment;
 import de.unipassau.isl.evs.ssh.core.container.Component;
@@ -231,10 +231,10 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         //If Notification is clicked send to this Page
         Context context = requireComponent(ContainerService.KEY_CONTEXT);
 
-        Intent resultIntent = new Intent(context, MainActivity.class);
-        resultIntent.putExtra(MainActivity.KEY_NOTIFICATION_FRAGMENT, openThisFragment);
+        Intent resultIntent = new Intent(context, AppMainActivity.class);
+        resultIntent.putExtra(AppMainActivity.KEY_NOTIFICATION_FRAGMENT, openThisFragment);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addParentStack(AppMainActivity.class);
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 

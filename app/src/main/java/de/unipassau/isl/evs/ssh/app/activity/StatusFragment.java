@@ -126,7 +126,7 @@ public class StatusFragment extends BoundFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         AppModifyModuleHandler handler = getComponent(AppModifyModuleHandler.KEY);
-                        if (handler != null && ((MainActivity) getActivity()).hasPermission(Permission.RENAME_MODULE)) {
+                        if (handler != null && ((AppMainActivity) getActivity()).hasPermission(Permission.RENAME_MODULE)) {
                             handler.removeModule(module);
                         } else {
                             Toast.makeText(getActivity(), R.string.you_can_not_remove_modules, Toast.LENGTH_SHORT).show();
@@ -151,7 +151,7 @@ public class StatusFragment extends BoundFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         AppSlaveManagementHandler handler = getComponent(AppSlaveManagementHandler.KEY);
-                        if (handler != null && ((MainActivity) getActivity()).hasPermission(Permission.DELETE_ODROID)) {
+                        if (handler != null && ((AppMainActivity) getActivity()).hasPermission(Permission.DELETE_ODROID)) {
                             handler.deleteSlave(slave.getSlaveID());
                         } else {
                             Toast.makeText(getActivity(), R.string.you_can_not_remove_odroids, Toast.LENGTH_SHORT).show();

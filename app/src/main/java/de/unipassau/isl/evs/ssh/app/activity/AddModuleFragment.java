@@ -86,7 +86,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         addGPIOButton.setEnabled(true);
 
         Toast.makeText(getActivity(), R.string.added_module_success, Toast.LENGTH_LONG).show();
-        ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+        ((AppMainActivity) getActivity()).showFragmentByClass(MainFragment.class);
     }
 
     @Override
@@ -296,7 +296,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             Log.e(TAG, "Container not connected");
             return;
         }
-        if (((MainActivity) getActivity()).hasPermission(Permission.ADD_MODULE)) {
+        if (((AppMainActivity) getActivity()).hasPermission(Permission.ADD_MODULE)) {
             String name = nameInput.getText().toString();
             DeviceID atSlave = ((Slave) slaveSpinner.getSelectedItem()).getSlaveID();
             int position = sensorTypeSpinner.getSelectedItemPosition();

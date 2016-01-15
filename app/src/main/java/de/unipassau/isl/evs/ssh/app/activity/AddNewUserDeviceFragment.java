@@ -46,7 +46,7 @@ public class AddNewUserDeviceFragment extends BoundFragment {
                 public void run() {
                     Bundle bundle = new Bundle();
                     bundle.putSerializable(CoreConstants.QRCodeInformation.EXTRA_QR_DEVICE_INFORMATION, deviceConnectInformation);
-                    ((MainActivity) getActivity()).showFragmentByClass(QRCodeFragment.class, bundle);
+                    ((AppMainActivity) getActivity()).showFragmentByClass(QRCodeFragment.class, bundle);
                 }
             });
         }

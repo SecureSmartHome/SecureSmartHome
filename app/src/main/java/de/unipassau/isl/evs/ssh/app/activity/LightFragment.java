@@ -96,7 +96,7 @@ public class LightFragment extends BoundFragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final MainActivity activity = (MainActivity) getActivity();
+                final AppMainActivity activity = (AppMainActivity) getActivity();
                 if (activity != null && activity.hasPermission(Permission.ADD_MODULE)) {
                     activity.showFragmentByClass(AddModuleFragment.class);
                 } else {
@@ -186,7 +186,7 @@ public class LightFragment extends BoundFragment {
                 public void onClick(View v) {
                     final AppLightHandler handler = getComponent(AppLightHandler.KEY);
                     if (handler != null) {
-                        if (((MainActivity) getActivity()).hasPermission(Permission.SWITCH_LIGHT, module.getName())) {
+                        if (((AppMainActivity) getActivity()).hasPermission(Permission.SWITCH_LIGHT, module.getName())) {
                             handler.toggleLight(module);
                         } else {
                             Toast.makeText(getActivity(), R.string.you_can_not_switch_light, Toast.LENGTH_SHORT).show();

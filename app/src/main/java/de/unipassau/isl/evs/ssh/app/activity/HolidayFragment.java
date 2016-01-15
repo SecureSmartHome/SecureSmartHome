@@ -54,7 +54,7 @@ public class HolidayFragment extends BoundFragment {
         switchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final MainActivity activity = (MainActivity) getActivity();
+                final AppMainActivity activity = (AppMainActivity) getActivity();
                 if (activity != null && activity.hasPermission(Permission.HOLIDAY_MODE_SWITCHED_ON)
                         && activity.hasPermission(Permission.HOLIDAY_MODE_SWITCHED_OFF)) {
                     switchButtonAction();

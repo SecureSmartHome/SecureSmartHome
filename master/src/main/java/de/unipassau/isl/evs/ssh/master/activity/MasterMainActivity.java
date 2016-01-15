@@ -47,8 +47,8 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT
  *
  * @author Phil Werli
  */
-public class MainActivity extends MasterStartUpActivity {
-    private static final String TAG = MainActivity.class.getSimpleName();
+public class MasterMainActivity extends MasterStartUpActivity {
+    private static final String TAG = MasterMainActivity.class.getSimpleName();
 
     private ListView slaveList;
     private ListView userDeviceList;
@@ -162,7 +162,7 @@ public class MainActivity extends MasterStartUpActivity {
                     @Override
                     public void run() {
                         String text = String.format(getResources().getString(R.string.closed_connection_with), name);
-                        Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MasterMainActivity.this, text, Toast.LENGTH_SHORT).show();
                     }
                 });
             }

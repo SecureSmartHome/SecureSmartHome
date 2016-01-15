@@ -21,7 +21,7 @@ public class MainFragment extends BoundFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout mLinearLayout = (LinearLayout) inflater.inflate(R.layout.fragment_main,
                 container, false);
-        final MainActivity parent = (MainActivity) getActivity();
+        final AppMainActivity parent = (AppMainActivity) getActivity();
 
         ImageButton doorButton = (ImageButton) mLinearLayout.findViewById(R.id.doorButtonOpen);
         doorButton.setOnClickListener(new View.OnClickListener() {

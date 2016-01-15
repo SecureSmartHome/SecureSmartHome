@@ -96,7 +96,7 @@ public class WelcomeScreenFragment extends ScanQRFragment {
             }
             /* TODO Wolfi/Phil: do not immediately switch to MainFragment, but show progress indicator while connecting;
             see SlaveQRCodeActivity for the related ClientConnectionListener (Niko, 2016-01-10) */
-            ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+            ((AppMainActivity) getActivity()).showFragmentByClass(MainFragment.class);
         }
     }
 }

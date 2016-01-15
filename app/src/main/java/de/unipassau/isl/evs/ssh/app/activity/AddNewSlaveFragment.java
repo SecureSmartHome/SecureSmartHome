@@ -31,7 +31,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
                 public void run() {
                     if (wasSuccessful) {
                         Toast.makeText(getActivity(), R.string.slave_registration_success, Toast.LENGTH_SHORT).show();
-                        ((MainActivity) getActivity()).showFragmentByClass(MainFragment.class);
+                        ((AppMainActivity) getActivity()).showFragmentByClass(MainFragment.class);
                     } else {
                         Toast.makeText(getActivity(), R.string.cannot_add_slave, Toast.LENGTH_SHORT).show();
                     }
@@ -92,7 +92,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
     protected void onQRCodeScanned(DeviceConnectInformation info) {
         AppSlaveManagementHandler handler = getComponent(AppSlaveManagementHandler.KEY);
 
-        if (info != null && handler != null && ((MainActivity) getActivity()).hasPermission(Permission.ADD_ODROID)) {
+        if (info != null && handler != null && ((AppMainActivity) getActivity()).hasPermission(Permission.ADD_ODROID)) {
             final DeviceID slaveID = info.getID();
             final String slaveName = slaveNameInput.getText().toString();
             final byte[] passiveRegistrationToken = info.getToken();

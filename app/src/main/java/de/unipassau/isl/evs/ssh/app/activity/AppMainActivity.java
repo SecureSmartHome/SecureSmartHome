@@ -45,9 +45,9 @@ import de.unipassau.isl.evs.ssh.core.sec.Permission;
  * @author Andreas Bucher
  * @author Wolfgang Popp
  */
-public class MainActivity extends BoundActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class AppMainActivity extends BoundActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static final String KEY_NOTIFICATION_FRAGMENT = "NOTIFICATION_FRAGMENT";
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = AppMainActivity.class.getSimpleName();
     private static final String KEY_LAST_FRAGMENT = "LAST_FRAGMENT";
 
     // This defines which permission is needed to show a fragment
@@ -107,7 +107,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
                     forceStopService();
                     finish();
 
-                    Intent intent = new Intent(MainActivity.this, RejectedActivity.class);
+                    Intent intent = new Intent(AppMainActivity.this, RejectedActivity.class);
                     startActivity(intent);
                 }
             });
@@ -118,7 +118,7 @@ public class MainActivity extends BoundActivity implements NavigationView.OnNavi
 
     // Lifecycle ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public MainActivity() {
+    public AppMainActivity() {
         super(AppContainer.class);
     }
 

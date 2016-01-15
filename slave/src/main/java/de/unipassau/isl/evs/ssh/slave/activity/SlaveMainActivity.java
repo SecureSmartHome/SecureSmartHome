@@ -38,7 +38,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT
  *
  * @author Phil Werli
  */
-public class MainActivity extends SlaveStartUpActivity implements ClientConnectionListener {
+public class SlaveMainActivity extends SlaveStartUpActivity implements ClientConnectionListener {
     private ListView moduleList;
     private ModuleAdapter moduleListAdapter;
 
@@ -260,7 +260,7 @@ public class MainActivity extends SlaveStartUpActivity implements ClientConnecti
          * @return A localized String representation of a module.
          */
         private String buildLocalizedModuleInformation(Module module) {
-            String moduleType = module.getModuleType().toLocalizedString(MainActivity.this);
+            String moduleType = module.getModuleType().toLocalizedString(SlaveMainActivity.this);
             String atSlave = module.getAtSlave().toShortString();
             String moduleAccessPoint = module.getModuleAccessPoint().toString();
 

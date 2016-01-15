@@ -161,7 +161,7 @@ public class DoorFragment extends BoundFragment {
             Log.i(TAG, "Container not bound.");
             return;
         }
-        if (((MainActivity) getActivity()).hasPermission(Permission.TAKE_CAMERA_PICTURE)) {
+        if (((AppMainActivity) getActivity()).hasPermission(Permission.TAKE_CAMERA_PICTURE)) {
             handler.refreshImage();
         } else {
             Toast.makeText(getActivity(), R.string.you_can_not_request_picture, Toast.LENGTH_SHORT).show();
@@ -181,7 +181,7 @@ public class DoorFragment extends BoundFragment {
         }
 
         if (!handler.isOpen() && !handler.isBlocked()) {
-            MainActivity activity = (MainActivity) getActivity();
+            AppMainActivity activity = (AppMainActivity) getActivity();
             if (activity.hasPermission(Permission.UNLATCH_DOOR) || activity.hasPermission(Permission.UNLATCH_DOOR_ON_HOLIDAY)) {
                 handler.unlatchDoor();
             } else {
@@ -201,7 +201,7 @@ public class DoorFragment extends BoundFragment {
             return;
         }
 
-        if (((MainActivity) getActivity()).hasPermission(Permission.LOCK_DOOR)) {
+        if (((AppMainActivity) getActivity()).hasPermission(Permission.LOCK_DOOR)) {
             if (handler.isBlocked()) {
                 handler.unblockDoor();
             } else {

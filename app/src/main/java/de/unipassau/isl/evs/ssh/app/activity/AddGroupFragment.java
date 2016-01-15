@@ -80,7 +80,7 @@ public class AddGroupFragment extends BoundFragment {
 
         final Button button = (Button) getActivity().findViewById(R.id.addgroupfragment_button);
         button.setOnClickListener(new View.OnClickListener() {
-                                      final MainActivity activity = (MainActivity) getActivity();
+                                      final AppMainActivity activity = (AppMainActivity) getActivity();
                                       @Override
                                       public void onClick(View v) {
                                           if (checkInputFields() && isContainerConnected()) {

@@ -85,7 +85,7 @@ public class EditGroupFragment extends BoundFragment {
 
 
         final Button editButton = (Button) getActivity().findViewById(R.id.editgroupfragment_button_edit);
-        final MainActivity activity = (MainActivity) getActivity();
+        final AppMainActivity activity = (AppMainActivity) getActivity();
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,7 +110,7 @@ public class EditGroupFragment extends BoundFragment {
                     if (handler.getAllGroupMembers(group).isEmpty()) {
                         handler.removeGroup(group);
                         Log.i(TAG, "Group " + group.getName() + " removed.");
-                        ((MainActivity) getActivity()).showFragmentByClass(ListGroupFragment.class);
+                        ((AppMainActivity) getActivity()).showFragmentByClass(ListGroupFragment.class);
                     } else {
                         Toast.makeText(getActivity(), R.string.you_can_not_remove_not_empty_group, Toast.LENGTH_SHORT).show();
                     }

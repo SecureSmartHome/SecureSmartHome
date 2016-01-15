@@ -49,7 +49,7 @@ public class SlaveStartUpActivity extends StartUpActivity {
                     }
                 });
             } else {
-                return doSwitch(MainActivity.class, "everything is set up");
+                return doSwitch(SlaveMainActivity.class, "everything is set up");
             }
         }
 

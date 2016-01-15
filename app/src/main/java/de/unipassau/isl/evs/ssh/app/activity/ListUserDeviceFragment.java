@@ -118,7 +118,7 @@ public class ListUserDeviceFragment extends BoundFragment {
             // when a user clicks short on an item, he opens the ListUserDeviceFragment
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final MainActivity activity = (MainActivity) getActivity();
+                final AppMainActivity activity = (AppMainActivity) getActivity();
                 if (activity != null && activity.hasPermission(Permission.CHANGE_USER_NAME) && activity.hasPermission(Permission.CHANGE_USER_GROUP)) {
                     UserDevice item = adapter.getItem(position);
                     Bundle bundle = new Bundle();
@@ -136,7 +136,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                 UserDevice item = adapter.getItem(position);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(DELETE_USERDEVICE_DIALOG, item);
-                final MainActivity activity = (MainActivity) getActivity();
+                final AppMainActivity activity = (AppMainActivity) getActivity();
                 if (activity != null && activity.hasPermission(Permission.DELETE_USER)) {
                     showRemoveUserDeviceDialog(bundle);
                     return true;
@@ -152,9 +152,9 @@ public class ListUserDeviceFragment extends BoundFragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final MainActivity activity = (MainActivity) getActivity();
+                final AppMainActivity activity = (AppMainActivity) getActivity();
                 if (activity.hasPermission(Permission.ADD_USER)) {
-                    ((MainActivity) getActivity()).showFragmentByClass(AddNewUserDeviceFragment.class);
+                    ((AppMainActivity) getActivity()).showFragmentByClass(AddNewUserDeviceFragment.class);
                 } else {
                     Toast.makeText(getActivity(), R.string.you_can_not_add_new_users, Toast.LENGTH_SHORT).show();
                 }
@@ -194,7 +194,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                         final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
                         if (handler == null) {
                             Log.i(TAG, "Container not yet connected!");
-                        } else if (((MainActivity) getActivity()).hasPermission(Permission.DELETE_USER)) {
+                        } else if (((AppMainActivity) getActivity()).hasPermission(Permission.DELETE_USER)) {
                             handler.removeUserDevice(userDevice.getUserDeviceID());
                         } else {
                             Toast.makeText(getActivity(), R.string.you_can_not_remove_users, Toast.LENGTH_SHORT).show();

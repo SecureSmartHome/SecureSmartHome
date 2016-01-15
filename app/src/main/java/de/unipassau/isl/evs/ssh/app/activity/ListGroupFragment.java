@@ -120,7 +120,7 @@ public class ListGroupFragment extends BoundFragment {
      * Builds the view components that require the container.
      */
     private void buildView() {
-        final MainActivity activity = (MainActivity) getActivity();
+        final AppMainActivity activity = (AppMainActivity) getActivity();
         groupList = (ListView) activity.findViewById(R.id.listGroupContainer);
         groupList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                              @Override
