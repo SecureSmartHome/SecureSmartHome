@@ -10,6 +10,9 @@
         <item name="android:colorBackground">@color/colorBackground</item>
         <item name="android:colorAccent">@color/colorAccent</item>
         <item name="android:colorControlHighlight">@color/colorControlHighlight</item>
+    </style>
 
+    <style name="floating_action_button">
+        <item name="android:layout_margin">16dp</item>
     </style>
 </resources>
