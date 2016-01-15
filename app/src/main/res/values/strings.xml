@@ -319,4 +319,6 @@
     <string name="user_edited">User edited</string>
     <string name="could_not_load_image">Could not load image</string>
     <string name="is_in_group">is in group %s</string>
+    <string name="no_climate_sensor_connected">No Weatherboards connected.</string>
+    <string name="connected_weather_boards">Connected weather boards:</string>
 </resources>

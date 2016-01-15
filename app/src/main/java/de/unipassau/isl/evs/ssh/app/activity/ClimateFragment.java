@@ -3,19 +3,21 @@ package de.unipassau.isl.evs.ssh.app.activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppClimateHandler;
@@ -36,18 +38,18 @@ public class ClimateFragment extends BoundFragment {
     private ClimateListAdapter adapter;
     private final AppClimateHandler.ClimateHandlerListener listener = new AppClimateHandler.ClimateHandlerListener() {
         @Override
-        public void statusChanged(Module module) {
+        public void statusChanged() {
             maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    adapter.notifyDataSetChanged();
+                    update();
                 }
             });
         }
     };
 
     private ListView climateSensorList;
-    private int counter = 0;
+    private TextView header;
 
     @Override
     public void onContainerConnected(Container container) {
@@ -55,6 +57,7 @@ public class ClimateFragment extends BoundFragment {
         container.require(AppClimateHandler.KEY).addListener(listener);
         adapter = new ClimateListAdapter();
         climateSensorList.setAdapter(adapter);
+        update();
     }
 
     @Override
@@ -72,9 +75,45 @@ public class ClimateFragment extends BoundFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.fragment_climate, container, false);
+        RelativeLayout root = (RelativeLayout) inflater.inflate(R.layout.fragment_climate, container, false);
         climateSensorList = (ListView) root.findViewById(R.id.climateSensorContainer);
+
+        final FloatingActionButton fab = (FloatingActionButton) root.findViewById(R.id.climate_fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppClimateHandler handler = getComponent(AppClimateHandler.KEY);
+                if (handler == null) {
+                    Log.i(TAG, "Container not yet connected!");
+                    return;
+                }
+                handler.refreshAllWeatherBoards();
+            }
+        });
+        header = (TextView) root.findViewById(R.id.climate_header);
         return root;
+    }
+
+    private void update() {
+
+        /**
+         * Creates a Map with Modules and links their ClimateStatus to them
+         */
+        AppClimateHandler handler = getComponent(AppClimateHandler.KEY);
+        if (handler == null) {
+            Log.i(TAG, "Container not yet connected!");
+            return;
+        }
+
+        handler.maybeUpdateModules();
+        final Set<Module> modules = handler.getAllClimateModuleStates().keySet();
+        if (modules.size() < 1) {
+            header.setText(getResources().getString(R.string.no_climate_sensor_connected));
+        } else {
+            header.setText(getResources().getString(R.string.connected_weather_boards));
+        }
+        adapter.update(modules);
+
     }
 
     /**
@@ -86,29 +125,13 @@ public class ClimateFragment extends BoundFragment {
 
         public ClimateListAdapter() {
             this.inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            updateModuleList();
         }
 
-        @Override
-        public void notifyDataSetChanged() {
-            updateModuleList();
-            super.notifyDataSetChanged();
-        }
-
-        /**
-         * Creates a Map with Modules and links their ClimateStatus to them
-         */
-        private void updateModuleList() {
-            AppClimateHandler handler = getComponent(AppClimateHandler.KEY);
-            if (handler == null) {
-                Log.i(TAG, "Container not yet connected!");
-                return;
-            }
-
-            handler.maybeUpdateModules();
+        private void update(Set<Module> climateSensors) {
             climateSensorModules.clear();
-            climateSensorModules.addAll(handler.getAllClimateModuleStates().keySet());
+            climateSensorModules.addAll(climateSensors);
             Collections.sort(climateSensorModules, NamedDTO.COMPARATOR);
+            notifyDataSetChanged();
         }
 
         /**
@@ -165,15 +188,6 @@ public class ClimateFragment extends BoundFragment {
             final Module m = getItem(position);
 
             /*
-            If there is more than one ClimateSensor, then a line between two blocks of SensorData
-            should be drawn, to separate them visually.
-            */
-            if (counter > 1) {
-                View divider = climateSensorLayout.findViewById(R.id.climatesensor_divider);
-                divider.setVisibility(View.VISIBLE);
-            }
-
-            /*
             Draw the WeatherSensorData to the Module which is part of the Fragment.
              */
             TextView climateSensorView = (TextView) climateSensorLayout.findViewById(R.id.climateSensor);
@@ -217,7 +231,6 @@ public class ClimateFragment extends BoundFragment {
                 int ir = handler.getIr(m);
                 irView.setText(String.format(getResources().getString(R.string.si_visible), ir));
             }
-            counter++;
             return climateSensorLayout;
         }
     }

@@ -12,14 +12,6 @@
     android:paddingTop="10dp"
     android:rowCount="3">
 
-    <View
-        android:id="@+id/climatesensor_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_margin="8dp"
-        android:visibility="gone"
-        />
-
     <TextView
         android:id="@+id/climateSensor"
         android:layout_width="wrap_content"
@@ -36,6 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
+            android:layout_marginEnd="3dp"
             android:text="@string/temperature_1"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
@@ -57,6 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
+            android:layout_marginEnd="3dp"
             android:text="@string/temperature2"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
@@ -76,6 +70,7 @@
 
         <TextView
             android:layout_width="wrap_content"
+            android:layout_marginEnd="3dp"
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:text="@string/pressure"
@@ -98,6 +93,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="3dp"
             android:layout_column="0"
             android:text="@string/altitude"
             android:textSize="@dimen/typography_subheadline"
@@ -120,6 +116,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
+            android:layout_marginEnd="3dp"
             android:text="@string/humidity"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
@@ -141,6 +138,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="0"
+            android:layout_marginEnd="3dp"
             android:text="@string/uv"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
@@ -161,6 +159,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="3dp"
             android:layout_column="0"
             android:text="@string/visible_1"
             android:textSize="@dimen/typography_subheadline"
@@ -182,6 +181,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="3dp"
             android:layout_column="0"
             android:text="@string/ir"
             android:textSize="@dimen/typography_subheadline"

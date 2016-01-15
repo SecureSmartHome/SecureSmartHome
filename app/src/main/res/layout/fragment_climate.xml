@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--@author Andreas Bucher-->
-<FrameLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -12,9 +13,33 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="de.unipassau.isl.evs.ssh.app.MainActivity">
 
+    <TextView
+        android:id="@+id/climate_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/no_climate_sensor_connected"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
     <ListView
         android:id="@+id/climateSensorContainer"
+        android:layout_below="@+id/climate_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     </ListView>
-</FrameLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/climate_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:clickable="true"
+        android:elevation="6dp"
+        android:longClickable="false"
+        android:scaleType="center"
+        android:src="@drawable/ic_replay_black_24dp"
+        app:borderWidth="0dp"
+        app:pressedTranslationZ="12dp"/>
+
+</RelativeLayout>

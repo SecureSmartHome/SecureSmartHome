@@ -1,5 +1,7 @@
 package de.unipassau.isl.evs.ssh.app.handler;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,13 +33,36 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
     private static final long REFRESH_DELAY_MILLIS = TimeUnit.SECONDS.toMillis(1);
     private final List<ClimateHandlerListener> listeners = new ArrayList<>();
     private final Map<Module, ClimateStatus> climateStatusMapping = new HashMap<>();
+    private final AppModuleHandler.AppModuleListener moduleListener = new AppModuleHandler.AppModuleListener() {
+        @Override
+        public void onModulesRefreshed() {
+            final List<Module> weather = requireComponent(AppModuleHandler.KEY).getWeather();
+            climateStatusMapping.clear();
+            for (Module module : weather) {
+                climateStatusMapping.put(module, new ClimateStatus());
+                refreshAllWeatherBoards();
+            }
+            fireStatusChanged();
+        }
+    };
 
     @Override
     public void init(Container container) {
         super.init(container);
-        for (Module module : container.require(AppModuleHandler.KEY).getWeather()) {
-            requestClimateStatus(module);
+        final AppModuleHandler moduleHandler = container.require(AppModuleHandler.KEY);
+        for (Module module : moduleHandler.getWeather()) {
+            climateStatusMapping.put(module, new ClimateStatus());
         }
+        moduleHandler.addAppModuleListener(moduleListener);
+    }
+
+    @Override
+    public void destroy() {
+        final AppModuleHandler moduleHandler = getComponent(AppModuleHandler.KEY);
+        if (moduleHandler != null) {
+            moduleHandler.addAppModuleListener(moduleListener);
+        }
+        super.destroy();
     }
 
     /**
@@ -56,14 +81,8 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
     private void setCachedStatus(Module module, double temp1, double temp2, double pressure, double altitude,
                                  double humidity, double uv, int ir, int visible) {
         ClimateStatus status = climateStatusMapping.get(module);
-        if (status == null) {
-            status = new ClimateStatus(temp1, temp2, pressure, altitude, humidity, uv, ir, visible);
-            climateStatusMapping.put(module, status);
-        } else {
+        if (status != null) {
             status.setStatus(temp1, temp2, pressure, altitude, humidity, uv, ir, visible);
-        }
-        for (ClimateHandlerListener listener : listeners) {
-            listener.statusChanged(module);
         }
     }
 
@@ -169,6 +188,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
      *
      * @return Map of Modules with SensorData
      */
+    @NonNull
     public Map<Module, ClimateStatus> getAllClimateModuleStates() {
         return Collections.unmodifiableMap(climateStatusMapping);
     }
@@ -192,6 +212,15 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
     }
 
     /**
+     * Sends Message to MasterClimateHandler to request SensorData of every Module.
+     */
+    public void refreshAllWeatherBoards() {
+        for (Module module : climateStatusMapping.keySet()) {
+            requestClimateStatus(module);
+        }
+    }
+
+    /**
      * Handles received Message from MasterClimateHandler. Refreshes SensorData.
      *
      * @param message Message to handle.
@@ -203,6 +232,7 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
             setCachedStatus(climatePayload.getModule(), climatePayload.getTemp1(), climatePayload.getTemp2(),
                     climatePayload.getPressure(), climatePayload.getAltitude(), climatePayload.getHumidity(),
                     climatePayload.getUv(), climatePayload.getIr(), climatePayload.getVisible());
+            fireStatusChanged();
         } else {
             invalidMessage(message);
         }
@@ -227,6 +257,12 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         listeners.remove(listener);
     }
 
+    private void fireStatusChanged() {
+        for (ClimateHandlerListener listener : listeners) {
+            listener.statusChanged();
+        }
+    }
+
     /**
      * Checks if there are weatherBoards registered in the system and puts all of them in the
      * climate mapping.
@@ -237,20 +273,20 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         if (weatherBoards.size() > climateStatusMapping.keySet().size()) {
             for (Module weatherBoard : weatherBoards) {
                 if (!climateStatusMapping.containsKey(weatherBoard)) {
-                    climateStatusMapping.put(weatherBoard, new ClimateStatus(0, 0, 0, 0, 0, 0, 0, 0));
+                    climateStatusMapping.put(weatherBoard, new ClimateStatus());
                 }
             }
         }
     }
 
     public interface ClimateHandlerListener {
-        void statusChanged(Module module);
+        void statusChanged();
     }
 
     /**
      * ClimateStatus saves the current climateData for a module.
      */
-    public class ClimateStatus {
+    private class ClimateStatus {
         private double temp1;
         private double temp2;
         private double pressure;
@@ -261,9 +297,8 @@ public class AppClimateHandler extends AbstractMessageHandler implements Compone
         private int ir;
         private long timestamp;
 
-        public ClimateStatus(double temp1, double temp2, double pressure, double altitude, double humidity,
-                             double uv, int ir, int visible) {
-            setStatus(temp1, temp2, pressure, altitude, humidity, uv, ir, visible);
+        private ClimateStatus() {
+            setStatus(0, 0, 0, 0, 0, 0, 0, 0);
         }
 
         /**
