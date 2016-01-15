@@ -17,7 +17,6 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_margin="8dp"
-        android:background="@color/md_black_1000"
         android:visibility="gone"
         />
 
@@ -27,7 +26,6 @@
         android:layout_height="match_parent"
         android:text="@string/climate_sensor"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/colorSecondaryText"
         android:textSize="@dimen/typography_headline2"/>
 
     <TableRow
@@ -39,7 +37,6 @@
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:text="@string/temperature_1"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
 
@@ -49,7 +46,6 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:text="New Text"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"/>
     </TableRow>
 
@@ -62,7 +58,6 @@
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:text="@string/temperature2"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
 
@@ -72,7 +67,6 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:text="New Text"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"/>
     </TableRow>
 
@@ -85,7 +79,6 @@
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:text="@string/pressure"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
 
@@ -95,7 +88,6 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:text="New Text"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"/>
     </TableRow>
 
@@ -108,7 +100,6 @@
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:text="@string/altitude"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
 
@@ -118,7 +109,6 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:text="New Text"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"/>
     </TableRow>
 
@@ -131,7 +121,6 @@
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:text="@string/humidity"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
 
@@ -141,7 +130,6 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:text="New Text"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"/>
     </TableRow>
 
@@ -154,7 +142,6 @@
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:text="@string/uv"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
 
@@ -164,7 +151,6 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:text="New Text"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"/>
     </TableRow>
 
@@ -177,7 +163,6 @@
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:text="@string/visible_1"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
 
@@ -187,7 +172,6 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:text="New Text"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"/>
     </TableRow>
 
@@ -200,7 +184,6 @@
             android:layout_height="wrap_content"
             android:layout_column="0"
             android:text="@string/ir"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"
             android:textStyle="bold"/>
 
@@ -210,7 +193,6 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:text="New Text"
-            android:textColor="@color/colorSecondaryText"
             android:textSize="@dimen/typography_subheadline"/>
     </TableRow>
 </TableLayout>

@@ -2,16 +2,15 @@
 <!--@author Phil Werli-->
 <resources>
 
-    <style name="DarkAppTheme" parent="Theme.AppCompat.Light">
-        <!-- Settings for Android 5+ devices -->
-        <item name="android:colorPrimary">@color/colorPrimary</item>
-        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="android:textColorPrimary">@color/colorPrimaryText</item>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:colorBackground">@color/colorBackground</item>
-        <item name="android:colorAccent">@color/colorAccent</item>
-        <item name="android:colorControlHighlight">@color/colorControlHighlight</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
-
     <style name="floating_action_button">
         <item name="android:layout_margin">16dp</item>
     </style>
