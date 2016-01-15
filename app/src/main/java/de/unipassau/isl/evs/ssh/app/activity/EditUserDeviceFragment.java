@@ -109,13 +109,6 @@ public class EditUserDeviceFragment extends BoundFragment {
         }
     };
 
-    /**
-     * Shows toast with given string resource.
-     */
-    private void showToast(int resId) {
-        Toast.makeText(getActivity(), resId, Toast.LENGTH_SHORT).show();
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_edituserdevice, container, false);

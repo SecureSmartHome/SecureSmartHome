@@ -4,6 +4,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import de.ncoder.typedmap.Key;
 import de.unipassau.isl.evs.ssh.core.activity.BoundActivity;
@@ -145,5 +146,14 @@ public class BoundFragment extends Fragment {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Shows {@link Toast} with given String resource.
+     *
+     * @param resId Resources ID of the given String resource.
+     */
+    protected void showToast(int resId) {
+        Toast.makeText(getActivity(), resId, Toast.LENGTH_SHORT).show();
     }
 }

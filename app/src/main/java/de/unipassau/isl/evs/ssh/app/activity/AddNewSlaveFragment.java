@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.dialogs.ErrorDialog;
@@ -30,10 +29,10 @@ public class AddNewSlaveFragment extends ScanQRFragment {
                 @Override
                 public void run() {
                     if (wasSuccessful) {
-                        Toast.makeText(getActivity(), R.string.slave_registration_success, Toast.LENGTH_SHORT).show();
+                        showToast(R.string.slave_registration_success);
                         ((AppMainActivity) getActivity()).showFragmentByClass(MainFragment.class);
                     } else {
-                        Toast.makeText(getActivity(), R.string.cannot_add_slave, Toast.LENGTH_SHORT).show();
+                        showToast(R.string.cannot_add_slave);
                     }
                 }
             });
@@ -99,7 +98,7 @@ public class AddNewSlaveFragment extends ScanQRFragment {
 
             handler.registerNewSlave(slaveID, slaveName, passiveRegistrationToken);
         } else {
-            Toast.makeText(getActivity(), R.string.cannot_add_slave, Toast.LENGTH_SHORT).show();
+            showToast(R.string.cannot_add_slave);
         }
     }
 

@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -76,7 +75,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
 
     private void onRegistrationFinished(boolean wasSuccessful) {
         if (!wasSuccessful) {
-            Toast.makeText(getActivity(), R.string.added_module_fail, Toast.LENGTH_LONG).show();
+            showToast(R.string.added_module_fail);
             return;
         }
 
@@ -85,7 +84,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         addUSBButton.setEnabled(true);
         addGPIOButton.setEnabled(true);
 
-        Toast.makeText(getActivity(), R.string.added_module_success, Toast.LENGTH_LONG).show();
+        showToast(R.string.added_module_success);
         ((AppMainActivity) getActivity()).showFragmentByClass(MainFragment.class);
     }
 
@@ -304,7 +303,7 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
             Module module = new Module(name, atSlave, moduleType, accessPoint);
             handler.addNewModule(module);
         } else {
-            Toast.makeText(getActivity(), R.string.you_can_not_add_modules, Toast.LENGTH_SHORT).show();
+            showToast(R.string.you_can_not_add_modules);
 
         }
     }

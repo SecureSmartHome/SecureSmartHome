@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppHolidaySimulationHandler;
@@ -37,7 +36,7 @@ public class HolidayFragment extends BoundFragment {
                     if (wasSuccessful) {
                         updateView();
                     } else {
-                        Toast.makeText(getActivity(), R.string.could_not_switch_holiday, Toast.LENGTH_SHORT).show();
+                        showToast(R.string.could_not_switch_holiday);
                     }
                 }
             });
@@ -59,7 +58,7 @@ public class HolidayFragment extends BoundFragment {
                         && activity.hasPermission(Permission.HOLIDAY_MODE_SWITCHED_OFF)) {
                     switchButtonAction();
                 } else {
-                    Toast.makeText(getActivity(), R.string.you_can_not_start_or_stop_the_holiday_simulation, Toast.LENGTH_SHORT).show();
+                    showToast(R.string.you_can_not_start_or_stop_the_holiday_simulation);
                 }
             }
         });

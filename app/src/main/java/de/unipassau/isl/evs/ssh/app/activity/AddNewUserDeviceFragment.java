@@ -10,7 +10,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
-import android.widget.Toast;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -56,7 +55,7 @@ public class AddNewUserDeviceFragment extends BoundFragment {
             maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(getActivity(), R.string.add_new_user_fail, Toast.LENGTH_SHORT).show();
+                    showToast(R.string.add_new_user_fail);
                 }
             });
         }
