@@ -260,4 +260,12 @@
     <string name="you_can_not_switch_light">Sie können das Licht nicht umschalten</string>
     <string name="you_can_not_unblock_door">Sie können die Tür nicht (ent-)sperren</string>
     <string name="you_can_not_unlatch_door">Sie können die Tür nicht entriegeln</string>
+    <string name="no_permission_to_request_door_status">Sie haben nicht die Rechte den Status der Tür anzufragen</string>
+    <string name="perm_switch_light_extern">Schalten des Lichts von extern</string>
+    <string name="permission_granted">Berechtigung bewährt</string>
+    <string name="permission_revoked">Berechtigung wiederrufen</string>
+    <string name="could_not_load_image">Bild konnte nicht geladen werden</string>
+    <string name="perm_desc_switch_light_extern">Erlaubt das Schalten des Lichtes von außerhalb des Heimbereichs</string>
+    <string name="user_edited">Benutzer editiert</string>
+    <string name="with_id_is_in_group">mit ID %1$s ist in Gruppe %2$s.</string>
 </resources>

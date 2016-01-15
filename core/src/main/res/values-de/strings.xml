@@ -23,4 +23,5 @@
     <string name="secure_smart_home">Secure Smart Home</string>
     <string name="slave">Slave</string>
     <string name="grant">Zulassen</string>
+    <string name="forModule">%1$s für %2$s</string>
 </resources>

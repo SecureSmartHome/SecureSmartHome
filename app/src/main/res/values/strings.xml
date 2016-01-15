@@ -318,4 +318,5 @@
     <string name="permission_revoked">Permission revoked</string>
     <string name="user_edited">User edited</string>
     <string name="could_not_load_image">Could not load image</string>
+    <string name="is_in_group">is in group %s</string>
 </resources>

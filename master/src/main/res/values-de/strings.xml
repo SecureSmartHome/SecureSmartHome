@@ -7,7 +7,6 @@
     <string name="closed_connection_with">"Verbindung beendet mit: %s"</string>
     <string name="connected_slaves">Verbundene Slaves</string>
     <string name="connected_user_devices">Verbundene Nutzergeräte</string>
-    <string name="hello_world">Hallo Welt!</string>
     <string name="id_format">ID: %s</string>
     <string name="invalid_city">Ungültiger Stadtname</string>
     <string name="invalid_port">Ungültiger Port. Bitte geben Sie nur Ports zwischen 1024 bis 65535</string>
@@ -25,4 +24,17 @@
     <string name="title_activity_register_local_slave">Lokalen Slave registrieren</string>
     <string name="userdevice_name">Nutzer Gerät: %s</string>
     <string name="title_qrcode_activity">Master - füge initiales Gerät hinzu</string>
+    <string name="active_connections">Aktive Verbindungen</string>
+    <string name="ignore">Ignorieren</string>
+    <string name="please_configure_the_ssh">Bitte konfigurieren Sie das Secur Smart Home bevor Sie das erste Admin Gerät hinzufügen</string>
+    <string name="proceed">Fortfahren</string>
+    <string name="register">Registrieren</string>
+    <string name="register_local_app">Registrieren der lokal installierten Secure Smart Home App mit diesem Master?</string>
+    <string name="register_local_slave">Registrieren der lokale installierten Secure Smart Home Slave mit diesem Master?</string>
+    <string name="server_not_started">Server noch nicht gestartet, bitte warte bis der Server gestartet ist</string>
+    <string name="please_set_prefs">Bitte setzen Sie alle Einstellungen bevor Sie fortfahren</string>
+    <string name="name_in_use">Name wird schon benutzt</string>
+    <string name="local_slave">Lokaler Slave</string>
+    <string name="local_app">Lokale App</string>
+    <string name="label_device_name">Name des Gerätes</string>
 </resources>
