@@ -81,8 +81,7 @@
         <ListView
             android:id="@+id/mainactivity_master_listview_slaves"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="64dp"
             android:layout_marginBottom="32dp"
             android:isScrollContainer="false"/>
 
@@ -96,8 +95,7 @@
         <ListView
             android:id="@+id/mainactivity_master_listview_userdevices"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="64dp"
             android:isScrollContainer="false">
         </ListView>
     </LinearLayout>

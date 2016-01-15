@@ -115,8 +115,7 @@
         <ListView
             android:id="@+id/mainactivity_slave_listview_slaves"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="64dp"
             android:isScrollContainer="false"/>
     </LinearLayout>
 </ScrollView>
