@@ -65,7 +65,7 @@ public class MasterPreferenceActivity extends MasterStartUpActivity {
 
         try {
             return validatePort(prefs, edit, getResources().getString(R.string.master_port_local), Server.PREF_SERVER_LOCAL_PORT) &&
-                    validatePort(prefs, edit, getResources().getString(R.string.master_port_intern), Server.PREF_SERVER_LOCAL_PORT) &&
+                    validatePort(prefs, edit, getResources().getString(R.string.master_port_intern), Server.PREF_SERVER_PUBLIC_PORT) &&
                     validatePort(prefs, edit, getResources().getString(R.string.master_port_extern), null) &&
                     !Strings.isNullOrEmpty(prefs.getString(getResources().getString(R.string.master_city_name), null));
         } catch (ClassCastException e) {

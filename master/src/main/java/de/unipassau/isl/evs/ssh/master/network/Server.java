@@ -125,7 +125,7 @@ public class Server extends AbstractComponent {
         if (publicPort >= 0 && publicPort <= 65535 && localPort != publicPort) {
             publicChannel = b.bind(publicPort).sync();
         }
-        Log.i(getClass().getSimpleName(), "Server bound to port " + localChannel + (publicChannel != null ? " and " + publicChannel : ""));
+        Log.i(getClass().getSimpleName(), "Server bound to port " + localChannel.channel() + (publicChannel != null ? " and " + publicChannel.channel() : ""));
     }
 
     /**
@@ -188,7 +188,7 @@ public class Server extends AbstractComponent {
         try {
             return getSharedPreferences().getInt(PREF_SERVER_PUBLIC_PORT, DEFAULT_PUBLIC_PORT);
         } catch (ClassCastException e) {
-            return DEFAULT_LOCAL_PORT;
+            return DEFAULT_PUBLIC_PORT;
         }
     }
 
