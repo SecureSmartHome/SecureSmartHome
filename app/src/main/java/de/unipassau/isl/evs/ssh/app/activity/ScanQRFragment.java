@@ -47,7 +47,7 @@ public abstract class ScanQRFragment extends BoundFragment {
                 try {
                     final DeviceConnectInformation info = DeviceConnectInformation.fromDataString(contents);
                     onQRCodeScanned(info);
-                } catch (IOException e) {
+                } catch (IOException | RuntimeException e) {
                     e.printStackTrace();
                     Toast.makeText(getActivity(), R.string.malformed_qr_code, Toast.LENGTH_SHORT).show();
                 }

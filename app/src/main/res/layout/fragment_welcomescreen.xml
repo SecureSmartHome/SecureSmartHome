@@ -29,6 +29,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="45dp"
         android:padding="@dimen/activity_vertical_margin"
+        android:singleLine="true"
         android:text="@string/register"
         android:textSize="@dimen/typography_display2"/>
 

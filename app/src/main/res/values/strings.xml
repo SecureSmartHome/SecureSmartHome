@@ -313,4 +313,7 @@
     <string name="could_not_edit_user">Could not edit user</string>
     <string name="could_not_delete_user">Could not remove user</string>
     <string name="no_permission_to_request_door_status">You don\'t have permission to request the door status</string>
+    <string name="permission_granted">Permission granted</string>
+    <string name="permission_revoked">Permission revoked</string>
+    <string name="user_edited">User edited</string>
 </resources>

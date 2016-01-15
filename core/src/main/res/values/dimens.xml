@@ -2,7 +2,7 @@
 <!--@author Phil Werli-->
 <resources>
     <!--Margins for typography from https://www.google.com/design/spec/style/typography.html#typography-line-height-->
-    <dimen name="typography_display2">45sp</dimen>
+    <dimen name="typography_display2">40sp</dimen>
     <dimen name="typography_display1">34sp</dimen>
     <dimen name="typography_headline2">28sp</dimen>
     <dimen name="typography_headline1">24sp</dimen>

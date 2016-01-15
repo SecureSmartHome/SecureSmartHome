@@ -165,15 +165,20 @@ public class MasterMainActivity extends MasterStartUpActivity implements Server.
     }
 
     private void updateDisplayedData() {
-        DeviceID id = getMasterID();
-        if (id != null) {
-            ((TextView) findViewById(R.id.mainactivity_master_masterid)).setText(id.toShortString());
-        }
-        ((TextView) findViewById(R.id.mainactivity_master_address)).setText(getMasterAddress());
-        ((TextView) findViewById(R.id.mainactivity_master_connected)).setText(String.valueOf(getNumberOfConnectedClients()));
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                DeviceID id = getMasterID();
+                if (id != null) {
+                    ((TextView) findViewById(R.id.mainactivity_master_masterid)).setText(id.toShortString());
+                }
+                ((TextView) findViewById(R.id.mainactivity_master_address)).setText(getMasterAddress());
+                ((TextView) findViewById(R.id.mainactivity_master_connected)).setText(String.valueOf(getNumberOfConnectedClients()));
 
-        slaveAdapter.notifyDataSetChanged();
-        userDeviceAdapter.notifyDataSetChanged();
+                slaveAdapter.notifyDataSetChanged();
+                userDeviceAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @NonNull
@@ -227,7 +232,7 @@ public class MasterMainActivity extends MasterStartUpActivity implements Server.
                 bob.append("/").append(publicAddress.getPort());
             }
         }
-        return bob.toString();
+        return DeviceConnectInformation.trimAddress(bob.toString());
     }
 
     private String getAddress(DeviceID id) {
@@ -241,7 +246,7 @@ public class MasterMainActivity extends MasterStartUpActivity implements Server.
                 address = ch.remoteAddress().toString();
             }
         }
-        return address;
+        return DeviceConnectInformation.trimAddress(address);
     }
 
     private int getNumberOfConnectedClients() {
@@ -309,7 +314,8 @@ public class MasterMainActivity extends MasterStartUpActivity implements Server.
                 address.setText(getAddress(slaveID));
 
                 TextView id = (TextView) layout.findViewById(R.id.slavelayout_slave_id);
-                id.setText(slaveID.toShortString());
+                id.setText(String.format(
+                        getResources().getString(R.string.id_format), slaveID.toShortString()));
             }
             return layout;
         }
