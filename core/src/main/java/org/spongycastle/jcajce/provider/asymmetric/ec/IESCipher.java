@@ -172,7 +172,6 @@ public class IESCipher
             throws NoSuchPaddingException {
         String paddingName = Strings.toUpperCase(padding);
 
-        // TODO: make this meaningful...
         if (paddingName.equals("NOPADDING")) {
 
         } else if (paddingName.equals("PKCS5PADDING") || paddingName.equals("PKCS7PADDING")) {

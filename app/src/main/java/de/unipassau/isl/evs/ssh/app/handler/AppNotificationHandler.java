@@ -134,7 +134,6 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
      * @param notificationID Is a unique ID for the Notification
      * @param args           Data (containing e.g. temperature) that are displayed in the notification text.
      */
-    //TODO edit text and text formatting
     private void issueClimateNotification(int notificationID, Serializable[] args) {
         double humidity = (Double) args[0];
         String title = resources.getString(R.string.climate_notification_title);
