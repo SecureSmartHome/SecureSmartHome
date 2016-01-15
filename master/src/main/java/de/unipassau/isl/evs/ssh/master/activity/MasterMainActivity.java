@@ -52,8 +52,8 @@ public class MasterMainActivity extends MasterStartUpActivity implements Server.
 
     private ListView slaveList;
     private ListView userDeviceList;
-    private SlaveAdapter slaveAdapter;
-    private UserDeviceAdapter userDeviceAdapter;
+    private final SlaveAdapter slaveAdapter = new SlaveAdapter();
+    private final UserDeviceAdapter userDeviceAdapter = new UserDeviceAdapter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,6 +139,7 @@ public class MasterMainActivity extends MasterStartUpActivity implements Server.
                 return true;
             }
         });
+        slaveList.setAdapter(slaveAdapter);
 
         userDeviceList = (ListView) findViewById(R.id.mainactivity_master_listview_userdevices);
         userDeviceList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -155,10 +156,6 @@ public class MasterMainActivity extends MasterStartUpActivity implements Server.
                 return true;
             }
         });
-
-        slaveAdapter = new SlaveAdapter();
-        userDeviceAdapter = new UserDeviceAdapter();
-        slaveList.setAdapter(slaveAdapter);
         userDeviceList.setAdapter(userDeviceAdapter);
 
         updateDisplayedData();

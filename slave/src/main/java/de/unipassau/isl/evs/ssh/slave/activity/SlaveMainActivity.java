@@ -41,7 +41,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT
  */
 public class SlaveMainActivity extends SlaveStartUpActivity implements ClientConnectionListener {
     private ListView moduleList;
-    private ModuleAdapter moduleListAdapter;
+    private final ModuleAdapter moduleListAdapter = new ModuleAdapter();
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -97,7 +97,6 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
      * Builds the view components that require the container.
      */
     private void buildView() {
-        moduleListAdapter = new ModuleAdapter();
         moduleList = (ListView) findViewById(R.id.mainactivity_slave_listview_slaves);
         moduleList.setAdapter(moduleListAdapter);
 
