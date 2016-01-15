@@ -13,6 +13,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.OutgoingRouter;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
+import de.unipassau.isl.evs.ssh.master.handler.MasterUserLocationHandler;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 import io.netty.channel.Channel;
 
@@ -74,13 +75,7 @@ public class NotificationBroadcaster extends AbstractComponent {
      */
     private void sendToUsersAtHome(List<UserDevice> allUserDevicesWithPermission, Message messageToSend) {
         for (UserDevice userDevice : allUserDevicesWithPermission) {
-            boolean isConnectionLocal = false;
-            Channel channel = requireComponent(Server.KEY).findChannel(userDevice.getUserDeviceID());
-            //noinspection ConstantConditions
-            if (channel != null && Boolean.TRUE.equals(channel.attr(ATTR_LOCAL_CONNECTION).get())) {
-                isConnectionLocal = true;
-            }
-            if (isConnectionLocal) {
+            if (requireComponent(MasterUserLocationHandler.KEY).isDeviceLocal(userDevice.getUserDeviceID())) {
                 requireComponent(OutgoingRouter.KEY).sendMessage(userDevice.getUserDeviceID(),
                         RoutingKeys.APP_NOTIFICATION_RECEIVE, messageToSend);
             }
@@ -95,9 +90,7 @@ public class NotificationBroadcaster extends AbstractComponent {
      */
     private boolean isSomeoneAtHome(List<UserDevice> allUserDevicesWithPermission) {
         for (UserDevice userDevice : allUserDevicesWithPermission) {
-            Channel channel = requireComponent(Server.KEY).findChannel(userDevice.getUserDeviceID());
-            //noinspection ConstantConditions
-            if (channel != null && Boolean.TRUE.equals(channel.attr(ATTR_LOCAL_CONNECTION).get())) {
+            if (requireComponent(MasterUserLocationHandler.KEY).isDeviceLocal(userDevice.getUserDeviceID())) {
                 return true;
             }
         }
