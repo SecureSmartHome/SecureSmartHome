@@ -11,6 +11,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 import java.net.InetSocketAddress;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 import de.ncoder.typedmap.Key;
@@ -267,5 +269,21 @@ public class Server extends AbstractComponent {
         if (publicChannel != null && publicChannel.channel() != null) {
             publicChannel.channel().closeFuture().await();
         }
+    }
+
+    final List<ServerConnectionListener> listeners = new LinkedList<>();
+
+    public boolean addListener(ServerConnectionListener object) {
+        return listeners.add(object);
+    }
+
+    public boolean removeListener(ServerConnectionListener object) {
+        return listeners.remove(object);
+    }
+
+    public interface ServerConnectionListener {
+        void onClientConnected(Channel channel);
+
+        void onClientDisonnected(Channel channel);
     }
 }

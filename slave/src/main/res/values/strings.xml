@@ -4,11 +4,17 @@
     <string name="app_name">Secure Smart Home - Slave</string>
     <string name="title_activity_main">MainActivity</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="please_scan_device">Scan this QR-Code to register this Slave Odroid</string>
     <string name="qr_code_description">QR-Code</string>
     <string name="connected_modules">Connected Modules</string>
     <string name="module_name">%1$s, %2$s</string>
     <string name="module_information">%1$s at %2$s via %3$s</string>
+    <string name="slave_rejected">Slave rejected</string>
+    <string name="warn_slave_rejected">Connection refused. Maybe the system has been reset or this slave has been deleted.</string>
+    <string name="dismiss">Dimiss</string>
+    <string name="no_master_address_known">no address known</string>
+    <string name="slave_connecting">connecting</string>
+    <string name="slave_not_connected">not connected</string>
+    <string name="slave_connected">connected</string>
 </resources>

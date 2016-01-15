@@ -47,7 +47,7 @@ import static de.unipassau.isl.evs.ssh.core.CoreConstants.NettyConstants.DEFAULT
  *
  * @author Phil Werli
  */
-public class MasterMainActivity extends MasterStartUpActivity {
+public class MasterMainActivity extends MasterStartUpActivity implements Server.ServerConnectionListener {
     private static final String TAG = MasterMainActivity.class.getSimpleName();
 
     private ListView slaveList;
@@ -69,6 +69,28 @@ public class MasterMainActivity extends MasterStartUpActivity {
         if (!isSwitching()) {
             buildView();
         }
+        container.require(Server.KEY).addListener(this);
+    }
+
+
+    @Override
+    public void onClientConnected(Channel channel) {
+        updateDisplayedData();
+    }
+
+    @Override
+    public void onClientDisonnected(Channel channel) {
+        updateDisplayedData();
+    }
+
+    @Override
+    public void onContainerDisconnected() {
+        final Server server = getComponent(Server.KEY);
+        if (server != null) {
+            server.removeListener(this);
+        }
+        super.onContainerDisconnected();
+        updateDisplayedData();
     }
 
     @Override
