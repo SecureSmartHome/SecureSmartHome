@@ -297,7 +297,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                         return -1;
                     }
                     FragmentActivity activity = getActivity();
-                    return lhs.getPermission().toLocalizedString(activity).compareTo(rhs.getPermission().toLocalizedString(activity));
+                    return lhs.toLocalizedString(activity).compareTo(rhs.toLocalizedString(activity));
                 }
             });
         }
@@ -360,7 +360,7 @@ public class EditUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
             } else {
                 TextView permissionText = (TextView) permissionLayout.findViewById(R.id.listpermission_permission_text);
-                permissionText.setText(permission.getPermission().toLocalizedString(getActivity()));
+                permissionText.setText(permission.toLocalizedString(getActivity()));
 
                 final Button permissionButton = (Button) permissionLayout.findViewById(R.id.listpermission_permission_button);
                 final boolean deviceHasPermission = userDeviceHasPermission(permission);
@@ -376,11 +376,11 @@ public class EditUserDeviceFragment extends BoundFragment {
                         if (activity != null && activity.hasPermission(Permission.MODIFY_USER_PERMISSION)) {
                             if (!deviceHasPermission) {
                                 handler.grantPermission(device.getUserDeviceID(), permission);
-                                Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
+                                Log.i(TAG, permission.toLocalizedString(getActivity())
                                         + " granted for user device " + device.getName());
                             } else {
                                 handler.revokePermission(device.getUserDeviceID(), permission);
-                                Log.i(TAG, permission.getPermission().toLocalizedString(getActivity())
+                                Log.i(TAG, permission.toLocalizedString(getActivity())
                                         + " revoked for user device " + device.getName());
                             }
                             updatePermissionList();

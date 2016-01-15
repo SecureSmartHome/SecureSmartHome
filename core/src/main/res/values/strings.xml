@@ -26,5 +26,6 @@
     <string name="action_settings">Settings</string>
     <string name="restart">Restart</string>
     <string name="refresh_page">Refresh Page</string>
+    <string name="forModule">%1$s for %2$s</string>
 
 </resources>

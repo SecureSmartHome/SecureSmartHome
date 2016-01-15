@@ -136,7 +136,7 @@ public enum Permission {
     }
 
     /**
-     * @return the localized Name of this PermissionDTO as defined in the strings.xml for the current locale.
+     * @return the localized Name of this Permission as defined in the strings.xml for the current locale.
      * The identifier of the String constant is the lower case name of the enum constant with the prefix "perm_",
      * so for {@link #ADD_ODROID} it would be "perm_add_odroid".
      * If no localized name is found, the name of the constant as defined in the source code is used ({@link #name()}).
@@ -149,7 +149,7 @@ public enum Permission {
     }
 
     /**
-     * @return the localized description of this PermissionDTO as defined in the strings.xml for the current locale.
+     * @return the localized description of this Permission as defined in the strings.xml for the current locale.
      * The identifier of the String constant is the lower case name of the enum constant with the prefix "perm_desc_",
      * so for {@link #ADD_ODROID} it would be "perm_desc_add_odroid".
      * If no localized description is found, the empty String is returned.

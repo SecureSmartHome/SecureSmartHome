@@ -1,8 +1,15 @@
 package de.unipassau.isl.evs.ssh.core.database.dto;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.support.annotation.NonNull;
+
 import com.google.common.base.Strings;
 
 import java.io.Serializable;
+
+import de.unipassau.isl.evs.ssh.core.R;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 /**
  * A DTO representing permissions. A permission has a name and may only be for a specific module.
@@ -55,6 +62,24 @@ public class PermissionDTO implements Serializable {
         int result = permission != null ? permission.hashCode() : 0;
         result = 31 * result + (moduleName != null ? moduleName.hashCode() : 0);
         return result;
+    }
+
+    /**
+     * Returns {@link Permission#toLocalizedString(Context)} if permission is binary ({@code moduleName == null}),
+     * adds module name with localized preposition if permission is ternary.
+     *
+     * @return the localized Name of this PermissionDTO.
+     */
+    @NonNull
+    public String toLocalizedString(Context context) {
+        // @author Phil Werli
+        Resources res = context.getResources();
+        String forModule = null;
+        String permissionString = permission.toLocalizedString(context);
+        if (moduleName != null) {
+            forModule = String.format(res.getString(R.string.forModule), permissionString, moduleName);
+        }
+        return forModule == null ? permissionString : forModule;
     }
 
     @Override
