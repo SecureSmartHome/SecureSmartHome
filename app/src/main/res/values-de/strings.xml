@@ -76,7 +76,7 @@
     <string name="nav_holiday_string">Urlaub</string>
     <string name="nav_home">Startbildschrim</string>
     <string name="nav_light_string">Licht</string>
-    <string name="nav_modifyPermissions_string">Berechtigungen bearbeiten</string>
+    <string name="nav_listGroups_string">Gruppen anzeigen</string>
     <string name="nav_status_string">Status</string>
     <string name="navigation_drawer_close">Navigieren</string>
     <string name="navigation_drawer_open">Navigation</string>

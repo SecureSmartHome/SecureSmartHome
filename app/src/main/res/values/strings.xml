@@ -16,7 +16,7 @@
     <string name="nav_climate_string">Climate</string>
     <string name="nav_holiday_string">Holiday</string>
     <string name="nav_status_string">Status</string>
-    <string name="nav_modifyPermissions_string">Modify permissions</string>
+    <string name="nav_listGroups_string">List Groups</string>
     <string name="nav_addNewUserDevice_sting">Add User</string>
     <string name="nav_addModule_string">Add Module</string>
     <string name="deviceStatusConnectedSlaves">Connected Slaves</string>
@@ -206,7 +206,7 @@
     <string name="si_degree" translatable="false">%3.1f C°</string>
     <string name="si_pressure" translatable="false">%4.1f Pa</string>
     <string name="si_altitude" translatable="false">%4.2f m</string>
-    <string name="si_humidity" translatable="false">%3.2f \U+0025</string>
+    <string name="si_humidity" translatable="false">%3.2f \%%</string>
     <string name="si_visible" translatable="false">%d Lux</string>
 
     <!--String to describe ImageViews / ImageButtons-->
@@ -222,7 +222,7 @@
 
     <!--Strings used for Notifications-->
     <string name="climate_notification_title">Climate Warning!</string>
-    <string name="climate_notification_text">Your indoor humidity is at %3.2f \U+0025 please air your home.</string>
+    <string name="climate_notification_text">Your indoor humidity is at %3.2f \%% please air your home.</string>
     <string name="brightness_warning_title">Light Warning!</string>
     <string name="brightness_warning_text">It has %d Lux in your room, which should be bright enough.</string>
     <string name="weather_warning_title">Weather Warning!</string>
