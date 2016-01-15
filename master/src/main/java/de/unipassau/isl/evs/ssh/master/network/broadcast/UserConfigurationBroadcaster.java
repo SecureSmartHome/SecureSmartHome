@@ -19,6 +19,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.UserDeviceInformationPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.PermissionController;
+import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.database.UserManagementController;
 import de.unipassau.isl.evs.ssh.master.network.Server;
 
@@ -49,7 +50,13 @@ public class UserConfigurationBroadcaster extends AbstractComponent {
      */
     public void updateClient(DeviceID id) {
         final Message message = new Message(generateUserDeviceInformationPayload());
-        requireComponent(OutgoingRouter.KEY).sendMessage(id, RoutingKeys.APP_USERINFO_UPDATE, message);
+        if (!isSlave(id)) {
+            requireComponent(OutgoingRouter.KEY).sendMessage(id, RoutingKeys.APP_USERINFO_UPDATE, message);
+        }
+    }
+
+    private boolean isSlave(DeviceID id) {
+        return requireComponent(SlaveController.KEY).getSlave(id) != null;
     }
 
     private UserDeviceInformationPayload generateUserDeviceInformationPayload() {
