@@ -72,14 +72,35 @@ public class EditUserDeviceFragment extends BoundFragment {
                 public void run() {
                     if (event.getType().equals(PUSH)) {
                         permissionListAdapter.notifyDataSetChanged();
-                    } else if (event.getType().equals(PERMISSION_GRANT) && !event.wasSuccessful()) {
-                        Toast.makeText(getActivity(), R.string.could_not_grant, Toast.LENGTH_SHORT).show();
-                    } else if (event.getType().equals(PERMISSION_REVOKE) && !event.wasSuccessful()) {
-                        Toast.makeText(getActivity(), R.string.could_not_revoke, Toast.LENGTH_SHORT).show();
-                    } else if (event.getType().equals(USERNAME_SET) && !event.wasSuccessful()) {
-                        Toast.makeText(getActivity(), R.string.could_not_edit_user_device_name, Toast.LENGTH_SHORT).show();
-                    } else if (event.getType().equals(USER_SET_GROUP) && !event.wasSuccessful()) {
-                        Toast.makeText(getActivity(), R.string.could_not_edit_user_device_group, Toast.LENGTH_SHORT).show();
+                    } else if (event.getType().equals(PERMISSION_GRANT)) {
+                        if (event.wasSuccessful()) {
+                            permissionListAdapter.notifyDataSetChanged();
+                            Toast.makeText(getActivity(), R.string.permission_granted, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), R.string.could_not_grant, Toast.LENGTH_SHORT).show();
+                        }
+                    } else if (event.getType().equals(PERMISSION_REVOKE)) {
+                        if (event.wasSuccessful()) {
+                            permissionListAdapter.notifyDataSetChanged();
+                            Toast.makeText(getActivity(), R.string.permission_revoked, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), R.string.could_not_revoke, Toast.LENGTH_SHORT).show();
+                        }
+                    } else if (event.getType().equals(USERNAME_SET)) {
+                        if (event.wasSuccessful()) {
+                            ((TextView) getActivity().findViewById(R.id.userdevice_user_name)).setText(device.getName());
+                            Toast.makeText(getActivity(), R.string.user_edited, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), R.string.could_not_edit_user_device_name, Toast.LENGTH_SHORT).show();
+                        }
+                    } else if (event.getType().equals(USER_SET_GROUP)) {
+                        if (event.wasSuccessful()) {
+                            TextView deviceGroup = ((TextView) getActivity().findViewById(R.id.userdevice_user_group));
+                            deviceGroup.setText(String.format(getResources().getString(R.string.is_in_group), device.getInGroup()));
+                            Toast.makeText(getActivity(), R.string.user_edited, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(), R.string.could_not_edit_user_device_group, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             });
@@ -124,8 +145,8 @@ public class EditUserDeviceFragment extends BoundFragment {
                 final AppMainActivity activity = (AppMainActivity) getActivity();
                 if (activity != null && !activity.hasPermission(Permission.CHANGE_USER_NAME)) {
                     Toast.makeText(getActivity(), R.string.you_can_not_edit_user_devices, Toast.LENGTH_SHORT).show();
-                } else if (activity != null && activity.hasPermission(Permission.CHANGE_USER_GROUP)) {
-                    Toast.makeText(getActivity(), R.string.you_can_not_edit_groups, Toast.LENGTH_SHORT).show();
+                } else if (activity != null && !activity.hasPermission(Permission.CHANGE_USER_GROUP)) {
+                    Toast.makeText(getActivity(), R.string.you_can_not_edit_user_devices, Toast.LENGTH_SHORT).show();
                 } else {
                     showEditUserDeviceDialog(bundle);
                 }
