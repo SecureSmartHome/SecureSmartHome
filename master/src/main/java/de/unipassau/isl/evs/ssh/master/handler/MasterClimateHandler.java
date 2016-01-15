@@ -19,6 +19,7 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_PUSH_WE
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_REQUEST_WEATHER_INFO;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_REQUEST_WEATHER_INFO_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_GET_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_LIGHT_SET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.BRIGHTNESS_WARNING;
 import static de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload.NotificationType.HUMIDITY_WARNING;
 
@@ -32,15 +33,15 @@ public class MasterClimateHandler extends AbstractMasterHandler implements Compo
 
     private static final long WARNING_TIMER = TimeUnit.MINUTES.toMillis(5);
 
-    private long humidityTimeStamp;
-    private long brightnessTimeStamp;
+    private long humidityTimeStamp = 0;
+    private long brightnessTimeStamp = 0;
 
     private final Map<Module, ClimatePayload> latestWeatherData = new HashMap<>();
     private final Map<Module, Boolean> latestLightStatus = new HashMap<>();
 
     @Override
     public RoutingKey[] getRoutingKeys() {
-        return new RoutingKey[]{MASTER_PUSH_WEATHER_INFO, SLAVE_LIGHT_GET_REPLY, MASTER_REQUEST_WEATHER_INFO};
+        return new RoutingKey[]{MASTER_PUSH_WEATHER_INFO, SLAVE_LIGHT_GET_REPLY, MASTER_REQUEST_WEATHER_INFO, SLAVE_LIGHT_SET_REPLY};
     }
 
     @Override
@@ -49,9 +50,9 @@ public class MasterClimateHandler extends AbstractMasterHandler implements Compo
             ClimatePayload payload = MASTER_PUSH_WEATHER_INFO.getPayload(message);
             latestWeatherData.put(payload.getModule(), payload);
             evaluateWeatherData(payload);
-        } else if (SLAVE_LIGHT_GET_REPLY.matches(message)) {
+        } else if (SLAVE_LIGHT_GET_REPLY.matches(message) || SLAVE_LIGHT_SET_REPLY.matches(message)) {
             //Reply to get request, this means this message actually contains an updated lamp value
-            LightPayload payload = SLAVE_LIGHT_GET_REPLY.getPayload(message);
+            LightPayload payload = message.getPayloadChecked(LightPayload.class);
             latestLightStatus.put(payload.getModule(), payload.getOn());
         } else if (MASTER_REQUEST_WEATHER_INFO.matches(message)) {
             for (ClimatePayload payload : latestWeatherData.values()) {
@@ -85,10 +86,9 @@ public class MasterClimateHandler extends AbstractMasterHandler implements Compo
                     if (latestLightStatus.get(module)) {
                         Serializable serializableLight = payload.getVisible();
                         notificationBroadcaster.sendMessageToAllReceivers(BRIGHTNESS_WARNING, serializableLight);
+                        brightnessTimeStamp = System.currentTimeMillis();
                     }
                 }
-
-                brightnessTimeStamp = System.currentTimeMillis();
             }
         }
     }

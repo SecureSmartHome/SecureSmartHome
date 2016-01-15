@@ -143,7 +143,7 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
     }
 
     private void issueBrightnessWarning(int notificationID, Serializable[] args) {
-        double visibleLight = (Double) args[0];
+        int visibleLight = (Integer) args[0];
         String title = resources.getString(R.string.brightness_warning_title);
         String text = String.format(resources.getString(R.string.brightness_warning_text), visibleLight);
         displayNotification(title, text, LightFragment.class, notificationID);
