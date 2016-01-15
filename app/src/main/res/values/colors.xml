@@ -1,23 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--@author Phil Werli-->
 <resources>
-    <color name="colorPrimary">@color/md_blue_500</color>
-    <color name="colorPrimaryDark">@color/md_blue_700</color>
-    <color name="colorPrimaryLight">#448AFF</color>
-    <color name="colorBackground">#f5d3d3d3</color>
-    <color name="colorAccent">#fb8c00</color>
-    <color name="colorControlHighlight">#90CAF9</color>
-
-    <color name="colorPrimaryText">#FFFFFF</color>
-    <color name="colorSecondaryText">#000000</color>
-
-    <color name="colorToolbar">#1E88E5</color>
-
-    <color name="colorNavigationDrawerBackground">#1c78c9</color>
-
-    <color name="colorIcons">#FFFFFF</color>
-    <color name="colorWhite">#FFFFFF</color>
-    <color name="colorDivider">#B6B6B6</color>
+    <color name="colorPrimary">@color/md_teal_500</color>
+    <color name="colorPrimaryDark">@color/md_teal_700</color>
+    <color name="colorBackground">@color/md_grey_50</color>
+    <color name="colorAccent">@color/md_orange_A700</color>
+    <color name="textColor">@color/md_grey_900</color>
 
     <!--button status-->
     <color name="button_red">#F44336</color>
