@@ -268,4 +268,5 @@
     <string name="perm_desc_switch_light_extern">Erlaubt das Schalten des Lichtes von außerhalb des Heimbereichs</string>
     <string name="user_edited">Benutzer editiert</string>
     <string name="with_id_is_in_group">mit ID %1$s ist in Gruppe %2$s.</string>
+    <string name="connected_weather_boards">Verbundene Wetterstationen:</string>
 </resources>
