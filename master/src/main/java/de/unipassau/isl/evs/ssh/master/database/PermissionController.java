@@ -92,10 +92,10 @@ public class PermissionController extends AbstractComponent {
     }
 
     /**
-     * Returns whether a given user has a given PermissionDTO.
+     * Returns whether a given user has a given Permission.
      *
      * @param userDeviceID DeviceID associated with the user.
-     * @param permission PermissionDTO to check.
+     * @param permission Permission to check.
      * @param moduleName Module the permission applies for.
      * @return true if has permissions otherwise false.
      */
@@ -160,10 +160,10 @@ public class PermissionController extends AbstractComponent {
     }
 
     /**
-     * Add a PermissionDTO to a Template.
+     * Add a Permission to a Template.
      *
      * @param templateName Name of the Template.
-     * @param permission PermissionDTO to add.
+     * @param permission Permission to add.
      * @param moduleName Module the permission applies for.
      */
     public void addPermissionToTemplate(String templateName, de.unipassau.isl.evs.ssh.core.sec.Permission permission,
@@ -196,10 +196,10 @@ public class PermissionController extends AbstractComponent {
     }
 
     /**
-     * Remove a PermissionDTO from a Template.
+     * Remove a Permission from a Template.
      *
      * @param templateName Name of the Template.
-     * @param permission PermissionDTO to remove.
+     * @param permission Permission to remove.
      * @param moduleName Module the permission applies for.
      */
     public void removePermissionFromTemplate(String templateName, de.unipassau.isl.evs.ssh.core.sec.Permission permission, String moduleName) {
@@ -225,10 +225,10 @@ public class PermissionController extends AbstractComponent {
     }
 
     /**
-     * Add a PermissionDTO for a UserDevice.
+     * Add a Permission for a UserDevice.
      *
      * @param userDeviceID DeviceID of the UserDevice.
-     * @param permission PermissionDTO to add.
+     * @param permission Permission to add.
      * @param moduleName Module the permission applies for.
      */
     public void addUserPermission(DeviceID userDeviceID, de.unipassau.isl.evs.ssh.core.sec.Permission permission,
@@ -255,15 +255,15 @@ public class PermissionController extends AbstractComponent {
             }
         } catch (SQLiteConstraintException sqlce) {
             throw new UnknownReferenceException(
-                    "The given UserDevice or PermissionDTO does not exist in the database", sqlce);
+                    "The given UserDevice or Permission does not exist in the database", sqlce);
         }
     }
 
     /**
-     * Remove a PermissionDTO for a UserDevice.
+     * Remove a Permission for a UserDevice.
      *
      * @param userDeviceID DeviceID of the UserDevice.
-     * @param permission PermissionDTO to remove.
+     * @param permission Permission to remove.
      * @param moduleName Module the permission applies for.
      */
     public void removeUserPermission(DeviceID userDeviceID, de.unipassau.isl.evs.ssh.core.sec.Permission permission,
@@ -307,9 +307,9 @@ public class PermissionController extends AbstractComponent {
     }
 
     /**
-     * Adds a new PermissionDTO to the database.
+     * Adds a new Permission to the database.
      *
-     * @param permission PermissionDTO to add.
+     * @param permission Permission to add.
      * @param moduleName Module the permission applies for.
      */
     public void addPermission(de.unipassau.isl.evs.ssh.core.sec.Permission permission,
@@ -337,9 +337,9 @@ public class PermissionController extends AbstractComponent {
     }
 
     /**
-     * Removes a PermissionDTO from the database.
+     * Removes a Permission from the database.
      *
-     * @param permission PermissionDTO to remove.
+     * @param permission Permission to remove.
      * @param moduleName Module the permission applies for.
      */
     public void removePermission(de.unipassau.isl.evs.ssh.core.sec.Permission permission, String moduleName) {
@@ -431,7 +431,7 @@ public class PermissionController extends AbstractComponent {
     /**
      * Returns all UserDevices that have a given permission.
      *
-     * @param permission PermissionDTO to check for.
+     * @param permission Permission to check for.
      * @param moduleName Module the permission applies for.
      * @return List of the UserDevices.
      */

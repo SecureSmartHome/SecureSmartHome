@@ -90,7 +90,7 @@ public enum Permission {
     SWITCH_LIGHT(true);
 
     /**
-     * A ternary PermissionDTO can selectively be granted for certain modules.
+     * A ternary Permission can selectively be granted for certain modules.
      */
     private final boolean isTernary;
     public static final List<Permission> binaryPermissions = filter(new Predicate<Permission>() {
