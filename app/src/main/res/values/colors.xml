@@ -11,6 +11,8 @@
     <color name="button_red">#F44336</color>
     <color name="button_green">#4CAF50</color>
 
+    <!--Color used to indicate the current user device while navigation through the users-->
+    <color name="color_own_id">@color/md_orange_A100</color>
 
     <!-- google's material design colors from
     http://www.google.com/design/spec/style/color.html#color-ui-color-palette -->

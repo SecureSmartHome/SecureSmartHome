@@ -22,7 +22,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignTop="@+id/userdevice_edit_button"
-            android:text="Blubb"
             android:textSize="28sp"/>
 
 
@@ -41,7 +40,6 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/userdevice_user_name"
             android:layout_toLeftOf="@id/userdevice_edit_button"
-            android:text="has ID 1232134324 and is in Group Parents"
             android:textSize="16sp"/>
     </RelativeLayout>
 
@@ -49,6 +47,7 @@
         android:id="@+id/listUserPermissionContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginRight="6dp"
         android:fastScrollAlwaysVisible="true"
         android:fastScrollEnabled="true"/>
 </LinearLayout>

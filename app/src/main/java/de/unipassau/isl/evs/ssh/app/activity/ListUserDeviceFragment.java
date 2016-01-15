@@ -28,6 +28,7 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.NamedDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.DELETE_USERDEVICE_DIALOG;
@@ -258,21 +259,36 @@ public class ListUserDeviceFragment extends BoundFragment {
         public View getView(int position, View convertView, ViewGroup parent) {
             // the UserDevice the list item is created for
             final UserDevice device = getItem(position);
-            LayoutInflater inflater = getActivity().getLayoutInflater();
-            LinearLayout userDeviceLayout;
+            final LayoutInflater inflater = getActivity().getLayoutInflater();
+            final LinearLayout userDeviceLayout;
             if (convertView == null) {
                 userDeviceLayout = (LinearLayout) inflater.inflate(R.layout.userdevicelayout, parent, false);
             } else {
                 userDeviceLayout = (LinearLayout) convertView;
             }
+            if (isUserCurrent(device)) {
+                userDeviceLayout.setBackgroundColor(getResources().getColor(R.color.color_own_id));
+            }
 
-            TextView userDeviceName = ((TextView) userDeviceLayout.findViewById(R.id.userdevicelistitem_device_name));
-            userDeviceName.setText(device.getName());
+            ((TextView) userDeviceLayout.findViewById(R.id.userdevicelistitem_device_name)).setText(device.getName());
 
-            TextView userDeviceDeviceID = ((TextView) userDeviceLayout.findViewById(R.id.userdevicelistitem_device_information));
-            userDeviceDeviceID.setText(device.getUserDeviceID().toString());
+            ((TextView) userDeviceLayout.findViewById(R.id.userdevicelistitem_device_information))
+                    .setText(device.getUserDeviceID().toString());
 
             return userDeviceLayout;
+        }
+
+        /**
+         * @param userDevice Given user device.
+         * @return Return if the given user device is the current user.
+         */
+        private boolean isUserCurrent(UserDevice userDevice) {
+            final NamingManager namingManager = getComponent(NamingManager.KEY);
+            if (namingManager == null) {
+                Log.i(TAG, "Container not yet connected!");
+                return false;
+            }
+            return namingManager.getOwnID().equals(userDevice.getUserDeviceID());
         }
     }
 }

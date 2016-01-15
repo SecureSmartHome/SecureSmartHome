@@ -28,6 +28,8 @@ import de.unipassau.isl.evs.ssh.core.container.Container;
 import de.unipassau.isl.evs.ssh.core.database.dto.Group;
 import de.unipassau.isl.evs.ssh.core.database.dto.NamedDTO;
 import de.unipassau.isl.evs.ssh.core.database.dto.UserDevice;
+import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.core.naming.NamingManager;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 import static de.unipassau.isl.evs.ssh.app.AppConstants.DialogArguments.EDIT_GROUP_DIALOG;
@@ -218,21 +220,44 @@ public class ListGroupFragment extends BoundFragment {
             // the Group the list item is created for
             final Group group = getItem(position);
 
-            LinearLayout groupLayout;
-            LayoutInflater inflater = getActivity().getLayoutInflater();
+            final LinearLayout groupLayout;
+            final LayoutInflater inflater = getActivity().getLayoutInflater();
             if (convertView == null) {
                 groupLayout = (LinearLayout) inflater.inflate(R.layout.grouplayout, parent, false);
             } else {
                 groupLayout = (LinearLayout) convertView;
             }
 
-            TextView textViewGroupName = (TextView) groupLayout.findViewById(R.id.listgroup_group_name);
+            if (isCurrentUser(group)) {
+                groupLayout.setBackgroundColor(getResources().getColor(R.color.color_own_id));
+            }
+
+            final TextView textViewGroupName = (TextView) groupLayout.findViewById(R.id.listgroup_group_name);
             textViewGroupName.setText(group.getName());
 
-            TextView textViewGroupMembers = (TextView) groupLayout.findViewById(R.id.listgroup_group_members);
+            final TextView textViewGroupMembers = (TextView) groupLayout.findViewById(R.id.listgroup_group_members);
             textViewGroupMembers.setText(createLocalizedGroupMemberText(group));
 
             return groupLayout;
+        }
+
+        /**
+         * @return {@code true} if the current user is in the group the listview item is created for.
+         */
+        private boolean isCurrentUser(Group group) {
+            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+            final NamingManager namingManager = getComponent(NamingManager.KEY);
+            if (handler == null || namingManager == null) {
+                Log.i(TAG, "Container not yet connected!");
+                return false;
+            }
+            final DeviceID ownID = namingManager.getOwnID();
+            for (UserDevice groupMember : handler.getAllGroupMembers(group)) {
+                if (groupMember.getUserDeviceID().equals(ownID)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /**
@@ -242,7 +267,7 @@ public class ListGroupFragment extends BoundFragment {
          * @return the text to display
          */
         private String createLocalizedGroupMemberText(Group group) {
-            Resources res = getResources();
+            final Resources res = getResources();
             String groupMemberText = res.getString(R.string.group_has_no_members);
             final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
             if (handler == null) {
