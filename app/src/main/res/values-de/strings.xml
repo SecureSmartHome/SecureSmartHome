@@ -22,7 +22,7 @@
     <string name="brightness_warning_title">Beleuchtungswarnung!</string>
     <string name="cannot_add_slave">Der neue Slave konnte nicht hinzugefügt werden.</string>
     <string name="click_to_register">Klicken sie unten, um sich in einem System zu registrieren.</string>
-    <string name="climate_notification_text">Die Luftfeuchtigkeit beträgt %3.2f \U+0025, bitte lüften sie bei Gelegenheit.</string>
+    <string name="climate_notification_text">Die Luftfeuchtigkeit beträgt %3.2f %%, bitte lüften sie bei Gelegenheit.</string>
     <string name="climate_notification_title">Raumklimawarnung!</string>
     <string name="climate_sensor">Raumklimasensor:</string>
     <string name="connected_to_type">Verbunden mit Slave:</string>
