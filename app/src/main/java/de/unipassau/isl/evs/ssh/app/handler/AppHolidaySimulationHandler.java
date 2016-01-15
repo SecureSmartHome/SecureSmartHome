@@ -52,7 +52,9 @@ public class AppHolidaySimulationHandler extends AbstractAppHandler implements C
     }
 
     /**
-     * @return if the Holiday Simulation is turned on.
+     * Indicates whether the holiday simulation is on
+     *
+     * @return true if the Holiday Simulation is turned on.
      */
     public boolean isOn() {
         final long now = System.currentTimeMillis();

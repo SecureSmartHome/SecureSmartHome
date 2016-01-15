@@ -10,6 +10,11 @@ public class DoorBellPayload implements MessagePayload {
     private final String moduleName; //Name of the bell which is rang
     private CameraPayload cameraPayload; //Picture of the door camera
 
+    /**
+     * Constructor for the DoorBellPayload
+     *
+     * @param moduleName of the module representing a door bell
+     */
     public DoorBellPayload(String moduleName) {
         this.moduleName = moduleName;
     }

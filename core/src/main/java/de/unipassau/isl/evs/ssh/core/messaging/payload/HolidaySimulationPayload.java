@@ -9,6 +9,12 @@ public class HolidaySimulationPayload implements MessagePayload {
 
     private final boolean on; //either indicates if the simulation should be switch on or off, or if it is switched on or off
 
+    /**
+     * Constructor for the payload
+     *
+     * @param on showing whether the holiday simulation should be switched on or is on, depending
+     *           on the use of the payload
+     */
     public HolidaySimulationPayload(boolean on) {
         this.on = on;
     }

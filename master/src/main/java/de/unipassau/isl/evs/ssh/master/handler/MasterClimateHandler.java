@@ -62,6 +62,11 @@ public class MasterClimateHandler extends AbstractMasterHandler implements Compo
         }
     }
 
+    /**
+     * Returns the latest weather data for modules
+     *
+     * @return map containing ClimatePayloads for Modules
+     */
     public Map<Module, ClimatePayload> getLatestWeatherData() {
         return new HashMap<>(latestWeatherData);
     }

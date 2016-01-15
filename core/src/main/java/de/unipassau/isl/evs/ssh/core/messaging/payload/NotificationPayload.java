@@ -5,6 +5,10 @@ import java.io.Serializable;
 import de.unipassau.isl.evs.ssh.core.sec.Permission;
 
 /**
+ * Generic Notification Payload to send information to Apps indicating which Notificaiton
+ * should be shown. May contain additional arguments which have to be evaluated by the app
+ * depending on the notification type.
+ *
  * @author Leon Sell
  */
 public class NotificationPayload implements MessagePayload {

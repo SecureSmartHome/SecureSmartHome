@@ -9,6 +9,8 @@ public enum MasterConstants {
     ;
 
     /**
+     * Containing thresholds for climate data. If thresholds are bypassed a warning should be sent.
+     *
      * @author Christoph Fraedrich
      */
     public enum ClimateThreshold {

@@ -129,6 +129,10 @@ public class MasterHolidaySimulationPlannerHandler extends AbstractMasterHandler
         super.destroy();
     }
 
+    /**
+     * Private class representing an action which has to be executed when the holiday simulation
+     * is active.
+     */
     private class HolidayLightAction implements Runnable {
 
         final String moduleName;

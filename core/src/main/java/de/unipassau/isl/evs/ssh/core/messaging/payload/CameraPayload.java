@@ -12,12 +12,13 @@ public class CameraPayload implements MessagePayload {
     private byte[] picture;
 
     /**
-     * Constructor for a CameraPayload only requesting the cameraID.
+     * Constructor for a CameraPayload only requesting the cameraID and the moduleName.
      * <p/>
-     * If this is used the picture in the payload will be null.
+     * If this is used the picture in the payload will be null unless it is explicitly set via the setter.
      * This can be used if a picture is requested.+
      *
      * @param cameraID of the camera which we interact with
+     * @param moduleName of the module representing the camera
      */
     public CameraPayload(int cameraID, String moduleName) {
         this.cameraID = cameraID;
