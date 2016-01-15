@@ -20,7 +20,6 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
@@ -167,7 +166,7 @@ public class ListGroupFragment extends BoundFragment {
      * Adapter used for {@link #groupList}.
      */
     private class GroupListAdapter extends BaseAdapter {
-        private List<Group> groups;
+        private List<Group> groups = new ArrayList<>();
 
         public GroupListAdapter() {
             updateGroupList();
@@ -186,37 +185,24 @@ public class ListGroupFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-            Set<Group> allGroups = handler.getAllGroups();
-            groups = Lists.newArrayList(allGroups);
+            groups.clear();
+            groups.addAll(handler.getAllGroups());
             Collections.sort(groups, NamedDTO.COMPARATOR);
         }
 
         @Override
         public int getCount() {
-            if (groups != null) {
-                return groups.size();
-            } else {
-                return 0;
-            }
+            return groups.size();
         }
 
         @Override
         public Group getItem(int position) {
-            if (groups != null) {
-                return groups.get(position);
-            } else {
-                return null;
-            }
+            return groups.get(position);
         }
 
         @Override
         public long getItemId(int position) {
-            final Group item = getItem(position);
-            if (item != null && item.getName() != null) {
-                return item.getName().hashCode();
-            } else {
-                return 0;
-            }
+            return getItem(position).hashCode();
         }
 
         @Override

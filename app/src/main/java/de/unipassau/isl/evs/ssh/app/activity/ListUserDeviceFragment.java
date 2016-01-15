@@ -17,11 +17,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.common.collect.Lists;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppUserConfigurationHandler;
@@ -209,7 +207,7 @@ public class ListUserDeviceFragment extends BoundFragment {
      * Adapter used for {@link #userDeviceList}.
      */
     private class UserDeviceListAdapter extends BaseAdapter {
-        private List<UserDevice> userDevices;
+        private List<UserDevice> userDevices = new ArrayList<>();
 
         public UserDeviceListAdapter() {
             updateUserDeviceList();
@@ -228,39 +226,24 @@ public class ListUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-
-            Set<UserDevice> allUserDevices = handler.getAllGroupMembers(group);
-
-            userDevices = Lists.newArrayList(allUserDevices);
+            userDevices.clear();
+            userDevices.addAll(handler.getAllGroupMembers(group));
             Collections.sort(userDevices, NamedDTO.COMPARATOR);
         }
 
         @Override
         public int getCount() {
-            if (userDevices != null) {
-                return userDevices.size();
-            } else {
-                return 0;
-            }
+            return userDevices.size();
         }
 
         @Override
         public UserDevice getItem(int position) {
-            if (userDevices != null) {
-                return userDevices.get(position);
-            } else {
-                return null;
-            }
+            return userDevices.get(position);
         }
 
         @Override
         public long getItemId(int position) {
-            final UserDevice item = getItem(position);
-            if (item != null && item.getName() != null) {
-                return item.getName().hashCode();
-            } else {
-                return 0;
-            }
+            return userDevices.get(position).hashCode();
         }
 
         @Override

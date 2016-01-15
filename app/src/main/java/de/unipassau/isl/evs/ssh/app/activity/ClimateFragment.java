@@ -13,11 +13,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.common.collect.Lists;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppClimateHandler;
@@ -84,7 +82,7 @@ public class ClimateFragment extends BoundFragment {
      */
     private class ClimateListAdapter extends BaseAdapter {
         private final LayoutInflater inflater;
-        private List<Module> climateSensorModules;
+        private List<Module> climateSensorModules = new ArrayList<>();
 
         public ClimateListAdapter() {
             this.inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -108,8 +106,8 @@ public class ClimateFragment extends BoundFragment {
             }
 
             handler.maybeUpdateModules();
-            final Map<Module, AppClimateHandler.ClimateStatus> climateStatus = handler.getAllClimateModuleStates();
-            climateSensorModules = Lists.newArrayList(climateStatus.keySet());
+            climateSensorModules.clear();
+            climateSensorModules.addAll(handler.getAllClimateModuleStates().keySet());
             Collections.sort(climateSensorModules, NamedDTO.COMPARATOR);
         }
 
@@ -142,12 +140,8 @@ public class ClimateFragment extends BoundFragment {
          */
         @Override
         public long getItemId(int position) {
-            final Module item = getItem(position);
-            if (item != null && item.getName() != null) {
-                return item.getName().hashCode();
-            } else {
-                return 0;
-            }
+            return getItem(position).getName().hashCode();
+
         }
 
         /**

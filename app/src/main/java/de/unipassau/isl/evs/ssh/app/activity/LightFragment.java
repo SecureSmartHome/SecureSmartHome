@@ -19,7 +19,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import de.unipassau.isl.evs.ssh.app.R;
 import de.unipassau.isl.evs.ssh.app.handler.AppLightHandler;
@@ -121,9 +120,8 @@ public class LightFragment extends BoundFragment {
                 return;
             }
 
-            final Map<Module, AppLightHandler.LightStatus> lightModulesStatus = handler.getAllLightModuleStates();
             lightModules.clear();
-            lightModules.addAll(lightModulesStatus.keySet());
+            lightModules.addAll(handler.getAllLightModuleStates().keySet());
             Collections.sort(lightModules, NamedDTO.COMPARATOR);
 
             super.notifyDataSetChanged();
@@ -141,22 +139,12 @@ public class LightFragment extends BoundFragment {
 
         @Override
         public long getItemId(int position) {
-            final Module item = getItem(position);
-            if (item != null && item.getName() != null) {
-                int hash = item.getName().hashCode();
-                final AppLightHandler appLightHandler = getComponent(AppLightHandler.KEY);
-                if (appLightHandler != null && appLightHandler.isLightOn(item)) {
-                    hash = ~hash;
-                }
-                return hash;
-            } else {
-                return 0;
-            }
+            return getItem(position).hashCode();
         }
 
         @Override
         public boolean hasStableIds() {
-            return false;
+            return true;
         }
 
         /**
