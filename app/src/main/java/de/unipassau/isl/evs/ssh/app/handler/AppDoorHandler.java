@@ -28,6 +28,9 @@ import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_CAMERA_
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BLOCK;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BLOCK_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BLOCK_REPLY;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_GET;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_GET_ERROR;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH_REPLY;
@@ -52,6 +55,8 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
                 APP_DOOR_RING,
                 APP_DOOR_STATUS_UPDATE,
                 APP_CAMERA_BROADCAST,
+                MASTER_DOOR_GET_REPLY,
+                MASTER_DOOR_GET_ERROR,
                 MASTER_DOOR_BLOCK_REPLY,
                 MASTER_DOOR_BLOCK_ERROR,
                 MASTER_DOOR_UNLATCH_REPLY,
@@ -64,7 +69,11 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
     @Override
     public void handle(Message.AddressedMessage message) {
         if (!tryHandleResponse(message)) {
-            if (MASTER_DOOR_BLOCK_REPLY.matches(message)) {
+            if (MASTER_DOOR_GET_REPLY.matches(message)) {
+                handleUpdate(MASTER_DOOR_GET_REPLY.getPayload(message));
+            } else if (MASTER_DOOR_GET_ERROR.matches(message)) {
+                fireStatusUpdated(false);
+            } else if (MASTER_DOOR_BLOCK_REPLY.matches(message)) {
                 isDoorBlocked = MASTER_DOOR_BLOCK_REPLY.getPayload(message).isBlock();
                 fireBlockActionFinished(true);
             } else if (MASTER_DOOR_BLOCK_ERROR.matches(message)) {
@@ -76,16 +85,13 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
             } else if (MASTER_CAMERA_GET_REPLY.matches(message)) {
                 picture = MASTER_CAMERA_GET_REPLY.getPayload(message).getPicture();
                 fireCameraActionFinished(true);
-            } else if (APP_CAMERA_BROADCAST.matches(message)){
+            } else if (APP_CAMERA_BROADCAST.matches(message)) {
                 picture = APP_CAMERA_BROADCAST.getPayload(message).getPicture();
                 fireCameraActionFinished(true);
             } else if (MASTER_CAMERA_GET_ERROR.matches(message)) {
                 fireCameraActionFinished(false);
             } else if (APP_DOOR_STATUS_UPDATE.matches(message)) {
-                DoorStatusPayload payload = APP_DOOR_STATUS_UPDATE.getPayload(message);
-                isDoorOpen = payload.isOpen();
-                isDoorBlocked = payload.isBlocked();
-                fireStatusUpdated();
+                handleUpdate(APP_DOOR_STATUS_UPDATE.getPayload(message));
             } else if (APP_DOOR_RING.matches(message)) {
                 DoorBellPayload doorBellPayload = APP_DOOR_RING.getPayload(message);
                 picture = doorBellPayload.getCameraPayload().getPicture();
@@ -94,6 +100,21 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
                 invalidMessage(message);
             }
         }
+    }
+
+    private void handleUpdate(DoorStatusPayload payload) {
+        isDoorOpen = payload.isOpen();
+        isDoorBlocked = payload.isBlocked();
+        fireStatusUpdated(true);
+    }
+
+    @Nullable
+    private String getDoor() {
+        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorBuzzers();
+        if (doors.size() < 1) {
+            return null;
+        }
+        return doors.get(0).getName();
     }
 
     /**
@@ -114,9 +135,9 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
         listeners.remove(listener);
     }
 
-    private void fireStatusUpdated() {
+    private void fireStatusUpdated(boolean wasSuccessful) {
         for (DoorListener listener : listeners) {
-            listener.onDoorStatusChanged();
+            listener.onDoorStatusChanged(wasSuccessful);
         }
     }
 
@@ -161,13 +182,14 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
      * Sends a "OpenDoor" message to the master.
      */
     public void unlatchDoor() {
-        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorBuzzers();
-        if (doors.size() < 1) {
+        final String door = getDoor();
+        if (door == null) {
             Log.e(TAG, "Could not open the door. No door buzzer installed");
             fireUnlatchActionFinished(false);
             return;
         }
-        DoorPayload doorPayload = new DoorPayload(doors.get(0).getName());
+
+        DoorPayload doorPayload = new DoorPayload(door);
         final Message.AddressedMessage messageToMaster = sendMessageToMaster(MASTER_DOOR_UNLATCH, new Message(doorPayload));
         final Future<Void> messagePayloadFuture = newResponseFuture(messageToMaster);
         messagePayloadFuture.addListener(new FutureListener<Void>() {
@@ -178,14 +200,29 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
         });
     }
 
+    /**
+     * Sends a "BlockDoor" message to the master.
+     */
+    public void blockDoor() {
+        blockDoor(true);
+    }
+
+    /**
+     * Sends a "UnblockDoor" message to the master.
+     */
+    public void unblockDoor() {
+        blockDoor(false);
+    }
+
     private void blockDoor(boolean isBlocked) {
-        List<Module> doors = requireComponent(AppModuleHandler.KEY).getDoorBuzzers();
-        if (doors.size() < 1) {
+        final String door = getDoor();
+        if (door == null) {
             Log.e(TAG, "Could not (un)block the door. No door sensor installed");
             fireBlockActionFinished(false);
             return;
         }
-        DoorBlockPayload doorPayload = new DoorBlockPayload(isBlocked, doors.get(0).getName());
+
+        DoorBlockPayload doorPayload = new DoorBlockPayload(isBlocked, door);
         final Future<DoorStatusPayload> future = newResponseFuture(sendMessageToMaster(MASTER_DOOR_BLOCK, new Message(doorPayload)));
         future.addListener(new FutureListener<DoorStatusPayload>() {
             @Override
@@ -236,17 +273,19 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
     }
 
     /**
-     * Sends a "BlockDoor" message to the master.
+     * Requests the door status from master by sending him a message.
      */
-    public void blockDoor() {
-        blockDoor(true);
-    }
-
-    /**
-     * Sends a "UnblockDoor" message to the master.
-     */
-    public void unblockDoor() {
-        blockDoor(false);
+    public void requestDoorStatus() {
+        Message message = new Message(new DoorPayload(getDoor()));
+        final Future<DoorStatusPayload> future = newResponseFuture(sendMessageToMaster(MASTER_DOOR_GET, message));
+        future.addListener(new FutureListener<DoorStatusPayload>() {
+            @Override
+            public void operationComplete(Future<DoorStatusPayload> future) throws Exception {
+                if (future.isSuccess()) {
+                    handleUpdate(future.get());
+                }
+            }
+        });
     }
 
     /**
@@ -256,8 +295,10 @@ public class AppDoorHandler extends AbstractAppHandler implements Component {
 
         /**
          * Called when the door status changed. This happens either when the door was (un)blocked, unlatched or opened.
+         *
+         * @param wasSuccessful true when the action finished successfully
          */
-        void onDoorStatusChanged();
+        void onDoorStatusChanged(boolean wasSuccessful);
 
         /**
          * Called when a door (un)block action finished.

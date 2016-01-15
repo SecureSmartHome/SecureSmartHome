@@ -1,11 +1,10 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
+import de.unipassau.isl.evs.ssh.core.handler.NoPermissionException;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorBlockPayload;
@@ -13,19 +12,16 @@ import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DoorStatusPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.NotificationPayload;
-import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.master.network.broadcast.NotificationBroadcaster;
 import de.unipassau.isl.evs.ssh.master.task.MasterHolidaySimulationPlannerHandler;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.Message.HEADER_REFERENCES_ID;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.APP_DOOR_STATUS_UPDATE;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_BLOCK;
+import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_GET;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_STATUS_UPDATE;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DOOR_UNLATCH;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET_ERROR;
-import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_STATUS_GET_REPLY;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH_ERROR;
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.SLAVE_DOOR_UNLATCH_REPLY;
@@ -48,21 +44,19 @@ public class MasterDoorHandler extends AbstractMasterHandler {
     @Override
     public RoutingKey[] getRoutingKeys() {
         return new RoutingKey[]{
-                MASTER_DEVICE_CONNECTED,
+                MASTER_DOOR_GET,
                 MASTER_DOOR_STATUS_UPDATE,
                 MASTER_DOOR_UNLATCH,
                 MASTER_DOOR_BLOCK,
                 SLAVE_DOOR_UNLATCH_REPLY,
                 SLAVE_DOOR_UNLATCH_ERROR,
-                SLAVE_DOOR_STATUS_GET_REPLY,
-                SLAVE_DOOR_STATUS_GET_ERROR
         };
     }
 
     @Override
     public void handle(Message.AddressedMessage message) {
-        if (MASTER_DEVICE_CONNECTED.matches(message)) {
-            pushDoorStatus(MASTER_DEVICE_CONNECTED.getPayload(message).getDeviceID());
+        if (MASTER_DOOR_GET.matches(message)) {
+            handleDoorGetRequest(MASTER_DOOR_GET.getPayload(message), message);
         } else if (MASTER_DOOR_STATUS_UPDATE.matches(message)) {
             handleDoorStatusUpdate(MASTER_DOOR_STATUS_UPDATE.getPayload(message));
         } else if (MASTER_DOOR_UNLATCH.matches(message)) {
@@ -71,10 +65,6 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             handleDoorUnlatchResponse(SLAVE_DOOR_UNLATCH_REPLY.getPayload(message), message);
         } else if (MASTER_DOOR_BLOCK.matches(message)) {
             handleDoorBlockSet(message, MASTER_DOOR_BLOCK.getPayload(message));
-        } else if (SLAVE_DOOR_STATUS_GET_REPLY.matches(message)) {
-            handleDoorStatusGetResponse(message, SLAVE_DOOR_STATUS_GET_REPLY.getPayload(message));
-        } else if (SLAVE_DOOR_STATUS_GET_ERROR.matches(message)) {
-            replyError(message, SLAVE_DOOR_STATUS_GET_ERROR);
         } else if (SLAVE_DOOR_UNLATCH_ERROR.matches(message)) {
             replyError(message, SLAVE_DOOR_UNLATCH_ERROR);
         } else {
@@ -82,15 +72,17 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         }
     }
 
-    private void pushDoorStatus(DeviceID deviceID) {
-        final SlaveController slaveController = requireComponent(SlaveController.KEY);
-        final List<Module> doors = slaveController.getModulesByType(CoreConstants.ModuleType.DoorBuzzer);
-        for (Module door : doors) {
-            final String moduleName = door.getName();
-            boolean isOpen = getOpen(moduleName);
-            boolean isBlocked = getBlocked(moduleName);
-            sendMessage(deviceID, APP_DOOR_STATUS_UPDATE, new Message(new DoorStatusPayload(isOpen, isBlocked, moduleName)));
+    private void handleDoorGetRequest(DoorPayload payload, Message.AddressedMessage original) {
+        if (!hasPermission(original.getFromID(), REQUEST_DOOR_STATUS)) {
+            sendReply(original, new Message(new ErrorPayload(new NoPermissionException(REQUEST_DOOR_STATUS))));
+            return;
         }
+
+        final String moduleName = payload.getModuleName();
+        final boolean isOpen = getOpen(moduleName);
+        final boolean isBlocked = getBlocked(moduleName);
+        final Message reply = new Message(new DoorStatusPayload(isOpen, isBlocked, moduleName));
+        sendReply(original, reply);
     }
 
     private void replyError(Message.AddressedMessage message, RoutingKey<ErrorPayload> routingKey) {
@@ -137,15 +129,6 @@ public class MasterDoorHandler extends AbstractMasterHandler {
                 takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
         sendReply(correspondingMessage, new Message());
         broadcastDoorStatus(payload.getModuleName());
-    }
-
-
-    private void handleDoorStatusGetResponse(Message.AddressedMessage message, DoorStatusPayload payload) {
-        final Message.AddressedMessage correspondingMessage =
-                takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
-        final Message messageToSend = new Message(payload);
-        setOpen(payload.getModuleName(), payload.isOpen());
-        sendReply(correspondingMessage, messageToSend);
     }
 
     private void handleDoorBlockSet(Message.AddressedMessage message, DoorBlockPayload payload) {

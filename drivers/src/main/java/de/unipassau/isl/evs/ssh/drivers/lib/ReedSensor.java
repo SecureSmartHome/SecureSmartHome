@@ -70,6 +70,7 @@ public class ReedSensor extends AbstractComponent {
         private final String TAG = ReedPollingRunnable.class.getSimpleName();
         private final ReedSensor sensor;
         private boolean isOpenFilter = false;
+        private boolean isFirstStart = true;
 
         public ReedPollingRunnable(ReedSensor sensor) {
             this.sensor = sensor;
@@ -79,9 +80,10 @@ public class ReedSensor extends AbstractComponent {
         public void run() {
             try {
                 boolean isOpen = sensor.isOpen();
-                if (future != null && isOpen != isOpenFilter) {
+                if (future != null && (isOpen != isOpenFilter || isFirstStart)) {
                     Log.i(TAG, "isOpen(): " + isOpen);
                     isOpenFilter = isOpen;
+                    isFirstStart = false;
                     sendReedInfo(isOpen);
                 }
             } catch (EvsIoException e) {

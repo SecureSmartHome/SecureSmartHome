@@ -40,13 +40,18 @@ public class DoorFragment extends BoundFragment {
 
     private final AppDoorHandler.DoorListener doorListener = new AppDoorHandler.DoorListener() {
         @Override
-        public void onDoorStatusChanged() {
+        public void onDoorStatusChanged(final boolean wasSuccessful) {
             maybeRunOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    updateButtons();
+                    if (wasSuccessful) {
+                        updateButtons();
+                    } else {
+                        Toast.makeText(getActivity(), R.string.no_permission_to_request_door_status, Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
+
         }
 
         @Override
@@ -133,6 +138,7 @@ public class DoorFragment extends BoundFragment {
         final AppDoorHandler handler = container.require(AppDoorHandler.KEY);
         handler.addListener(doorListener);
 
+        handler.requestDoorStatus();
 
         displayImage();
         updateButtons();
