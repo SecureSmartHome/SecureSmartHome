@@ -61,6 +61,13 @@ public class NotificationBroadcaster extends AbstractComponent {
             } else {
                 sendToUsers(allUserDevicesWithPermission, messageToSend);
             }
+        } else if (type.equals(NotificationPayload.NotificationType.BRIGHTNESS_WARNING)) {
+            userAtHome = isSomeoneAtHome(allUserDevicesWithPermission);
+            if (userAtHome) {
+                sendToUsersAtHome(allUserDevicesWithPermission, messageToSend);
+            } else {
+                sendToUsers(allUserDevicesWithPermission, messageToSend);
+            }
         } else {
             sendToUsers(allUserDevicesWithPermission, messageToSend);
         }

@@ -79,7 +79,6 @@ public class MasterClimateHandler extends AbstractMasterHandler implements Compo
 
     private void evaluateBrightness(ClimatePayload payload) {
         NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
-        //TODO Schwellwert puffer hinzufügen. Wenn lampe eingeschaltet und über Schwellwert keine warnung.
         if (payload.getVisible() > MasterConstants.ClimateThreshold.VISIBLE_LIGHT) {
             if (System.currentTimeMillis() - brightnessTimeStamp > WARNING_TIMER) {
                 for (Module module : latestLightStatus.keySet()) {
