@@ -3,6 +3,7 @@ package de.unipassau.isl.evs.ssh.app.activity;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -17,6 +18,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SectionIndexer;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -25,8 +27,10 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import de.unipassau.isl.evs.ssh.app.R;
@@ -287,9 +291,10 @@ public class EditUserDeviceFragment extends BoundFragment {
     /**
      * Adapter used for {@link #userPermissionList}.
      */
-    private class PermissionListAdapter extends BaseAdapter {
+    private class PermissionListAdapter extends BaseAdapter implements SectionIndexer {
         private final List<PermissionDTO> allPermissions = new ArrayList<>();
-        private final Set<PermissionDTO> userPermissions = new HashSet<>();
+        private final Map<Character, Integer> sectionPositions = new HashMap<>();
+        private final List<Character> sections = new ArrayList<>();
 
         public PermissionListAdapter() {
             updatePermissionList();
@@ -307,8 +312,6 @@ public class EditUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-            userPermissions.clear();
-            userPermissions.addAll(handler.getPermissionForUser(device.getUserDeviceID()));
 
             allPermissions.clear();
             allPermissions.addAll(handler.getAllPermissions());
@@ -325,6 +328,20 @@ public class EditUserDeviceFragment extends BoundFragment {
                     return lhs.toLocalizedString(activity).compareTo(rhs.toLocalizedString(activity));
                 }
             });
+
+            sectionPositions.clear();
+            final Iterator<PermissionDTO> it = allPermissions.iterator();
+            for (int i = 0; it.hasNext(); i++) {
+                final PermissionDTO next = it.next();
+                final Character character = getSection(next);
+                if (!sectionPositions.containsKey(character)) {
+                    sectionPositions.put(character, i);
+                }
+            }
+
+            sections.clear();
+            sections.addAll(sectionPositions.keySet());
+            Collections.sort(sections);
         }
 
         @Override
@@ -404,11 +421,32 @@ public class EditUserDeviceFragment extends BoundFragment {
          */
         private boolean userDeviceHasPermission(PermissionDTO permission) {
             final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
-            if (handler == null) {
-                return userPermissions.contains(permission);
-            } else {
+            if (handler != null) {
                 return handler.hasPermission(device.getUserDeviceID(), permission);
+            } else {
+                return false;
             }
+        }
+
+        @Override
+        public Object[] getSections() {
+            return sections.toArray();
+        }
+
+        @Override
+        public int getPositionForSection(int sectionIndex) {
+            return sectionPositions.get(sections.get(sectionIndex));
+        }
+
+        @Override
+        public int getSectionForPosition(int position) {
+            return Math.max(0, sections.indexOf(getSection(getItem(position))));
+        }
+
+        @NonNull
+        private Character getSection(PermissionDTO next) {
+            final String name = next.getPermission().toLocalizedString(getActivity());
+            return Character.toUpperCase(name.charAt(0));
         }
     }
 }
