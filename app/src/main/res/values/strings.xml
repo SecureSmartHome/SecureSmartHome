@@ -200,8 +200,8 @@
     <string name="perm_desc_door_unlocked">Allows you to check if the door is unlocked.</string>
     <string name="perm_desc_holiday_mode_switched_off">Allows you to check if the holiday simulation is inactive.</string>
     <string name="perm_desc_holiday_mode_switched_on">Allows you to check if the holiday simulation is active.</string>
-    <string name="perm_delete_module">Allows you to delete configured Modules</string>
-    <string name="perm_add_module">Allows you to add new hardware Modules</string>
+    <string name="perm_desc_delete_module">Allows you to delete configured Modules</string>
+    <string name="perm_desc_add_module">Allows you to add new hardware Modules</string>
 
     <string name="si_degree" translatable="false">%3.1f C°</string>
     <string name="si_pressure" translatable="false">%4.1f Pa</string>

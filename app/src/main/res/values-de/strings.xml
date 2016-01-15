@@ -269,8 +269,8 @@
     <string name="perm_desc_switch_light_extern">Erlaubt das Schalten des Lichtes von außerhalb des Heimbereichs</string>
     <string name="user_edited">Benutzer editiert</string>
     <string name="with_id_is_in_group">mit ID %1$s ist in Gruppe %2$s.</string>
-    <string name="perm_add_module">Allows </string>
-    <string name="perm_delete_module">Allows deleteing modules</string>
+    <string name="perm_add_module">Module hinzufügen</string>
+    <string name="perm_delete_module">Module löschen</string>
     <string name="connected_weather_boards">Verbundene Wetterstationen:</string>
     <string name="no_climate_sensor_connected">Keine verbundenen Wetterstationen.</string>
 </resources>
