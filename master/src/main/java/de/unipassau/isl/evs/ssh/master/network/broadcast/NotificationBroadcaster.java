@@ -105,7 +105,7 @@ public class NotificationBroadcaster extends AbstractComponent {
     }
 
     /**
-     * Sends out an notification to all userDevices with PermissionDTO to receive the notification.
+     * Sends out an notification to all userDevices with Permission to receive the notification.
      *
      * @param allUserDevicesWithPermission to receive the notification
      * @param messageToSend                content of the notification

@@ -122,7 +122,7 @@
     <string name="visible_1">Visible:</string>
     <string name="ir">IR:</string>
 
-    <!-- PermissionDTO names -->
+    <!-- Permission names -->
     <string name="perm_add_odroid">Adding Odroids</string>
     <string name="perm_rename_odroid">Edit Odroid names</string>
     <string name="perm_delete_odroid">Delete Odroids</string>
@@ -165,7 +165,7 @@
     <string name="perm_door_unlocked">Request door unlocked status</string>
     <string name="perm_switch_light">Switch lights</string>
 
-    <!-- PermissionDTO descriptions -->
+    <!-- Permission descriptions -->
     <string name="perm_desc_add_odroid">Allows adding new Odroids.</string>
     <string name="perm_desc_rename_odroid">Allows renaming a Odroid\' name.</string>
     <string name="perm_desc_delete_odroid">Allows deleting Odroids.</string>

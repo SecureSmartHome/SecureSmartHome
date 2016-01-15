@@ -60,7 +60,7 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
     /**
      * Returns whether the device with the given DeviceID is a Slave.
      *
-     * @param deviceID DeviceID for the device to check for whether it a Slave or not.
+     * @param deviceID DeviceID for the device to check for whether it is a Slave or not.
      * @return Whether or not the device with given DeviceID is a Slave.
      */
     public boolean isSlave(DeviceID deviceID) {
@@ -70,7 +70,7 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
     /**
      * Returns whether the device with the given DeviceID is a Master.
      *
-     * @param userDeviceID DeviceID for the device to check for whether it a Master or not.
+     * @param userDeviceID DeviceID for the device to check for whether it is a Master or not.
      * @return Whether or not the device with given DeviceID is a Master.
      */
     public boolean isMaster(DeviceID userDeviceID) {
@@ -78,11 +78,11 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
     }
 
     /**
-     * Check if a given Device has a given PermissionDTO. Master has all PermissionDTO.
+     * Check if a given Device has a given Permission. Master has all Permission.
      *
      * @param userDeviceID DeviceID of the Device.
-     * @param permission   PermissionDTO to check for.
-     * @param moduleName   Module the PermissionDTO applies for.
+     * @param permission   Permission to check for.
+     * @param moduleName   Module the Permission applies for.
      * @return true if has permissions otherwise false.
      */
     protected boolean hasPermission(DeviceID userDeviceID, Permission permission, String moduleName) {
@@ -91,10 +91,10 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
     }
 
     /**
-     * Has PermissionDTO for Permissions that are independent of a Module.
+     * Has Permission for Permissions that are independent of a Module.
      *
      * @param userDeviceID DeviceID of the Device.
-     * @param permission   PermissionDTO to check for.
+     * @param permission   Permission to check for.
      * @return true if has permissions otherwise false.
      */
     protected boolean hasPermission(DeviceID userDeviceID, Permission permission) {
@@ -102,11 +102,11 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
     }
 
     /**
-     * Send a message to all Devices that have a given PermissionDTO.
+     * Send a message to all Devices that have a given Permission.
      *
      * @param messageToSend Message to send to the devices.
-     * @param permission    PermissionDTO the Device has to have.
-     * @param moduleName    Module to PermissionDTO applies for.
+     * @param permission    Permission the Device has to have.
+     * @param moduleName    Module to Permission applies for.
      * @param routingKey    RoutingKey to send the message with.
      */
     protected void sendMessageToAllDevicesWithPermission(
@@ -126,7 +126,7 @@ public abstract class AbstractMasterHandler extends AbstractMessageHandler {
      * Send a reply containing a no permission error.
      *
      * @param original   Message to reply to
-     * @param permission PermissionDTO the author of the original Message doesn't have.
+     * @param permission Permission the author of the original Message doesn't have.
      */
     protected void sendNoPermissionReply(Message.AddressedMessage original, Permission permission) {
         Message message = new Message(new ErrorPayload(new NoPermissionException(permission)));
