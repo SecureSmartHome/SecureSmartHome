@@ -13,17 +13,19 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.common.collect.Lists;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -293,8 +295,8 @@ public class EditUserDeviceFragment extends BoundFragment {
      * Adapter used for {@link #userPermissionList}.
      */
     private class PermissionListAdapter extends BaseAdapter {
-        private List<PermissionDTO> allPermissions;
-        private Set<PermissionDTO> userPermissions;
+        private final List<PermissionDTO> allPermissions = new ArrayList<>();
+        private final Set<PermissionDTO> userPermissions = new HashSet<>();
 
         public PermissionListAdapter() {
             updatePermissionList();
@@ -312,9 +314,11 @@ public class EditUserDeviceFragment extends BoundFragment {
                 Log.i(TAG, "Container not yet connected!");
                 return;
             }
-            userPermissions = handler.getPermissionForUser(device.getUserDeviceID());
-            Set<PermissionDTO> tempPermissionList = handler.getAllPermissions();
-            allPermissions = Lists.newArrayList(tempPermissionList);
+            userPermissions.clear();
+            userPermissions.addAll(handler.getPermissionForUser(device.getUserDeviceID()));
+
+            allPermissions.clear();
+            allPermissions.addAll(handler.getAllPermissions());
             Collections.sort(allPermissions, new Comparator<PermissionDTO>() {
                 @Override
                 public int compare(PermissionDTO lhs, PermissionDTO rhs) {
@@ -332,30 +336,17 @@ public class EditUserDeviceFragment extends BoundFragment {
 
         @Override
         public int getCount() {
-            if (allPermissions != null) {
-                return allPermissions.size();
-            } else {
-                return 0;
-            }
+            return allPermissions.size();
         }
 
         @Override
         public PermissionDTO getItem(int position) {
-            if (allPermissions != null) {
-                return allPermissions.get(position);
-            } else {
-                return null;
-            }
+            return allPermissions.get(position);
         }
 
         @Override
         public long getItemId(int position) {
-            final PermissionDTO item = getItem(position);
-            if (item != null && item.getPermission() != null) {
-                return item.getPermission().hashCode();
-            } else {
-                return 0;
-            }
+            return getItem(position).hashCode();
         }
 
         @Override
@@ -363,46 +354,36 @@ public class EditUserDeviceFragment extends BoundFragment {
             return true;
         }
 
-        @Override
-        public boolean isEnabled(int position) {
-            // TODO Phil: test what {@code false} does exactly (Phil, 2016-01-13)
-            return areAllItemsEnabled();
-        }
-
         /**
          * Creates a view for every permission registered in the system.
          */
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = getActivity().getLayoutInflater();
             final PermissionDTO permission = getItem(position);
-            LinearLayout permissionLayout;
+            final LinearLayout layout;
             if (convertView == null) {
-                permissionLayout = (LinearLayout) inflater.inflate(R.layout.permissionlayout, parent, false);
+                layout = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.permissionlayout, parent, false);
             } else {
-                permissionLayout = (LinearLayout) convertView;
+                layout = (LinearLayout) convertView;
             }
 
             final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
             if (handler == null) {
-                Log.i(TAG, "Container not yet connected!");
-            } else {
-                TextView permissionText = (TextView) permissionLayout.findViewById(R.id.listpermission_permission_text);
-                permissionText.setText(permission.toLocalizedString(getActivity()));
+                return layout;
+            }
 
-                final Button permissionButton = (Button) permissionLayout.findViewById(R.id.listpermission_permission_button);
-                final boolean deviceHasPermission = userDeviceHasPermission(permission);
-                if (deviceHasPermission) {
-                    permissionButton.setText(getResources().getString(R.string.revoke));
-                } else {
-                    permissionButton.setText(getResources().getString(R.string.grant));
-                }
-                permissionButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+            final Switch permissionSwitch = (Switch) layout.findViewById(R.id.listpermission_permission_switch);
+            permissionSwitch.setText(
+                    permission.toLocalizedString(getActivity())
+            );
+            permissionSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    final boolean hasPermission = userDeviceHasPermission(permission);
+                    if (hasPermission != isChecked) {
                         final AppMainActivity activity = (AppMainActivity) getActivity();
                         if (activity != null && activity.hasPermission(Permission.MODIFY_USER_PERMISSION)) {
-                            if (!deviceHasPermission) {
+                            if (isChecked) {
                                 handler.grantPermission(device.getUserDeviceID(), permission);
                                 Log.i(TAG, permission.toLocalizedString(getActivity())
                                         + " granted for user device " + device.getName());
@@ -411,26 +392,30 @@ public class EditUserDeviceFragment extends BoundFragment {
                                 Log.i(TAG, permission.toLocalizedString(getActivity())
                                         + " revoked for user device " + device.getName());
                             }
-                            updatePermissionList();
                         } else {
                             showToast(R.string.you_can_not_set_permissions);
                         }
-
                     }
-                });
+                }
+            });
+            permissionSwitch.setChecked(userDeviceHasPermission(permission));
 
-                final TextView permissionDescription = (TextView) permissionLayout.findViewById(R.id.listpermission_permission_type);
-                permissionDescription.setText(permission.getPermission().getLocalizedDescription(getActivity()));
-            }
+            final TextView permissionDescription = (TextView) layout.findViewById(R.id.listpermission_permission_type);
+            permissionDescription.setText(permission.getPermission().getLocalizedDescription(getActivity()));
 
-            return permissionLayout;
+            return layout;
         }
 
         /**
          * @return {@code true} if a user device is granted a certain permission.
          */
         private boolean userDeviceHasPermission(PermissionDTO permission) {
-            return userPermissions.contains(permission);
+            final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+            if (handler == null) {
+                return userPermissions.contains(permission);
+            } else {
+                return handler.hasPermission(device.getUserDeviceID(), permission);
+            }
         }
     }
 }
