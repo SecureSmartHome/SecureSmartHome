@@ -41,7 +41,7 @@ import static de.unipassau.isl.evs.ssh.core.sec.Permission.UNLATCH_DOOR;
  */
 public class MasterLightHandler extends AbstractMasterHandler {
     private static final String TAG = MasterLightHandler.class.getSimpleName();
-    private static final int BRIGHTNESS_LOWER_THRESHOLD = 20000;
+    private static final int BRIGHTNESS_LOWER_THRESHOLD = 20;
 
     @Override
     public void handle(Message.AddressedMessage message) {
@@ -129,10 +129,9 @@ public class MasterLightHandler extends AbstractMasterHandler {
                 takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
         final LightPayload lightPayload = SLAVE_LIGHT_SET_REPLY.getPayload(message);
         final Message messageToSend = new Message(lightPayload);
-
-        messageToSend.putHeader(Message.HEADER_REFERENCES_ID, correspondingMessage.getSequenceNr());
-
-        sendReply(correspondingMessage, messageToSend);
+        if (correspondingMessage != null) {
+            sendReply(correspondingMessage, messageToSend);
+        }
         sendMessageToAllDevicesWithPermission(messageToSend, REQUEST_LIGHT_STATUS, null, APP_LIGHT_UPDATE);
     }
 
@@ -150,16 +149,15 @@ public class MasterLightHandler extends AbstractMasterHandler {
         boolean isExtern = !masterUserLocationHandler.isDeviceLocal(message.getFromID());
 
         if (hasPermission(message.getFromID(), UNLATCH_DOOR)) {
-            if (switchedPosition || isExtern) {
+            if (switchedPosition && !isExtern) {
                 final SlaveController slaveController = requireComponent(SlaveController.KEY);
                 boolean tooDark = false;
                 final List<Module> modulesByType = slaveController
                         .getModulesByType(CoreConstants.ModuleType.WeatherBoard);
 
+                final MasterClimateHandler masterClimateHandler = requireComponent(MasterClimateHandler.KEY);
+                final Map<Module, ClimatePayload> latestWeatherData = masterClimateHandler.getLatestWeatherData();
                 for (Module module : modulesByType) {
-                    final MasterClimateHandler masterClimateHandler = requireComponent(MasterClimateHandler.KEY);
-                    final Map<Module, ClimatePayload> latestWeatherData = masterClimateHandler.getLatestWeatherData();
-
                     if (latestWeatherData.get(module).getVisible() < BRIGHTNESS_LOWER_THRESHOLD) {
                         tooDark = true;
                         break;

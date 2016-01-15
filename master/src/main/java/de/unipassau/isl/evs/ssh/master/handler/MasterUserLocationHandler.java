@@ -1,18 +1,23 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import android.util.Log;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import de.ncoder.typedmap.Key;
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.container.Component;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.DeviceConnectedPayload;
 import de.unipassau.isl.evs.ssh.core.naming.DeviceID;
+import de.unipassau.isl.evs.ssh.master.network.Server;
+import io.netty.channel.Channel;
 
 import static de.unipassau.isl.evs.ssh.core.messaging.RoutingKeys.MASTER_DEVICE_CONNECTED;
 
@@ -31,7 +36,7 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
 
     //Contains a mapping from boolean to a queue which contains information whether the device
     //connected to local
-    private final Map<DeviceID, LinkedList<Message.AddressedMessage>> positionMap = new HashMap<>();
+    private final ListMultimap<DeviceID, Record> positionMap = ArrayListMultimap.create();
 
     @Override
     public RoutingKey[] getRoutingKeys() {
@@ -45,15 +50,12 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
         if (RoutingKeys.MASTER_DEVICE_CONNECTED.matches(message)) {
             final DeviceConnectedPayload payload = RoutingKeys.MASTER_DEVICE_CONNECTED.getPayload(message);
 
-            if (!positionMap.containsKey(payload.getDeviceID())) {
-                positionMap.put(payload.getDeviceID(), new LinkedList<Message.AddressedMessage>());
+            final List<Record> list = positionMap.get(payload.getDeviceID());
+            if (list.size() <= 1 || list.get(0).isLocal != payload.isLocal()) {
+                list.add(0, new Record(payload.isLocal()));
             }
-
-            final List<Message.AddressedMessage> list = positionMap.get(payload.getDeviceID());
-            list.add(0, message);
-
-            if (list.size() > MAX_POSITION_COUNT) {
-                list.remove(MAX_POSITION_COUNT);
+            while (list.size() > MAX_POSITION_COUNT) {
+                list.remove(list.size() - 1);
             }
         }
     }
@@ -61,22 +63,25 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
     /**
      * Checks if the given Device switched from extern to local within the last 'interval' minutes
      *
-     * @param deviceID  of the device to be checked
+     * @param deviceID of the device to be checked
      * @param interval in which the change has happened in min
      * @return true if change to local happened in the last 'interval' min.
      */
     public boolean switchedPositionToLocal(DeviceID deviceID, int interval) {
-        if (positionMap.get(deviceID) == null || positionMap.get(deviceID).size() >= 2) {
+        if (positionMap.get(deviceID).size() < 2) {
             return false;
         }
 
-        final Message.AddressedMessage lastMessage = positionMap.get(deviceID).get(0);
-        final Message.AddressedMessage preLastMessage = positionMap.get(deviceID).get(1);
+        final Record lastMessage = positionMap.get(deviceID).get(0);
+        final Record preLastMessage = positionMap.get(deviceID).get(1);
 
         //Is last location local and was last outside of home network and was that change in the last 2 min?
-        return MASTER_DEVICE_CONNECTED.getPayload(lastMessage).isLocal()
-                && !MASTER_DEVICE_CONNECTED.getPayload(preLastMessage).isLocal()
-                && lastMessage.getHeaders().get(Message.HEADER_TIMESTAMP) - System.currentTimeMillis() > TimeUnit.MINUTES.toMillis(interval);
+        boolean result = lastMessage.isLocal && !preLastMessage.isLocal
+                && System.currentTimeMillis() - lastMessage.timestamp < TimeUnit.MINUTES.toMillis(interval);
+
+        Log.v(getClass().getSimpleName(), "switchedPositionToLocal=" + result + "\n\t last Message was " + lastMessage
+                + "\n\t pre last Message was " + preLastMessage + "\n\t at timestamp " + System.currentTimeMillis());
+        return result;
 
     }
 
@@ -87,6 +92,33 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
      * @return true if device is in local network
      */
     public boolean isDeviceLocal(DeviceID deviceID) {
-        return MASTER_DEVICE_CONNECTED.getPayload(positionMap.get(deviceID).get(0)).isLocal();
+        final Channel channel = requireComponent(Server.KEY).findChannel(deviceID);
+        if (channel != null) {
+            return channel.isOpen() && channel.attr(CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION).get();
+        } else {
+            final List<Record> list = positionMap.get(deviceID);
+            if (list.size() >= 1) {
+                return list.get(0).isLocal;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    private static class Record {
+        private final boolean isLocal;
+        private final long timestamp = System.currentTimeMillis();
+
+        private Record(boolean isLocal) {
+            this.isLocal = isLocal;
+        }
+
+        @Override
+        public String toString() {
+            return "Record{" +
+                    "isLocal=" + isLocal +
+                    ", timestamp=" + timestamp +
+                    '}';
+        }
     }
 }
