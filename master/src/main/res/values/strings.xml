@@ -26,7 +26,7 @@
     <string name="userdevice_name">User Device: %s</string>
     <string name="address_format">Address: %s</string>
     <string name="id_format">ID: %s</string>
-    <string name="closed_connection_with">"Closed Connection with: %s"</string>
+    <string name="closed_connection_with">Closed Connection with: %s</string>
 
     <!--others-->
 
