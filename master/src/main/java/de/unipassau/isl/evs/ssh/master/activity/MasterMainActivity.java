@@ -90,8 +90,7 @@ public class MasterMainActivity extends MasterStartUpActivity {
             forceRestartService();
             return true;
         } else if (id == R.id.action_refresh) {
-            userDeviceAdapter.notifyDataSetChanged();
-            slaveAdapter.notifyDataSetChanged();
+            updateDisplayedData();
             return true;
         }
 
@@ -103,18 +102,6 @@ public class MasterMainActivity extends MasterStartUpActivity {
      * Builds the view components that require the container.
      */
     private void buildView() {
-        TextView masterID = (TextView) findViewById(R.id.mainactivity_master_masterid);
-        TextView address = (TextView) findViewById(R.id.mainactivity_master_address);
-
-        DeviceID id = getMasterID();
-        if (id != null) {
-            masterID.setText(id.toShortString());
-            address.setText(getMasterAddress());
-        }
-
-        TextView connected = (TextView) findViewById(R.id.mainactivity_master_connected);
-        connected.setText(String.valueOf(getNumberOfConnectedClients()));
-
         slaveList = (ListView) findViewById(R.id.mainactivity_master_listview_slaves);
         slaveList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -151,6 +138,20 @@ public class MasterMainActivity extends MasterStartUpActivity {
         userDeviceAdapter = new UserDeviceAdapter();
         slaveList.setAdapter(slaveAdapter);
         userDeviceList.setAdapter(userDeviceAdapter);
+
+        updateDisplayedData();
+    }
+
+    private void updateDisplayedData() {
+        DeviceID id = getMasterID();
+        if (id != null) {
+            ((TextView) findViewById(R.id.mainactivity_master_masterid)).setText(id.toShortString());
+        }
+        ((TextView) findViewById(R.id.mainactivity_master_address)).setText(getMasterAddress());
+        ((TextView) findViewById(R.id.mainactivity_master_connected)).setText(String.valueOf(getNumberOfConnectedClients()));
+
+        slaveAdapter.notifyDataSetChanged();
+        userDeviceAdapter.notifyDataSetChanged();
     }
 
     @NonNull

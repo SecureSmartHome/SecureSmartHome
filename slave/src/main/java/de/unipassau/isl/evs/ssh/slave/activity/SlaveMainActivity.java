@@ -58,7 +58,7 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
             doBind();
             return true;
         } else if (id == R.id.action_refresh) {
-            moduleListAdapter.notifyDataSetChanged();
+            updateDisplayedData();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -83,7 +83,7 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
 
     @Override
     public void onContainerDisconnected() {
-        updateConnectionStatus();
+        updateDisplayedData();
     }
 
     /**
@@ -95,13 +95,10 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
         moduleList = (ListView) findViewById(R.id.mainactivity_slave_listview_slaves);
         moduleList.setAdapter(moduleListAdapter);
 
-        updateConnectionStatus();
+        updateDisplayedData();
     }
 
-    /**
-     * Update connection status and en/disables the visibility of the master connection
-     */
-    private void updateConnectionStatus() {
+    private void updateDisplayedData() {
         final DeviceID slaveID = getSlaveID();
         if (slaveID != null) {
             ((TextView) findViewById(R.id.mainactivity_slave_slaveid)).setText(slaveID.toShortString());
@@ -120,6 +117,8 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
             text = "connected";
         }
         ((TextView) findViewById(R.id.mainactivity_slave_connection)).setText(text);
+
+        moduleListAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -176,23 +175,23 @@ public class SlaveMainActivity extends SlaveStartUpActivity implements ClientCon
 
     @Override
     public void onMasterFound() {
-        updateConnectionStatus();
+        updateDisplayedData();
     }
 
     @Override
     public void onClientConnecting(String host, int port) {
-        updateConnectionStatus();
+        updateDisplayedData();
         ((TextView) findViewById(R.id.mainactivity_slave_connection)).setText("connecting");
     }
 
     @Override
     public void onClientConnected() {
-        updateConnectionStatus();
+        updateDisplayedData();
     }
 
     @Override
     public void onClientDisconnected() {
-        updateConnectionStatus();
+        updateDisplayedData();
     }
 
     @Override
