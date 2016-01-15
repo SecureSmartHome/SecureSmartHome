@@ -69,7 +69,7 @@ public class MasterCameraHandler extends AbstractMasterHandler {
     private void handleResponse(Message.AddressedMessage message, CameraPayload cameraPayload) {
         Message reply = new Message(cameraPayload);
         Message.AddressedMessage originalMessage = takeProxiedReceivedMessage(message.getHeader(HEADER_REFERENCES_ID));
-        if (originalMessage != null) {
+        if (!isMaster(originalMessage.getFromID())) {
             sendReply(originalMessage, reply);
         } else {
             //Broadcast picture too all devices that may also be informed that the bell rang
