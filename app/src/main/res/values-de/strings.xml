@@ -34,7 +34,7 @@
     <string name="deviceSatusConnectedSlaves">Verbundene Slaves</string>
     <string name="deviceStatusConnectedModules">Verbundene Module</string>
     <string name="deviceStatusConnectedSlaves">Verbundene Slaves</string>
-    <string name="device_id">"Geräte ID: %s"</string>
+    <string name="device_id">Geräte ID: %s</string>
     <string name="doorStatusOpen">Status: geöffnet</string>
     <string name="door_bell_notification_text">Sie haben Besuch an der Haustür.</string>
     <string name="door_bell_notification_title">Es hat geklingelt!</string>
@@ -117,7 +117,7 @@
     <string name="weather_warning_text">Bitte schließen Sie alle Fenster und Türen, es wird heute regnen.</string>
     <string name="weather_warning_title">Wetterwarnung!</string>
     <string name="welcome_to_ssh">Willkommen in der Secure Smart Home App.</string>
-    <string name="door_unlatched_text"> </string>
+    <string name="door_unlatched_text">Der Türsummer wurde aktiviert.</string>
     <string name="weather_service_failed_title">Wetterdienst abgestürzt.</string>
     <string name="edit_user_device">%s bearbeiten</string>
     <string name="group_created">Gruppe erstellt.</string>
@@ -246,7 +246,7 @@
     <string name="edit_user_success">Benutzer wurde editiert</string>
     <string name="fragment_access_denied">Zugriff verweigert. Fehlende Berechtigung: %s</string>
     <string name="master_host_address">Master Host Adresse</string>
-    <string name="master_port"></string>
+    <string name="master_port">Master Port</string>
     <string name="please_enter_master_address">Bitte geben Sie die Adresse des Master ein, die benutzt wird, wenn dieser im lokalen Netzwerk nicht gefunden werden kann. Diese Addresse wird benutzt, um sich von außerhalb des Heimnetzwerks zu verbinden. Diese Addresse sollte selten geändert werden und der Port muss in der Firewall freigeschalten werden.</string>
     <string name="you_can_not_add_modules">Sie können keine neuen Module hinzufügen</string>
     <string name="you_can_not_edit_user_devices">Sie können keine Benutzer editieren</string>

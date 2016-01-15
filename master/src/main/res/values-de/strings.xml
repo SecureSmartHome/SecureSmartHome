@@ -4,7 +4,7 @@
     <string name="app_name">Secure Smart Home - Master</string>
     <string name="action_settings">Einstellungen</string>
     <string name="address_format">Adresse: %s</string>
-    <string name="closed_connection_with">"Verbindung beendet mit: %s"</string>
+    <string name="closed_connection_with">Verbindung beendet mit: %s</string>
     <string name="connected_slaves">Verbundene Slaves</string>
     <string name="connected_user_devices">Verbundene Nutzergeräte</string>
     <string name="id_format">ID: %s</string>

@@ -195,6 +195,13 @@
     <string name="perm_desc_weather_warning">Allows receiving weather notifications.</string>
     <string name="perm_desc_switch_light">Allows switching a light.</string>
     <string name="perm_desc_switch_light_extern">Allows switching a light from outside the home network.</string>
+    <string name="perm_desc_door_locked">Allows you to check  if the door is locked.</string>
+    <string name="perm_desc_door_unlatched">Allows you to check  if the door is unlatched.</string>
+    <string name="perm_desc_door_unlocked">Allows you to check if the door is unlocked.</string>
+    <string name="perm_desc_holiday_mode_switched_off">Allows you to check if the holiday simulation is inactive.</string>
+    <string name="perm_desc_holiday_mode_switched_on">Allows you to check if the holiday simulation is active.</string>
+    <string name="perm_delete_module">Allows you to delete configured Modules</string>
+    <string name="perm_add_module">Allows you to add new hardware Modules</string>
 
     <string name="si_degree" translatable="false">%3.1f C°</string>
     <string name="si_pressure" translatable="false">%4.1f Pa</string>
@@ -231,7 +238,7 @@
     <string name="holiday_mode_switched_off_title">Holiday Mode Inactive!</string>
     <string name="holiday_mode_switched_off_text">You have now the control over your home. Welcome back!</string>
     <string name="door_unlatched_title">Door is now open!</string>
-    <string name="door_unlatched_text" translatable="false"></string>
+    <string name="door_unlatched_text" translatable="false">The door buzzer was triggered.</string>
     <string name="door_locked_title">Door is now locked!</string>
     <string name="door_locked_text">Unauthorised users can not open it anymore.</string>
     <string name="door_unlocked_title">Door is now unlocked!</string>
@@ -281,11 +288,6 @@
     <string name="you_can_not_switch_light">You can\'t switch the light</string>
     <string name="you_can_not_start_or_stop_the_holiday_simulation">You can\'t start or stop the holiday simulation</string>
     <string name="fragment_access_denied">Access denied. Missing Permission: %s</string>
-    <string name="perm_desc_door_locked">Allows you to check  if the door is locked.</string>
-    <string name="perm_desc_door_unlatched">Allows you to check  if the door is unlatched.</string>
-    <string name="perm_desc_door_unlocked">Allows you to check if the door is unlocked.</string>
-    <string name="perm_desc_holiday_mode_switched_off">Allows you to check if the holiday simulation is inactive.</string>
-    <string name="perm_desc_holiday_mode_switched_on">Allows you to check if the holiday simulation is active.</string>
 
     <string name="you_can_not_remove_users">You can\'t remove users</string>
     <string name="you_can_not_remove_modules">You can\'t remove modules</string>
@@ -295,7 +297,7 @@
     <string name="you_can_not_unlatch_door">You can\'t unlatch the door</string>
     <string name="you_can_not_unblock_door">You can\'t (un)block the door</string>
     <string name="you_can_not_request_picture">You can\'t request a picture</string>
-    <string name="master_port" translatable="false">Master Port</string>
+    <string name="master_port">Master Port</string>
     <string name="master_host_address">Master Host Address</string>
     <string name="please_enter_master_address">Please enter the address of the Master that will be used if it can\'t be found on the local network. This address will be used when connecting from outside your home network, so the address shouldn\'t change often and the port must be made available through the firewall.</string>
     <string name="you_can_not_remove_not_empty_group">You can\'t remove this group. There are still users in it</string>
@@ -313,4 +315,9 @@
     <string name="is_in_group">is in group %s</string>
     <string name="no_climate_sensor_connected">No Weatherboards connected.</string>
     <string name="connected_weather_boards">Connected weather boards:</string>
+    <string name="perm_desc_change_group_template">Allows changing a group template.</string>
+    <string name="perm_delete_template">x</string>
+    <string name="perm_create_template">x</string>
+    <string name="perm_change_group_template">Edit group template</string>
+    <string name="device_id">Device ID: %s</string>
 </resources>

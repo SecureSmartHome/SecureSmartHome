@@ -281,8 +281,12 @@ public class AddModuleFragment extends BoundFragment implements AdapterView.OnIt
         addMockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addMockButton.setEnabled(false);
-                addNewModule(new MockAccessPoint());
+                if (checkInputFields()) {
+                    addMockButton.setEnabled(false);
+                    addNewModule(new MockAccessPoint());
+                } else {
+                    ErrorDialog.show(getActivity(), getActivity().getResources().getString(R.string.error_fill_all_fields));
+                }
             }
         });
 
