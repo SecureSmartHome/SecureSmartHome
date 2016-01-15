@@ -1,8 +1,10 @@
 package de.unipassau.isl.evs.ssh.master.handler;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import de.unipassau.isl.evs.ssh.core.CoreConstants;
 import de.unipassau.isl.evs.ssh.core.database.dto.Module;
 import de.unipassau.isl.evs.ssh.core.handler.NoPermissionException;
 import de.unipassau.isl.evs.ssh.core.messaging.Message;
@@ -80,7 +82,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
         final String moduleName = payload.getModuleName();
         final boolean isOpen = getOpen(moduleName);
-        final boolean isBlocked = getBlocked(moduleName);
+        final boolean isBlocked = getBlocked();
         final Message reply = new Message(new DoorStatusPayload(isOpen, isBlocked, moduleName));
         sendReply(original, reply);
     }
@@ -101,7 +103,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         final Message messageToSend = new Message(payload);
 
         if (hasPermission(message.getFromID(), UNLATCH_DOOR)) {
-            if (!getBlocked(atModule.getName())) {
+            if (!getBlocked()) {
                 final Message.AddressedMessage sentMessage =
                         sendMessage(atModule.getAtSlave(), SLAVE_DOOR_UNLATCH, messageToSend);
                 recordReceivedMessageProxy(message, sentMessage);
@@ -110,7 +112,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             }
         } else if (hasPermission(message.getFromID(), UNLATCH_DOOR_ON_HOLIDAY)) {
             if (requireComponent(MasterHolidaySimulationPlannerHandler.KEY).isRunHolidaySimulation()) {
-                if (!getBlocked(atModule.getName())) {
+                if (!getBlocked()) {
                     final Message.AddressedMessage sentMessage =
                             sendMessage(atModule.getAtSlave(), SLAVE_DOOR_UNLATCH, messageToSend);
                     recordReceivedMessageProxy(message, sentMessage);
@@ -136,7 +138,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         final NotificationBroadcaster notificationBroadcaster = requireComponent(NotificationBroadcaster.KEY);
 
         if (hasPermission(message.getFromID(), LOCK_DOOR)) {
-            setBlocked(atModule.getName(), payload.isBlock());
+            setBlocked(payload.isBlock());
 
             if (payload.isBlock()) {
                 notificationBroadcaster.sendMessageToAllReceivers(NotificationPayload.NotificationType.DOOR_LOCKED);
@@ -151,7 +153,7 @@ public class MasterDoorHandler extends AbstractMasterHandler {
 
     private void broadcastDoorStatus(String moduleName) {
         boolean isOpen = getOpen(moduleName);
-        boolean isBlocked = getBlocked(moduleName);
+        boolean isBlocked = getBlocked();
         final Message messageToSend = new Message(new DoorStatusPayload(isOpen, isBlocked, moduleName));
         sendMessageToAllDevicesWithPermission(messageToSend, REQUEST_DOOR_STATUS, null, APP_DOOR_STATUS_UPDATE);
     }
@@ -173,20 +175,22 @@ public class MasterDoorHandler extends AbstractMasterHandler {
         }
     }
 
-    private synchronized void setBlocked(String moduleName, boolean locked) {
-        if (moduleName != null) {
-            blockedFor.put(requireComponent(SlaveController.KEY).getModuleID(moduleName), locked);
-        } else {
-            throw new IllegalArgumentException("moduleName may not be null. Can't lock nonexistent Module.");
+    private synchronized void setBlocked(boolean locked) {
+        List<Module> modulesByType = requireComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.DoorBuzzer);
+        for (Module module : modulesByType) {
+            Integer moduleID = requireComponent(SlaveController.KEY).getModuleID(module.getName());
+            blockedFor.put(moduleID, locked);
         }
     }
 
-    private synchronized boolean getBlocked(String moduleName) {
-        final Boolean isBlocked = blockedFor.get(requireComponent(SlaveController.KEY).getModuleID(moduleName));
-        if (isBlocked != null) {
-            return isBlocked;
-        } else {
-            return true;
+    private synchronized boolean getBlocked() {
+        List<Module> modulesByType = requireComponent(SlaveController.KEY).getModulesByType(CoreConstants.ModuleType.DoorBuzzer);
+        for (Module module : modulesByType) {
+            final Boolean isBlocked = blockedFor.get(requireComponent(SlaveController.KEY).getModuleID(module.getName()));
+            if (Boolean.TRUE.equals(isBlocked)) {
+                return true;
+            }
         }
+        return false;
     }
 }
