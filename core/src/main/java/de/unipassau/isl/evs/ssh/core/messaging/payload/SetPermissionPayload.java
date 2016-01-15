@@ -52,13 +52,6 @@ public class SetPermissionPayload implements MessagePayload {
     }
 
     /**
-     * The Action enum describes whether to grant or revoke the permission.
-     */
-    public enum Action {
-        GRANT, REVOKE
-    }
-
-    /**
      * Gets the action - either grant or revoke.
      *
      * @return grant or revoke
