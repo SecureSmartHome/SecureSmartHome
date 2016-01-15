@@ -46,9 +46,9 @@ public class StatusFragment extends BoundFragment {
                 @Override
                 public void run() {
                     if (wasSuccessful) {
-                        Toast.makeText(getActivity(), R.string.module_removed, Toast.LENGTH_SHORT).show();
+                        showToast(R.string.module_removed);
                     } else {
-                        Toast.makeText(getActivity(), R.string.cannot_remove_module, Toast.LENGTH_SHORT).show();
+                        showToast(R.string.cannot_remove_module);
                     }
                 }
             });
@@ -67,9 +67,9 @@ public class StatusFragment extends BoundFragment {
                 @Override
                 public void run() {
                     if (wasSuccessful) {
-                        Toast.makeText(getActivity(), R.string.slave_removed, Toast.LENGTH_SHORT).show();
+                        showToast(R.string.slave_removed);
                     } else {
-                        Toast.makeText(getActivity(), R.string.cannot_remove_slave, Toast.LENGTH_SHORT).show();
+                        showToast(R.string.cannot_remove_slave);
                     }
                 }
             });
@@ -129,7 +129,7 @@ public class StatusFragment extends BoundFragment {
                         if (handler != null && ((AppMainActivity) getActivity()).hasPermission(Permission.RENAME_MODULE)) {
                             handler.removeModule(module);
                         } else {
-                            Toast.makeText(getActivity(), R.string.you_can_not_remove_modules, Toast.LENGTH_SHORT).show();
+                            showToast(R.string.you_can_not_remove_modules);
                         }
                     }
                 };

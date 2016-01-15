@@ -15,7 +15,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +56,7 @@ public class LightFragment extends BoundFragment {
                 @Override
                 public void run() {
                     if (!wasSuccess) {
-                        Toast.makeText(getActivity(), R.string.could_not_switch_light, Toast.LENGTH_SHORT).show();
+                        showToast(R.string.could_not_switch_light);
                     }
                 }
             });
@@ -100,7 +99,7 @@ public class LightFragment extends BoundFragment {
                 if (activity != null && activity.hasPermission(Permission.ADD_MODULE)) {
                     activity.showFragmentByClass(AddModuleFragment.class);
                 } else {
-                    Toast.makeText(getActivity(), R.string.you_can_not_add_new_modules, Toast.LENGTH_SHORT).show();
+                    showToast(R.string.you_can_not_add_new_modules);
                 }
             }
         });
@@ -189,7 +188,7 @@ public class LightFragment extends BoundFragment {
                         if (((AppMainActivity) getActivity()).hasPermission(Permission.SWITCH_LIGHT, module.getName())) {
                             handler.toggleLight(module);
                         } else {
-                            Toast.makeText(getActivity(), R.string.you_can_not_switch_light, Toast.LENGTH_SHORT).show();
+                            showToast(R.string.you_can_not_switch_light);
                         }
                     } else {
                         Log.w(TAG, "Could not switch light, AppLightHandler not available");

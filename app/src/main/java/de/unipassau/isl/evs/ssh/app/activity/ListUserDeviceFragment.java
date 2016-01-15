@@ -16,7 +16,6 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
@@ -67,16 +66,16 @@ public class ListUserDeviceFragment extends BoundFragment {
                     } else if (event.getType().equals(USERNAME_SET)) {
                         if (event.wasSuccessful()) {
                             update();
-                            Toast.makeText(getActivity(), R.string.edit_user_success, Toast.LENGTH_SHORT).show();
+                            showToast(R.string.edit_user_success);
                         } else {
-                            Toast.makeText(getActivity(), R.string.could_not_edit_user, Toast.LENGTH_SHORT).show();
+                            showToast(R.string.could_not_edit_user);
                         }
                     } else if (event.getType().equals(USER_DELETE)) {
                         if (event.wasSuccessful()) {
                             update();
-                            Toast.makeText(getActivity(), R.string.delete_user_success, Toast.LENGTH_SHORT).show();
+                            showToast(R.string.delete_user_success);
                         } else {
-                            Toast.makeText(getActivity(), R.string.could_not_delete_user, Toast.LENGTH_SHORT).show();
+                            showToast(R.string.could_not_delete_user);
                         }
                     }
                 }
@@ -110,7 +109,7 @@ public class ListUserDeviceFragment extends BoundFragment {
      */
     private void buildView() {
         group = (Group) getArguments().getSerializable(GROUP_ARGUMENT_FRAGMENT);
-        TextView groupName = (TextView) getActivity().findViewById(R.id.listuserdevice_groupname);
+        final TextView groupName = (TextView) getActivity().findViewById(R.id.listuserdevice_groupname);
         groupName.setText(group.getName());
 
         userDeviceList = (ListView) getActivity().findViewById(R.id.listuserDeviceContainer);
@@ -125,7 +124,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                     bundle.putSerializable(USER_DEVICE_ARGUMENT_FRAGMENT, item);
                     activity.showFragmentByClass(EditUserDeviceFragment.class, bundle);
                 } else {
-                    Toast.makeText(getActivity(), R.string.you_can_not_edit_user_devices, Toast.LENGTH_SHORT).show();
+                    showToast(R.string.you_can_not_edit_user_devices);
                 }
             }
         });
@@ -141,14 +140,14 @@ public class ListUserDeviceFragment extends BoundFragment {
                     showRemoveUserDeviceDialog(bundle);
                     return true;
                 } else {
-                    Toast.makeText(getActivity(), R.string.you_can_not_remove_users, Toast.LENGTH_SHORT).show();
+                    showToast(R.string.you_can_not_remove_users);
                     return false;
                 }
 
             }
         });
 
-        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.listuserdevice_fab);
+        final FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.listuserdevice_fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -156,7 +155,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                 if (activity.hasPermission(Permission.ADD_USER)) {
                     ((AppMainActivity) getActivity()).showFragmentByClass(AddNewUserDeviceFragment.class);
                 } else {
-                    Toast.makeText(getActivity(), R.string.you_can_not_add_new_users, Toast.LENGTH_SHORT).show();
+                    showToast(R.string.you_can_not_add_new_users);
                 }
             }
         });
@@ -167,7 +166,7 @@ public class ListUserDeviceFragment extends BoundFragment {
 
     @Override
     public void onContainerDisconnected() {
-        AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
+        final AppUserConfigurationHandler handler = getComponent(AppUserConfigurationHandler.KEY);
         if (handler != null) {
             handler.removeUserInfoListener(listener);
         }
@@ -197,7 +196,7 @@ public class ListUserDeviceFragment extends BoundFragment {
                         } else if (((AppMainActivity) getActivity()).hasPermission(Permission.DELETE_USER)) {
                             handler.removeUserDevice(userDevice.getUserDeviceID());
                         } else {
-                            Toast.makeText(getActivity(), R.string.you_can_not_remove_users, Toast.LENGTH_SHORT).show();
+                            showToast(R.string.you_can_not_remove_users);
                         }
                     }
                 })

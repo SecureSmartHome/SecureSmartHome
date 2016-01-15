@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -97,7 +96,7 @@ public class EditGroupFragment extends BoundFragment {
                     Log.i(TAG, "Group " + name + " edited.");
                     activity.showFragmentByClass(ListGroupFragment.class);
                 } else {
-                    Toast.makeText(getActivity(), R.string.you_can_not_edit_groups, Toast.LENGTH_SHORT).show();
+                    showToast(R.string.you_can_not_edit_groups);
                 }
             }
         });
@@ -112,10 +111,10 @@ public class EditGroupFragment extends BoundFragment {
                         Log.i(TAG, "Group " + group.getName() + " removed.");
                         ((AppMainActivity) getActivity()).showFragmentByClass(ListGroupFragment.class);
                     } else {
-                        Toast.makeText(getActivity(), R.string.you_can_not_remove_not_empty_group, Toast.LENGTH_SHORT).show();
+                        showToast(R.string.you_can_not_remove_not_empty_group);
                     }
                 } else {
-                    Toast.makeText(getActivity(), R.string.you_can_not_remove_groups, Toast.LENGTH_SHORT).show();
+                    showToast(R.string.you_can_not_remove_groups);
                 }
             }
         });

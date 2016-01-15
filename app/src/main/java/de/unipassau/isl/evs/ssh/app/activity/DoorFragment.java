@@ -47,7 +47,7 @@ public class DoorFragment extends BoundFragment {
                     if (wasSuccessful) {
                         updateButtons();
                     } else {
-                        Toast.makeText(getActivity(), R.string.no_permission_to_request_door_status, Toast.LENGTH_SHORT).show();
+                        showToast(R.string.no_permission_to_request_door_status);
                     }
                 }
             });
@@ -62,7 +62,7 @@ public class DoorFragment extends BoundFragment {
                     if (wasSuccessful) {
                         updateButtons();
                     } else {
-                        Toast.makeText(getActivity(), R.string.could_not_block_door, Toast.LENGTH_SHORT).show();
+                        showToast(R.string.could_not_block_door);
                     }
                 }
             });
@@ -92,7 +92,7 @@ public class DoorFragment extends BoundFragment {
                         displayImage();
                     } else {
                         Log.e(TAG, "Could not load image");
-                        Toast.makeText(getActivity(), "Could not load image", Toast.LENGTH_SHORT).show();
+                        showToast(R.string.could_not_load_image);
                     }
                 }
             });
@@ -170,7 +170,7 @@ public class DoorFragment extends BoundFragment {
         if (((AppMainActivity) getActivity()).hasPermission(Permission.TAKE_CAMERA_PICTURE)) {
             handler.refreshImage();
         } else {
-            Toast.makeText(getActivity(), R.string.you_can_not_request_picture, Toast.LENGTH_SHORT).show();
+            showToast(R.string.you_can_not_request_picture);
         }
 
     }
@@ -191,7 +191,7 @@ public class DoorFragment extends BoundFragment {
             if (activity.hasPermission(Permission.UNLATCH_DOOR) || activity.hasPermission(Permission.UNLATCH_DOOR_ON_HOLIDAY)) {
                 handler.unlatchDoor();
             } else {
-                Toast.makeText(getActivity(), R.string.you_can_not_unlatch_door, Toast.LENGTH_SHORT).show();
+                showToast(R.string.you_can_not_unlatch_door);
             }
         }
     }
@@ -214,7 +214,7 @@ public class DoorFragment extends BoundFragment {
                 handler.blockDoor();
             }
         } else {
-            Toast.makeText(getActivity(), R.string.you_can_not_unblock_door, Toast.LENGTH_SHORT).show();
+            showToast(R.string.you_can_not_unblock_door);
         }
     }
 

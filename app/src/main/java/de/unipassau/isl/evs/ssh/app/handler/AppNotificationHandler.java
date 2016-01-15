@@ -254,15 +254,19 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
         if(notificationID == DOOR_UNLATCHED.ordinal()){
             notificationManager.cancel(BELL_RANG.ordinal());
         }
+        //Delete old HolidayMode switched on notification if HolidayMode is switched off
         if(notificationID == HOLIDAY_MODE_SWITCHED_OFF.ordinal()){
             notificationManager.cancel(HOLIDAY_MODE_SWITCHED_ON.ordinal());
         }
+        //^vis versa HolidayMode
         if(notificationID == HOLIDAY_MODE_SWITCHED_ON.ordinal()){
             notificationManager.cancel(HOLIDAY_MODE_SWITCHED_OFF.ordinal());
         }
+        //Delete old door locked notification if door is unlocked
         if(notificationID == DOOR_UNLOCKED.ordinal()){
             notificationManager.cancel(DOOR_LOCKED.ordinal());
         }
+        //^vis versa door notification
         if(notificationID == DOOR_LOCKED.ordinal()){
             notificationManager.cancel(DOOR_UNLOCKED.ordinal());
         }

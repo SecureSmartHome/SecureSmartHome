@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.google.common.base.Strings;
 
@@ -91,7 +90,7 @@ public class AddGroupFragment extends BoundFragment {
                                                   Log.i(TAG, "Group " + name + " added.");
                                                   activity.showFragmentByClass(ListGroupFragment.class);
                                               } else {
-                                                  Toast.makeText(activity, R.string.you_can_not_add_groups, Toast.LENGTH_SHORT).show();
+                                                  showToast(R.string.you_can_not_add_groups);
                                               }
                                           } else {
                                               ErrorDialog.show(activity, getActivity().getResources().getString(R.string.error_cannot_add_group));

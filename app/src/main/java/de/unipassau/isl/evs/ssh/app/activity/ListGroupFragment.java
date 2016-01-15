@@ -60,24 +60,25 @@ public class ListGroupFragment extends BoundFragment {
                         update();
                     } else if (event.getType().equals(UserConfigurationEvent.EventType.GROUP_ADD)) {
                         if (event.wasSuccessful()) {
-                            Toast.makeText(getActivity(), R.string.group_created, Toast.LENGTH_SHORT).show();
+                            int resId = R.string.group_created;
+                            showToast(resId);
                             update();
                         } else {
-                            Toast.makeText(getActivity(), R.string.could_not_edit_group, Toast.LENGTH_SHORT).show();
+                            showToast(R.string.could_not_edit_group);
                         }
                     } else if (event.getType().equals(GROUP_SET_NAME)) {
                         if (event.wasSuccessful()) {
-                            Toast.makeText(getActivity(), R.string.edit_group_success, Toast.LENGTH_SHORT).show();
+                            showToast(R.string.edit_group_success);
                             update();
                         } else {
-                            Toast.makeText(getActivity(), R.string.could_not_edit_group, Toast.LENGTH_SHORT).show();
+                            showToast(R.string.could_not_edit_group);
                         }
                     } else if (event.getType().equals(GROUP_DELETE)) {
                         if (event.wasSuccessful()) {
-                            Toast.makeText(getActivity(), R.string.delete_group_success, Toast.LENGTH_SHORT).show();
+                            showToast(R.string.delete_group_success);
                             update();
                         } else {
-                            Toast.makeText(getActivity(), R.string.could_not_delete_group, Toast.LENGTH_SHORT).show();
+                            showToast(R.string.could_not_delete_group);
                         }
                     }
                 }
@@ -142,7 +143,7 @@ public class ListGroupFragment extends BoundFragment {
                     activity.showFragmentByClass(EditGroupFragment.class, bundle);
                     return true;
                 } else {
-                    Toast.makeText(activity, R.string.you_can_not_edit_groups, Toast.LENGTH_SHORT).show();
+                    showToast(R.string.you_can_not_edit_groups);
                     return false;
                 }
             }
@@ -154,7 +155,7 @@ public class ListGroupFragment extends BoundFragment {
                 if (activity.hasPermission(Permission.ADD_GROUP)) {
                     activity.showFragmentByClass(AddGroupFragment.class);
                 } else {
-                    Toast.makeText(activity, R.string.you_can_not_add_groups, Toast.LENGTH_SHORT).show();
+                    showToast(R.string.you_can_not_add_groups);
                 }
             }
         });
