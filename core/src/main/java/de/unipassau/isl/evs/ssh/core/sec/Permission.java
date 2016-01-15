@@ -85,6 +85,7 @@ public enum Permission {
     DOOR_UNLATCHED,
     DOOR_LOCKED,
     DOOR_UNLOCKED,
+    SWITCH_LIGHT_EXTERN,
 
     //Ternary Permissions
     SWITCH_LIGHT(true);

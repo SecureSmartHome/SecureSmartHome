@@ -12,6 +12,7 @@ import de.unipassau.isl.evs.ssh.core.messaging.RoutingKey;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ClimatePayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.ErrorPayload;
 import de.unipassau.isl.evs.ssh.core.messaging.payload.LightPayload;
+import de.unipassau.isl.evs.ssh.core.sec.Permission;
 import de.unipassau.isl.evs.ssh.master.database.HolidayController;
 import de.unipassau.isl.evs.ssh.master.database.SlaveController;
 import de.unipassau.isl.evs.ssh.core.database.UnknownReferenceException;
@@ -91,7 +92,10 @@ public class MasterLightHandler extends AbstractMasterHandler {
         final LightPayload payload = MASTER_LIGHT_SET.getPayload(message);
         final Module atModule = payload.getModule();
 
-        if (!hasPermission(message.getFromID(), SWITCH_LIGHT, atModule.getName())) {
+        if (!hasPermission(message.getFromID(), SWITCH_LIGHT, atModule.getName())
+                || (!hasPermission(message.getFromID(), Permission.SWITCH_LIGHT_EXTERN) &&
+                        !requireComponent(MasterUserLocationHandler.KEY).isDeviceLocal(message.getFromID()))
+            ) {
             sendNoPermissionReply(message, SWITCH_LIGHT);
             return;
         }

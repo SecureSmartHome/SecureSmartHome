@@ -215,7 +215,8 @@ public class DatabaseConnector extends AbstractComponent {
                     Permission.WEATHER_WARNING.ordinal(),
                     Permission.DOOR_UNLATCHED.ordinal(),
                     Permission.DOOR_LOCKED.ordinal(),
-                    Permission.DOOR_UNLOCKED.ordinal()
+                    Permission.DOOR_UNLOCKED.ordinal(),
+                    Permission.SWITCH_LIGHT_EXTERN.ordinal()
             };
 
             int[] guestPermissionIDs = new int[]{

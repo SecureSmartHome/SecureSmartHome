@@ -163,6 +163,7 @@
     <string name="perm_door_locked">Request door locked status</string>
     <string name="perm_door_unlocked">Request door unlocked status</string>
     <string name="perm_switch_light">Switch lights</string>
+    <string name="perm_switch_light_extern">Switch lights from extern</string>
 
     <!-- Permission descriptions -->
     <string name="perm_desc_add_odroid">Allows adding new Odroids.</string>
@@ -201,6 +202,7 @@
     <string name="perm_desc_bell_rang">Allows receiving doorbell notifications.</string>
     <string name="perm_desc_weather_warning">Allows receiving weather notifications.</string>
     <string name="perm_desc_switch_light">Allows switching a light.</string>
+    <string name="perm_desc_switch_light_extern">Allows switching a light from outside the home network.</string>
 
     <string name="si_degree" translatable="false">%3.1f C°</string>
     <string name="si_pressure" translatable="false">%4.1f Pa</string>

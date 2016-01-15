@@ -12,7 +12,7 @@
     <string name="module_information">%1$s at %2$s via %3$s</string>
     <string name="slave_rejected">Slave rejected</string>
     <string name="warn_slave_rejected">Connection refused. Maybe the system has been reset or this slave has been deleted.</string>
-    <string name="dismiss">Dimiss</string>
+    <string name="dismiss">Dismiss</string>
     <string name="no_master_address_known">no address known</string>
     <string name="slave_connecting">connecting</string>
     <string name="slave_not_connected">not connected</string>
