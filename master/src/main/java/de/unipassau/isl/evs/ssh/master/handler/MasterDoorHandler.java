@@ -117,15 +117,15 @@ public class MasterDoorHandler extends AbstractMasterHandler {
             } else {
                 sendReply(message, new Message(new ErrorPayload("Cannot unlatch door. Door is blocked.")));
             }
-        } else if (hasPermission(message.getFromID(), UNLATCH_DOOR_ON_HOLIDAY)) {
-            if (requireComponent(MasterHolidaySimulationPlannerHandler.KEY).isRunHolidaySimulation()) {
-                if (!getBlocked()) {
-                    final Message.AddressedMessage sentMessage =
-                            sendMessage(atModule.getAtSlave(), SLAVE_DOOR_UNLATCH, messageToSend);
-                    recordReceivedMessageProxy(message, sentMessage);
-                } else {
-                    sendReply(message, new Message(new ErrorPayload("Cannot unlatch door. Door is blocked.")));
-                }
+        } else if (hasPermission(message.getFromID(), UNLATCH_DOOR_ON_HOLIDAY)
+                && requireComponent(MasterUserLocationHandler.KEY).isDeviceLocal(message.getFromID())
+                && requireComponent(MasterHolidaySimulationPlannerHandler.KEY).isRunHolidaySimulation()) {
+            if (!getBlocked()) {
+                final Message.AddressedMessage sentMessage =
+                        sendMessage(atModule.getAtSlave(), SLAVE_DOOR_UNLATCH, messageToSend);
+                recordReceivedMessageProxy(message, sentMessage);
+            } else {
+                sendReply(message, new Message(new ErrorPayload("Cannot unlatch door. Door is blocked.")));
             }
         } else {
             sendNoPermissionReply(message, UNLATCH_DOOR);

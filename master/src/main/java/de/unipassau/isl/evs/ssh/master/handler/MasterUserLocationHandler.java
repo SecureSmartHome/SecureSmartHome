@@ -96,12 +96,7 @@ public class MasterUserLocationHandler extends AbstractMasterHandler implements 
         if (channel != null) {
             return channel.isOpen() && channel.attr(CoreConstants.NettyConstants.ATTR_LOCAL_CONNECTION).get();
         } else {
-            final List<Record> list = positionMap.get(deviceID);
-            if (list.size() >= 1) {
-                return list.get(0).isLocal;
-            } else {
-                return false;
-            }
+            return false;
         }
     }
 

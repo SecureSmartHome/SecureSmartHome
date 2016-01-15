@@ -101,6 +101,7 @@ public class MasterWeatherCheckHandler extends AbstractMasterHandler implements 
             return;
         }
 
+        Log.i(TAG, "Inquiring weather data for " + city);
         //Presentation Mode
         if (city.equals("Mordor")) {
             for (Boolean isOpen : openForModule.values()) {

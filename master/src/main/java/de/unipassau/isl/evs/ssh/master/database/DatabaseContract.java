@@ -109,7 +109,7 @@ public class DatabaseContract {
     }
 
     public class Permission {
-        public static final String TABLE_NAME = "PermissionDTO";
+        public static final String TABLE_NAME = "Permission";
         public static final String COLUMN_ID = "_ID";
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_ELECTRONIC_MODULE_ID = "electronicModuleId";
