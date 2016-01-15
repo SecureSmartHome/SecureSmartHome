@@ -200,7 +200,6 @@
     <string name="perm_request_weather_status">Klimastatus abfragen</string>
     <string name="perm_request_window_status">Fensterstatus abfragen</string>
     <string name="perm_show_group_member">Gruppenmitglieder anzeigen</string>
-    <string name="perm_show_template_permission">Berechtigungsvorlagen anzeigen</string>
     <string name="perm_switch_light">Schalten des Lichts</string>
     <string name="perm_system_health_warning">Systemstatus Warnungen erhalten</string>
     <string name="perm_take_camera_picture">Kamerabild erstellen</string>
@@ -273,4 +272,7 @@
     <string name="perm_delete_module">Module löschen</string>
     <string name="connected_weather_boards">Verbundene Wetterstationen:</string>
     <string name="no_climate_sensor_connected">Keine verbundenen Wetterstationen.</string>
+    <string name="perm_desc_add_module">Ermöglicht das Hinzufügen neuer Module</string>
+    <string name="perm_desc_delete_module">Ermöglicht das Löschen von Modulen</string>
+    <string name="perm_show_template_permission">Templates anzeigen</string>
 </resources>
