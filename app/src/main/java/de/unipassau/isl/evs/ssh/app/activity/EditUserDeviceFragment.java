@@ -94,15 +94,24 @@ public class EditUserDeviceFragment extends BoundFragment {
                         }
                     } else if (event.getType().equals(USERNAME_SET)) {
                         if (event.wasSuccessful()) {
-                            ((TextView) getActivity().findViewById(R.id.userdevice_user_name)).setText(device.getName());
+                            ((TextView) getActivity().findViewById(R.id.userdevice_id_group)).setText(String.format(
+                                    getResources().getString(R.string.with_id_is_in_group),
+                                    device.getUserDeviceID().toShortString(),
+                                    device.getInGroup()
+                            ));
+
                             showToast(R.string.user_edited);
                         } else {
                             showToast(R.string.could_not_edit_user_device_name);
                         }
                     } else if (event.getType().equals(USER_SET_GROUP)) {
                         if (event.wasSuccessful()) {
-                            TextView deviceGroup = ((TextView) getActivity().findViewById(R.id.userdevice_user_group));
-                            deviceGroup.setText(String.format(getResources().getString(R.string.is_in_group), device.getInGroup()));
+                            ((TextView) getActivity().findViewById(R.id.userdevice_id_group)).setText(String.format(
+                                    getResources().getString(R.string.with_id_is_in_group),
+                                    device.getUserDeviceID().toShortString(),
+                                    device.getInGroup()
+                            ));
+                            ;
                             showToast(R.string.user_edited);
                         } else {
                             showToast(R.string.could_not_edit_user_device_group);
@@ -128,13 +137,12 @@ public class EditUserDeviceFragment extends BoundFragment {
         TextView deviceName = ((TextView) getActivity().findViewById(R.id.userdevice_user_name));
         deviceName.setText(device.getName());
 
-        Resources res = getResources();
-
-        TextView deviceID = ((TextView) getActivity().findViewById(R.id.userdevice_user_deviceid));
-        deviceID.setText(String.format(res.getString(R.string.device_id), device.getUserDeviceID().getIDString()));
-
-        TextView deviceGroup = ((TextView) getActivity().findViewById(R.id.userdevice_user_group));
-        deviceGroup.setText(String.format(res.getString(R.string.is_in_group), device.getInGroup()));
+        TextView deviceID = ((TextView) getActivity().findViewById(R.id.userdevice_id_group));
+        deviceID.setText(String.format(
+                getResources().getString(R.string.with_id_is_in_group),
+                device.getUserDeviceID().toShortString(),
+                device.getInGroup()
+        ));
 
         Button editButton = (Button) getActivity().findViewById(R.id.userdevice_edit_button);
         editButton.setOnClickListener(new View.OnClickListener() {
