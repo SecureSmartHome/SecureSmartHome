@@ -250,6 +250,10 @@ public class AppNotificationHandler extends AbstractMessageHandler implements Co
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
+        //Delete old BellRang if door gets unlocked
+        if(notificationID == DOOR_UNLOCKED.ordinal()){
+            notificationManager.cancel(BELL_RANG.ordinal());
+        }
         //Send notification out to Device
         if (notificationManager != null) {
             notificationManager.notify(notificationID, notificationBuilder.build());
