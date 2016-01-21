@@ -230,6 +230,8 @@ public class ListGroupFragment extends BoundFragment {
 
             if (isCurrentUser(group)) {
                 groupLayout.setBackgroundColor(getResources().getColor(R.color.color_own_id));
+            } else {
+                groupLayout.setBackgroundColor(0);
             }
 
             final TextView textViewGroupName = (TextView) groupLayout.findViewById(R.id.listgroup_group_name);

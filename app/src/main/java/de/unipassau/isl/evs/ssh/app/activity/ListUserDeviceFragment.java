@@ -268,6 +268,8 @@ public class ListUserDeviceFragment extends BoundFragment {
             }
             if (isUserCurrent(device)) {
                 userDeviceLayout.setBackgroundColor(getResources().getColor(R.color.color_own_id));
+            } else {
+                userDeviceLayout.setBackgroundColor(0);
             }
 
             ((TextView) userDeviceLayout.findViewById(R.id.userdevicelistitem_device_name)).setText(device.getName());
